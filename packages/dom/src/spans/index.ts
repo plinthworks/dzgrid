@@ -177,7 +177,7 @@ function setup(g: GridContext<unknown>): FeatureHandle {
       if (h?.kind === 'header' && (h.level ?? 0) < -g.bands.length) kernel.dispatch({ type: 'focus.set', focus: { kind: 'header', column: h.column } }, 'api');
     },
     afterRows(f) {
-      bands.stretch(g.headerHeight());
+      bands.stretch(g.groupHeight());
       // A focused header moved to another segment or made again (a pin, a move, a group cut in
       // two) lost the DOM focus: the paint gives it back (`pendingFocus`, without scrolling).
       const h = kernel.focus;

@@ -18,6 +18,12 @@ export const COLUMNS_KEYS = [
 export interface ColumnsOptions {
   /** A header dragged by the mouse (never a finger, Q-M3; a pen clicks); false: the keys and the API only. Default true. */
   readonly drag?: boolean;
+  /**
+   * `'content'` (1.10.0, column-resize.md 16–21): once, when the first rows are shown, the shown columns fitted to their
+   * content as « fit all » does — flexible columns, `resizable: false` ones and widths already set left alone; not again
+   * on a data change (`fitContent()` does it again).
+   */
+  readonly fitOnLoad?: 'content';
 }
 /** What a move did: `edge` at its segment's edge (O2), `locked` a `movable: false` column, `unknown` no such shown column. */
 export type MoveResult = 'moved' | 'edge' | 'locked' | 'unknown';
@@ -44,6 +50,11 @@ export interface ColumnsApi {
   autoSizeAll(o?: { readonly say?: boolean }): void;
   /** The keyboard resize mode on this column's header (focused): false when it is not shown or not resizable. */
   resizeMode(column: string): boolean;
+  /**
+   * The load's fit again (1.10.0, column-resize.md 18): flexible columns and widths set by the user or the app left alone;
+   * silent. Always set on the feature's api (optional in the type: an interface of 1.x gains no required member).
+   */
+  fitContent?(): void;
 }
 export interface ColumnsFeature extends GridFeature {
   /** The moves of a grid this feature is set up on; null before its setup and after it is destroyed. */
@@ -106,18 +117,28 @@ export function columns(o: ColumnsOptions = {}): ColumnsFeature {
       // ---- Auto-size (column-resize.md 10–14) ----
       const shown = (id: string) => m.visible().some((c) => c.id === id && c.def.resizable !== false);
       /** One patch for the columns that can be fitted; `columnResized` for those whose width changed; said when asked. */
-      const size = (ids: readonly string[], say?: boolean): void => {
+      const size = (ids: readonly string[], say?: boolean, source: 'user' | 'api' = 'user'): void => {
         const r = fits(g, ids.filter(shown));
         const was = new Map([...r.keys()].map((id) => [id, widthOf(g, id)]));
-        kernel.dispatch({ type: 'column.state', patch: [...r].map(([id, width]) => ({ id, width })) }, 'user');
+        kernel.dispatch({ type: 'column.state', patch: [...r].map(([id, width]) => ({ id, width })) }, source);
         let n = 0;
         for (const [id, w0] of was) {
           const width = widthOf(g, id);
-          if (width !== w0) n++, emit(kernel, { type: 'columnResized', source: 'user', column: id, width, finished: true });
+          if (source == 'api') own.set(id, m.state().find((c) => c.id === id)?.width);
+          if (width !== w0) n++, emit(kernel, { type: 'columnResized', source, column: id, width, finished: true });
         }
         if (say) g.live.announce(ids.length === 1 ? text('size.width', ids[0]!, { width: widthOf(g, ids[0]!) }) : g.msg('size.autoAll', { n }));
       };
       g.fit = (id) => size([id], true);
+      // ---- Fitted at load (column-resize.md 16–21): the widths this fit set; another width there is someone else's ----
+      const own = new Map<string, number | null | undefined>();
+      let loaded = o.fitOnLoad !== 'content';
+      let fonts = !doc.fonts;
+      doc.fonts?.ready.then(() => ((fonts = true), g.schedule()));
+      const fitContent = (): void => {
+        const st = m.state();
+        size(m.visible().filter((c) => !c.def.flex && (own.get(c.id) ?? null) === (st.find((x) => x.id === c.id)?.width ?? null)).map((c) => c.id), false, 'api');
+      };
 
       // ---- The keyboard resize mode (column-resize.md 1–7; Q-K3, Q6-1: no buttons, O10) ----
       /** The column, its width on entering, its own width then (undefined: the definition's, maybe flexible), a key pressed. */
@@ -340,6 +361,7 @@ export function columns(o: ColumnsOptions = {}): ColumnsFeature {
         autoSize: (ids, x) => size(ids, x?.say),
         autoSizeAll: (x) => size(m.visible().map((c) => c.id), x?.say),
         resizeMode: enter,
+        fitContent,
       });
       return {
         keys(e: KeyboardEvent, at: FocusPos | null, owner: KeyOwner): boolean {
@@ -361,6 +383,7 @@ export function columns(o: ColumnsOptions = {}): ColumnsFeature {
           setAttr(cell, 'aria-description', on ? g.msg('size.modeHint') : null);
         },
         afterRows() {
+          if (!loaded && fonts && g.rows.displayed.count && g.rows.status.phase != 'loading' && el.body.querySelector('.dzg-cell')) (loaded = true), fitContent();
           if (d && d.dir !== g.dir) cancel();
           // The focused header re-ordered by the paint may lose the DOM focus in some engines (risk R1): given back.
           const c = refocus && g.headerRenderer.cell(refocus);

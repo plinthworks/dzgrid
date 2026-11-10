@@ -44,9 +44,10 @@ export interface GridSettings<T> {
   /**
    * The column headers' row and the column-group rows above it, in px at 16 px text (density.md « Header height »,
    * 1.9.0): the same rule as `rowHeight` (24 to 1 000, grown with the text size, else told and ignored); a feature's
-   * row under the headers (the filter row) keeps the row height. Absent: the row height. Live.
+   * row under the headers (the filter row) keeps the row height. Absent: the row height. Live. 1.10.0: `{ columns,
+   * groups }` sets them apart (« Group rows' height »): `columns` absent the row height, `groups` absent the columns'.
    */
-  readonly headerHeight?: number;
+  readonly headerHeight?: number | HeaderHeights;
   /**
    * `keepOnFilter`: false clears the selection when a filter or the search changes (a sort or
    * a page never does); true by default, rows ticked stay ticked even once hidden. `canSelect`
@@ -135,4 +136,17 @@ export interface RowClassContext<T> {
 export const ROW_HEIGHT = { compact: 28, comfortable: 32, spacious: 40 } as const;
 
 /** `rowHeight` when the grid takes it (a number from 24, WCAG 2.5.8's target size, to 1 000), else undefined. */
+/** `headerHeight` apart (1.10.0, density.md « Group rows' height »): the column headers' row, the column-group rows. */
+export interface HeaderHeights {
+  readonly columns?: number;
+  readonly groups?: number;
+}
+
 export const rowPx = (v: unknown): number | undefined => (typeof v == 'number' && v >= 24 && v <= 1e3 ? v : undefined);
+
+/** A `headerHeight` (a number: every header row; 1.10.0 an object, by member) scaled as `rowHeight`; undefined: none. */
+export function headerPx(s: { readonly headerHeight?: number | HeaderHeights | undefined }, k: keyof HeaderHeights, remPx: number): number | undefined {
+  const v = s.headerHeight;
+  const n = rowPx(v && typeof v == 'object' ? v[k] : v);
+  return n && Math.max(24, Math.round((n * remPx) / 16));
+}

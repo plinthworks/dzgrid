@@ -79,9 +79,11 @@ Sets `headerHeight` (a number of px at 16 px text) in the settings, or later wit
 3. The column-group rows above the column headers (`columnGroups`, the pivot's) take it too: the header is one
    height throughout (decided alone, 2026-11-09: a group title and the titles under it read as one block; a 70 px
    header with groups is 140 px). A column header with no group above it, stretched up over the empty group cells,
-   covers that height.
+   covers that height. **1.10.0** (owner 2026-11-10, review 1.4): the group rows apart — see « Group rows' height »
+   below.
 4. The rows a feature adds under the column headers (the filter row) keep the row height: they hold controls, as
-   cells do. A feature's row that gives its own height keeps it.
+   cells do. A feature's row that gives its own height keeps it (1.10.0: `filters({ rowHeight })`, `filter-ui.md`
+   « Floating row height »).
 5. The same rule as `rowHeight`: from 24 to 1 000 px, grown with the reader's text size, whole px, never under 24
    (WCAG 1.4.4, 2.5.8). Anything else is ignored (the row height is used) and told: warning `invalid-setting`, path
    `settings.headerHeight`; the same value sent again is not told again.
@@ -95,6 +97,26 @@ Sets `headerHeight` (a number of px at 16 px text) in the settings, or later wit
    in `GridState`.
 10. The grid writes `--dzg-header-height` on its root (read-only, as `--dzg-row-height`): the column headers' row
    height. Print: a table, no heights (unchanged).
+
+### Group rows' height (1.10.0, owner 2026-11-10, review 1.4)
+Written before the code. An application wants tall column titles under thin group titles (a 70 px header row under
+30 px group rows).
+
+11. `headerHeight` also takes an object: `{ columns, groups }`. `columns` is the column headers' row, `groups` every
+    column-group row above it (`columnGroups`, the pivot's). A number keeps its meaning: both.
+12. A member left out: `columns` absent → the row height; `groups` absent → the column headers' height (so
+    `{ columns: 70 }` is `70`, and `{ groups: 30 }` gives 30 px groups over row-high titles).
+13. Each member follows rule 5 on its own: 24–1 000 px at 16 px text, grown with the text size, whole px; a bad one is
+    ignored (its default above) and told: `invalid-setting`, path `settings.headerHeight.columns` or
+    `settings.headerHeight.groups`; another value (a string, an array) is told at `settings.headerHeight`. The same
+    heights sent again (a new object with the same numbers) are not told again.
+14. Live as the number (6): the group rows, the column header stretched over empty group cells (it covers the group
+    rows' heights, not its own row's), the pinned top rows, the sticky labels of spanned cells, the overlay and the busy
+    bar start under the new header. `--dzg-header-height` stays the column headers' row. Print: a table, no heights.
+15. Vertical and wrapped titles (`vertical-headers.md`, `header-wrap.md`) grow the column headers' row only, never the
+    group rows.
+16. Angular `[headerHeight]` takes the object; the element's `header-height` attribute stays a number (the object
+    through its `headerHeight` property).
 
 ## Paddings follow the density (1.9.0, owner 2026-11-09, review 11.2)
 Written before the code; the full sheet is `presentation-settings.md` 15. The layout sets `--dzg-density` from the

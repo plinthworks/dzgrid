@@ -295,7 +295,7 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     const sort = kernel.query.sort;
     g.partBase = { ctx, dir, doc: g.doc, msg: partMsg, announce, context };
     const headerHeight = headerRenderer.render({
-      layout: L, cols: w.cols, height: H, rowHeight: h, colIndex,
+      layout: L, cols: w.cols, height: H, rowHeight: h, groupHeight: g.groupHeight(), colIndex,
       decorate: (col, cell) => {
         let label = decorateHeader(g, col, cell, sort);
         let keys = '';

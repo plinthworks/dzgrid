@@ -75,6 +75,11 @@ export interface ColumnDef<T, V = unknown> {
    */
   readonly headerVertical?: boolean;
   /**
+   * Its header's title on several lines (`@dzgrid/dom/wrapped-headers`, docs/behaviors/header-wrap.md; 1.10.0): the
+   * column headers' row grows to the tallest wrapped title, at most `maxLines`. Needs that feature.
+   */
+  readonly headerWrap?: boolean;
+  /**
    * With `@dzgrid/dom/responsive` (docs/behaviors/responsive-columns.md; 1.9.0): when the columns do not fit the view, which
    * collapse under their rows first — the highest first, the last on screen among equals; 0 never. Default 1.
    */

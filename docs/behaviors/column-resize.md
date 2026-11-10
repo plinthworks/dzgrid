@@ -69,7 +69,8 @@ Plan D5; owner Q-M1 (A).
 11. The width is the widest of: the header's text (with room for its sort mark, filter button and ⋮ button),
    and the formatted text of the cells of the **mounted rows** plus a deterministic sample — the first 200
    displayed rows (choice 2) — formatted by the column's formatter; plus the cell's padding; clamped by min /
-   max. Tree column: with the indentation and the chevron of the deepest sampled row. Custom cell parts are
+   max. Tree column: with the indentation and the chevron of the deepest sampled row. A column whose title wraps
+   (`headerWrap`, 1.10.0, `header-wrap.md` 10): its cells and the title's longest word. Custom cell parts are
    measured only where mounted. Pinned rows (`pinned-rows.md`) are part of the sample.
 12. Measured in **one read phase** (owner Q6-2: the real cells): a hidden copy of the header and of every mounted
     cell beside its original (same font, direction, badge, tree indentation), a plain cell for each other sampled
@@ -78,6 +79,28 @@ Plan D5; owner Q-M1 (A).
 13. Hidden columns are skipped; a column with `resizable: false` is skipped; a flexible column becomes fixed.
 14. Sentence: one column `size.width`; all `size.autoAll` (« Colonnes ajustées : 9 »). The API is silent.
 15. « Fit the columns to the view's width » (shrink all) is not offered in this phase.
+
+### Fitted at load (1.10.0, owner 2026-11-10, review 1.8)
+Written before the code. An application whose columns should open as wide as their content, without guessing widths.
+
+16. `columns({ fitOnLoad: 'content' })`: once, when the first rows are shown (the first displayed rows mounted, the
+    data loaded — on a server, the first page or block; a grid that starts empty fits when rows first come), every shown
+    column is fitted as « Ajuster toutes les colonnes » does (11–12: header text with its marks and buttons, the mounted
+    cells and the first 200 displayed rows), within its `minWidth` / `maxWidth`.
+17. Left alone (decided alone): a **flexible** column (`flex`: it shares the room left, the developer's choice wins —
+    the fitted columns are fixed first, the flexible ones take what remains); a `resizable: false` column; a hidden one;
+    a column whose width was **already set** when the fit runs (a restored `GridState`, the user's drag or keys before
+    the rows came, the application's `column.state`).
+18. Not done again on a data change, a sort, a filter, a new page, new rows. Again only when the application asks:
+    `api.fitContent()` on the feature, with the same rules (17) — and a width the user set since (drag, keys, the menu)
+    is never overwritten, nor one the application set. `autoSize` / `autoSizeAll` stay what they were (they fit whatever
+    is asked).
+19. Silent (nothing said), source `api`: one `column.state` patch, `columnResized` (`finished: true`) per changed column,
+    so a saved `GridState` keeps the fitted widths.
+20. Measured once the page's fonts are ready (`document.fonts.ready`, where the browser has it), so a late web font does
+    not leave the columns too narrow.
+21. Right to left, text size: as auto-size (measured as drawn). The view's own width is not a goal: columns wider than
+    the view scroll, narrower leave room (« fit to the view » stays the `flex` columns' job).
 
 ### Keyboard
 

@@ -24,7 +24,7 @@ const CORE = 29550; // 1.9.0 lot B (+2 % rule, measured 29 507): 29 300 → 29 5
 /** @dzgrid/dom/range and /fill's ceilings: 4 950 and 3 000 until Phase 6 step 8b-2 (owner Q1: blocks and the fill in the pinned bands, up to ~5 200 and ~3 150). */
 const RANGE = 5200;
 const FILL = 3264; // Phase 8 step 5 (+2 %): 3 200 → 3 264; // Phase 9 (owner Q-CM4, 2026-11-02): 3 150 → 3 200 (the fill's `along` and `can`)
-const DOM = 24550; // 1.9.0 presentation settings (+2 % rule, measured 24 498); headerHeight 24 200 before it; 1.9.0 lot A: 24 050 (+2 % rule, measured 24 013: hidden headers written on the header rows, missing-feature for total and headerVertical); Phase 11 L9: 23 850 (+2 % rule, the unbounded view); Phase 11 L4a (+2 % rule, the window follows the focus): 23 660 → 23 690; Phase 8 step 4 (+2 % rule, a block list in the base): 23 290 → 23 660; 1.4.0 (+2 % rule): 22 440 → 22 880; the busy bar: 23 070; the busy part: 23 250; Phase 7 `shapeAfter`: 23 290
+const DOM = 24650; // 1.10.0 (+2 % rule, measured 24 630: group heights, headerWrap's missing-feature): DOM 24 650; 1.9.0 presentation settings (+2 % rule, measured 24 498); headerHeight 24 200 before it; 1.9.0 lot A: 24 050 (+2 % rule, measured 24 013: hidden headers written on the header rows, missing-feature for total and headerVertical); Phase 11 L9: 23 850 (+2 % rule, the unbounded view); Phase 11 L4a (+2 % rule, the window follows the focus): 23 660 → 23 690; Phase 8 step 4 (+2 % rule, a block list in the base): 23 290 → 23 660; 1.4.0 (+2 % rule): 22 440 → 22 880; the busy bar: 23 070; the busy part: 23 250; Phase 7 `shapeAfter`: 23 290
 
 describe('sizes: measure + 10 %, rounded up to 50 B', () => {
   it('rounds up to the next 50 B', () => {
@@ -57,7 +57,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
       '@dzgrid/core': CORE, '@dzgrid/dom': DOM, '@dzgrid/angular': 8100, // 1.9.0 presentation settings (+2 %): 8 100; 1.9.0 headerHeight (+2 %): 8 000; 1.9.0 lot A (+2 %): 7 975; Phase 11 L2 (+2 %): 7 950 (R9)
       '@dzgrid/dom/tree': 4250, '@dzgrid/dom/detail': 4200, // 1.9.0 presentation settings (+2 %): tree 4 250, detail 4 200; Phase 9 (Q-CM4, +2 % rule): tree 4 200; S8-O1, S8-O3, S8-O7 (step 8); tree Q9-5 (Phase 6 step 9): 3 850; owner step 14/15 (2026-10-29): 3 950; « étape 7 » (owner 2026-11-01): 4 080; owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
      
-      '@dzgrid/dom/filters': 12050, '@dzgrid/theme': 2990, // 1.9.0 presentation settings (+2 %): 12 050, 2 990; Phase 8 step 4 (+2 %): 2 907 → 2 960; filters: owner's-look budgets (2026-10-27) 10 000 → 10 100; Phase 9 (Q-F6) 11 400
+      '@dzgrid/dom/filters': 12150, '@dzgrid/theme': 2990, // 1.10.0 (+2 % rule, the filter row's height): filters 12 150, filters-base 12 100; 1.9.0 presentation settings (+2 %): 12 050, 2 990; Phase 8 step 4 (+2 %): 2 907 → 2 960; filters: owner's-look budgets (2026-10-27) 10 000 → 10 100; Phase 9 (Q-F6) 11 400
       '@dzgrid/core/tree': 3500, // theme: Q-C2 (Phase 5 close), « up to 2 750 within T7's 3 050 »
       '@dzgrid/core/rules': 600, '@dzgrid/dom/parts': 800, // Q-C3 (Phase 5 close): the rule's raises accepted, now grants
       '@dzgrid/core/tree-lazy': 1500, '@dzgrid/dom/tree-lazy': 1000,
@@ -127,10 +127,10 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(ceilingFor('@dzgrid/core')).toBe(CORE);
     expect(ceilingFor('@dzgrid/core/edit')).toBe(3175); // owner « set include only » (2026-10-29): core/edit 3 150 → 3 160
     expect(ceilingFor('@dzgrid/dom/edit')).toBe(4150); // S8-O1 (step 8) // S7-O1 (step 7)
-    expect(ceilingFor('@dzgrid/dom/filters')).toBe(12050); // 1.9.0 presentation settings (+2 %): 12 050; owner's-look budgets; Phase 9 (owner Q-F6 then B, F1–F2 measured): 12 000
+    expect(ceilingFor('@dzgrid/dom/filters')).toBe(12150); // 1.10.0 (+2 % rule, the filter row's height): filters 12 150, filters-base 12 100; 1.9.0 presentation settings (+2 %): 12 050; owner's-look budgets; Phase 9 (owner Q-F6 then B, F1–F2 measured): 12 000
     type Entry = { maxGzip: number | null; external?: string[]; over?: string; files?: string[] };
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;
-    expect(['@dzgrid/dom/editors', '@dzgrid/theme/edit.css', '@dzgrid/dom/editors: calendar (lazy)', '@dzgrid/core', '@dzgrid/core/edit', '@dzgrid/dom/edit', '@dzgrid/dom', '@dzgrid/dom/filters'].map((n) => e[n]?.maxGzip)).toEqual([6720, 2280, 1520, CORE, 3175, 4150, DOM, 12050]); // 1.9.0 presentation settings (+2 %): filters 12 050; Phase 9 (owner B after F1–F2): filters 12 000; // Q8-5: core/edit 3 150; // Phase 5 close: dom 21 980 (Q-C2) // S7-O1 (step 7): /editors 6 650, dom/edit 3 750; QB5 (step 12): /editors 6 720 // owner « set include only » (2026-10-29): core/edit 3 150 → 3 160
+    expect(['@dzgrid/dom/editors', '@dzgrid/theme/edit.css', '@dzgrid/dom/editors: calendar (lazy)', '@dzgrid/core', '@dzgrid/core/edit', '@dzgrid/dom/edit', '@dzgrid/dom', '@dzgrid/dom/filters'].map((n) => e[n]?.maxGzip)).toEqual([6720, 2280, 1520, CORE, 3175, 4150, DOM, 12150]); // 1.10.0 (+2 % rule, the filter row's height): filters 12 150, filters-base 12 100; 1.9.0 presentation settings (+2 %): filters 12 050; Phase 9 (owner B after F1–F2): filters 12 000; // Q8-5: core/edit 3 150; // Phase 5 close: dom 21 980 (Q-C2) // S7-O1 (step 7): /editors 6 650, dom/edit 3 750; QB5 (step 12): /editors 6 720 // owner « set include only » (2026-10-29): core/edit 3 150 → 3 160
     // The internal entry: its measure with the filters' loader moved in, + 50 (S6-O6), never above 1 250.
     expect(e['@dzgrid/dom/internal']!.maxGzip).toBeGreaterThan(900);
     expect(e['@dzgrid/dom/internal']!.maxGzip).toBeLessThanOrEqual(3800); // Phase 9 status bar: 3 800; Phase 9 (owner Q-CM4): 1 250 → 3 700, the menus' shared list
@@ -700,8 +700,8 @@ describe('the command: --dry by default, --write to save', () => {
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, Entry> }).entries;
     const names = ['@dzgrid/dom/filters', '@dzgrid/dom/filters: set (lazy)', '@dzgrid/dom/filters: date adapters (lazy)', 'profile: audit screen (K.8)'];
     // The owner's third look (« Comfort stylesheet »): the date adapters 2 850, K.8 84 450, the theme 2 850.
-    expect(names.map(ceilingFor)).toEqual([12050, 4850, 2850, 90000]); // Phase 9 (owner Q-F6): filters 11 400, set chunk 4 850; // K.8 84 800 since step 12; owner « set include only » (2026-10-29): the set chunk 4 350, K.8 84 950; owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
-    expect(names.map((n) => e[n]?.maxGzip)).toEqual([12050, 4850, 2850, 90000]); // Phase 9 (owner Q-F6); // owner « set include only » (2026-10-29); owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
+    expect(names.map(ceilingFor)).toEqual([12150, 4850, 2850, 90000]); // 1.10.0 (+2 % rule, the filter row's height): filters 12 150, filters-base 12 100; Phase 9 (owner Q-F6): filters 11 400, set chunk 4 850; // K.8 84 800 since step 12; owner « set include only » (2026-10-29): the set chunk 4 350, K.8 84 950; owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
+    expect(names.map((n) => e[n]?.maxGzip)).toEqual([12150, 4850, 2850, 90000]); // 1.10.0 (+2 % rule): filters 12 150; Phase 9 (owner Q-F6); // owner « set include only » (2026-10-29); owner step 16 (2026-10-29, « ok pour les hausses »): K.8 90 000, set chunk 4 500, core/detail 1 150, Angular 7 450
     expect(['@dzgrid/theme', '@dzgrid/dom/popup', '@dzgrid/dom'].map((n) => e[n]?.maxGzip)).toEqual([2990, 1700, DOM]); // 1.9.0 presentation settings (+2 %): theme 2 990; theme: Phase 8 step 4 // Phase 9 (Q-CM4): the popup host 1 700
   });
 

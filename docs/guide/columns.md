@@ -55,6 +55,12 @@ feature from `@dzgrid/dom/auto-height`). Sides are logical: `start` is the left 
 (and a `minWidth`, so they never get too narrow): they share the room the fixed columns leave, and follow the grid's
 width when the window is resized. With every column flexible, the columns always fill the grid exactly.
 
+**Fitted to their content at load** (1.10.0): `columns({ fitOnLoad: 'content' })` from `@dzgrid/dom/columns` fits the
+shown columns once, when the first rows are shown (on a server, the first page): header and cells as drawn, within
+`minWidth` / `maxWidth`. Flexible columns are left alone (they share what remains), and so is any width already set (a
+restored state, the user). Data changes never refit; `columnsFeature.api(grid).fitContent()` does it again on your call,
+never over a width the user set.
+
 ## Columns made from the data
 
 `autoColumns(rows, options)` from `@dzgrid/core/auto-columns` makes the column list from the first rows: one column per
@@ -153,6 +159,29 @@ createGrid<Plot>(document.getElementById('watering')!, {
   getRowId: (p) => p.id,
   messages: EN,
   features: [verticalHeaders({ maxHeight: 120 })],
+});
+```
+
+## Titles on several lines
+
+`headerWrap: true` on a column, with the `wrappedHeaders()` feature from `@dzgrid/dom/wrapped-headers` (no stylesheet),
+puts a long title on several lines (at most `maxLines`, 3 by default, then « … ») and grows the column headers' row to
+the tallest — measured again when a column is resized or the text size changes, never while scrolling. With
+`headerHeight` the taller wins. Fitting such a column to its content takes its cells and the title's longest word.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { wrappedHeaders } from '@dzgrid/dom/wrapped-headers';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Parcel = { id: string; route: string; days: number };
+
+createGrid<Parcel>(document.getElementById('parcels')!, {
+  rows: [{ id: 'p1', route: 'Harbour – Hill farm', days: 3 }],
+  columns: [{ id: 'route', header: 'Route', flex: 1 }, { id: 'days', header: 'Average delivery time in days', type: 'number', width: 90, headerWrap: true }],
+  getRowId: (p) => p.id,
+  messages: EN,
+  features: [wrappedHeaders({ maxLines: 2 })],
 });
 ```
 

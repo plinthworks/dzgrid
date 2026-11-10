@@ -19,6 +19,7 @@
 # history: Owner « ★ partout » (2026-11-09, 1.9.0 lot B): the import options the guide names (onRows); an addition — @dzgrid/dom/import#FileImportOptions
 # history: Owner 2026-11-09 (1.9.0 presentation settings, answers to docs/presentation-review.md): the names the guide documents for the new entry; additions only, nothing removed or narrowed — @dzgrid/dom/theme#theming, @dzgrid/dom/theme#THEME_KEYS, @dzgrid/dom/theme#ICONS_CSS, @dzgrid/dom/theme#injectIconStyles, @dzgrid/dom#GridTheme, @dzgrid/dom#GridIcons, @dzgrid/dom#GridIcon, @dzgrid/dom#ThemeValue
 # history: owner 2026-11-09: LAYOUT_CSS gains 7 layout lines (odd rows, pinned shadow, header alignment) — @dzgrid/dom#LAYOUT_CSS
+# history: Owner 2026-11-10 (1.10.0, answers to docs/presentation-review.md rows 1.4, 1.5, 1.8, 5.7, 6.5): the names the guide documents for the new entries and options; additions only, nothing removed or narrowed — @dzgrid/dom/wrapped-headers#wrappedHeaders, @dzgrid/dom/wrapped-headers#WrappedHeadersOptions, @dzgrid/dom/wrapped-headers#WRAPPED_HEADERS_CSS, @dzgrid/dom/column-hover#columnHover, @dzgrid/dom/column-hover#COLUMN_HOVER_CSS, @dzgrid/dom/columns#ColumnsApi, @dzgrid/dom/columns#ColumnsOptions, @dzgrid/dom/filters#FiltersOptions, @dzgrid/dom/filters-base#FiltersOptions, @dzgrid/dom#HeaderHeights, @dzgrid/dom#GridSettings
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -113,7 +114,11 @@
       readonly numerals?: 'latn' | 'locale';
       readonly direction?: 'auto' | 'ltr' | 'rtl';
       readonly density?: 'compact' | 'comfortable' | 'spacious';
+      readonly headers?: 'shown' | 'hidden';
+      readonly multiSort?: boolean;
+      readonly sameRow?: (a: T, b: T) => boolean;
       readonly rowHeight?: number;
+      readonly headerHeight?: number | HeaderHeights;
       readonly selection?: {
           readonly mode: 'none' | 'single' | 'multi';
           readonly checkbox?: boolean;
@@ -124,6 +129,7 @@
       readonly context?: unknown;
       readonly rowClass?: (c: RowClassContext<T>) => string | null | undefined;
       readonly overlay?: 'loading' | 'error' | null;
+      readonly busy?: boolean;
       readonly label?: string;
       readonly tooltips?: {
           readonly delayMs?: number;
@@ -146,6 +152,8 @@
           readonly part?: string;
       };
       readonly motion?: boolean;
+      readonly theme?: GridTheme;
+      readonly icons?: GridIcons;
       readonly features?: readonly GridFeature[];
   }
 ## HeaderRowSpec
@@ -534,6 +542,11 @@
   export type GridIcon = string | SVGElement;
 ## ThemeValue
   export type ThemeValue = string | number;
+## HeaderHeights
+  export interface HeaderHeights {
+      readonly columns?: number;
+      readonly groups?: number;
+  }
 
 @ @dzgrid/dom/popup
 ## PopupHost
@@ -1128,6 +1141,7 @@
           readonly say?: boolean;
       }): void;
       resizeMode(column: string): boolean;
+      fitContent?(): void;
   }
 ## ColumnsFeature
   export interface ColumnsFeature extends GridFeature {
@@ -1147,6 +1161,7 @@
 ## ColumnsOptions
   export interface ColumnsOptions {
       readonly drag?: boolean;
+      readonly fitOnLoad?: 'content';
   }
 ## DropTarget
   export interface DropTarget {
@@ -1505,6 +1520,9 @@
       readonly dateZone?: boolean;
       readonly busyFlash?: number;
       readonly loadSet?: () => Promise<SetKit>;
+      readonly maxConditions?: number;
+      readonly matchCase?: boolean;
+      readonly rowHeight?: number;
   }
 ## SetKit
   export interface SetKit {
@@ -2919,6 +2937,7 @@
       readonly loadSet?: () => Promise<SetKit>;
       readonly maxConditions?: number;
       readonly matchCase?: boolean;
+      readonly rowHeight?: number;
   }
 
 @ @dzgrid/dom/filters-panel
@@ -3387,3 +3406,19 @@
   export declare const ICONS_CSS: string;
 ## injectIconStyles
   export declare function injectIconStyles(target: Document | ShadowRoot, nonce?: string): void;
+
+@ @dzgrid/dom/wrapped-headers
+## wrappedHeaders
+  export declare function wrappedHeaders(o?: WrappedHeadersOptions): GridFeature;
+## WrappedHeadersOptions
+  export interface WrappedHeadersOptions {
+      readonly maxLines?: number;
+  }
+## WRAPPED_HEADERS_CSS
+  export declare const WRAPPED_HEADERS_CSS: string;
+
+@ @dzgrid/dom/column-hover
+## columnHover
+  export declare function columnHover(): GridFeature;
+## COLUMN_HOVER_CSS
+  export declare const COLUMN_HOVER_CSS = "@layer dzgrid.skin{.dzg-cell[data-col-hover]:not(:focus),.dzg-hcell[data-col-hover]{background-image:linear-gradient(var(--dzg-column-hover-bg),var(--dzg-column-hover-bg))}}";

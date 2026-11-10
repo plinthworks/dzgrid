@@ -35,7 +35,7 @@ export interface Opener {
  * or F2 on a cell goes into its part, Escape inside comes back to the cell. A summary opens the
  * column's popup when it has one (step 13), anchored to the cell's `aria-haspopup` control.
  */
-export function floatingRow(g: GridContext<unknown>, resolve: Resolve, commit: Commit, popup: Opener): FloatingRow {
+export function floatingRow(g: GridContext<unknown>, resolve: Resolve, commit: Commit, popup: Opener, px?: number): FloatingRow {
   const cells = new Map<HTMLElement, Mounted<FC>>();
   const flush = commit.flush;
   const tab = (cell: HTMLElement, i: number): void => {
@@ -65,7 +65,8 @@ export function floatingRow(g: GridContext<unknown>, resolve: Resolve, commit: C
   }
 
   return {
-    spec: { id: 'filters.floating', mount: (cell) => void cells.set(cell, mounted<FC>(g)), update: paint },
+    // Its own height (`filters({ rowHeight })`, 1.10.0), scaled as the rows'; else the row height.
+    spec: { id: 'filters.floating', mount: (cell) => void cells.set(cell, mounted<FC>(g)), update: paint, get height() { return px ? Math.max(24, Math.round((px * g.remPx) / 16)) : g.rowHeight(); } },
     // A cell that left the column window (or the page): its pending edit applied, its part destroyed.
     sweep() {
       for (const [cell, m] of cells) {

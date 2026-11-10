@@ -1,6 +1,7 @@
 import type { GridContext } from '../context.js';
 import type { GridFeature } from '../features.js';
-import { setAttr, setPx } from '../render/write.js';
+import { setAttr } from '../render/write.js';
+import { needHeader } from '../render/header-need.js';
 
 export interface VerticalHeadersOptions {
   /** The header row's height at most, in px (240 by default); a longer title is cut with « … ». */
@@ -40,7 +41,6 @@ export function verticalHeaders(o: VerticalHeadersOptions = {}): GridFeature {
       el.header.append(probe);
       let key = '';
       let need = 0;
-      let row: HTMLElement | null = null;
       return {
         decorateHeader(col, c) {
           setAttr(c, 'data-vertical', col.def.headerVertical ? '' : null);
@@ -56,20 +56,12 @@ export function verticalHeaders(o: VerticalHeadersOptions = {}): GridFeature {
             // The title's length and the cell's padding, between the header row's height (`headerHeight`) and the cap.
             need = len && len + 16 > h ? Math.min(max, len + 16) : 0;
           }
-          // The column headers' row: after the group rows above it.
-          const r = el.header.querySelector<HTMLElement>(`.dzg-hrow[aria-rowindex="${g.bands.length + 1}"]`);
-          if (row && row !== r) row.style.removeProperty('min-block-size');
-          row = r;
-          if (!r) return;
-          const was = r.style.getPropertyValue('min-block-size');
-          if (need) setPx(r, 'min-block-size', need);
-          else r.style.removeProperty('min-block-size');
-          // The body's view follows the header's new height at the next read.
-          if (r.style.getPropertyValue('min-block-size') !== was) g.schedule();
+          // The column headers' row, the largest of the features' needs (wrapped titles too, header-wrap.md 4).
+          needHeader(g, 'vertical', need);
         },
         destroy() {
           probe.remove();
-          row?.style.removeProperty('min-block-size');
+          needHeader(g, 'vertical', 0, true);
           for (const c of el.header.querySelectorAll('[data-vertical]')) c.removeAttribute('data-vertical');
         },
       };

@@ -380,6 +380,7 @@ export function unslotted(s: GridSettings<unknown>, paged: unknown): Problem[] {
       // A column's total, vertical title or collapse priority without its feature (1.9.0, totals-row.md 5, vertical-headers.md 2, responsive-columns.md 14).
       ...(d?.total !== undefined ? missing(`columns[${i}].total`, 'totals-row') : []),
       ...(d?.headerVertical ? missing(`columns[${i}].headerVertical`, 'vertical-headers') : []),
+      ...(d?.headerWrap ? missing(`columns[${i}].headerWrap`, 'wrapped-headers') : []),
       ...(d?.collapsePriority !== undefined ? missing(`columns[${i}].collapsePriority`, 'responsive') : []),
       ...Object.keys(d?.ui ?? {}).flatMap((k): Problem[] => {
         const at = `columns[${i}].ui.${k}`;

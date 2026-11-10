@@ -44,6 +44,13 @@ and a job title). The application may change either while the grid is shown.
 ### Tests (row height)
 `packages/dom/test/row-height.test.ts`; `npm run test:browser -- --only demos` (the HR demo, 52 px rows).
 
+## The grid's height comes from its container (owner, 2026-11-10)
+**Rule: the grid's height always comes from its container, never from its rows.** A grid that grew and shrank with
+its rows would jump each time a filter or a search changes the count (the page below it moving up and down under the
+reader's pointer — the « yo-yo »). So DzGrid has no « as tall as its rows » mode (review row 1.6, « Won't do »): the
+application gives the host a height (a fixed one, a share of a flex or grid layout, `100dvh` minus its bar), the rows
+scroll inside. A host sized by its content is the unbounded case below, held to the window and told.
+
 ## A host without the layout (unbounded viewport, Phase 11 L9)
 
 ### What the application does

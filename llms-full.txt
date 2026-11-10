@@ -552,6 +552,12 @@ feature from `@dzgrid/dom/auto-height`). Sides are logical: `start` is the left 
 (and a `minWidth`, so they never get too narrow): they share the room the fixed columns leave, and follow the grid's
 width when the window is resized. With every column flexible, the columns always fill the grid exactly.
 
+**Fitted to their content at load** (1.10.0): `columns({ fitOnLoad: 'content' })` from `@dzgrid/dom/columns` fits the
+shown columns once, when the first rows are shown (on a server, the first page): header and cells as drawn, within
+`minWidth` / `maxWidth`. Flexible columns are left alone (they share what remains), and so is any width already set (a
+restored state, the user). Data changes never refit; `columnsFeature.api(grid).fitContent()` does it again on your call,
+never over a width the user set.
+
 ## Columns made from the data
 
 `autoColumns(rows, options)` from `@dzgrid/core/auto-columns` makes the column list from the first rows: one column per
@@ -650,6 +656,29 @@ createGrid<Plot>(document.getElementById('watering')!, {
   getRowId: (p) => p.id,
   messages: EN,
   features: [verticalHeaders({ maxHeight: 120 })],
+});
+```
+
+## Titles on several lines
+
+`headerWrap: true` on a column, with the `wrappedHeaders()` feature from `@dzgrid/dom/wrapped-headers` (no stylesheet),
+puts a long title on several lines (at most `maxLines`, 3 by default, then « … ») and grows the column headers' row to
+the tallest — measured again when a column is resized or the text size changes, never while scrolling. With
+`headerHeight` the taller wins. Fitting such a column to its content takes its cells and the title's longest word.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { wrappedHeaders } from '@dzgrid/dom/wrapped-headers';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Parcel = { id: string; route: string; days: number };
+
+createGrid<Parcel>(document.getElementById('parcels')!, {
+  rows: [{ id: 'p1', route: 'Harbour – Hill farm', days: 3 }],
+  columns: [{ id: 'route', header: 'Route', flex: 1 }, { id: 'days', header: 'Average delivery time in days', type: 'number', width: 90, headerWrap: true }],
+  getRowId: (p) => p.id,
+  messages: EN,
+  features: [wrappedHeaders({ maxLines: 2 })],
 });
 ```
 
@@ -886,7 +915,8 @@ grid.kernel.dispatch({ type: 'filter.set', filter: {} }, 'api');   // clears eve
 ```
 
 - `floating: true` adds a row of small filter fields under the headers; `apply: 'button'` waits for the Apply
-  button instead of filtering as you type.
+  button instead of filtering as you type. `rowHeight: 44` (1.10.0) gives that row its own height (px at 16 px text,
+  24 to 1 000); the row height otherwise.
 - `filter: false` on a column removes its filter; `filter.ops` limits the operators offered.
 - A filter on a `day` or `instant` column is resolved in the grid's `timeZone`, half-open, to the millisecond —
   also when it is sent to a server.
@@ -2361,6 +2391,21 @@ taller — `{ rowHeight: 40, headerHeight: 70 }`, Angular `[headerHeight]="70"`,
 sets the column headers' row and the column-group rows above it (a 70 px header with one group row is 140 px); the
 filter row keeps the row height. It follows the text zoom as rows do; vertical titles still grow the row when they
 need more. The grid writes it on its root as `--dzg-header-height` (read-only, as `--dzg-row-height`).
+
+Since 1.10.0 the group rows have their own height: `headerHeight: { columns: 70, groups: 30 }` (`columns` absent: the
+row height; `groups` absent: the columns'). The filter row has its own too: `filters({ floating: true, rowHeight: 44 })`.
+Titles on several lines (`headerWrap`, [columns](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/columns.md)) grow the column headers' row; the taller wins.
+
+**The grid's height comes from its container**, never from its rows: give the host a height (fixed, a flex or grid
+share, `100dvh` minus a bar) and the rows scroll inside. There is no « as tall as its rows » mode — the page would
+jump each time a filter changes the count.
+
+**Column under the pointer** (1.10.0): `columnHover()` from `@dzgrid/dom/column-hover` writes `data-hover-col` on the
+root and `data-col-hover` on that column's cells (mouse and pen only, never the keyboard); the tint is yours:
+
+```css
+.dzg { --dzg-column-hover-bg: color-mix(in srgb, var(--tz-accent) 8%, transparent); }
+```
 
 ## Right to left
 

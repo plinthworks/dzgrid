@@ -21,7 +21,7 @@ import { Scope } from './render/scope.js';
 import { Tooltip } from './render/tooltip.js';
 import { featureParts, unslotted } from './part.js';
 import { createPainter } from './render/viewport.js';
-import { ROW_HEIGHT, rowPx, type GridSettings } from './settings.js';
+import { headerPx, ROW_HEIGHT, rowPx, type GridSettings } from './settings.js';
 import { injectStyles } from './styles.js';
 import { installWarmup } from './warmup.js';
 import { applyUpdate, closed, ctxOf, rowHeightProblems } from './update.js';
@@ -119,7 +119,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
     schedule, report, restoreFocus: () => {}, warm: null!, reveal: null!, ensureVisible: null!, retip: null!, parts: featureParts(initial.features, () => g.settings.parts),
     now: () => win?.performance.now() ?? 0,
     rowHeight: () => Math.max(24, Math.round(((rowPx(g.settings.rowHeight) ?? ROW_HEIGHT[g.settings.density ?? 'comfortable']) * g.remPx) / 16)),
-    headerHeight: () => (rowPx(g.settings.headerHeight) ? Math.max(24, Math.round((g.settings.headerHeight! * g.remPx) / 16)) : g.rowHeight()),
+    headerHeight: () => headerPx(g.settings, 'columns', g.remPx) ?? g.rowHeight(), groupHeight: () => headerPx(g.settings, 'groups', g.remPx) ?? g.headerHeight(),
     msg: (key, params = {}) => msg(g.settings.messages, key, params, g.ctx),
   };
 

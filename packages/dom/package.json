@@ -517,6 +517,14 @@
       "types": "./src/theme.ts",
       "default": "./src/theme.ts"
     },
+    "./wrapped-headers": {
+      "types": "./src/wrapped-headers.ts",
+      "default": "./src/wrapped-headers.ts"
+    },
+    "./column-hover": {
+      "types": "./src/column-hover.ts",
+      "default": "./src/column-hover.ts"
+    },
     "./locales/en-totals": {
       "types": "./src/locales/en-totals.ts",
       "default": "./src/locales/en-totals.ts"

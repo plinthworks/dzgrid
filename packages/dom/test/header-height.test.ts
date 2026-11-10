@@ -8,6 +8,7 @@ import { pm, ref } from './support-pinned.js';
 import { make as fmake, cleanup as fcleanup } from './support-filters.js';
 import { spans } from '../src/spans.js';
 import { verticalHeaders } from '../src/vertical-headers.js';
+import { filters } from '../src/filters.js';
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -124,5 +125,65 @@ describe('headerHeight', () => {
   it('hidden headers take no room whatever it says (8)', () => {
     const m = pm({ top: [ref()], settings: { headerHeight: 70, headers: 'hidden' } });
     expect(m.host.querySelector<HTMLElement>('.dzg-pins-top')!.style.getPropertyValue('inset-block-start')).toBe('0px');
+  });
+});
+
+// 1.10.0 (owner 2026-11-10, review 1.4): `headerHeight: { columns, groups }` (density.md « Group rows' height » 11–16).
+describe('headerHeight: { columns, groups }', () => {
+  const tree: ColumnOrGroup<R>[] = [{ id: 'g', header: 'Group', children: [{ id: 'name', header: 'Name', width: 120 }, { id: 'n', header: 'N', type: 'number', width: 80 }] }, { id: 's', header: 'S', width: 80 }];
+  const grouped = (headerHeight: unknown, more: object = {}) => emake({ columns: tree as never, settings: { headerHeight: headerHeight as never, rowHeight: 40, features: [spans()], ...more } }); // a tree of columns; an object or a bad value from an untyped host
+
+  it('the group rows and the column headers apart; a stretched header covers the group rows’ height (11, 14)', () => {
+    const m = grouped({ columns: 70, groups: 30 });
+    expect(hrows(m.host).map(size)).toEqual(['30px', '70px']);
+    expect(m.host.querySelector<HTMLElement>('.dzg-hcell[data-col="s"]')!.style.getPropertyValue('--dzg-up')).toBe('30px');
+    const root = m.host.querySelector<HTMLElement>('.dzg')!;
+    expect(root.style.getPropertyValue('--dzg-header-h')).toBe('100px');
+    expect(root.style.getPropertyValue('--dzg-header-height')).toBe('70px');
+  });
+
+  it('a member left out: columns → the row height, groups → the column headers’ (12)', () => {
+    expect(hrows(grouped({ columns: 70 }).host).map(size)).toEqual(['70px', '70px']);
+    expect(hrows(grouped({ groups: 30 }).host).map(size)).toEqual(['30px', '40px']);
+    expect(hrows(grouped(56).host).map(size)).toEqual(['56px', '56px']);
+  });
+
+  it('each member checked on its own, told at its path, not again for the same numbers (13)', () => {
+    const m = grouped({ columns: 70, groups: 10 });
+    expect(hrows(m.host).map(size)).toEqual(['70px', '70px']);
+    expect(told(m.events).map((p) => [p.path, p.detail])).toEqual([['settings.headerHeight.groups', '10']]);
+    m.g.update({ headerHeight: { columns: 70, groups: 10 } });
+    expect(told(m.events)).toHaveLength(1);
+    m.g.update({ headerHeight: [70] as never }); // an array from an untyped host
+    expect(told(m.events).map((p) => p.path)).toEqual(['settings.headerHeight.groups', 'settings.headerHeight']);
+    expect(hrows(m.host).map(size)).toEqual(['40px', '40px']);
+  });
+
+  it('grows with the text size; live; the pinned top rows under both (13, 14)', () => {
+    const m = grouped({ columns: 70, groups: 30 });
+    m.box.remPx = 20;
+    m.g.update({ label: 'x' });
+    // 30 × 20 / 16 = 37.5 → 38; 70 → 88.
+    expect(hrows(m.host).map(size)).toEqual(['38px', '88px']);
+    m.g.update({ headerHeight: { columns: 48, groups: 24 } });
+    expect(hrows(m.host).map(size)).toEqual(['30px', '60px']);
+    const p = pm({ top: [ref()], settings: { headerHeight: { columns: 70, groups: 30 }, rowHeight: 40 } });
+    expect(p.host.querySelector<HTMLElement>('.dzg-pins-top')!.style.getPropertyValue('inset-block-start')).toBe('70px');
+  });
+});
+
+// 1.10.0 (owner 2026-11-10, review 1.5): the floating filter row's own height (filter-ui.md « Floating row height »).
+describe('filters({ rowHeight })', () => {
+  it('the filter row apart from the rows and the header', () => {
+    const m = fmake({ features: [filters({ floating: true, rowHeight: 48 })], settings: { headerHeight: 70, rowHeight: 40 } });
+    expect(hrows(m.host).map(size)).toEqual(['70px', '48px']);
+  });
+
+  it('a bad one: the row height, told once at its path', () => {
+    for (const bad of [12, 'tall']) {
+      const m = fmake({ features: [filters({ floating: true, rowHeight: bad as never })], settings: { rowHeight: 40 } }); // a bad value from an untyped host
+      expect(hrows(m.host).map(size)).toEqual(['40px', '40px']);
+      expect(told(m.events).map((p) => [p.path, p.detail])).toEqual([['features.filters.rowHeight', String(bad)]]);
+    }
   });
 });

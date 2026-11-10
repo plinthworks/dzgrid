@@ -1,0 +1,24 @@
+{
+  "at": "2026-11-10T08:36:45.381Z",
+  "node": "v24.22.1",
+  "data": {
+    "mb": 19.4,
+    "nodes": 441
+  },
+  "one": {
+    "mb": 20.4,
+    "nodes": 441,
+    "firstOpenMs": 8.6,
+    "switchMs": 8.5,
+    "switchMaxMs": 9.6,
+    "scrollKept": "12000 → 0"
+  },
+  "many": {
+    "mb": 23.2,
+    "nodes": 4205,
+    "firstOpenMs": 5.6,
+    "switchMs": 0.9,
+    "switchMaxMs": 1.7,
+    "scrollKept": 12000
+  }
+}

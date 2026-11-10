@@ -577,7 +577,7 @@
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
-      "maxGzip": 24550,
+      "maxGzip": 24650,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal"
@@ -1019,7 +1019,27 @@
     },
     "@dzgrid/dom/vertical-headers": {
       "file": "packages/dom/src/vertical-headers.ts",
-      "maxGzip": 500,
+      "maxGzip": 510,
+      "over": "@dzgrid/dom",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/wrapped-headers": {
+      "file": "packages/dom/src/wrapped-headers.ts",
+      "maxGzip": 995,
+      "over": "@dzgrid/dom",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/column-hover": {
+      "file": "packages/dom/src/column-hover.ts",
+      "maxGzip": 475,
       "over": "@dzgrid/dom",
       "external": [
         "@dzgrid/core",
@@ -1170,7 +1190,7 @@
     },
     "@dzgrid/dom/filters": {
       "file": "packages/dom/src/filters.ts",
-      "maxGzip": 12050,
+      "maxGzip": 12150,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
@@ -1183,7 +1203,7 @@
     },
     "@dzgrid/dom/filters-base": {
       "file": "packages/dom/src/filters-base.ts",
-      "maxGzip": 12000,
+      "maxGzip": 12100,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",

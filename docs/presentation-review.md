@@ -16,6 +16,10 @@ from `packages/theme/*.scss`, `packages/dom/src/styles.ts` (the injected layout)
 layout the grid must compute and none asked by an app yet: 1.2, 1.4, 1.5, 1.6, 1.8, 5.7, 6.5; nothing to do: 2.10, 2.11,
 8.4.
 
+**Done (1.10.0, owner's answers of 2026-11-10).** 1.4, 1.5, 1.8, 5.7, 6.5 (rows marked « Done in 1.10.0 »). **Won't do:**
+1.6 — the owner's rule: the grid's height always comes from its container, never from its content (no yo-yo when
+filtering). 1.2 stays « only if an app asks ».
+
 **Reading the table.**
 - *Verdict*: ✅ covered (a setting, a column option or a `--dzg-*` / `--tz-*` variable meant for it) · 🟡 possible but
   only with raw CSS on the grid's classes, or only in part (one token drives several things that cannot be told
@@ -40,11 +44,11 @@ column options, style docs).
 | 1.1 | Height of a data row | AG `rowHeight` (option and theme parameter); Tab `rowHeight` | `rowHeight` (24–1 000 px, grows with text size), `density`; `--dzg-row-height` written by the grid, read-only (`settings.ts`, `density.md`) | ✅ | — | — | — |
 | 1.2 | A different height per row | AG `getRowHeight`; Tab rows sized by their content | `autoHeight()` feature + column `wrap` (measured); no per-row function | 🟡 | Keep measured heights; a `rowHeight(row)` function only if an app asks (virtualisation must know it) | L | base DOM |
 | 1.3 | Height of the column headers' row | AG `headerHeight`; Tab CSS | `headerHeight` (1.9.0, being added; `density.md` « Header height »), `--dzg-header-height` read-only | ✅ | — (in progress, not touched here) | — | — |
-| 1.4 | Height of the column-group rows apart from the headers | AG `groupHeaderHeight`, `pivotHeaderHeight` | Group rows take `headerHeight` (decided 2026-11-09, `density.md` « Header height » 3) | 🟡 | If asked: `headerHeight: { columns, groups }` (the grid lays them out) | S | base DOM |
-| 1.5 | Height of the filter row under the headers | AG `floatingFiltersHeight` | Keeps the row height (`density.md` « Header height » 4) | 🟡 | `filters({ rowHeight })` if asked | S | feature |
-| 1.6 | Grid as tall as its rows (no inner scroll) | AG `domLayout: 'autoHeight'`; Tab no `height` / `maxHeight` | The grid fills its host; a host grown to its rows is held to the window and told `unbounded-viewport` (`virtual-scroll.md`) | 🟡 | A setting `fit: 'host' \| 'rows'` with a row cap (`maxRows`), the view sized by the grid; beyond the cap it scrolls | M | base DOM |
+| 1.4 | Height of the column-group rows apart from the headers | AG `groupHeaderHeight`, `pivotHeaderHeight` | Group rows take `headerHeight` (decided 2026-11-09, `density.md` « Header height » 3) | 🟡 | **Done in 1.10.0** — `headerHeight: { columns, groups }` (a number: both; `density.md` « Group rows' height ») | S | base DOM |
+| 1.5 | Height of the filter row under the headers | AG `floatingFiltersHeight` | Keeps the row height (`density.md` « Header height » 4) | 🟡 | **Done in 1.10.0** — `filters({ rowHeight })` (`filter-ui.md` « Floating row height ») | S | feature |
+| 1.6 | Grid as tall as its rows (no inner scroll) | AG `domLayout: 'autoHeight'`; Tab no `height` / `maxHeight` | The grid fills its host; a host grown to its rows is held to the window and told `unbounded-viewport` (`virtual-scroll.md`) | 🟡 | **Won't do** (owner 2026-11-10): the grid's height always comes from its container, never from its content — no yo-yo of the page when a filter changes the count (`virtual-scroll.md`) | — | — |
 | 1.7 | Column width, min, max, share of the free room | AG `width`, `minWidth`, `maxWidth`, `flex`; Tab `width`, `minWidth`, `maxWidth`, `widthGrow` | Column `width`, `minWidth`, `maxWidth`, `flex` (`defs.ts`) | ✅ | — | — | — |
-| 1.8 | Columns fitted to their content or to the view at load | AG `autoSizeStrategy`, size-to-fit; Tab `layout` (`fitData`, `fitColumns`, `fitDataFill`, `fitDataStretch`) | `flex` shares the room; « fit » on demand (columns feature: menu, double-click on an edge) | 🟡 | `columns({ fitOnLoad: 'content' })` if asked | M | feature |
+| 1.8 | Columns fitted to their content or to the view at load | AG `autoSizeStrategy`, size-to-fit; Tab `layout` (`fitData`, `fitColumns`, `fitDataFill`, `fitDataStretch`) | `flex` shares the room; « fit » on demand (columns feature: menu, double-click on an edge) | 🟡 | **Done in 1.10.0** — `columns({ fitOnLoad: 'content' })`, `fitContent()` (`column-resize.md` 16–21; flexible columns left alone) | M | feature |
 | 1.9 | Cell padding along the line | AG `cellHorizontalPadding`; Tab cell padding (style docs) | `--dzg-cell-padding-inline` (`dzgrid.scss`) | ✅ | — | — | — |
 | 1.10 | Cell padding above / below (wrapped text) | AG `rowVerticalPaddingScale` | None: text centred by its line height; a wrapped cell has no block padding | 🟡 | **Done in 1.9.0** — `--dzg-cell-padding-block` (default 0), read on `[data-wrap]` cells| S | theme |
 | 1.11 | One spacing unit that scales the whole grid | AG `spacing` | None: gaps hard-written in rem (header gap .25rem, popup .75rem, footer .25/.5rem, menu items 32 px) | ❌ | **Done in 1.9.0** — `--dzg-space` (default .25rem); the sheets' gaps written as multiples of it| M | theme + every feature sheet |
@@ -115,7 +119,7 @@ column options, style docs).
 | 5.4 | Header cell while dragged | AG `headerCellMovingBackgroundColor` | Drop bar `--dzg-move-bar` (`columns.scss`) | ✅ | — | — | — |
 | 5.5 | Header title aligned with its column | Tab `headerHozAlign`; AG `headerClass` | Title always at the start, even over a number column whose cells sit at the end (`data-align` set on cells only, `render/rows.ts`; not on `.dzg-hcell`) | 🟡 | **Done in 1.9.0** — The header follows the column's `align` (`data-align` on `.dzg-hcell`), column `headerAlign` to differ| S | base DOM + theme |
 | 5.6 | Header title's vertical place (tall headers) | Tab `columnHeaderVertAlign` | Centred (flex), fixed | 🟡 | **Done in 1.9.0** — `--dzg-header-align-block` (`start` / `center` / `end`): matters now that `headerHeight` makes tall headers| S | theme |
-| 5.7 | Long header titles on several lines | AG `wrapHeaderText`, `autoHeaderHeight` | One line, ellipsis; with a fixed `headerHeight`, raw CSS `white-space: normal` on `.dzg-hlabel` wraps within it | 🟡 | Column `headerWrap`, the header row grown to the tallest title (as vertical titles do) | M | feature |
+| 5.7 | Long header titles on several lines | AG `wrapHeaderText`, `autoHeaderHeight` | One line, ellipsis; with a fixed `headerHeight`, raw CSS `white-space: normal` on `.dzg-hlabel` wraps within it | 🟡 | **Done in 1.10.0** — Column `headerWrap` with `wrappedHeaders({ maxLines })` (`header-wrap.md`) | M | feature |
 | 5.8 | Titles written upwards | Tab `headerVertical` | Column `headerVertical` (`@dzgrid/dom/vertical-headers`, 1.9.0) | ✅ | — | — | — |
 | 5.9 | No header row | Tab `headerVisible` | `headers: 'hidden'` (kept for screen readers, `hidden-headers.md`) | ✅ | — | — | — |
 | 5.10 | Classes on one header / one group | AG `headerClass` | `ui.headerClass`; `.dzg-hgroup[data-g][data-level]` (public hook) | ✅ | — | — | — |
@@ -130,7 +134,7 @@ column options, style docs).
 | 6.2 | Row under the pointer | AG `rowHoverColor`, `suppressRowHoverHighlight`; Tab row hover colour | `--dzg-row-hover-bg` (set it to `var(--tz-bg)` to turn hover off) | ✅ | — | — | — |
 | 6.3 | Selected row | AG `selectedRowBackgroundColor`; Tab selected row colour | `--dzg-row-selected-bg`, `--dzg-select-bar` (bar at the row's start) | ✅ | — | — | — |
 | 6.4 | Row holding the focus | — | `--dzg-row-active-bg` | ✅ | — | — | — |
-| 6.5 | Column under the pointer | AG `columnHoverHighlight`, `columnHoverColor` | None | ❌ | Only if asked: a feature writes `data-hover-col` on the root, theme tints `[data-col]` cells (`--dzg-column-hover-bg`) | M | feature |
+| 6.5 | Column under the pointer | AG `columnHoverHighlight`, `columnHoverColor` | None | ❌ | **Done in 1.10.0** — `columnHover()` writes `data-hover-col` on the root and `data-col-hover` on the column's cells; `--dzg-column-hover-bg` (`column-hover.md`) | M | feature |
 | 6.6 | A row's classes from its data | AG `getRowClass`, `rowClassRules`, `rowStyle`; Tab `rowFormatter` | `rowClass` (row, key, context, pinned side) | ✅ | — | — | — |
 | 6.7 | Group rows and group footers | AG group-row styling (CSS) | Header surface, weight 600 (`grouping.scss`) | 🟡 | **Done in 1.9.0** — `--dzg-group-row-bg`, falling back to `--dzg-header-bg`| S | optional sheet |
 | 6.8 | Row numbers column | AG `rowNumbers`; Tab row header | `rowNumbers()` feature, header surface (`row-numbers.scss`) | ✅ | — | — | — |
@@ -211,6 +215,7 @@ column options, style docs).
 9. **Spacing unit and density-aware paddings (1.11, 11.2)** — M, touches every sheet.
 10. **Later, only if an app asks** — header titles that wrap and grow the row (5.7), a grid as tall as its rows
     (1.6), column hover (6.5), separate group-row and filter-row heights (1.4, 1.5), a per-row height function (1.2).
+    1.10.0: 1.4, 1.5, 1.8, 5.7, 6.5 done; 1.6 won't be done (owner); 1.2 still only if asked.
 
 Everything in 3–9 is a CSS variable whose fallback is today's value: no look changes unless an app sets it, no
 setting, no `GridState` entry; each new colour goes into `contrast-pairs.json`. Only 1, 2 and 5 touch the base JS.

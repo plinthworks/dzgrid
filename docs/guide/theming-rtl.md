@@ -193,6 +193,21 @@ sets the column headers' row and the column-group rows above it (a 70 px header 
 filter row keeps the row height. It follows the text zoom as rows do; vertical titles still grow the row when they
 need more. The grid writes it on its root as `--dzg-header-height` (read-only, as `--dzg-row-height`).
 
+Since 1.10.0 the group rows have their own height: `headerHeight: { columns: 70, groups: 30 }` (`columns` absent: the
+row height; `groups` absent: the columns'). The filter row has its own too: `filters({ floating: true, rowHeight: 44 })`.
+Titles on several lines (`headerWrap`, [columns](columns.md)) grow the column headers' row; the taller wins.
+
+**The grid's height comes from its container**, never from its rows: give the host a height (fixed, a flex or grid
+share, `100dvh` minus a bar) and the rows scroll inside. There is no « as tall as its rows » mode — the page would
+jump each time a filter changes the count.
+
+**Column under the pointer** (1.10.0): `columnHover()` from `@dzgrid/dom/column-hover` writes `data-hover-col` on the
+root and `data-col-hover` on that column's cells (mouse and pen only, never the keyboard); the tint is yours:
+
+```css
+.dzg { --dzg-column-hover-bg: color-mix(in srgb, var(--tz-accent) 8%, transparent); }
+```
+
 ## Right to left
 
 Direction is designed in: pinned columns, scrolling, the arrow keys (in Arabic, → moves toward the start, which is on the right), popups, the

@@ -3,7 +3,7 @@ import { cellValue } from '../render/rows.js';
 
 /**
  * Auto-size's measure (Phase 6 step 6, docs/behaviors/column-resize.md 11–12; owner Q6-2, Q6-3, Q6-4): what each column
- * needs, as the browser draws it. Each probe is a copy of a real cell beside it — the header, every mounted body cell
+ * needs, as the browser draws it. Each probe is a copy of a real cell beside it — the header (a wrapped title by its longest word), every mounted body cell
  * (its badge, its tree indentation and chevron) — or, for another of the first 200 displayed rows, a plain cell with the
  * column's formatted text (a text already met is not measured again); each takes its parent's font and direction, at
  * `max-content`, unseen. Every probe is written, then every width read (one layout), then every probe removed: never a
@@ -14,9 +14,9 @@ export function fits(g: GridContext<unknown>, ids: readonly string[]): Map<strin
   const { el, columns: m, rows } = g;
   const d = rows.displayed;
   const all: [string, HTMLElement][] = [];
-  const put = (id: string, x: HTMLElement, at: Element | null | undefined) => {
+  const put = (id: string, x: HTMLElement, at: Element | null | undefined, fit = 'max') => {
     if (!at) return;
-    x.style.cssText += ';position:absolute;visibility:hidden;inline-size:max-content';
+    x.style.cssText += `;position:absolute;visibility:hidden;inline-size:${fit}-content`;
     at.append(x);
     all.push([id, x]);
   };
@@ -25,7 +25,8 @@ export function fits(g: GridContext<unknown>, ids: readonly string[]): Map<strin
   for (const id of ids) {
     const col = m.get(id)!;
     const h = g.headerRenderer.cell(id);
-    put(id, h?.cloneNode(true) as HTMLElement, h?.parentElement);
+    // A title that wraps (`headerWrap`, header-wrap.md 10) goes on lines instead: only its longest word (min-content) counts.
+    put(id, h?.cloneNode(true) as HTMLElement, h?.parentElement, col.def.headerWrap ? 'min' : 'max');
     const seen = new Set<string>();
     for (const c of el.body.querySelectorAll<HTMLElement>('.dzg-cell')) if (c.dataset['col'] === id) seen.add(c.textContent!), put(id, c.cloneNode(true) as HTMLElement, c.parentElement);
     for (let i = 0; i < Math.min(200, d.count); i++) {

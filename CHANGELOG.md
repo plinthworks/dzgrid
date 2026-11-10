@@ -5,6 +5,33 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — 1.10.0
+
+A minor (owner's answers of 2026-11-10 to the presentation review, rows 1.4, 1.5, 1.8, 5.7, 6.5). Additions only.
+
+### Added
+- **Group rows apart from the column headers**: `headerHeight: { columns: 70, groups: 30 }` (a number keeps its meaning:
+  every header row). Each member checked as `rowHeight` (24–1 000, text-zoom scaled), told at
+  `settings.headerHeight.columns` / `.groups`; live. Angular `[headerHeight]` takes the object; the element's
+  `header-height` attribute stays a number. New type `HeaderHeights` (`@dzgrid/dom`).
+- **The filter row's own height**: `filters({ rowHeight })` (same rule; told at `features.filters.rowHeight`).
+- **Columns fitted to their content at load**: `columns({ fitOnLoad: 'content' })` — once, at the first rows shown (the
+  first page on a server); flexible columns, `resizable: false` ones and widths already set are left alone; not again on
+  data changes. `ColumnsApi.fitContent()` again on the app's call, never over a width the user set.
+- **Titles on several lines**: column `headerWrap: true` with `wrappedHeaders({ maxLines })` from
+  `@dzgrid/dom/wrapped-headers`; the column headers' row grows to the tallest title (the taller of it and `headerHeight`,
+  and of vertical titles). Fitting such a column takes its cells and the title's longest word.
+- **Column under the pointer**: `columnHover()` from `@dzgrid/dom/column-hover` — `data-hover-col` on the root,
+  `data-col-hover` on the column's cells, tinted by `--dzg-column-hover-bg` (unset: nothing drawn); mouse and pen only.
+
+### Decided
+- **The grid's height always comes from its container, never from its rows** (owner): no « as tall as its rows » mode
+  (review row 1.6, won't do) — a page that jumps when a filter changes the count is worse. `virtual-scroll.md`, the guide.
+- Multiple sheets in one grid: parked (owner: too heavy); the plan stays in `docs/phase-12-steps/sheets-plan.md`.
+
+### Upgrading from 1.9.0
+- Nothing to change. Every addition is off until asked for.
+
 ## [1.9.0] - 2026-11-10
 
 A minor: nothing of 1.8.0 is removed (`npm run check:api`). Columns from the data, a totals row, JSON export, vertical

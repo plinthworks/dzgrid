@@ -65,7 +65,8 @@ grid.kernel.dispatch({ type: 'filter.set', filter: {} }, 'api');   // clears eve
 ```
 
 - `floating: true` adds a row of small filter fields under the headers; `apply: 'button'` waits for the Apply
-  button instead of filtering as you type.
+  button instead of filtering as you type. `rowHeight: 44` (1.10.0) gives that row its own height (px at 16 px text,
+  24 to 1 000); the row height otherwise.
 - `filter: false` on a column removes its filter; `filter.ops` limits the operators offered.
 - A filter on a `day` or `instant` column is resolved in the grid's `timeZone`, half-open, to the millisecond —
   also when it is sent to a server.

@@ -69,6 +69,8 @@ const domAlias = {
   '@dzgrid/dom/state': fileURLToPath(new URL('./packages/dom/src/state.ts', import.meta.url)),
   '@dzgrid/dom/totals-row': fileURLToPath(new URL('./packages/dom/src/totals-row.ts', import.meta.url)),
   '@dzgrid/dom/vertical-headers': fileURLToPath(new URL('./packages/dom/src/vertical-headers.ts', import.meta.url)),
+  '@dzgrid/dom/wrapped-headers': fileURLToPath(new URL('./packages/dom/src/wrapped-headers.ts', import.meta.url)),
+  '@dzgrid/dom/column-hover': fileURLToPath(new URL('./packages/dom/src/column-hover.ts', import.meta.url)),
   '@dzgrid/dom/locales/en-totals': fileURLToPath(new URL('./packages/dom/src/locales/en-totals.ts', import.meta.url)),
   '@dzgrid/dom/locales/fr-totals': fileURLToPath(new URL('./packages/dom/src/locales/fr-totals.ts', import.meta.url)),
   '@dzgrid/dom/locales/ar-totals': fileURLToPath(new URL('./packages/dom/src/locales/ar-totals.ts', import.meta.url)),

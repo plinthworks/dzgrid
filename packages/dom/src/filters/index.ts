@@ -63,6 +63,11 @@ export interface FiltersOptions {
   readonly maxConditions?: number;
   /** Phase 9: a « Match case » box on each text row (off by default); a column's `filter.matchCase` wins. */
   readonly matchCase?: boolean;
+  /**
+   * The floating row's height in px at 16 px text (1.10.0, filter-ui.md « Floating row height »): 24 to 1 000, grown with
+   * the text size; absent or anything else (told): the row height.
+   */
+  readonly rowHeight?: number;
 }
 
 /** The feature, with the popup's handles (owner decision O6: here, not on the grid). */
@@ -138,7 +143,9 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
   const missing = [...FILTER_KEYS, ...(rows ? lack : [])].filter((k) => text[k] === undefined);
   if (missing.length) throw new TypeError(`filters: missing ${missing.join(', ')}`);
   env.words = !lack.length;
-  const bad = o.maxConditions !== undefined && !rowsOk(o.maxConditions) ? [problem('invalid-setting', 'warning', 'features.filters.maxConditions', String(o.maxConditions))] : [];
+  // The row's own height (1.10.0): the rule of `rowHeight` (24 to 1 000), else the row height and told.
+  const px = typeof o.rowHeight == 'number' && o.rowHeight >= 24 && o.rowHeight <= 1e3 ? o.rowHeight : undefined;
+  const bad = [...(o.maxConditions !== undefined && !rowsOk(o.maxConditions) ? [problem('invalid-setting', 'warning', 'features.filters.maxConditions', String(o.maxConditions))] : []), ...(o.rowHeight != null && !px ? [problem('invalid-setting', 'warning', 'features.filters.rowHeight', String(o.rowHeight))] : [])];
   const told = [...(env.calendarProblems ?? []), ...bad];
   if (told.length) emit(g.kernel, { type: 'problems', source: 'host', problems: told });
   const root = g.el.root.getRootNode();
@@ -163,7 +170,7 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
   onCommand(g.kernel, commit.heard);
   const popup = menu(g, resolve, commit, o.popup !== false, o.apply);
   keep(popup);
-  const row = floatingRow(g, resolve, commit, popup);
+  const row = floatingRow(g, resolve, commit, popup, px);
   // Shown or hidden live (floating-toggle.md): the row's spec in the header rows or not; a hide moves the grid's
   // focus off the row first. The paint reads the view's height before the header changes: one more reads it after.
   let again = false;

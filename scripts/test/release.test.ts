@@ -306,7 +306,7 @@ describe('1.9.0, the five packages', () => {
 
   it('export the 1.9.0 presentation entries (dom theme; variables.css), built like the others', () => {
     expect(pkg('dom').exports['./theme']).toEqual({ types: './src/theme.ts', default: './src/theme.ts' });
-    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/locales\/ar-import', '\.\/theme'\]/);
+    expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/locales\/ar-import', '\.\/theme'[,\]]/); // 1.10.0: './wrapped-headers', './column-hover' after it
     const theme = pkg('theme');
     for (const f of ['variables.css', 'variables.unlayered.css', 'variables.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
     expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'vertical-headers', 'variables'\]/);

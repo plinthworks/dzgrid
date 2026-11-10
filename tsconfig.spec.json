@@ -200,6 +200,12 @@
       "@dzgrid/dom/vertical-headers": [
         "./packages/dom/src/vertical-headers.ts"
       ],
+      "@dzgrid/dom/wrapped-headers": [
+        "./packages/dom/src/wrapped-headers.ts"
+      ],
+      "@dzgrid/dom/column-hover": [
+        "./packages/dom/src/column-hover.ts"
+      ],
       "@dzgrid/dom/locales/en-totals": [
         "./packages/dom/src/locales/en-totals.ts"
       ],

@@ -112,8 +112,8 @@ export class DzGrid<T> implements AfterContentInit {
   readonly headers = input<S<T>['headers']>();
   /** Row height in px over the density's (owner D1, D3, virtual-scroll.md « Row height »); live. */
   readonly rowHeight = input<number>();
-  /** The header rows' height in px, over the row height (density.md « Header height », 1.9.0); live. */
-  readonly headerHeight = input<number>();
+  /** The header rows' height in px, over the row height (density.md « Header height », 1.9.0); `{ columns, groups }` apart (1.10.0); live. */
+  readonly headerHeight = input<S<T>['headerHeight']>();
   /** CSS variables on the grid's root by typed keys, and the app's own icons (presentation-settings.md, 1.9.0; need `theming()`); live. */
   readonly theme = input<S<T>['theme']>();
   readonly icons = input<S<T>['icons']>();

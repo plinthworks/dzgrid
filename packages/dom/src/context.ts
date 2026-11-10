@@ -102,6 +102,8 @@ export interface GridContext<T> {
   remPx: number;
   /** The view's block size at the last paint (what a screen of rows is, measured). */
   viewBlock: number;
+  /** What the features growing the column headers' row need of it, by feature (vertical, wrapped titles; `render/header-need.ts`, 1.10.0). */
+  headerNeeds?: Record<string, number>;
   /**
    * Where the rows sit when a feature gives their heights (D7); the uniform layout otherwise. `was`: the
    * same rows' layout at another row height (density, text zoom), whose heights the feature set (a measure)
@@ -142,6 +144,8 @@ export interface GridContext<T> {
   rowHeight(): number;
   /** The column headers' and the group rows' height: `headerHeight` scaled as `rowHeight`, else the row height (1.9.0). */
   headerHeight(): number;
+  /** The column-group rows' height: `headerHeight.groups` scaled, else the column headers' (1.10.0). */
+  groupHeight(): number;
   /**
    * Scrolls (logically, no paint asked) so display row `i` is seen whole in a view `block` high, under the
    * pinned parents (WCAG 2.4.11): the stack drawn, or the room its own need, whichever is more. True when it moved.

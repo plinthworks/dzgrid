@@ -194,7 +194,7 @@ export function pinnedRows<T = unknown>(o: PinnedRowsOptions<T> = {}): PinnedRow
       const paint = (f: Frame<T>): void => {
         // Under the header (its height read with the view); the bottom band at the grid's foot when the body is short (Q3).
         // Without a layout (jsdom), the header rows' heights (`headerHeight`); hidden headers take no room (hidden-headers.md 7).
-        setPx(T.el, 'inset-block-start', head || (g.settings.headers == 'hidden' ? 0 : (g.bands.length + 1) * g.headerHeight() + g.headerRows.length * g.rowHeight()));
+        setPx(T.el, 'inset-block-start', head || (g.settings.headers == 'hidden' ? 0 : g.bands.length * g.groupHeight() + g.headerHeight() + g.headerRows.reduce((s, r) => s + (r.height ?? g.rowHeight()), 0)));
         setPx(B.el, 'margin-block-start', Math.max(0, view - T.px - B.px - (g.layout?.total ?? 0)));
         for (const b of bands) draw(b, f);
         last = f;

@@ -125,6 +125,11 @@ Header titles that wrap and grow the header (5.7), a grid as tall as its rows (1
 heights for the group and filter rows (1.4, 1.5), a per-row height function (1.2), columns fitted at load (1.8): each
 is layout the grid must compute, none is cheap. 2.10 and 2.11 need nothing new; 7.3 is a documented raw-CSS hook.
 
+**1.10.0 (owner 2026-11-10):** 1.4 (`headerHeight: { columns, groups }`, `density.md` « Group rows' height »), 1.5
+(`filters({ rowHeight })`, `filter-ui.md`), 1.8 (`columns({ fitOnLoad: 'content' })`, `column-resize.md` 16–21), 5.7
+(`headerWrap`, `header-wrap.md`) and 6.5 (`columnHover()`, `column-hover.md`) are built. 1.6 **won't be done**: the
+grid's height always comes from its container, never from its rows (`virtual-scroll.md`). 1.2 stays « only if asked ».
+
 ## Right to left
 Every new line and mark is logical. The pinned shadow and the chevron icon are mirrored by the grid (`scale: -1 1`);
 a header title at the end sits on the left in Arabic; `--dzg-header-case` leaves Arabic as it is.
