@@ -1,0 +1,144 @@
+---
+/**
+ * A real DzGrid, drawn in the browser from the library's sources (the Vite aliases in astro.config.mjs) with the
+ * theme the whole site loads. One grid per demo, made only when the demo comes near the screen.
+ *
+ *   <LiveDemo rows={[…]} columns={[…]} settings={{ label: 'Books' }} features={['filters']} />
+ *
+ * Everything crosses into the page as JSON: rows, columns (no functions), the other settings, and the features by
+ * name (FEATURES below). Rows are told apart by their `id` field. The texts are the page's language (EN or FR, with
+ * each feature's bundle merged), the locale en-GB or fr-FR. Light and dark follow Starlight's switch by themselves:
+ * the theme reads `data-theme` on <html>. `element` draws it with the Web Component (`<dz-grid>`) instead of
+ * `createGrid`.
+ */
+interface Props {
+  rows: readonly Record<string, unknown>[];
+  columns: readonly Record<string, unknown>[];
+  /** Any other settings of `createGrid`, as JSON (`label`, `selection`, `pagination`, `density`…). */
+  settings?: Record<string, unknown>;
+  /** Features by name: 'filters', 'pagination'. */
+  features?: readonly string[];
+  /** The grid's height in pixels. Default 360. */
+  height?: number;
+  /** Drawn by `<dz-grid>` from @dzgrid/element. */
+  element?: boolean;
+  /** A line under the grid. */
+  caption?: string;
+}
+const { rows, columns, settings = {}, features = [], height = 360, element = false, caption } = Astro.props;
+const lang = Astro.currentLocale === 'fr' ? 'fr' : 'en';
+const data = JSON.stringify({ rows, columns, settings, features, element });
+---
+
+<dzg-live-demo class="not-content" data-lang={lang} data-demo={data}>
+  <div class="dzg-demo-host" style={`--demo-height: ${height}px`}></div>
+  {caption && <p class="dzg-demo-caption">{caption}</p>}
+</dzg-live-demo>
+
+<script>
+  import type { GridEvent, Problem } from '@dzgrid/core';
+  import type { GridMessages } from '@dzgrid/dom';
+
+  /** A demo's problems in the console, where a check of the site looks for them. */
+  const warn = (problems: readonly Problem[]) => {
+    for (const p of problems) console.warn('dzgrid demo', p.code, p.path, p.detail);
+  };
+
+  type Lang = 'en' | 'fr';
+  type Demo = {
+    rows: Record<string, unknown>[];
+    columns: Record<string, unknown>[];
+    settings: Record<string, unknown>;
+    features: string[];
+    element: boolean;
+  };
+  type Loaded = { feature: unknown; text: Record<string, string> };
+
+  /** What a demo may switch on, loaded only by a demo that names it. */
+  const FEATURES: Record<string, (lang: Lang) => Promise<Loaded>> = {
+    filters: async (lang) => {
+      // The full entry: day columns get their calendar (@tzslot/*, installed at the root).
+      const { filters } = await import('@dzgrid/dom/filters');
+      const text = lang === 'fr' ? (await import('@dzgrid/dom/locales/fr-filters')).FR_FILTERS.text : (await import('@dzgrid/dom/locales/en-filters')).EN_FILTERS.text;
+      return { feature: filters(), text };
+    },
+    pagination: async (lang) => {
+      const { pagination } = await import('@dzgrid/dom/pagination');
+      const text = lang === 'fr' ? (await import('@dzgrid/dom/locales/fr-pagination')).FR_PAGINATION.text : (await import('@dzgrid/dom/locales/en-pagination')).EN_PAGINATION.text;
+      return { feature: pagination(), text };
+    },
+  };
+
+  async function base(lang: Lang): Promise<GridMessages> {
+    return lang === 'fr' ? (await import('@dzgrid/dom/locales/fr')).FR : (await import('@dzgrid/dom/locales/en')).EN;
+  }
+
+  class DzgLiveDemo extends HTMLElement {
+    #destroy: (() => void) | null = null;
+    #seen: IntersectionObserver | null = null;
+    #started = false;
+
+    connectedCallback() {
+      if (this.#started) return;
+      // Lazy: made when the demo comes within a screen of the view.
+      this.#seen = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          this.#seen?.disconnect();
+          this.#seen = null;
+          void this.#draw();
+        }
+      }, { rootMargin: '400px 0px' });
+      this.#seen.observe(this);
+    }
+
+    async #draw() {
+      if (this.#started) return;
+      this.#started = true;
+      const host = this.querySelector<HTMLElement>('.dzg-demo-host');
+      if (!host) return;
+      const lang: Lang = this.dataset.lang === 'fr' ? 'fr' : 'en';
+      const demo = JSON.parse(this.dataset.demo ?? '{}') as Demo;
+      try {
+        const unknown = demo.features.filter((name) => !(name in FEATURES));
+        if (unknown.length) throw new Error(`unknown demo feature: ${unknown.join(', ')}`);
+        const [messages, loaded] = await Promise.all([base(lang), Promise.all(demo.features.map((name) => FEATURES[name]!(lang)))]);
+        const merged = { ...messages, text: Object.assign({}, messages.text, ...loaded.map((l) => l.text)) } as GridMessages;
+        const features = loaded.map((l) => l.feature);
+        const locale = lang === 'fr' ? 'fr-FR' : 'en-GB';
+        const getRowId = (row: Record<string, unknown>) => String(row.id);
+        if (!this.isConnected) return;
+        if (demo.element) {
+          // `defineDzGrid()` rather than `import '@dzgrid/element/define'`: read from the sources, that entry is
+          // not listed in the package's `sideEffects` (it names the built `./define.js`), so the build drops it.
+          const { defineDzGrid } = await import('@dzgrid/element');
+          if (!customElements.get('dz-grid')) defineDzGrid();
+          const el = document.createElement('dz-grid') as HTMLElement & Record<string, unknown>;
+          el.setAttribute('locale', locale);
+          Object.assign(el, { columns: demo.columns, getRowId, messages: merged, features, settings: demo.settings, rows: demo.rows });
+          el.addEventListener('dzg-problems', (e) => warn((e as CustomEvent<{ problems: readonly Problem[] }>).detail.problems));
+          host.append(el);
+          this.#destroy = () => el.remove();
+        } else {
+          const { createGrid } = await import('@dzgrid/dom');
+          // The settings are JSON from the page: checked by the grid itself, which says what it refuses.
+          const grid = createGrid(host, { locale, ...demo.settings, rows: demo.rows, columns: demo.columns, getRowId, messages: merged, features, onEvent: (e: GridEvent<Record<string, unknown>>) => e.type === 'problems' && warn(e.problems) } as never);
+          this.#destroy = () => grid.destroy();
+        }
+      } catch (error) {
+        // A demo the grid refused: said on the page, not a blank box.
+        host.textContent = String(error);
+        console.error(error);
+      }
+    }
+
+    disconnectedCallback() {
+      this.#seen?.disconnect();
+      this.#seen = null;
+      this.#destroy?.();
+      this.#destroy = null;
+      this.#started = false;
+    }
+  }
+
+  if (!customElements.get('dzg-live-demo')) customElements.define('dzg-live-demo', DzgLiveDemo);
+</script>

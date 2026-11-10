@@ -1,0 +1,79 @@
+# The documentation site (website/, Astro Starlight) on GitHub Pages: https://plinthworks.github.io/dzgrid/
+# The site reads the library from packages/*/src, so a change there rebuilds it. Pages is switched on by the owner
+# in the repository's settings (Settings → Pages → Source: GitHub Actions); until then the deploy job fails, the
+# build still checks every page.
+name: docs
+
+on:
+  push:
+    branches: [main]
+    paths: &paths
+      - 'website/**'
+      - 'packages/**'
+      - 'api/**'
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+      - 'scripts/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vitest.config.ts'
+  # A pull request builds the site (a broken page found before main), and deploys nothing.
+  pull_request:
+    paths: *paths
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; a newer push does not cancel one already deploying.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          # Astro 7 needs Node 22.12 or later; the release workflow uses 24.
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            website/package-lock.json
+
+      # The root install brings what the packages' sources import (@tzslot/*, gsap) and the compilers the tests use.
+      - name: Install the workspace
+        run: npm ci
+
+      # Every example compiles (ngc, strict templates), every page has its twin, every link lands, no banned word.
+      - name: Check the pages and their examples
+        run: npx vitest run --project tools website/test scripts/test/banned-words.test.ts
+
+      - name: Install the site
+        working-directory: website
+        run: npm ci
+
+      - name: Build the site
+        working-directory: website
+        run: npm run build
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: website/dist
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

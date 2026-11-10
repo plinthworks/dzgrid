@@ -1,0 +1,272 @@
+---
+title: "Composant web"
+description: "L’élément <dz-grid> de @dzgrid/element, pour du HTML simple, un CMS ou tout framework qui écrit une balise : installation, première grille, propriétés, attributs, événements dzg-*."
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+
+`@dzgrid/element` définit `<dz-grid>` pour du HTML simple, un CMS, ou tout framework qui sait écrire une balise
+(React 19, Vue, Svelte…). C’est la grille de `@dzgrid/dom`, dessinée dans la page — sans shadow root, donc le thème
+et votre propre CSS l’atteignent. Ses réglages sont des propriétés et des attributs, ses événements des événements
+DOM `dzg-*`. Les onglets montrent la même grille en [TypeScript](../typescript/) et avec [Angular](../angular/).
+
+Une application Angular utilise plutôt `@dzgrid/angular` : les deux nomment leur balise `<dz-grid>`. Une page qui a
+besoin des deux définit l’élément sous un autre nom avec `defineDzGrid('dz-grid-wc')`.
+
+## Installer
+
+```sh
+npm install @dzgrid/core @dzgrid/dom @dzgrid/theme @dzgrid/element
+```
+
+## Une première grille
+
+L’élément est en `display: contents` : dimensionnez donc la grille elle-même, `dz-grid > .dzg { block-size: … }`. La
+grille est dessinée dès que l’élément est dans la page et a `columns`, `getRowId` et `messages`.
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Moon = { id: string; name: string; found: string; radius: number };
+
+createGrid<Moon>(document.getElementById('moons')!, {
+  rows: [
+    { id: 'm1', name: 'Quill', found: '2023-05-30', radius: 812 },
+    { id: 'm2', name: 'Tallow', found: '2021-02-14', radius: 1460 },
+  ],
+  columns: [
+    { id: 'name', header: 'Moon', flex: 1 },
+    { id: 'found', header: 'Found', type: 'day' },
+    { id: 'radius', header: 'Radius (km)', type: 'number' },
+  ],
+  getRowId: (m) => m.id,
+  messages: EN,
+  locale: 'en-GB',
+  density: 'compact',
+  label: 'Moons',
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Moon = { id: string; name: string; found: string; radius: number };
+
+@Component({
+  selector: 'app-moons',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+    locale="en-GB" density="compact" label="Moons" />`,
+})
+export class Moons {
+  readonly rows: Moon[] = [
+    { id: 'm1', name: 'Quill', found: '2023-05-30', radius: 812 },
+    { id: 'm2', name: 'Tallow', found: '2021-02-14', radius: 1460 },
+  ];
+  readonly columns: DzgColumnOrGroup<Moon>[] = [
+    { id: 'name', header: 'Moon', flex: 1 },
+    { id: 'found', header: 'Found', type: 'day' },
+    { id: 'radius', header: 'Radius (km)', type: 'number' },
+  ];
+  readonly rowId = (m: Moon) => m.id;
+  readonly messages = EN;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<link rel="stylesheet" href="/node_modules/@dzgrid/theme/dzgrid.css">
+<style>dz-grid > .dzg { block-size: 260px; }</style>
+
+<dz-grid locale="en-GB" density="compact" label="Moons"></dz-grid>
+
+<script type="module">
+  import '@dzgrid/element/define';
+  import { EN } from '@dzgrid/dom/locales/en';
+
+  const grid = document.querySelector('dz-grid');
+  grid.columns = [
+    { id: 'name', header: 'Moon', flex: 1 },
+    { id: 'found', header: 'Found', type: 'day' },
+    { id: 'radius', header: 'Radius (km)', type: 'number' },
+  ];
+  grid.getRowId = (m) => m.id;
+  grid.messages = EN;
+  grid.rows = [
+    { id: 'm1', name: 'Quill', found: '2023-05-30', radius: 812 },
+    { id: 'm2', name: 'Tallow', found: '2021-02-14', radius: 1460 },
+  ];
+  grid.addEventListener('dzg-row-clicked', (e) => console.log(e.detail.row.key));
+</script>
+```
+
+</Fragment>
+</CodeTabs>
+
+<LiveDemo
+  element
+  height={260}
+  settings={{ label: 'Moons', density: 'compact' }}
+  columns={[
+    { id: 'name', header: 'Moon', flex: 1 },
+    { id: 'found', header: 'Found', type: 'day' },
+    { id: 'radius', header: 'Radius (km)', type: 'number' },
+  ]}
+  rows={[
+    { id: 'm1', name: 'Quill', found: '2023-05-30', radius: 812 },
+    { id: 'm2', name: 'Tallow', found: '2021-02-14', radius: 1460 },
+    { id: 'm3', name: 'Brindle', found: '2019-10-07', radius: 233 },
+    { id: 'm4', name: 'Saffron Minor', found: '2024-12-21', radius: 95 },
+    { id: 'm5', name: 'Old Lantern', found: '2018-07-16', radius: 2104 },
+  ]}
+  caption="Celle-ci est un vrai élément <dz-grid>."
+/>
+
+## En TypeScript
+
+La classe de l’élément est générique sur le type de ligne : demandez-la à `querySelector`. `await grid.ready` attend
+le premier dessin ; `grid.grid` est alors la grille elle-même, avec son `kernel` et son `api`.
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters-base';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+
+type Moon = { id: string; name: string; radius: number };
+
+const grid = createGrid<Moon>(document.getElementById('moons')!, {
+  rows: [{ id: 'm1', name: 'Quill', radius: 812 }],
+  columns: [{ id: 'name', header: 'Moon' }, { id: 'radius', header: 'Radius (km)', type: 'number' }],
+  getRowId: (m) => m.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_FILTERS.text } },
+  features: [filters()],
+  selection: { mode: 'single' },
+  onEvent: (e) => {
+    if (e.type === 'sortChanged') console.log(e.type);
+  },
+});
+grid.kernel.dispatch({ type: 'quick.set', text: 'quill' }, 'api');
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { filters } from '@dzgrid/dom/filters-base';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+
+type Moon = { id: string; name: string; radius: number };
+
+@Component({
+  selector: 'app-moon-search',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+    [features]="features" [selection]="{ mode: 'single' }" [(quick)]="quick" />`,
+})
+export class MoonSearch {
+  readonly rows: Moon[] = [{ id: 'm1', name: 'Quill', radius: 812 }];
+  readonly columns: DzgColumnOrGroup<Moon>[] = [{ id: 'name', header: 'Moon' }, { id: 'radius', header: 'Radius (km)', type: 'number' }];
+  readonly rowId = (m: Moon) => m.id;
+  readonly messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+  readonly features = [filters()];
+  quick = 'quill';
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import type { GridEvent } from '@dzgrid/core';
+import { filters } from '@dzgrid/dom/filters-base';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+
+type Moon = { id: string; name: string; radius: number };
+
+const grid = document.querySelector<DzGridElement<Moon>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Moon' }, { id: 'radius', header: 'Radius (km)', type: 'number' }];
+grid.getRowId = (m) => m.id;
+grid.messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+grid.features = [filters()];
+grid.settings = { selection: { mode: 'single' } };
+grid.rows = [{ id: 'm1', name: 'Quill', radius: 812 }];
+
+grid.addEventListener('dzg-sort-changed', (e) => {
+  const event = (e as CustomEvent<GridEvent<Moon>>).detail;
+  console.log(event.type);
+});
+
+await grid.ready;   // resolved when first drawn
+grid.grid?.kernel.dispatch({ type: 'quick.set', text: 'quill' }, 'api');
+```
+
+</Fragment>
+</CodeTabs>
+
+## Propriétés
+
+| Propriété | Ce que c’est |
+|---|---|
+| `rows`, `source`, `columns`, `getRowId`, `messages`, `features`, `parts` | Comme les réglages de `createGrid`. Vivants (par identité), sauf `getRowId` et `features`, lus à la création de la grille. |
+| `settings` | Tous les autres réglages (`selection`, `context`, `rowClass`, `pagination`…), comparés clé par clé. |
+| `env` | Le `GridEnv`, lu à la création de la grille. |
+| `grid` | La `GridInstance` (`kernel`, `api`, `update`) tant qu’elle est dessinée ; `null` sinon. |
+| `ready` | Une promesse : tenue au premier dessin, rompue quand les réglages sont refusés. |
+| `problems` | Les 100 derniers problèmes signalés. |
+| `update(patch)` | Comme `grid.update(patch)`. |
+
+Les parties sont des fonctions faites avec `definePart` de `@dzgrid/dom` ; les enfants `<template>` ne sont pas lus.
+
+## Attributs
+
+Vivants, et ils l’emportent sur `settings` ; en retirer un rend au réglage sa valeur par défaut. Une valeur que
+l’élément ne sait pas lire est écartée et signalée (`invalid-setting`, chemin `attribute:<name>`).
+
+`locale`, `time-zone`, `numerals` (`latn` | `locale`), `direction` (`auto` | `ltr` | `rtl` ; sans lui la grille suit
+le `dir` de l’élément), `density` (`compact` | `comfortable` | `spacious`), `row-height`, `header-height`,
+`label`, `overlay` (`loading` | `error`), `busy`, `motion`, `multi-sort` (lu à la création de la grille). Booléens :
+présent ou `"true"` vaut oui, `"false"` non.
+
+## Événements
+
+Chaque événement de la grille est émis sur l’élément sous le nom `dzg-` suivi de son type en kebab-case, avec
+l’événement lui-même en `detail` : `dzg-cell-clicked`, `dzg-row-clicked`, `dzg-selection-changed`,
+`dzg-sort-changed`, `dzg-filter-changed`, `dzg-row-move`, `dzg-state-changed`, `dzg-problems`… Ils remontent et
+traversent les shadow roots (`composed`). `dzg-ready` suit chaque création de la grille. Les événements du premier
+dessin arrivent une micro-tâche plus tard : un écouteur ajouté juste après la dernière propriété les entend encore.
+
+## Dans un framework
+
+<Aside>
+React 19 et Vue passent des propriétés aux éléments personnalisés : liez `columns`, `rows`, `getRowId` et `messages`
+en propriétés, écoutez les événements `dzg-*`. Gardez `features` et `getRowId` stables (hors de la fonction de rendu,
+ou mémorisés) : ils sont lus une fois.
+</Aside>
+
+## Ensuite
+
+- La page [TypeScript](../typescript/), pour les réglages que l’élément transmet.
+- Les [guides](../../guides/columns/), tâche par tâche, en commençant par les colonnes.

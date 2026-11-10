@@ -1,0 +1,91 @@
+---
+title: DzGrid
+description: Une grille de données écrite de zéro en TypeScript — un cœur pur, une couche DOM, un thème, Angular et un composant web. Droite à gauche, fuseaux horaires et lecteurs d’écran pensés dès le départ.
+template: splash
+hero:
+  tagline: Une grille de données écrite de zéro en TypeScript. Tri, filtres, édition, arbres, groupes, tableaux croisés, données serveur, export — chaque fonction est son propre petit import, en TypeScript, en Angular ou en composant web.
+  actions:
+    - text: Commencer
+      link: getting-started/typescript/
+      icon: right-arrow
+    - text: Voir sur GitHub
+      link: https://github.com/plinthworks/dzgrid
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import LiveDemo from '../../../components/LiveDemo.astro';
+
+export const NAMES = ['Amber', 'Blue', 'Copper', 'Dusk', 'Ember', 'Frost', 'Golden', 'Hazel', 'Ivory', 'Jade'];
+export const KINDS = ['Bean', 'Poppy', 'Sage', 'Squash', 'Tomato', 'Violet'];
+export const seeds = Array.from({ length: 60 }, (_, i) => ({
+  id: `s${i + 1}`,
+  name: `${NAMES[i % NAMES.length]} ${KINDS[(i * 7) % KINDS.length]}`,
+  kind: KINDS[(i * 7) % KINDS.length],
+  sown: `2026-${String(1 + (i % 9)).padStart(2, '0')}-${String(1 + ((i * 11) % 28)).padStart(2, '0')}`,
+  height: 20 + ((i * 37) % 160),
+  price: 1.5 + ((i * 13) % 40) / 4,
+  organic: i % 3 !== 0,
+}));
+
+## Ce que c’est
+
+DzGrid montre des lignes de données dans un tableau où l’on peut travailler : trier par colonne, filtrer, chercher,
+sélectionner, modifier, déplacer des lignes, les grouper, les exporter dans un fichier. Elle est écrite de zéro en
+TypeScript, en couches que l’on prend séparément :
+
+- **`@dzgrid/core`** — les calculs : tri, filtres, groupes, arbres, tableaux croisés, édition, état. Sans DOM, sans
+  horloge, sans dépendance : il tourne dans un navigateur, un worker ou un serveur.
+- **`@dzgrid/dom`** — dessine la grille dans n’importe quelle page. Chaque fonction est sa propre entrée
+  (`@dzgrid/dom/filters`, `@dzgrid/dom/export`…) : une page ne paie que ce qu’elle importe.
+- **`@dzgrid/theme`** — l’aspect, en variables CSS : clair et sombre, densités, contrastes vérifiés.
+- **`@dzgrid/angular`** et **`@dzgrid/element`** — la même grille en composant Angular ou en composant web.
+
+La grille ci-dessous est une vraie, dessinée par la bibliothèque sur cette page. Triez par un titre, filtrez depuis le
+menu d’un titre, cochez des lignes, déplacez-vous avec les flèches ; passez le site en sombre et la grille suit.
+
+<LiveDemo
+  height={440}
+  features={['filters']}
+  settings={{ label: 'Seeds', selection: { mode: 'multi', checkbox: true } }}
+  columns={[
+    { id: 'name', header: 'Seed', flex: 2, pinned: 'start' },
+    { id: 'kind', header: 'Kind', flex: 1 },
+    { id: 'sown', header: 'Sown', type: 'day', width: 130 },
+    { id: 'height', header: 'Height (cm)', type: 'number', width: 130 },
+    { id: 'price', header: 'Price', type: 'number', width: 120, numberFormat: { style: 'currency', currency: 'EUR' } },
+    { id: 'organic', header: 'Organic', type: 'boolean', width: 110 },
+  ]}
+  rows={seeds}
+  caption="Données inventées : 60 sachets de graines."
+/>
+
+## Pensé dès le départ, pas ajouté
+
+<CardGrid>
+  <Card title="Des lignes par identifiant, jamais par position" icon="list-format">
+    Chaque ligne a un identifiant stable (`getRowId`). Commandes, sélection et focus suivent la ligne à travers tris,
+    filtres et nouvelles données.
+  </Card>
+  <Card title="Une donnée invalide ne lève jamais d’erreur" icon="warning">
+    Une colonne illisible, une date sans décalage horaire, une réponse du serveur mal formée : chacune devient un
+    `Problem` que vous pouvez journaliser, et la grille continue de marcher.
+  </Card>
+  <Card title="Droite à gauche et fuseaux horaires" icon="translate">
+    Uniquement des côtés logiques : une page en arabe ou en hébreu ne demande aucun autre CSS. Jours du calendrier et
+    instants sont des types de colonne distincts, affichés dans le fuseau choisi.
+  </Card>
+  <Card title="Clavier et lecteurs d’écran" icon="star">
+    Le modèle de grille WAI-ARIA, un seul arrêt de tabulation, un chemin clavier pour chaque action, tris et filtres
+    annoncés ; les textes de la grille sont livrés en anglais, en français et en arabe.
+  </Card>
+</CardGrid>
+
+## Par où commencer
+
+<CardGrid>
+  <LinkCard title="TypeScript" href="getting-started/typescript/" description="createGrid dans n’importe quelle page, sans framework." />
+  <LinkCard title="Angular" href="getting-started/angular/" description="Le composant dz-grid, Angular 19 à 22." />
+  <LinkCard title="Composant web" href="getting-started/web-component/" description="dz-grid pour du HTML simple ou tout framework." />
+</CardGrid>

@@ -1,0 +1,42 @@
+/*
+ * The DzGrid look on Starlight: the site's accent is the grid's own palette (--tz-*, from @dzgrid/theme, loaded
+ * before this file), so a reader sees the same blue in the prose and in the live demos, light and dark alike.
+ * Starlight sets `color-scheme` on <html> from its theme switch, which is what `light-dark()` in --tz-* follows.
+ * Colours only as variables: no colour written here.
+ */
+:root {
+  --sl-color-accent: var(--tz-accent);
+  --sl-color-text-accent: var(--tz-accent);
+  /* Text on the accent (the current page in the sidebar, the hero's button): the palette's own pair. */
+  --sl-color-text-invert: var(--tz-accent-fg);
+  --sl-color-accent-low: color-mix(in srgb, var(--tz-accent) 18%, var(--tz-bg));
+  --sl-color-accent-high: color-mix(in srgb, var(--tz-accent) 60%, var(--tz-fg));
+}
+
+/* The live demos: a grid inside the page, out of Starlight's prose styles (.not-content). */
+dzg-live-demo {
+  display: block;
+  margin-block: 1.5rem;
+}
+dzg-live-demo .dzg-demo-host {
+  display: flex;
+  flex-direction: column;
+  block-size: var(--demo-height, 360px);
+}
+/*
+ * The element sets itself `display: contents` only when it computes `inline`; a flex host blockifies it, so it is
+ * said here (reported to the owner, 2026-11-10).
+ */
+dzg-live-demo .dzg-demo-host > dz-grid {
+  display: contents;
+}
+/* The grid takes the host's whole height, even with few rows. */
+dzg-live-demo .dzg-demo-host > .dzg,
+dzg-live-demo .dzg-demo-host > dz-grid > .dzg {
+  flex: 1;
+}
+dzg-live-demo .dzg-demo-caption {
+  margin-block-start: 0.5rem;
+  font-size: var(--sl-text-sm);
+  color: var(--sl-color-gray-3);
+}

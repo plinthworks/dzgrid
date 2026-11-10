@@ -9,8 +9,10 @@ import { fileURLToPath } from 'node:url';
  * domain never appear, not even in demo data. Demo data stays visibly made up.
  */
 const root = fileURLToPath(new URL('../..', import.meta.url));
-const SKIP = new Set(['node_modules', 'dist', '.git', 'coverage', 'test-results']);
-const TEXT = /\.(ts|mts|mjs|js|html|scss|css|md|json|yml|yaml|txt)$/;
+// `.astro`: the documentation site's generated types (website/.astro), not written by anyone.
+const SKIP = new Set(['node_modules', 'dist', '.git', 'coverage', 'test-results', '.astro']);
+/** Every text the repository holds, the documentation site's pages (`.mdx`) and components (`.astro`) included. */
+const TEXT = /\.(ts|mts|mjs|js|html|scss|css|md|mdx|astro|svg|json|yml|yaml|txt)$/;
 /** A banned word, written as char codes so this file names none of them. */
 const w = (...c: number[]): string => String.fromCharCode(...c);
 const ORG = [w(82, 84, 69), w(69, 78, 84, 83, 79, 45, 63, 69), w(109, 63, 70, 82, 82), w(65, 74, 85, 95, 77, 63, 70, 82, 82), w(65, 74, 85, 95, 82, 82)];
@@ -43,6 +45,11 @@ describe('banned words', () => {
     expect(hits('certes, la porte, sortes, un terrain, ERREUR')).toEqual([]);
     expect(hits(`le « ${SCREEN} »\n${SCREEN.toUpperCase()}_GRID\n${SCREEN.toLowerCase()}.html`)).toEqual([1, 3]);
     expect(hits(`${w(65, 106, 117, 115, 116, 101, 109, 101, 110, 116)} ${w(109, 70, 82, 82)}\n${PHRASE}\n${w(65, 74, 85, 95, 82, 82)}`)).toEqual([1, 2, 3]);
+  });
+
+  it('reads the documentation site too: its pages, components and pictures', () => {
+    const scanned = [...files(join(root, 'website'))].map((f) => relative(root, f).replace(/\\/g, '/'));
+    for (const f of ['website/src/content/docs/index.mdx', 'website/src/components/LiveDemo.astro', 'website/src/assets/logo.svg', 'website/astro.config.mjs']) expect(scanned).toContain(f);
   });
 
   it('no file of the repository holds one', () => {

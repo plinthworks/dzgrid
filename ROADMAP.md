@@ -1371,3 +1371,15 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   reported « changed » (two keys added) — the owner accepts or not**; `test:real-app` 58 / 58 (references kept);
   `release:check` « the 5 packages at 1.10.0 » (its bytes step re-run after the real-build line moved).
 - For the owner: commit and publish (`docs/release-1.10.0.md`).
+
+## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)
+
+- **Batch 1 — skeleton (2026-11-10, not committed).** `website/` (Astro Starlight, versions pinned as DzCalendar's,
+  port 4720), English root and `/fr/`, every sidebar section with stubs, home page with a live grid, the three
+  getting-started pages written (three tabs, live demos), `website/test/` (examples compiled by ngc strict, EN/FR
+  shape, links and anchors), `.github/workflows/docs.yml` (Pages to be switched on by the owner). Seen in Chrome:
+  en/fr, light/dark, demos drawn, no console message, axe 0 on the home page. Found, not fixed: `<dz-grid>` in a flex
+  host stays `block`; `sideEffects` vs `src/define.ts` when built from source; a short grid does not fill a flex
+  host; the guide's `filters-base` day-filter sentence.
+- Next: batch 2 (the guides move in; llms.txt from the site), 3 (one page per option), 4 (API from
+  `api/*.api.txt`), 5 (Chrome pass, the owner enables Pages).

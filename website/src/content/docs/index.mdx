@@ -1,0 +1,91 @@
+---
+title: DzGrid
+description: A data grid written from scratch in TypeScript — a pure core, a DOM layer, a theme, Angular and a Web Component. Right to left, time zones and screen readers designed in.
+template: splash
+hero:
+  tagline: A data grid written from scratch in TypeScript. Sorting, filters, editing, trees, groups, pivots, server data, export — each feature its own small import, in plain TypeScript, Angular or as a Web Component.
+  actions:
+    - text: Get started
+      link: getting-started/typescript/
+      icon: right-arrow
+    - text: View on GitHub
+      link: https://github.com/plinthworks/dzgrid
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import LiveDemo from '../../components/LiveDemo.astro';
+
+export const NAMES = ['Amber', 'Blue', 'Copper', 'Dusk', 'Ember', 'Frost', 'Golden', 'Hazel', 'Ivory', 'Jade'];
+export const KINDS = ['Bean', 'Poppy', 'Sage', 'Squash', 'Tomato', 'Violet'];
+export const seeds = Array.from({ length: 60 }, (_, i) => ({
+  id: `s${i + 1}`,
+  name: `${NAMES[i % NAMES.length]} ${KINDS[(i * 7) % KINDS.length]}`,
+  kind: KINDS[(i * 7) % KINDS.length],
+  sown: `2026-${String(1 + (i % 9)).padStart(2, '0')}-${String(1 + ((i * 11) % 28)).padStart(2, '0')}`,
+  height: 20 + ((i * 37) % 160),
+  price: 1.5 + ((i * 13) % 40) / 4,
+  organic: i % 3 !== 0,
+}));
+
+## What it is
+
+DzGrid shows rows of data in a table people can work in: sort by a column, filter, search, select, edit, move
+rows, group them, export them to a file. It is written from scratch in TypeScript, in layers you can take
+separately:
+
+- **`@dzgrid/core`** — the calculations: sorting, filtering, grouping, trees, pivots, editing, the state. No DOM, no
+  clock, no dependency: it runs in a browser, a worker or a server.
+- **`@dzgrid/dom`** — draws the grid in any page. Every feature is its own entry (`@dzgrid/dom/filters`,
+  `@dzgrid/dom/export`…): a page pays only for what it imports.
+- **`@dzgrid/theme`** — the look, as CSS variables: light and dark, densities, contrast checked.
+- **`@dzgrid/angular`** and **`@dzgrid/element`** — the same grid as an Angular component or a Web Component.
+
+The grid below is a real one, drawn by the library on this page. Sort by a title, filter from a title's menu, tick
+rows, move with the arrow keys; switch the site to dark and the grid follows.
+
+<LiveDemo
+  height={440}
+  features={['filters']}
+  settings={{ label: 'Seeds', selection: { mode: 'multi', checkbox: true } }}
+  columns={[
+    { id: 'name', header: 'Seed', flex: 2, pinned: 'start' },
+    { id: 'kind', header: 'Kind', flex: 1 },
+    { id: 'sown', header: 'Sown', type: 'day', width: 130 },
+    { id: 'height', header: 'Height (cm)', type: 'number', width: 130 },
+    { id: 'price', header: 'Price', type: 'number', width: 120, numberFormat: { style: 'currency', currency: 'EUR' } },
+    { id: 'organic', header: 'Organic', type: 'boolean', width: 110 },
+  ]}
+  rows={seeds}
+  caption="Made-up data: 60 packets of seeds."
+/>
+
+## Designed in, not added
+
+<CardGrid>
+  <Card title="Rows by id, never by position" icon="list-format">
+    Every row has a stable id (`getRowId`). Commands, selection and focus follow the row through sorts, filters and
+    new data.
+  </Card>
+  <Card title="Bad input never throws" icon="warning">
+    A column it cannot read, a date without its offset, a server answer out of shape: each becomes a `Problem` you
+    can log, and the grid keeps working.
+  </Card>
+  <Card title="Right to left and time zones" icon="translate">
+    Logical sides only, so Arabic or Hebrew pages need no other CSS. Calendar days and instants are different
+    column types, shown in the zone you choose.
+  </Card>
+  <Card title="Keyboards and screen readers" icon="star">
+    The WAI-ARIA grid pattern, one tab stop, a keyboard way for every action, sorts and filters said aloud; the
+    grid's own texts ship in English, French and Arabic.
+  </Card>
+</CardGrid>
+
+## Start here
+
+<CardGrid>
+  <LinkCard title="TypeScript" href="getting-started/typescript/" description="createGrid in any page, no framework." />
+  <LinkCard title="Angular" href="getting-started/angular/" description="The dz-grid component, Angular 19 to 22." />
+  <LinkCard title="Web Component" href="getting-started/web-component/" description="dz-grid for plain HTML or any framework." />
+</CardGrid>

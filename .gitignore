@@ -18,3 +18,8 @@ examples/angular-audit/package-lock.json
 !scripts/test/fixtures/split/ng/dist/
 packages/core/test/.planted/
 .size-ref/
+
+# The documentation site (website/)
+website/node_modules/
+website/dist/
+website/.astro/

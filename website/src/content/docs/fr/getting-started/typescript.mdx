@@ -1,0 +1,453 @@
+---
+title: "TypeScript"
+description: "Une première grille avec createGrid de @dzgrid/dom, dans n’importe quelle page et sans framework : installation, première grille, fonctions et leurs textes, événements, mises à jour."
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+
+`@dzgrid/dom` dessine la grille dans n’importe quelle page, sans framework. `@dzgrid/core` fait les calculs (sans
+DOM) et `@dzgrid/theme` apporte le CSS. Cette page utilise `createGrid` directement ; les onglets montrent la même
+grille avec [Angular](../angular/) et avec le [composant web](../web-component/).
+
+## Installer
+
+```sh
+npm install @dzgrid/core @dzgrid/dom @dzgrid/theme
+```
+
+`@dzgrid/dom/filters` et `@dzgrid/dom/editors` chargent un calendrier de dates venu de `@tzslot/core` et
+`@tzslot/dom` : installez-les aussi si vous utilisez ces deux entrées, ou importez les mêmes fonctions depuis
+`@dzgrid/dom/filters-base` et `@dzgrid/dom/editors-base`, qui n’ont pas de calendrier.
+
+## Une première grille
+
+La grille remplit son élément hôte : donnez une hauteur à l’hôte, et disposez-le en colonne.
+
+```html
+<div id="books" style="block-size: 320px; display: flex; flex-direction: column"></div>
+```
+
+Le `display: flex; flex-direction: column` compte : il tient la grille dans la hauteur de l’hôte, si bien que la
+grille défile à l’intérieur et ne dessine que les lignes visibles. Sans lui, la grille grandit avec ses lignes ;
+elle limite alors sa vue à la hauteur de la fenêtre et signale une fois un événement `problems` de code
+`unbounded-viewport` (chemin `host`).
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { EN } from '@dzgrid/dom/locales/en';
+import '@dzgrid/theme/dzgrid.css';
+
+type Book = { id: string; title: string; author: string; published: string; price: number };
+
+const rows: Book[] = [
+  { id: 'b1', title: 'The Glass Orchard', author: 'Mira Volkov', published: '2019-03-14', price: 18.5 },
+  { id: 'b2', title: 'Salt and Lanterns', author: 'Idris Fenwick', published: '2021-11-02', price: 22 },
+  { id: 'b3', title: 'A Map of Quiet Rivers', author: 'Lena Okafor', published: '2017-06-30', price: 15.9 },
+  { id: 'b4', title: 'The Clockmaker’s Garden', author: 'Tomas Ruel', published: '2023-01-19', price: 24 },
+  { id: 'b5', title: 'Nine Paper Boats', author: 'Ada Lindqvist', published: '2020-09-08', price: 12.75 },
+  { id: 'b6', title: 'Winter at Hollow Pier', author: 'Mira Volkov', published: '2024-02-27', price: 19.9 },
+];
+
+const columns: ColumnOrGroup<Book>[] = [
+  { id: 'title', header: 'Title', flex: 2, pinned: 'start' },
+  { id: 'author', header: 'Author', flex: 1 },
+  { id: 'published', header: 'Published', type: 'day', width: 130 },
+  { id: 'price', header: 'Price', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
+];
+
+createGrid<Book>(document.getElementById('books')!, {
+  rows,
+  columns,
+  getRowId: (b) => b.id,
+  messages: EN,
+  locale: 'en-GB',
+  label: 'Books',
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Book = { id: string; title: string; author: string; published: string; price: number };
+
+@Component({
+  selector: 'app-books',
+  imports: [DzGrid],
+  template: `
+    <div class="grid-box">
+      <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" locale="en-GB" label="Books" />
+    </div>`,
+})
+export class Books {
+  readonly rows: Book[] = [
+    { id: 'b1', title: 'The Glass Orchard', author: 'Mira Volkov', published: '2019-03-14', price: 18.5 },
+    { id: 'b2', title: 'Salt and Lanterns', author: 'Idris Fenwick', published: '2021-11-02', price: 22 },
+    { id: 'b3', title: 'A Map of Quiet Rivers', author: 'Lena Okafor', published: '2017-06-30', price: 15.9 },
+  ];
+  readonly columns: DzgColumnOrGroup<Book>[] = [
+    { id: 'title', header: 'Title', flex: 2, pinned: 'start' },
+    { id: 'author', header: 'Author', flex: 1 },
+    { id: 'published', header: 'Published', type: 'day', width: 130 },
+    { id: 'price', header: 'Price', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
+  ];
+  readonly rowId = (b: Book) => b.id;
+  readonly messages = EN;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid locale="en-GB" label="Books"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Book = { id: string; title: string; author: string; published: string; price: number };
+
+const grid = document.querySelector<DzGridElement<Book>>('dz-grid')!;
+grid.columns = [
+  { id: 'title', header: 'Title', flex: 2, pinned: 'start' },
+  { id: 'author', header: 'Author', flex: 1 },
+  { id: 'published', header: 'Published', type: 'day', width: 130 },
+  { id: 'price', header: 'Price', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
+];
+grid.getRowId = (b) => b.id;
+grid.messages = EN;
+grid.rows = [
+  { id: 'b1', title: 'The Glass Orchard', author: 'Mira Volkov', published: '2019-03-14', price: 18.5 },
+  { id: 'b2', title: 'Salt and Lanterns', author: 'Idris Fenwick', published: '2021-11-02', price: 22 },
+];
+```
+
+</Fragment>
+</CodeTabs>
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Books' }}
+  columns={[
+    { id: 'title', header: 'Title', flex: 2, pinned: 'start' },
+    { id: 'author', header: 'Author', flex: 1 },
+    { id: 'published', header: 'Published', type: 'day', width: 130 },
+    { id: 'price', header: 'Price', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
+  ]}
+  rows={[
+    { id: 'b1', title: 'The Glass Orchard', author: 'Mira Volkov', published: '2019-03-14', price: 18.5 },
+    { id: 'b2', title: 'Salt and Lanterns', author: 'Idris Fenwick', published: '2021-11-02', price: 22 },
+    { id: 'b3', title: 'A Map of Quiet Rivers', author: 'Lena Okafor', published: '2017-06-30', price: 15.9 },
+    { id: 'b4', title: 'The Clockmaker’s Garden', author: 'Tomas Ruel', published: '2023-01-19', price: 24 },
+    { id: 'b5', title: 'Nine Paper Boats', author: 'Ada Lindqvist', published: '2020-09-08', price: 12.75 },
+    { id: 'b6', title: 'Winter at Hollow Pier', author: 'Mira Volkov', published: '2024-02-27', price: 19.9 },
+  ]}
+/>
+
+Trois réglages sont obligatoires : `columns`, `getRowId` (un identifiant stable et unique par ligne) et `messages`
+(la grille n’a pas de langue par défaut ; `EN`, `FR` et `AR` sont dans `@dzgrid/dom/locales/*`). La grille injecte
+son propre CSS de mise en page ; `@dzgrid/theme/dzgrid.css` lui donne son aspect fini (bordures, couleurs, anneau de
+focus). Cliquez sur un titre pour trier ; Tab entre dans la grille, les flèches vont de cellule en cellule.
+
+## Les fonctions et leurs textes
+
+Chaque fonction vient de sa propre entrée et se donne une fois dans `features`. Une fonction qui affiche du texte a
+besoin de son lot de textes fusionné dans `messages` ; un lot manquant lève une erreur à la création de la grille,
+avec la liste des clés manquantes.
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters-base';
+import { pagination } from '@dzgrid/dom/pagination';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { EN_PAGINATION } from '@dzgrid/dom/locales/en-pagination';
+
+type Plant = { id: number; name: string; height: number };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text, ...EN_PAGINATION.text } };
+
+createGrid<Plant>(document.getElementById('plants')!, {
+  rows: [{ id: 1, name: 'Blue fern', height: 40 }],
+  columns: [{ id: 'name', header: 'Name' }, { id: 'height', header: 'Height (cm)', type: 'number' }],
+  getRowId: (p) => p.id,
+  messages,
+  pagination: { pageSize: 50 },
+  features: [filters(), pagination()],
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { filters } from '@dzgrid/dom/filters-base';
+import { pagination } from '@dzgrid/dom/pagination';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { EN_PAGINATION } from '@dzgrid/dom/locales/en-pagination';
+
+type Plant = { id: number; name: string; height: number };
+
+@Component({
+  selector: 'app-plants',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+    [features]="features" [pagination]="{ pageSize: 50 }" />`,
+})
+export class Plants {
+  readonly rows: Plant[] = [{ id: 1, name: 'Blue fern', height: 40 }];
+  readonly columns: DzgColumnOrGroup<Plant>[] = [{ id: 'name', header: 'Name' }, { id: 'height', header: 'Height (cm)', type: 'number' }];
+  readonly rowId = (p: Plant) => p.id;
+  readonly messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text, ...EN_PAGINATION.text } };
+  // A field, not written in the template: features are read once, when the grid is made.
+  readonly features = [filters(), pagination()];
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { filters } from '@dzgrid/dom/filters-base';
+import { pagination } from '@dzgrid/dom/pagination';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { EN_PAGINATION } from '@dzgrid/dom/locales/en-pagination';
+
+type Plant = { id: number; name: string; height: number };
+
+const grid = document.querySelector<DzGridElement<Plant>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Name' }, { id: 'height', header: 'Height (cm)', type: 'number' }];
+grid.getRowId = (p) => p.id;
+grid.messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text, ...EN_PAGINATION.text } };
+grid.features = [filters(), pagination()];
+grid.settings = { pagination: { pageSize: 50 } };
+grid.rows = [{ id: 1, name: 'Blue fern', height: 40 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+`features` est lu une fois, à la création de la grille. La plupart des autres réglages sont vivants (voir plus bas).
+
+## Événements
+
+`onEvent` reçoit chaque événement de la grille ; aiguillez sur `type`. Les problèmes (une colonne invalide, un filtre
+invalide, une réponse du serveur illisible) arrivent dans un événement `problems` : affichez-les pendant le
+développement.
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Tea = { id: string; name: string };
+
+createGrid<Tea>(document.getElementById('teas')!, {
+  rows: [{ id: 't1', name: 'Smoked oolong' }],
+  columns: [{ id: 'name', header: 'Tea' }],
+  getRowId: (t) => t.id,
+  messages: EN,
+  selection: { mode: 'multi', checkbox: true },
+  onEvent: (e) => {
+    if (e.type === 'rowClicked' && e.row.kind === 'data') console.log('clicked', e.row.data.name);
+    if (e.type === 'selectionChanged') console.log('selected', e.count);
+    if (e.type === 'problems') for (const p of e.problems) console.warn('dzgrid', p.code, p.path, p.detail);
+  },
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import type { Problem } from '@dzgrid/core';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Tea = { id: string; name: string };
+
+@Component({
+  selector: 'app-teas',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+    [selection]="{ mode: 'multi', checkbox: true }"
+    (selectionChanged)="count = $event.count" (problems)="onProblems($event)" />
+    <p>{{ count ?? 'some' }} selected</p>`,
+})
+export class Teas {
+  readonly rows: Tea[] = [{ id: 't1', name: 'Smoked oolong' }];
+  readonly columns: DzgColumnOrGroup<Tea>[] = [{ id: 'name', header: 'Tea' }];
+  readonly rowId = (t: Tea) => t.id;
+  readonly messages = EN;
+  count: number | null = 0;
+  onProblems(ps: readonly Problem[]) { for (const p of ps) console.warn('dzgrid', p.code, p.path, p.detail); }
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import type { GridEvent } from '@dzgrid/core';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Tea = { id: string; name: string };
+
+const grid = document.querySelector<DzGridElement<Tea>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Tea' }];
+grid.getRowId = (t) => t.id;
+grid.messages = EN;
+grid.settings = { selection: { mode: 'multi', checkbox: true } };
+grid.rows = [{ id: 't1', name: 'Smoked oolong' }];
+
+// Every grid event, as `dzg-` and its type in kebab case; the event itself is the detail.
+grid.addEventListener('dzg-selection-changed', (e) => {
+  const event = (e as CustomEvent<GridEvent<Tea>>).detail;
+  if (event.type === 'selectionChanged') console.log('selected', event.count);
+});
+grid.addEventListener('dzg-problems', (e) => {
+  const event = (e as CustomEvent<GridEvent<Tea>>).detail;
+  if (event.type === 'problems') for (const p of event.problems) console.warn('dzgrid', p.code, p.path, p.detail);
+});
+```
+
+</Fragment>
+</CodeTabs>
+
+Les mêmes événements s’écoutent aussi plus tard avec `grid.kernel.subscribe(fn)`, qui rend une fonction pour arrêter
+l’écoute.
+
+## Mettre à jour et piloter la grille
+
+`grid.update(patch)` change des réglages. Donnez de nouveaux tableaux et objets, jamais des objets modifiés : les
+lignes sont reconnues par leur identifiant, si bien qu’un nouveau tableau garde le focus, la sélection et les lignes
+ouvertes de celles qui restent.
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { dataKey } from '@dzgrid/core';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Kite = { id: string; name: string; span: number };
+let kites: Kite[] = [{ id: 'k1', name: 'Red falcon', span: 120 }];
+
+const grid = createGrid<Kite>(document.getElementById('kites')!, {
+  rows: kites,
+  columns: [{ id: 'name', header: 'Kite' }, { id: 'span', header: 'Span (cm)', type: 'number' }],
+  getRowId: (k) => k.id,
+  messages: EN,
+});
+
+kites = [...kites, { id: 'k2', name: 'Paper moth', span: 80 }];
+grid.update({ rows: kites, density: 'compact' });
+
+grid.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'span', dir: 'desc' }] }, 'api');
+const key = dataKey('k2');
+if (key) grid.api.focusCell(key, 'name');
+
+// When the page goes away:
+grid.destroy();
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, DzgController, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { dataKey } from '@dzgrid/core';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Kite = { id: string; name: string; span: number };
+
+@Component({
+  selector: 'app-kites',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows()" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+    density="compact" (gridReady)="ctrl = $event" />
+    <button type="button" (click)="add()">Add a kite</button>`,
+})
+export class Kites {
+  readonly rows = signal<Kite[]>([{ id: 'k1', name: 'Red falcon', span: 120 }]);
+  readonly columns: DzgColumnOrGroup<Kite>[] = [{ id: 'name', header: 'Kite' }, { id: 'span', header: 'Span (cm)', type: 'number' }];
+  readonly rowId = (k: Kite) => k.id;
+  readonly messages = EN;
+  ctrl: DzgController<Kite> | null = null;
+
+  add() {
+    this.rows.update((rs) => [...rs, { id: 'k2', name: 'Paper moth', span: 80 }]);
+    this.ctrl?.dispatch({ type: 'sort.set', sort: [{ column: 'span', dir: 'desc' }] });
+    const key = dataKey('k2');
+    if (key) this.ctrl?.ensureVisible(key, 'name');
+  }
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Kite = { id: string; name: string; span: number };
+
+const grid = document.querySelector<DzGridElement<Kite>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Kite' }, { id: 'span', header: 'Span (cm)', type: 'number' }];
+grid.getRowId = (k) => k.id;
+grid.messages = EN;
+grid.rows = [{ id: 'k1', name: 'Red falcon', span: 120 }];
+
+await grid.ready;
+grid.rows = [...(grid.rows ?? []), { id: 'k2', name: 'Paper moth', span: 80 }];
+grid.update({ density: 'compact' });
+grid.grid?.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'span', dir: 'desc' }] }, 'api');
+```
+
+</Fragment>
+</CodeTabs>
+
+Les commandes (`grid.kernel.dispatch`) prennent une `RowKey` (de `dataKey(id)`), jamais une position : les positions
+changent à chaque tri et à chaque filtre.
+
+<Aside type="tip">
+La grille ne lève jamais d’erreur sur une donnée invalide : une colonne illisible, un filtre sur une colonne absente,
+une date sans son décalage horaire — chacun devient un `Problem` (un code, un chemin, le détail brut) dans
+l’événement `problems`. Les lignes ne sont jamais copiées dans un problème.
+</Aside>
+
+## Ensuite
+
+- Les pages [Angular](../angular/) et [composant web](../web-component/) pour les deux enveloppes.
+- Les [guides](../../guides/columns/), tâche par tâche, en commençant par les colonnes.

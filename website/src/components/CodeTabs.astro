@@ -1,0 +1,28 @@
+---
+/**
+ * The same example in the three flavours, one tab each — TypeScript (`createGrid`), Angular (`<dz-grid>` from
+ * @dzgrid/angular), Web Component (`<dz-grid>` from @dzgrid/element) — synced across the site (`syncKey`): a reader
+ * who picks Angular sees Angular everywhere, and on the next visit.
+ *
+ *   <CodeTabs>
+ *     <Fragment slot="ts">```ts …```</Fragment>
+ *     <Fragment slot="angular">…</Fragment>
+ *     <Fragment slot="element">…</Fragment>
+ *   </CodeTabs>
+ *
+ * A flavour without its slot has no tab. Every block in a tab is compiled by website/test/examples.test.ts.
+ */
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+const FLAVOURS = [
+  { slot: 'ts', label: 'TypeScript' },
+  { slot: 'angular', label: 'Angular' },
+  { slot: 'element', label: 'Web Component' },
+] as const;
+const present = FLAVOURS.filter((f) => Astro.slots.has(f.slot));
+const rendered = await Promise.all(present.map((f) => Astro.slots.render(f.slot)));
+---
+
+<Tabs syncKey="dzgrid-flavour">
+  {present.map((f, i) => <TabItem label={f.label}><Fragment set:html={rendered[i]} /></TabItem>)}
+</Tabs>
