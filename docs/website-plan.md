@@ -41,21 +41,37 @@ three on the Angular and Web Component pages; one live demo each — the Web Com
 tests, the workflow. 45 pages built. Chrome: en and fr, light and dark, the four demos drawn, no console message,
 axe 0 on the home page.
 
-## Batch 2 — the guides
+## Batch 2 — the guides (done 2026-11-10, not committed)
 
-The 14 pages of `docs/guide/` (all but the three getting-started ones, already on the site) become
-`website/src/content/docs/guides/*.mdx`, English and French, each with its three tabs and at least one live demo;
-facts left to the option pages (batch 3) and linked. In three sub-batches, a review each: (a) columns, sort / filter /
-search, selection and ranges, editing, tree; (b) grouping, pivot, server data, row moves, dock and panels; (c) export
-and print, state, theming and right to left, accessibility. Then, with the last one:
+Owner (2026-11-10): « ★ partout », then « A partout ». The 14 pages of `docs/guide/` became
+`website/src/content/docs/guides/*.mdx` in English and French: each with its code in three tabs (TypeScript, Angular,
+Web Component) for its main examples (the others in TypeScript), and at least one live demo — 22 demos in all, one by
+`<dz-grid>`, one in Arabic right to left, two on a made-up server inside the page (5 000 asteroids in pages, 100 000
+in an infinite list). Facts that belong to one option stay in the guides until batch 3 moves them; each guide links
+to the section index of its options (`../../settings/`, `../../column-options/`, `../../features/`), the only option
+pages that exist yet. The server-data guide keeps « How it works, in pictures », its diagrams redrawn narrower so each
+fits the column without scrolling.
 
-- `docs/guide/` removed (its README's index becomes the sidebar's order); `scripts/test/guide.test.ts` retired —
-  its checks already live in `website/test/examples.test.ts`.
-- `scripts/llms.mjs` reads the site's English pages (MDX stripped to Markdown: tabs flattened to their TypeScript
-  block, demos dropped), links to `https://plinthworks.github.io/dzgrid/…`; its test moves to `website/test/`.
-- The README's « Documentation » points at the site only; the `ar` demo (right to left) added to the theming guide.
-- To fix in the text while moving: `sort-filter-search.md` says `filters-base` keeps a day filter without a
-  calendar — it gives a day or instant column no filter and a `missing-feature` warning (`filters-base.ts`).
+- **French pages use French column titles and French made-up data** (owner A), the home page and the getting-started
+  pages included. `pages.test.ts` compares the two languages' code by its skeleton (strings, numbers, comments and
+  the language's bundles `EN_*` / `FR_*` masked; a ```text picture by its place only): the same names, keys, calls
+  and structure, the texts and data in the page's language.
+- `LiveDemo`: features by name or `[name, options]` (`src/components/demo/features.ts`: 32 names, each with its
+  texts; options a JSON cannot hold made there, as `tree`'s `parentField`); controls above the grid for the features
+  that need one (search field, export and print buttons, undo / redo, open / close all, reset the layout); `server`
+  for a made-up server (`demo/server.ts`: filters in their wire form, quick search, sort, pages, blocks, the signal);
+  `language="ar"` for the right-to-left demo. Every feature's sheet is in `customCss`.
+- `docs/guide/` is now a README pointing to the site; `scripts/test/guide.test.ts` retired: compiling, imported names,
+  links are in `examples.test.ts` / `pages.test.ts`; `website/test/llms.test.ts` holds the rest (llms up to date, the
+  `dzg-*` events named exist, `filters-base` pages say a day column gets no filter). `examples.test.ts` accepts the
+  French and Arabic twin of a locale bundle whose English one is in `api/*.api.txt` (the baseline holds only the
+  English names the guide documented).
+- `scripts/llms.mjs` reads the site's English pages in the sidebar's order (tabs flattened to their TypeScript block,
+  demos and imports dropped, links on `https://plinthworks.github.io/dzgrid/…`). The README's « Documentation » and
+  `packages/dom/README.md` point at the site.
+- Fixed in the text while moving: `filters-base` and day columns (no filter); collapsible column groups need
+  `groups()` (with the `-columns` texts) to fold; a list column is edited with `editors({ list: listEditor })` (the old
+  guide called `listEditor()` a ready editor).
 
 ## Batch 3 — one page per option
 
@@ -79,6 +95,5 @@ deploy runs from `main`.
 
 - Port 4720 is taken on this Mac by an `ng serve --port 4720` started 2026-11-04 (not ours, left running); the
   batch-1 check used 4721.
-- Demo data and code are the same in both languages (headers in English on `/fr/`, the grid's own texts in
-  French): say if the French pages should get French headers (then the code blocks differ too).
+- Answered (A, 2026-11-10): French headers and data on `/fr/`.
 - Found while building (library, not fixed): see `docs/STATUS.md` 2026-11-10 « site, lot 1 ».

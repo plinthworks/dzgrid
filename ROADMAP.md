@@ -1398,5 +1398,10 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   en/fr, light/dark, demos drawn, no console message, axe 0 on the home page. Found, not fixed: `<dz-grid>` in a flex
   host stays `block`; `sideEffects` vs `src/define.ts` when built from source; a short grid does not fill a flex
   host; the guide's `filters-base` day-filter sentence.
-- Next: batch 2 (the guides move in; llms.txt from the site), 3 (one page per option), 4 (API from
-  `api/*.api.txt`), 5 (Chrome pass, the owner enables Pages).
+- **Batch 2 — the guides (2026-11-10, not committed).** The 14 guides of `docs/guide/` moved into the site, English
+  and French (French titles and made-up data on `/fr/`, owner A, the batch-1 pages too), three tabs for the main
+  examples, 22 live demos (`LiveDemo` takes features by name with options, controls, a made-up server, Arabic).
+  `docs/guide/` is a README pointing to the site; `guide.test.ts` retired into `website/test/` (`llms.test.ts` new);
+  `llms.txt` / `llms-full.txt` built from the site's English pages. Found, not fixed: see `docs/STATUS.md`
+  « site, lot 2 ».
+- Next: batch 3 (one page per option), 4 (API from `api/*.api.txt`), 5 (Chrome pass, the owner enables Pages).

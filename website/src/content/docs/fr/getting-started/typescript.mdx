@@ -44,34 +44,34 @@ lignes ; elle limite alors sa vue à la hauteur de la fenêtre et signale une fo
 ```ts
 import { createGrid } from '@dzgrid/dom';
 import type { ColumnOrGroup } from '@dzgrid/core';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 import '@dzgrid/theme/dzgrid.css';
 
 type Book = { id: string; title: string; author: string; published: string; price: number };
 
 const rows: Book[] = [
-  { id: 'b1', title: 'The Glass Orchard', author: 'Mira Volkov', published: '2019-03-14', price: 18.5 },
-  { id: 'b2', title: 'Salt and Lanterns', author: 'Idris Fenwick', published: '2021-11-02', price: 22 },
-  { id: 'b3', title: 'A Map of Quiet Rivers', author: 'Lena Okafor', published: '2017-06-30', price: 15.9 },
-  { id: 'b4', title: 'The Clockmaker’s Garden', author: 'Tomas Ruel', published: '2023-01-19', price: 24 },
-  { id: 'b5', title: 'Nine Paper Boats', author: 'Ada Lindqvist', published: '2020-09-08', price: 12.75 },
-  { id: 'b6', title: 'Winter at Hollow Pier', author: 'Mira Volkov', published: '2024-02-27', price: 19.9 },
+  { id: 'b1', title: 'Le Verger de verre', author: 'Mireille Vautrin', published: '2019-03-14', price: 18.5 },
+  { id: 'b2', title: 'Sel et lanternes', author: 'Isidore Fenouil', published: '2021-11-02', price: 22 },
+  { id: 'b3', title: 'Carte des rivières tranquilles', author: 'Léna Okafor', published: '2017-06-30', price: 15.9 },
+  { id: 'b4', title: 'Le Jardin de l’horloger', author: 'Thomas Ruel', published: '2023-01-19', price: 24 },
+  { id: 'b5', title: 'Neuf Bateaux de papier', author: 'Adèle Lindqvist', published: '2020-09-08', price: 12.75 },
+  { id: 'b6', title: 'L’Hiver au quai Creux', author: 'Mireille Vautrin', published: '2024-02-27', price: 19.9 },
 ];
 
 const columns: ColumnOrGroup<Book>[] = [
-  { id: 'title', header: 'Title', flex: 2, pinned: 'start' },
-  { id: 'author', header: 'Author', flex: 1 },
-  { id: 'published', header: 'Published', type: 'day', width: 130 },
-  { id: 'price', header: 'Price', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
+  { id: 'title', header: 'Titre', flex: 2, pinned: 'start' },
+  { id: 'author', header: 'Auteur', flex: 1 },
+  { id: 'published', header: 'Parution', type: 'day', width: 130 },
+  { id: 'price', header: 'Prix', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
 ];
 
 createGrid<Book>(document.getElementById('books')!, {
   rows,
   columns,
   getRowId: (b) => b.id,
-  messages: EN,
-  locale: 'en-GB',
-  label: 'Books',
+  messages: FR,
+  locale: 'fr-FR',
+  label: 'Livres',
 });
 ```
 
@@ -81,7 +81,7 @@ createGrid<Book>(document.getElementById('books')!, {
 ```ts
 import { Component } from '@angular/core';
 import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 
 type Book = { id: string; title: string; author: string; published: string; price: number };
 
@@ -90,23 +90,23 @@ type Book = { id: string; title: string; author: string; published: string; pric
   imports: [DzGrid],
   template: `
     <div class="grid-box">
-      <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" locale="en-GB" label="Books" />
+      <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" locale="fr-FR" label="Livres" />
     </div>`,
 })
 export class Books {
   readonly rows: Book[] = [
-    { id: 'b1', title: 'The Glass Orchard', author: 'Mira Volkov', published: '2019-03-14', price: 18.5 },
-    { id: 'b2', title: 'Salt and Lanterns', author: 'Idris Fenwick', published: '2021-11-02', price: 22 },
-    { id: 'b3', title: 'A Map of Quiet Rivers', author: 'Lena Okafor', published: '2017-06-30', price: 15.9 },
+    { id: 'b1', title: 'Le Verger de verre', author: 'Mireille Vautrin', published: '2019-03-14', price: 18.5 },
+    { id: 'b2', title: 'Sel et lanternes', author: 'Isidore Fenouil', published: '2021-11-02', price: 22 },
+    { id: 'b3', title: 'Carte des rivières tranquilles', author: 'Léna Okafor', published: '2017-06-30', price: 15.9 },
   ];
   readonly columns: DzgColumnOrGroup<Book>[] = [
-    { id: 'title', header: 'Title', flex: 2, pinned: 'start' },
-    { id: 'author', header: 'Author', flex: 1 },
-    { id: 'published', header: 'Published', type: 'day', width: 130 },
-    { id: 'price', header: 'Price', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
+    { id: 'title', header: 'Titre', flex: 2, pinned: 'start' },
+    { id: 'author', header: 'Auteur', flex: 1 },
+    { id: 'published', header: 'Parution', type: 'day', width: 130 },
+    { id: 'price', header: 'Prix', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
   ];
   readonly rowId = (b: Book) => b.id;
-  readonly messages = EN;
+  readonly messages = FR;
 }
 ```
 
@@ -114,28 +114,28 @@ export class Books {
 <Fragment slot="element">
 
 ```html
-<dz-grid locale="en-GB" label="Books"></dz-grid>
+<dz-grid locale="fr-FR" label="Livres"></dz-grid>
 ```
 
 ```ts
 import '@dzgrid/element/define';
 import type { DzGridElement } from '@dzgrid/element';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 
 type Book = { id: string; title: string; author: string; published: string; price: number };
 
 const grid = document.querySelector<DzGridElement<Book>>('dz-grid')!;
 grid.columns = [
-  { id: 'title', header: 'Title', flex: 2, pinned: 'start' },
-  { id: 'author', header: 'Author', flex: 1 },
-  { id: 'published', header: 'Published', type: 'day', width: 130 },
-  { id: 'price', header: 'Price', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
+  { id: 'title', header: 'Titre', flex: 2, pinned: 'start' },
+  { id: 'author', header: 'Auteur', flex: 1 },
+  { id: 'published', header: 'Parution', type: 'day', width: 130 },
+  { id: 'price', header: 'Prix', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
 ];
 grid.getRowId = (b) => b.id;
-grid.messages = EN;
+grid.messages = FR;
 grid.rows = [
-  { id: 'b1', title: 'The Glass Orchard', author: 'Mira Volkov', published: '2019-03-14', price: 18.5 },
-  { id: 'b2', title: 'Salt and Lanterns', author: 'Idris Fenwick', published: '2021-11-02', price: 22 },
+  { id: 'b1', title: 'Le Verger de verre', author: 'Mireille Vautrin', published: '2019-03-14', price: 18.5 },
+  { id: 'b2', title: 'Sel et lanternes', author: 'Isidore Fenouil', published: '2021-11-02', price: 22 },
 ];
 ```
 
@@ -144,20 +144,20 @@ grid.rows = [
 
 <LiveDemo
   height={300}
-  settings={{ label: 'Books' }}
+  settings={{ label: 'Livres' }}
   columns={[
-    { id: 'title', header: 'Title', flex: 2, pinned: 'start' },
-    { id: 'author', header: 'Author', flex: 1 },
-    { id: 'published', header: 'Published', type: 'day', width: 130 },
-    { id: 'price', header: 'Price', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
+    { id: 'title', header: 'Titre', flex: 2, pinned: 'start' },
+    { id: 'author', header: 'Auteur', flex: 1 },
+    { id: 'published', header: 'Parution', type: 'day', width: 130 },
+    { id: 'price', header: 'Prix', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
   ]}
   rows={[
-    { id: 'b1', title: 'The Glass Orchard', author: 'Mira Volkov', published: '2019-03-14', price: 18.5 },
-    { id: 'b2', title: 'Salt and Lanterns', author: 'Idris Fenwick', published: '2021-11-02', price: 22 },
-    { id: 'b3', title: 'A Map of Quiet Rivers', author: 'Lena Okafor', published: '2017-06-30', price: 15.9 },
-    { id: 'b4', title: 'The Clockmaker’s Garden', author: 'Tomas Ruel', published: '2023-01-19', price: 24 },
-    { id: 'b5', title: 'Nine Paper Boats', author: 'Ada Lindqvist', published: '2020-09-08', price: 12.75 },
-    { id: 'b6', title: 'Winter at Hollow Pier', author: 'Mira Volkov', published: '2024-02-27', price: 19.9 },
+    { id: 'b1', title: 'Le Verger de verre', author: 'Mireille Vautrin', published: '2019-03-14', price: 18.5 },
+    { id: 'b2', title: 'Sel et lanternes', author: 'Isidore Fenouil', published: '2021-11-02', price: 22 },
+    { id: 'b3', title: 'Carte des rivières tranquilles', author: 'Léna Okafor', published: '2017-06-30', price: 15.9 },
+    { id: 'b4', title: 'Le Jardin de l’horloger', author: 'Thomas Ruel', published: '2023-01-19', price: 24 },
+    { id: 'b5', title: 'Neuf Bateaux de papier', author: 'Adèle Lindqvist', published: '2020-09-08', price: 12.75 },
+    { id: 'b6', title: 'L’Hiver au quai Creux', author: 'Mireille Vautrin', published: '2024-02-27', price: 19.9 },
   ]}
 />
 
@@ -179,17 +179,17 @@ avec la liste des clés manquantes.
 import { createGrid, type GridMessages } from '@dzgrid/dom';
 import { filters } from '@dzgrid/dom/filters-base';
 import { pagination } from '@dzgrid/dom/pagination';
-import { EN } from '@dzgrid/dom/locales/en';
-import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
-import { EN_PAGINATION } from '@dzgrid/dom/locales/en-pagination';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { FR_PAGINATION } from '@dzgrid/dom/locales/fr-pagination';
 
 type Plant = { id: number; name: string; height: number };
 
-const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text, ...EN_PAGINATION.text } };
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text, ...FR_PAGINATION.text } };
 
 createGrid<Plant>(document.getElementById('plants')!, {
-  rows: [{ id: 1, name: 'Blue fern', height: 40 }],
-  columns: [{ id: 'name', header: 'Name' }, { id: 'height', header: 'Height (cm)', type: 'number' }],
+  rows: [{ id: 1, name: 'Fougère bleue', height: 40 }],
+  columns: [{ id: 'name', header: 'Nom' }, { id: 'height', header: 'Hauteur (cm)', type: 'number' }],
   getRowId: (p) => p.id,
   messages,
   pagination: { pageSize: 50 },
@@ -205,9 +205,9 @@ import { Component } from '@angular/core';
 import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
 import { filters } from '@dzgrid/dom/filters-base';
 import { pagination } from '@dzgrid/dom/pagination';
-import { EN } from '@dzgrid/dom/locales/en';
-import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
-import { EN_PAGINATION } from '@dzgrid/dom/locales/en-pagination';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { FR_PAGINATION } from '@dzgrid/dom/locales/fr-pagination';
 
 type Plant = { id: number; name: string; height: number };
 
@@ -218,11 +218,11 @@ type Plant = { id: number; name: string; height: number };
     [features]="features" [pagination]="{ pageSize: 50 }" />`,
 })
 export class Plants {
-  readonly rows: Plant[] = [{ id: 1, name: 'Blue fern', height: 40 }];
-  readonly columns: DzgColumnOrGroup<Plant>[] = [{ id: 'name', header: 'Name' }, { id: 'height', header: 'Height (cm)', type: 'number' }];
+  readonly rows: Plant[] = [{ id: 1, name: 'Fougère bleue', height: 40 }];
+  readonly columns: DzgColumnOrGroup<Plant>[] = [{ id: 'name', header: 'Nom' }, { id: 'height', header: 'Hauteur (cm)', type: 'number' }];
   readonly rowId = (p: Plant) => p.id;
-  readonly messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text, ...EN_PAGINATION.text } };
-  // A field, not written in the template: features are read once, when the grid is made.
+  readonly messages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text, ...FR_PAGINATION.text } };
+  // Un champ, pas écrit dans le gabarit : les fonctions sont lues une fois, à la création de la grille.
   readonly features = [filters(), pagination()];
 }
 ```
@@ -235,19 +235,19 @@ import '@dzgrid/element/define';
 import type { DzGridElement } from '@dzgrid/element';
 import { filters } from '@dzgrid/dom/filters-base';
 import { pagination } from '@dzgrid/dom/pagination';
-import { EN } from '@dzgrid/dom/locales/en';
-import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
-import { EN_PAGINATION } from '@dzgrid/dom/locales/en-pagination';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { FR_PAGINATION } from '@dzgrid/dom/locales/fr-pagination';
 
 type Plant = { id: number; name: string; height: number };
 
 const grid = document.querySelector<DzGridElement<Plant>>('dz-grid')!;
-grid.columns = [{ id: 'name', header: 'Name' }, { id: 'height', header: 'Height (cm)', type: 'number' }];
+grid.columns = [{ id: 'name', header: 'Nom' }, { id: 'height', header: 'Hauteur (cm)', type: 'number' }];
 grid.getRowId = (p) => p.id;
-grid.messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text, ...EN_PAGINATION.text } };
+grid.messages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text, ...FR_PAGINATION.text } };
 grid.features = [filters(), pagination()];
 grid.settings = { pagination: { pageSize: 50 } };
-grid.rows = [{ id: 1, name: 'Blue fern', height: 40 }];
+grid.rows = [{ id: 1, name: 'Fougère bleue', height: 40 }];
 ```
 
 </Fragment>
@@ -266,19 +266,19 @@ développement.
 
 ```ts
 import { createGrid } from '@dzgrid/dom';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 
 type Tea = { id: string; name: string };
 
 createGrid<Tea>(document.getElementById('teas')!, {
-  rows: [{ id: 't1', name: 'Smoked oolong' }],
-  columns: [{ id: 'name', header: 'Tea' }],
+  rows: [{ id: 't1', name: 'Oolong fumé' }],
+  columns: [{ id: 'name', header: 'Thé' }],
   getRowId: (t) => t.id,
-  messages: EN,
+  messages: FR,
   selection: { mode: 'multi', checkbox: true },
   onEvent: (e) => {
-    if (e.type === 'rowClicked' && e.row.kind === 'data') console.log('clicked', e.row.data.name);
-    if (e.type === 'selectionChanged') console.log('selected', e.count);
+    if (e.type === 'rowClicked' && e.row.kind === 'data') console.log('cliqué', e.row.data.name);
+    if (e.type === 'selectionChanged') console.log('sélectionnées', e.count);
     if (e.type === 'problems') for (const p of e.problems) console.warn('dzgrid', p.code, p.path, p.detail);
   },
 });
@@ -291,7 +291,7 @@ createGrid<Tea>(document.getElementById('teas')!, {
 import { Component } from '@angular/core';
 import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
 import type { Problem } from '@dzgrid/core';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 
 type Tea = { id: string; name: string };
 
@@ -301,13 +301,13 @@ type Tea = { id: string; name: string };
   template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
     [selection]="{ mode: 'multi', checkbox: true }"
     (selectionChanged)="count = $event.count" (problems)="onProblems($event)" />
-    <p>{{ count ?? 'some' }} selected</p>`,
+    <p>{{ count ?? 'quelques' }} sélectionnées</p>`,
 })
 export class Teas {
-  readonly rows: Tea[] = [{ id: 't1', name: 'Smoked oolong' }];
-  readonly columns: DzgColumnOrGroup<Tea>[] = [{ id: 'name', header: 'Tea' }];
+  readonly rows: Tea[] = [{ id: 't1', name: 'Oolong fumé' }];
+  readonly columns: DzgColumnOrGroup<Tea>[] = [{ id: 'name', header: 'Thé' }];
   readonly rowId = (t: Tea) => t.id;
-  readonly messages = EN;
+  readonly messages = FR;
   count: number | null = 0;
   onProblems(ps: readonly Problem[]) { for (const p of ps) console.warn('dzgrid', p.code, p.path, p.detail); }
 }
@@ -320,21 +320,21 @@ export class Teas {
 import '@dzgrid/element/define';
 import type { DzGridElement } from '@dzgrid/element';
 import type { GridEvent } from '@dzgrid/core';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 
 type Tea = { id: string; name: string };
 
 const grid = document.querySelector<DzGridElement<Tea>>('dz-grid')!;
-grid.columns = [{ id: 'name', header: 'Tea' }];
+grid.columns = [{ id: 'name', header: 'Thé' }];
 grid.getRowId = (t) => t.id;
-grid.messages = EN;
+grid.messages = FR;
 grid.settings = { selection: { mode: 'multi', checkbox: true } };
-grid.rows = [{ id: 't1', name: 'Smoked oolong' }];
+grid.rows = [{ id: 't1', name: 'Oolong fumé' }];
 
-// Every grid event, as `dzg-` and its type in kebab case; the event itself is the detail.
+// Chaque événement de la grille, en `dzg-` suivi de son type en kebab-case ; l’événement lui-même est le detail.
 grid.addEventListener('dzg-selection-changed', (e) => {
   const event = (e as CustomEvent<GridEvent<Tea>>).detail;
-  if (event.type === 'selectionChanged') console.log('selected', event.count);
+  if (event.type === 'selectionChanged') console.log('sélectionnées', event.count);
 });
 grid.addEventListener('dzg-problems', (e) => {
   const event = (e as CustomEvent<GridEvent<Tea>>).detail;
@@ -360,26 +360,26 @@ ouvertes de celles qui restent.
 ```ts
 import { createGrid } from '@dzgrid/dom';
 import { dataKey } from '@dzgrid/core';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 
 type Kite = { id: string; name: string; span: number };
-let kites: Kite[] = [{ id: 'k1', name: 'Red falcon', span: 120 }];
+let kites: Kite[] = [{ id: 'k1', name: 'Faucon rouge', span: 120 }];
 
 const grid = createGrid<Kite>(document.getElementById('kites')!, {
   rows: kites,
-  columns: [{ id: 'name', header: 'Kite' }, { id: 'span', header: 'Span (cm)', type: 'number' }],
+  columns: [{ id: 'name', header: 'Cerf-volant' }, { id: 'span', header: 'Envergure (cm)', type: 'number' }],
   getRowId: (k) => k.id,
-  messages: EN,
+  messages: FR,
 });
 
-kites = [...kites, { id: 'k2', name: 'Paper moth', span: 80 }];
+kites = [...kites, { id: 'k2', name: 'Phalène de papier', span: 80 }];
 grid.update({ rows: kites, density: 'compact' });
 
 grid.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'span', dir: 'desc' }] }, 'api');
 const key = dataKey('k2');
 if (key) grid.api.focusCell(key, 'name');
 
-// When the page goes away:
+// Quand la page s’en va :
 grid.destroy();
 ```
 
@@ -390,7 +390,7 @@ grid.destroy();
 import { Component, signal } from '@angular/core';
 import { DzGrid, DzgController, type DzgColumnOrGroup } from '@dzgrid/angular';
 import { dataKey } from '@dzgrid/core';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 
 type Kite = { id: string; name: string; span: number };
 
@@ -399,17 +399,17 @@ type Kite = { id: string; name: string; span: number };
   imports: [DzGrid],
   template: `<dz-grid [rows]="rows()" [columns]="columns" [getRowId]="rowId" [messages]="messages"
     density="compact" (gridReady)="ctrl = $event" />
-    <button type="button" (click)="add()">Add a kite</button>`,
+    <button type="button" (click)="add()">Ajouter un cerf-volant</button>`,
 })
 export class Kites {
-  readonly rows = signal<Kite[]>([{ id: 'k1', name: 'Red falcon', span: 120 }]);
-  readonly columns: DzgColumnOrGroup<Kite>[] = [{ id: 'name', header: 'Kite' }, { id: 'span', header: 'Span (cm)', type: 'number' }];
+  readonly rows = signal<Kite[]>([{ id: 'k1', name: 'Faucon rouge', span: 120 }]);
+  readonly columns: DzgColumnOrGroup<Kite>[] = [{ id: 'name', header: 'Cerf-volant' }, { id: 'span', header: 'Envergure (cm)', type: 'number' }];
   readonly rowId = (k: Kite) => k.id;
-  readonly messages = EN;
+  readonly messages = FR;
   ctrl: DzgController<Kite> | null = null;
 
   add() {
-    this.rows.update((rs) => [...rs, { id: 'k2', name: 'Paper moth', span: 80 }]);
+    this.rows.update((rs) => [...rs, { id: 'k2', name: 'Phalène de papier', span: 80 }]);
     this.ctrl?.dispatch({ type: 'sort.set', sort: [{ column: 'span', dir: 'desc' }] });
     const key = dataKey('k2');
     if (key) this.ctrl?.ensureVisible(key, 'name');
@@ -423,18 +423,18 @@ export class Kites {
 ```ts
 import '@dzgrid/element/define';
 import type { DzGridElement } from '@dzgrid/element';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 
 type Kite = { id: string; name: string; span: number };
 
 const grid = document.querySelector<DzGridElement<Kite>>('dz-grid')!;
-grid.columns = [{ id: 'name', header: 'Kite' }, { id: 'span', header: 'Span (cm)', type: 'number' }];
+grid.columns = [{ id: 'name', header: 'Cerf-volant' }, { id: 'span', header: 'Envergure (cm)', type: 'number' }];
 grid.getRowId = (k) => k.id;
-grid.messages = EN;
-grid.rows = [{ id: 'k1', name: 'Red falcon', span: 120 }];
+grid.messages = FR;
+grid.rows = [{ id: 'k1', name: 'Faucon rouge', span: 120 }];
 
 await grid.ready;
-grid.rows = [...(grid.rows ?? []), { id: 'k2', name: 'Paper moth', span: 80 }];
+grid.rows = [...(grid.rows ?? []), { id: 'k2', name: 'Phalène de papier', span: 80 }];
 grid.update({ density: 'compact' });
 grid.grid?.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'span', dir: 'desc' }] }, 'api');
 ```

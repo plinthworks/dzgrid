@@ -1,0 +1,237 @@
+---
+title: "Tree"
+description: "Rows nested by a parent id, a path or a children list; lazy children."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import LiveDemo from '../../../components/LiveDemo.astro';
+
+`tree()` from `@dzgrid/dom/tree` shows rows as a tree (a WAI-ARIA treegrid): the tree column is indented one step per
+level, a parent has a chevron, → opens it, ← closes it or goes to the parent (mirrored in right to left), `*` opens
+its siblings. Texts `-tree`. Tree rows are ordinary data rows with ordinary keys: selection, editing and export work on
+them as on flat rows.
+
+Give the hierarchy one of three ways:
+
+| Option | Your rows | Example |
+|---|---|---|
+| `parentId(row)` | flat, each with its parent's id (`null` at the top) | folders in a table |
+| `children(row)` | nested, each holding its children | a JSON document |
+| `path(row)` | flat, each with its path of names | `['Garden', 'Tools', 'Rake']` |
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { tree } from '@dzgrid/dom/tree';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_TREE } from '@dzgrid/dom/locales/en-tree';
+
+type Room = { id: string; parent: string | null; name: string; area: number };
+
+const rows: Room[] = [
+  { id: 'h', parent: null, name: 'Lighthouse', area: 120 },
+  { id: 'h1', parent: 'h', name: 'Lamp room', area: 14 },
+  { id: 'h2', parent: 'h', name: 'Keeper’s kitchen', area: 22 },
+  { id: 'h21', parent: 'h2', name: 'Pantry', area: 4 },
+];
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_TREE.text } };
+
+const rooms = tree<Room>({ parentId: (r) => r.parent, initial: 1, column: 'name', filter: 'ancestors' });
+const grid = createGrid<Room>(document.getElementById('rooms')!, {
+  rows,
+  columns: [{ id: 'name', header: 'Room', flex: 1 }, { id: 'area', header: 'Area (m²)', type: 'number' }],
+  getRowId: (r) => r.id,
+  messages,
+  features: [rooms],
+});
+
+grid.kernel.dispatch({ type: 'rows.expandAll', expanded: true }, 'api');
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import type { RowKey } from '@dzgrid/core';
+import { tree } from '@dzgrid/dom/tree';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_TREE } from '@dzgrid/dom/locales/en-tree';
+
+type Room = { id: string; parent: string | null; name: string; area: number };
+
+@Component({
+  selector: 'app-rooms',
+  imports: [DzGrid],
+  template: `
+    <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features"
+      [(expanded)]="open" />
+    <p>{{ open()?.size ?? 0 }} rooms open</p>`,
+})
+export class Rooms {
+  readonly rows: Room[] = [
+    { id: 'h', parent: null, name: 'Lighthouse', area: 120 },
+    { id: 'h1', parent: 'h', name: 'Lamp room', area: 14 },
+    { id: 'h2', parent: 'h', name: 'Keeper’s kitchen', area: 22 },
+    { id: 'h21', parent: 'h2', name: 'Pantry', area: 4 },
+  ];
+  readonly columns: DzgColumnOrGroup<Room>[] = [{ id: 'name', header: 'Room', flex: 1 }, { id: 'area', header: 'Area (m²)', type: 'number' }];
+  readonly rowId = (r: Room) => r.id;
+  readonly messages = { ...EN, text: { ...EN.text, ...EN_TREE.text } };
+  readonly features = [tree<Room>({ parentId: (r) => r.parent, initial: 1, column: 'name', filter: 'ancestors' })];
+  // The open rows, both ways.
+  readonly open = signal<ReadonlySet<RowKey> | undefined>(undefined);
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { tree } from '@dzgrid/dom/tree';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_TREE } from '@dzgrid/dom/locales/en-tree';
+
+type Room = { id: string; parent: string | null; name: string; area: number };
+
+const grid = document.querySelector<DzGridElement<Room>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Room', flex: 1 }, { id: 'area', header: 'Area (m²)', type: 'number' }];
+grid.getRowId = (r) => r.id;
+grid.messages = { ...EN, text: { ...EN.text, ...EN_TREE.text } };
+grid.features = [tree<Room>({ parentId: (r) => r.parent, initial: 1, column: 'name', filter: 'ancestors' })];
+grid.rows = [
+  { id: 'h', parent: null, name: 'Lighthouse', area: 120 },
+  { id: 'h1', parent: 'h', name: 'Lamp room', area: 14 },
+  { id: 'h2', parent: 'h', name: 'Keeper’s kitchen', area: 22 },
+  { id: 'h21', parent: 'h2', name: 'Pantry', area: 4 },
+];
+
+await grid.ready;
+grid.grid?.kernel.dispatch({ type: 'rows.expandAll', expanded: true }, 'api');
+```
+
+</Fragment>
+</CodeTabs>
+
+<LiveDemo
+  height={340}
+  settings={{ label: 'Rooms of the lighthouse' }}
+  features={[['tree', { parentField: 'parent', initial: 1, column: 'name', filter: 'ancestors' }], 'filters']}
+  columns={[
+    { id: 'name', header: 'Room', flex: 1, minWidth: 220 },
+    { id: 'floor', header: 'Floor', type: 'number', width: 100 },
+    { id: 'area', header: 'Area (m²)', type: 'number', width: 130 },
+  ]}
+  rows={[
+    { id: 'h', parent: null, name: 'Lighthouse', floor: 0, area: 120 },
+    { id: 'h1', parent: 'h', name: 'Lamp room', floor: 6, area: 14 },
+    { id: 'h11', parent: 'h1', name: 'Lens cabinet', floor: 6, area: 3 },
+    { id: 'h2', parent: 'h', name: 'Keeper’s cottage', floor: 0, area: 64 },
+    { id: 'h21', parent: 'h2', name: 'Kitchen', floor: 0, area: 22 },
+    { id: 'h211', parent: 'h21', name: 'Pantry', floor: 0, area: 4 },
+    { id: 'h22', parent: 'h2', name: 'Bedroom', floor: 1, area: 18 },
+    { id: 'h3', parent: 'h', name: 'Oil store', floor: 0, area: 9 },
+    { id: 'h4', parent: 'h', name: 'Watch room', floor: 5, area: 12 },
+  ]}
+  caption="→ opens a room, ← closes it; filter Room for « pantry » and its parents stay so it can be reached."
+/>
+
+- `initial`: `'none'` (all closed), `'all'`, or a depth (open down to that level).
+- `filter`: `'ancestors'` keeps the parents of a matching row (so it can be reached), `'subtree'` also keeps the
+  children of a matching parent.
+- A sort orders each parent's children among themselves; parents stay above their children. What is open stays open
+  after a sort, a filter or new rows.
+- `sticky: n` keeps the open parents of the rows in view pinned under the header, up to `n` levels.
+- `column` is the tree column (the first visible column by default); `indent` its step in pixels.
+- `rows.expand` and `rows.expandAll` commands open and close from code; `rowExpanded` events tell you. In Angular,
+  `[(expanded)]` holds the open keys.
+
+Every option of `tree()` will have its place under [Features](../../features/).
+
+## Children loaded on demand
+
+`lazyChildren({ has, load })` from `@dzgrid/dom/tree-lazy` loads a parent's children when it is first opened:
+`has(row)` says whether a row may have children (it gets a chevron), `load(row, { signal })` returns them. While they
+load, a loading row stands under the parent; a failure there offers a retry.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { tree } from '@dzgrid/dom/tree';
+import { lazyChildren } from '@dzgrid/dom/tree-lazy';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_TREE } from '@dzgrid/dom/locales/en-tree';
+
+type Folder = { id: string; parent: string | null; name: string; folders: number };
+
+createGrid<Folder>(document.getElementById('folders')!, {
+  rows: [{ id: 'root', parent: null, name: 'Archive of maps', folders: 3 }],
+  columns: [{ id: 'name', header: 'Folder' }],
+  getRowId: (f) => f.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_TREE.text } },
+  features: [tree<Folder>({
+    parentId: (f) => f.parent,
+    lazy: lazyChildren<Folder>({
+      has: (f) => f.folders > 0,
+      load: async (f, { signal }) => (await fetch(`/api/folders/${f.id}`, { signal: signal as AbortSignal })).json(),
+    }),
+  })],
+});
+```
+
+## Master and detail
+
+`detail({ part, height })` from `@dzgrid/dom/detail` opens a panel under a row instead of child rows (texts
+`-detail`). The panel is a `detail` part; `nestedGrid({ settings })` makes that part a whole grid of its own. Nesting
+stops past three levels.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { detail, nestedGrid } from '@dzgrid/dom/detail';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_DETAIL } from '@dzgrid/dom/locales/en-detail';
+
+type Trip = { id: string; date: string; km: number };
+type Bicycle = { id: string; name: string; trips: Trip[] };
+
+const messages = { ...EN, text: { ...EN.text, ...EN_DETAIL.text } };
+const trips = nestedGrid<Trip>({
+  settings: (c) => ({
+    rows: (c.row as Bicycle).trips,
+    columns: [{ id: 'date', header: 'Date', type: 'day' }, { id: 'km', header: 'km', type: 'number' }],
+    getRowId: (t) => t.id,
+    messages,
+  }),
+});
+
+createGrid<Bicycle>(document.getElementById('bicycles')!, {
+  rows: [{ id: 'b1', name: 'Blue heron', trips: [{ id: 't1', date: '2026-06-01', km: 42 }] }],
+  columns: [{ id: 'name', header: 'Bicycle' }],
+  getRowId: (b) => b.id,
+  messages,
+  features: [detail<Bicycle>({ part: trips, height: 200 })],
+});
+```
+
+<LiveDemo
+  height={360}
+  settings={{ label: 'Bicycles' }}
+  features={[['detail', { field: 'trips', height: 170, columns: [{ id: 'date', header: 'Date', type: 'day', flex: 1 }, { id: 'km', header: 'km', type: 'number', width: 100 }] }]]}
+  columns={[
+    { id: 'name', header: 'Bicycle', flex: 1 },
+    { id: 'owner', header: 'Rider', flex: 1 },
+  ]}
+  rows={[
+    { id: 'b1', name: 'Blue heron', owner: 'Nell Ashby', trips: [{ id: 't1', date: '2026-06-01', km: 42 }, { id: 't2', date: '2026-06-08', km: 17.5 }] },
+    { id: 'b2', name: 'Copper fox', owner: 'Rafe Lindell', trips: [{ id: 't3', date: '2026-05-23', km: 63 }] },
+    { id: 'b3', name: 'Night moth', owner: 'Ivy Brannock', trips: [] },
+  ]}
+  caption="The chevron on a bicycle opens its trips: a grid of their own inside the row."
+/>
+
+In Angular the panel is a component given with `componentPart('detail', Component)`, and a `<dz-grid [dzgNested]>`
+inside it makes the nested grid.

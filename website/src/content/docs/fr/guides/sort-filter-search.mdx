@@ -1,0 +1,308 @@
+---
+title: "Trier, filtrer, rechercher"
+description: "Le tri, les filtres de colonne, la rangée de filtres, le volet des filtres, la recherche rapide, la recherche dans la grille."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+
+Quatre façons de réduire et d’ordonner les lignes : le tri (aucune fonction requise), les filtres de colonne, la
+recherche rapide sur toutes les colonnes, et la recherche dans la grille, qui marque les résultats sans masquer de
+ligne. La démo ci-dessous a les quatre : cliquez sur un titre, tapez dans la rangée de petits champs sous les titres,
+ou dans la zone de recherche au-dessus.
+
+<LiveDemo
+  height={380}
+  settings={{ label: 'Recettes' }}
+  features={[['filters', { floating: true }], 'search']}
+  columns={[
+    { id: 'name', header: 'Recette', flex: 2, minWidth: 180 },
+    { id: 'cuisine', header: 'Cuisine', width: 140, filter: { kind: 'set' } },
+    { id: 'minutes', header: 'Minutes', type: 'number', width: 120 },
+    { id: 'added', header: 'Ajoutée le', type: 'day', width: 150 },
+    { id: 'vegan', header: 'Végane', type: 'boolean', width: 110 },
+  ]}
+  rows={[
+    { id: 'c1', name: 'Soupe de lune', cuisine: 'Lunaire', minutes: 25, added: '2026-01-12', vegan: true },
+    { id: 'c2', name: 'Crumble de comète', cuisine: 'Orbitale', minutes: 50, added: '2025-11-03', vegan: false },
+    { id: 'c3', name: 'Galette du cratère', cuisine: 'Lunaire', minutes: 35, added: '2026-02-08', vegan: true },
+    { id: 'c4', name: 'Nouilles de nébuleuse', cuisine: 'Espace lointain', minutes: 15, added: '2025-12-21', vegan: true },
+    { id: 'c5', name: 'Ragoût de vent solaire', cuisine: 'Orbitale', minutes: 90, added: '2026-03-01', vegan: false },
+    { id: 'c6', name: 'Crêpes de poussière d’étoile', cuisine: 'Espace lointain', minutes: 20, added: '2026-01-30', vegan: false },
+    { id: 'c7', name: 'Salade de marée figée', cuisine: 'Lunaire', minutes: 10, added: '2026-02-17', vegan: true },
+    { id: 'c8', name: 'Tarte de l’éclipse', cuisine: 'Orbitale', minutes: 75, added: '2025-10-09', vegan: false },
+    { id: 'c9', name: 'Raviolis d’astéroïde', cuisine: 'Espace lointain', minutes: 45, added: '2026-03-12', vegan: true },
+  ]}
+  caption="Maj+clic sur un second titre trie par deux colonnes ; l’entonnoir d’un titre ouvre son filtre."
+/>
+
+## Trier
+
+Le tri ne demande aucune fonction : un clic sur un titre trie, un second clic inverse, Maj+clic ajoute la colonne au
+tri ; au clavier, Entrée et Maj+Entrée sur un titre font de même. `sortable: false` sur une colonne le désactive ; le
+réglage `multiSort: false` garde une seule clé. Les tris de texte suivent la `locale` de la grille (lettres arabes,
+accents, chiffres). Les cellules vides sont en dernier dans les deux sens (`nulls: 'first'` dans un élément de tri les
+met en premier).
+
+Il n’y a pas de clé de tri sur une colonne. Triez depuis le code avec une commande, ou fixez le premier tri avec la
+fonction d’[état](../state/) (`gridState({ initial })`, qui n’envoie qu’une requête à un serveur).
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type River = { id: string; name: string; length: number };
+
+const grid = createGrid<River>(document.getElementById('rivers')!, {
+  rows: [{ id: 'r1', name: 'Argentine', length: 412 }, { id: 'r2', name: 'Boucle-Morte', length: 96 }],
+  columns: [{ id: 'name', header: 'Rivière' }, { id: 'length', header: 'Longueur (km)', type: 'number' }],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+
+grid.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'length', dir: 'desc' }] }, 'api');
+grid.kernel.dispatch({ type: 'sort.toggle', column: 'name', multi: true }, 'api');
+console.log(grid.kernel.query.sort);
+```
+
+## Filtres de colonne
+
+`filters()` ajoute un bouton de filtre à chaque titre et une fenêtre de filtre : texte, nombre, jour, instant, oui/non,
+et une liste de valeurs (`kind: 'set'`). Importez-la depuis `@dzgrid/dom/filters` (tous les genres ; les formulaires de
+jour et d’instant utilisent un calendrier, qui demande `@tzslot/*`) ou depuis `@dzgrid/dom/filters-base` (sans
+calendrier : texte, nombre, oui/non et liste de valeurs seulement — une colonne de jours ou d’instants n’a **aucun
+filtre**, pas de bouton, et un avertissement `missing-feature` qui nomme `@dzgrid/dom/filters` ; donnez-lui
+`loadDates` pour retrouver les formulaires de dates). Textes : `-filters`.
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { filters } from '@dzgrid/dom/filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+
+type Recipe = { id: string; name: string; cuisine: string; minutes: number; added: string; vegan: boolean };
+
+const columns: ColumnOrGroup<Recipe>[] = [
+  { id: 'name', header: 'Recette', filter: { kind: 'text', debounceMs: 200 } },
+  { id: 'cuisine', header: 'Cuisine', filter: { kind: 'set' } },
+  { id: 'minutes', header: 'Minutes', type: 'number', filter: { maxConditions: 2 } },
+  { id: 'added', header: 'Ajoutée le', type: 'day' },
+  { id: 'vegan', header: 'Végane', type: 'boolean' },
+];
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text } };
+
+const grid = createGrid<Recipe>(document.getElementById('recipes')!, {
+  rows: [{ id: 'c1', name: 'Soupe de lune', cuisine: 'Lunaire', minutes: 25, added: '2026-01-12', vegan: true }],
+  columns,
+  getRowId: (r) => r.id,
+  messages,
+  features: [filters({ floating: true, apply: 'live' })],
+});
+
+grid.kernel.dispatch({ type: 'filter.column', column: 'minutes', filter: { type: 'number', op: 'lte', value: 30 } }, 'api');
+grid.kernel.dispatch({ type: 'filter.column', column: 'cuisine', filter: { type: 'set', include: ['Lunaire'] } }, 'api');
+grid.kernel.dispatch({ type: 'filter.set', filter: {} }, 'api');   // efface tous les filtres
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import type { ColumnFilter } from '@dzgrid/core';
+import { filters } from '@dzgrid/dom/filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+
+type Recipe = { id: string; name: string; cuisine: string; minutes: number; added: string; vegan: boolean };
+
+@Component({
+  selector: 'app-recipes',
+  imports: [DzGrid],
+  template: `
+    <button type="button" (click)="quick()">Les rapides</button>
+    <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+      [features]="features" [(filter)]="filter" />`,
+})
+export class Recipes {
+  readonly rows: Recipe[] = [{ id: 'c1', name: 'Soupe de lune', cuisine: 'Lunaire', minutes: 25, added: '2026-01-12', vegan: true }];
+  readonly columns: DzgColumnOrGroup<Recipe>[] = [
+    { id: 'name', header: 'Recette', filter: { kind: 'text', debounceMs: 200 } },
+    { id: 'cuisine', header: 'Cuisine', filter: { kind: 'set' } },
+    { id: 'minutes', header: 'Minutes', type: 'number', filter: { maxConditions: 2 } },
+    { id: 'added', header: 'Ajoutée le', type: 'day' },
+    { id: 'vegan', header: 'Végane', type: 'boolean' },
+  ];
+  readonly rowId = (r: Recipe) => r.id;
+  readonly messages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text } };
+  readonly features = [filters({ floating: true, apply: 'live' })];
+  // Les filtres, dans les deux sens : les changements de l’utilisateur reviennent ici, une valeur posée ici s’applique.
+  readonly filter = signal<Readonly<Record<string, ColumnFilter>> | undefined>(undefined);
+
+  quick() {
+    this.filter.set({ minutes: { type: 'number', op: 'lte', value: 30 } });
+  }
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { filters } from '@dzgrid/dom/filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+
+type Recipe = { id: string; name: string; cuisine: string; minutes: number; added: string; vegan: boolean };
+
+const grid = document.querySelector<DzGridElement<Recipe>>('dz-grid')!;
+grid.columns = [
+  { id: 'name', header: 'Recette', filter: { kind: 'text', debounceMs: 200 } },
+  { id: 'cuisine', header: 'Cuisine', filter: { kind: 'set' } },
+  { id: 'minutes', header: 'Minutes', type: 'number', filter: { maxConditions: 2 } },
+  { id: 'added', header: 'Ajoutée le', type: 'day' },
+  { id: 'vegan', header: 'Végane', type: 'boolean' },
+];
+grid.getRowId = (r) => r.id;
+grid.messages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text } };
+grid.features = [filters({ floating: true, apply: 'live' })];
+grid.rows = [{ id: 'c1', name: 'Soupe de lune', cuisine: 'Lunaire', minutes: 25, added: '2026-01-12', vegan: true }];
+
+await grid.ready;
+grid.grid?.kernel.dispatch({ type: 'filter.column', column: 'minutes', filter: { type: 'number', op: 'lte', value: 30 } }, 'api');
+```
+
+</Fragment>
+</CodeTabs>
+
+- `floating: true` ajoute une rangée de petits champs de filtre sous les titres ; `apply: 'button'` attend le bouton
+  Appliquer au lieu de filtrer pendant la frappe. `rowHeight: 44` donne à cette rangée sa propre hauteur (px pour un
+  texte de 16 px, de 24 à 1 000) ; sinon la hauteur de ligne.
+- `filter: false` sur une colonne retire son filtre ; `filter.ops` limite les opérateurs proposés.
+- Un filtre sur une colonne `day` ou `instant` est résolu dans le `timeZone` de la grille, semi-ouvert, à la
+  milliseconde — y compris quand il est envoyé à un serveur.
+- Les formes de filtre (`ColumnFilter`) : `text`, `number`, `day`, `instant`, `boolean`, `set`, `combined` (`and` /
+  `or` de conditions), `custom` (votre propre genre, enregistré avec le réglage `filterKinds`).
+
+Chaque option de `filters()` aura sa place sous [Fonctions](../../features/).
+
+## Le volet des filtres
+
+`filtersPanel()` de `@dzgrid/dom/filters-panel` liste le filtre de chaque colonne dans un volet latéral (textes
+`-filters-panel`, CSS `filters-panel.css`). Dans un [dock](../dock-panels/), il devient l’un des panneaux du dock.
+
+## Recherche rapide
+
+`quickSearch()` de `@dzgrid/dom/search` filtre sur toutes les colonnes visibles à la fois, depuis un champ qui est à
+vous ; les correspondances sont surlignées (CSS `search.css`).
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { quickSearch } from '@dzgrid/dom/search';
+import { FR } from '@dzgrid/dom/locales/fr';
+import '@dzgrid/theme/search.css';
+
+type Cloud = { id: string; name: string; height: number };
+
+const search = quickSearch({ highlight: true });
+createGrid<Cloud>(document.getElementById('clouds')!, {
+  rows: [{ id: 'n1', name: 'Cirrus en plume', height: 9000 }],
+  columns: [{ id: 'name', header: 'Nuage' }, { id: 'height', header: 'Altitude (m)', type: 'number' }],
+  getRowId: (c) => c.id,
+  messages: FR,
+  features: [search],
+});
+search.bind(document.querySelector<HTMLInputElement>('#cloud-search')!, { debounceMs: 150 });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, DzgSearch, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { quickSearch } from '@dzgrid/dom/search';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Cloud = { id: string; name: string; height: number };
+
+@Component({
+  selector: 'app-clouds',
+  imports: [DzGrid, DzgSearch],
+  template: `
+    <input type="search" aria-label="Chercher dans les nuages" [dzgSearch]="search" />
+    <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+      [features]="features" [(quick)]="text" />
+    <p>Recherche : {{ text() ?? '' }}</p>`,
+})
+export class Clouds {
+  readonly rows: Cloud[] = [{ id: 'n1', name: 'Cirrus en plume', height: 9000 }];
+  readonly columns: DzgColumnOrGroup<Cloud>[] = [{ id: 'name', header: 'Nuage' }, { id: 'height', header: 'Altitude (m)', type: 'number' }];
+  readonly rowId = (c: Cloud) => c.id;
+  readonly messages = FR;
+  readonly search = quickSearch({ highlight: true });
+  readonly features = [this.search];
+  readonly text = signal<string | undefined>(undefined);
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { quickSearch } from '@dzgrid/dom/search';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Cloud = { id: string; name: string; height: number };
+
+const search = quickSearch({ highlight: true });
+const grid = document.querySelector<DzGridElement<Cloud>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Nuage' }, { id: 'height', header: 'Altitude (m)', type: 'number' }];
+grid.getRowId = (c) => c.id;
+grid.messages = FR;
+grid.features = [search];
+grid.rows = [{ id: 'n1', name: 'Cirrus en plume', height: 9000 }];
+search.bind(document.querySelector<HTMLInputElement>('#cloud-search')!, { debounceMs: 150 });
+```
+
+</Fragment>
+</CodeTabs>
+
+La recherche suit la langue : lettres arabes avec ou sans hamza et voyelles brèves, chiffres arabes orientaux.
+
+## Rechercher dans la grille (Ctrl+F)
+
+`find()` de `@dzgrid/dom/find` remplace le Ctrl+F du navigateur dans la grille : elle marque un texte dans les cellules
+de toutes les lignes que gardent les filtres (y compris les lignes dans des nœuds d’arbre fermés) et promène le focus
+d’un résultat à l’autre avec Entrée et Maj+Entrée, sans masquer de ligne (textes `-find`, CSS `find.css`).
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Phares' }}
+  features={['find']}
+  columns={[
+    { id: 'name', header: 'Phare', flex: 1 },
+    { id: 'coast', header: 'Côte', flex: 1 },
+    { id: 'range', header: 'Portée (milles)', type: 'number', width: 130 },
+  ]}
+  rows={[
+    { id: 'l1', name: 'Pointe du Héron gris', coast: 'Côte nord', range: 22 },
+    { id: 'l2', name: 'Feu des Salines', coast: 'Côte est', range: 14 },
+    { id: 'l3', name: 'Roche du Héron', coast: 'Côte nord', range: 18 },
+    { id: 'l4', name: 'Anse de la Lanterne', coast: 'Côte sud', range: 9 },
+    { id: 'l5', name: 'Vieille tour du Héron', coast: 'Côte ouest', range: 26 },
+  ]}
+  caption="Cliquez sur une cellule, appuyez sur Ctrl+F (Cmd+F sur Mac) et tapez « héron » : Entrée va au suivant."
+/>

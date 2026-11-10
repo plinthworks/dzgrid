@@ -1,0 +1,499 @@
+---
+title: "Données du serveur et défilement infini"
+description: "Des lignes venues d’un serveur : la demande et sa réponse, le défilement infini, les lignes côté serveur."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+
+Quand les lignes vivent sur un serveur, donnez à la grille une `source` au lieu de `rows`. Trois sources, de
+`@dzgrid/core` :
+
+| Source | Entrée | Ce que l’utilisateur obtient |
+|---|---|---|
+| `sourceRows(data)` | `@dzgrid/core/server` | des pages (avec le pied de pagination), ou toutes les lignes que garde le filtre du serveur |
+| `infiniteRows(data)` | `@dzgrid/core/infinite` | une seule longue liste, chargée par blocs pendant le défilement ; les blocs lointains sont lâchés |
+| `serverSideRows(data, { by })` | `@dzgrid/core/server-side` | des groupes calculés par le serveur, les lignes de chaque groupe chargées par blocs |
+
+Chacune prend le même `DataSource` : un `fetch(request)` qui rend (directement ou par une promesse) `{ rows, total?,
+hasNext?, nextCursor? }`, et en option `values(request)` pour la liste de valeurs du filtre par liste.
+
+## Comment ça marche, en images
+
+L’idée est simple une fois vue, et surprenante la première fois : **la grille construit elle-même la requête et
+appelle votre back end**. Vous ne gardez ni les filtres, ni le tri, ni la page dans un store, et vous ne mettez pas les
+lignes en cache : c’est la grille qui les tient. Les images ci-dessous suivent le catalogue d’astéroïdes d’un
+observatoire inventé.
+
+### Qui fait quoi
+
+Une grille qui ne fait qu’afficher a besoin que l’application porte tout :
+
+```text
+l’utilisateur filtre ──► store (critères)
+store ─────────────────► un effect lit les critères
+effect ────────────────► appelle le back end, annule l’appel précédent
+effect ────────────────► met les lignes dans le store
+store ─────────────────► la grille les affiche
+
+            deux copies de la même vérité
+```
+
+DzGrid avec une source fait elle-même le même travail :
+
+```text
+l’utilisateur filtre ──► la grille construit la requête
+                         la grille appelle source.fetch(request)
+                         la grille garde les pages, le total,
+                         la barre de chargement, l’erreur et Réessayer
+
+            un seul endroit qui sait
+```
+
+### La requête, remplie à mesure que l’utilisateur travaille
+
+Chaque geste remplit une partie de la requête ; la grille l’envoie entière, une fois par changement.
+
+```text
+l’utilisateur tape « Ves » dans le filtre de Nom
+   └► request.filter = { name: { type: 'text',
+                                 op: 'contains', value: 'Ves' } }
+l’utilisateur trie par Diamètre, le plus grand d’abord
+   └► request.sort   = [{ column: 'diameter', dir: 'desc' }]
+l’utilisateur va à la page 3
+   └► request.page   = { index: 2, size: 100, offset: 200 }
+vos propres valeurs, venues de l’extérieur de la grille
+   └► request.params = { from: '2026-01-01', to: '2026-06-30' }
+la grille, pour annuler un appel plus ancien
+   └► request.signal
+```
+
+### `params` : ce qui vient de l’extérieur de la grille
+
+Disons que la page a un choix de « fenêtre d’observation » **au-dessus** de la grille, pas un filtre de colonne. La
+fenêtre doit atteindre le back end avec chaque requête, et la changer doit repartir de la page 1. C’est à cela que
+sert `params` :
+
+```text
+choix de la fenêtre (hors de la grille) ──► window (un signal)
+                       │
+                       ▼
+  sourceRows(source, { params: { from, to } })
+                       │  la grille met params
+                       ▼  dans CHAQUE requête
+  source.fetch(request)    request.params = { from, to }
+                       │
+                       ▼
+  votre traducteur ──► le corps qu’attend votre back end :
+                       { seenAfter: from, seenBefore: to,
+                         …les filtres des colonnes }
+```
+
+Deux choses à voir dans cette image :
+
+1. `params` ne fait que **porter** la fenêtre jusqu’à votre code ; **votre traducteur** décide où elle va dans le
+   corps.
+2. Un nouveau `params` **dit à la grille que la question a changé** : retour à la page 1, l’appel plus ancien annulé,
+   la sélection vidée — d’elle-même.
+
+Le raccourci tentant est de lire la fenêtre directement depuis votre traducteur. La requête serait juste, mais la
+grille ne saurait pas qu’elle a changé : elle resterait à la page 5 et continuerait d’afficher les anciennes pages
+jusqu’à ce que quelque chose d’autre bouge.
+
+### Le traducteur : votre back end garde son propre format
+
+La grille envoie les filtres sous une forme bien définie ; votre back end en parle peut-être déjà une autre. Un petit
+traducteur se place entre les deux, et le back end ne change pas :
+
+```ts
+import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
+
+type Asteroid = { id: string; name: string; found: string; diameter: number };
+type Filter = NonNullable<DataRequest['filter']>[string];
+
+/** Le format propre à l’observatoire : un critère par colonne, l’opérateur dans `op`. */
+type Criterion = { op: string; value?: unknown; values?: readonly unknown[] };
+
+function criterion(f: Filter): Criterion | null {
+  switch (f.type) {
+    case 'text': return { op: f.op, value: f.value };
+    case 'number': return f.op === 'between' ? { op: 'range', values: [f.value, f.valueTo] } : { op: f.op, value: f.value };
+    case 'day': return f.op === 'between' ? { op: 'range', values: [f.value, f.valueTo] } : { op: f.op, value: f.value };
+    case 'set': return { op: 'in', values: f.include ?? [] };
+    default: return null;
+  }
+}
+
+/** La requête de la grille → le corps de l’observatoire (la fenêtre de `params` d’abord, les filtres de l’utilisateur par-dessus). */
+function body(req: DataRequest): Record<string, unknown> {
+  const criteria: Record<string, Criterion> = {};
+  const { from, to } = req.params as { from?: string; to?: string };
+  if (from && to) criteria['found'] = { op: 'range', values: [from, to] };
+  for (const [column, f] of Object.entries(req.filter ?? {})) {
+    const c = criterion(f);
+    if (c) criteria[column] = c;
+  }
+  const first = req.sort?.[0];
+  return { criteria, orderBy: first?.column ?? null, order: first?.dir ?? null };
+}
+
+async function fetchPage(req: DataRequest): Promise<DataResponse<Asteroid>> {
+  const answer = await fetch(`/api/catalogue?page=${req.page?.index ?? 0}&size=${req.page?.size ?? 100}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body(req)),
+    signal: req.signal as AbortSignal,
+  });
+  const json = (await answer.json()) as { items: Asteroid[]; count: number };
+  return { rows: json.items, total: json.count };
+}
+
+/** Une nouvelle fenêtre = une nouvelle source avec d’autres params = une nouvelle question, depuis la page 1. */
+export const catalogue = (from: string, to: string) => sourceRows<Asteroid>({ fetch: fetchPage }, { params: { from, to } });
+```
+
+### Annuler : seule la dernière réponse compte
+
+```text
+l’utilisateur tape      V        Ve        Ves
+requêtes              ──1──►   ──2──►    ──3──►
+                        ✕ annulée (signal)
+                                 ✕ annulée
+réponses                                    ◄──3── affichée
+une réponse 2 tardive qui arrive quand même ◄──2──  ignorée : périmée
+```
+
+Passez `request.signal` à votre appel HTTP pour que le travail réseau s’arrête aussi ; la grille ignore de toute façon
+une réponse périmée.
+
+### Le premier écran, en un seul appel
+
+Le tri par défaut (les plus récents d’abord, disons) et la fenêtre de départ partent **avec la toute première
+requête** : un seul aller-retour, jamais « non trié, puis trié ». Donnez le tri avec
+`gridState({ initial: { v: 1, sort: [...] } })` (Angular : `[state]`) et la fenêtre en `params` dès le départ.
+
+### Ce que la grille fait ensuite d’elle-même
+
+Le chargement, la fine barre « mise à jour », une erreur avec Réessayer, les pages, les réponses périmées, une
+sélection qui couvre toutes les pages (« tout ce qui correspond », envoyée comme la requête et les lignes laissées de
+côté) — sans store, sans effect ni cache de votre part.
+
+## Pages
+
+La grille ci-dessous demande à un serveur inventé, à l’intérieur de cette page, chaque page de 5 000 astéroïdes :
+filtrez, triez et tournez les pages, et chaque geste devient une requête, servie après une courte attente.
+
+<LiveDemo
+  height={420}
+  server={{ kind: 'pages', data: 'asteroids', count: 5000, delay: 350 }}
+  settings={{ label: 'Catalogue d’astéroïdes', operations: 'server', pagination: { pageSize: 50, pageSizes: [50, 100, 200] } }}
+  features={['filters', 'pagination']}
+  columns={[
+    { id: 'name', header: 'Astéroïde', flex: 1 },
+    { id: 'found', header: 'Découvert le', type: 'day', width: 150 },
+    { id: 'diameter', header: 'Diamètre (km)', type: 'number', width: 160 },
+  ]}
+/>
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
+import { filters } from '@dzgrid/dom/filters';
+import { pagination } from '@dzgrid/dom/pagination';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { FR_PAGINATION } from '@dzgrid/dom/locales/fr-pagination';
+
+type Asteroid = { id: string; name: string; found: string; diameter: number };
+
+async function page(req: DataRequest): Promise<DataResponse<Asteroid>> {
+  const answer = await fetch('/api/asteroids', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ filter: req.filter, quick: req.quick, sort: req.sort, page: req.page, zone: req.zone }),
+    signal: req.signal as AbortSignal,
+  });
+  return answer.json();   // { rows, total }
+}
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text, ...FR_PAGINATION.text } };
+
+createGrid<Asteroid>(document.getElementById('asteroids')!, {
+  source: sourceRows<Asteroid>({ fetch: page }, { params: { catalogue: 'inventé' } }),
+  columns: [
+    { id: 'name', header: 'Astéroïde' },
+    { id: 'found', header: 'Découvert le', type: 'day' },
+    { id: 'diameter', header: 'Diamètre (km)', type: 'number' },
+  ],
+  getRowId: (a) => a.id,
+  messages,
+  operations: 'server',
+  pagination: { pageSize: 100, pageSizes: [50, 100, 200] },
+  features: [filters(), pagination()],
+  onEvent: (e) => {
+    if (e.type === 'fetchFailed') console.warn('le serveur n’a pas répondu', e.error);
+  },
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, computed, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
+import { filters } from '@dzgrid/dom/filters';
+import { pagination } from '@dzgrid/dom/pagination';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { FR_PAGINATION } from '@dzgrid/dom/locales/fr-pagination';
+
+type Asteroid = { id: string; name: string; found: string; diameter: number };
+
+async function page(req: DataRequest): Promise<DataResponse<Asteroid>> {
+  const answer = await fetch('/api/asteroids', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ filter: req.filter, sort: req.sort, page: req.page, window: req.params }),
+    signal: req.signal as AbortSignal,
+  });
+  return answer.json();
+}
+
+@Component({
+  selector: 'app-asteroids',
+  imports: [DzGrid],
+  template: `
+    <label>Du <input type="date" [value]="from()" (change)="from.set($any($event.target).value)" /></label>
+    <dz-grid [source]="source()" [columns]="columns" [getRowId]="rowId" [messages]="messages" operations="server"
+      [pagination]="{ pageSize: 100, pageSizes: [50, 100, 200] }" [features]="features"
+      (fetchFailed)="failed = true" />`,
+})
+export class Asteroids {
+  readonly from = signal('2026-01-01');
+  // Une nouvelle fenêtre est une nouvelle source : la grille revient à la page 1 et annule l’appel plus ancien.
+  readonly source = computed(() => sourceRows<Asteroid>({ fetch: page }, { params: { from: this.from() } }));
+  readonly columns: DzgColumnOrGroup<Asteroid>[] = [
+    { id: 'name', header: 'Astéroïde' },
+    { id: 'found', header: 'Découvert le', type: 'day' },
+    { id: 'diameter', header: 'Diamètre (km)', type: 'number' },
+  ];
+  readonly rowId = (a: Asteroid) => a.id;
+  readonly messages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text, ...FR_PAGINATION.text } };
+  readonly features = [filters(), pagination()];
+  failed = false;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
+import { filters } from '@dzgrid/dom/filters';
+import { pagination } from '@dzgrid/dom/pagination';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { FR_PAGINATION } from '@dzgrid/dom/locales/fr-pagination';
+
+type Asteroid = { id: string; name: string; found: string; diameter: number };
+
+async function page(req: DataRequest): Promise<DataResponse<Asteroid>> {
+  const answer = await fetch('/api/asteroids', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ filter: req.filter, sort: req.sort, page: req.page }),
+    signal: req.signal as AbortSignal,
+  });
+  return answer.json();
+}
+
+const grid = document.querySelector<DzGridElement<Asteroid>>('dz-grid')!;
+grid.columns = [
+  { id: 'name', header: 'Astéroïde' },
+  { id: 'found', header: 'Découvert le', type: 'day' },
+  { id: 'diameter', header: 'Diamètre (km)', type: 'number' },
+];
+grid.getRowId = (a) => a.id;
+grid.messages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text, ...FR_PAGINATION.text } };
+grid.features = [filters(), pagination()];
+grid.settings = { operations: 'server', pagination: { pageSize: 100, pageSizes: [50, 100, 200] } };
+grid.source = sourceRows<Asteroid>({ fetch: page });
+```
+
+</Fragment>
+</CodeTabs>
+
+- La requête : `filter` (sous une forme de transport : jours et instants déjà résolus dans le fuseau de la grille),
+  `quick`, `sort`, `page` (`offset` et `size`, ou un curseur avec `paging: 'cursor'`), vos `params`, la `zone`, une
+  `key` qui nomme la requête, et un `signal`.
+- La réponse : `rows`, et `total` quand il est connu ; sans total, `hasNext` dit s’il y en a d’autres.
+- Seule la réponse à la dernière requête est affichée, quel que soit l’ordre d’arrivée des réponses ; les requêtes plus
+  anciennes sont interrompues par `signal`. Un échec affiche une erreur avec un bouton pour réessayer et un événement
+  `fetchFailed`.
+- `operations` place chaque étape : `'server'` (le défaut avec une source) envoie filtre, recherche, tri et page au
+  serveur ; `{ filter: 'client', sort: 'client', page: 'off' }` demande toutes les lignes une fois et finit dans le
+  navigateur. Des pages côté serveur impliquent aussi filtre, recherche et tri sur le serveur.
+- `refresh` (Angular `ctrl.refresh({})`, commande `rows.refresh` en TypeScript seul) redemande et garde les lignes
+  affichées entre-temps ; le réglage `busy` montre une fine barre pendant que vous rechargez.
+
+## Des colonnes tirées de la première réponse
+
+`autoColumns()` ([Colonnes](../columns/#des-colonnes-faites-à-partir-des-données)) est une fonction pure : elle ne
+connaît pas les sources. Appelez-la sur les lignes de la **première** réponse et donnez ses colonnes à la grille **une
+seule fois** ; les réponses suivantes ne les changent pas (sinon un filtre qui vide une page emporterait les colonnes).
+Le même endroit peut passer à la ligne de totaux les totaux du serveur, quand votre serveur les envoie.
+
+```ts
+import { autoColumns } from '@dzgrid/core/auto-columns';
+import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
+import { createGrid, type GridInstance, type GridMessages } from '@dzgrid/dom';
+import { pinnedRows } from '@dzgrid/dom/pinned-rows';
+import { totalsRow } from '@dzgrid/dom/totals-row';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_PINNED } from '@dzgrid/dom/locales/fr-pinned';
+import { FR_TOTALS } from '@dzgrid/dom/locales/fr-totals';
+
+type Comet = { id: string; name: string; period: number; seen: string };
+type Answer = DataResponse<Comet> & { totals?: Record<string, number> };
+
+const totals = totalsRow();
+let grid: GridInstance<Comet> | null = null;
+let columnsSet = false;
+
+async function fetchComets(req: DataRequest): Promise<Answer> {
+  const answer = await fetch('/api/comets', { method: 'POST', body: JSON.stringify({ page: req.page }), signal: req.signal as AbortSignal });
+  const json = (await answer.json()) as Answer;
+  if (!columnsSet && json.rows.length) {
+    columnsSet = true;
+    const { columns } = autoColumns(json.rows, { hide: ['id'], override: { period: { total: 'sum' } } });
+    grid?.update({ columns });
+  }
+  if (json.totals) totals.api(grid!)?.set(json.totals);   // les totaux du serveur ; ceux de la page tromperaient
+  return json;
+}
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_PINNED.text, ...FR_TOTALS.text } };
+grid = createGrid<Comet>(document.getElementById('comets')!, {
+  source: sourceRows<Comet>({ fetch: fetchComets }),
+  columns: [],
+  getRowId: (c) => c.id,
+  messages,
+  features: [pinnedRows<Comet>(), totals],
+});
+```
+
+En Angular, gardez les colonnes dans un signal donné une seule fois depuis le même endroit :
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { autoColumns } from '@dzgrid/core/auto-columns';
+import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Comet = { id: string; name: string; period: number; seen: string };
+
+@Component({
+  selector: 'app-comets',
+  imports: [DzGrid],
+  template: `<dz-grid [source]="source" [columns]="columns()" [getRowId]="rowId" [messages]="messages" />`,
+})
+export class Comets {
+  readonly columns = signal<DzgColumnOrGroup<Comet>[]>([]);
+  readonly rowId = (c: Comet) => c.id;
+  readonly messages = FR;
+  readonly source = sourceRows<Comet>({ fetch: (req) => this.load(req) });
+
+  private async load(req: DataRequest): Promise<DataResponse<Comet>> {
+    const answer = await fetch('/api/comets', { method: 'POST', body: JSON.stringify({ page: req.page }), signal: req.signal as AbortSignal });
+    const json = (await answer.json()) as DataResponse<Comet>;
+    // Une fois : la première réponse avec des lignes fait les colonnes ; les réponses suivantes les laissent.
+    if (!this.columns().length && json.rows.length) this.columns.set(autoColumns(json.rows, { hide: ['id'] }).columns);
+    return json;
+  }
+}
+```
+
+## Défilement infini
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { infiniteRows } from '@dzgrid/core/infinite';
+import type { DataRequest } from '@dzgrid/core/server';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Star = { id: number; name: string; magnitude: number };
+
+const stars = infiniteRows<Star>({
+  fetch: async (req: DataRequest) => {
+    const at = req.page?.offset ?? 0;
+    const rows = Array.from({ length: 100 }, (_, i) => ({ id: at + i, name: `Étoile ${at + i}`, magnitude: (at + i) % 7 }));
+    return { rows, total: 1_000_000 };
+  },
+}, { blockSize: 100, maxBlocks: 20 });
+
+createGrid<Star>(document.getElementById('sky')!, {
+  source: stars,
+  columns: [{ id: 'name', header: 'Étoile' }, { id: 'magnitude', header: 'Magnitude', type: 'number' }],
+  getRowId: (s) => s.id,
+  messages: FR,
+});
+```
+
+<LiveDemo
+  height={360}
+  server={{ kind: 'infinite', data: 'asteroids', count: 100000, delay: 250 }}
+  settings={{ label: 'Une longue liste d’astéroïdes' }}
+  columns={[
+    { id: 'name', header: 'Astéroïde', flex: 1 },
+    { id: 'found', header: 'Découvert le', type: 'day', width: 150 },
+    { id: 'diameter', header: 'Diamètre (km)', type: 'number', width: 160 },
+  ]}
+  caption="100 000 lignes, chargées cent par cent pendant que vous faites défiler ; triez une colonne et la liste repart du début."
+/>
+
+Les blocs arrivent pendant que l’utilisateur fait défiler (`ahead` blocs d’avance, `concurrency` à la fois) ; au plus
+`maxBlocks` sont gardés. Les lignes pas encore chargées s’affichent comme lignes de chargement ; un bloc en échec
+affiche « réessayer » à sa place. Avec un total inconnu, Ctrl+Fin va à la dernière ligne connue, et plus loin à chaque
+nouvel appui.
+
+## Groupes sur le serveur
+
+`serverSideRows(data, { by, aggFuncs })` envoie une requête par niveau : le `group` de la requête dit quel niveau et
+quel chemin ouvert ; le serveur répond avec les groupes de ce niveau, leurs nombres et leurs totaux, ou avec les lignes
+d’un groupe par blocs. La grille ne calcule elle-même aucun total. La fiche
+[`server-side-groups.md`](https://github.com/plinthworks/dzgrid/blob/main/docs/behaviors/server-side-groups.md)
+donne la forme de la requête et de la réponse ; le [tableau croisé sur un serveur](../pivot/#tableau-croisé-sur-un-serveur)
+s’appuie dessus.
+
+## Des lignes qui changent
+
+Avec `rows`, donnez un nouveau tableau, ou appliquez une transaction (les lignes sont appariées par identifiant ; le
+focus, la sélection et les lignes ouvertes restent) :
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import type { ClientModel } from '@dzgrid/core';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Buoy = { id: string; sea: string; wave: number };
+
+const grid = createGrid<Buoy, ClientModel<Buoy>>(document.getElementById('buoys')!, {
+  rows: [{ id: 'y1', sea: 'Mer de verre', wave: 1.2 }],
+  columns: [{ id: 'sea', header: 'Mer' }, { id: 'wave', header: 'Houle (m)', type: 'number' }],
+  getRowId: (b) => b.id,
+  messages: FR,
+});
+
+grid.kernel.rows.applyTransaction({ add: [{ id: 'y2', sea: 'Baie salée', wave: 0.4 }], patch: [{ id: 'y1', set: { wave: 2.8 } }] });
+```
+
+En Angular : `ctrl.applyTransaction(tx)` et `ctrl.applyTransactionAsync(tx)` (beaucoup de petites mises à jour
+réunies en une).

@@ -17,11 +17,11 @@ hero:
 import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 import LiveDemo from '../../../components/LiveDemo.astro';
 
-export const NAMES = ['Amber', 'Blue', 'Copper', 'Dusk', 'Ember', 'Frost', 'Golden', 'Hazel', 'Ivory', 'Jade'];
-export const KINDS = ['Bean', 'Poppy', 'Sage', 'Squash', 'Tomato', 'Violet'];
+export const NAMES = ['Ambre', 'Azur', 'Cuivre', 'Crépuscule', 'Braise', 'Givre', 'Soleil', 'Noisette', 'Ivoire', 'Jade'];
+export const KINDS = ['Haricot', 'Coquelicot', 'Sauge', 'Courge', 'Tomate', 'Violette'];
 export const seeds = Array.from({ length: 60 }, (_, i) => ({
   id: `s${i + 1}`,
-  name: `${NAMES[i % NAMES.length]} ${KINDS[(i * 7) % KINDS.length]}`,
+  name: `${KINDS[(i * 7) % KINDS.length]} ${NAMES[i % NAMES.length]}`,
   kind: KINDS[(i * 7) % KINDS.length],
   sown: `2026-${String(1 + (i % 9)).padStart(2, '0')}-${String(1 + ((i * 11) % 28)).padStart(2, '0')}`,
   height: 20 + ((i * 37) % 160),
@@ -48,14 +48,14 @@ menu d’un titre, cochez des lignes, déplacez-vous avec les flèches ; passez 
 <LiveDemo
   height={440}
   features={['filters']}
-  settings={{ label: 'Seeds', selection: { mode: 'multi', checkbox: true } }}
+  settings={{ label: 'Graines', selection: { mode: 'multi', checkbox: true } }}
   columns={[
-    { id: 'name', header: 'Seed', flex: 2, pinned: 'start' },
-    { id: 'kind', header: 'Kind', flex: 1 },
-    { id: 'sown', header: 'Sown', type: 'day', width: 130 },
-    { id: 'height', header: 'Height (cm)', type: 'number', width: 130 },
-    { id: 'price', header: 'Price', type: 'number', width: 120, numberFormat: { style: 'currency', currency: 'EUR' } },
-    { id: 'organic', header: 'Organic', type: 'boolean', width: 110 },
+    { id: 'name', header: 'Graine', flex: 2, pinned: 'start' },
+    { id: 'kind', header: 'Espèce', flex: 1 },
+    { id: 'sown', header: 'Semée le', type: 'day', width: 130 },
+    { id: 'height', header: 'Hauteur (cm)', type: 'number', width: 130 },
+    { id: 'price', header: 'Prix', type: 'number', width: 120, numberFormat: { style: 'currency', currency: 'EUR' } },
+    { id: 'organic', header: 'Bio', type: 'boolean', width: 110 },
   ]}
   rows={seeds}
   caption="Données inventées : 60 sachets de graines."

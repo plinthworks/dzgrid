@@ -42,8 +42,8 @@ createGrid<Patient>(document.getElementById('grid')!, {
 
 ## Documentation
 
-- [The guide](https://github.com/plinthworks/dzgrid/tree/main/docs/guide): getting started and one page per feature.
-- `llms.txt` in this package: the guide's index for a language model (the whole guide: `llms-full.txt` in the repository).
+- [The documentation site](https://plinthworks.github.io/dzgrid/): getting started and one guide per task, with live grids (English and French).
+- `llms.txt` in this package: the site's index for a language model (every page in one file: `llms-full.txt` in the repository).
 - [The project's README](https://github.com/plinthworks/dzgrid#readme): every entry, what it holds, its size.
 - [Behaviour sheets](https://github.com/plinthworks/dzgrid/tree/main/docs/behaviors): one per behaviour, with its tests.
 - [Changelog](https://github.com/plinthworks/dzgrid/blob/main/CHANGELOG.md).

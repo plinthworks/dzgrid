@@ -1,0 +1,237 @@
+---
+title: "Arbre"
+description: "Des lignes imbriquées par un parent, un chemin ou une liste d’enfants ; des enfants chargés à la demande."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+
+`tree()` de `@dzgrid/dom/tree` affiche les lignes en arbre (un treegrid WAI-ARIA) : la colonne de l’arbre est
+décalée d’un pas par niveau, un parent a un chevron, → l’ouvre, ← le ferme ou va au parent (inversé de droite à
+gauche), `*` ouvre ses frères. Textes `-tree`. Les lignes d’un arbre sont des lignes de données ordinaires avec des
+clés ordinaires : la sélection, l’édition et l’export marchent sur elles comme sur des lignes à plat.
+
+Donnez la hiérarchie de l’une de trois façons :
+
+| Option | Vos lignes | Exemple |
+|---|---|---|
+| `parentId(row)` | à plat, chacune avec l’identifiant de son parent (`null` en haut) | des dossiers dans une table |
+| `children(row)` | imbriquées, chacune contenant ses enfants | un document JSON |
+| `path(row)` | à plat, chacune avec son chemin de noms | `['Jardin', 'Outils', 'Râteau']` |
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { tree } from '@dzgrid/dom/tree';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_TREE } from '@dzgrid/dom/locales/fr-tree';
+
+type Room = { id: string; parent: string | null; name: string; area: number };
+
+const rows: Room[] = [
+  { id: 'h', parent: null, name: 'Phare', area: 120 },
+  { id: 'h1', parent: 'h', name: 'Chambre de la lanterne', area: 14 },
+  { id: 'h2', parent: 'h', name: 'Cuisine du gardien', area: 22 },
+  { id: 'h21', parent: 'h2', name: 'Garde-manger', area: 4 },
+];
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_TREE.text } };
+
+const rooms = tree<Room>({ parentId: (r) => r.parent, initial: 1, column: 'name', filter: 'ancestors' });
+const grid = createGrid<Room>(document.getElementById('rooms')!, {
+  rows,
+  columns: [{ id: 'name', header: 'Pièce', flex: 1 }, { id: 'area', header: 'Surface (m²)', type: 'number' }],
+  getRowId: (r) => r.id,
+  messages,
+  features: [rooms],
+});
+
+grid.kernel.dispatch({ type: 'rows.expandAll', expanded: true }, 'api');
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import type { RowKey } from '@dzgrid/core';
+import { tree } from '@dzgrid/dom/tree';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_TREE } from '@dzgrid/dom/locales/fr-tree';
+
+type Room = { id: string; parent: string | null; name: string; area: number };
+
+@Component({
+  selector: 'app-rooms',
+  imports: [DzGrid],
+  template: `
+    <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features"
+      [(expanded)]="open" />
+    <p>{{ open()?.size ?? 0 }} pièces ouvertes</p>`,
+})
+export class Rooms {
+  readonly rows: Room[] = [
+    { id: 'h', parent: null, name: 'Phare', area: 120 },
+    { id: 'h1', parent: 'h', name: 'Chambre de la lanterne', area: 14 },
+    { id: 'h2', parent: 'h', name: 'Cuisine du gardien', area: 22 },
+    { id: 'h21', parent: 'h2', name: 'Garde-manger', area: 4 },
+  ];
+  readonly columns: DzgColumnOrGroup<Room>[] = [{ id: 'name', header: 'Pièce', flex: 1 }, { id: 'area', header: 'Surface (m²)', type: 'number' }];
+  readonly rowId = (r: Room) => r.id;
+  readonly messages = { ...FR, text: { ...FR.text, ...FR_TREE.text } };
+  readonly features = [tree<Room>({ parentId: (r) => r.parent, initial: 1, column: 'name', filter: 'ancestors' })];
+  // Les lignes ouvertes, dans les deux sens.
+  readonly open = signal<ReadonlySet<RowKey> | undefined>(undefined);
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { tree } from '@dzgrid/dom/tree';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_TREE } from '@dzgrid/dom/locales/fr-tree';
+
+type Room = { id: string; parent: string | null; name: string; area: number };
+
+const grid = document.querySelector<DzGridElement<Room>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Pièce', flex: 1 }, { id: 'area', header: 'Surface (m²)', type: 'number' }];
+grid.getRowId = (r) => r.id;
+grid.messages = { ...FR, text: { ...FR.text, ...FR_TREE.text } };
+grid.features = [tree<Room>({ parentId: (r) => r.parent, initial: 1, column: 'name', filter: 'ancestors' })];
+grid.rows = [
+  { id: 'h', parent: null, name: 'Phare', area: 120 },
+  { id: 'h1', parent: 'h', name: 'Chambre de la lanterne', area: 14 },
+  { id: 'h2', parent: 'h', name: 'Cuisine du gardien', area: 22 },
+  { id: 'h21', parent: 'h2', name: 'Garde-manger', area: 4 },
+];
+
+await grid.ready;
+grid.grid?.kernel.dispatch({ type: 'rows.expandAll', expanded: true }, 'api');
+```
+
+</Fragment>
+</CodeTabs>
+
+<LiveDemo
+  height={340}
+  settings={{ label: 'Pièces du phare' }}
+  features={[['tree', { parentField: 'parent', initial: 1, column: 'name', filter: 'ancestors' }], 'filters']}
+  columns={[
+    { id: 'name', header: 'Pièce', flex: 1, minWidth: 220 },
+    { id: 'floor', header: 'Étage', type: 'number', width: 100 },
+    { id: 'area', header: 'Surface (m²)', type: 'number', width: 130 },
+  ]}
+  rows={[
+    { id: 'h', parent: null, name: 'Phare', floor: 0, area: 120 },
+    { id: 'h1', parent: 'h', name: 'Chambre de la lanterne', floor: 6, area: 14 },
+    { id: 'h11', parent: 'h1', name: 'Armoire des lentilles', floor: 6, area: 3 },
+    { id: 'h2', parent: 'h', name: 'Maison du gardien', floor: 0, area: 64 },
+    { id: 'h21', parent: 'h2', name: 'Cuisine', floor: 0, area: 22 },
+    { id: 'h211', parent: 'h21', name: 'Garde-manger', floor: 0, area: 4 },
+    { id: 'h22', parent: 'h2', name: 'Chambre à coucher', floor: 1, area: 18 },
+    { id: 'h3', parent: 'h', name: 'Réserve d’huile', floor: 0, area: 9 },
+    { id: 'h4', parent: 'h', name: 'Salle de veille', floor: 5, area: 12 },
+  ]}
+  caption="→ ouvre une pièce, ← la ferme ; filtrez Pièce sur « garde-manger » et ses parents restent pour qu’on puisse l’atteindre."
+/>
+
+- `initial` : `'none'` (tout fermé), `'all'`, ou une profondeur (ouvert jusqu’à ce niveau).
+- `filter` : `'ancestors'` garde les parents d’une ligne qui correspond (pour qu’on puisse l’atteindre), `'subtree'`
+  garde aussi les enfants d’un parent qui correspond.
+- Un tri ordonne les enfants de chaque parent entre eux ; les parents restent au-dessus de leurs enfants. Ce qui est
+  ouvert reste ouvert après un tri, un filtre ou de nouvelles lignes.
+- `sticky: n` garde les parents ouverts des lignes visibles figés sous les titres, jusqu’à `n` niveaux.
+- `column` est la colonne de l’arbre (la première colonne visible par défaut) ; `indent` son pas en pixels.
+- Les commandes `rows.expand` et `rows.expandAll` ouvrent et ferment depuis le code ; les événements `rowExpanded` vous
+  le disent. En Angular, `[(expanded)]` tient les clés ouvertes.
+
+Chaque option de `tree()` aura sa place sous [Fonctions](../../features/).
+
+## Enfants chargés à la demande
+
+`lazyChildren({ has, load })` de `@dzgrid/dom/tree-lazy` charge les enfants d’un parent à sa première ouverture :
+`has(row)` dit si une ligne peut avoir des enfants (elle reçoit un chevron), `load(row, { signal })` les rend. Pendant
+le chargement, une ligne de chargement se tient sous le parent ; en cas d’échec, elle propose de réessayer.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { tree } from '@dzgrid/dom/tree';
+import { lazyChildren } from '@dzgrid/dom/tree-lazy';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_TREE } from '@dzgrid/dom/locales/fr-tree';
+
+type Folder = { id: string; parent: string | null; name: string; folders: number };
+
+createGrid<Folder>(document.getElementById('folders')!, {
+  rows: [{ id: 'root', parent: null, name: 'Archives des cartes', folders: 3 }],
+  columns: [{ id: 'name', header: 'Dossier' }],
+  getRowId: (f) => f.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_TREE.text } },
+  features: [tree<Folder>({
+    parentId: (f) => f.parent,
+    lazy: lazyChildren<Folder>({
+      has: (f) => f.folders > 0,
+      load: async (f, { signal }) => (await fetch(`/api/folders/${f.id}`, { signal: signal as AbortSignal })).json(),
+    }),
+  })],
+});
+```
+
+## Maître et détail
+
+`detail({ part, height })` de `@dzgrid/dom/detail` ouvre un panneau sous une ligne au lieu de lignes enfants (textes
+`-detail`). Le panneau est une partie `detail` ; `nestedGrid({ settings })` fait de cette partie une grille entière.
+L’imbrication s’arrête au-delà de trois niveaux.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { detail, nestedGrid } from '@dzgrid/dom/detail';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_DETAIL } from '@dzgrid/dom/locales/fr-detail';
+
+type Trip = { id: string; date: string; km: number };
+type Bicycle = { id: string; name: string; trips: Trip[] };
+
+const messages = { ...FR, text: { ...FR.text, ...FR_DETAIL.text } };
+const trips = nestedGrid<Trip>({
+  settings: (c) => ({
+    rows: (c.row as Bicycle).trips,
+    columns: [{ id: 'date', header: 'Date', type: 'day' }, { id: 'km', header: 'km', type: 'number' }],
+    getRowId: (t) => t.id,
+    messages,
+  }),
+});
+
+createGrid<Bicycle>(document.getElementById('bicycles')!, {
+  rows: [{ id: 'b1', name: 'Héron bleu', trips: [{ id: 't1', date: '2026-06-01', km: 42 }] }],
+  columns: [{ id: 'name', header: 'Vélo' }],
+  getRowId: (b) => b.id,
+  messages,
+  features: [detail<Bicycle>({ part: trips, height: 200 })],
+});
+```
+
+<LiveDemo
+  height={360}
+  settings={{ label: 'Vélos' }}
+  features={[['detail', { field: 'trips', height: 170, columns: [{ id: 'date', header: 'Date', type: 'day', flex: 1 }, { id: 'km', header: 'km', type: 'number', width: 100 }] }]]}
+  columns={[
+    { id: 'name', header: 'Vélo', flex: 1 },
+    { id: 'owner', header: 'Cycliste', flex: 1 },
+  ]}
+  rows={[
+    { id: 'b1', name: 'Héron bleu', owner: 'Nella Aubray', trips: [{ id: 't1', date: '2026-06-01', km: 42 }, { id: 't2', date: '2026-06-08', km: 17.5 }] },
+    { id: 'b2', name: 'Renard cuivré', owner: 'Raphaël Lindrac', trips: [{ id: 't3', date: '2026-05-23', km: 63 }] },
+    { id: 'b3', name: 'Phalène de nuit', owner: 'Ivette Brannoc', trips: [] },
+  ]}
+  caption="Le chevron d’un vélo ouvre ses sorties : une grille à elles, dans la ligne."
+/>
+
+En Angular, le panneau est un composant donné avec `componentPart('detail', Component)`, et un
+`<dz-grid [dzgNested]>` à l’intérieur fait la grille imbriquée.

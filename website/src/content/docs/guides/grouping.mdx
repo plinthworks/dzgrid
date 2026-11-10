@@ -1,0 +1,197 @@
+---
+title: "Grouping"
+description: "Row groups, totals, the drop band."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import LiveDemo from '../../../components/LiveDemo.astro';
+
+`grouping({ by })` from `@dzgrid/dom/grouping` gathers rows under group rows, one level per column in `by`, with
+totals (texts `-group`, CSS `grouping.css`). The group rows are drawn in a group column; → and ← open and close them,
+Enter toggles.
+
+<LiveDemo
+  height={420}
+  settings={{ label: 'Fruit market' }}
+  features={['columns', ['grouping', { by: ['island', 'stall'], expanded: 1, footers: 'grand', grandTotal: 'bottom' }], 'groupZone', 'columnMenu']}
+  columns={[
+    { id: 'island', header: 'Island', flex: 1, minWidth: 190 },
+    { id: 'stall', header: 'Stall', width: 110 },
+    { id: 'fruit', header: 'Fruit', width: 100, aggFunc: 'count' },
+    { id: 'crates', header: 'Crates', type: 'number', width: 90, aggFunc: 'sum' },
+    { id: 'price', header: 'Price (avg.)', type: 'number', width: 120, aggFunc: 'avg', numberFormat: { maximumFractionDigits: 2 } },
+  ]}
+  rows={[
+    { id: 's1', island: 'Maru', stall: 'North pier', fruit: 'Starfruit', crates: 4, price: 3.2 },
+    { id: 's2', island: 'Maru', stall: 'North pier', fruit: 'Papaya', crates: 6, price: 2.6 },
+    { id: 's3', island: 'Maru', stall: 'Old well', fruit: 'Guava', crates: 7, price: 2.1 },
+    { id: 's4', island: 'Teva', stall: 'Reef gate', fruit: 'Mango', crates: 2, price: 4.5 },
+    { id: 's5', island: 'Teva', stall: 'Reef gate', fruit: 'Starfruit', crates: 5, price: 3.4 },
+    { id: 's6', island: 'Teva', stall: 'Lagoon steps', fruit: 'Lychee', crates: 3, price: 5.1 },
+    { id: 's7', island: 'Oru', stall: 'Market hall', fruit: 'Guava', crates: 9, price: 1.9 },
+    { id: 's8', island: 'Oru', stall: 'Market hall', fruit: 'Mango', crates: 4, price: 4.2 },
+  ]}
+  caption="Drag a title into the band above the titles to group by it, or use « Group by this column » in its ⋮ menu."
+/>
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { grouping } from '@dzgrid/dom/grouping';
+import { groupZone } from '@dzgrid/dom/group-zone';
+import { columns } from '@dzgrid/dom/columns';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_GROUP } from '@dzgrid/dom/locales/en-group';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import { EN_COLUMN_MENU } from '@dzgrid/dom/locales/en-column-menu';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/grouping.css';
+import '@dzgrid/theme/columns.css';
+import '@dzgrid/theme/menu.css';
+
+type Sale = { id: string; island: string; stall: string; fruit: string; crates: number; price: number };
+
+const cols: ColumnOrGroup<Sale>[] = [
+  { id: 'island', header: 'Island' },
+  { id: 'stall', header: 'Stall' },
+  { id: 'fruit', header: 'Fruit', aggFunc: 'count' },
+  { id: 'crates', header: 'Crates', type: 'number', aggFunc: 'sum' },
+  { id: 'price', header: 'Price (avg.)', type: 'number', aggFunc: 'avg', numberFormat: { maximumFractionDigits: 2 } },
+];
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_GROUP.text, ...EN_COLUMNS.text, ...EN_COLUMN_MENU.text } };
+
+const groups = grouping({ by: ['island', 'stall'], expanded: 1, footers: 'grand', grandTotal: 'bottom' });
+const moves = columns();
+const grid = createGrid<Sale>(document.getElementById('market')!, {
+  rows: [
+    { id: 's1', island: 'Maru', stall: 'North pier', fruit: 'Starfruit', crates: 4, price: 3.2 },
+    { id: 's2', island: 'Maru', stall: 'Old well', fruit: 'Guava', crates: 7, price: 2.1 },
+    { id: 's3', island: 'Teva', stall: 'Reef gate', fruit: 'Mango', crates: 2, price: 4.5 },
+  ],
+  columns: cols,
+  getRowId: (s) => s.id,
+  messages,
+  features: [moves, groups, groupZone({ use: { grouping: groups, columns: moves } }), columnMenu({ use: { grouping: groups, columns: moves } })],
+});
+
+const api = groups.api(grid);
+api?.setBy(['fruit']);
+api?.expandAll();
+console.log(api?.totals());
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, DzgController, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { grouping } from '@dzgrid/dom/grouping';
+import { groupZone } from '@dzgrid/dom/group-zone';
+import { columns } from '@dzgrid/dom/columns';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_GROUP } from '@dzgrid/dom/locales/en-group';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import { EN_COLUMN_MENU } from '@dzgrid/dom/locales/en-column-menu';
+
+type Sale = { id: string; island: string; stall: string; fruit: string; crates: number; price: number };
+
+const groups = grouping({ by: ['island', 'stall'], expanded: 1, footers: 'grand', grandTotal: 'bottom' });
+const moves = columns();
+
+@Component({
+  selector: 'app-market',
+  imports: [DzGrid],
+  template: `
+    <dz-grid [rows]="rows" [columns]="cols" [getRowId]="rowId" [messages]="messages" [features]="features"
+      [(groupBy)]="by" (gridReady)="ctrl = $event" />
+    <p>Grouped by {{ by()?.join(', ') }}</p>
+    <button type="button" (click)="ctrl?.grouping()?.expandAll()">Open every group</button>`,
+})
+export class Market {
+  readonly rows: Sale[] = [
+    { id: 's1', island: 'Maru', stall: 'North pier', fruit: 'Starfruit', crates: 4, price: 3.2 },
+    { id: 's2', island: 'Maru', stall: 'Old well', fruit: 'Guava', crates: 7, price: 2.1 },
+    { id: 's3', island: 'Teva', stall: 'Reef gate', fruit: 'Mango', crates: 2, price: 4.5 },
+  ];
+  readonly cols: DzgColumnOrGroup<Sale>[] = [
+    { id: 'island', header: 'Island' },
+    { id: 'stall', header: 'Stall' },
+    { id: 'fruit', header: 'Fruit', aggFunc: 'count' },
+    { id: 'crates', header: 'Crates', type: 'number', aggFunc: 'sum' },
+    { id: 'price', header: 'Price (avg.)', type: 'number', aggFunc: 'avg', numberFormat: { maximumFractionDigits: 2 } },
+  ];
+  readonly rowId = (s: Sale) => s.id;
+  readonly messages = { ...EN, text: { ...EN.text, ...EN_GROUP.text, ...EN_COLUMNS.text, ...EN_COLUMN_MENU.text } };
+  readonly features = [moves, groups, groupZone({ use: { grouping: groups, columns: moves } }), columnMenu({ use: { grouping: groups, columns: moves } })];
+  // The grouped columns, both ways: the user's drags come back here.
+  readonly by = signal<readonly string[] | undefined>(undefined);
+  ctrl: DzgController<Sale> | null = null;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { grouping } from '@dzgrid/dom/grouping';
+import { groupZone } from '@dzgrid/dom/group-zone';
+import { columns } from '@dzgrid/dom/columns';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_GROUP } from '@dzgrid/dom/locales/en-group';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import { EN_COLUMN_MENU } from '@dzgrid/dom/locales/en-column-menu';
+
+type Sale = { id: string; island: string; stall: string; fruit: string; crates: number; price: number };
+
+const groups = grouping({ by: ['island', 'stall'], expanded: 1, footers: 'grand', grandTotal: 'bottom' });
+const moves = columns();
+const grid = document.querySelector<DzGridElement<Sale>>('dz-grid')!;
+grid.columns = [
+  { id: 'island', header: 'Island' },
+  { id: 'stall', header: 'Stall' },
+  { id: 'fruit', header: 'Fruit', aggFunc: 'count' },
+  { id: 'crates', header: 'Crates', type: 'number', aggFunc: 'sum' },
+  { id: 'price', header: 'Price (avg.)', type: 'number', aggFunc: 'avg', numberFormat: { maximumFractionDigits: 2 } },
+];
+grid.getRowId = (s) => s.id;
+grid.messages = { ...EN, text: { ...EN.text, ...EN_GROUP.text, ...EN_COLUMNS.text, ...EN_COLUMN_MENU.text } };
+grid.features = [moves, groups, groupZone({ use: { grouping: groups, columns: moves } }), columnMenu({ use: { grouping: groups, columns: moves } })];
+grid.rows = [
+  { id: 's1', island: 'Maru', stall: 'North pier', fruit: 'Starfruit', crates: 4, price: 3.2 },
+  { id: 's2', island: 'Maru', stall: 'Old well', fruit: 'Guava', crates: 7, price: 2.1 },
+  { id: 's3', island: 'Teva', stall: 'Reef gate', fruit: 'Mango', crates: 2, price: 4.5 },
+];
+
+await grid.ready;
+if (grid.grid) groups.api(grid.grid)?.setBy(['fruit']);
+```
+
+</Fragment>
+</CodeTabs>
+
+- `by`: the columns to group by, outermost first. Change it with `api.setBy(ids)`, or let the user do it: the drop
+  band `groupZone()` from `@dzgrid/dom/group-zone` (drag a header into it), or « Group by this column » in the column
+  menu. A column with `groupable: false` cannot be grouped by.
+- Totals: a column's `aggFunc` — `sum`, `avg`, `min`, `max`, `count`, `first`, `last`, or your own function — or
+  `aggFuncs: { column: fn }` in the options. A group row shows its totals in those columns.
+- `expanded`: `'none'`, `'all'` or a depth. `footers`: `'group'` adds a total row under each group, `'grand'` a grand
+  total, `'both'`. `grandTotal`: `'top'` or `'bottom'`.
+- `api.expandAll(depth?)`, `api.collapseAll()`; the `rows.expandAll` command does the same.
+- Sorting a grouped column sorts the groups; other sorts sort the rows inside each group.
+- In Angular, `[(groupBy)]` holds the grouped columns and `ctrl.grouping()` gives the api.
+
+Every option of `grouping()` will have its place under [Features](../../features/).
+
+## Groups on a server
+
+When the rows live on a server, `serverSideRows({ by })` from `@dzgrid/core/server-side` asks the server for one level
+at a time: see [Server data](../server-data/#groups-on-the-server).

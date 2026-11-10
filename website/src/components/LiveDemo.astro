@@ -3,21 +3,29 @@
  * A real DzGrid, drawn in the browser from the library's sources (the Vite aliases in astro.config.mjs) with the
  * theme the whole site loads. One grid per demo, made only when the demo comes near the screen.
  *
- *   <LiveDemo rows={[…]} columns={[…]} settings={{ label: 'Books' }} features={['filters']} />
+ *   <LiveDemo rows={[…]} columns={[…]} settings={{ label: 'Books' }} features={['columns', ['filters', { floating: true }]]} />
  *
  * Everything crosses into the page as JSON: rows, columns (no functions), the other settings, and the features by
- * name (FEATURES below). Rows are told apart by their `id` field. The texts are the page's language (EN or FR, with
- * each feature's bundle merged), the locale en-GB or fr-FR. Light and dark follow Starlight's switch by themselves:
- * the theme reads `data-theme` on <html>. `element` draws it with the Web Component (`<dz-grid>`) instead of
- * `createGrid`.
+ * name, alone or with their options (demo/features.ts says which, and what each makes of its options). Rows are told
+ * apart by their `id` field. The texts are the page's language (EN or FR, each feature's bundle merged; `language`
+ * forces another, as Arabic for a right-to-left demo), the locale en-GB, fr-FR or ar-DZ. Light and dark follow
+ * Starlight's switch by themselves: the theme reads `data-theme` on <html>. `element` draws it with the Web Component
+ * (`<dz-grid>`) instead of `createGrid`; `server` gives it a made-up server instead of rows (demo/server.ts).
  */
+import type { ServerDemo } from './demo/server';
+
+type Feature = string | readonly [string, Record<string, unknown>];
 interface Props {
-  rows: readonly Record<string, unknown>[];
+  rows?: readonly Record<string, unknown>[];
   columns: readonly Record<string, unknown>[];
   /** Any other settings of `createGrid`, as JSON (`label`, `selection`, `pagination`, `density`…). */
   settings?: Record<string, unknown>;
-  /** Features by name: 'filters', 'pagination'. */
-  features?: readonly string[];
+  /** Features by name, or `[name, options]`: see demo/features.ts. */
+  features?: readonly Feature[];
+  /** A made-up server in place of `rows`. */
+  server?: ServerDemo;
+  /** The grid's language when it is not the page's: `ar` for a right-to-left demo. */
+  language?: 'ar';
   /** The grid's height in pixels. Default 360. */
   height?: number;
   /** Drawn by `<dz-grid>` from @dzgrid/element. */
@@ -25,53 +33,37 @@ interface Props {
   /** A line under the grid. */
   caption?: string;
 }
-const { rows, columns, settings = {}, features = [], height = 360, element = false, caption } = Astro.props;
-const lang = Astro.currentLocale === 'fr' ? 'fr' : 'en';
-const data = JSON.stringify({ rows, columns, settings, features, element });
+const { rows = [], columns, settings = {}, features = [], server, language, height = 360, element = false, caption } = Astro.props;
+const lang = language ?? (Astro.currentLocale === 'fr' ? 'fr' : 'en');
+const data = JSON.stringify({ rows, columns, settings, features, server: server ?? null, element });
 ---
 
 <dzg-live-demo class="not-content" data-lang={lang} data-demo={data}>
-  <div class="dzg-demo-host" style={`--demo-height: ${height}px`}></div>
+  <div class="dzg-demo-bar" hidden></div>
+  <div class="dzg-demo-host" style={`--demo-height: ${height}px`} dir={lang === 'ar' ? 'rtl' : undefined} lang={language}></div>
   {caption && <p class="dzg-demo-caption">{caption}</p>}
 </dzg-live-demo>
 
 <script>
   import type { GridEvent, Problem } from '@dzgrid/core';
-  import type { GridMessages } from '@dzgrid/dom';
+  import type { GridInstance, GridMessages } from '@dzgrid/dom';
+  import { FEATURES, bundle, type Lang, type Made } from './demo/features';
+  import type { ServerDemo } from './demo/server';
 
   /** A demo's problems in the console, where a check of the site looks for them. */
   const warn = (problems: readonly Problem[]) => {
     for (const p of problems) console.warn('dzgrid demo', p.code, p.path, p.detail);
   };
 
-  type Lang = 'en' | 'fr';
   type Demo = {
     rows: Record<string, unknown>[];
     columns: Record<string, unknown>[];
     settings: Record<string, unknown>;
-    features: string[];
+    features: (string | [string, Record<string, unknown>])[];
+    server: ServerDemo | null;
     element: boolean;
   };
-  type Loaded = { feature: unknown; text: Record<string, string> };
-
-  /** What a demo may switch on, loaded only by a demo that names it. */
-  const FEATURES: Record<string, (lang: Lang) => Promise<Loaded>> = {
-    filters: async (lang) => {
-      // The full entry: day columns get their calendar (@tzslot/*, installed at the root).
-      const { filters } = await import('@dzgrid/dom/filters');
-      const text = lang === 'fr' ? (await import('@dzgrid/dom/locales/fr-filters')).FR_FILTERS.text : (await import('@dzgrid/dom/locales/en-filters')).EN_FILTERS.text;
-      return { feature: filters(), text };
-    },
-    pagination: async (lang) => {
-      const { pagination } = await import('@dzgrid/dom/pagination');
-      const text = lang === 'fr' ? (await import('@dzgrid/dom/locales/fr-pagination')).FR_PAGINATION.text : (await import('@dzgrid/dom/locales/en-pagination')).EN_PAGINATION.text;
-      return { feature: pagination(), text };
-    },
-  };
-
-  async function base(lang: Lang): Promise<GridMessages> {
-    return lang === 'fr' ? (await import('@dzgrid/dom/locales/fr')).FR : (await import('@dzgrid/dom/locales/en')).EN;
-  }
+  const LOCALE: Record<Lang, string> = { en: 'en-GB', fr: 'fr-FR', ar: 'ar-DZ' };
 
   class DzgLiveDemo extends HTMLElement {
     #destroy: (() => void) | null = null;
@@ -95,35 +87,50 @@ const data = JSON.stringify({ rows, columns, settings, features, element });
       if (this.#started) return;
       this.#started = true;
       const host = this.querySelector<HTMLElement>('.dzg-demo-host');
-      if (!host) return;
-      const lang: Lang = this.dataset.lang === 'fr' ? 'fr' : 'en';
+      const bar = this.querySelector<HTMLElement>('.dzg-demo-bar');
+      if (!host || !bar) return;
+      const lang = (['en', 'fr', 'ar'].includes(this.dataset.lang ?? '') ? this.dataset.lang : 'en') as Lang;
       const demo = JSON.parse(this.dataset.demo ?? '{}') as Demo;
       try {
-        const unknown = demo.features.filter((name) => !(name in FEATURES));
-        if (unknown.length) throw new Error(`unknown demo feature: ${unknown.join(', ')}`);
-        const [messages, loaded] = await Promise.all([base(lang), Promise.all(demo.features.map((name) => FEATURES[name]!(lang)))]);
-        const merged = { ...messages, text: Object.assign({}, messages.text, ...loaded.map((l) => l.text)) } as GridMessages;
-        const features = loaded.map((l) => l.feature);
-        const locale = lang === 'fr' ? 'fr-FR' : 'en-GB';
+        // Made in the order listed, each seeing the ones before it.
+        const made: Record<string, Made> = {};
+        for (const entry of demo.features) {
+          const [name, options] = typeof entry === 'string' ? [entry, {}] : entry;
+          const make = FEATURES[name];
+          if (!make) throw new Error(`unknown demo feature: ${name}`);
+          made[name] = await make(options, made, lang);
+        }
+        const all = Object.values(made);
+        const names = ['base', ...new Set(all.flatMap((m) => m.texts ?? []))];
+        const [messages, ...texts] = await Promise.all(names.map((n) => bundle(n, lang)));
+        const merged = { ...messages, text: Object.assign({}, messages!.text, ...texts.map((t) => t.text)) } as GridMessages;
+        const features = all.flatMap((m) => (m.aside ? [] : (m.feature ?? [])));
+        const source = demo.server ? await (await import('./demo/server')).source(demo.server) : null;
+        const data = source ? { source } : { rows: demo.rows };
         const getRowId = (row: Record<string, unknown>) => String(row.id);
         if (!this.isConnected) return;
+        let grid: () => Promise<GridInstance<Record<string, unknown>> | null>;
         if (demo.element) {
           // `defineDzGrid()` rather than `import '@dzgrid/element/define'`: read from the sources, that entry is
           // not listed in the package's `sideEffects` (it names the built `./define.js`), so the build drops it.
           const { defineDzGrid } = await import('@dzgrid/element');
           if (!customElements.get('dz-grid')) defineDzGrid();
-          const el = document.createElement('dz-grid') as HTMLElement & Record<string, unknown>;
-          el.setAttribute('locale', locale);
-          Object.assign(el, { columns: demo.columns, getRowId, messages: merged, features, settings: demo.settings, rows: demo.rows });
+          const el = document.createElement('dz-grid') as HTMLElement & Record<string, unknown> & { ready: Promise<void>; grid: GridInstance<Record<string, unknown>> | null };
+          el.setAttribute('locale', LOCALE[lang]);
+          Object.assign(el, { columns: demo.columns, getRowId, messages: merged, features, settings: demo.settings, ...data });
           el.addEventListener('dzg-problems', (e) => warn((e as CustomEvent<{ problems: readonly Problem[] }>).detail.problems));
           host.append(el);
+          grid = async () => (await el.ready, el.grid);
           this.#destroy = () => el.remove();
         } else {
           const { createGrid } = await import('@dzgrid/dom');
           // The settings are JSON from the page: checked by the grid itself, which says what it refuses.
-          const grid = createGrid(host, { locale, ...demo.settings, rows: demo.rows, columns: demo.columns, getRowId, messages: merged, features, onEvent: (e: GridEvent<Record<string, unknown>>) => e.type === 'problems' && warn(e.problems) } as never);
-          this.#destroy = () => grid.destroy();
+          const made = createGrid(host, { locale: LOCALE[lang], ...demo.settings, ...data, columns: demo.columns, getRowId, messages: merged, features, onEvent: (e: GridEvent<Record<string, unknown>>) => e.type === 'problems' && warn(e.problems) } as never) as GridInstance<Record<string, unknown>>;
+          grid = async () => made;
+          this.#destroy = () => made.destroy();
         }
+        for (const m of all) m.bar?.(bar, grid);
+        bar.hidden = !bar.childElementCount;
       } catch (error) {
         // A demo the grid refused: said on the page, not a blank box.
         host.textContent = String(error);
@@ -136,6 +143,7 @@ const data = JSON.stringify({ rows, columns, settings, features, element });
       this.#seen = null;
       this.#destroy?.();
       this.#destroy = null;
+      this.querySelector('.dzg-demo-bar')?.replaceChildren();
       this.#started = false;
     }
   }

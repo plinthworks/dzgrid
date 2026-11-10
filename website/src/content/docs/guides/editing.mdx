@@ -1,0 +1,245 @@
+---
+title: "Editing"
+description: "Editable cells, editors, validation, saving, undo and redo."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import LiveDemo from '../../../components/LiveDemo.astro';
+
+Two features: `edit()` from `@dzgrid/dom/edit` holds the edits (save, undo, refusals; texts `-edit`, CSS `edit.css`),
+`editors()` draws the fields (texts `-editors`). Take `editors` from `@dzgrid/dom/editors` (a date calendar from
+`@tzslot/*`, loaded on first use) or from `@dzgrid/dom/editors-base` (no calendar: a day is typed).
+
+F2, Enter, a double click or typing a character opens the field; Enter keeps the value and moves down (`enterMoves`),
+Tab moves to the next editable cell, Escape gives the old value back.
+
+<LiveDemo
+  height={320}
+  settings={{ label: 'Garden gnomes' }}
+  features={['edit']}
+  columns={[
+    { id: 'name', header: 'Name', flex: 1, minWidth: 140, editable: true, edit: { required: true, maxLength: 40 } },
+    { id: 'hat', header: 'Hat', type: 'enum', width: 110, editable: true, enumOptions: [{ value: 'red', label: 'Red' }, { value: 'green', label: 'Green' }, { value: 'blue', label: 'Blue' }] },
+    { id: 'height', header: 'Height (cm)', type: 'number', width: 130, editable: true, edit: { min: 5, max: 120 } },
+    { id: 'painted', header: 'Painted on', type: 'day', width: 140, editable: true },
+    { id: 'fishing', header: 'Fishing', type: 'boolean', width: 100, editable: true },
+  ]}
+  rows={[
+    { id: 'g1', name: 'Barnaby', hat: 'red', height: 31, painted: '2025-04-02', fishing: true },
+    { id: 'g2', name: 'Pip', hat: 'green', height: 18, painted: '2024-09-14', fishing: false },
+    { id: 'g3', name: 'Old Thistle', hat: 'blue', height: 46, painted: '2023-06-30', fishing: true },
+    { id: 'g4', name: 'Marigold', hat: 'red', height: 22, painted: '2025-08-19', fishing: false },
+  ]}
+  caption="Type over a name, or try a height of 300 (refused: at most 120). Undo and Redo above, or Ctrl+Z and Ctrl+Y."
+/>
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import type { SaveRequest } from '@dzgrid/core/edit';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { listEditor } from '@dzgrid/dom/editors-list';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/edit.css';
+
+type Gnome = { id: string; name: string; hat: string; height: number; painted: string; locked: boolean };
+
+const columns: ColumnOrGroup<Gnome>[] = [
+  { id: 'name', header: 'Name', editable: (g) => !g.locked, edit: { required: true, maxLength: 40 } },
+  { id: 'hat', header: 'Hat', type: 'enum', editable: true,
+    edit: { options: [{ value: 'red', label: 'Red' }, { value: 'green', label: 'Green' }] } },
+  { id: 'height', header: 'Height (cm)', type: 'number', editable: true, edit: { min: 5, max: 120 },
+    validate: (v) => (typeof v === 'number' && v % 1 !== 0 ? 'whole' : null) },
+  { id: 'painted', header: 'Painted on', type: 'day', editable: true },
+];
+
+async function save(req: SaveRequest<Gnome>, signal: AbortSignal): Promise<void> {
+  const body = req.changes.map((c) => ({ id: c.row.id, column: c.column, value: c.value }));
+  const answer = await fetch('/api/gnomes', { method: 'PATCH', body: JSON.stringify(body), signal });
+  if (!answer.ok) throw Object.assign(new Error('refused'), { reason: await answer.text() });
+}
+
+// Not typed `GridMessages`: an app's own `validation.<code>` keys are extra keys.
+const messages = {
+  ...EN,
+  text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text, 'validation.whole': 'a whole number' },
+};
+
+const grid = createGrid<Gnome>(document.getElementById('gnomes')!, {
+  rows: [{ id: 'g1', name: 'Barnaby', hat: 'red', height: 31, painted: '2025-04-02', locked: false }],
+  columns,
+  getRowId: (g) => g.id,
+  messages,
+  features: [edit<Gnome>({ save: (req, signal) => save(req, signal as AbortSignal) }), editors({ enterMoves: 'down', list: listEditor })],
+  onEvent: (e) => {
+    if (e.type === 'cellEdited') console.log(e.column, e.previous, '→', e.value, e.origin);
+    if (e.type === 'saveFailed') console.warn('not saved', e.column, e.reason);
+  },
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import type { SaveRequest } from '@dzgrid/core/edit';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { listEditor } from '@dzgrid/dom/editors-list';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+
+type Gnome = { id: string; name: string; hat: string; height: number; painted: string; locked: boolean };
+
+@Component({
+  selector: 'app-gnomes',
+  imports: [DzGrid],
+  template: `
+    <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features"
+      [save]="save" (cellEdited)="said = $event.column + ' changed'" (saveFailed)="said = $event.reason ?? 'not saved'"
+      (undoChanged)="canUndo = $event.canUndo" #grid="dzGrid" />
+    <button type="button" [disabled]="!canUndo" (click)="grid.controller.edit()?.undo()">Undo</button>
+    <p>{{ said }}</p>`,
+})
+export class Gnomes {
+  readonly rows: Gnome[] = [{ id: 'g1', name: 'Barnaby', hat: 'red', height: 31, painted: '2025-04-02', locked: false }];
+  readonly columns: DzgColumnOrGroup<Gnome>[] = [
+    { id: 'name', header: 'Name', editable: (g) => !g.locked, edit: { required: true, maxLength: 40 } },
+    { id: 'hat', header: 'Hat', type: 'enum', editable: true, edit: { options: [{ value: 'red', label: 'Red' }, { value: 'green', label: 'Green' }] } },
+    { id: 'height', header: 'Height (cm)', type: 'number', editable: true, edit: { min: 5, max: 120 } },
+    { id: 'painted', header: 'Painted on', type: 'day', editable: true },
+  ];
+  readonly rowId = (g: Gnome) => g.id;
+  readonly messages = { ...EN, text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text } };
+  readonly features = [edit<Gnome>(), editors({ enterMoves: 'down', list: listEditor })];
+  said = '';
+  canUndo = false;
+
+  readonly save = async (req: SaveRequest<Gnome>, signal: unknown): Promise<void> => {
+    const body = req.changes.map((c) => ({ id: c.row.id, column: c.column, value: c.value }));
+    const answer = await fetch('/api/gnomes', { method: 'PATCH', body: JSON.stringify(body), signal: signal as AbortSignal });
+    if (!answer.ok) throw Object.assign(new Error('refused'), { reason: await answer.text() });
+  };
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import type { GridEvent } from '@dzgrid/core';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { listEditor } from '@dzgrid/dom/editors-list';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+
+type Gnome = { id: string; name: string; hat: string; height: number; painted: string; locked: boolean };
+
+const editing = edit<Gnome>({
+  save: async (req, signal) => {
+    const body = req.changes.map((c) => ({ id: c.row.id, column: c.column, value: c.value }));
+    const answer = await fetch('/api/gnomes', { method: 'PATCH', body: JSON.stringify(body), signal: signal as AbortSignal });
+    if (!answer.ok) throw Object.assign(new Error('refused'), { reason: await answer.text() });
+  },
+});
+const grid = document.querySelector<DzGridElement<Gnome>>('dz-grid')!;
+grid.columns = [
+  { id: 'name', header: 'Name', editable: (g) => !g.locked, edit: { required: true, maxLength: 40 } },
+  { id: 'hat', header: 'Hat', type: 'enum', editable: true, edit: { options: [{ value: 'red', label: 'Red' }, { value: 'green', label: 'Green' }] } },
+  { id: 'height', header: 'Height (cm)', type: 'number', editable: true, edit: { min: 5, max: 120 } },
+  { id: 'painted', header: 'Painted on', type: 'day', editable: true },
+];
+grid.getRowId = (g) => g.id;
+grid.messages = { ...EN, text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text } };
+grid.features = [editing, editors({ enterMoves: 'down', list: listEditor })];
+grid.rows = [{ id: 'g1', name: 'Barnaby', hat: 'red', height: 31, painted: '2025-04-02', locked: false }];
+
+grid.addEventListener('dzg-save-failed', (e) => {
+  const event = (e as CustomEvent<GridEvent<Gnome>>).detail;
+  if (event.type === 'saveFailed') console.warn('not saved', event.column, event.reason);
+});
+document.getElementById('undo')!.addEventListener('click', () => {
+  if (grid.grid) editing.api(grid.grid)?.undo();
+});
+```
+
+</Fragment>
+</CodeTabs>
+
+## Checks
+
+- `editable`: `true`, or a function `(row, context, info)`; a cell that cannot be edited answers « read-only ».
+- `edit`: `required`, `min`, `max`, `pattern`, `maxLength`, `options` (a list, or a function of the row), and
+  `editor` (the name of your own editor part).
+- A list (an `enum` column, or `edit.options`) is chosen in the list editor: give it to the editors as
+  `editors({ list: listEditor })`, with `listEditor` from `@dzgrid/dom/editors-list` (its own entry, so a grid without
+  lists does not load it). Without it, a list column opens a text field read by its codec, with one
+  `missing-feature` warning per column.
+- `validate(value, row, context)` returns a code, or `null` when the value is fine. Give the code's sentence in
+  `messages` as `validation.<code>`; without it, a generic « invalid » is said.
+- A refused value stays in the open field, blinks, and is said to screen readers with the column's name and the reason.
+
+These keys will each have their page under [Column options](../../column-options/).
+
+## Saving
+
+`save(request, signal)` receives one request per gesture (`request.changes`: `key`, `column`, `value`, `previous`,
+`row`; `request.origin` says whether it was an edit, a paste, a fill, an undo…). Resolve: saved. Reject or throw:
+refused — the cells go back, and an error with a string `reason` shows that reason. Without `save`, edits are kept in
+the grid only (you hear `cellEdited` and may apply it to your rows). While a save runs, the cell shows a moving
+border and says « saving » to screen readers. Saves of one cell go in order: a newer gesture waits for the older one.
+The grid never writes into your rows: a kept value is shown over the row until your rows (a new array, a transaction,
+a server answer) carry it. Hand `signal` on to `fetch`.
+
+## Undo and redo
+
+Ctrl+Z undoes, Ctrl+Y or Ctrl+Shift+Z redoes (Cmd on a Mac), over the last 100 gestures, each going through `save`
+again. From code:
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+
+type Note = { id: string; text: string };
+
+const editing = edit<Note>();
+const grid = createGrid<Note>(document.getElementById('notes')!, {
+  rows: [{ id: 'n1', text: 'Feed the dragon' }],
+  columns: [{ id: 'text', header: 'Note', editable: true }],
+  getRowId: (n) => n.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text } },
+  features: [editing, editors()],
+  onEvent: (e) => {
+    if (e.type === 'undoChanged') console.log('can undo:', e.canUndo, 'can redo:', e.canRedo);
+  },
+});
+
+document.getElementById('undo')!.addEventListener('click', () => editing.api(grid)?.undo());
+```
+
+In Angular: `[save]="save"` on `<dz-grid>`, `(cellEdited)`, `(saveFailed)`, `(undoChanged)`, and
+`ctrl.edit()?.undo()`.
+
+## Your own editor
+
+An `editor` part draws the field; its context's `keep(input)` keeps a value (through the same checks and save),
+`cancel()` closes without one, `refuse(code)` refuses with a reason. Register it under a name and point the column's
+`edit.editor` at it (or name it `editor.<type>` to replace an editor for a whole type).

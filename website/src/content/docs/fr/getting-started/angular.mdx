@@ -39,26 +39,26 @@ L’hôte `<dz-grid>` est en `display: contents` (il n’a pas de boîte à lui)
 ```ts
 import { createGrid } from '@dzgrid/dom';
 import type { ColumnOrGroup } from '@dzgrid/core';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 
 type Comet = { id: string; name: string; seen: string; period: number };
 
 const columns: ColumnOrGroup<Comet>[] = [
-  { id: 'name', header: 'Comet', flex: 2 },
-  { id: 'seen', header: 'Last seen', type: 'day', width: 140 },
-  { id: 'period', header: 'Period (years)', type: 'number', numberFormat: { maximumFractionDigits: 1 } },
+  { id: 'name', header: 'Comète', flex: 2 },
+  { id: 'seen', header: 'Dernier passage', type: 'day', width: 140 },
+  { id: 'period', header: 'Période (ans)', type: 'number', numberFormat: { maximumFractionDigits: 1 } },
 ];
 
 createGrid<Comet>(document.querySelector<HTMLElement>('.grid-box')!, {
   rows: [
-    { id: 'c1', name: 'Vantor-Elm', seen: '2024-08-19', period: 71.4 },
-    { id: 'c2', name: 'Ossian Blue', seen: '2025-01-03', period: 6.2 },
+    { id: 'c1', name: 'Vantor-Orme', seen: '2024-08-19', period: 71.4 },
+    { id: 'c2', name: 'Ossian Bleue', seen: '2025-01-03', period: 6.2 },
   ],
   columns,
   getRowId: (c) => c.id,
-  messages: EN,
-  locale: 'en-GB',
-  label: 'Comets',
+  messages: FR,
+  locale: 'fr-FR',
+  label: 'Comètes',
 });
 ```
 
@@ -68,7 +68,7 @@ createGrid<Comet>(document.querySelector<HTMLElement>('.grid-box')!, {
 ```ts
 import { Component } from '@angular/core';
 import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 
 type Comet = { id: string; name: string; seen: string; period: number };
 
@@ -77,22 +77,22 @@ type Comet = { id: string; name: string; seen: string; period: number };
   imports: [DzGrid],
   template: `
     <div class="grid-box">
-      <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" locale="en-GB" label="Comets" />
+      <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" locale="fr-FR" label="Comètes" />
     </div>`,
 })
 export class Comets {
   readonly rows: Comet[] = [
-    { id: 'c1', name: 'Vantor-Elm', seen: '2024-08-19', period: 71.4 },
-    { id: 'c2', name: 'Ossian Blue', seen: '2025-01-03', period: 6.2 },
-    { id: 'c3', name: 'Little Harrow', seen: '2023-11-27', period: 13.8 },
+    { id: 'c1', name: 'Vantor-Orme', seen: '2024-08-19', period: 71.4 },
+    { id: 'c2', name: 'Ossian Bleue', seen: '2025-01-03', period: 6.2 },
+    { id: 'c3', name: 'Petite Herse', seen: '2023-11-27', period: 13.8 },
   ];
   readonly columns: DzgColumnOrGroup<Comet>[] = [
-    { id: 'name', header: 'Comet', flex: 2 },
-    { id: 'seen', header: 'Last seen', type: 'day', width: 140 },
-    { id: 'period', header: 'Period (years)', type: 'number', numberFormat: { maximumFractionDigits: 1 } },
+    { id: 'name', header: 'Comète', flex: 2 },
+    { id: 'seen', header: 'Dernier passage', type: 'day', width: 140 },
+    { id: 'period', header: 'Période (ans)', type: 'number', numberFormat: { maximumFractionDigits: 1 } },
   ];
   readonly rowId = (c: Comet) => c.id;
-  readonly messages = EN;
+  readonly messages = FR;
 }
 ```
 
@@ -102,21 +102,21 @@ export class Comets {
 ```ts
 import '@dzgrid/element/define';
 import type { DzGridElement } from '@dzgrid/element';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 
 type Comet = { id: string; name: string; seen: string; period: number };
 
 const grid = document.querySelector<DzGridElement<Comet>>('dz-grid')!;
 grid.columns = [
-  { id: 'name', header: 'Comet', flex: 2 },
-  { id: 'seen', header: 'Last seen', type: 'day', width: 140 },
-  { id: 'period', header: 'Period (years)', type: 'number', numberFormat: { maximumFractionDigits: 1 } },
+  { id: 'name', header: 'Comète', flex: 2 },
+  { id: 'seen', header: 'Dernier passage', type: 'day', width: 140 },
+  { id: 'period', header: 'Période (ans)', type: 'number', numberFormat: { maximumFractionDigits: 1 } },
 ];
 grid.getRowId = (c) => c.id;
-grid.messages = EN;
+grid.messages = FR;
 grid.rows = [
-  { id: 'c1', name: 'Vantor-Elm', seen: '2024-08-19', period: 71.4 },
-  { id: 'c2', name: 'Ossian Blue', seen: '2025-01-03', period: 6.2 },
+  { id: 'c1', name: 'Vantor-Orme', seen: '2024-08-19', period: 71.4 },
+  { id: 'c2', name: 'Ossian Bleue', seen: '2025-01-03', period: 6.2 },
 ];
 ```
 
@@ -125,18 +125,18 @@ grid.rows = [
 
 <LiveDemo
   height={260}
-  settings={{ label: 'Comets' }}
+  settings={{ label: 'Comètes' }}
   columns={[
-    { id: 'name', header: 'Comet', flex: 2 },
-    { id: 'seen', header: 'Last seen', type: 'day', width: 140 },
-    { id: 'period', header: 'Period (years)', type: 'number', numberFormat: { maximumFractionDigits: 1 } },
+    { id: 'name', header: 'Comète', flex: 2 },
+    { id: 'seen', header: 'Dernier passage', type: 'day', width: 140 },
+    { id: 'period', header: 'Période (ans)', type: 'number', numberFormat: { maximumFractionDigits: 1 } },
   ]}
   rows={[
-    { id: 'c1', name: 'Vantor-Elm', seen: '2024-08-19', period: 71.4 },
-    { id: 'c2', name: 'Ossian Blue', seen: '2025-01-03', period: 6.2 },
-    { id: 'c3', name: 'Little Harrow', seen: '2023-11-27', period: 13.8 },
+    { id: 'c1', name: 'Vantor-Orme', seen: '2024-08-19', period: 71.4 },
+    { id: 'c2', name: 'Ossian Bleue', seen: '2025-01-03', period: 6.2 },
+    { id: 'c3', name: 'Petite Herse', seen: '2023-11-27', period: 13.8 },
     { id: 'c4', name: 'Pell-Marchetti', seen: '2022-04-11', period: 112 },
-    { id: 'c5', name: 'Wren’s Tail', seen: '2025-06-02', period: 3.3 },
+    { id: 'c5', name: 'Queue du Roitelet', seen: '2025-06-02', period: 3.3 },
   ]}
   caption="Dessinée sur cette page par @dzgrid/dom, la grille qu’enveloppe <dz-grid>."
 />
@@ -156,26 +156,26 @@ tableau `features` en champs de la classe : `features` est lu une fois, à la cr
 ```ts
 import { createGrid } from '@dzgrid/dom';
 import { filters } from '@dzgrid/dom/filters-base';
-import { EN } from '@dzgrid/dom/locales/en';
-import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
 
 type Lamp = { id: number; model: string; watts: number };
-let rows: Lamp[] = [{ id: 1, model: 'Moth 3', watts: 40 }];
+let rows: Lamp[] = [{ id: 1, model: 'Phalène 3', watts: 40 }];
 
 const grid = createGrid<Lamp>(document.getElementById('lamps')!, {
   rows,
-  columns: [{ id: 'model', header: 'Model' }, { id: 'watts', header: 'Watts', type: 'number' }],
+  columns: [{ id: 'model', header: 'Modèle' }, { id: 'watts', header: 'Watts', type: 'number' }],
   getRowId: (l) => l.id,
-  messages: { ...EN, text: { ...EN.text, ...EN_FILTERS.text } },
+  messages: { ...FR, text: { ...FR.text, ...FR_FILTERS.text } },
   features: [filters()],
   selection: { mode: 'multi', checkbox: true },
   onEvent: (e) => {
-    if (e.type === 'selectionChanged') console.log(e.count ?? 'some', 'selected');
+    if (e.type === 'selectionChanged') console.log(e.count ?? 'quelques', 'sélectionnées');
   },
 });
 
-// A new array, never the old one changed.
-rows = [...rows, { id: rows.length + 1, model: 'Heron 1', watts: 25 }];
+// Un nouveau tableau, jamais l’ancien modifié.
+rows = [...rows, { id: rows.length + 1, model: 'Héron 1', watts: 25 }];
 grid.update({ rows });
 ```
 
@@ -187,8 +187,8 @@ import { Component, signal } from '@angular/core';
 import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
 import type { Problem } from '@dzgrid/core';
 import { filters } from '@dzgrid/dom/filters-base';
-import { EN } from '@dzgrid/dom/locales/en';
-import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
 
 type Lamp = { id: number; model: string; watts: number };
 
@@ -196,23 +196,23 @@ type Lamp = { id: number; model: string; watts: number };
   selector: 'app-lamps',
   imports: [DzGrid],
   template: `
-    <button type="button" (click)="add()">Add a lamp</button>
+    <button type="button" (click)="add()">Ajouter une lampe</button>
     <div class="grid-box">
       <dz-grid [rows]="rows()" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features"
         [selection]="{ mode: 'multi', checkbox: true }" [(quick)]="quick"
         (selectionChanged)="count = $event.count" (problems)="onProblems($event)" />
     </div>
-    <p>{{ count ?? 'some' }} selected</p>`,
+    <p>{{ count ?? 'quelques' }} sélectionnées</p>`,
 })
 export class Lamps {
-  readonly rows = signal<Lamp[]>([{ id: 1, model: 'Moth 3', watts: 40 }]);
-  readonly columns: DzgColumnOrGroup<Lamp>[] = [{ id: 'model', header: 'Model' }, { id: 'watts', header: 'Watts', type: 'number' }];
+  readonly rows = signal<Lamp[]>([{ id: 1, model: 'Phalène 3', watts: 40 }]);
+  readonly columns: DzgColumnOrGroup<Lamp>[] = [{ id: 'model', header: 'Modèle' }, { id: 'watts', header: 'Watts', type: 'number' }];
   readonly rowId = (l: Lamp) => l.id;
-  readonly messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+  readonly messages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text } };
   readonly features = [filters()];
   quick = '';
   count: number | null = 0;
-  add() { this.rows.update((rs) => [...rs, { id: rs.length + 1, model: 'Heron 1', watts: 25 }]); }
+  add() { this.rows.update((rs) => [...rs, { id: rs.length + 1, model: 'Héron 1', watts: 25 }]); }
   onProblems(ps: readonly Problem[]) { for (const p of ps) console.warn('dzgrid', p.code, p.path, p.detail); }
 }
 ```
@@ -224,21 +224,21 @@ export class Lamps {
 import '@dzgrid/element/define';
 import type { DzGridElement } from '@dzgrid/element';
 import { filters } from '@dzgrid/dom/filters-base';
-import { EN } from '@dzgrid/dom/locales/en';
-import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
 
 type Lamp = { id: number; model: string; watts: number };
 
 const grid = document.querySelector<DzGridElement<Lamp>>('dz-grid')!;
-grid.columns = [{ id: 'model', header: 'Model' }, { id: 'watts', header: 'Watts', type: 'number' }];
+grid.columns = [{ id: 'model', header: 'Modèle' }, { id: 'watts', header: 'Watts', type: 'number' }];
 grid.getRowId = (l) => l.id;
-grid.messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+grid.messages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text } };
 grid.features = [filters()];
 grid.settings = { selection: { mode: 'multi', checkbox: true } };
-grid.rows = [{ id: 1, model: 'Moth 3', watts: 40 }];
+grid.rows = [{ id: 1, model: 'Phalène 3', watts: 40 }];
 
-// Properties are compared by identity too: a new array, never the old one changed.
-grid.rows = [...(grid.rows ?? []), { id: 2, model: 'Heron 1', watts: 25 }];
+// Les propriétés aussi sont comparées par identité : un nouveau tableau, jamais l’ancien modifié.
+grid.rows = [...(grid.rows ?? []), { id: 2, model: 'Héron 1', watts: 25 }];
 ```
 
 </Fragment>
@@ -273,15 +273,15 @@ Sans Angular, la grille elle-même offre la même chose : `grid.kernel` et `grid
 ```ts
 import { createGrid } from '@dzgrid/dom';
 import { dataKey } from '@dzgrid/core';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 
 type Owl = { id: string; name: string; age: number };
 
 const grid = createGrid<Owl>(document.getElementById('owls')!, {
-  rows: [{ id: 'o1', name: 'Pip', age: 3 }, { id: 'o2', name: 'Bramble', age: 9 }],
-  columns: [{ id: 'name', header: 'Owl' }, { id: 'age', header: 'Age', type: 'number' }],
+  rows: [{ id: 'o1', name: 'Pépin', age: 3 }, { id: 'o2', name: 'Ronce', age: 9 }],
+  columns: [{ id: 'name', header: 'Chouette' }, { id: 'age', header: 'Âge', type: 'number' }],
   getRowId: (o) => o.id,
-  messages: EN,
+  messages: FR,
   selection: { mode: 'multi' },
 });
 
@@ -301,7 +301,7 @@ grid.kernel.rows.applyTransaction({ patch: [{ id: 'o1', set: { age: 4 } }] });
 import { Component } from '@angular/core';
 import { DzGrid, DzgController, selectedIds, type DzgColumnOrGroup } from '@dzgrid/angular';
 import { dataKey } from '@dzgrid/core';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 
 type Owl = { id: string; name: string; age: number };
 
@@ -310,13 +310,13 @@ type Owl = { id: string; name: string; age: number };
   imports: [DzGrid],
   template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
     [selection]="{ mode: 'multi' }" (gridReady)="ctrl = $event" />
-    <button type="button" (click)="oldestFirst()">Oldest first</button>`,
+    <button type="button" (click)="oldestFirst()">Les plus âgées d’abord</button>`,
 })
 export class Owls {
-  readonly rows: Owl[] = [{ id: 'o1', name: 'Pip', age: 3 }, { id: 'o2', name: 'Bramble', age: 9 }];
-  readonly columns: DzgColumnOrGroup<Owl>[] = [{ id: 'name', header: 'Owl' }, { id: 'age', header: 'Age', type: 'number' }];
+  readonly rows: Owl[] = [{ id: 'o1', name: 'Pépin', age: 3 }, { id: 'o2', name: 'Ronce', age: 9 }];
+  readonly columns: DzgColumnOrGroup<Owl>[] = [{ id: 'name', header: 'Chouette' }, { id: 'age', header: 'Âge', type: 'number' }];
   readonly rowId = (o: Owl) => o.id;
-  readonly messages = EN;
+  readonly messages = FR;
   ctrl: DzgController<Owl> | null = null;
 
   oldestFirst() {
@@ -327,7 +327,7 @@ export class Owls {
       this.ctrl?.dispatch({ type: 'selection.only', row: key });
     }
     this.ctrl?.applyTransaction({ patch: [{ id: 'o1', set: { age: 4 } }] });
-    const chosen = this.ctrl && selectedIds(this.ctrl);   // { mode, ids, query } — ids, ready for a server
+    const chosen = this.ctrl && selectedIds(this.ctrl);   // { mode, ids, query } — des identifiants, prêts pour un serveur
     console.log(chosen);
   }
 }
@@ -340,19 +340,19 @@ export class Owls {
 import '@dzgrid/element/define';
 import type { DzGridElement } from '@dzgrid/element';
 import { dataKey } from '@dzgrid/core';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 
 type Owl = { id: string; name: string; age: number };
 
 const owls = document.querySelector<DzGridElement<Owl>>('dz-grid')!;
-owls.columns = [{ id: 'name', header: 'Owl' }, { id: 'age', header: 'Age', type: 'number' }];
+owls.columns = [{ id: 'name', header: 'Chouette' }, { id: 'age', header: 'Âge', type: 'number' }];
 owls.getRowId = (o) => o.id;
-owls.messages = EN;
+owls.messages = FR;
 owls.settings = { selection: { mode: 'multi' } };
-owls.rows = [{ id: 'o1', name: 'Pip', age: 3 }, { id: 'o2', name: 'Bramble', age: 9 }];
+owls.rows = [{ id: 'o1', name: 'Pépin', age: 3 }, { id: 'o2', name: 'Ronce', age: 9 }];
 
 await owls.ready;
-// `grid` is the GridInstance while the element is drawn.
+// `grid` est la GridInstance tant que l’élément est dessiné.
 const grid = owls.grid;
 const key = dataKey('o2');
 if (grid && key) {
@@ -373,7 +373,7 @@ une entrée signal nommée `cell`. Les instances sont réutilisées d’une lign
 ```ts
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { DzGrid, type DzgColumnOrGroup, type DzgPartContext } from '@dzgrid/angular';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 
 type Robot = { id: string; name: string; state: 'awake' | 'asleep' };
 
@@ -381,7 +381,7 @@ type Robot = { id: string; name: string; state: 'awake' | 'asleep' };
   selector: 'app-robot-state',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<span>{{ cell().text }}</span>
-    <button type="button" (click)="cell().emit('wake', robot().id)">Wake</button>`,
+    <button type="button" (click)="cell().emit('wake', robot().id)">Réveiller</button>`,
 })
 export class RobotState {
   readonly cell = input.required<DzgPartContext<'cell'>>();
@@ -395,10 +395,10 @@ export class RobotState {
     (cellAction)="last = $event.name + ' ' + $event.detail" />`,
 })
 export class Robots {
-  readonly rows: Robot[] = [{ id: 'r1', name: 'Tock', state: 'asleep' }];
-  readonly columns: DzgColumnOrGroup<Robot>[] = [{ id: 'name', header: 'Robot' }, { id: 'state', header: 'State', ui: { cell: RobotState } }];
+  readonly rows: Robot[] = [{ id: 'r1', name: 'Tic', state: 'asleep' }];
+  readonly columns: DzgColumnOrGroup<Robot>[] = [{ id: 'name', header: 'Robot' }, { id: 'state', header: 'État', ui: { cell: RobotState } }];
   readonly rowId = (r: Robot) => r.id;
-  readonly messages = EN;
+  readonly messages = FR;
   last = '';
 }
 ```

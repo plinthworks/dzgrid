@@ -1,0 +1,193 @@
+---
+title: "Volets latéraux"
+description: "Les volets sur le côté : le choix des colonnes, le volet des filtres, vos propres volets."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+
+Deux volets viennent avec DzGrid : le **choix des colonnes** (`columnsChooser()` de `@dzgrid/dom/columns-panel` :
+chercher, afficher, masquer et ordonner les colonnes ; textes `-columns`, CSS `columns-panel.css`) et le **volet des
+filtres** (`filtersPanel()` de `@dzgrid/dom/filters-panel` : le filtre de chaque colonne dans une seule liste ; textes
+`-filters-panel`, CSS `filters-panel.css`). Sans dock, le choix des colonnes s’ouvre en boîte de dialogue et le volet
+des filtres se tient sur son propre côté.
+
+`dock()` de `@dzgrid/dom/dock` leur donne, ainsi qu’à vos propres volets, une place à côté des lignes ou sous elles
+(textes `-dock`, CSS `dock.css`) : les zones `start` et `end` (à côté des lignes, côtés logiques) et `bottom`. Chaque
+zone se redimensionne par son bord (aussi avec les flèches), se replie en bandeau, se ferme, ou passe dans une autre
+zone ; deux volets dans une même zone deviennent des onglets.
+
+<LiveDemo
+  height={440}
+  settings={{ label: 'Potions' }}
+  features={['filters', 'chooser', 'filtersPanel', 'columnMenu', ['dock', { open: { columns: 'end', filters: 'end' }, sizes: { min: 200, max: 480 } }]]}
+  columns={[
+    { id: 'name', header: 'Potion', flex: 1, minWidth: 140 },
+    { id: 'colour', header: 'Couleur', width: 100 },
+    { id: 'doses', header: 'Doses', type: 'number', width: 90 },
+    { id: 'brewed', header: 'Préparée le', type: 'day', width: 140, hidden: true },
+  ]}
+  rows={[
+    { id: 'p1', name: 'Brume en bouteille', colour: 'Gris', doses: 3, brewed: '2026-01-14' },
+    { id: 'p2', name: 'Breuvage du calme', colour: 'Bleu', doses: 8, brewed: '2025-12-02' },
+    { id: 'p3', name: 'Tonique de braise', colour: 'Rouge', doses: 5, brewed: '2026-02-20' },
+    { id: 'p4', name: 'Élixir de mousse', colour: 'Vert', doses: 12, brewed: '2025-11-09' },
+    { id: 'p5', name: 'Sirop de clair d’étoile', colour: 'Argent', doses: 2, brewed: '2026-03-01' },
+  ]}
+  caption="Les deux volets partagent la zone de fin en onglets : cochez Préparée le dans le choix des colonnes pour l’afficher, glissez le bord de la zone pour la redimensionner."
+/>
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { dock } from '@dzgrid/dom/dock';
+import { columnsChooser } from '@dzgrid/dom/columns-panel';
+import { filtersPanel } from '@dzgrid/dom/filters-panel';
+import { filters } from '@dzgrid/dom/filters-base';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_DOCK } from '@dzgrid/dom/locales/fr-dock';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { FR_FILTERS_PANEL } from '@dzgrid/dom/locales/fr-filters-panel';
+import { FR_COLUMN_MENU } from '@dzgrid/dom/locales/fr-column-menu';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/dock.css';
+import '@dzgrid/theme/columns-panel.css';
+import '@dzgrid/theme/filters-panel.css';
+import '@dzgrid/theme/menu.css';
+
+type Potion = { id: string; name: string; colour: string; doses: number };
+
+const messages: GridMessages = {
+  ...FR,
+  text: { ...FR.text, ...FR_DOCK.text, ...FR_COLUMNS.text, ...FR_FILTERS.text, ...FR_FILTERS_PANEL.text, ...FR_COLUMN_MENU.text },
+};
+
+const chooser = columnsChooser();
+const panels = dock({
+  open: { columns: 'end' },
+  sizes: { min: 200, max: 480 },
+  panels: [{
+    id: 'notes',
+    title: 'Notes',
+    area: 'bottom',
+    mount(host) {
+      const p = host.ownerDocument.createElement('p');
+      p.textContent = 'Agiter avant emploi.';
+      host.append(p);
+      return () => p.remove();
+    },
+  }],
+  onChange: (layout) => console.log('dock déplacé', layout),
+});
+
+const grid = createGrid<Potion>(document.getElementById('potions')!, {
+  rows: [{ id: 'p1', name: 'Brume en bouteille', colour: 'gris', doses: 3 }],
+  columns: [{ id: 'name', header: 'Potion' }, { id: 'colour', header: 'Couleur' }, { id: 'doses', header: 'Doses', type: 'number' }],
+  getRowId: (p) => p.id,
+  messages,
+  features: [filters(), chooser, filtersPanel(), columnMenu({ use: { chooser } }), panels],
+});
+
+panels.api(grid)?.show('notes');
+panels.api(grid)?.move('filters', 'start');
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, DzgController, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { dock } from '@dzgrid/dom/dock';
+import { columnsChooser } from '@dzgrid/dom/columns-panel';
+import { filtersPanel } from '@dzgrid/dom/filters-panel';
+import { filters } from '@dzgrid/dom/filters-base';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_DOCK } from '@dzgrid/dom/locales/fr-dock';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { FR_FILTERS_PANEL } from '@dzgrid/dom/locales/fr-filters-panel';
+import { FR_COLUMN_MENU } from '@dzgrid/dom/locales/fr-column-menu';
+
+type Potion = { id: string; name: string; colour: string; doses: number };
+
+const chooser = columnsChooser();
+const panels = dock({ open: { columns: 'end' }, sizes: { min: 200, max: 480 } });
+
+@Component({
+  selector: 'app-potions',
+  imports: [DzGrid],
+  template: `
+    <button type="button" (click)="ctrl?.use(panels)?.show('filters', 'start')">Afficher les filtres</button>
+    <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features"
+      (gridReady)="ctrl = $event" />`,
+})
+export class Potions {
+  readonly rows: Potion[] = [{ id: 'p1', name: 'Brume en bouteille', colour: 'gris', doses: 3 }];
+  readonly columns: DzgColumnOrGroup<Potion>[] = [{ id: 'name', header: 'Potion' }, { id: 'colour', header: 'Couleur' }, { id: 'doses', header: 'Doses', type: 'number' }];
+  readonly rowId = (p: Potion) => p.id;
+  readonly messages = {
+    ...FR,
+    text: { ...FR.text, ...FR_DOCK.text, ...FR_COLUMNS.text, ...FR_FILTERS.text, ...FR_FILTERS_PANEL.text, ...FR_COLUMN_MENU.text },
+  };
+  readonly features = [filters(), chooser, filtersPanel(), columnMenu({ use: { chooser } }), panels];
+  readonly panels = panels;
+  ctrl: DzgController<Potion> | null = null;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { dock } from '@dzgrid/dom/dock';
+import { columnsChooser } from '@dzgrid/dom/columns-panel';
+import { filtersPanel } from '@dzgrid/dom/filters-panel';
+import { filters } from '@dzgrid/dom/filters-base';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_DOCK } from '@dzgrid/dom/locales/fr-dock';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { FR_FILTERS_PANEL } from '@dzgrid/dom/locales/fr-filters-panel';
+import { FR_COLUMN_MENU } from '@dzgrid/dom/locales/fr-column-menu';
+
+type Potion = { id: string; name: string; colour: string; doses: number };
+
+const chooser = columnsChooser();
+const panels = dock({ open: { columns: 'end' }, sizes: { min: 200, max: 480 } });
+const grid = document.querySelector<DzGridElement<Potion>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Potion' }, { id: 'colour', header: 'Couleur' }, { id: 'doses', header: 'Doses', type: 'number' }];
+grid.getRowId = (p) => p.id;
+grid.messages = {
+  ...FR,
+  text: { ...FR.text, ...FR_DOCK.text, ...FR_COLUMNS.text, ...FR_FILTERS.text, ...FR_FILTERS_PANEL.text, ...FR_COLUMN_MENU.text },
+};
+grid.features = [filters(), chooser, filtersPanel(), columnMenu({ use: { chooser } }), panels];
+grid.rows = [{ id: 'p1', name: 'Brume en bouteille', colour: 'gris', doses: 3 }];
+
+await grid.ready;
+if (grid.grid) panels.api(grid.grid)?.show('filters', 'start');
+```
+
+</Fragment>
+</CodeTabs>
+
+- Les identifiants des volets : `columns` (le choix des colonnes), `filters` (le volet des filtres), et les
+  identifiants de vos propres volets.
+- `open: { id: area }` affiche un volet à cet endroit dès le départ ; sinon le choix des colonnes attend à la fin
+  qu’on l’ouvre (« Choisir les colonnes » dans le menu de colonne, ou `chooser.api(grid)?.open()`), et vos volets
+  attendent dans leur `area` (`end` par défaut) jusqu’à `api.show(id)`.
+- Le `mount(host)` de votre volet construit son contenu et peut rendre une fonction de nettoyage.
+- `api` : `show`, `hide`, `move`, `collapse`, `resize`, `layout()`, `setLayout(layout)`. Avec la fonction
+  [état](../state/), la place de chaque volet est enregistrée avec le reste de l’état de la grille.
+- Une fenêtre flottante (zone `float`) est prévue, pas encore là : elle est refusée avec un avertissement.
+
+Chaque option de `dock()` aura sa place sous [Fonctions](../../features/).

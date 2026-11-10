@@ -1,0 +1,186 @@
+---
+title: "Déplacer des lignes"
+description: "Glisser des lignes, les déplacer au clavier ou par un menu, appliquer le déplacement."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+
+`rowDrag()` de `@dzgrid/dom/row-drag` laisse l’utilisateur déplacer des lignes : glisser la poignée au début d’une
+cellule, ou appuyer sur Alt+Maj+↑ / ↓ (Option+Maj sur Mac), Alt+Maj+Début / Fin, et dans un arbre Alt+Maj+→ / ← pour
+descendre ou remonter d’un niveau ; ou passer par le menu du clic droit. Textes `-row-drag`, CSS `row-drag.css`. La
+poignée répond à la souris, au stylet et au doigt ; grâce aux touches, glisser n’est jamais le seul moyen.
+
+La grille vous dit où vont les lignes par un événement `rowMove` ; **vos données décident**. `moveRows` de
+`@dzgrid/core/row-drag` applique un déplacement à votre tableau (ou à votre arbre d’identifiants de parents) et en rend
+un nouveau.
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Tâches', selection: { mode: 'multi' } }}
+  features={[['rowDrag', { column: 'title', apply: true }], 'contextMenu']}
+  columns={[
+    { id: 'title', header: 'Tâche', flex: 1 },
+    { id: 'who', header: 'Qui', width: 140 },
+    { id: 'done', header: 'Fait', type: 'boolean', width: 100 },
+  ]}
+  rows={[
+    { id: 'c1', title: 'Remonter l’horloge de la tour', who: 'Anselme', done: false },
+    { id: 'c2', title: 'Huiler la girouette', who: 'Clarisse', done: true },
+    { id: 'c3', title: 'Compter les pigeons', who: 'Anselme', done: false },
+    { id: 'c4', title: 'Polir la cloche', who: 'Firmin', done: false },
+    { id: 'c5', title: 'Balayer l’escalier du clocher', who: 'Clarisse', done: false },
+  ]}
+  caption="Glissez une tâche par sa poignée, ou placez-y le focus et appuyez sur Alt+Maj+↓ ; clic droit pour « Monter », « Descendre »…"
+/>
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { moveRows } from '@dzgrid/core/row-drag';
+import { rowDrag } from '@dzgrid/dom/row-drag';
+import { contextMenu } from '@dzgrid/dom/context-menu';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_ROW_DRAG } from '@dzgrid/dom/locales/fr-row-drag';
+import { FR_CONTEXT_MENU } from '@dzgrid/dom/locales/fr-context-menu';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/menu.css';
+import '@dzgrid/theme/row-drag.css';
+
+type Chore = { id: string; title: string; done: boolean };
+
+let chores: Chore[] = [
+  { id: 'c1', title: 'Remonter l’horloge de la tour', done: false },
+  { id: 'c2', title: 'Huiler la girouette', done: true },
+  { id: 'c3', title: 'Compter les pigeons', done: false },
+];
+const id = (c: Chore) => c.id;
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_ROW_DRAG.text, ...FR_CONTEXT_MENU.text } };
+
+const moves = rowDrag<Chore>({ column: 'title', canDrag: (c) => !c.done });
+const grid = createGrid<Chore>(document.getElementById('chores')!, {
+  rows: chores,
+  columns: [{ id: 'title', header: 'Tâche', flex: 1 }, { id: 'done', header: 'Fait', type: 'boolean' }],
+  getRowId: id,
+  messages,
+  selection: { mode: 'multi' },
+  features: [moves, contextMenu<Chore>({ items: (c, defaults) => [...defaults, { separator: true }, ...moves.menuItems(c)] })],
+  onEvent: (e) => {
+    if (e.type === 'rowMove' && !e.applied) {
+      chores = moveRows(chores, e, id);
+      grid.update({ rows: chores });
+    }
+  },
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import type { GridEvent } from '@dzgrid/core';
+import { moveRows } from '@dzgrid/core/row-drag';
+import { rowDrag } from '@dzgrid/dom/row-drag';
+import { contextMenu } from '@dzgrid/dom/context-menu';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_ROW_DRAG } from '@dzgrid/dom/locales/fr-row-drag';
+import { FR_CONTEXT_MENU } from '@dzgrid/dom/locales/fr-context-menu';
+
+type Chore = { id: string; title: string; done: boolean };
+type Move = Extract<GridEvent<Chore>, { type: 'rowMove' }>;
+
+const id = (c: Chore) => c.id;
+const moves = rowDrag<Chore>({ column: 'title', canDrag: (c) => !c.done });
+
+@Component({
+  selector: 'app-chores',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="chores()" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+    [selection]="{ mode: 'multi' }" [features]="features" (rowMove)="move($event)" />`,
+})
+export class Chores {
+  // Dans un store (NgRx, un signal), le déplacement s’applique là où vit l’état.
+  readonly chores = signal<Chore[]>([
+    { id: 'c1', title: 'Remonter l’horloge de la tour', done: false },
+    { id: 'c2', title: 'Huiler la girouette', done: true },
+    { id: 'c3', title: 'Compter les pigeons', done: false },
+  ]);
+  readonly columns: DzgColumnOrGroup<Chore>[] = [{ id: 'title', header: 'Tâche', flex: 1 }, { id: 'done', header: 'Fait', type: 'boolean' }];
+  readonly rowId = id;
+  readonly messages = { ...FR, text: { ...FR.text, ...FR_ROW_DRAG.text, ...FR_CONTEXT_MENU.text } };
+  readonly features = [moves, contextMenu<Chore>({ items: (c, defaults) => [...defaults, { separator: true }, ...moves.menuItems(c)] })];
+
+  move(e: Move) {
+    if (!e.applied) this.chores.update((rows) => moveRows(rows, e, id));
+  }
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import type { GridEvent } from '@dzgrid/core';
+import { moveRows } from '@dzgrid/core/row-drag';
+import { rowDrag } from '@dzgrid/dom/row-drag';
+import { contextMenu } from '@dzgrid/dom/context-menu';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_ROW_DRAG } from '@dzgrid/dom/locales/fr-row-drag';
+import { FR_CONTEXT_MENU } from '@dzgrid/dom/locales/fr-context-menu';
+
+type Chore = { id: string; title: string; done: boolean };
+
+let chores: Chore[] = [
+  { id: 'c1', title: 'Remonter l’horloge de la tour', done: false },
+  { id: 'c2', title: 'Huiler la girouette', done: true },
+  { id: 'c3', title: 'Compter les pigeons', done: false },
+];
+const id = (c: Chore) => c.id;
+const moves = rowDrag<Chore>({ column: 'title', canDrag: (c) => !c.done });
+const grid = document.querySelector<DzGridElement<Chore>>('dz-grid')!;
+grid.columns = [{ id: 'title', header: 'Tâche', flex: 1 }, { id: 'done', header: 'Fait', type: 'boolean' }];
+grid.getRowId = id;
+grid.messages = { ...FR, text: { ...FR.text, ...FR_ROW_DRAG.text, ...FR_CONTEXT_MENU.text } };
+grid.features = [moves, contextMenu<Chore>({ items: (c, defaults) => [...defaults, { separator: true }, ...moves.menuItems(c)] })];
+grid.settings = { selection: { mode: 'multi' } };
+grid.rows = chores;
+
+grid.addEventListener('dzg-row-move', (e) => {
+  const event = (e as CustomEvent<GridEvent<Chore>>).detail;
+  if (event.type === 'rowMove' && !event.applied) {
+    chores = moveRows(chores, event, id);
+    grid.rows = chores;
+  }
+});
+```
+
+</Fragment>
+</CodeTabs>
+
+- `apply: true` laisse la grille réordonner elle-même des lignes à plat tenues dans le navigateur (l’événement dit
+  alors `applied: true`) ; avec un store (NgRx, signaux), laissez-le éteint et appliquez le déplacement là où vit votre
+  état. La démo ci-dessus utilise `apply: true`.
+- La poignée d’une ligne **sélectionnée** emporte toutes les lignes sélectionnées affichées.
+- `canDrag(row)` et `canDrop({ keys, rows, target, parent })` refusent un déplacement ; `maxRows` plafonne le nombre
+  de lignes déplacées d’un coup.
+- Tant que les lignes sont triées ou regroupées, un déplacement est refusé et la grille dit pourquoi ;
+  `whenSorted: 'allow'` envoie quand même l’événement et vous laisse décider.
+- Avec une source serveur, la grille ne fait qu’envoyer l’événement (`apply` est ignoré) : enregistrez le nouvel ordre
+  sur le serveur, puis rafraîchissez.
+- Dans un [arbre](../tree/), une ligne peut être déposée dans une autre (`target.where: 'inside'`) ; `moveRows(rows,
+  move, id, { parentId, setParent })` réécrit pour vous les identifiants de parents.
+- En Angular, la sortie `(rowMove)` porte le même événement, et `ctrl.rowDrag()` l’api (`move`, `step`).
+
+Chaque option de `rowDrag()` aura sa place sous [Fonctions](../../features/).
+
+## Entre des grilles, ou sur votre propre élément
+
+`moves.api(grid)?.dropTargets.add(element, { accept(keys), drop(keys) })` fait de n’importe quel élément un endroit
+où déposer des lignes : une corbeille, une liste de dossiers, la boîte d’une autre grille. Déplacer des lignes d’une
+grille à l’autre, ce sont deux mises à jour de vos propres données : les retirer d’un tableau et les ajouter à l’autre.

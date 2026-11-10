@@ -1,0 +1,220 @@
+---
+title: "Tableau croisé"
+description: "Un tableau croisé sur les groupes, sa barre, des données pour un graphique."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+
+Un tableau croisé ajoute un axe en travers des [groupes](../grouping/) : les lignes sont les groupes, chaque valeur des
+colonnes croisées devient une colonne, et chaque cellule totalise les colonnes de valeurs là où un groupe et une
+colonne se rencontrent. `pivot()` de `@dzgrid/dom/pivot` est donné à `grouping({ pivot })`, qui le dessine (textes
+`-pivot`, CSS `pivot.css`). Les titres des colonnes de valeurs ont besoin de `spans()`.
+
+<LiveDemo
+  height={380}
+  settings={{ label: 'Billetterie' }}
+  features={['spans', 'groups', 'columns', ['pivot', { columns: ['month'], values: { seats: 'sum', takings: 'sum' }, subtotals: true }], ['grouping', { by: ['cinema'] }], 'pivotBar']}
+  columns={[
+    { id: 'cinema', header: 'Cinéma' },
+    { id: 'month', header: 'Mois' },
+    { id: 'film', header: 'Film' },
+    { id: 'seats', header: 'Places', type: 'number' },
+    { id: 'takings', header: 'Recettes', type: 'number', numberFormat: { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 } },
+  ]}
+  rows={[
+    { id: 't1', cinema: 'La Comète', month: '2026-01', film: 'Marées de papier', seats: 120, takings: 960 },
+    { id: 't2', cinema: 'La Comète', month: '2026-02', film: 'Marées de papier', seats: 80, takings: 640 },
+    { id: 't3', cinema: 'La Comète', month: '2026-02', film: 'Neuf lanternes', seats: 64, takings: 576 },
+    { id: 't4', cinema: 'Salle du Verger', month: '2026-01', film: 'Neuf lanternes', seats: 45, takings: 405 },
+    { id: 't5', cinema: 'Salle du Verger', month: '2026-03', film: 'La Route du sel', seats: 98, takings: 882 },
+    { id: 't6', cinema: 'Le Petit Bijou', month: '2026-02', film: 'La Route du sel', seats: 30, takings: 240 },
+    { id: 't7', cinema: 'Le Petit Bijou', month: '2026-03', film: 'Marées de papier', seats: 52, takings: 416 },
+  ]}
+  caption="Dans la barre au-dessus de la grille, + sous Colonnes ajoute Film comme seconde bande ; la pastille d’une valeur change sa fonction."
+/>
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { grouping } from '@dzgrid/dom/grouping';
+import { pivot } from '@dzgrid/dom/pivot';
+import { pivotBar } from '@dzgrid/dom/pivot-bar';
+import { spans } from '@dzgrid/dom/spans';
+import { groups } from '@dzgrid/dom/groups';
+import { columns } from '@dzgrid/dom/columns';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_GROUP } from '@dzgrid/dom/locales/fr-group';
+import { FR_PIVOT } from '@dzgrid/dom/locales/fr-pivot';
+import { FR_PIVOT_BAR } from '@dzgrid/dom/locales/fr-pivot-bar';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/grouping.css';
+import '@dzgrid/theme/pivot.css';
+import '@dzgrid/theme/columns.css';
+
+type Ticket = { id: string; cinema: string; month: string; film: string; seats: number; takings: number };
+
+const cols: ColumnOrGroup<Ticket>[] = [
+  { id: 'cinema', header: 'Cinéma' },
+  { id: 'month', header: 'Mois' },
+  { id: 'film', header: 'Film' },
+  { id: 'seats', header: 'Places', type: 'number' },
+  { id: 'takings', header: 'Recettes', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
+];
+const messages: GridMessages = {
+  ...FR,
+  text: { ...FR.text, ...FR_GROUP.text, ...FR_PIVOT.text, ...FR_PIVOT_BAR.text, ...FR_COLUMNS.text },
+};
+
+const cross = pivot({ columns: ['month'], values: { seats: 'sum', takings: 'sum' }, subtotals: true });
+const rowsBy = grouping({ by: ['cinema'], pivot: cross });
+const moves = columns();
+const grid = createGrid<Ticket>(document.getElementById('box-office')!, {
+  rows: [
+    { id: 't1', cinema: 'La Comète', month: '2026-01', film: 'Marées de papier', seats: 120, takings: 960 },
+    { id: 't2', cinema: 'La Comète', month: '2026-02', film: 'Marées de papier', seats: 80, takings: 640 },
+    { id: 't3', cinema: 'Salle du Verger', month: '2026-01', film: 'Neuf lanternes', seats: 45, takings: 405 },
+  ],
+  columns: cols,
+  getRowId: (t) => t.id,
+  messages,
+  features: [spans(), groups(), moves, rowsBy, pivotBar({ use: { grouping: rowsBy, pivot: cross, columns: moves } })],
+});
+
+const api = cross.api(grid);
+api?.setBy(['month', 'film']);                   // deux niveaux de colonnes
+api?.setValues({ seats: 'avg', takings: 'sum' });
+const chart = api?.series({ value: 'takings' });  // { categories, series: [{ id, name, values }] }
+console.log(chart?.categories, chart?.series.length);
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, DzgController, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { grouping } from '@dzgrid/dom/grouping';
+import { pivot } from '@dzgrid/dom/pivot';
+import { pivotBar } from '@dzgrid/dom/pivot-bar';
+import { spans } from '@dzgrid/dom/spans';
+import { groups } from '@dzgrid/dom/groups';
+import { columns } from '@dzgrid/dom/columns';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_GROUP } from '@dzgrid/dom/locales/fr-group';
+import { FR_PIVOT } from '@dzgrid/dom/locales/fr-pivot';
+import { FR_PIVOT_BAR } from '@dzgrid/dom/locales/fr-pivot-bar';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+
+type Ticket = { id: string; cinema: string; month: string; film: string; seats: number; takings: number };
+
+const cross = pivot({ columns: ['month'], values: { seats: 'sum', takings: 'sum' }, subtotals: true });
+const rowsBy = grouping({ by: ['cinema'], pivot: cross });
+const moves = columns();
+
+@Component({
+  selector: 'app-box-office',
+  imports: [DzGrid],
+  template: `
+    <dz-grid [rows]="rows" [columns]="cols" [getRowId]="rowId" [messages]="messages" [features]="features"
+      (gridReady)="ctrl = $event" />
+    <button type="button" (click)="chart()">Les recettes pour un graphique</button>`,
+})
+export class BoxOffice {
+  readonly rows: Ticket[] = [
+    { id: 't1', cinema: 'La Comète', month: '2026-01', film: 'Marées de papier', seats: 120, takings: 960 },
+    { id: 't2', cinema: 'La Comète', month: '2026-02', film: 'Marées de papier', seats: 80, takings: 640 },
+    { id: 't3', cinema: 'Salle du Verger', month: '2026-01', film: 'Neuf lanternes', seats: 45, takings: 405 },
+  ];
+  readonly cols: DzgColumnOrGroup<Ticket>[] = [
+    { id: 'cinema', header: 'Cinéma' },
+    { id: 'month', header: 'Mois' },
+    { id: 'film', header: 'Film' },
+    { id: 'seats', header: 'Places', type: 'number' },
+    { id: 'takings', header: 'Recettes', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
+  ];
+  readonly rowId = (t: Ticket) => t.id;
+  readonly messages = { ...FR, text: { ...FR.text, ...FR_GROUP.text, ...FR_PIVOT.text, ...FR_PIVOT_BAR.text, ...FR_COLUMNS.text } };
+  readonly features = [spans(), groups(), moves, rowsBy, pivotBar({ use: { grouping: rowsBy, pivot: cross, columns: moves } })];
+  ctrl: DzgController<Ticket> | null = null;
+
+  chart() {
+    console.log(this.ctrl?.use(cross)?.series({ value: 'takings' }));
+  }
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { grouping } from '@dzgrid/dom/grouping';
+import { pivot } from '@dzgrid/dom/pivot';
+import { pivotBar } from '@dzgrid/dom/pivot-bar';
+import { spans } from '@dzgrid/dom/spans';
+import { groups } from '@dzgrid/dom/groups';
+import { columns } from '@dzgrid/dom/columns';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_GROUP } from '@dzgrid/dom/locales/fr-group';
+import { FR_PIVOT } from '@dzgrid/dom/locales/fr-pivot';
+import { FR_PIVOT_BAR } from '@dzgrid/dom/locales/fr-pivot-bar';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+
+type Ticket = { id: string; cinema: string; month: string; film: string; seats: number; takings: number };
+
+const cross = pivot({ columns: ['month'], values: { seats: 'sum', takings: 'sum' }, subtotals: true });
+const rowsBy = grouping({ by: ['cinema'], pivot: cross });
+const moves = columns();
+const grid = document.querySelector<DzGridElement<Ticket>>('dz-grid')!;
+grid.columns = [
+  { id: 'cinema', header: 'Cinéma' },
+  { id: 'month', header: 'Mois' },
+  { id: 'film', header: 'Film' },
+  { id: 'seats', header: 'Places', type: 'number' },
+  { id: 'takings', header: 'Recettes', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
+];
+grid.getRowId = (t) => t.id;
+grid.messages = { ...FR, text: { ...FR.text, ...FR_GROUP.text, ...FR_PIVOT.text, ...FR_PIVOT_BAR.text, ...FR_COLUMNS.text } };
+grid.features = [spans(), groups(), moves, rowsBy, pivotBar({ use: { grouping: rowsBy, pivot: cross, columns: moves } })];
+grid.rows = [
+  { id: 't1', cinema: 'La Comète', month: '2026-01', film: 'Marées de papier', seats: 120, takings: 960 },
+  { id: 't2', cinema: 'La Comète', month: '2026-02', film: 'Marées de papier', seats: 80, takings: 640 },
+  { id: 't3', cinema: 'Salle du Verger', month: '2026-01', film: 'Neuf lanternes', seats: 45, takings: 405 },
+];
+
+await grid.ready;
+if (grid.grid) console.log(cross.api(grid.grid)?.series({ value: 'takings' }));
+```
+
+</Fragment>
+</CodeTabs>
+
+- `columns` : les colonnes croisées, la plus extérieure d’abord ; `values` : chaque colonne de valeurs et la façon de
+  la totaliser (`sum`, `avg`, `min`, `max`, `count`, `first`, `last`). `desc` liste les colonnes croisées dont l’ordre
+  est inversé.
+- `subtotals: true` ajoute une colonne de total après chaque bande. `maxColumns` (200 par défaut) plafonne le nombre
+  de colonnes créées : au-delà, aucune n’est créée, les lignes restent regroupées avec leurs totaux, et la grille dit
+  combien il y en aurait eu (problème `pivot-too-many`). Le côté des lignes, ce sont les groupes : leur `by`, leurs
+  totaux et leurs règles d’ouverture valent.
+- `pivotBar()` de `@dzgrid/dom/pivot-bar` dessine une barre « Lignes │ Colonnes │ Valeurs » où l’utilisateur déplace
+  les colonnes d’une partie à l’autre, inverse un ordre, ou change la fonction d’une valeur (textes `-pivot-bar`).
+- Le mode croisé appartient à l’application : `toggle: true` (ou un élément à vous) montre un interrupteur pour
+  l’activer et le désactiver ; sinon `api.setOn(on)`.
+- `api.series()` donne les nombres d’une colonne de valeurs, prêts pour une bibliothèque de graphiques à vous :
+  DzGrid ne dessine aucun graphique.
+
+Chaque option de `pivot()` aura sa place sous [Fonctions](../../features/).
+
+## Tableau croisé sur un serveur
+
+`serverSideRows(data, { pivot: serverPivot() })`, avec `serverPivot` de `@dzgrid/core/server-pivot`, laisse le serveur
+calculer les croisements ; le `group` de la requête porte alors les colonnes croisées utilisées et leur limite. Les
+fonctions restent les mêmes (`spans()`, `grouping({ by, pivot })`). La fiche de comportement
+[`server-pivot.md`](https://github.com/plinthworks/dzgrid/blob/main/docs/behaviors/server-pivot.md) donne la forme de
+la requête et de la réponse.

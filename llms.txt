@@ -2,34 +2,34 @@
 
 > A data grid written from scratch in TypeScript: a pure core (`@dzgrid/core`), a DOM layer with every feature as its own entry (`@dzgrid/dom`), a CSS theme (`@dzgrid/theme`), an Angular wrapper (`@dzgrid/angular`) and a Web Component (`@dzgrid/element`). Right to left, time zones and screen readers are designed in. MIT, no runtime dependency.
 
-Only the names written in these pages exist; do not borrow option names from other grid libraries. Rows are identified by `getRowId`, never by position. Days (`YYYY-MM-DD`) and instants (epoch milliseconds, or ISO text with an offset) are different column types. Bad input never throws: it is reported as a `Problem` (`code`, `path`, `detail`). Every sample in the guide is type-checked against the published types.
+Only the names written in these pages exist; do not borrow option names from other grid libraries. Rows are identified by `getRowId`, never by position. Days (`YYYY-MM-DD`) and instants (epoch milliseconds, or ISO text with an offset) are different column types. Bad input never throws: it is reported as a `Problem` (`code`, `path`, `detail`). Every sample on the documentation site (https://plinthworks.github.io/dzgrid/) is type-checked against the published types.
 
 ## Getting started
 
-- [Plain TypeScript](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/getting-started-ts.md): `createGrid` from `@dzgrid/dom`: install, a first grid, texts, events, updates
-- [Angular](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/getting-started-angular.md): `<dz-grid>` from `@dzgrid/angular`: inputs, outputs, the controller, parts as components
-- [Web Component](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/getting-started-element.md): `<dz-grid>` from `@dzgrid/element`: properties, attributes, `dzg-*` events
+- [TypeScript](https://plinthworks.github.io/dzgrid/getting-started/typescript/): Draw a first grid with createGrid from @dzgrid/dom, in any page and with no framework: install, a first grid, features and their texts, events, updates.
+- [Angular](https://plinthworks.github.io/dzgrid/getting-started/angular/): The <dz-grid> component from @dzgrid/angular, for Angular 19 to 22: install, a first grid, inputs and two-way models, app-wide defaults, the controller, parts as components.
+- [Web Component](https://plinthworks.github.io/dzgrid/getting-started/web-component/): The <dz-grid> element from @dzgrid/element, for plain HTML, a CMS or any framework that writes a tag: install, a first grid, properties, attributes, dzg-* events.
 
-## Features
+## Guides
 
-- [Columns](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/columns.md): column definitions: values, types, formats, widths, pinning, groups, moving and resizing, the column menu; columns made from the data, the totals row, vertical titles, no header row, columns that collapse on narrow screens
-- [Sort, filter and search](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/sort-filter-search.md): sorting, column filters, the floating row, the filters panel, quick search, find
-- [Selection and ranges](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/selection-ranges.md): row selection, blocks of cells, the clipboard, the fill handle
-- [Editing](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/editing.md): editable cells, editors, validation, saving, undo and redo
-- [Tree](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/tree.md): rows nested by a parent id, a path or a children list; lazy children
-- [Grouping](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/grouping.md): row groups, totals, the drop band
-- [Pivot](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/pivot.md): a pivot table on top of grouping, its bar, data for a chart
-- [Server data and infinite scroll](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/server-data.md): `sourceRows`, `infiniteRows`, `serverSideRows`; the request and its answer
-- [Row moves](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/row-moves.md): dragging rows, moving them with keys or a menu, applying the move
-- [Dock and panels](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/dock-panels.md): side panels: the columns chooser, the filters panel, your own panels
-- [Export and print](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/export-print.md): CSV, Excel and JSON files, importing a CSV or Excel file, printing, the browser's own print menu
-- [State](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/state.md): saving and restoring sort, filters, columns; in storage or in the address
-- [Theming and right to left](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/theming-rtl.md): the theme's CSS, its variables, dark mode, density, direction
-- [Accessibility](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/accessibility.md): what the grid does for keyboards and screen readers, and what is left to you
+- [Columns](https://plinthworks.github.io/dzgrid/guides/columns/): Column definitions: values, types, formats, widths, pinning, groups, moving and resizing, the column menu.
+- [Sort, filter and search](https://plinthworks.github.io/dzgrid/guides/sort-filter-search/): Sorting, column filters, the floating row, the filters panel, quick search, find.
+- [Selection and ranges](https://plinthworks.github.io/dzgrid/guides/selection-ranges/): Row selection, blocks of cells, the clipboard, the fill handle.
+- [Editing](https://plinthworks.github.io/dzgrid/guides/editing/): Editable cells, editors, validation, saving, undo and redo.
+- [Tree](https://plinthworks.github.io/dzgrid/guides/tree/): Rows nested by a parent id, a path or a children list; lazy children.
+- [Grouping](https://plinthworks.github.io/dzgrid/guides/grouping/): Row groups, totals, the drop band.
+- [Pivot](https://plinthworks.github.io/dzgrid/guides/pivot/): A pivot table on top of grouping, its bar, data for a chart.
+- [Server data and infinite scroll](https://plinthworks.github.io/dzgrid/guides/server-data/): sourceRows, infiniteRows, serverSideRows; the request and its answer.
+- [Row moves](https://plinthworks.github.io/dzgrid/guides/row-moves/): Dragging rows, moving them with keys or a menu, applying the move.
+- [Dock and panels](https://plinthworks.github.io/dzgrid/guides/dock-panels/): Side panels: the columns chooser, the filters panel, your own panels.
+- [Export and print](https://plinthworks.github.io/dzgrid/guides/export-print/): CSV, Excel and JSON files, importing a CSV or Excel file, printing, the browser's own print menu.
+- [State](https://plinthworks.github.io/dzgrid/guides/state/): Saving and restoring sort, filters, columns; in storage or in the address.
+- [Theming and right to left](https://plinthworks.github.io/dzgrid/guides/theming-rtl/): The theme's CSS, its variables, dark mode, density, direction.
+- [Accessibility](https://plinthworks.github.io/dzgrid/guides/accessibility/): What the grid does for keyboards and screen readers, and what is left to you.
 
 ## Optional
 
-- [The full guide in one file](https://github.com/plinthworks/dzgrid/blob/main/llms-full.txt): every page above, concatenated
+- [The whole documentation in one file](https://github.com/plinthworks/dzgrid/blob/main/llms-full.txt): every page above, concatenated
 - [Behaviour sheets](https://github.com/plinthworks/dzgrid/blob/main/docs/behaviors): one sheet per behaviour, the reference the tests follow
 - [Public types](https://github.com/plinthworks/dzgrid/blob/main/api): the accepted public type surface of each package, as text
 - [Changelog](https://github.com/plinthworks/dzgrid/blob/main/CHANGELOG.md): what changed, version by version

@@ -1,0 +1,592 @@
+---
+title: "Colonnes"
+description: "Les définitions de colonnes : valeurs, types, formats, largeurs, colonnes figées, groupes, déplacement et redimensionnement, menu de colonne."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+
+Une colonne est un simple objet (`ColumnDef<T>` de `@dzgrid/core`). Seules les clés décrites ici existent ; une clé
+inconnue est signalée comme un problème, jamais devinée. Le `DzgColumnDef<T>` d’Angular est le même objet, et accepte
+aussi des classes de composants dans `ui`. Chaque clé aura sa propre page sous [Options de colonne](../../column-options/) ;
+ce guide montre comment elles fonctionnent ensemble.
+
+## Valeur et type
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { textCodec } from '@dzgrid/core';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Parcel = {
+  id: number;
+  code: string;
+  sender: { name: string; town: string };
+  status: string;
+  weight: number;
+  sentOn: string;
+  arrivedAt: number | null;
+  insured: boolean;
+};
+
+const shout = { ...textCodec, format: (v: string) => v.toUpperCase() };
+
+const columns: ColumnOrGroup<Parcel>[] = [
+  { id: 'code', header: 'Code', width: 110, pinned: 'start', codec: shout },
+  { id: 'sender', header: 'Expéditeur', field: 'sender.name', flex: 2, minWidth: 160 },
+  { id: 'status', header: 'Statut', type: 'enum', enumOptions: [{ value: 'open', label: 'En cours' }, { value: 'done', label: 'Livré' }] },
+  { id: 'weight', header: 'Poids', type: 'number', align: 'end', numberFormat: { maximumFractionDigits: 2 } },
+  { id: 'sentOn', header: 'Envoyé le', type: 'day' },
+  { id: 'arrivedAt', header: 'Arrivé', type: 'instant', instantFormat: { date: true, time: true } },
+  { id: 'insured', header: 'Assuré', type: 'boolean' },
+  { id: 'heavy', header: 'Lourd', type: 'boolean', value: (p) => p.weight > 20, sortable: false, filter: false },
+];
+
+createGrid<Parcel>(document.getElementById('parcels')!, {
+  rows: [{ id: 1, code: 'px-104', sender: { name: 'Odile Verchamp', town: 'Brumeval' }, status: 'open', weight: 2.4, sentOn: '2026-03-02', arrivedAt: null, insured: true }],
+  columns,
+  getRowId: (p) => p.id,
+  messages: FR,
+  timeZone: 'Europe/London',
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Parcel = { id: number; code: string; sender: { name: string }; status: string; weight: number; sentOn: string; insured: boolean };
+
+@Component({
+  selector: 'app-parcels',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" timeZone="Europe/London" />`,
+})
+export class Parcels {
+  readonly rows: Parcel[] = [{ id: 1, code: 'px-104', sender: { name: 'Odile Verchamp' }, status: 'open', weight: 2.4, sentOn: '2026-03-02', insured: true }];
+  readonly columns: DzgColumnOrGroup<Parcel>[] = [
+    { id: 'code', header: 'Code', width: 110, pinned: 'start' },
+    { id: 'sender', header: 'Expéditeur', field: 'sender.name', flex: 2, minWidth: 160 },
+    { id: 'status', header: 'Statut', type: 'enum', enumOptions: [{ value: 'open', label: 'En cours' }, { value: 'done', label: 'Livré' }] },
+    { id: 'weight', header: 'Poids', type: 'number', align: 'end', numberFormat: { maximumFractionDigits: 2 } },
+    { id: 'sentOn', header: 'Envoyé le', type: 'day' },
+    { id: 'insured', header: 'Assuré', type: 'boolean' },
+    { id: 'heavy', header: 'Lourd', type: 'boolean', value: (p) => p.weight > 20, sortable: false, filter: false },
+  ];
+  readonly rowId = (p: Parcel) => p.id;
+  readonly messages = FR;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Parcel = { id: number; code: string; sender: { name: string }; status: string; weight: number; sentOn: string; insured: boolean };
+
+const grid = document.querySelector<DzGridElement<Parcel>>('dz-grid')!;
+grid.columns = [
+  { id: 'code', header: 'Code', width: 110, pinned: 'start' },
+  { id: 'sender', header: 'Expéditeur', field: 'sender.name', flex: 2, minWidth: 160 },
+  { id: 'status', header: 'Statut', type: 'enum', enumOptions: [{ value: 'open', label: 'En cours' }, { value: 'done', label: 'Livré' }] },
+  { id: 'weight', header: 'Poids', type: 'number', align: 'end', numberFormat: { maximumFractionDigits: 2 } },
+  { id: 'sentOn', header: 'Envoyé le', type: 'day' },
+  { id: 'insured', header: 'Assuré', type: 'boolean' },
+  { id: 'heavy', header: 'Lourd', type: 'boolean', value: (p) => p.weight > 20, sortable: false, filter: false },
+];
+grid.getRowId = (p) => p.id;
+grid.messages = FR;
+grid.setAttribute('time-zone', 'Europe/London');
+grid.rows = [{ id: 1, code: 'px-104', sender: { name: 'Odile Verchamp' }, status: 'open', weight: 2.4, sentOn: '2026-03-02', insured: true }];
+```
+
+</Fragment>
+</CodeTabs>
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Colis', timeZone: 'Europe/London' }}
+  features={['columns', 'columnMenu']}
+  columns={[
+    { id: 'code', header: 'Code', width: 110, pinned: 'start' },
+    { id: 'sender', header: 'Expéditeur', field: 'sender.name', flex: 2, minWidth: 160 },
+    { id: 'status', header: 'Statut', type: 'enum', width: 120, enumOptions: [{ value: 'open', label: 'En cours' }, { value: 'done', label: 'Livré' }] },
+    { id: 'weight', header: 'Poids', type: 'number', width: 100, align: 'end', numberFormat: { maximumFractionDigits: 2 } },
+    { id: 'sentOn', header: 'Envoyé le', type: 'day', width: 130 },
+    { id: 'arrivedAt', header: 'Arrivé', type: 'instant', width: 180, instantFormat: { date: true, time: true } },
+    { id: 'insured', header: 'Assuré', type: 'boolean', width: 100 },
+  ]}
+  rows={[
+    { id: 1, code: 'px-104', sender: { name: 'Odile Verchamp' }, status: 'open', weight: 2.4, sentOn: '2026-03-02', arrivedAt: null, insured: true },
+    { id: 2, code: 'px-105', sender: { name: 'Bastien Plumefeuille' }, status: 'done', weight: 21.75, sentOn: '2026-02-26', arrivedAt: 1772442000000, insured: false },
+    { id: 3, code: 'px-106', sender: { name: 'Tiphaine Fresnaie' }, status: 'done', weight: 0.6, sentOn: '2026-02-27', arrivedAt: 1772537400000, insured: true },
+    { id: 4, code: 'px-107', sender: { name: 'Évrard Moulinot' }, status: 'open', weight: 8.1, sentOn: '2026-03-03', arrivedAt: null, insured: false },
+    { id: 5, code: 'px-108', sender: { name: 'Isaure Combelande' }, status: 'done', weight: 13.3, sentOn: '2026-02-20', arrivedAt: 1772010000000, insured: true },
+  ]}
+  caption="Faites glisser un titre pour déplacer sa colonne, son bord pour la redimensionner ; le bouton ⋮ d’un titre ouvre son menu."
+/>
+
+- `id` est obligatoire, unique et stable. La valeur est lue dans `field` (un chemin à points, propriétés propres
+  seulement ; par défaut l’`id`), ou calculée par `value(row)`.
+- `type` : `text` (par défaut), `number`, `day`, `instant`, `boolean`, `enum`, `custom`.
+- Un `day` est une chaîne `'YYYY-MM-DD'`. Un `instant` est un nombre de millisecondes depuis l’époque ou un texte ISO
+  **avec** un décalage (`Z`, `+02:00`). Un texte sans décalage est ambigu : la cellule reste vide et un problème
+  `ambiguous-instant` est signalé, sauf si la colonne dit dans quel fuseau le lire avec `assumeZone: 'Europe/Paris'`.
+  Une `Date` JavaScript n’est pas lue : passez `date.getTime()`.
+- Ce qu’affiche une cellule vient du type et de `numberFormat`, `instantFormat`, `enumOptions`, ou d’un `codec` complet
+  (lire, formater, trier). Les instants sont affichés dans le `timeZone` de la grille.
+
+## Taille et place
+
+`width`, `minWidth`, `maxWidth` (px), `flex` (une part de la place restante), `resizable`, `movable`, `pinned: 'start' |
+'end'`, `hidden`, `align: 'start' | 'center' | 'end'`, `wrap` (plusieurs lignes ; les lignes grandissent avec la
+fonction `autoHeight()` de `@dzgrid/dom/auto-height`). Les côtés sont logiques : `start` est la gauche en français et
+la droite en arabe.
+
+**Remplir la largeur** : il n’y a pas d’interrupteur « ajuster à la largeur » à part. Donnez un `flex` aux colonnes qui
+doivent s’étirer (et un `minWidth`, pour qu’elles ne deviennent jamais trop étroites) : elles se partagent la place que
+laissent les colonnes fixes, et suivent la largeur de la grille quand la fenêtre change de taille. Avec toutes les
+colonnes flexibles, les colonnes remplissent toujours exactement la grille.
+
+**Ajustées à leur contenu au chargement** : `columns({ fitOnLoad: 'content' })` de `@dzgrid/dom/columns` ajuste une
+fois les colonnes affichées, quand les premières lignes apparaissent (avec un serveur, la première page) : titre et
+cellules tels qu’ils sont dessinés, entre `minWidth` et `maxWidth`. Les colonnes flexibles ne sont pas touchées (elles
+se partagent le reste), ni une largeur déjà fixée (un état restauré, l’utilisateur). Un changement de données ne
+réajuste jamais ; `columnsFeature.api(grid).fitContent()` le refait quand vous l’appelez, jamais par-dessus une largeur
+fixée par l’utilisateur.
+
+## Des colonnes faites à partir des données
+
+`autoColumns(rows, options)` de `@dzgrid/core/auto-columns` fait la liste des colonnes à partir des premières lignes :
+une colonne par champ, typée par ses valeurs — nombres, oui / non, jours `YYYY-MM-DD`, dates-heures ISO **avec** un
+décalage en instants (une sans décalage reste du texte : son fuseau n’est jamais deviné), sinon texte. Elle rend
+`{ columns, problems }`.
+
+```ts
+import { autoColumns } from '@dzgrid/core/auto-columns';
+import type { ColumnDef } from '@dzgrid/core';
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Booking = { ref: string; room: string; guests: number; paid: boolean; from: string; to: string; note: string };
+const rows: Booking[] = [
+  { ref: 'R-1', room: 'Lagune', guests: 2, paid: true, from: '2026-07-01T14:00:00Z', to: '2026-07-04T10:00:00Z', note: '' },
+  { ref: 'R-2', room: 'Falaise', guests: 4, paid: false, from: '2026-07-02T14:00:00Z', to: '2026-07-09T10:00:00Z', note: 'Arrivée tardive' },
+];
+const labels: Record<string, string> = { ref: 'Réf.', room: 'Chambre', guests: 'Personnes', paid: 'Payé', stay: 'Séjour' };
+const actions: ColumnDef<Booking> = { id: 'actions', header: 'Actions', sortable: false, filter: false };
+
+const { columns, problems } = autoColumns(rows, {
+  header: (field) => labels[field] ?? field,           // traduction
+  override: { guests: { width: 90 } },                 // toute partie d’une définition l’emporte sur la déduction
+  merge: { stay: { from: ['from', 'to'], flex: 1 } },  // une colonne qui lit les deux champs ; ils sont masqués
+  hide: ['note'],                                      // faite, masquée (le choix des colonnes peut l’afficher)
+  add: [actions],                                      // des colonnes absentes des données
+  order: ['room', 'stay'],                             // celles-ci d’abord, les autres dans l’ordre des données
+});
+if (problems.length) console.warn(problems);           // un nom au plus, jamais une valeur
+
+createGrid<Booking>(document.getElementById('bookings')!, { rows, columns, getRowId: (b) => b.ref, messages: FR });
+```
+
+La valeur d’une colonne fusionnée est celle de ses champs non vides, jointes par « – » ; donnez-lui votre propre
+`value`, un `codec` ou une partie de cellule (`ui.cell`, qui reçoit la ligne entière) pour autre chose. Avec des
+données serveur, les colonnes viennent de la première réponse puis ne changent plus : voir
+[Données serveur](../server-data/).
+
+## Ligne de totaux
+
+`total` sur une colonne — `'sum'`, `'avg'`, `'min'`, `'max'`, `'count'`, `'first'`, `'last'`, ou votre fonction des
+valeurs de la colonne — et la fonction `totalsRow()` de `@dzgrid/dom/totals-row` donnent une ligne « Total » en bas de
+la grille, toujours visible, sur les lignes qui passent les filtres (toutes les pages), modifications comprises. C’est
+une ligne de la bande figée du bas, il faut donc aussi `pinnedRows()` (textes `-pinned` et `-totals`, CSS
+`pinned-rows.css`). Les fichiers CSV et Excel et le tableau imprimé se terminent par elle ; un fichier JSON non (il ne
+contient que des enregistrements).
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { pinnedRows } from '@dzgrid/dom/pinned-rows';
+import { totalsRow } from '@dzgrid/dom/totals-row';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_PINNED } from '@dzgrid/dom/locales/fr-pinned';
+import { FR_TOTALS } from '@dzgrid/dom/locales/fr-totals';
+import '@dzgrid/theme/pinned-rows.css';
+
+type Harvest = { id: string; orchard: string; crates: number; sugar: number };
+const totals = totalsRow();
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_PINNED.text, ...FR_TOTALS.text } };
+
+const grid = createGrid<Harvest>(document.getElementById('harvest')!, {
+  rows: [{ id: 'h1', orchard: 'Coteau nord', crates: 41, sugar: 14.2 }, { id: 'h2', orchard: 'Vieux moulin', crates: 17, sugar: 12.8 }],
+  columns: [
+    { id: 'orchard', header: 'Verger' },
+    { id: 'crates', header: 'Cagettes', type: 'number', total: 'sum' },
+    { id: 'sugar', header: 'Sucre (°Bx)', type: 'number', total: 'avg', numberFormat: { maximumFractionDigits: 1 } },
+  ],
+  getRowId: (h) => h.id,
+  messages,
+  features: [pinnedRows<Harvest>(), totals],
+});
+
+console.log(totals.api(grid)?.values());   // { crates: 58, sugar: 13.5 }
+```
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Récolte' }}
+  features={['totals']}
+  columns={[
+    { id: 'orchard', header: 'Verger', flex: 1 },
+    { id: 'crates', header: 'Cagettes', type: 'number', total: 'sum' },
+    { id: 'sugar', header: 'Sucre (°Bx)', type: 'number', total: 'avg', numberFormat: { maximumFractionDigits: 1 } },
+  ]}
+  rows={[
+    { id: 'h1', orchard: 'Coteau nord', crates: 41, sugar: 14.2 },
+    { id: 'h2', orchard: 'Vieux moulin', crates: 17, sugar: 12.8 },
+    { id: 'h3', orchard: 'Méandre de la rivière', crates: 33, sugar: 13.6 },
+    { id: 'h4', orchard: 'Haut de la colline', crates: 25, sugar: 15.1 },
+  ]}
+/>
+
+Les mêmes règles que pour les totaux de groupe (des sommes sans dérive, des moyennes sur les nombres présents, `count`
+comptant chaque ligne). Un total qui ne convient pas à sa colonne (une somme de texte) est signalé une fois comme un
+problème. Avec des pages serveur, la grille ne tient qu’une page, elle ne calcule donc rien : donnez les totaux que
+votre serveur envoie avec `api.set({ crates: 1234 })`.
+
+## Titres verticaux
+
+`headerVertical: true` sur une colonne, avec la fonction `verticalHeaders()` de `@dzgrid/dom/vertical-headers` (CSS
+`vertical-headers.css`), écrit son titre vers le haut, si bien qu’une grille de nombreuses colonnes étroites les garde
+étroites. La ligne des titres grandit jusqu’au plus long de ces titres (au plus `maxHeight`, 240 px par défaut). Les
+touches et les lecteurs d’écran ne changent pas.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { verticalHeaders } from '@dzgrid/dom/vertical-headers';
+import { FR } from '@dzgrid/dom/locales/fr';
+import '@dzgrid/theme/vertical-headers.css';
+
+type Plot = { id: string; bed: string; mon: boolean; tue: boolean; wed: boolean };
+const day = (id: 'mon' | 'tue' | 'wed', header: string) => ({ id, header, type: 'boolean' as const, width: 44, headerVertical: true });
+
+createGrid<Plot>(document.getElementById('watering')!, {
+  rows: [{ id: 'p1', bed: 'Spirale d’aromatiques', mon: true, tue: false, wed: true }],
+  columns: [{ id: 'bed', header: 'Planche', flex: 1, minWidth: 140 }, day('mon', 'Lundi'), day('tue', 'Mardi'), day('wed', 'Mercredi')],
+  getRowId: (p) => p.id,
+  messages: FR,
+  features: [verticalHeaders({ maxHeight: 120 })],
+});
+```
+
+## Titres sur plusieurs lignes
+
+`headerWrap: true` sur une colonne, avec la fonction `wrappedHeaders()` de `@dzgrid/dom/wrapped-headers` (sans feuille
+de style), met un long titre sur plusieurs lignes (au plus `maxLines`, 3 par défaut, puis « … ») et fait grandir la
+ligne des titres de colonnes jusqu’au plus haut — mesuré de nouveau quand une colonne est redimensionnée ou que la
+taille du texte change, jamais pendant le défilement. Avec `headerHeight`, le plus haut l’emporte. Ajuster une telle
+colonne à son contenu prend ses cellules et le mot le plus long du titre.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { wrappedHeaders } from '@dzgrid/dom/wrapped-headers';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Parcel = { id: string; route: string; days: number };
+
+createGrid<Parcel>(document.getElementById('parcels')!, {
+  rows: [{ id: 'p1', route: 'Port – Ferme de la colline', days: 3 }],
+  columns: [{ id: 'route', header: 'Trajet', flex: 1 }, { id: 'days', header: 'Délai moyen de livraison en jours', type: 'number', width: 90, headerWrap: true }],
+  getRowId: (p) => p.id,
+  messages: FR,
+  features: [wrappedHeaders({ maxLines: 2 })],
+});
+```
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Arrosage' }}
+  features={['verticalHeaders', ['wrappedHeaders', { maxLines: 2 }]]}
+  columns={[
+    { id: 'bed', header: 'Planche', flex: 1, minWidth: 140 },
+    { id: 'mon', header: 'Lundi', type: 'boolean', width: 44, headerVertical: true },
+    { id: 'tue', header: 'Mardi', type: 'boolean', width: 44, headerVertical: true },
+    { id: 'wed', header: 'Mercredi', type: 'boolean', width: 44, headerVertical: true },
+    { id: 'litres', header: 'Eau moyenne en litres par semaine', type: 'number', width: 100, headerWrap: true },
+  ]}
+  rows={[
+    { id: 'p1', bed: 'Spirale d’aromatiques', mon: true, tue: false, wed: true, litres: 12 },
+    { id: 'p2', bed: 'Tunnel de haricots', mon: false, tue: true, wed: false, litres: 30 },
+    { id: 'p3', bed: 'Tour de fraisiers', mon: true, tue: true, wed: true, litres: 18 },
+  ]}
+/>
+
+## Pas de ligne de titres à l’écran
+
+Le réglage `headers: 'hidden'` de la grille (vivant ; Angular `[headers]`, composant web `headers="hidden"`) n’affiche
+pas de ligne de titres. Les titres restent dans la page pour les lecteurs d’écran, et apparaissent tant que le clavier
+y est (flèche haut depuis la première ligne), si bien que le tri et le menu de colonne marchent toujours au clavier. À
+la souris, triez et filtrez par le menu de cellule, les panneaux du dock ou vos propres commandes. L’impression et les
+fichiers gardent leur ligne de titres, sauf si vous passez `header: false`.
+
+## Des colonnes qui se replient sur les écrans étroits
+
+Avec la fonction `responsive()` de `@dzgrid/dom/responsive`, les colonnes qui ne tiennent pas dans la vue sont retirées
+des lignes au lieu de faire défiler la grille de côté : un chevron sur la première cellule de chaque ligne ouvre des
+lignes « Titre : valeur » en dessous (le panneau des lignes de détail, il faut donc les textes `-detail`). Les
+dernières colonnes partent en premier ; `collapsePriority` sur une colonne (plus haut part en premier, `0` jamais) ou
+`responsive({ priority: { id: n } })` changent l’ordre. La première colonne et les colonnes figées ne se replient
+jamais. Une colonne flexible compte son `minWidth`. Cela suit chaque redimensionnement ; la recherche rapide, les
+filtres, les fichiers et l’impression voient toujours toutes les colonnes, et rien n’est enregistré dans l’état de la
+grille.
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { responsive } from '@dzgrid/dom/responsive';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_DETAIL } from '@dzgrid/dom/locales/fr-detail';
+
+type Hive = { id: string; name: string; apiary: string; frames: number; queen: string; checked: string };
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_DETAIL.text } };
+
+createGrid<Hive>(document.getElementById('hives')!, {
+  rows: [{ id: 'h1', name: 'Trèfle', apiary: 'Colline', frames: 9, queen: 'Marquée en bleu', checked: '2026-05-02' }],
+  columns: [
+    { id: 'name', header: 'Ruche', width: 160 },
+    { id: 'apiary', header: 'Rucher', width: 140, collapsePriority: 2 },
+    { id: 'frames', header: 'Cadres', type: 'number', width: 100, collapsePriority: 0 },
+    { id: 'queen', header: 'Reine', width: 180 },
+    { id: 'checked', header: 'Visitée le', type: 'day', width: 140 },
+  ],
+  getRowId: (h) => h.id,
+  messages,
+  features: [responsive()],
+});
+```
+
+Sur la première cellule d’une ligne, Entrée ou Espace ouvre et ferme ses lignes (les flèches aussi, comme pour les
+lignes de détail). C’est une fonction des lignes de détail : elle ne se combine pas avec un arbre, un regroupement de
+lignes, des groupes de titres ou votre propre `detail()` (signalé par `unsupported-combination`).
+
+## Groupes de colonnes
+
+Un groupe a des `children` et un `header` facultatif ; les groupes `collapsible` se replient sur les colonnes marquées
+`groupShow: 'closed'`. Les lignes de titres de groupe ont besoin de la fonction `spans()` ; la fonction `groups()` de
+`@dzgrid/dom/groups` ajoute le bouton qui ouvre et ferme un groupe repliable (ses textes sont dans le lot `-columns`).
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { spans } from '@dzgrid/dom/spans';
+import { groups } from '@dzgrid/dom/groups';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+
+type Station = { id: string; name: string; tempMin: number; tempMax: number; rain: number };
+
+const columns: ColumnOrGroup<Station>[] = [
+  { id: 'name', header: 'Station' },
+  { id: 'weather', header: 'Météo', collapsible: true, children: [
+    { id: 'tempMin', header: 'Min °C', type: 'number' },
+    { id: 'tempMax', header: 'Max °C', type: 'number', groupShow: 'closed' },
+    { id: 'rain', header: 'Pluie (mm)', type: 'number' },
+  ] },
+];
+
+createGrid<Station>(document.getElementById('stations')!, {
+  rows: [{ id: 's1', name: 'Cap Lumière', tempMin: 4, tempMax: 17, rain: 2.5 }],
+  columns,
+  getRowId: (s) => s.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_COLUMNS.text } },
+  features: [spans(), groups()],
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { spans } from '@dzgrid/dom/spans';
+import { groups } from '@dzgrid/dom/groups';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+
+type Station = { id: string; name: string; tempMin: number; tempMax: number; rain: number };
+
+@Component({
+  selector: 'app-stations',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features" />`,
+})
+export class Stations {
+  readonly rows: Station[] = [{ id: 's1', name: 'Cap Lumière', tempMin: 4, tempMax: 17, rain: 2.5 }];
+  readonly columns: DzgColumnOrGroup<Station>[] = [
+    { id: 'name', header: 'Station' },
+    { id: 'weather', header: 'Météo', collapsible: true, children: [
+      { id: 'tempMin', header: 'Min °C', type: 'number' },
+      { id: 'tempMax', header: 'Max °C', type: 'number', groupShow: 'closed' },
+      { id: 'rain', header: 'Pluie (mm)', type: 'number' },
+    ] },
+  ];
+  readonly rowId = (s: Station) => s.id;
+  readonly messages = { ...FR, text: { ...FR.text, ...FR_COLUMNS.text } };
+  readonly features = [spans(), groups()];
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { spans } from '@dzgrid/dom/spans';
+import { groups } from '@dzgrid/dom/groups';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+
+type Station = { id: string; name: string; tempMin: number; tempMax: number; rain: number };
+
+const grid = document.querySelector<DzGridElement<Station>>('dz-grid')!;
+grid.columns = [
+  { id: 'name', header: 'Station' },
+  { id: 'weather', header: 'Météo', collapsible: true, children: [
+    { id: 'tempMin', header: 'Min °C', type: 'number' },
+    { id: 'tempMax', header: 'Max °C', type: 'number', groupShow: 'closed' },
+    { id: 'rain', header: 'Pluie (mm)', type: 'number' },
+  ] },
+];
+grid.getRowId = (s) => s.id;
+grid.messages = { ...FR, text: { ...FR.text, ...FR_COLUMNS.text } };
+grid.features = [spans(), groups()];
+grid.rows = [{ id: 's1', name: 'Cap Lumière', tempMin: 4, tempMax: 17, rain: 2.5 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+<LiveDemo
+  height={250}
+  element
+  settings={{ label: 'Stations météo' }}
+  features={['spans', 'groups']}
+  columns={[
+    { id: 'name', header: 'Station', flex: 1 },
+    { id: 'weather', header: 'Météo', collapsible: true, children: [
+      { id: 'tempMin', header: 'Min °C', type: 'number' },
+      { id: 'tempMax', header: 'Max °C', type: 'number', groupShow: 'closed' },
+      { id: 'rain', header: 'Pluie (mm)', type: 'number' },
+    ] },
+  ]}
+  rows={[
+    { id: 's1', name: 'Cap Lumière', tempMin: 4, tempMax: 17, rain: 2.5 },
+    { id: 's2', name: 'Roche aux Mouettes', tempMin: 7, tempMax: 15, rain: 11 },
+    { id: 's3', name: 'Landebrune', tempMin: -1, tempMax: 12, rain: 0.4 },
+  ]}
+  caption="Dessinée par le composant web. Le bouton du groupe le replie sur sa colonne Max °C."
+/>
+
+`spans()` fusionne aussi des cellules : `merge: true` sur une colonne joint les voisines égales, `rowSpan(ctx)` et
+`colSpan(ctx)` décident d’après les données, et le réglage `fullWidth` dessine une ligne sur toutes les colonnes.
+
+## Classes, infobulles, cellules sur mesure
+
+- `ui.cellClass(c)` rend une classe pour une cellule ; `ui.headerClass` une classe pour le titre ; le réglage de grille
+  `rowClass(c)` une classe pour une ligne.
+- `tooltip(value, row, context)` rend le texte affiché au survol et au focus ; `headerTooltip` celui du titre.
+- `ui.cell`, `ui.header`, `ui.tooltip` nomment une partie (dessin sur mesure, voir plus bas).
+
+```ts
+import { createGrid, definePart } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+import '@dzgrid/theme/dzgrid.css';
+
+type Bee = { id: string; hive: string; honey: number };
+
+const jar = definePart('cell', {
+  mount(host, c) {
+    const span = host.ownerDocument.createElement('span');
+    host.append(span);
+    const draw = (n: typeof c) => { span.textContent = n.value == null ? '' : `${n.text} kg`; };
+    draw(c);
+    return { update: draw, destroy: () => span.remove() };
+  },
+});
+
+createGrid<Bee>(document.getElementById('hives')!, {
+  rows: [{ id: 'h1', hive: 'Colline du trèfle', honey: 12.5 }],
+  columns: [
+    { id: 'hive', header: 'Ruche', tooltip: (v) => (v ? `Ruche ${v}` : null) },
+    { id: 'honey', header: 'Miel', type: 'number', ui: { cell: 'jar', cellClass: (c) => (Number(c.value) > 10 ? 'is-full' : null) } },
+  ],
+  getRowId: (b) => b.id,
+  messages: FR,
+  parts: { jar },
+  rowClass: (c) => (c.row.honey === 0 ? 'is-empty' : null),
+});
+```
+
+La grille n’écrit jamais de chaînes HTML : une partie construit du DOM dans l’hôte qu’on lui donne, et la grille garde
+le rôle, le focus et le clavier de la cellule. Les parties de titre, d’infobulle et de superposition ont besoin de la
+fonction `slots()` de `@dzgrid/dom/slots`. Des cellules toutes faites (`badge`, `cellBoolean`) sont dans
+`@dzgrid/dom/parts`. En Angular, une partie est un composant : donnez la classe elle-même dans `ui.cell` (voir
+[Premiers pas avec Angular](../../getting-started/angular/)).
+
+## Déplacer, redimensionner, masquer
+
+- `columns()` de `@dzgrid/dom/columns` : faites glisser un titre pour le déplacer, son bord pour le redimensionner,
+  double-cliquez le bord pour ajuster au contenu ; le clavier fait de même (textes `-columns`, CSS `columns.css`).
+- `columnMenu()` de `@dzgrid/dom/column-menu` : le menu de chaque titre (trier, figer, taille, masquer, regrouper… ;
+  textes `-column-menu`, CSS `menu.css`). Donnez-lui dans `use` les autres fonctions qu’il peut piloter.
+- `columnsChooser()` de `@dzgrid/dom/columns-panel` : un panneau pour afficher, masquer et ordonner les colonnes (voir
+  [Dock et panneaux](../dock-panels/)).
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { columns } from '@dzgrid/dom/columns';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { columnsChooser } from '@dzgrid/dom/columns-panel';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+import { FR_COLUMN_MENU } from '@dzgrid/dom/locales/fr-column-menu';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/columns.css';
+import '@dzgrid/theme/menu.css';
+import '@dzgrid/theme/columns-panel.css';
+
+type Shell = { id: string; name: string; beach: string; size: number };
+
+const moves = columns();
+const chooser = columnsChooser();
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_COLUMNS.text, ...FR_COLUMN_MENU.text } };
+
+const grid = createGrid<Shell>(document.getElementById('shells')!, {
+  rows: [{ id: 'x1', name: 'Cône spiralé', beach: 'Baie d’Ambre', size: 4.2 }],
+  columns: [{ id: 'name', header: 'Coquillage' }, { id: 'beach', header: 'Plage' }, { id: 'size', header: 'Taille (cm)', type: 'number' }],
+  getRowId: (s) => s.id,
+  messages,
+  features: [moves, chooser, columnMenu({ use: { columns: moves, chooser } })],
+});
+
+moves.api(grid)?.autoSizeAll();
+grid.kernel.dispatch({ type: 'column.state', patch: [{ id: 'beach', hidden: true }] }, 'api');
+```
+
+Chaque fonction qui a une api la donne par `feature.api(grid)` (en Angular, `ctrl.use(feature)`) ; elle vaut `null`
+tant que la grille n’existe pas.

@@ -9,7 +9,7 @@
 import { describe, expect, it } from 'vitest';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 // @ts-expect-error a plain .mjs script
@@ -47,9 +47,24 @@ const all = files.flatMap((f) => blocks(f.page, f.text));
 const surface: Record<string, Record<string, string>> = {};
 for (const f of readdirSync(join(ROOT, 'api'))) Object.assign(surface, parse(readFileSync(join(ROOT, 'api', f), 'utf8')).surface);
 const declared = Object.values(surface).flatMap((e) => Object.values(e)).join('\n');
+/**
+ * A French or Arabic bundle whose English twin is in the surface: `@dzgrid/dom/locales/fr-totals#FR_TOTALS` stands for
+ * `en-totals#EN_TOTALS` (api/*.api.txt holds the English names the guide documented; the twins ship beside them).
+ */
+const twin = (entry: string, name?: string): [string, string | undefined] | null => {
+  const m = /^@dzgrid\/dom\/locales\/(fr|ar)(-[\w-]+)?$/.exec(entry);
+  if (!m) return null;
+  return [`@dzgrid/dom/locales/en${m[2] ?? ''}`, name?.replace(/^(FR|AR)(?=_|$)/, 'EN')];
+};
+const has = (entry: string, name: string) => {
+  if (name in (surface[entry] ?? {})) return true;
+  const t = twin(entry, name);
+  return !!t && t[1]! in (surface[t[0]] ?? {}) && existsSync(join(ROOT, 'packages/dom/src/locales', `${entry.split('/').pop()}.ts`));
+};
 const themeFiles = new Set(readdirSync(join(ROOT, 'packages/theme')).filter((f) => f.endsWith('.css')));
 const entryExists = (spec: string) =>
-  spec in surface || spec === '@dzgrid/theme' || (spec.startsWith('@dzgrid/theme/') && themeFiles.has(spec.slice('@dzgrid/theme/'.length)));
+  spec in surface ||
+  (!!twin(spec) && twin(spec)![0] in surface && existsSync(join(ROOT, 'packages/dom/src/locales', `${spec.split('/').pop()}.ts`))) || spec === '@dzgrid/theme' || (spec.startsWith('@dzgrid/theme/') && themeFiles.has(spec.slice('@dzgrid/theme/'.length)));
 
 describe('the site’s examples', () => {
   it('finds them, with their language', () => {
@@ -82,7 +97,7 @@ describe('the site’s examples', () => {
     const missing: string[] = [];
     for (const b of all) {
       const code = b.lang === 'html' ? scripts(b.code).join('\n') : b.code;
-      for (const [entry, name] of imported(code)) if (!(name in (surface[entry] ?? {}))) missing.push(`${b.page}#${b.n}: ${entry}#${name}`);
+      for (const [entry, name] of imported(code)) if (!has(entry, name)) missing.push(`${b.page}#${b.n}: ${entry}#${name}`);
     }
     expect(missing).toEqual([]);
   });

@@ -1,0 +1,257 @@
+---
+title: "Export et impression"
+description: "Fichiers CSV, Excel et JSON, import d’un fichier CSV ou Excel, impression, le menu d’impression du navigateur."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+
+La grille écrit ce qu’elle affiche dans un fichier — CSV, Excel ou JSON — et l’imprime comme un vrai tableau. La
+démo a les trois fichiers et l’impression au-dessus d’elle, et les mêmes dans son menu du clic droit : triez ou
+filtrez d’abord, le fichier suit.
+
+<LiveDemo
+  height={320}
+  settings={{ label: 'Bouilloires', selection: { mode: 'multi' } }}
+  features={['filters', 'export', ['print', { title: 'Bouilloires' }], 'contextMenu']}
+  columns={[
+    { id: 'model', header: 'Modèle', flex: 1 },
+    { id: 'litres', header: 'Litres', type: 'number', width: 110 },
+    { id: 'boughtOn', header: 'Achetée le', type: 'day', width: 150 },
+    { id: 'whistles', header: 'Siffle', type: 'boolean', width: 120 },
+  ]}
+  rows={[
+    { id: 'k1', model: 'Roitelet siffleur', litres: 1.7, boughtOn: '2024-12-01', whistles: true },
+    { id: 'k2', model: 'Hibou de cuivre', litres: 1.2, boughtOn: '2023-05-17', whistles: false },
+    { id: 'k3', model: 'Alouette vapeur', litres: 2.0, boughtOn: '2025-02-08', whistles: true },
+    { id: 'k4', model: 'Phalène discrète', litres: 0.8, boughtOn: '2025-09-30', whistles: false },
+    { id: 'k5', model: 'Héron de laiton', litres: 1.5, boughtOn: '2022-11-11', whistles: true },
+  ]}
+/>
+
+## CSV et Excel
+
+`csvExport({ canExport })` de `@dzgrid/dom/export` écrit les lignes de la grille dans un fichier CSV, et dans un
+fichier Excel (`.xlsx`) avec `xlsx: true` (textes `-export`). Le fichier contient les colonnes visibles dans leur
+ordre, le tri et les filtres ; les valeurs sont écrites comme valeurs (jours ISO, instants dans le fuseau de la grille,
+nombres qu’un tableur sait additionner), ou comme les cellules les affichent avec `text: 'display'`.
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { csvExport } from '@dzgrid/dom/export';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_EXPORT } from '@dzgrid/dom/locales/fr-export';
+
+type Kettle = { id: string; model: string; litres: number; boughtOn: string };
+
+const exporter = csvExport({
+  canExport: true,
+  xlsx: true,
+  separator: ';',
+  fileName: ({ scope }) => `bouilloires-${scope}`,
+});
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_EXPORT.text } };
+
+createGrid<Kettle>(document.getElementById('kettles')!, {
+  rows: [{ id: 'k1', model: 'Roitelet siffleur', litres: 1.7, boughtOn: '2024-12-01' }],
+  columns: [
+    { id: 'model', header: 'Modèle' },
+    { id: 'litres', header: 'Litres', type: 'number' },
+    { id: 'boughtOn', header: 'Achetée le', type: 'day' },
+  ],
+  getRowId: (k) => k.id,
+  messages,
+  selection: { mode: 'multi' },
+  features: [exporter],
+});
+
+exporter.bind(document.getElementById('csv')!, { scope: 'displayed' });
+exporter.bind(document.getElementById('xlsx')!, { scope: 'displayed', format: 'xlsx' });
+document.getElementById('selected')!.addEventListener('click', async () => {
+  const outcome = await exporter.run('selected');   // 'done' | 'refused' | 'failed' | 'cancelled' | 'busy'
+  console.log(outcome);
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, DzgExport, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { csvExport } from '@dzgrid/dom/export';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_EXPORT } from '@dzgrid/dom/locales/fr-export';
+
+type Kettle = { id: string; model: string; litres: number; boughtOn: string };
+
+const exporter = csvExport({ canExport: true, xlsx: true, separator: ';', fileName: ({ scope }) => `bouilloires-${scope}` });
+
+@Component({
+  selector: 'app-kettles',
+  imports: [DzGrid, DzgExport],
+  template: `
+    <button type="button" [dzgExport]="exporter" dzgExportScope="displayed">Fichier CSV</button>
+    <button type="button" [dzgExport]="exporter" dzgExportScope="selected">Les lignes sélectionnées</button>
+    <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+      [selection]="{ mode: 'multi' }" [features]="features" />`,
+})
+export class Kettles {
+  readonly rows: Kettle[] = [{ id: 'k1', model: 'Roitelet siffleur', litres: 1.7, boughtOn: '2024-12-01' }];
+  readonly columns: DzgColumnOrGroup<Kettle>[] = [
+    { id: 'model', header: 'Modèle' },
+    { id: 'litres', header: 'Litres', type: 'number' },
+    { id: 'boughtOn', header: 'Achetée le', type: 'day' },
+  ];
+  readonly rowId = (k: Kettle) => k.id;
+  readonly messages = { ...FR, text: { ...FR.text, ...FR_EXPORT.text } };
+  readonly exporter = exporter;
+  readonly features = [exporter];
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { csvExport } from '@dzgrid/dom/export';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_EXPORT } from '@dzgrid/dom/locales/fr-export';
+
+type Kettle = { id: string; model: string; litres: number; boughtOn: string };
+
+const exporter = csvExport({ canExport: true, xlsx: true, separator: ';', fileName: ({ scope }) => `bouilloires-${scope}` });
+const grid = document.querySelector<DzGridElement<Kettle>>('dz-grid')!;
+grid.columns = [
+  { id: 'model', header: 'Modèle' },
+  { id: 'litres', header: 'Litres', type: 'number' },
+  { id: 'boughtOn', header: 'Achetée le', type: 'day' },
+];
+grid.getRowId = (k) => k.id;
+grid.messages = { ...FR, text: { ...FR.text, ...FR_EXPORT.text } };
+grid.features = [exporter];
+grid.settings = { selection: { mode: 'multi' } };
+grid.rows = [{ id: 'k1', model: 'Roitelet siffleur', litres: 1.7, boughtOn: '2024-12-01' }];
+
+exporter.bind(document.getElementById('csv')!, { scope: 'displayed' });
+exporter.bind(document.getElementById('xlsx')!, { scope: 'displayed', format: 'xlsx' });
+```
+
+</Fragment>
+</CodeTabs>
+
+- Portées : `'displayed'` (les lignes affichées maintenant : la page en cours quand la grille est paginée),
+  `'selected'`, `'all'` (toutes les lignes qui correspondent à la requête, sur toutes les pages ; les filtres
+  s’appliquent toujours).
+- `canExport: true`, ou une fonction qui peut refuser (`{ ok: false, reason }`) — la place de votre propre règle
+  d’autorisation.
+- Un texte qui commence comme une formule (`=`, `+`, `-`, `@`) reçoit un `'` devant pour qu’un tableur ne l’exécute
+  pas ; un nombre comme `-5` jamais. `numbers: 'excel'` (le défaut) écrit le séparateur décimal de la langue quand le
+  séparateur est `;`, `numbers: 'raw'` la forme machine. `csv: 'text'` sur une colonne garde comme texte des
+  identifiants tels que `0123`.
+- Le fichier est construit par morceaux pour que la page ne se fige jamais ; `exporter.cancel()` l’arrête,
+  `onProgress` le suit.
+- Avec des données du serveur, la grille ne tient qu’une partie des lignes : donnez
+  `exportAll(request, { signal, progress })`, qui demande le fichier à votre serveur (la requête porte la recherche sous sa forme de transport) et
+  rend `{ url }` ou `{ blob }`.
+- Le menu du clic droit offre la même chose : `contextMenu({ use: { csv: exporter, xlsx: exporter.xlsx } })`.
+- En Angular : `<button [dzgExport]="exporter" dzgExportScope="displayed">` (directive `DzgExport`).
+
+Chaque option de `csvExport()` aura sa place sous [Fonctions](../../features/).
+
+## JSON
+
+La même fonction écrit un fichier JSON : `run(scope, { format: 'json' })` ou `bind(button, { format: 'json' })` —
+aucune option pour l’activer, son code est chargé au premier export JSON. Le fichier est un seul tableau d’objets dont
+les clés sont les identifiants des colonnes, dans l’ordre de l’écran, avec les valeurs brutes : nombres, `true` /
+`false`, jours `'YYYY-MM-DD'`, instants en texte ISO UTC avec `Z`, codes d’énumération, `null` pour une cellule vide
+(`text: 'display'` écrit ce que montrent les cellules). Les lignes de groupe et de totaux ne sont pas écrites ;
+`canExport` et `exportAll` voient `request.format === 'json'`.
+
+```ts
+import type { CsvExport } from '@dzgrid/dom/export';
+
+declare const exporter: CsvExport;
+exporter.bind(document.getElementById('json')!, { scope: 'all', format: 'json' });
+```
+
+## Importer un fichier
+
+`fileImport({ onRows })` de `@dzgrid/dom/import` lit un fichier CSV ou Excel (`.xlsx`) déposé sur la grille, ou
+choisi avec votre propre bouton (`api(grid).bind(button)`, le chemin clavier), dans le navigateur. La première ligne
+non vide est l’en-tête, rapproché de vos colonnes par titre ou par identifiant (casse et accents mis à part) ; chaque
+cellule passe par le type de sa colonne comme si elle était tapée dans la langue de la grille. **La grille ne change
+jamais ses lignes** : `onRows(rows, problems, file)` reçoit un objet par ligne, au `field` de chaque colonne (ou à son
+identifiant), et c’est vous qui décidez — les ajouter, remplacer, ou montrer un aperçu. Une cellule refusée est
+laissée de côté et signalée comme problème (`import-cell`, chemin `rows[3].qty`, son code), jamais avec sa valeur. Les
+fichiers Excel sont décompressés par le `DecompressionStream` du navigateur ; le code de lecture est chargé au premier
+fichier. Textes `-import`.
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { fileImport } from '@dzgrid/dom/import';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_IMPORT } from '@dzgrid/dom/locales/fr-import';
+
+type Jar = { id: string; flavour: string; grams: number };
+let jars: Jar[] = [{ id: 'j1', flavour: 'Figue', grams: 250 }];
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_IMPORT.text } };
+const importer = fileImport({
+  accept: ['csv', 'xlsx'],
+  onRows: (rows, problems) => {
+    if (problems.length) console.warn(problems);
+    jars = [...jars, ...rows.map((r, i) => ({ ...(r as Omit<Jar, 'id'>), id: `new-${Date.now()}-${i}` }))];
+    grid.update({ rows: jars });
+  },
+});
+const grid = createGrid<Jar>(document.getElementById('jars')!, {
+  rows: jars,
+  columns: [{ id: 'flavour', header: 'Parfum' }, { id: 'grams', header: 'Grammes', type: 'number' }],
+  getRowId: (j) => j.id,
+  messages,
+  features: [importer],
+});
+importer.api(grid)!.bind(document.getElementById('import-button')!);
+```
+
+## Imprimer
+
+`print(grid, { title })` de `@dzgrid/dom/print` imprime les lignes telles qu’elles sont à l’écran — mêmes colonnes,
+ordre, tri et filtres, pas seulement les lignes amenées à la vue par le défilement — comme un vrai tableau : en-têtes
+répétés sur chaque page, aucune ligne coupée en deux, droite à gauche en arabe, un thème sombre imprimé clair (textes
+`-print`, CSS `print.css`). Au plus 5 000 lignes (`maxRows`) ; au-delà, une ligne dit combien ont été imprimées. Une
+grille aux pages venues du serveur imprime la page affichée.
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { print } from '@dzgrid/dom/print';
+import { printOnMenu } from '@dzgrid/dom/print-menu';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_PRINT } from '@dzgrid/dom/locales/fr-print';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/print.css';
+
+type Bell = { id: string; tower: string; note: string };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_PRINT.text } };
+const grid = createGrid<Bell>(document.getElementById('bells')!, {
+  rows: [{ id: 'b1', tower: 'Marais-Salant', note: 'Fa dièse' }],
+  columns: [{ id: 'tower', header: 'Clocher' }, { id: 'note', header: 'Note' }],
+  getRowId: (b) => b.id,
+  messages,
+});
+
+document.getElementById('print')!.addEventListener('click', () => void print(grid, { title: 'Cloches de la côte' }));
+printOnMenu(grid, { title: 'Cloches de la côte' });   // le Ctrl+P du navigateur imprime lui aussi toute la grille
+```
+
+`print(grid, { header: false })` laisse de côté les lignes d’en-tête (elles sont imprimées par défaut, même sur une
+grille avec `headers: 'hidden'`). `print` est une fonction, pas une fonctionnalité : rien n’est chargé avant son appel.
+`printOnMenu(grid)` fait que la commande d’impression du navigateur lui-même (Ctrl+P, le menu Fichier) imprime aussi
+toute la grille ; sans lui, cette commande n’imprime que ce que montre la page. En Angular, passez `ctrl.grid()` aux
+deux.

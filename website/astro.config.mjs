@@ -32,7 +32,7 @@ function aliases() {
   return out;
 }
 
-/** The guides (docs/guide/ moves here in batch 2), in the order of the guide's index. */
+/** The guides, by task (moved here from docs/guide/ in batch 2; the order is the old guide index's). */
 const GUIDES = [
   'columns',
   'sort-filter-search',
@@ -69,7 +69,12 @@ export default defineConfig({
         fr: { label: 'Français', lang: 'fr' },
       },
       // The grid's theme on every page: its palette (--tz-*) is the site's accent too.
-      customCss: ['@dzgrid/theme/dzgrid.css', './src/styles/custom.css'],
+      customCss: [
+        '@dzgrid/theme/dzgrid.css',
+        // Each feature's sheet, for the guides' demos (they change nothing on a grid without the feature).
+        ...['columns', 'menu', 'grouping', 'pivot', 'edit', 'range', 'fill', 'dock', 'columns-panel', 'filters-panel', 'find', 'search', 'print', 'row-drag', 'pinned-rows', 'vertical-headers', 'variables'].map((s) => `@dzgrid/theme/${s}.css`),
+        './src/styles/custom.css',
+      ],
       sidebar: [
         {
           label: 'Getting started',

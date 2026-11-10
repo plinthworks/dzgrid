@@ -1,0 +1,305 @@
+---
+title: "Sort, filter and search"
+description: "Sorting, column filters, the floating row, the filters panel, quick search, find."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import LiveDemo from '../../../components/LiveDemo.astro';
+
+Four ways to narrow and order the rows: sorting (no feature needed), the column filters, the quick search over every
+column, and find, which marks matches without hiding a row. The demo below has all four: click a title, type in the
+row of small fields under the titles, or in the search box above.
+
+<LiveDemo
+  height={380}
+  settings={{ label: 'Recipes' }}
+  features={[['filters', { floating: true }], 'search']}
+  columns={[
+    { id: 'name', header: 'Recipe', flex: 2, minWidth: 180 },
+    { id: 'cuisine', header: 'Cuisine', width: 140, filter: { kind: 'set' } },
+    { id: 'minutes', header: 'Minutes', type: 'number', width: 120 },
+    { id: 'added', header: 'Added', type: 'day', width: 150 },
+    { id: 'vegan', header: 'Vegan', type: 'boolean', width: 110 },
+  ]}
+  rows={[
+    { id: 'c1', name: 'Moon soup', cuisine: 'Lunar', minutes: 25, added: '2026-01-12', vegan: true },
+    { id: 'c2', name: 'Comet crumble', cuisine: 'Orbital', minutes: 50, added: '2025-11-03', vegan: false },
+    { id: 'c3', name: 'Crater flatbread', cuisine: 'Lunar', minutes: 35, added: '2026-02-08', vegan: true },
+    { id: 'c4', name: 'Nebula noodles', cuisine: 'Deep space', minutes: 15, added: '2025-12-21', vegan: true },
+    { id: 'c5', name: 'Solar-wind stew', cuisine: 'Orbital', minutes: 90, added: '2026-03-01', vegan: false },
+    { id: 'c6', name: 'Stardust pancakes', cuisine: 'Deep space', minutes: 20, added: '2026-01-30', vegan: false },
+    { id: 'c7', name: 'Tidal-lock salad', cuisine: 'Lunar', minutes: 10, added: '2026-02-17', vegan: true },
+    { id: 'c8', name: 'Eclipse pie', cuisine: 'Orbital', minutes: 75, added: '2025-10-09', vegan: false },
+    { id: 'c9', name: 'Asteroid dumplings', cuisine: 'Deep space', minutes: 45, added: '2026-03-12', vegan: true },
+  ]}
+  caption="Shift+click a second title to sort by two columns; the funnel on a title opens its filter."
+/>
+
+## Sorting
+
+Sorting needs no feature: a click on a header sorts, a second click reverses, Shift+click adds the column to the
+sort; from the keyboard, Enter and Shift+Enter on a header do the same. `sortable: false` on a column turns it off;
+the `multiSort: false` setting keeps one key. Text sorts follow the grid's `locale` (Arabic letters, accents,
+digits). Empty cells are last in both directions (`nulls: 'first'` in a sort item puts them first).
+
+There is no sort key on a column. Sort from code with a command, or set the first sort with the
+[state](../state/) feature (`gridState({ initial })`, which sends a single request to a server).
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type River = { id: string; name: string; length: number };
+
+const grid = createGrid<River>(document.getElementById('rivers')!, {
+  rows: [{ id: 'r1', name: 'Silverrun', length: 412 }, { id: 'r2', name: 'Oxbow', length: 96 }],
+  columns: [{ id: 'name', header: 'River' }, { id: 'length', header: 'Length (km)', type: 'number' }],
+  getRowId: (r) => r.id,
+  messages: EN,
+});
+
+grid.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'length', dir: 'desc' }] }, 'api');
+grid.kernel.dispatch({ type: 'sort.toggle', column: 'name', multi: true }, 'api');
+console.log(grid.kernel.query.sort);
+```
+
+## Column filters
+
+`filters()` adds a filter button to each header and a filter popup: text, number, day, instant, yes/no, and a value
+list (`kind: 'set'`). Import it from `@dzgrid/dom/filters` (every kind; the day and instant forms use a calendar,
+which needs `@tzslot/*`) or from `@dzgrid/dom/filters-base` (no calendar: text, number, yes/no and the value list
+only — a day or instant column gets **no filter**, no button, and one `missing-feature` warning naming
+`@dzgrid/dom/filters`; give it `loadDates` to bring the date forms back). Texts: `-filters`.
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { filters } from '@dzgrid/dom/filters';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+
+type Recipe = { id: string; name: string; cuisine: string; minutes: number; added: string; vegan: boolean };
+
+const columns: ColumnOrGroup<Recipe>[] = [
+  { id: 'name', header: 'Recipe', filter: { kind: 'text', debounceMs: 200 } },
+  { id: 'cuisine', header: 'Cuisine', filter: { kind: 'set' } },
+  { id: 'minutes', header: 'Minutes', type: 'number', filter: { maxConditions: 2 } },
+  { id: 'added', header: 'Added', type: 'day' },
+  { id: 'vegan', header: 'Vegan', type: 'boolean' },
+];
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+
+const grid = createGrid<Recipe>(document.getElementById('recipes')!, {
+  rows: [{ id: 'c1', name: 'Moon soup', cuisine: 'Lunar', minutes: 25, added: '2026-01-12', vegan: true }],
+  columns,
+  getRowId: (r) => r.id,
+  messages,
+  features: [filters({ floating: true, apply: 'live' })],
+});
+
+grid.kernel.dispatch({ type: 'filter.column', column: 'minutes', filter: { type: 'number', op: 'lte', value: 30 } }, 'api');
+grid.kernel.dispatch({ type: 'filter.column', column: 'cuisine', filter: { type: 'set', include: ['Lunar'] } }, 'api');
+grid.kernel.dispatch({ type: 'filter.set', filter: {} }, 'api');   // clears every filter
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import type { ColumnFilter } from '@dzgrid/core';
+import { filters } from '@dzgrid/dom/filters';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+
+type Recipe = { id: string; name: string; cuisine: string; minutes: number; added: string; vegan: boolean };
+
+@Component({
+  selector: 'app-recipes',
+  imports: [DzGrid],
+  template: `
+    <button type="button" (click)="quick()">Quick ones</button>
+    <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+      [features]="features" [(filter)]="filter" />`,
+})
+export class Recipes {
+  readonly rows: Recipe[] = [{ id: 'c1', name: 'Moon soup', cuisine: 'Lunar', minutes: 25, added: '2026-01-12', vegan: true }];
+  readonly columns: DzgColumnOrGroup<Recipe>[] = [
+    { id: 'name', header: 'Recipe', filter: { kind: 'text', debounceMs: 200 } },
+    { id: 'cuisine', header: 'Cuisine', filter: { kind: 'set' } },
+    { id: 'minutes', header: 'Minutes', type: 'number', filter: { maxConditions: 2 } },
+    { id: 'added', header: 'Added', type: 'day' },
+    { id: 'vegan', header: 'Vegan', type: 'boolean' },
+  ];
+  readonly rowId = (r: Recipe) => r.id;
+  readonly messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+  readonly features = [filters({ floating: true, apply: 'live' })];
+  // The filters, both ways: the user's changes come back here, a value set here is applied.
+  readonly filter = signal<Readonly<Record<string, ColumnFilter>> | undefined>(undefined);
+
+  quick() {
+    this.filter.set({ minutes: { type: 'number', op: 'lte', value: 30 } });
+  }
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { filters } from '@dzgrid/dom/filters';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+
+type Recipe = { id: string; name: string; cuisine: string; minutes: number; added: string; vegan: boolean };
+
+const grid = document.querySelector<DzGridElement<Recipe>>('dz-grid')!;
+grid.columns = [
+  { id: 'name', header: 'Recipe', filter: { kind: 'text', debounceMs: 200 } },
+  { id: 'cuisine', header: 'Cuisine', filter: { kind: 'set' } },
+  { id: 'minutes', header: 'Minutes', type: 'number', filter: { maxConditions: 2 } },
+  { id: 'added', header: 'Added', type: 'day' },
+  { id: 'vegan', header: 'Vegan', type: 'boolean' },
+];
+grid.getRowId = (r) => r.id;
+grid.messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+grid.features = [filters({ floating: true, apply: 'live' })];
+grid.rows = [{ id: 'c1', name: 'Moon soup', cuisine: 'Lunar', minutes: 25, added: '2026-01-12', vegan: true }];
+
+await grid.ready;
+grid.grid?.kernel.dispatch({ type: 'filter.column', column: 'minutes', filter: { type: 'number', op: 'lte', value: 30 } }, 'api');
+```
+
+</Fragment>
+</CodeTabs>
+
+- `floating: true` adds a row of small filter fields under the headers; `apply: 'button'` waits for the Apply
+  button instead of filtering as you type. `rowHeight: 44` gives that row its own height (px at 16 px text, 24 to
+  1 000); the row height otherwise.
+- `filter: false` on a column removes its filter; `filter.ops` limits the operators offered.
+- A filter on a `day` or `instant` column is resolved in the grid's `timeZone`, half-open, to the millisecond —
+  also when it is sent to a server.
+- The filter shapes (`ColumnFilter`): `text`, `number`, `day`, `instant`, `boolean`, `set`, `combined` (`and` / `or`
+  of conditions), `custom` (your own kind, registered with the `filterKinds` setting).
+
+Every option of `filters()` will have its place under [Features](../../features/).
+
+## The filters panel
+
+`filtersPanel()` from `@dzgrid/dom/filters-panel` lists every column's filter in a side panel (texts
+`-filters-panel`, CSS `filters-panel.css`). Inside a [dock](../dock-panels/) it becomes one of the dock's panels.
+
+## Quick search
+
+`quickSearch()` from `@dzgrid/dom/search` filters on every visible column at once, from an input you own; matches are
+highlighted (CSS `search.css`).
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { quickSearch } from '@dzgrid/dom/search';
+import { EN } from '@dzgrid/dom/locales/en';
+import '@dzgrid/theme/search.css';
+
+type Cloud = { id: string; name: string; height: number };
+
+const search = quickSearch({ highlight: true });
+createGrid<Cloud>(document.getElementById('clouds')!, {
+  rows: [{ id: 'n1', name: 'Cirrus feather', height: 9000 }],
+  columns: [{ id: 'name', header: 'Cloud' }, { id: 'height', header: 'Height (m)', type: 'number' }],
+  getRowId: (c) => c.id,
+  messages: EN,
+  features: [search],
+});
+search.bind(document.querySelector<HTMLInputElement>('#cloud-search')!, { debounceMs: 150 });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, DzgSearch, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { quickSearch } from '@dzgrid/dom/search';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Cloud = { id: string; name: string; height: number };
+
+@Component({
+  selector: 'app-clouds',
+  imports: [DzGrid, DzgSearch],
+  template: `
+    <input type="search" aria-label="Search the clouds" [dzgSearch]="search" />
+    <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+      [features]="features" [(quick)]="text" />
+    <p>Searching: {{ text() ?? '' }}</p>`,
+})
+export class Clouds {
+  readonly rows: Cloud[] = [{ id: 'n1', name: 'Cirrus feather', height: 9000 }];
+  readonly columns: DzgColumnOrGroup<Cloud>[] = [{ id: 'name', header: 'Cloud' }, { id: 'height', header: 'Height (m)', type: 'number' }];
+  readonly rowId = (c: Cloud) => c.id;
+  readonly messages = EN;
+  readonly search = quickSearch({ highlight: true });
+  readonly features = [this.search];
+  readonly text = signal<string | undefined>(undefined);
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { quickSearch } from '@dzgrid/dom/search';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Cloud = { id: string; name: string; height: number };
+
+const search = quickSearch({ highlight: true });
+const grid = document.querySelector<DzGridElement<Cloud>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Cloud' }, { id: 'height', header: 'Height (m)', type: 'number' }];
+grid.getRowId = (c) => c.id;
+grid.messages = EN;
+grid.features = [search];
+grid.rows = [{ id: 'n1', name: 'Cirrus feather', height: 9000 }];
+search.bind(document.querySelector<HTMLInputElement>('#cloud-search')!, { debounceMs: 150 });
+```
+
+</Fragment>
+</CodeTabs>
+
+Searching follows the language: Arabic letters with or without hamza and short vowels, Arabic-Indic digits.
+
+## Find (Ctrl+F)
+
+`find()` from `@dzgrid/dom/find` replaces the browser's Ctrl+F inside the grid: it marks a text in the cells of every
+row the filters keep (rows inside closed tree nodes too) and walks the focus from hit to hit with Enter and
+Shift+Enter, without hiding any row (texts `-find`, CSS `find.css`).
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Lighthouses' }}
+  features={['find']}
+  columns={[
+    { id: 'name', header: 'Lighthouse', flex: 1 },
+    { id: 'coast', header: 'Coast', flex: 1 },
+    { id: 'range', header: 'Range (nmi)', type: 'number', width: 130 },
+  ]}
+  rows={[
+    { id: 'l1', name: 'Grey Heron Point', coast: 'North shore', range: 22 },
+    { id: 'l2', name: 'Saltmarsh Light', coast: 'East shore', range: 14 },
+    { id: 'l3', name: 'Heron Rock', coast: 'North shore', range: 18 },
+    { id: 'l4', name: 'Lantern Cove', coast: 'South shore', range: 9 },
+    { id: 'l5', name: 'Old Heron Tower', coast: 'West shore', range: 26 },
+  ]}
+  caption="Click a cell, press Ctrl+F (Cmd+F on a Mac) and type « heron »: Enter goes to the next one."
+/>

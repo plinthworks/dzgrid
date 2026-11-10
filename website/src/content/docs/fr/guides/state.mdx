@@ -1,0 +1,183 @@
+---
+title: "État"
+description: "Enregistrer et rétablir tri, filtres et colonnes, dans le stockage du navigateur ou dans l’adresse."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+
+`gridState()` de `@dzgrid/dom/state` lit et rétablit l’état de la grille : les colonnes (ordre, largeur, masquées,
+figées), les groupes d’en-têtes, le tri, les filtres, la recherche rapide, la page et la taille de page, la densité,
+les colonnes groupées, la disposition du dock, le tableau croisé. Un état est un simple objet versionné
+(`{ v: 1, … }`) que vous pouvez ranger n’importe où. Il ne contient jamais de données des lignes, mais il contient ce
+que l’utilisateur a tapé dans les filtres.
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Réverbères' }}
+  features={['columns', 'filters', ['state', { initial: { v: 1, sort: [{ column: 'street', dir: 'asc' }] }, persist: { key: 'dzgrid-site-lanterns' } }]]}
+  columns={[
+    { id: 'street', header: 'Rue', flex: 1 },
+    { id: 'lit', header: 'Allumé', type: 'boolean', width: 100 },
+    { id: 'height', header: 'Hauteur (m)', type: 'number', width: 130 },
+    { id: 'lamp', header: 'Lampe', width: 140 },
+  ]}
+  rows={[
+    { id: 'l1', street: 'Ruelle de la Mèche', lit: true, height: 3.5, lamp: 'Huile' },
+    { id: 'l2', street: 'Rang du Suif', lit: false, height: 4, lamp: 'Gaz' },
+    { id: 'l3', street: 'Place des Braises', lit: true, height: 5.2, lamp: 'Gaz' },
+    { id: 'l4', street: 'Degrés du Silex', lit: true, height: 2.8, lamp: 'Huile' },
+    { id: 'l5', street: 'Allée du Fanal', lit: false, height: 4.4, lamp: 'Électrique' },
+  ]}
+  caption="Triez, filtrez, déplacez ou élargissez une colonne, puis rechargez la page : la grille revient comme vous l’avez laissée. « Rétablir la disposition » l’oublie."
+/>
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { gridState, type GridState } from '@dzgrid/dom/state';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Lantern = { id: string; street: string; lit: boolean; height: number };
+
+const state = gridState({
+  initial: { v: 1, sort: [{ column: 'street', dir: 'asc' }] },
+  persist: { key: 'lanterns-grid' },
+  debounce: 300,
+});
+
+const grid = createGrid<Lantern>(document.getElementById('lanterns')!, {
+  rows: [{ id: 'l1', street: 'Ruelle de la Mèche', lit: true, height: 3.5 }],
+  columns: [
+    { id: 'street', header: 'Rue' },
+    { id: 'lit', header: 'Allumé', type: 'boolean' },
+    { id: 'height', header: 'Hauteur (m)', type: 'number' },
+  ],
+  getRowId: (l) => l.id,
+  messages: FR,
+  features: [state],
+  onEvent: (e) => {
+    if (e.type === 'stateChanged') save(e.state);
+  },
+});
+
+function save(s: GridState) { console.log(JSON.stringify(s)); }
+
+const api = state.api(grid);
+const saved = api?.state();
+if (saved) api?.setState(saved);   // rend les problèmes d’un état qu’il n’a pas pu lire en entier
+api?.reset();                      // retour aux colonnes et aux options avec lesquelles la grille a été créée
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, DzgController, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { gridState, type GridState } from '@dzgrid/dom/state';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Lantern = { id: string; street: string; lit: boolean; height: number };
+
+@Component({
+  selector: 'app-lanterns',
+  imports: [DzGrid],
+  template: `
+    <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features"
+      [state]="layout()" (stateChanged)="layout.set($event.state)" (gridReady)="ctrl = $event" />
+    <button type="button" (click)="ctrl?.resetState()">Rétablir la disposition</button>`,
+})
+export class Lanterns {
+  readonly rows: Lantern[] = [{ id: 'l1', street: 'Ruelle de la Mèche', lit: true, height: 3.5 }];
+  readonly columns: DzgColumnOrGroup<Lantern>[] = [
+    { id: 'street', header: 'Rue' },
+    { id: 'lit', header: 'Allumé', type: 'boolean' },
+    { id: 'height', header: 'Hauteur (m)', type: 'number' },
+  ];
+  readonly rowId = (l: Lantern) => l.id;
+  readonly messages = FR;
+  readonly features = [gridState({ initial: { v: 1, sort: [{ column: 'street', dir: 'asc' }] } })];
+  // Gardé là où l’application garde son état (un store, un signal) : rétabli quand on le donne, entendu quand il change.
+  readonly layout = signal<GridState | null>(null);
+  ctrl: DzgController<Lantern> | null = null;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import type { GridEvent } from '@dzgrid/core';
+import { gridState } from '@dzgrid/dom/state';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Lantern = { id: string; street: string; lit: boolean; height: number };
+
+const state = gridState({ initial: { v: 1, sort: [{ column: 'street', dir: 'asc' }] }, persist: { key: 'lanterns-grid' } });
+const grid = document.querySelector<DzGridElement<Lantern>>('dz-grid')!;
+grid.columns = [
+  { id: 'street', header: 'Rue' },
+  { id: 'lit', header: 'Allumé', type: 'boolean' },
+  { id: 'height', header: 'Hauteur (m)', type: 'number' },
+];
+grid.getRowId = (l) => l.id;
+grid.messages = FR;
+grid.features = [state];
+grid.rows = [{ id: 'l1', street: 'Ruelle de la Mèche', lit: true, height: 3.5 }];
+
+grid.addEventListener('dzg-state-changed', (e) => {
+  const event = (e as CustomEvent<GridEvent<Lantern>>).detail;
+  if (event.type === 'stateChanged') console.log(JSON.stringify(event.state));
+});
+document.getElementById('reset')!.addEventListener('click', () => {
+  if (grid.grid) state.api(grid.grid)?.reset();
+});
+```
+
+</Fragment>
+</CodeTabs>
+
+- `initial` s’applique avant le premier dessin, et avec un serveur avant la première requête : une seule requête au
+  départ.
+- `persist: { key, include? }` garde l’état dans `localStorage` sous cette clé et le rétablit au départ ; un stockage
+  bloqué ou plein ne lève rien (un seul avertissement `state-storage`). `persistLocal(grid, key)` fait de même pour
+  une grille créée sans l’option.
+- `stateChanged` arrive après une pause (`debounce`, 300 ms) qui suit un changement de l’utilisateur : une colonne
+  élargie, un tri, un filtre, un volet déplacé.
+- Un rétablissement ne lève jamais d’erreur. Les identifiants de colonnes inconnus ou retirés sont sautés
+  (avertissement `state-column`), les colonnes que l’état ne nomme pas gardent leurs réglages et passent après celles
+  qu’il nomme, un champ du mauvais type est sauté ; un état écrit par une version plus récente (`v` plus grand) est
+  refusé en entier (`state-version`).
+- Non enregistrés : les lignes ouvertes, la sélection, le focus, la position de défilement, les modifications en
+  cours.
+
+Chaque option de `gridState()` aura sa place sous [Fonctions](../../features/).
+
+## Dans l’adresse
+
+`toSearchParams(state)` et `fromSearchParams(params)` écrivent l’état en un seul paramètre compact (`?grid=1.…`) et le
+relisent. Les valeurs tapées dans les filtres et la recherche peuvent être des noms ou des numéros de dossier, et une
+adresse atteint l’historique du navigateur, les journaux des serveurs et les en-têtes `Referer` : elles sont laissées
+de côté sauf si vous le demandez avec `include: ['filter', 'quick']`.
+
+```ts
+import { toSearchParams, fromSearchParams, type GridState } from '@dzgrid/dom/state';
+
+export function writeAddress(state: GridState): void {
+  const { params } = toSearchParams(state, { name: 'grid' });
+  history.replaceState(null, '', `?${params.toString()}`);
+}
+
+export function readAddress(): GridState | null {
+  return fromSearchParams(new URLSearchParams(location.search), { name: 'grid' }).state;
+}
+```
+
+Les fonctions d’aide ne touchent jamais `history` elles-mêmes : c’est vous qui choisissez `pushState` ou
+`replaceState`. En Angular, `[state]` rétablit un état, `(stateChanged)` l’entend, et `ctrl.resetState()` le remet à
+zéro.

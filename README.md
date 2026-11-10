@@ -91,9 +91,12 @@ createGrid<Patient>(host, {
 
 ## Documentation
 
-- [The documentation site](https://plinthworks.github.io/dzgrid/) — getting started in TypeScript, Angular and as a Web Component, with live grids (being built from `website/`; the guides move there next). Until then:
-- [`docs/guide/`](docs/guide/README.md) — **how to use it**: getting started (plain TypeScript, Angular, the Web Component) and one page per feature; every sample type-checked by a test.
-- [`llms.txt`](llms.txt) and [`llms-full.txt`](llms-full.txt) — the guide for a language model (an index, and the whole guide in one file), made from `docs/guide/` by `node scripts/llms.mjs`; `llms.txt` also ships in `@dzgrid/dom`.
+- **[The documentation site](https://plinthworks.github.io/dzgrid/)** — **how to use it**, in English and
+  [French](https://plinthworks.github.io/dzgrid/fr/): getting started in TypeScript, Angular and as a Web Component,
+  then one guide per task, each with a live grid and its code in the three flavours; every example type-checked by a
+  test. Its sources are in [`website/`](website/).
+- [`llms.txt`](llms.txt) and [`llms-full.txt`](llms-full.txt) — the site for a language model (an index, and every
+  English page in one file), made from the site by `node scripts/llms.mjs`; `llms.txt` also ships in `@dzgrid/dom`.
 - [`docs/STATUS.md`](docs/STATUS.md) — where the work is, what comes next.
 - [`ARCHITECTURE.md`](ARCHITECTURE.md) — the design and every decision taken (in French).
 - [`ROADMAP.md`](ROADMAP.md) — phases, steps and measures.

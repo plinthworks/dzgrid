@@ -6,5 +6,5 @@ sidebar:
 ---
 
 :::note[En cours de rédaction]
-Cette page est en cours de rédaction. En attendant, lisez [le guide sur GitHub](https://github.com/plinthworks/dzgrid/blob/main/docs/guide/columns.md) (en anglais).
+Cette page est en cours de rédaction. En attendant, lisez [le guide sur GitHub](https://github.com/plinthworks/dzgrid/blob/main/website/src/content/docs/guides/columns.mdx) (en anglais).
 :::

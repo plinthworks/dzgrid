@@ -31,25 +31,25 @@ grille est dessinée dès que l’élément est dans la page et a `columns`, `ge
 
 ```ts
 import { createGrid } from '@dzgrid/dom';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 
 type Moon = { id: string; name: string; found: string; radius: number };
 
 createGrid<Moon>(document.getElementById('moons')!, {
   rows: [
-    { id: 'm1', name: 'Quill', found: '2023-05-30', radius: 812 },
-    { id: 'm2', name: 'Tallow', found: '2021-02-14', radius: 1460 },
+    { id: 'm1', name: 'Plume', found: '2023-05-30', radius: 812 },
+    { id: 'm2', name: 'Suif', found: '2021-02-14', radius: 1460 },
   ],
   columns: [
-    { id: 'name', header: 'Moon', flex: 1 },
-    { id: 'found', header: 'Found', type: 'day' },
-    { id: 'radius', header: 'Radius (km)', type: 'number' },
+    { id: 'name', header: 'Lune', flex: 1 },
+    { id: 'found', header: 'Découverte le', type: 'day' },
+    { id: 'radius', header: 'Rayon (km)', type: 'number' },
   ],
   getRowId: (m) => m.id,
-  messages: EN,
-  locale: 'en-GB',
+  messages: FR,
+  locale: 'fr-FR',
   density: 'compact',
-  label: 'Moons',
+  label: 'Lunes',
 });
 ```
 
@@ -59,7 +59,7 @@ createGrid<Moon>(document.getElementById('moons')!, {
 ```ts
 import { Component } from '@angular/core';
 import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
-import { EN } from '@dzgrid/dom/locales/en';
+import { FR } from '@dzgrid/dom/locales/fr';
 
 type Moon = { id: string; name: string; found: string; radius: number };
 
@@ -67,20 +67,20 @@ type Moon = { id: string; name: string; found: string; radius: number };
   selector: 'app-moons',
   imports: [DzGrid],
   template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
-    locale="en-GB" density="compact" label="Moons" />`,
+    locale="fr-FR" density="compact" label="Lunes" />`,
 })
 export class Moons {
   readonly rows: Moon[] = [
-    { id: 'm1', name: 'Quill', found: '2023-05-30', radius: 812 },
-    { id: 'm2', name: 'Tallow', found: '2021-02-14', radius: 1460 },
+    { id: 'm1', name: 'Plume', found: '2023-05-30', radius: 812 },
+    { id: 'm2', name: 'Suif', found: '2021-02-14', radius: 1460 },
   ];
   readonly columns: DzgColumnOrGroup<Moon>[] = [
-    { id: 'name', header: 'Moon', flex: 1 },
-    { id: 'found', header: 'Found', type: 'day' },
-    { id: 'radius', header: 'Radius (km)', type: 'number' },
+    { id: 'name', header: 'Lune', flex: 1 },
+    { id: 'found', header: 'Découverte le', type: 'day' },
+    { id: 'radius', header: 'Rayon (km)', type: 'number' },
   ];
   readonly rowId = (m: Moon) => m.id;
-  readonly messages = EN;
+  readonly messages = FR;
 }
 ```
 
@@ -91,23 +91,23 @@ export class Moons {
 <link rel="stylesheet" href="/node_modules/@dzgrid/theme/dzgrid.css">
 <style>dz-grid > .dzg { block-size: 260px; }</style>
 
-<dz-grid locale="en-GB" density="compact" label="Moons"></dz-grid>
+<dz-grid locale="fr-FR" density="compact" label="Lunes"></dz-grid>
 
 <script type="module">
   import '@dzgrid/element/define';
-  import { EN } from '@dzgrid/dom/locales/en';
+  import { FR } from '@dzgrid/dom/locales/fr';
 
   const grid = document.querySelector('dz-grid');
   grid.columns = [
-    { id: 'name', header: 'Moon', flex: 1 },
-    { id: 'found', header: 'Found', type: 'day' },
-    { id: 'radius', header: 'Radius (km)', type: 'number' },
+    { id: 'name', header: 'Lune', flex: 1 },
+    { id: 'found', header: 'Découverte le', type: 'day' },
+    { id: 'radius', header: 'Rayon (km)', type: 'number' },
   ];
   grid.getRowId = (m) => m.id;
-  grid.messages = EN;
+  grid.messages = FR;
   grid.rows = [
-    { id: 'm1', name: 'Quill', found: '2023-05-30', radius: 812 },
-    { id: 'm2', name: 'Tallow', found: '2021-02-14', radius: 1460 },
+    { id: 'm1', name: 'Plume', found: '2023-05-30', radius: 812 },
+    { id: 'm2', name: 'Suif', found: '2021-02-14', radius: 1460 },
   ];
   grid.addEventListener('dzg-row-clicked', (e) => console.log(e.detail.row.key));
 </script>
@@ -119,18 +119,18 @@ export class Moons {
 <LiveDemo
   element
   height={260}
-  settings={{ label: 'Moons', density: 'compact' }}
+  settings={{ label: 'Lunes', density: 'compact' }}
   columns={[
-    { id: 'name', header: 'Moon', flex: 1 },
-    { id: 'found', header: 'Found', type: 'day' },
-    { id: 'radius', header: 'Radius (km)', type: 'number' },
+    { id: 'name', header: 'Lune', flex: 1 },
+    { id: 'found', header: 'Découverte le', type: 'day' },
+    { id: 'radius', header: 'Rayon (km)', type: 'number' },
   ]}
   rows={[
-    { id: 'm1', name: 'Quill', found: '2023-05-30', radius: 812 },
-    { id: 'm2', name: 'Tallow', found: '2021-02-14', radius: 1460 },
-    { id: 'm3', name: 'Brindle', found: '2019-10-07', radius: 233 },
-    { id: 'm4', name: 'Saffron Minor', found: '2024-12-21', radius: 95 },
-    { id: 'm5', name: 'Old Lantern', found: '2018-07-16', radius: 2104 },
+    { id: 'm1', name: 'Plume', found: '2023-05-30', radius: 812 },
+    { id: 'm2', name: 'Suif', found: '2021-02-14', radius: 1460 },
+    { id: 'm3', name: 'Tavelée', found: '2019-10-07', radius: 233 },
+    { id: 'm4', name: 'Safran Mineure', found: '2024-12-21', radius: 95 },
+    { id: 'm5', name: 'Vieille Lanterne', found: '2018-07-16', radius: 2104 },
   ]}
   caption="Celle-ci est un vrai élément <dz-grid>."
 />
@@ -146,23 +146,23 @@ le premier dessin ; `grid.grid` est alors la grille elle-même, avec son `kernel
 ```ts
 import { createGrid } from '@dzgrid/dom';
 import { filters } from '@dzgrid/dom/filters-base';
-import { EN } from '@dzgrid/dom/locales/en';
-import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
 
 type Moon = { id: string; name: string; radius: number };
 
 const grid = createGrid<Moon>(document.getElementById('moons')!, {
-  rows: [{ id: 'm1', name: 'Quill', radius: 812 }],
-  columns: [{ id: 'name', header: 'Moon' }, { id: 'radius', header: 'Radius (km)', type: 'number' }],
+  rows: [{ id: 'm1', name: 'Plume', radius: 812 }],
+  columns: [{ id: 'name', header: 'Lune' }, { id: 'radius', header: 'Rayon (km)', type: 'number' }],
   getRowId: (m) => m.id,
-  messages: { ...EN, text: { ...EN.text, ...EN_FILTERS.text } },
+  messages: { ...FR, text: { ...FR.text, ...FR_FILTERS.text } },
   features: [filters()],
   selection: { mode: 'single' },
   onEvent: (e) => {
     if (e.type === 'sortChanged') console.log(e.type);
   },
 });
-grid.kernel.dispatch({ type: 'quick.set', text: 'quill' }, 'api');
+grid.kernel.dispatch({ type: 'quick.set', text: 'plume' }, 'api');
 ```
 
 </Fragment>
@@ -172,8 +172,8 @@ grid.kernel.dispatch({ type: 'quick.set', text: 'quill' }, 'api');
 import { Component } from '@angular/core';
 import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
 import { filters } from '@dzgrid/dom/filters-base';
-import { EN } from '@dzgrid/dom/locales/en';
-import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
 
 type Moon = { id: string; name: string; radius: number };
 
@@ -184,12 +184,12 @@ type Moon = { id: string; name: string; radius: number };
     [features]="features" [selection]="{ mode: 'single' }" [(quick)]="quick" />`,
 })
 export class MoonSearch {
-  readonly rows: Moon[] = [{ id: 'm1', name: 'Quill', radius: 812 }];
-  readonly columns: DzgColumnOrGroup<Moon>[] = [{ id: 'name', header: 'Moon' }, { id: 'radius', header: 'Radius (km)', type: 'number' }];
+  readonly rows: Moon[] = [{ id: 'm1', name: 'Plume', radius: 812 }];
+  readonly columns: DzgColumnOrGroup<Moon>[] = [{ id: 'name', header: 'Lune' }, { id: 'radius', header: 'Rayon (km)', type: 'number' }];
   readonly rowId = (m: Moon) => m.id;
-  readonly messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+  readonly messages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text } };
   readonly features = [filters()];
-  quick = 'quill';
+  quick = 'plume';
 }
 ```
 
@@ -201,26 +201,26 @@ import '@dzgrid/element/define';
 import type { DzGridElement } from '@dzgrid/element';
 import type { GridEvent } from '@dzgrid/core';
 import { filters } from '@dzgrid/dom/filters-base';
-import { EN } from '@dzgrid/dom/locales/en';
-import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
 
 type Moon = { id: string; name: string; radius: number };
 
 const grid = document.querySelector<DzGridElement<Moon>>('dz-grid')!;
-grid.columns = [{ id: 'name', header: 'Moon' }, { id: 'radius', header: 'Radius (km)', type: 'number' }];
+grid.columns = [{ id: 'name', header: 'Lune' }, { id: 'radius', header: 'Rayon (km)', type: 'number' }];
 grid.getRowId = (m) => m.id;
-grid.messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+grid.messages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text } };
 grid.features = [filters()];
 grid.settings = { selection: { mode: 'single' } };
-grid.rows = [{ id: 'm1', name: 'Quill', radius: 812 }];
+grid.rows = [{ id: 'm1', name: 'Plume', radius: 812 }];
 
 grid.addEventListener('dzg-sort-changed', (e) => {
   const event = (e as CustomEvent<GridEvent<Moon>>).detail;
   console.log(event.type);
 });
 
-await grid.ready;   // resolved when first drawn
-grid.grid?.kernel.dispatch({ type: 'quick.set', text: 'quill' }, 'api');
+await grid.ready;   // résolu au premier dessin
+grid.grid?.kernel.dispatch({ type: 'quick.set', text: 'plume' }, 'api');
 ```
 
 </Fragment>

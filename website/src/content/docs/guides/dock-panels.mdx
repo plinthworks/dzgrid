@@ -1,0 +1,191 @@
+---
+title: "Dock and panels"
+description: "Side panels: the columns chooser, the filters panel, your own panels."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import LiveDemo from '../../../components/LiveDemo.astro';
+
+Two panels come with DzGrid: the **columns chooser** (`columnsChooser()` from `@dzgrid/dom/columns-panel`: search,
+show, hide and order columns; texts `-columns`, CSS `columns-panel.css`) and the **filters panel** (`filtersPanel()`
+from `@dzgrid/dom/filters-panel`: every column's filter in one list; texts `-filters-panel`, CSS `filters-panel.css`).
+Without a dock, the chooser opens as a dialog and the filters panel stands at its own side.
+
+`dock()` from `@dzgrid/dom/dock` gives them, and panels of your own, a place beside or under the rows (texts `-dock`,
+CSS `dock.css`): areas `start` and `end` (beside the rows, logical sides) and `bottom`. Each area can be resized by
+its edge (also with the arrow keys), collapsed to a strip, closed, or moved to another area; two panels in one area
+become tabs.
+
+<LiveDemo
+  height={440}
+  settings={{ label: 'Potions' }}
+  features={['filters', 'chooser', 'filtersPanel', 'columnMenu', ['dock', { open: { columns: 'end', filters: 'end' }, sizes: { min: 200, max: 480 } }]]}
+  columns={[
+    { id: 'name', header: 'Potion', flex: 1, minWidth: 140 },
+    { id: 'colour', header: 'Colour', width: 100 },
+    { id: 'doses', header: 'Doses', type: 'number', width: 90 },
+    { id: 'brewed', header: 'Brewed', type: 'day', width: 140, hidden: true },
+  ]}
+  rows={[
+    { id: 'p1', name: 'Fog in a bottle', colour: 'Grey', doses: 3, brewed: '2026-01-14' },
+    { id: 'p2', name: 'Draught of quiet', colour: 'Blue', doses: 8, brewed: '2025-12-02' },
+    { id: 'p3', name: 'Ember tonic', colour: 'Red', doses: 5, brewed: '2026-02-20' },
+    { id: 'p4', name: 'Moss elixir', colour: 'Green', doses: 12, brewed: '2025-11-09' },
+    { id: 'p5', name: 'Starlight syrup', colour: 'Silver', doses: 2, brewed: '2026-03-01' },
+  ]}
+  caption="The two panels share the end area as tabs: tick Brewed in the chooser to show it, drag the area's edge to resize it."
+/>
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { dock } from '@dzgrid/dom/dock';
+import { columnsChooser } from '@dzgrid/dom/columns-panel';
+import { filtersPanel } from '@dzgrid/dom/filters-panel';
+import { filters } from '@dzgrid/dom/filters-base';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_DOCK } from '@dzgrid/dom/locales/en-dock';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { EN_FILTERS_PANEL } from '@dzgrid/dom/locales/en-filters-panel';
+import { EN_COLUMN_MENU } from '@dzgrid/dom/locales/en-column-menu';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/dock.css';
+import '@dzgrid/theme/columns-panel.css';
+import '@dzgrid/theme/filters-panel.css';
+import '@dzgrid/theme/menu.css';
+
+type Potion = { id: string; name: string; colour: string; doses: number };
+
+const messages: GridMessages = {
+  ...EN,
+  text: { ...EN.text, ...EN_DOCK.text, ...EN_COLUMNS.text, ...EN_FILTERS.text, ...EN_FILTERS_PANEL.text, ...EN_COLUMN_MENU.text },
+};
+
+const chooser = columnsChooser();
+const panels = dock({
+  open: { columns: 'end' },
+  sizes: { min: 200, max: 480 },
+  panels: [{
+    id: 'notes',
+    title: 'Notes',
+    area: 'bottom',
+    mount(host) {
+      const p = host.ownerDocument.createElement('p');
+      p.textContent = 'Shake before use.';
+      host.append(p);
+      return () => p.remove();
+    },
+  }],
+  onChange: (layout) => console.log('dock moved', layout),
+});
+
+const grid = createGrid<Potion>(document.getElementById('potions')!, {
+  rows: [{ id: 'p1', name: 'Fog in a bottle', colour: 'grey', doses: 3 }],
+  columns: [{ id: 'name', header: 'Potion' }, { id: 'colour', header: 'Colour' }, { id: 'doses', header: 'Doses', type: 'number' }],
+  getRowId: (p) => p.id,
+  messages,
+  features: [filters(), chooser, filtersPanel(), columnMenu({ use: { chooser } }), panels],
+});
+
+panels.api(grid)?.show('notes');
+panels.api(grid)?.move('filters', 'start');
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, DzgController, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { dock } from '@dzgrid/dom/dock';
+import { columnsChooser } from '@dzgrid/dom/columns-panel';
+import { filtersPanel } from '@dzgrid/dom/filters-panel';
+import { filters } from '@dzgrid/dom/filters-base';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_DOCK } from '@dzgrid/dom/locales/en-dock';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { EN_FILTERS_PANEL } from '@dzgrid/dom/locales/en-filters-panel';
+import { EN_COLUMN_MENU } from '@dzgrid/dom/locales/en-column-menu';
+
+type Potion = { id: string; name: string; colour: string; doses: number };
+
+const chooser = columnsChooser();
+const panels = dock({ open: { columns: 'end' }, sizes: { min: 200, max: 480 } });
+
+@Component({
+  selector: 'app-potions',
+  imports: [DzGrid],
+  template: `
+    <button type="button" (click)="ctrl?.use(panels)?.show('filters', 'start')">Show the filters</button>
+    <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features"
+      (gridReady)="ctrl = $event" />`,
+})
+export class Potions {
+  readonly rows: Potion[] = [{ id: 'p1', name: 'Fog in a bottle', colour: 'grey', doses: 3 }];
+  readonly columns: DzgColumnOrGroup<Potion>[] = [{ id: 'name', header: 'Potion' }, { id: 'colour', header: 'Colour' }, { id: 'doses', header: 'Doses', type: 'number' }];
+  readonly rowId = (p: Potion) => p.id;
+  readonly messages = {
+    ...EN,
+    text: { ...EN.text, ...EN_DOCK.text, ...EN_COLUMNS.text, ...EN_FILTERS.text, ...EN_FILTERS_PANEL.text, ...EN_COLUMN_MENU.text },
+  };
+  readonly features = [filters(), chooser, filtersPanel(), columnMenu({ use: { chooser } }), panels];
+  readonly panels = panels;
+  ctrl: DzgController<Potion> | null = null;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { dock } from '@dzgrid/dom/dock';
+import { columnsChooser } from '@dzgrid/dom/columns-panel';
+import { filtersPanel } from '@dzgrid/dom/filters-panel';
+import { filters } from '@dzgrid/dom/filters-base';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_DOCK } from '@dzgrid/dom/locales/en-dock';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { EN_FILTERS_PANEL } from '@dzgrid/dom/locales/en-filters-panel';
+import { EN_COLUMN_MENU } from '@dzgrid/dom/locales/en-column-menu';
+
+type Potion = { id: string; name: string; colour: string; doses: number };
+
+const chooser = columnsChooser();
+const panels = dock({ open: { columns: 'end' }, sizes: { min: 200, max: 480 } });
+const grid = document.querySelector<DzGridElement<Potion>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Potion' }, { id: 'colour', header: 'Colour' }, { id: 'doses', header: 'Doses', type: 'number' }];
+grid.getRowId = (p) => p.id;
+grid.messages = {
+  ...EN,
+  text: { ...EN.text, ...EN_DOCK.text, ...EN_COLUMNS.text, ...EN_FILTERS.text, ...EN_FILTERS_PANEL.text, ...EN_COLUMN_MENU.text },
+};
+grid.features = [filters(), chooser, filtersPanel(), columnMenu({ use: { chooser } }), panels];
+grid.rows = [{ id: 'p1', name: 'Fog in a bottle', colour: 'grey', doses: 3 }];
+
+await grid.ready;
+if (grid.grid) panels.api(grid.grid)?.show('filters', 'start');
+```
+
+</Fragment>
+</CodeTabs>
+
+- The panels' ids: `columns` (the chooser), `filters` (the filters panel), and the ids of your own panels.
+- `open: { id: area }` shows a panel there at the start; otherwise the chooser waits at the end until opened (the
+  column menu's « Choose columns », or `chooser.api(grid)?.open()`), and your panels wait at their `area` (`end` by
+  default) until `api.show(id)`.
+- Your panel's `mount(host)` builds its content and may return a cleanup function.
+- `api`: `show`, `hide`, `move`, `collapse`, `resize`, `layout()`, `setLayout(layout)`. With the [state](../state/)
+  feature, where each panel stands is saved with the rest of the grid's state.
+- A floating window (area `float`) is planned, not there yet: it is refused with a warning.
+
+Every option of `dock()` will have its place under [Features](../../features/).

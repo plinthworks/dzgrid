@@ -1,0 +1,154 @@
+---
+title: "Accessibilité"
+description: "Ce que la grille fait pour le clavier et les lecteurs d’écran, et ce qui vous revient."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+
+DzGrid suit le modèle de grille WAI-ARIA (un treegrid pour les arbres et les groupes) et vise WCAG 2.2 AA. Le rapport
+de conformité, en projet, est
+[`docs/a11y/acr-wcag22.md`](https://github.com/plinthworks/dzgrid/blob/main/docs/a11y/acr-wcag22.md) : il dit,
+critère par critère, ce qui est vérifié et comment. Son écoute au lecteur d’écran n’est pas encore faite ; d’ici là,
+les critères qui reposent sur ce que dit un lecteur d’écran sont marqués « partially supports ».
+
+## Ce que fait la grille
+
+- **Un seul arrêt de tabulation.** Tab entre dans la grille sur la cellule qui a le focus ; les flèches, Page Up /
+  Down, Home / End et Ctrl+Home / End se déplacent à l’intérieur ; Tab en sort. Le focus n’est jamais perdu quand les
+  lignes sont triées, filtrées, rechargées ou défilent hors de la vue (les lignes sont virtualisées : la ligne qui a
+  le focus est gardée).
+- **Rôles et états.** `role="grid"` (ou `treegrid`), de vrais nombres de lignes et de colonnes (`aria-rowcount`,
+  `aria-colcount`) même quand seule une partie des lignes est dessinée, `aria-sort` sur les en-têtes triés,
+  `aria-selected` et `aria-expanded` sur les lignes, `aria-readonly` là où l’édition est active.
+- **Annonces.** Un tri, un filtre, un changement de page, un export, une modification refusée, une ligne déplacée sont
+  dits par une région live, dans la langue de la grille, avec les pluriels.
+- **Chaque action a un chemin clavier** : déplacements et tailles des colonnes, déplacements de lignes
+  (Alt+Shift+flèches), la recopie (Ctrl+D / Ctrl+R), les bords et les onglets du dock, les menus (Shift+F10 ou la
+  touche Menu). Le glisser n’est jamais le seul moyen.
+- **Cibles** de 24 px au moins ; **contraste** de 4,5:1 pour chaque texte et de 3:1 pour chaque élément, vérifié par
+  script sur chaque paire de couleurs, en clair et en sombre ; les **couleurs forcées** (Contraste élevé de Windows)
+  prennent les couleurs du système ; le mouvement suit `prefers-reduced-motion`.
+- **Zoom et taille du texte.** Le zoom de la page jusqu’à 400 % fonctionne ; à 320 pixels CSS de large rien ne
+  défile de côté hors de la grille ; les lignes grandissent avec la taille de texte par défaut du lecteur.
+
+Essayez sur la grille ci-dessous au clavier seul : Tab pour y entrer, les flèches pour se déplacer, Entrée sur un
+titre trie, Shift+F10 ouvre le menu d’un titre, Espace sélectionne une ligne.
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Phares de la côte', selection: { mode: 'multi', checkbox: true } }}
+  features={['columns', 'columnMenu']}
+  columns={[
+    { id: 'name', header: 'Phare', flex: 1 },
+    { id: 'range', header: 'Portée (nmi)', type: 'number', width: 140 },
+    { id: 'lit', header: 'Allumé le', type: 'day', width: 150 },
+  ]}
+  rows={[
+    { id: 'p1', name: 'Phare du Cap-Brumeux', range: 22, lit: '1871-10-01' },
+    { id: 'p2', name: 'Roche aux Fous', range: 18, lit: '1903-04-15' },
+    { id: 'p3', name: 'Tour du Marais-Salant', range: 14, lit: '1858-12-20' },
+    { id: 'p4', name: 'Anse de la Lanterne', range: 9, lit: '1924-06-02' },
+  ]}
+/>
+
+## Ce qui vous revient
+
+- **Un nom.** Donnez le réglage `label` (`label="Invoices"`, `[label]` en Angular), sinon toutes les grilles de la
+  page portent le même nom générique (« Grille de données »).
+- **Des textes traduits.** Les titres sont vos chaînes, déjà dans la langue de l’utilisateur ; les phrases propres à
+  la grille viennent de `messages` (l’anglais, le français et l’arabe sont livrés). Les textes d’une partie passent
+  par le `msg('app.key')` de son contexte.
+- **La langue et le sens de la page** (`lang` et `dir` sur `<html>`) : la grille suit `direction: 'auto'` et dit ses
+  phrases dans la langue de ses `messages`.
+- **Les parties sur mesure tiennent leurs promesses.** Une partie de cellule dessine dans une cellule qui appartient à
+  la grille (rôle, focus et touches restent ceux de la grille) ; un bouton dedans doit être un vrai
+  `<button type="button">` avec un nom. Ne déplacez pas le focus vous-même depuis une partie ; dites les choses avec
+  l’`announce(text)` du contexte.
+- **Les couleurs** uniquement par les variables du thème (`--tz-*`, `--dzg-*`), pour que les vérifications de
+  contraste et les modes sombre et couleurs forcées continuent de marcher. Ne portez pas un sens par la seule
+  couleur : une partie `badge` écrit aussi son texte.
+- **Les problèmes.** Un `Problem` ne porte jamais de données des lignes (les lignes peuvent être personnelles),
+  seulement un code, un chemin et un court détail : journalisez-les, ne les montrez pas tels quels à l’utilisateur.
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Lighthouse = { id: string; name: string; range: number };
+
+document.documentElement.lang = 'fr';
+document.documentElement.dir = 'ltr';
+
+const grid = createGrid<Lighthouse>(document.getElementById('lighthouses')!, {
+  rows: [{ id: 'p1', name: 'Phare du Cap-Brumeux', range: 22 }],
+  columns: [{ id: 'name', header: 'Phare' }, { id: 'range', header: 'Portée (nmi)', type: 'number' }],
+  getRowId: (p) => p.id,
+  messages: FR,
+  locale: 'fr-FR',
+  label: 'Phares de la côte',
+  direction: 'auto',
+});
+
+grid.api.announce('Liste mise à jour');
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, DzgController, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Lighthouse = { id: string; name: string; range: number };
+
+@Component({
+  selector: 'app-lighthouses',
+  imports: [DzGrid],
+  template: `
+    <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" locale="fr-FR"
+      label="Phares de la côte" direction="auto" (gridReady)="ctrl = $event" />
+    <button type="button" (click)="ctrl?.announce('Liste mise à jour')">Actualiser</button>`,
+})
+export class Lighthouses {
+  readonly rows: Lighthouse[] = [{ id: 'p1', name: 'Phare du Cap-Brumeux', range: 22 }];
+  readonly columns: DzgColumnOrGroup<Lighthouse>[] = [{ id: 'name', header: 'Phare' }, { id: 'range', header: 'Portée (nmi)', type: 'number' }];
+  readonly rowId = (p: Lighthouse) => p.id;
+  readonly messages = FR;
+  ctrl: DzgController<Lighthouse> | null = null;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid locale="fr-FR" label="Phares de la côte" direction="auto"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Lighthouse = { id: string; name: string; range: number };
+
+const grid = document.querySelector<DzGridElement<Lighthouse>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Phare' }, { id: 'range', header: 'Portée (nmi)', type: 'number' }];
+grid.getRowId = (p) => p.id;
+grid.messages = FR;
+grid.rows = [{ id: 'p1', name: 'Phare du Cap-Brumeux', range: 22 }];
+
+await grid.ready;
+grid.grid?.api.announce('Liste mise à jour');
+```
+
+</Fragment>
+</CodeTabs>
+
+Le parcours d’écoute fait à la main par le propriétaire (clavier et lecteurs d’écran, le chemin essentiel) est
+[`docs/a11y/parcours-essentiel.md`](https://github.com/plinthworks/dzgrid/blob/main/docs/a11y/parcours-essentiel.md).

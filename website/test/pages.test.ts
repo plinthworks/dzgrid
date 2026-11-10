@@ -14,7 +14,13 @@ import { fileURLToPath } from 'node:url';
 const SITE = fileURLToPath(new URL('..', import.meta.url));
 const DOCS = join(SITE, 'src/content/docs');
 /** The pages written so far, batch by batch (docs/website-plan.md); every other page is still a stub. */
-const WRITTEN = ['index', 'getting-started/typescript', 'getting-started/angular', 'getting-started/web-component'];
+const WRITTEN = [
+  'index', 'getting-started/typescript', 'getting-started/angular', 'getting-started/web-component',
+  // Batch 2 (2026-11-10): the guides.
+  'guides/columns', 'guides/sort-filter-search', 'guides/selection-ranges', 'guides/editing', 'guides/tree',
+  'guides/grouping', 'guides/pivot', 'guides/server-data', 'guides/row-moves', 'guides/dock-panels',
+  'guides/export-print', 'guides/state', 'guides/theming-rtl', 'guides/accessibility',
+];
 /** The sidebar's sections: a page lives in one of them (or is the home page). */
 const SECTIONS = ['getting-started', 'guides', 'settings', 'column-options', 'features', 'api'];
 /** A stub's one note: its title, and its sentence around the link to what stands in for the page meanwhile. */
@@ -71,6 +77,22 @@ export function target(from: string, href: string): { slug: string; hash: string
 const slugExists = (lang: Lang, slug: string) => pages[lang].has(slug) || pages[lang].has(`${slug}/index`);
 const fileOf = (lang: Lang, slug: string) => pages[lang].get(slug) ?? pages[lang].get(`${slug}/index`);
 
+/**
+ * Code with its texts and figures taken out: strings (quoted or between backticks), numbers and comments become one
+ * mark each, so an English and a French example of the same code have the same skeleton. The words of a French
+ * example's strings — titles, made-up data — may differ; its names, keys, calls and options may not.
+ */
+export const skeleton = (code: string) =>
+  code
+    .replace(/(^|[^:])\/\/.*$/gm, '$1')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/`(?:[^`\\]|\\.)*`|'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|’/g, 'S')
+    .replace(/\b\d[\d_.]*\b/g, 'N')
+    // The language's bundles: `EN_FILTERS` on the English page is `FR_FILTERS` on the French one.
+    .replace(/\b(?:EN|FR|AR)(_[A-Z_]+)?\b/g, 'L$1')
+    .replace(/[ \t]+$/gm, '')
+    .replace(/\n\s*\n/g, '\n');
+
 /** What must match between the two languages of a written page. */
 function shape(text: string) {
   const b = body(text);
@@ -84,10 +106,12 @@ function shape(text: string) {
     tables: (b.match(/^\|---/gm) ?? []).length,
     links: links(text).filter((l) => !external(l)).map((l) => l.split('#')[0]),
     external: links(text).filter(external),
-    // The examples are the same code in both languages, and the demos the same data (their caption aside).
-    code: [...b.matchAll(/^```[\s\S]*?^```$/gm)].map((m) => m[0]),
-    demoData: [...b.matchAll(/<LiveDemo\b[\s\S]*?\/>/g)].map((m) => m[0].replace(/\n\s*caption="[^"]*"/, '')),
-    data: [...b.matchAll(/^export const [\s\S]*?;$/gm)].map((m) => m[0]),
+    // The examples are the same code in both languages, and the demos the same settings: only their texts and
+    // made-up data are the page's language (owner A, 2026-11-10: French titles and French data on French pages).
+    // A `text` block is a picture in words: translated whole, compared by its place only.
+    code: [...b.matchAll(/^```([^\n]*)\n([\s\S]*?)^```$/gm)].map((m) => (m[1]!.startsWith('text') ? m[1] : `${m[1]}\n${skeleton(m[2]!)}`)),
+    demoData: [...b.matchAll(/<LiveDemo\b[\s\S]*?\/>/g)].map((m) => skeleton(m[0].replace(/\n\s*caption="[^"]*"/, ''))),
+    data: [...b.matchAll(/^export const [\s\S]*?;$/gm)].map((m) => skeleton(m[0])),
   };
 }
 
@@ -101,6 +125,9 @@ describe('the site’s pages', () => {
     expect(anchor('Inputs are compared by `identity`')).toBe('inputs-are-compared-by-identity');
     expect(anchor('Les entrées sont comparées par identité')).toBe('les-entrées-sont-comparées-par-identité');
     expect(anchor('Pensé dès le départ, pas ajouté')).toBe('pensé-dès-le-départ-pas-ajouté');
+    expect(skeleton("const a = { t: 'Title', n: 12.5 }; // a note")).toBe(skeleton('const a = { t: "Titre du livre", n: 3 };'));
+    expect(skeleton("{ id: 'title' }")).not.toBe(skeleton("{ key: 'title' }"));
+    expect(skeleton("import { EN_TREE } from '@dzgrid/dom/locales/en-tree'; messages: EN")).toBe(skeleton("import { FR_TREE } from '@dzgrid/dom/locales/fr-tree'; messages: FR"));
   });
 
   it('every page has its twin in the other language, of the same kind', () => {

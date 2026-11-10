@@ -1,0 +1,294 @@
+---
+title: "Sélection et plages"
+description: "La sélection de lignes, les blocs de cellules, le presse-papiers, la poignée de recopie."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+
+Deux choses différentes : les **lignes** sont sélectionnées (un ensemble de lignes, pour une action sur elles), les
+**cellules** sont prises en **bloc** (un rectangle, pour copier, coller et recopier).
+
+## Sélectionner des lignes
+
+Le réglage `selection` l’active ; aucune fonction n’est requise.
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { idOfDataKey, type SelectionState } from '@dzgrid/core';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Seed = { id: string; plant: string; packets: number };
+
+const grid = createGrid<Seed>(document.getElementById('seeds')!, {
+  rows: [{ id: 's1', plant: 'Courge de lune', packets: 12 }, { id: 's2', plant: 'Haricot de verre', packets: 0 }],
+  columns: [{ id: 'plant', header: 'Plante' }, { id: 'packets', header: 'Sachets', type: 'number' }],
+  getRowId: (s) => s.id,
+  messages: FR,
+  selection: { mode: 'multi', checkbox: true, keepOnFilter: true },
+  onEvent: (e) => {
+    if (e.type === 'selectionChanged') console.log(describe(e.selection), e.count);
+  },
+});
+
+function describe(s: SelectionState): string {
+  const ids = [...s.keys].map(idOfDataKey);
+  return s.mode === 'include' ? `seulement ${ids.join(', ')}` : `toutes les lignes sauf ${ids.join(', ')}`;
+}
+
+grid.kernel.dispatch({ type: 'selection.all' }, 'api');
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, DzgController, selectedIds, type DzgColumnOrGroup } from '@dzgrid/angular';
+import type { SelectionState } from '@dzgrid/core';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Seed = { id: string; plant: string; packets: number };
+
+@Component({
+  selector: 'app-seeds',
+  imports: [DzGrid],
+  template: `
+    <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+      [selection]="{ mode: 'multi', checkbox: true, keepOnFilter: true }"
+      [(selected)]="selected" (gridReady)="ctrl = $event" />
+    <button type="button" (click)="order()">Commander les graines choisies</button>`,
+})
+export class Seeds {
+  readonly rows: Seed[] = [{ id: 's1', plant: 'Courge de lune', packets: 12 }, { id: 's2', plant: 'Haricot de verre', packets: 0 }];
+  readonly columns: DzgColumnOrGroup<Seed>[] = [{ id: 'plant', header: 'Plante' }, { id: 'packets', header: 'Sachets', type: 'number' }];
+  readonly rowId = (s: Seed) => s.id;
+  readonly messages = FR;
+  readonly selected = signal<SelectionState | undefined>(undefined);
+  ctrl: DzgController<Seed> | null = null;
+
+  order() {
+    // Les identifiants, avec la requête quand la sélection est « toutes les lignes sauf celles-ci ».
+    if (this.ctrl) console.log(selectedIds(this.ctrl));
+  }
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { idOfDataKey, type GridEvent } from '@dzgrid/core';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Seed = { id: string; plant: string; packets: number };
+
+const grid = document.querySelector<DzGridElement<Seed>>('dz-grid')!;
+grid.columns = [{ id: 'plant', header: 'Plante' }, { id: 'packets', header: 'Sachets', type: 'number' }];
+grid.getRowId = (s) => s.id;
+grid.messages = FR;
+grid.settings = { selection: { mode: 'multi', checkbox: true, keepOnFilter: true } };
+grid.rows = [{ id: 's1', plant: 'Courge de lune', packets: 12 }, { id: 's2', plant: 'Haricot de verre', packets: 0 }];
+
+grid.addEventListener('dzg-selection-changed', (e) => {
+  const event = (e as CustomEvent<GridEvent<Seed>>).detail;
+  if (event.type === 'selectionChanged') console.log(event.selection.mode, [...event.selection.keys].map(idOfDataKey));
+});
+```
+
+</Fragment>
+</CodeTabs>
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Sachets de graines', selection: { mode: 'multi', checkbox: true } }}
+  columns={[
+    { id: 'plant', header: 'Plante', flex: 1 },
+    { id: 'packets', header: 'Sachets', type: 'number', width: 120 },
+    { id: 'sown', header: 'Semé le', type: 'day', width: 140 },
+  ]}
+  rows={[
+    { id: 's1', plant: 'Courge de lune', packets: 12, sown: '2026-03-02' },
+    { id: 's2', plant: 'Haricot de verre', packets: 0, sown: '2026-03-09' },
+    { id: 's3', plant: 'Radis de velours', packets: 7, sown: '2026-02-23' },
+    { id: 's4', plant: 'Piment lanterne', packets: 4, sown: '2026-04-01' },
+    { id: 's5', plant: 'Pois étourneau', packets: 19, sown: '2026-03-15' },
+  ]}
+  caption="Un clic sélectionne une ligne, Ctrl/Cmd+clic ajoute ou retire, Maj+clic sélectionne une suite ; la case du titre sélectionne tout."
+/>
+
+- `mode` : `none`, `single` ou `multi`. `checkbox: true` ajoute une colonne de cases avec une case dans le titre ;
+  `click: false` laisse les clics au seul focus (sélection par Espace ou par la case).
+- Un clic sélectionne une ligne, Ctrl/Cmd+clic bascule, Maj+clic sélectionne une suite dans l’ordre de l’écran ; Espace
+  bascule la ligne qui a le focus, Ctrl+A sélectionne tout. La sélection survit au tri et au filtrage.
+- La sélection contient des **clés de ligne**, pas vos identifiants. `idOfDataKey(key)` rend l’identifiant ; en
+  Angular, `selectedIds(controller)` rend les identifiants de toute la sélection avec la requête.
+- `mode: 'exclude'` veut dire « toutes les lignes que la requête trouve, sauf ces clés » : après « tout sélectionner »
+  sur des lignes paginées ou venues d’un serveur, la grille ne peut pas les lister, votre serveur le peut en rejouant
+  la requête.
+- `canSelect(row, selection, context)` rend `false`, ou un code de raison, pour refuser une ligne ; il demande la
+  fonction `rules()` de `@dzgrid/dom/rules` (textes `-rules`), qui dit pourquoi à l’utilisateur.
+
+Chaque clé du réglage `selection` aura sa propre page sous [Réglages](../../settings/).
+
+## Blocs de cellules et presse-papiers
+
+`range()` de `@dzgrid/dom/range` ajoute les blocs : Maj+flèches, un glisser, Ctrl+A. Ctrl+C copie le bloc en texte
+séparé par des tabulations, que lisent les tableurs (nombres dans la forme de la locale, débuts de formule protégés),
+Ctrl+X coupe, Ctrl+V colle dans les cellules modifiables, Suppr les vide. Coller et couper demandent
+l’[édition](../editing/). Textes `-range`, CSS `range.css`.
+
+`fill(blocks)` de `@dzgrid/dom/fill` ajoute la poignée de recopie au coin du bloc : faites-la glisser pour recopier le
+bloc, ou pour continuer une série (1, 2, 3… ; les jours de jour en jour) ; Ctrl+D et Ctrl+R recopient vers le bas et
+vers la droite au clavier. Textes `-fill`, CSS `fill.css`. Une recopie ou un collage fait une seule demande
+d’enregistrement et une seule annulation.
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { range } from '@dzgrid/dom/range';
+import { fill } from '@dzgrid/dom/fill';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_EDIT } from '@dzgrid/dom/locales/fr-edit';
+import { FR_EDITORS } from '@dzgrid/dom/locales/fr-editors';
+import { FR_RANGE } from '@dzgrid/dom/locales/fr-range';
+import { FR_FILL } from '@dzgrid/dom/locales/fr-fill';
+import '@dzgrid/theme/edit.css';
+import '@dzgrid/theme/range.css';
+import '@dzgrid/theme/fill.css';
+
+type Shelf = { id: string; aisle: string; jars: number };
+
+const blocks = range();
+const handle = fill(blocks);
+const messages: GridMessages = {
+  ...FR,
+  text: { ...FR.text, ...FR_EDIT.text, ...FR_EDITORS.text, ...FR_RANGE.text, ...FR_FILL.text },
+};
+
+const grid = createGrid<Shelf>(document.getElementById('pantry')!, {
+  rows: [{ id: 'a1', aisle: 'Confitures', jars: 14 }, { id: 'a2', aisle: 'Miel', jars: 9 }],
+  columns: [
+    { id: 'aisle', header: 'Rayon' },
+    { id: 'jars', header: 'Bocaux', type: 'number', editable: true },
+  ],
+  getRowId: (s) => s.id,
+  messages,
+  features: [edit<Shelf>(), editors(), blocks, handle],
+  onEvent: (e) => {
+    if (e.type === 'rangeCopied') console.log(`${e.cells} cellules copiées`);
+  },
+});
+
+const copied = blocks.api(grid)?.copy({ headers: true });   // le bloc en texte, comme le ferait Ctrl+C
+console.log(copied);
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, DzgController, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { range } from '@dzgrid/dom/range';
+import { fill } from '@dzgrid/dom/fill';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_EDIT } from '@dzgrid/dom/locales/fr-edit';
+import { FR_EDITORS } from '@dzgrid/dom/locales/fr-editors';
+import { FR_RANGE } from '@dzgrid/dom/locales/fr-range';
+import { FR_FILL } from '@dzgrid/dom/locales/fr-fill';
+
+type Shelf = { id: string; aisle: string; jars: number };
+
+const blocks = range();
+
+@Component({
+  selector: 'app-pantry',
+  imports: [DzGrid],
+  template: `
+    <dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features"
+      (rangeCopied)="copied = $event.cells" (gridReady)="ctrl = $event" />
+    <button type="button" (click)="copy()">Copier avec les titres</button>
+    <p>{{ copied }} cellules copiées</p>`,
+})
+export class Pantry {
+  readonly rows: Shelf[] = [{ id: 'a1', aisle: 'Confitures', jars: 14 }, { id: 'a2', aisle: 'Miel', jars: 9 }];
+  readonly columns: DzgColumnOrGroup<Shelf>[] = [{ id: 'aisle', header: 'Rayon' }, { id: 'jars', header: 'Bocaux', type: 'number', editable: true }];
+  readonly rowId = (s: Shelf) => s.id;
+  readonly messages = { ...FR, text: { ...FR.text, ...FR_EDIT.text, ...FR_EDITORS.text, ...FR_RANGE.text, ...FR_FILL.text } };
+  readonly features = [edit<Shelf>(), editors(), blocks, fill(blocks)];
+  ctrl: DzgController<Shelf> | null = null;
+  copied = 0;
+
+  copy() {
+    console.log(this.ctrl?.range()?.copy({ headers: true }));
+  }
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { range } from '@dzgrid/dom/range';
+import { fill } from '@dzgrid/dom/fill';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_EDIT } from '@dzgrid/dom/locales/fr-edit';
+import { FR_EDITORS } from '@dzgrid/dom/locales/fr-editors';
+import { FR_RANGE } from '@dzgrid/dom/locales/fr-range';
+import { FR_FILL } from '@dzgrid/dom/locales/fr-fill';
+
+type Shelf = { id: string; aisle: string; jars: number };
+
+const blocks = range();
+const grid = document.querySelector<DzGridElement<Shelf>>('dz-grid')!;
+grid.columns = [{ id: 'aisle', header: 'Rayon' }, { id: 'jars', header: 'Bocaux', type: 'number', editable: true }];
+grid.getRowId = (s) => s.id;
+grid.messages = { ...FR, text: { ...FR.text, ...FR_EDIT.text, ...FR_EDITORS.text, ...FR_RANGE.text, ...FR_FILL.text } };
+grid.features = [edit<Shelf>(), editors(), blocks, fill(blocks)];
+grid.rows = [{ id: 'a1', aisle: 'Confitures', jars: 14 }, { id: 'a2', aisle: 'Miel', jars: 9 }];
+
+await grid.ready;
+if (grid.grid) console.log(blocks.api(grid.grid)?.copy({ headers: true }));
+```
+
+</Fragment>
+</CodeTabs>
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Garde-manger' }}
+  features={['edit', 'range', 'fill', 'contextMenu']}
+  columns={[
+    { id: 'aisle', header: 'Rayon', flex: 1 },
+    { id: 'jars', header: 'Bocaux', type: 'number', width: 110, editable: true },
+    { id: 'shelf', header: 'Étagère', type: 'number', width: 110, editable: true },
+    { id: 'checked', header: 'Vérifié le', type: 'day', width: 150, editable: true },
+  ]}
+  rows={[
+    { id: 'a1', aisle: 'Confitures', jars: 14, shelf: 1, checked: '2026-05-04' },
+    { id: 'a2', aisle: 'Miel', jars: 9, shelf: 2, checked: null },
+    { id: 'a3', aisle: 'Cornichons', jars: 21, shelf: null, checked: null },
+    { id: 'a4', aisle: 'Chutneys', jars: 6, shelf: null, checked: null },
+    { id: 'a5', aisle: 'Marmelades', jars: 11, shelf: null, checked: null },
+  ]}
+  caption="Maj+flèches prennent un bloc ; faites glisser la poignée de son coin vers le bas dans Étagère ou Vérifié le pour continuer la série ; clic droit pour le menu."
+/>
+
+Le menu du clic droit (`contextMenu({ use: { range: blocks, fill: handle } })` de `@dzgrid/dom/context-menu`) offre
+les mêmes actions à la souris.
