@@ -1,0 +1,17 @@
+---
+title: "Réglages"
+description: "Chaque réglage de la grille, une page par réglage."
+sidebar:
+  order: 0
+---
+
+import OptionList from '../../../../components/OptionList.astro';
+
+Ce que prend `createGrid`, ce que le `<dz-grid>` d’Angular prend en entrées et le Web Component en attributs ou en
+propriétés : les mêmes réglages partout. Chaque page donne les faits du réglage (son type, sa valeur par défaut, si
+`update()` le change), ce qu’il fait, un exemple dans les trois saveurs et, quand il montre quelque chose, une grille
+vivante.
+
+Trois sont obligatoires : `getRowId`, `columns` et `messages`. Les autres sont facultatifs.
+
+<OptionList of="settings" />

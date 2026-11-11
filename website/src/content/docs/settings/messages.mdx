@@ -1,0 +1,105 @@
+---
+title: "messages"
+description: "Every text the grid shows or says, in one language: required, the grid bundles none."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Every text the grid shows or says — « No rows », the sort announcements, a menu's items — in one language.
+
+<OptionFacts setting="messages" />
+
+## What it does
+
+The grid carries no language of its own: you give it one bundle, `{ locale, text }`. Ready ones come with the
+package, one import per language and per feature, so a page loads only the texts it uses: `EN`, `FR` and `AR` from
+`@dzgrid/dom/locales/en` (`fr`, `ar`) for the base, and each feature's from its own, as `EN_FILTERS` from
+`@dzgrid/dom/locales/en-filters`. Put a feature's texts into the base's `text`.
+
+The bundle's `locale` gives the grammar of its sentences (one row, two rows) and, unless [`locale`](../locale/) is set,
+the formatting of numbers and dates. A bundle missing one of the base's texts is refused at once: `createGrid` (or
+`update()`) throws a `TypeError` naming the missing keys. Your own bundle can change any text, as `grid.label` or a
+boolean column's `cell.yes` and `cell.no`.
+
+Changing the bundle with `update()` redraws every text, and the cells when the language or its yes and no change.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+
+type Book = { id: string; title: string; pages: number };
+
+const texts = { ...EN, text: { ...EN.text, ...EN_FILTERS.text, 'grid.noRows': 'No books yet' } };
+
+const grid = createGrid<Book>(document.getElementById('books')!, {
+  rows: [],
+  columns: [{ id: 'title', header: 'Title' }, { id: 'pages', header: 'Pages', type: 'number' }],
+  getRowId: (b) => b.id,
+  messages: texts,
+  features: [filters()],
+});
+
+grid.update({ messages: { ...FR, text: { ...FR.text, ...FR_FILTERS.text } } });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { filters } from '@dzgrid/dom/filters';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+
+type Book = { id: string; title: string; pages: number };
+
+@Component({
+  selector: 'app-books',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features" />`,
+})
+export class Books {
+  readonly rows: Book[] = [];
+  readonly columns: DzgColumnOrGroup<Book>[] = [{ id: 'title', header: 'Title' }, { id: 'pages', header: 'Pages', type: 'number' }];
+  readonly rowId = (b: Book) => b.id;
+  readonly messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text, 'grid.noRows': 'No books yet' } };
+  readonly features = [filters()];
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Book = { id: string; title: string; pages: number };
+
+const grid = document.querySelector<DzGridElement<Book>>('dz-grid')!;
+grid.columns = [{ id: 'title', header: 'Title' }, { id: 'pages', header: 'Pages', type: 'number' }];
+grid.getRowId = (b) => b.id;
+grid.messages = { ...EN, text: { ...EN.text, 'grid.noRows': 'No books yet' } };
+grid.rows = [];
+```
+
+</Fragment>
+</CodeTabs>
+
+## See also
+
+- [`locale`](../locale/) — numbers and dates in another locale than the bundle's.
+- [`label`](../label/) — the grid's name.
+- [Getting started](../../getting-started/typescript/).

@@ -1,0 +1,140 @@
+---
+title: "headerHeight"
+description: "La hauteur des lignes d’en-tête en pixels : les titres de colonnes, et les lignes de groupes au-dessus."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+La hauteur des lignes d’en-tête en pixels, à part de celle des lignes.
+
+<OptionFacts setting="headerHeight" />
+
+## Ce qu’il fait
+
+Un nombre règle la ligne des titres de colonnes et chaque ligne de groupes au-dessus : `headerHeight: 70` avec une
+ligne de groupes donne un en-tête de 140 px. Un objet les règle à part : `{ columns: 56, groups: 32 }` ; sans
+`columns`, la hauteur des lignes ; sans `groups`, celle des colonnes.
+
+La même règle que [`rowHeight`](../row-height/) : de 24 à 1 000 px pour un texte de 16 px, agrandie avec la taille du
+texte du lecteur ; toute autre valeur est signalée par un avertissement `invalid-setting` (son chemin nomme le
+membre, `headerHeight.groups`) et ignorée. Une ligne qu’une fonction ajoute sous les titres, comme la ligne de
+filtres, garde la hauteur des lignes. Les titres sur plusieurs lignes (`headerWrap`) et les titres verticaux
+agrandissent la ligne des titres quand il le faut : la plus haute l’emporte.
+
+La grille écrit la hauteur de la ligne des titres de colonnes sur sa racine, `--dzg-header-height`, que votre CSS
+peut lire.
+L’attribut `header-height` de `<dz-grid>` prend un nombre ; l’objet passe par sa propriété `settings`.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { spans } from '@dzgrid/dom/spans';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Run = { id: string; trail: string; km: number; climb: number };
+
+const grid = createGrid<Run>(document.getElementById('courses')!, {
+  rows: [{ id: 'r1', trail: 'Crête des Pins', km: 12.4, climb: 380 }],
+  columns: [
+    { id: 'trail', header: 'Sentier' },
+    { id: 'course', header: 'Parcours', children: [{ id: 'km', header: 'Distance (km)', type: 'number' }, { id: 'climb', header: 'Dénivelé (m)', type: 'number' }] },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+  headerHeight: { columns: 56, groups: 32 },
+  features: [spans()],
+});
+
+grid.update({ headerHeight: 48 });   // chaque ligne d’en-tête à 48 px
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { spans } from '@dzgrid/dom/spans';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Run = { id: string; trail: string; km: number; climb: number };
+
+@Component({
+  selector: 'app-courses',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features" [headerHeight]="{ columns: 56, groups: 32 }" />`,
+})
+export class Runs {
+  readonly rows: Run[] = [{ id: 'r1', trail: 'Crête des Pins', km: 12.4, climb: 380 }];
+  readonly columns: DzgColumnOrGroup<Run>[] = [
+    { id: 'trail', header: 'Sentier' },
+    { id: 'course', header: 'Parcours', children: [{ id: 'km', header: 'Distance (km)', type: 'number' }, { id: 'climb', header: 'Dénivelé (m)', type: 'number' }] },
+  ];
+  readonly rowId = (r: Run) => r.id;
+  readonly messages = FR;
+  readonly features = [spans()];
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid header-height="56"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { spans } from '@dzgrid/dom/spans';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Run = { id: string; trail: string; km: number; climb: number };
+
+const grid = document.querySelector<DzGridElement<Run>>('dz-grid')!;
+grid.columns = [
+  { id: 'trail', header: 'Sentier' },
+  { id: 'course', header: 'Parcours', children: [{ id: 'km', header: 'Distance (km)', type: 'number' }, { id: 'climb', header: 'Dénivelé (m)', type: 'number' }] },
+];
+grid.getRowId = (r) => r.id;
+grid.messages = FR;
+grid.features = [spans()];
+grid.rows = [{ id: 'r1', trail: 'Crête des Pins', km: 12.4, climb: 380 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Démo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Courses en sentier', headerHeight: { columns: 56, groups: 32 } }}
+  features={['spans']}
+  columns={[
+    { id: 'trail', header: 'Sentier', flex: 1 },
+    { id: 'course', header: 'Parcours', children: [
+      { id: 'km', header: 'Distance (km)', type: 'number', width: 140 },
+      { id: 'climb', header: 'Dénivelé (m)', type: 'number', width: 120 },
+    ] },
+  ]}
+  rows={[
+    { id: 'r1', trail: 'Crête des Pins', km: 12.4, climb: 380 },
+    { id: 'r2', trail: 'Tour du lac', km: 8.1, climb: 95 },
+    { id: 'r3', trail: 'Vieille carrière', km: 15.7, climb: 610 },
+    { id: 'r4', trail: 'Vallon des fougères', km: 6.3, climb: 140 },
+  ]}
+  caption="La ligne de groupes à 32 px, les titres de colonnes à 56 px, les lignes aux 32 px de la densité."
+/>
+
+## Voir aussi
+
+- [`rowHeight`](../row-height/) — les lignes en pixels.
+- [`headers`](../headers/) — aucune ligne d’en-tête à l’écran.
+- [Colonnes](../../guides/columns/) — les groupes, et les titres sur plusieurs lignes.

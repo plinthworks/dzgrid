@@ -1,0 +1,126 @@
+---
+title: "busy"
+description: "Dire que les lignes à l’écran se rechargent, sans les couvrir."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Pour une application qui recharge des lignes qu’elle garde à l’écran — une relève chaque minute, son propre bouton
+d’actualisation.
+
+<OptionFacts setting="busy" />
+
+## Ce qu’il fait
+
+`true` : la grille porte `aria-busy="true"` aussitôt, et après 200 ms montre une fine barre sous l’en-tête ; une fois
+montrée, la barre reste au moins 400 ms, pour qu’un rechargement rapide ne clignote pas. Les lignes restent lisibles
+et utilisables. Rien n’est annoncé : un lecteur n’est pas interrompu pour une actualisation. `false` y met fin.
+
+Les lignes d’un serveur (`source`) le font d’elles-mêmes quand une requête part avec des lignes gardées à l’écran ;
+`busy` sert aux lignes que vous donnez. La barre ne se montre jamais avec le message « Chargement… »
+d’[`overlay`](../overlay/). Sous [`motion: false`](../motion/) ou des animations réduites, la barre est immobile ;
+une partie peut dessiner la vôtre à la place (`slots()`).
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Train = { id: string; line: string; delay: number };
+
+const grid = createGrid<Train>(document.getElementById('trains-du-jour')!, {
+  rows: [{ id: 't1', line: 'Ligne de la côte', delay: 4 }],
+  columns: [{ id: 'line', header: 'Ligne' }, { id: 'delay', header: 'Retard (min)', type: 'number' }],
+  getRowId: (t) => t.id,
+  messages: FR,
+});
+
+setInterval(async () => {
+  grid.update({ busy: true });
+  const rows = (await (await fetch('/api/trains')).json()) as Train[];
+  grid.update({ rows, busy: false });
+}, 60_000);
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Train = { id: string; line: string; delay: number };
+
+@Component({
+  selector: 'app-trains',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows()" [columns]="columns" [getRowId]="rowId" [messages]="messages" [busy]="loading()" />`,
+})
+export class Trains {
+  readonly rows = signal<Train[]>([{ id: 't1', line: 'Ligne de la côte', delay: 4 }]);
+  readonly loading = signal(false);
+  readonly columns: DzgColumnOrGroup<Train>[] = [{ id: 'line', header: 'Ligne' }, { id: 'delay', header: 'Retard (min)', type: 'number' }];
+  readonly rowId = (t: Train) => t.id;
+  readonly messages = FR;
+
+  async reload(): Promise<void> {
+    this.loading.set(true);
+    this.rows.set((await (await fetch('/api/trains')).json()) as Train[]);
+    this.loading.set(false);
+  }
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid busy></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Train = { id: string; line: string; delay: number };
+
+const grid = document.querySelector<DzGridElement<Train>>('dz-grid')!;
+grid.columns = [{ id: 'line', header: 'Ligne' }, { id: 'delay', header: 'Retard (min)', type: 'number' }];
+grid.getRowId = (t) => t.id;
+grid.messages = FR;
+grid.rows = (await (await fetch('/api/trains')).json()) as Train[];
+grid.removeAttribute('busy');
+```
+
+</Fragment>
+</CodeTabs>
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Trains', busy: true }}
+  columns={[
+    { id: 'line', header: 'Ligne', flex: 1 },
+    { id: 'delay', header: 'Retard (min)', type: 'number', width: 140 },
+  ]}
+  rows={[
+    { id: 't1', line: 'Ligne de la côte', delay: 4 },
+    { id: 't2', line: 'Ligne de la vallée', delay: 0 },
+    { id: 't3', line: 'Train de nuit', delay: 12 },
+  ]}
+  caption="busy: true — les lignes restent, une fine barre sous l’en-tête dit qu’elles se rechargent."
+/>
+
+## Voir aussi
+
+- [`overlay`](../overlay/) — un message par-dessus les lignes.
+- [Données du serveur et défilement infini](../../guides/server-data/).

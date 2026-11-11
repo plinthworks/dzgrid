@@ -1,0 +1,112 @@
+---
+title: "icons"
+description: "Your own icons for the grid's marks: sort, filter, menu, toggle, submenu, grip."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Your own icons in place of the grid's marks, as SVG.
+
+<OptionFacts setting="icons" />
+
+## What it does
+
+The grid draws its marks itself, with no file. Give an SVG — its text, or an `<svg>` element already in the page,
+copied — for any of them:
+
+| Key | The mark |
+|---|---|
+| `sortAsc`, `sortDesc` | A sorted column's arrow. |
+| `filter` | The header's filter button. |
+| `filterActive` | A filtered column's filter button; without it, `filter` in the accent colour. |
+| `menu` | The column menu's button. |
+| `chevron` | A tree's, a detail's and a column group's toggle, pointing to the end of the line when closed; turned and mirrored as the default is. |
+| `submenu` | A menu item's submenu mark, mirrored in right to left. |
+| `grip` | The handle a row is moved by. |
+
+The icon is drawn in the mark's colour and size (`--dzg-icon-size`), whatever its own fill. It needs `theming()` from
+`@dzgrid/dom/theme`. An icon that is not plain shapes — a `<script>`, a `<style>`, a `<foreignObject>`, an `on…`
+attribute, a link out of the icon, more than 20 000 characters — is refused: the default stays and an
+`invalid-setting` warning is told. The icons are drawn as `data:` images: a Content Security Policy must allow
+`img-src data:`.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { theming } from '@dzgrid/dom/theme';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Plant = { id: string; name: string; height: number };
+
+const funnel = document.querySelector<SVGSVGElement>('#my-funnel')!;   // an <svg> already in the page
+
+createGrid<Plant>(document.getElementById('plants')!, {
+  rows: [{ id: 'p1', name: 'Foxglove', height: 120 }],
+  columns: [{ id: 'name', header: 'Plant' }, { id: 'height', header: 'Height (cm)', type: 'number' }],
+  getRowId: (p) => p.id,
+  messages: EN,
+  icons: { sortAsc: '<svg viewBox="0 0 16 16"><path d="M8 3l5 8H3z"/></svg>', filter: funnel },
+  features: [theming()],
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { theming } from '@dzgrid/dom/theme';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Plant = { id: string; name: string; height: number };
+
+@Component({
+  selector: 'app-plants',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features" [icons]="icons" />`,
+})
+export class Plants {
+  readonly rows: Plant[] = [{ id: 'p1', name: 'Foxglove', height: 120 }];
+  readonly columns: DzgColumnOrGroup<Plant>[] = [{ id: 'name', header: 'Plant' }, { id: 'height', header: 'Height (cm)', type: 'number' }];
+  readonly rowId = (p: Plant) => p.id;
+  readonly messages = EN;
+  readonly features = [theming()];
+  readonly icons = { sortAsc: '<svg viewBox="0 0 16 16"><path d="M8 3l5 8H3z"/></svg>' };
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { theming } from '@dzgrid/dom/theme';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Plant = { id: string; name: string; height: number };
+
+const grid = document.querySelector<DzGridElement<Plant>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Plant' }, { id: 'height', header: 'Height (cm)', type: 'number' }];
+grid.getRowId = (p) => p.id;
+grid.messages = EN;
+grid.features = [theming()];
+grid.icons = { sortAsc: '<svg viewBox="0 0 16 16"><path d="M8 3l5 8H3z"/></svg>' };
+grid.rows = [{ id: 'p1', name: 'Foxglove', height: 120 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+With `injectStyles: false`, load `ICONS_CSS` from `@dzgrid/dom/theme` with the rest of the layout CSS.
+
+## See also
+
+- [`theme`](../theme/) — colours and sizes.
+- [Theming and right to left](../../guides/theming-rtl/#icons).

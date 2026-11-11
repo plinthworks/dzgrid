@@ -1,0 +1,934 @@
+{
+  "settings": [
+    {
+      "name": "rows",
+      "type": "Iterable<T>",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": {
+        "code": "[]"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "property": "rows"
+      }
+    },
+    {
+      "name": "getRowId",
+      "type": "(row: T) => RowIdInput",
+      "resolved": null,
+      "required": true,
+      "doc": "",
+      "default": null,
+      "source": "packages/dom/src/settings.ts",
+      "live": false,
+      "angular": true,
+      "element": {
+        "property": "getRowId"
+      }
+    },
+    {
+      "name": "columns",
+      "type": "readonly ColumnOrGroup<T>[]",
+      "resolved": null,
+      "required": true,
+      "doc": "Columns, or groups of them (a group's header needs the spans feature; the base keeps its columns).",
+      "default": null,
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "property": "columns"
+      }
+    },
+    {
+      "name": "messages",
+      "type": "GridMessages",
+      "resolved": null,
+      "required": true,
+      "doc": "Required (D1): the grid bundles no language.",
+      "default": null,
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "property": "messages"
+      }
+    },
+    {
+      "name": "locale",
+      "type": "string",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": {
+        "token": "messagesLocale"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "attribute": "locale"
+      }
+    },
+    {
+      "name": "timeZone",
+      "type": "string",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": {
+        "code": "'UTC'"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "attribute": "time-zone"
+      }
+    },
+    {
+      "name": "numerals",
+      "type": "'latn' | 'locale'",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": {
+        "code": "'latn'"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "attribute": "numerals"
+      }
+    },
+    {
+      "name": "direction",
+      "type": "'auto' | 'ltr' | 'rtl'",
+      "resolved": null,
+      "required": false,
+      "doc": "`auto` follows the host's direction, and its changes.",
+      "default": {
+        "code": "'auto'"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "attribute": "direction"
+      }
+    },
+    {
+      "name": "density",
+      "type": "'compact' | 'comfortable' | 'spacious'",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": {
+        "code": "'comfortable'"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "attribute": "density"
+      }
+    },
+    {
+      "name": "headers",
+      "type": "'shown' | 'hidden'",
+      "resolved": null,
+      "required": false,
+      "doc": "`'hidden'`: no header row on screen, kept for screen readers and shown while the keyboard is in it (docs/behaviors/hidden-headers.md, 1.9.0). Live. Default `'shown'`.",
+      "default": {
+        "code": "'shown'"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "attribute": "headers"
+      }
+    },
+    {
+      "name": "multiSort",
+      "type": "boolean",
+      "resolved": null,
+      "required": false,
+      "doc": "False: one sort only — Shift+click, Shift+Enter and a header part's `toggleSort(true)` act as a plain click (sort.md « One sort only »); the app's own `sort.set` of several is kept. True by default. Fixed.",
+      "default": {
+        "code": "true"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": false,
+      "angular": true,
+      "element": {
+        "attribute": "multi-sort"
+      }
+    },
+    {
+      "name": "sameRow",
+      "type": "(a: T, b: T) => boolean",
+      "resolved": null,
+      "required": false,
+      "doc": "A full reload (`rows` again, a server's answer) compares a row kept by id with its new copy: equal, it is unchanged and keeps its old object, so only real changes flash (row-identity-transactions.md « Rows compared by value »; `sameValues` from `@dzgrid/core/compare`). A throw: changed, one warning per load. Fixed.",
+      "default": null,
+      "source": "packages/dom/src/settings.ts",
+      "live": false,
+      "angular": true,
+      "element": null
+    },
+    {
+      "name": "rowHeight",
+      "type": "number",
+      "resolved": null,
+      "required": false,
+      "doc": "The row height in px at 16 px text, over the density's (owner D1, virtual-scroll.md « Row height »): from 24 to 1 000, grown with the reader's text size; header rows follow unless `headerHeight` is set. Anything else is told (`invalid-setting`, a warning) and the density's height is used. Live.",
+      "default": {
+        "token": "densityHeight"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "attribute": "row-height"
+      }
+    },
+    {
+      "name": "headerHeight",
+      "type": "number | HeaderHeights",
+      "resolved": null,
+      "required": false,
+      "doc": "The column headers' row and the column-group rows above it, in px at 16 px text (density.md « Header height », 1.9.0): the same rule as `rowHeight` (24 to 1 000, grown with the text size, else told and ignored); a feature's row under the headers (the filter row) keeps the row height. Absent: the row height. Live. 1.10.0: `{ columns, groups }` sets them apart (« Group rows' height »): `columns` absent the row height, `groups` absent the columns'.",
+      "default": {
+        "token": "rowHeight"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "attribute": "header-height"
+      }
+    },
+    {
+      "name": "selection",
+      "type": "{ readonly mode: 'none' | 'single' | 'multi'; readonly checkbox?: boolean; readonly click?: boolean; readonly keepOnFilter?: boolean; readonly canSelect?: (row: DataNode<T>, selection: SelectionState, context: unknown) => boolean | string }",
+      "resolved": null,
+      "required": false,
+      "doc": "`keepOnFilter`: false clears the selection when a filter or the search changes (a sort or a page never does); true by default, rows ticked stay ticked even once hidden. `canSelect` (step 21, docs/behaviors/selection-rules.md, needs `rules()`): whether a row may join the selection; true allows, false refuses, a string refuses and is said ('' refuses unsaid). Never asked to untick; its `selection` keeps changing while one action is vetted (copy it to keep it).",
+      "default": {
+        "code": "{ mode: 'none' }"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": null
+    },
+    {
+      "name": "context",
+      "type": "unknown",
+      "resolved": null,
+      "required": false,
+      "doc": "The application's own context (step 21): handed to every part (`context`), `canSelect`, the export's `canExport` and the tooltip callback. Live; a new value is a new identity (pass a new object).",
+      "default": null,
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": null
+    },
+    {
+      "name": "rowClass",
+      "type": "(c: RowClassContext<T>) => string | null | undefined",
+      "resolved": null,
+      "required": false,
+      "doc": "Classes for a data row from its data (showcase themes step 6, cell-class.md): space-separated, null for none; asked when the row is bound again (another row, new data, columns, language, context or rule). Live. Keep the same function from one update to the next: a new one (an inline arrow) binds every row again.",
+      "default": null,
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": null
+    },
+    {
+      "name": "overlay",
+      "type": "'loading' | 'error' | null",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": {
+        "code": "null"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "attribute": "overlay"
+      }
+    },
+    {
+      "name": "busy",
+      "type": "boolean",
+      "resolved": null,
+      "required": false,
+      "doc": "The host is reloading rows it keeps on screen (a poll, its own arrows; 1.4.0, overlays.md « Busy bar »): `aria-busy` on the grid at once, a thin bar under the header after 200 ms (held 400 ms once shown), never with the loading overlay. A server's request with rows kept shows it by itself. Live; nothing announced.",
+      "default": {
+        "code": "false"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "attribute": "busy"
+      }
+    },
+    {
+      "name": "label",
+      "type": "string",
+      "resolved": null,
+      "required": false,
+      "doc": "The grid's accessible name, already translated; the bundle's `grid.label` otherwise.",
+      "default": {
+        "token": "bundleLabel"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "attribute": "label"
+      }
+    },
+    {
+      "name": "tooltips",
+      "type": "{ readonly delayMs?: number }",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": {
+        "code": "{ delayMs: 500 }"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": null
+    },
+    {
+      "name": "onEvent",
+      "type": "(e: GridEvent<T>) => void",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": false,
+      "element": null
+    },
+    {
+      "name": "injectStyles",
+      "type": "boolean",
+      "resolved": null,
+      "required": false,
+      "doc": "False when the host loads the layout CSS itself (strict CSP).",
+      "default": {
+        "code": "true"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": false,
+      "angular": true,
+      "element": null
+    },
+    {
+      "name": "nonce",
+      "type": "string",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/dom/src/settings.ts",
+      "live": false,
+      "angular": true,
+      "element": null
+    },
+    {
+      "name": "overscan",
+      "type": "{ readonly rows?: number; readonly cols?: number }",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": {
+        "token": "overscanAuto"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": null
+    },
+    {
+      "name": "searchWarmup",
+      "type": "'idle' | 'off'",
+      "resolved": null,
+      "required": false,
+      "doc": "`idle` prepares the quick search after each load, in idle time, so the first keystroke is instant — at the cost of holding the search caches (627 bytes a row measured on dataset A's ten text columns; budget for the owner, D13). Off by default (D13).",
+      "default": {
+        "code": "'off'"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": null
+    },
+    {
+      "name": "parts",
+      "type": "Readonly<Record<string, SlotPart>>",
+      "resolved": null,
+      "required": false,
+      "doc": "Parts by name: a column says `ui: { cell: 'statusBadge' }`, or a part replaces a default for a type (`'cell.number'`). One registry per grid.",
+      "default": null,
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "property": "parts"
+      }
+    },
+    {
+      "name": "source",
+      "type": "SourceBinding<T>",
+      "resolved": null,
+      "required": false,
+      "doc": "A server's rows: `sourceRows(data, …)` from `@dzgrid/core/server`. Live: another source asks again.",
+      "default": null,
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "property": "source"
+      }
+    },
+    {
+      "name": "operations",
+      "type": "OperationsInput",
+      "resolved": "\"client\" | \"server\" | Partial<Operations>",
+      "required": false,
+      "doc": "Where filter, search, sort and page run (`'server'`, `'client'`, or per operation). Set once.",
+      "default": {
+        "token": "operationsAuto"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": false,
+      "angular": true,
+      "element": null
+    },
+    {
+      "name": "pagination",
+      "type": "PageOptions",
+      "resolved": null,
+      "required": false,
+      "doc": "Paged in the browser: one page of the filtered, sorted rows at a time. Set once.",
+      "default": null,
+      "source": "packages/dom/src/settings.ts",
+      "live": false,
+      "angular": true,
+      "element": null
+    },
+    {
+      "name": "filterKinds",
+      "type": "readonly AnyFilterKind[]",
+      "resolved": null,
+      "required": false,
+      "doc": "Custom filter kinds (docs/behaviors/filter-custom.md), for the browser's filter and a server's. Set once.",
+      "default": null,
+      "source": "packages/dom/src/settings.ts",
+      "live": false,
+      "angular": true,
+      "element": null
+    },
+    {
+      "name": "clock",
+      "type": "() => number",
+      "resolved": null,
+      "required": false,
+      "doc": "The clock (milliseconds since 1970 UTC) date shortcuts count from (filter-relative.md); `Date.now` by default. Set once.",
+      "default": {
+        "code": "Date.now"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": false,
+      "angular": true,
+      "element": null
+    },
+    {
+      "name": "fullWidth",
+      "type": "(row: Readonly<T>) => boolean | { readonly part?: string }",
+      "resolved": null,
+      "required": false,
+      "doc": "Rows drawn as one cell across the whole width (a title, a note): true, or the part that draws it. Needs the spans feature; the base ignores it.",
+      "default": null,
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": null
+    },
+    {
+      "name": "motion",
+      "type": "boolean",
+      "resolved": null,
+      "required": false,
+      "doc": "False: no motion (`@dzgrid/dom/motion-gsap` stops, `data-motion=\"off\"` on the root for the theme). Live.",
+      "default": {
+        "code": "true"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "attribute": "motion"
+      }
+    },
+    {
+      "name": "theme",
+      "type": "GridTheme",
+      "resolved": null,
+      "required": false,
+      "doc": "CSS variables written on the grid's root, by typed keys (`{ rowOddBg: '…', headerWeight: 500 }`; presentation-settings.md 20–22, 1.9.0). Needs `theming()` from `@dzgrid/dom/theme`; a bad key or value is told (`invalid-setting`) and skipped. Live.",
+      "default": null,
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "property": "theme"
+      }
+    },
+    {
+      "name": "icons",
+      "type": "GridIcons",
+      "resolved": null,
+      "required": false,
+      "doc": "The application's own icons for the grid's marks (presentation-settings.md 17–19). Needs `theming()`. Live.",
+      "default": null,
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "property": "icons"
+      }
+    },
+    {
+      "name": "features",
+      "type": "readonly GridFeature[]",
+      "resolved": null,
+      "required": false,
+      "doc": "Optional features (`filters()`, `pagination()`…), set up once with the grid.",
+      "default": {
+        "code": "[]"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": false,
+      "angular": true,
+      "element": {
+        "property": "features"
+      }
+    }
+  ],
+  "columns": [
+    {
+      "name": "id",
+      "type": "string",
+      "resolved": null,
+      "required": true,
+      "doc": "Required and stable: the key of the column's state.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "field",
+      "type": "string",
+      "resolved": null,
+      "required": false,
+      "doc": "A path into the row (`a.b.c`); defaults to the id when no `value` is given.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "value",
+      "type": "(row: Readonly<T>) => V",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "header",
+      "type": "string",
+      "resolved": null,
+      "required": false,
+      "doc": "Already translated by the host.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "headerShort",
+      "type": "string",
+      "resolved": null,
+      "required": false,
+      "doc": "A shorter header, without unit, where room is short (the pivot's created headers and chips, pivot.md 38); absent: `header`.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "type",
+      "type": "ColumnType",
+      "resolved": "\"number\" | \"boolean\" | \"text\" | \"day\" | \"instant\" | \"enum\" | \"custom\"",
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "codec",
+      "type": "ValueCodec<V>",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "enumOptions",
+      "type": "readonly EnumOption[]",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "assumeZone",
+      "type": "string",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "numberFormat",
+      "type": "NumberFormatSpec",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "instantFormat",
+      "type": "InstantFormatSpec",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "width",
+      "type": "number",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "minWidth",
+      "type": "number",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "maxWidth",
+      "type": "number",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "flex",
+      "type": "number",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "resizable",
+      "type": "boolean",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "movable",
+      "type": "boolean",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "hideable",
+      "type": "false",
+      "resolved": null,
+      "required": false,
+      "doc": "`false`: the column menu's « Hide » is disabled for it (Phase 6 step 3, column-menu.md 13).",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "menu",
+      "type": "false",
+      "resolved": null,
+      "required": false,
+      "doc": "`false`: no column menu (no ⋮, no right-click menu; its keys left to the page). Phase 6 step 3.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "chooser",
+      "type": "false",
+      "resolved": null,
+      "required": false,
+      "doc": "`false`: left out of the column chooser's list (still hideable by the menu). Phase 6 step 4, columns-chooser.md 6.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "sortable",
+      "type": "boolean",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "groupable",
+      "type": "boolean",
+      "resolved": null,
+      "required": false,
+      "doc": "`false`: rows are never grouped by it (`@dzgrid/core/grouping`, row-grouping.md 14; the zone and the menu refuse it). Phase 7.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "aggFunc",
+      "type": "AggFuncName | AggFn<V>",
+      "resolved": null,
+      "required": false,
+      "doc": "Its total on group rows, footers and the grand total (`@dzgrid/core/grouping`, aggregation.md 2–3): a built-in, or a function of the group's values. The grouping's own `aggFuncs` win over it. Phase 7.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "total",
+      "type": "AggFuncName | AggFn<V>",
+      "resolved": null,
+      "required": false,
+      "doc": "Its total in the totals row of a flat grid (`@dzgrid/dom/totals-row`, docs/behaviors/totals-row.md; 1.9.0): the same built-ins and rules as `aggFunc`, or a function of the column's values (`level` null). Needs that feature.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "headerVertical",
+      "type": "boolean",
+      "resolved": null,
+      "required": false,
+      "doc": "Its header's title written upwards (`@dzgrid/dom/vertical-headers`, docs/behaviors/vertical-headers.md; 1.9.0): the header row grows to the longest such title. Needs that feature; keys and screen readers unchanged.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "headerWrap",
+      "type": "boolean",
+      "resolved": null,
+      "required": false,
+      "doc": "Its header's title on several lines (`@dzgrid/dom/wrapped-headers`, docs/behaviors/header-wrap.md; 1.10.0): the column headers' row grows to the tallest wrapped title, at most `maxLines`. Needs that feature.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "collapsePriority",
+      "type": "number",
+      "resolved": null,
+      "required": false,
+      "doc": "With `@dzgrid/dom/responsive` (docs/behaviors/responsive-columns.md; 1.9.0): when the columns do not fit the view, which collapse under their rows first — the highest first, the last on screen among equals; 0 never. Default 1.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "filter",
+      "type": "false | { readonly kind?: string; readonly floating?: boolean; readonly debounceMs?: number; readonly ops?: readonly string[]; readonly optionPart?: string; readonly exclude?: false; readonly start?: 'all' | 'empty'; readonly selectAll?: boolean; readonly maxConditions?: number; readonly matchCase?: boolean; readonly condition?: boolean }",
+      "resolved": null,
+      "required": false,
+      "doc": "`false`: not filterable. `kind`: the filter kind whose UI the column shows (a built-in or a custom kind's name). `floating`: a box in the floating filter row (`@dzgrid/dom/filters`; the grid's `filters({ floating })` otherwise, `false` keeps this column out). `debounceMs`: the pause before what is typed there applies (150 in the browser, 300 on a server by default). `ops`: the operators its popup offers, in this order (the kind's own list when absent). `optionPart`: the `filterOption` part painting each row of a set filter's list (feedback pass C). `exclude: false`: its set filter never writes an `exclude` filter, nor `blanks` (docs/behaviors/filter-set.md « Include only »). `start: 'empty'`: its set list opens with nothing ticked when no filter is in force, and nothing ticked is no filter (default `'all'`); `selectAll: false`: no « Select all » box (filter-set.md « Starting empty »). Phase 9 (docs/behaviors/filter-combined.md, filter-multi.md): `maxConditions` 1 to 5, the rows its popup offers (over `filters({ maxConditions })`); `matchCase`: a « Match case » box on each text row; `condition` (a set column): a condition above the list, both stored as a `combined` AND.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "pinned",
+      "type": "Side | null",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "hidden",
+      "type": "boolean",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "align",
+      "type": "'start' | 'center' | 'end'",
+      "resolved": null,
+      "required": false,
+      "doc": "",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "headerAlign",
+      "type": "'start' | 'center' | 'end'",
+      "resolved": null,
+      "required": false,
+      "doc": "The header title's place (presentation-settings.md 3, 1.9.0): over `align`, which the title follows by default (a number column's title at the end, as its cells).",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "wrap",
+      "type": "boolean",
+      "resolved": null,
+      "required": false,
+      "doc": "The cells' text wraps on several lines (Phase 6 step 9, docs/behaviors/auto-height.md 1): with `@dzgrid/dom/auto-height` the row grows to its tallest wrapped cell; without it, or under a fixed `rowHeight`, the text wraps and is clipped.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "ui",
+      "type": "{ readonly cell?: string; readonly header?: string; readonly tooltip?: string; readonly cellClass?: (c: CellClassContext<T, V>) => string | null | undefined; readonly headerClass?: string; readonly data?: Readonly<Record<string, unknown>> }",
+      "resolved": null,
+      "required": false,
+      "doc": "Parts by name for this column (a cell renderer, a header, a tooltip): plain names, resolved by the grid's registry. `cellClass` (step 26, docs/behaviors/cell-class.md): classes for a body cell from its data, space-separated (null: none). `headerClass` (showcase themes step 6): classes for the column's header cell, space-separated. `data` (feedback pass D): the app's own plain data for its parts, delivered as is (`c.column.def.ui.data`, same reference) to every part of the column. Any other key is a warning `unknown-ui-key` from the DOM layer.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "headerTooltip",
+      "type": "string",
+      "resolved": null,
+      "required": false,
+      "doc": "Shown over the header, already translated by the host.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "tooltip",
+      "type": "(value: V | null, row: Readonly<T>, context: unknown) => string | null",
+      "resolved": null,
+      "required": false,
+      "doc": "`context`: the grid's `settings.context` (step 21).",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "merge",
+      "type": "true | ((a: SpanCtx<T>, b: SpanCtx<T>) => boolean) | { readonly same?: (a: SpanCtx<T>, b: SpanCtx<T>) => boolean; readonly within?: readonly string[] }",
+      "resolved": null,
+      "required": false,
+      "doc": "Consecutive rows with the same value show one tall cell (docs/behaviors/spans.md). `true` compares the values' stable text; a function decides; `within` cuts a run where the listed columns change. Needs the spans feature; the base ignores it.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "rowSpan",
+      "type": "(ctx: SpanCtx<T>) => number",
+      "resolved": null,
+      "required": false,
+      "doc": "How many rows this cell covers, from the data (1 when absent). Needs the spans feature.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "colSpan",
+      "type": "(ctx: SpanCtx<T>) => number",
+      "resolved": null,
+      "required": false,
+      "doc": "How many columns this cell covers, from the data (1 when absent). Needs the spans feature.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "groupShow",
+      "type": "'open' | 'closed'",
+      "resolved": null,
+      "required": false,
+      "doc": "Under a collapsible group (header-groups.md 1): shown only while it is open (`'open'`) or closed (`'closed'`); absent, in both. Ignored under a group that does not open and close.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "csv",
+      "type": "'text'",
+      "resolved": null,
+      "required": false,
+      "doc": "`'text'`: in a CSV file, a digits-only value is written `=\"0123\"` so Excel keeps it as text (csv-export.md).",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "editable",
+      "type": "EditableRule<T>",
+      "resolved": null,
+      "required": false,
+      "doc": "Whether a data row's cell can be edited (editing.md 1): `true`, or a rule told the row and the grid's `settings.context`; only `true` means yes. Never a detail, filler or loading row.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "validate",
+      "type": "(value: V | null, row: Readonly<T>, context: unknown) => string | null | undefined",
+      "resolved": null,
+      "required": false,
+      "doc": "A refusal code (`validation.<code>` in the DOM's messages) or null: run by `@dzgrid/core/edit` after the column's `edit` checks (edit-validation.md 1). Synchronous only (owner S3-O1).",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "edit",
+      "type": "EditChecks<T, V>",
+      "resolved": null,
+      "required": false,
+      "doc": "The simple checks of a kept value (owner S3-O3), run by `@dzgrid/core/edit`; the base reads none of it.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    }
+  ]
+}

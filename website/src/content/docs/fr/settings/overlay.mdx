@@ -1,0 +1,127 @@
+---
+title: "overlay"
+description: "Couvrir les lignes de « Chargement… » ou du message d’erreur, ou laisser la grille décider."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Le message par-dessus les lignes : chargement, erreur, rien à montrer.
+
+<OptionFacts setting="overlay" />
+
+## Ce qu’il fait
+
+Sans lui (ou à `null`), la grille décide seule : « Chargement… » pendant que les premières lignes d’un serveur
+arrivent, le message d’erreur quand la requête d’un serveur a échoué, « Aucune ligne » quand il n’y en a pas, « Aucune
+ligne ne correspond aux filtres » quand les filtres ou la recherche les cachent toutes — et rien sinon. Sous le message
+d’erreur, imposé ou non, un bouton « Réessayer » redemande les lignes (celles d’un serveur : une nouvelle requête).
+
+`'loading'` et `'error'` en imposent un, quelles que soient les lignes : pour une application qui charge ses lignes
+elle-même et les donne par `rows`. Redonnez `null` une fois qu’elles sont là. Les textes sont ceux du paquet
+(`grid.loading`, `grid.error`, `grid.noRows`, `grid.noMatches`) ; une partie peut dessiner le message à la place
+(`slots()`).
+
+Pour dire que des lignes à l’écran se rechargent, sans les couvrir : [`busy`](../busy/).
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Station = { id: string; name: string; rain: number };
+
+const grid = createGrid<Station>(document.getElementById('stations')!, {
+  columns: [{ id: 'name', header: 'Station' }, { id: 'rain', header: 'Pluie (mm)', type: 'number' }],
+  getRowId: (s) => s.id,
+  messages: FR,
+  overlay: 'loading',
+});
+
+fetch('/api/stations')
+  .then((r) => r.json() as Promise<Station[]>)
+  .then((rows) => grid.update({ rows, overlay: null }))
+  .catch(() => grid.update({ overlay: 'error' }));
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Station = { id: string; name: string; rain: number };
+
+@Component({
+  selector: 'app-stations-meteo',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows()" [columns]="columns" [getRowId]="rowId" [messages]="messages" [overlay]="overlay()" />`,
+})
+export class Stations {
+  readonly rows = signal<Station[]>([]);
+  readonly overlay = signal<'loading' | 'error' | null>('loading');
+  readonly columns: DzgColumnOrGroup<Station>[] = [{ id: 'name', header: 'Station' }, { id: 'rain', header: 'Pluie (mm)', type: 'number' }];
+  readonly rowId = (s: Station) => s.id;
+  readonly messages = FR;
+
+  constructor() {
+    fetch('/api/stations')
+      .then((r) => r.json() as Promise<Station[]>)
+      .then((rows) => (this.rows.set(rows), this.overlay.set(null)))
+      .catch(() => this.overlay.set('error'));
+  }
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid overlay="loading"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Station = { id: string; name: string; rain: number };
+
+const grid = document.querySelector<DzGridElement<Station>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Station' }, { id: 'rain', header: 'Pluie (mm)', type: 'number' }];
+grid.getRowId = (s) => s.id;
+grid.messages = FR;
+fetch('/api/stations')
+  .then((r) => r.json() as Promise<Station[]>)
+  .then((rows) => ((grid.rows = rows), grid.removeAttribute('overlay')))
+  .catch(() => grid.setAttribute('overlay', 'error'));
+```
+
+</Fragment>
+</CodeTabs>
+
+## Démo
+
+<LiveDemo
+  height={200}
+  settings={{ label: 'Stations météo' }}
+  columns={[
+    { id: 'name', header: 'Station', flex: 1 },
+    { id: 'rain', header: 'Pluie (mm)', type: 'number', width: 130 },
+  ]}
+  rows={[]}
+  caption="Aucun message imposé et aucune ligne : la grille dit « Aucune ligne » d’elle-même."
+/>
+
+## Voir aussi
+
+- [`busy`](../busy/) — des lignes rechargées et gardées à l’écran.
+- [Données du serveur et défilement infini](../../guides/server-data/) — les messages qu’apportent d’elles-mêmes les
+  lignes d’un serveur.

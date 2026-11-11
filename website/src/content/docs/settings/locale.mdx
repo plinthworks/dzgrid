@@ -1,0 +1,128 @@
+---
+title: "locale"
+description: "How numbers and dates are written and how text sorts, apart from the texts' language."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+How the cells write numbers and dates, and how text sorts — apart from the language of the texts.
+
+<OptionFacts setting="locale" />
+
+## What it does
+
+A language tag (`'en-GB'`, `'fr-CH'`, `'ar-DZ'`): `1 234,5` or `1,234.5`, `03/02/2026` or `2026-03-02`, and the order
+of « é » among the other letters when a text column is sorted. Left out, the grid takes the [`messages`](../messages/)
+bundle's `locale` — so English texts with Swiss numbers are `messages: EN, locale: 'de-CH'`.
+
+The calendar is always the Gregorian one, whatever the tag says, and the digits are Latin unless
+[`numerals`](../numerals/) asks for the language's own. A malformed tag throws a `RangeError`: from
+`createGrid`, or from `update()`, which then leaves the grid as it was. The
+`<dz-grid>` attribute does not throw: it leaves the value out and tells an `invalid-setting` warning.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Cheese = { id: string; name: string; price: number; aged: string };
+
+const grid = createGrid<Cheese>(document.getElementById('cheeses')!, {
+  rows: [{ id: 'c1', name: 'Mountain wheel', price: 1234.5, aged: '2025-11-02' }],
+  columns: [
+    { id: 'name', header: 'Cheese' },
+    { id: 'price', header: 'Price', type: 'number' },
+    { id: 'aged', header: 'Aged since', type: 'day' },
+  ],
+  getRowId: (c) => c.id,
+  messages: EN,
+  locale: 'de-CH',
+});
+
+grid.update({ locale: 'en-GB' });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Cheese = { id: string; name: string; price: number; aged: string };
+
+@Component({
+  selector: 'app-cheeses',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" locale="de-CH" />`,
+})
+export class Cheeses {
+  readonly rows: Cheese[] = [{ id: 'c1', name: 'Mountain wheel', price: 1234.5, aged: '2025-11-02' }];
+  readonly columns: DzgColumnOrGroup<Cheese>[] = [
+    { id: 'name', header: 'Cheese' },
+    { id: 'price', header: 'Price', type: 'number' },
+    { id: 'aged', header: 'Aged since', type: 'day' },
+  ];
+  readonly rowId = (c: Cheese) => c.id;
+  readonly messages = EN;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid locale="de-CH"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Cheese = { id: string; name: string; price: number; aged: string };
+
+const grid = document.querySelector<DzGridElement<Cheese>>('dz-grid')!;
+grid.columns = [
+  { id: 'name', header: 'Cheese' },
+  { id: 'price', header: 'Price', type: 'number' },
+  { id: 'aged', header: 'Aged since', type: 'day' },
+];
+grid.getRowId = (c) => c.id;
+grid.messages = EN;
+grid.rows = [{ id: 'c1', name: 'Mountain wheel', price: 1234.5, aged: '2025-11-02' }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Cheeses', locale: 'de-CH' }}
+  columns={[
+    { id: 'name', header: 'Cheese', flex: 1 },
+    { id: 'price', header: 'Price', type: 'number', width: 130, numberFormat: { minimumFractionDigits: 2 } },
+    { id: 'aged', header: 'Aged since', type: 'day', width: 140 },
+  ]}
+  rows={[
+    { id: 'c1', name: 'Mountain wheel', price: 1234.5, aged: '2025-11-02' },
+    { id: 'c2', name: 'Valley blue', price: 87.2, aged: '2026-01-15' },
+    { id: 'c3', name: 'Smoked round', price: 412, aged: '2025-08-30' },
+  ]}
+  caption="English texts, Swiss numbers and dates (de-CH)."
+/>
+
+## See also
+
+- [`numerals`](../numerals/) — the language's own digits.
+- [`timeZone`](../time-zone/) — the zone instants are shown in.
+- [`messages`](../messages/) — the texts' language.

@@ -1,0 +1,107 @@
+---
+title: "messages"
+description: "Tous les textes que la grille affiche ou dit, dans une langue : obligatoire, la grille n’en embarque aucun."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Tous les textes que la grille affiche ou dit — « Aucune ligne », les annonces de tri, les entrées d’un menu — dans
+une langue.
+
+<OptionFacts setting="messages" />
+
+## Ce qu’il fait
+
+La grille n’a pas de langue à elle : vous lui donnez un paquet de textes, `{ locale, text }`. Le paquet en fournit de
+prêts, un import par langue et par fonction, pour qu’une page ne charge que les textes qu’elle emploie : `EN`, `FR` et
+`AR` depuis `@dzgrid/dom/locales/en` (`fr`, `ar`) pour la base, et ceux de chaque fonction depuis le sien, comme
+`FR_FILTERS` depuis `@dzgrid/dom/locales/fr-filters`. Mettez les textes d’une fonction dans le `text` de la base.
+
+Le `locale` du paquet donne la grammaire de ses phrases (une ligne, deux lignes) et, sauf si [`locale`](../locale/)
+est réglé, le format des nombres et des dates. Un paquet auquel manque un texte de la base est refusé aussitôt :
+`createGrid` (ou `update()`) lève une `TypeError` qui nomme les clés manquantes. Votre propre paquet peut changer
+n’importe quel texte, comme `grid.label` ou le `cell.yes` et le `cell.no` d’une colonne booléenne.
+
+Changer de paquet par `update()` redessine tous les textes, et les cellules quand la langue ou son oui et son non
+changent.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+
+type Book = { id: string; title: string; pages: number };
+
+const texts = { ...FR, text: { ...FR.text, ...FR_FILTERS.text, 'grid.noRows': 'Pas encore de livre' } };
+
+const grid = createGrid<Book>(document.getElementById('livres')!, {
+  rows: [],
+  columns: [{ id: 'title', header: 'Titre' }, { id: 'pages', header: 'Pages', type: 'number' }],
+  getRowId: (b) => b.id,
+  messages: texts,
+  features: [filters()],
+});
+
+grid.update({ messages: { ...EN, text: { ...EN.text, ...EN_FILTERS.text } } });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { filters } from '@dzgrid/dom/filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+
+type Book = { id: string; title: string; pages: number };
+
+@Component({
+  selector: 'app-livres',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features" />`,
+})
+export class Books {
+  readonly rows: Book[] = [];
+  readonly columns: DzgColumnOrGroup<Book>[] = [{ id: 'title', header: 'Titre' }, { id: 'pages', header: 'Pages', type: 'number' }];
+  readonly rowId = (b: Book) => b.id;
+  readonly messages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text, 'grid.noRows': 'Pas encore de livre' } };
+  readonly features = [filters()];
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Book = { id: string; title: string; pages: number };
+
+const grid = document.querySelector<DzGridElement<Book>>('dz-grid')!;
+grid.columns = [{ id: 'title', header: 'Titre' }, { id: 'pages', header: 'Pages', type: 'number' }];
+grid.getRowId = (b) => b.id;
+grid.messages = { ...FR, text: { ...FR.text, 'grid.noRows': 'Pas encore de livre' } };
+grid.rows = [];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Voir aussi
+
+- [`locale`](../locale/) — les nombres et les dates dans une autre langue que celle du paquet.
+- [`label`](../label/) — le nom de la grille.
+- [Prise en main](../../getting-started/typescript/).

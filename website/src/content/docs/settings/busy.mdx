@@ -1,0 +1,124 @@
+---
+title: "busy"
+description: "Say that the rows on screen are being reloaded, without covering them."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+For an application that reloads rows it keeps on screen — a poll every minute, its own refresh button.
+
+<OptionFacts setting="busy" />
+
+## What it does
+
+`true`: the grid says `aria-busy="true"` at once, and after 200 ms shows a thin bar under the header; once shown, the
+bar stays at least 400 ms, so a quick reload does not flicker. The rows stay readable and usable. Nothing is
+announced: a reader is not interrupted for a refresh. `false` ends it.
+
+A server's rows (`source`) do this by themselves when a request is made with rows kept on screen; `busy` is for the
+rows you give. The bar never shows with the « Loading… » [`overlay`](../overlay/). Under
+[`motion: false`](../motion/) or reduced motion, the bar is still; a part can draw your own instead (`slots()`).
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Train = { id: string; line: string; delay: number };
+
+const grid = createGrid<Train>(document.getElementById('trains')!, {
+  rows: [{ id: 't1', line: 'Coast line', delay: 4 }],
+  columns: [{ id: 'line', header: 'Line' }, { id: 'delay', header: 'Delay (min)', type: 'number' }],
+  getRowId: (t) => t.id,
+  messages: EN,
+});
+
+setInterval(async () => {
+  grid.update({ busy: true });
+  const rows = (await (await fetch('/api/trains')).json()) as Train[];
+  grid.update({ rows, busy: false });
+}, 60_000);
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Train = { id: string; line: string; delay: number };
+
+@Component({
+  selector: 'app-trains',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows()" [columns]="columns" [getRowId]="rowId" [messages]="messages" [busy]="loading()" />`,
+})
+export class Trains {
+  readonly rows = signal<Train[]>([{ id: 't1', line: 'Coast line', delay: 4 }]);
+  readonly loading = signal(false);
+  readonly columns: DzgColumnOrGroup<Train>[] = [{ id: 'line', header: 'Line' }, { id: 'delay', header: 'Delay (min)', type: 'number' }];
+  readonly rowId = (t: Train) => t.id;
+  readonly messages = EN;
+
+  async reload(): Promise<void> {
+    this.loading.set(true);
+    this.rows.set((await (await fetch('/api/trains')).json()) as Train[]);
+    this.loading.set(false);
+  }
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid busy></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Train = { id: string; line: string; delay: number };
+
+const grid = document.querySelector<DzGridElement<Train>>('dz-grid')!;
+grid.columns = [{ id: 'line', header: 'Line' }, { id: 'delay', header: 'Delay (min)', type: 'number' }];
+grid.getRowId = (t) => t.id;
+grid.messages = EN;
+grid.rows = (await (await fetch('/api/trains')).json()) as Train[];
+grid.removeAttribute('busy');
+```
+
+</Fragment>
+</CodeTabs>
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Trains', busy: true }}
+  columns={[
+    { id: 'line', header: 'Line', flex: 1 },
+    { id: 'delay', header: 'Delay (min)', type: 'number', width: 140 },
+  ]}
+  rows={[
+    { id: 't1', line: 'Coast line', delay: 4 },
+    { id: 't2', line: 'Valley line', delay: 0 },
+    { id: 't3', line: 'Night sleeper', delay: 12 },
+  ]}
+  caption="busy: true — the rows stay, a thin bar under the header says they are being reloaded."
+/>
+
+## See also
+
+- [`overlay`](../overlay/) — a message over the rows.
+- [Server data](../../guides/server-data/).

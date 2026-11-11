@@ -1,0 +1,115 @@
+---
+title: "numerals"
+description: "Les chiffres latins partout, ou ceux de la langue."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Les chiffres avec lesquels s’écrivent les nombres et les dates.
+
+<OptionFacts setting="numerals" />
+
+## Ce qu’il fait
+
+`'latn'` : 0 à 9, quelle que soit la langue. `'locale'` : les chiffres que la langue écrit par défaut — `١٢٣` pour
+`ar-EG`, tandis que `ar-DZ` et `ar-MA` écrivent 0 à 9 même alors, comme toute langue sans chiffres à elle. Cela
+touche les nombres et les dates des cellules.
+
+La grille ne laisse jamais le choix au navigateur : elle décide des chiffres une fois et les écrit, si bien que deux
+navigateurs montrent le même texte.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { AR } from '@dzgrid/dom/locales/ar';
+
+type Well = { id: string; name: string; depth: number };
+
+const grid = createGrid<Well>(document.getElementById('puits')!, {
+  rows: [{ id: 'w1', name: 'بئر النخلة', depth: 42 }],
+  columns: [{ id: 'name', header: 'البئر' }, { id: 'depth', header: 'العمق (م)', type: 'number' }],
+  getRowId: (w) => w.id,
+  messages: AR,
+  locale: 'ar-EG',
+  numerals: 'locale',
+});
+
+grid.update({ numerals: 'latn' });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { AR } from '@dzgrid/dom/locales/ar';
+
+type Well = { id: string; name: string; depth: number };
+
+@Component({
+  selector: 'app-puits',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" locale="ar-EG" numerals="locale" />`,
+})
+export class Wells {
+  readonly rows: Well[] = [{ id: 'w1', name: 'بئر النخلة', depth: 42 }];
+  readonly columns: DzgColumnOrGroup<Well>[] = [{ id: 'name', header: 'البئر' }, { id: 'depth', header: 'العمق (م)', type: 'number' }];
+  readonly rowId = (w: Well) => w.id;
+  readonly messages = AR;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid locale="ar-EG" numerals="locale"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { AR } from '@dzgrid/dom/locales/ar';
+
+type Well = { id: string; name: string; depth: number };
+
+const grid = document.querySelector<DzGridElement<Well>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'البئر' }, { id: 'depth', header: 'العمق (م)', type: 'number' }];
+grid.getRowId = (w) => w.id;
+grid.messages = AR;
+grid.rows = [{ id: 'w1', name: 'بئر النخلة', depth: 42 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Démo
+
+<LiveDemo
+  height={220}
+  language="ar"
+  settings={{ label: 'الآبار', locale: 'ar-EG', numerals: 'locale' }}
+  columns={[
+    { id: 'name', header: 'البئر', flex: 1 },
+    { id: 'depth', header: 'العمق (م)', type: 'number', width: 130 },
+    { id: 'dug', header: 'الحفر', type: 'day', width: 150 },
+  ]}
+  rows={[
+    { id: 'w1', name: 'بئر النخلة', depth: 42, dug: '1994-05-17' },
+    { id: 'w2', name: 'بئر الواحة', depth: 118, dug: '2008-10-03' },
+    { id: 'w3', name: 'بئر الرمال', depth: 67, dug: '2015-02-21' },
+  ]}
+  caption="L’arabe (ar-EG) avec ses propres chiffres."
+/>
+
+## Voir aussi
+
+- [`locale`](../locale/) — la langue dans laquelle s’écrivent les nombres.
+- [`direction`](../direction/) — de droite à gauche.

@@ -1,0 +1,101 @@
+---
+title: "clock"
+description: "Le « maintenant » d’où comptent les raccourcis de date et « aujourd’hui »."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Le « maintenant » de la grille, pour les quelques choses qui dépendent du jour.
+
+<OptionFacts setting="clock" />
+
+## Ce qu’il fait
+
+Une fonction qui rend des millisecondes depuis 1970 UTC, comme `Date.now`. La grille la questionne quand elle a besoin
+d’aujourd’hui : les raccourcis d’un filtre de date (« aujourd’hui », « 7 derniers jours », « ce mois-ci »), le jour où
+s’ouvrent un éditeur de date et le panneau des filtres, et le moment d’où la fonction de filtres compte le prochain
+minuit, quand un raccourci en vigueur doit passer au nouveau jour. Le jour est celui que l’horloge lit dans
+[`timeZone`](../time-zone/).
+
+Donnez-la pour fixer « maintenant » dans les tests et les captures, ou pour suivre l’horloge d’un serveur plutôt que
+la machine du lecteur. Elle est lue à la création de la grille : `update()` en refuse une nouvelle.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+
+type Visit = { id: string; place: string; on: string };
+
+const serverOffset = 1_250;   // ms d’avance de l’horloge du serveur, mesurées par l’appli
+
+createGrid<Visit>(document.getElementById('visites')!, {
+  rows: [{ id: 'v1', place: 'Jardin des simples', on: '2026-03-02' }],
+  columns: [{ id: 'place', header: 'Lieu' }, { id: 'on', header: 'Visité le', type: 'day' }],
+  getRowId: (v) => v.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_FILTERS.text } },
+  timeZone: 'Europe/Paris',
+  clock: () => Date.now() + serverOffset,
+  features: [filters()],
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { filters } from '@dzgrid/dom/filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+
+type Visit = { id: string; place: string; on: string };
+
+@Component({
+  selector: 'app-visites',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features" timeZone="Europe/Paris" [clock]="clock" />`,
+})
+export class Visits {
+  readonly rows: Visit[] = [{ id: 'v1', place: 'Jardin des simples', on: '2026-03-02' }];
+  readonly columns: DzgColumnOrGroup<Visit>[] = [{ id: 'place', header: 'Lieu' }, { id: 'on', header: 'Visité le', type: 'day' }];
+  readonly rowId = (v: Visit) => v.id;
+  readonly messages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text } };
+  readonly features = [filters()];
+  readonly clock = () => Date.parse('2026-03-02T09:00:00Z');   // un « maintenant » fixe, pour une capture
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Visit = { id: string; place: string; on: string };
+
+const grid = document.querySelector<DzGridElement<Visit>>('dz-grid')!;
+grid.columns = [{ id: 'place', header: 'Lieu' }, { id: 'on', header: 'Visité le', type: 'day' }];
+grid.getRowId = (v) => v.id;
+grid.messages = FR;
+grid.settings = { clock: () => Date.parse('2026-03-02T09:00:00Z') };
+grid.rows = [{ id: 'v1', place: 'Jardin des simples', on: '2026-03-02' }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Voir aussi
+
+- [`timeZone`](../time-zone/) — le fuseau où se lit le jour.
+- [Trier, filtrer, rechercher](../../guides/sort-filter-search/).

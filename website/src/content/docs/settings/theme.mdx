@@ -1,0 +1,126 @@
+---
+title: "theme"
+description: "The theme's CSS variables, set from code for one grid, by typed keys."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+The theme's colours and sizes for one grid, from code, with a type that knows every key.
+
+<OptionFacts setting="theme" />
+
+## What it does
+
+Each key is one CSS variable, written on the grid's root: the shared palette's keys become `--tz-*` (`bgRaised` →
+`--tz-bg-raised`), the others `--dzg-*` (`rowOddBg` → `--dzg-row-odd-bg`). A value is a CSS value (`'light-dark(#0f766e,
+#5eead4)'`, `'0.5rem'`) or a number written as is (`500`). Written on the root, it wins over your stylesheets for that
+grid only; the other grids of the page keep theirs.
+
+It needs the `theming()` feature from `@dzgrid/dom/theme`: without it the setting is told as a missing feature and
+nothing is written. A key the type does not know, or a value that could carry more than a value (a `;`, a `{`, a
+`url(`…), is told as an `invalid-setting` warning and skipped; the other keys apply. Keys that the
+`@dzgrid/theme/variables.css` sheet reads need that sheet loaded.
+
+Every key, what it changes and its default: [the table of variables](../../guides/theming-rtl/#every-variable).
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { theming } from '@dzgrid/dom/theme';
+import { EN } from '@dzgrid/dom/locales/en';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/variables.css';
+
+type Boat = { id: string; name: string; berth: number };
+
+const grid = createGrid<Boat>(document.getElementById('boats')!, {
+  rows: [{ id: 'b1', name: 'Sea Lark', berth: 12 }],
+  columns: [{ id: 'name', header: 'Boat' }, { id: 'berth', header: 'Berth', type: 'number' }],
+  getRowId: (b) => b.id,
+  messages: EN,
+  theme: { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 8%, var(--tz-bg))', headerWeight: 500 },
+  features: [theming()],
+});
+
+grid.update({ theme: { headerCase: 'uppercase' } });   // the whole theme: rowOddBg and headerWeight go back
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { theming } from '@dzgrid/dom/theme';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Boat = { id: string; name: string; berth: number };
+
+@Component({
+  selector: 'app-boats',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features" [theme]="theme" />`,
+})
+export class Boats {
+  readonly rows: Boat[] = [{ id: 'b1', name: 'Sea Lark', berth: 12 }];
+  readonly columns: DzgColumnOrGroup<Boat>[] = [{ id: 'name', header: 'Boat' }, { id: 'berth', header: 'Berth', type: 'number' }];
+  readonly rowId = (b: Boat) => b.id;
+  readonly messages = EN;
+  readonly features = [theming()];
+  readonly theme = { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 8%, var(--tz-bg))', headerWeight: 500 };
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { theming } from '@dzgrid/dom/theme';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Boat = { id: string; name: string; berth: number };
+
+const grid = document.querySelector<DzGridElement<Boat>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Boat' }, { id: 'berth', header: 'Berth', type: 'number' }];
+grid.getRowId = (b) => b.id;
+grid.messages = EN;
+grid.features = [theming()];
+grid.theme = { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 8%, var(--tz-bg))', headerWeight: 500 };
+grid.rows = [{ id: 'b1', name: 'Sea Lark', berth: 12 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Live demo
+
+<LiveDemo
+  height={240}
+  settings={{ label: 'Boats', theme: { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 8%, var(--tz-bg))', headerWeight: 500, headerCase: 'uppercase', columnLine: 'var(--dzg-line) solid var(--tz-border)' } }}
+  features={['theming']}
+  columns={[
+    { id: 'name', header: 'Boat', flex: 1 },
+    { id: 'harbour', header: 'Harbour', width: 150 },
+    { id: 'berth', header: 'Berth', type: 'number', width: 110 },
+  ]}
+  rows={[
+    { id: 'b1', name: 'Sea Lark', harbour: 'Gull Harbour', berth: 12 },
+    { id: 'b2', name: 'Morning Tern', harbour: 'Shell Bay', berth: 4 },
+    { id: 'b3', name: 'Grey Seal', harbour: 'Gull Harbour', berth: 27 },
+    { id: 'b4', name: 'Kelp Runner', harbour: 'North Pier', berth: 9 },
+  ]}
+  caption="Alternate rows, lines between columns, a lighter header in capitals: four keys, this grid only."
+/>
+
+## See also
+
+- [`icons`](../icons/) — the grid's marks, drawn by you.
+- [Theming and right to left](../../guides/theming-rtl/).

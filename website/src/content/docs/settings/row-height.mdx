@@ -1,0 +1,117 @@
+---
+title: "rowHeight"
+description: "The rows' height in pixels, over the density's."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+The rows' height in pixels, when the three heights of [`density`](../density/) are not the one you need.
+
+<OptionFacts setting="rowHeight" />
+
+## What it does
+
+A number from 24 to 1 000: the row height at a 16 px text size. The grid grows it with the reader's text size, as it
+does the density's heights, so a reader who makes the text bigger still gets rows that hold it. The header rows take
+it too, unless [`headerHeight`](../header-height/) sets them.
+
+Anything else (a string, 12, 5 000) is told as an `invalid-setting` warning and the density's height is used. The
+cells' side padding still follows the density. While `rowHeight` is set, the column menu does not offer the density.
+
+Under a `rowHeight`, every row keeps that height, even with `@dzgrid/dom/auto-height`: a column's `wrap` puts its
+text on several lines and cuts what does not fit.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Tide = { id: string; port: string; high: number };
+
+const grid = createGrid<Tide>(document.getElementById('tides')!, {
+  rows: [{ id: 't1', port: 'Gull Harbour', high: 4.2 }],
+  columns: [{ id: 'port', header: 'Port' }, { id: 'high', header: 'High water (m)', type: 'number' }],
+  getRowId: (t) => t.id,
+  messages: EN,
+  rowHeight: 48,
+});
+
+grid.update({ rowHeight: undefined });   // back to the density's height
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Tide = { id: string; port: string; high: number };
+
+@Component({
+  selector: 'app-tides',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [rowHeight]="48" />`,
+})
+export class Tides {
+  readonly rows: Tide[] = [{ id: 't1', port: 'Gull Harbour', high: 4.2 }];
+  readonly columns: DzgColumnOrGroup<Tide>[] = [{ id: 'port', header: 'Port' }, { id: 'high', header: 'High water (m)', type: 'number' }];
+  readonly rowId = (t: Tide) => t.id;
+  readonly messages = EN;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid row-height="48"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Tide = { id: string; port: string; high: number };
+
+const grid = document.querySelector<DzGridElement<Tide>>('dz-grid')!;
+grid.columns = [{ id: 'port', header: 'Port' }, { id: 'high', header: 'High water (m)', type: 'number' }];
+grid.getRowId = (t) => t.id;
+grid.messages = EN;
+grid.rows = [{ id: 't1', port: 'Gull Harbour', high: 4.2 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Live demo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Tides', rowHeight: 48 }}
+  columns={[
+    { id: 'port', header: 'Port', flex: 1 },
+    { id: 'high', header: 'High water (m)', type: 'number', width: 150 },
+    { id: 'low', header: 'Low water (m)', type: 'number', width: 150 },
+  ]}
+  rows={[
+    { id: 't1', port: 'Gull Harbour', high: 4.2, low: 0.6 },
+    { id: 't2', port: 'Saltmarsh Quay', high: 3.8, low: 0.9 },
+    { id: 't3', port: 'North Pier', high: 5.1, low: 0.4 },
+    { id: 't4', port: 'Shell Bay', high: 2.9, low: 1.1 },
+  ]}
+  caption="Rows and header 48 px tall at a 16 px text size."
+/>
+
+## See also
+
+- [`density`](../density/) — three heights, and the cells' padding.
+- [`headerHeight`](../header-height/) — the header rows apart.

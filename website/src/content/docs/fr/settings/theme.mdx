@@ -1,0 +1,127 @@
+---
+title: "theme"
+description: "Les variables CSS du thème, réglées par le code pour une grille, par clés typées."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Les couleurs et les tailles du thème pour une grille, depuis le code, avec un type qui connaît chaque clé.
+
+<OptionFacts setting="theme" />
+
+## Ce qu’il fait
+
+Chaque clé est une variable CSS, écrite sur la racine de la grille : les clés de la palette partagée deviennent
+`--tz-*` (`bgRaised` → `--tz-bg-raised`), les autres `--dzg-*` (`rowOddBg` → `--dzg-row-odd-bg`). Une valeur est une
+valeur CSS (`'light-dark(#0f766e, #5eead4)'`, `'0.5rem'`) ou un nombre écrit tel quel (`500`). Écrite sur la racine,
+elle l’emporte sur vos feuilles de style pour cette grille seulement ; les autres grilles de la page gardent les
+leurs.
+
+Il demande la fonction `theming()` de `@dzgrid/dom/theme` : sans elle, le réglage est signalé comme une fonction
+manquante et rien n’est écrit. Une clé que le type ne connaît pas, ou une valeur qui pourrait porter plus qu’une
+valeur (un `;`, une `{`, un `url(`…), est signalée par un avertissement `invalid-setting` et écartée ; les autres clés
+s’appliquent. Les clés que lit la feuille `@dzgrid/theme/variables.css` demandent cette feuille.
+
+Chaque clé, ce qu’elle change et sa valeur par défaut : [le tableau des variables](../../guides/theming-rtl/#toutes-les-variables).
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { theming } from '@dzgrid/dom/theme';
+import { FR } from '@dzgrid/dom/locales/fr';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/variables.css';
+
+type Boat = { id: string; name: string; berth: number };
+
+const grid = createGrid<Boat>(document.getElementById('bateaux')!, {
+  rows: [{ id: 'b1', name: 'Alouette de mer', berth: 12 }],
+  columns: [{ id: 'name', header: 'Bateau' }, { id: 'berth', header: 'Anneau', type: 'number' }],
+  getRowId: (b) => b.id,
+  messages: FR,
+  theme: { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 8%, var(--tz-bg))', headerWeight: 500 },
+  features: [theming()],
+});
+
+grid.update({ theme: { headerCase: 'uppercase' } });   // tout le thème : rowOddBg et headerWeight reviennent à leur défaut
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { theming } from '@dzgrid/dom/theme';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Boat = { id: string; name: string; berth: number };
+
+@Component({
+  selector: 'app-bateaux',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features" [theme]="theme" />`,
+})
+export class Boats {
+  readonly rows: Boat[] = [{ id: 'b1', name: 'Alouette de mer', berth: 12 }];
+  readonly columns: DzgColumnOrGroup<Boat>[] = [{ id: 'name', header: 'Bateau' }, { id: 'berth', header: 'Anneau', type: 'number' }];
+  readonly rowId = (b: Boat) => b.id;
+  readonly messages = FR;
+  readonly features = [theming()];
+  readonly theme = { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 8%, var(--tz-bg))', headerWeight: 500 };
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { theming } from '@dzgrid/dom/theme';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Boat = { id: string; name: string; berth: number };
+
+const grid = document.querySelector<DzGridElement<Boat>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Bateau' }, { id: 'berth', header: 'Anneau', type: 'number' }];
+grid.getRowId = (b) => b.id;
+grid.messages = FR;
+grid.features = [theming()];
+grid.theme = { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 8%, var(--tz-bg))', headerWeight: 500 };
+grid.rows = [{ id: 'b1', name: 'Alouette de mer', berth: 12 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Démo
+
+<LiveDemo
+  height={240}
+  settings={{ label: 'Bateaux', theme: { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 8%, var(--tz-bg))', headerWeight: 500, headerCase: 'uppercase', columnLine: 'var(--dzg-line) solid var(--tz-border)' } }}
+  features={['theming']}
+  columns={[
+    { id: 'name', header: 'Bateau', flex: 1 },
+    { id: 'harbour', header: 'Port', width: 150 },
+    { id: 'berth', header: 'Anneau', type: 'number', width: 110 },
+  ]}
+  rows={[
+    { id: 'b1', name: 'Alouette de mer', harbour: 'Port-aux-Mouettes', berth: 12 },
+    { id: 'b2', name: 'Sterne du matin', harbour: 'Anse aux Coquillages', berth: 4 },
+    { id: 'b3', name: 'Phoque gris', harbour: 'Port-aux-Mouettes', berth: 27 },
+    { id: 'b4', name: 'Coureur de varech', harbour: 'Jetée Nord', berth: 9 },
+  ]}
+  caption="Lignes alternées, traits entre colonnes, un en-tête plus léger en capitales : quatre clés, cette grille seulement."
+/>
+
+## Voir aussi
+
+- [`icons`](../icons/) — les marques de la grille, dessinées par vous.
+- [Thèmes et droite à gauche](../../guides/theming-rtl/).

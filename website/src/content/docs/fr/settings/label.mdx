@@ -1,0 +1,94 @@
+---
+title: "label"
+description: "Le nom accessible de la grille, déjà traduit."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Le nom que dit un lecteur d’écran quand le focus entre dans la grille.
+
+<OptionFacts setting="label" />
+
+## Ce qu’il fait
+
+Un texte dans la langue du lecteur, pris tel quel : la grille ne le traduit pas. Sans lui, la grille prend le
+`grid.label` de son paquet de textes (« Grille de données »), qui ne dit rien des lignes — nommez chaque grille qui
+partage une page avec une autre.
+
+Le nom va sur la zone qui défile, et dans le nom de ce qui appartient à la grille : la pagination (« Pagination,
+Factures »), la barre d’état. Le changer par `update()` les renomme aussitôt.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Invoice = { id: string; client: string; total: number };
+
+const grid = createGrid<Invoice>(document.getElementById('factures')!, {
+  rows: [{ id: 'i1', client: 'Moulin Bleu', total: 1250 }],
+  columns: [{ id: 'client', header: 'Client' }, { id: 'total', header: 'Total', type: 'number' }],
+  getRowId: (i) => i.id,
+  messages: FR,
+  label: 'Factures',
+});
+
+grid.update({ label: 'Factures de mars' });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Invoice = { id: string; client: string; total: number };
+
+@Component({
+  selector: 'app-factures',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" label="Factures" />`,
+})
+export class Invoices {
+  readonly rows: Invoice[] = [{ id: 'i1', client: 'Moulin Bleu', total: 1250 }];
+  readonly columns: DzgColumnOrGroup<Invoice>[] = [{ id: 'client', header: 'Client' }, { id: 'total', header: 'Total', type: 'number' }];
+  readonly rowId = (i: Invoice) => i.id;
+  readonly messages = FR;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid label="Factures"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Invoice = { id: string; client: string; total: number };
+
+const grid = document.querySelector<DzGridElement<Invoice>>('dz-grid')!;
+grid.columns = [{ id: 'client', header: 'Client' }, { id: 'total', header: 'Total', type: 'number' }];
+grid.getRowId = (i) => i.id;
+grid.messages = FR;
+grid.rows = [{ id: 'i1', client: 'Moulin Bleu', total: 1250 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Voir aussi
+
+- [`messages`](../messages/) — le paquet d’où vient `grid.label`.
+- [Accessibilité](../../guides/accessibility/).

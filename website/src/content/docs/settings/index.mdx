@@ -1,0 +1,16 @@
+---
+title: "Settings"
+description: "Every setting of the grid, one page each."
+sidebar:
+  order: 0
+---
+
+import OptionList from '../../../components/OptionList.astro';
+
+What `createGrid` takes, what Angular's `<dz-grid>` takes as inputs and the Web Component as attributes or
+properties: the same settings everywhere. Each page gives the setting's facts (its type, its default, whether
+`update()` changes it), what it does, an example in the three flavours and, when it shows something, a live grid.
+
+Three are required: `getRowId`, `columns` and `messages`. The rest are optional.
+
+<OptionList of="settings" />

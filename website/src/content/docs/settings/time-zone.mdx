@@ -1,0 +1,125 @@
+---
+title: "timeZone"
+description: "The time zone instants are shown, filtered and edited in."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+The time zone the grid shows instants in — and counts « today » in.
+
+<OptionFacts setting="timeZone" />
+
+## What it does
+
+An IANA zone name (`'Europe/London'`, `'Pacific/Auckland'`). An `instant` column holds moments (epoch milliseconds, or
+ISO text with an offset); the grid writes each one as the clock reads in this zone, and its filters, editors and
+date shortcuts (« today », « last 7 days ») count days in it too. A `day` column holds calendar days (`'2026-03-02'`),
+which belong to no zone: the zone never moves them.
+
+The default is UTC, not the reader's zone: the same rows show the same text on every machine. To follow the
+reader, give it theirs: `Intl.DateTimeFormat().resolvedOptions().timeZone`. A name that is not a zone throws a
+`RangeError`: from `createGrid`, or from `update()`, which then leaves the grid as it was. The
+`<dz-grid>` attribute does not throw: it leaves the value out and tells an `invalid-setting` warning.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Flight = { id: string; route: string; lands: number };
+
+const grid = createGrid<Flight>(document.getElementById('flights')!, {
+  rows: [{ id: 'f1', route: 'Harbour → Summit', lands: 1772442000000 }],
+  columns: [
+    { id: 'route', header: 'Route' },
+    { id: 'lands', header: 'Lands', type: 'instant', instantFormat: { date: true, time: true } },
+  ],
+  getRowId: (f) => f.id,
+  messages: EN,
+  timeZone: 'Pacific/Auckland',
+});
+
+grid.update({ timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });   // the reader's own
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Flight = { id: string; route: string; lands: number };
+
+@Component({
+  selector: 'app-flights',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" timeZone="Pacific/Auckland" />`,
+})
+export class Flights {
+  readonly rows: Flight[] = [{ id: 'f1', route: 'Harbour → Summit', lands: 1772442000000 }];
+  readonly columns: DzgColumnOrGroup<Flight>[] = [
+    { id: 'route', header: 'Route' },
+    { id: 'lands', header: 'Lands', type: 'instant', instantFormat: { date: true, time: true } },
+  ];
+  readonly rowId = (f: Flight) => f.id;
+  readonly messages = EN;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid time-zone="Pacific/Auckland"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Flight = { id: string; route: string; lands: number };
+
+const grid = document.querySelector<DzGridElement<Flight>>('dz-grid')!;
+grid.columns = [
+  { id: 'route', header: 'Route' },
+  { id: 'lands', header: 'Lands', type: 'instant', instantFormat: { date: true, time: true } },
+];
+grid.getRowId = (f) => f.id;
+grid.messages = EN;
+grid.rows = [{ id: 'f1', route: 'Harbour → Summit', lands: 1772442000000 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Flights', timeZone: 'Pacific/Auckland' }}
+  columns={[
+    { id: 'route', header: 'Route', flex: 1 },
+    { id: 'lands', header: 'Lands (Auckland)', type: 'instant', width: 200, instantFormat: { date: true, time: true } },
+  ]}
+  rows={[
+    { id: 'f1', route: 'Harbour → Summit', lands: 1772442000000 },
+    { id: 'f2', route: 'Summit → Bay', lands: 1772537400000 },
+    { id: 'f3', route: 'Bay → Harbour', lands: 1772010000000 },
+  ]}
+  caption="The same instants on every machine: written as the clock reads in Auckland."
+/>
+
+## See also
+
+- [`locale`](../locale/) — how the date and time are written.
+- [`clock`](../clock/) — the « now » date shortcuts count from.
+- [Columns](../../guides/columns/) — days and instants.

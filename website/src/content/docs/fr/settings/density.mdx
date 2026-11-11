@@ -1,0 +1,121 @@
+---
+title: "density"
+description: "La hauteur des lignes et la place prise sur les côtés des cellules."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+La hauteur des lignes, et la place que prennent les cellules sur leurs côtés.
+
+<OptionFacts setting="density" />
+
+## Ce qu’il fait
+
+`'compact'`, `'comfortable'` (par défaut) ou `'spacious'` : une ligne mesure 28, 32 ou 40 px pour un texte de 16 px,
+et davantage quand le lecteur grossit le texte. Les lignes d’en-tête suivent, sauf si
+[`headerHeight`](../header-height/) les règle. La marge sur les côtés des cellules suit aussi : le CSS de la grille
+donne `--dzg-density` à sa racine (`.75`, `1`, `1.25`) et la marge est multipliée par lui ; `.dzg { --dzg-density: 1 }`
+dans votre CSS la garde fixe.
+
+[`rowHeight`](../row-height/) règle les lignes en pixels et l’emporte sur la hauteur de la densité ; la marge suit
+toujours la densité. Le menu de colonne peut proposer la densité à l’utilisateur (`columnMenu({ density: true })`, pas tant que `rowHeight` est
+réglé), et
+l’[état](../../guides/state/) la garde.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Kite = { id: string; name: string; span: number };
+
+const grid = createGrid<Kite>(document.getElementById('kites')!, {
+  rows: [{ id: 'k1', name: 'Delta rouge', span: 1.6 }],
+  columns: [{ id: 'name', header: 'Cerf-volant' }, { id: 'span', header: 'Envergure (m)', type: 'number' }],
+  getRowId: (k) => k.id,
+  messages: FR,
+  density: 'compact',
+});
+
+grid.update({ density: 'spacious' });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Kite = { id: string; name: string; span: number };
+
+@Component({
+  selector: 'app-kites',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [density]="density()" />`,
+})
+export class Kites {
+  readonly density = signal<'compact' | 'comfortable' | 'spacious'>('compact');
+  readonly rows: Kite[] = [{ id: 'k1', name: 'Delta rouge', span: 1.6 }];
+  readonly columns: DzgColumnOrGroup<Kite>[] = [{ id: 'name', header: 'Cerf-volant' }, { id: 'span', header: 'Envergure (m)', type: 'number' }];
+  readonly rowId = (k: Kite) => k.id;
+  readonly messages = FR;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid density="compact"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Kite = { id: string; name: string; span: number };
+
+const grid = document.querySelector<DzGridElement<Kite>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Cerf-volant' }, { id: 'span', header: 'Envergure (m)', type: 'number' }];
+grid.getRowId = (k) => k.id;
+grid.messages = FR;
+grid.rows = [{ id: 'k1', name: 'Delta rouge', span: 1.6 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Démo
+
+<LiveDemo
+  height={240}
+  settings={{ label: 'Cerfs-volants', density: 'compact' }}
+  columns={[
+    { id: 'name', header: 'Cerf-volant', flex: 1 },
+    { id: 'shape', header: 'Forme', width: 140 },
+    { id: 'span', header: 'Envergure (m)', type: 'number', width: 120 },
+  ]}
+  rows={[
+    { id: 'k1', name: 'Delta rouge', shape: 'Delta', span: 1.6 },
+    { id: 'k2', name: 'Boîte de nuit', shape: 'Boîte', span: 0.9 },
+    { id: 'k3', name: 'Longue queue', shape: 'Losange', span: 1.1 },
+    { id: 'k4', name: 'Goéland', shape: 'Luge', span: 1.3 },
+    { id: 'k5', name: 'Lune de papier', shape: 'Rond', span: 0.7 },
+  ]}
+  caption="Compact : lignes de 28 px, marges latérales plus étroites."
+/>
+
+## Voir aussi
+
+- [`rowHeight`](../row-height/) — les lignes en pixels.
+- [`headerHeight`](../header-height/) — les lignes d’en-tête à part.
+- [Thèmes et droite à gauche](../../guides/theming-rtl/).

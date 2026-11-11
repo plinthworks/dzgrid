@@ -1,0 +1,57 @@
+---
+/**
+ * A setting's or a column option's facts, generated from the sources (scripts/gen-options.mjs →
+ * src/generated/options.json): its type, its default, whether it is required, whether `update()` changes it, how
+ * Angular and `<dz-grid>` set it, where it is declared. An unknown name fails the build.
+ *
+ *   <OptionFacts setting="density" />
+ *   <OptionFacts column="pinned" />
+ */
+import data from '../generated/options.json';
+import { FACTS } from '../i18n/facts';
+
+interface Props {
+  setting?: string;
+  column?: string;
+}
+interface Fact {
+  name: string;
+  type: string;
+  resolved: string | null;
+  required: boolean;
+  doc: string;
+  default: { code: string } | { token: string } | null;
+  source: string;
+  live?: boolean;
+  angular?: boolean;
+  element?: { attribute?: string; property?: string } | null;
+}
+const { setting, column } = Astro.props;
+const name = setting ?? column ?? '';
+const list = (setting ? data.settings : data.columns) as Fact[];
+const fact = list.find((o) => o.name === name);
+if (!fact) throw new Error(`<OptionFacts ${setting ? 'setting' : 'column'}="${name}">: not in src/generated/options.json (node scripts/gen-options.mjs)`);
+const words = FACTS[Astro.currentLocale === 'fr' ? 'fr' : 'en'];
+const escape = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const code = (text: string) => `<code>${escape(text)}</code>`;
+/** The words' only markup: `code`. */
+const inline = (md: string) => escape(md).replace(/`([^`]+)`/g, '<code>$1</code>');
+if (fact.default && 'token' in fact.default && !words.tokens[fact.default.token]) throw new Error(`<OptionFacts ${name}>: no words for the default {${fact.default.token}} in src/i18n/facts.ts`);
+const def = fact.default === null ? words.none : 'code' in fact.default ? code(fact.default.code) : inline(words.tokens[fact.default.token]!);
+const live = setting ? (fact.live ? words.liveYes : words.liveNo) : words.liveColumn;
+const angular = fact.angular ? inline(words.input(name)) : inline(words.noInput);
+const el = fact.element;
+const element = el?.attribute ? inline(words.attribute(el.attribute)) : el?.property ? inline(words.property(el.property)) : inline(words.viaSettings(name));
+const href = `https://github.com/plinthworks/dzgrid/blob/main/${fact.source}`;
+---
+
+<table class="dzg-facts">
+  <tbody>
+    <tr><th scope="row">{words.type}</th><td set:html={code(fact.type) + (fact.resolved ? ` — ${code(fact.resolved)}` : '')} /></tr>
+    {fact.required ? <tr><th scope="row">{words.required}</th><td>{words.yes}</td></tr> : <tr><th scope="row">{words.default}</th><td set:html={def} /></tr>}
+    <tr><th scope="row" set:html={inline(words.live)} /><td set:html={inline(live)} /></tr>
+    {setting && <tr><th scope="row">{words.angular}</th><td set:html={angular} /></tr>}
+    {setting && <tr><th scope="row" set:html={inline(words.element)} /><td set:html={element} /></tr>}
+    <tr><th scope="row">{words.source}</th><td><a href={href}><code>{fact.source}</code></a></td></tr>
+  </tbody>
+</table>

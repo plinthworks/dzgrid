@@ -1,0 +1,119 @@
+---
+title: "headers"
+description: "Les titres de colonnes à l’écran, ou cachés aux yeux et gardés pour les lecteurs d’écran."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Pour une petite grille qui se comprend sans titres — une liste de noms, une clé et sa valeur.
+
+<OptionFacts setting="headers" />
+
+## Ce qu’il fait
+
+`'hidden'` : aucune ligne d’en-tête à l’écran — ni les titres de colonnes, ni les lignes de groupes au-dessus, ni la
+ligne de filtres — et les lignes commencent en haut de la grille, qui en dessine d’autant plus.
+
+Les lignes d’en-tête sont cachées aux yeux seulement. Elles restent dans la grille avec leurs rôles et leurs noms : un
+lecteur d’écran dit toujours la colonne de chaque cellule. Quand le clavier y est, elles se montrent : ↑ depuis la
+première ligne met le focus sur un titre, l’en-tête apparaît à sa place, Entrée trie toujours, les touches du menu et
+du filtre marchent toujours ; ↓ pour revenir dans les lignes les cache à nouveau. La souris n’a pas d’en-tête où
+cliquer : le tri et les filtres restent au clavier, au menu de cellule, aux panneaux du dock et à votre code.
+
+L’impression et les exports CSV et Excel gardent leur ligne d’en-tête ; `header: false` les en prive. La racine de la grille porte
+`data-headers="hidden"`.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Spice = { id: string; name: string; origin: string };
+
+const grid = createGrid<Spice>(document.getElementById('epices')!, {
+  rows: [{ id: 's1', name: 'Safran', origin: 'Hauts plateaux' }],
+  columns: [{ id: 'name', header: 'Épice' }, { id: 'origin', header: 'Origine' }],
+  getRowId: (s) => s.id,
+  messages: FR,
+  label: 'Épices',
+  headers: 'hidden',
+});
+
+grid.update({ headers: 'shown' });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Spice = { id: string; name: string; origin: string };
+
+@Component({
+  selector: 'app-epices',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" label="Épices" headers="hidden" />`,
+})
+export class Spices {
+  readonly rows: Spice[] = [{ id: 's1', name: 'Safran', origin: 'Hauts plateaux' }];
+  readonly columns: DzgColumnOrGroup<Spice>[] = [{ id: 'name', header: 'Épice' }, { id: 'origin', header: 'Origine' }];
+  readonly rowId = (s: Spice) => s.id;
+  readonly messages = FR;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid headers="hidden" label="Épices"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Spice = { id: string; name: string; origin: string };
+
+const grid = document.querySelector<DzGridElement<Spice>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Épice' }, { id: 'origin', header: 'Origine' }];
+grid.getRowId = (s) => s.id;
+grid.messages = FR;
+grid.rows = [{ id: 's1', name: 'Safran', origin: 'Hauts plateaux' }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Démo
+
+<LiveDemo
+  height={200}
+  settings={{ label: 'Épices', headers: 'hidden' }}
+  columns={[
+    { id: 'name', header: 'Épice', flex: 1 },
+    { id: 'origin', header: 'Origine', flex: 1 },
+  ]}
+  rows={[
+    { id: 's1', name: 'Safran', origin: 'Hauts plateaux' },
+    { id: 's2', name: 'Cardamome', origin: 'Forêt humide' },
+    { id: 's3', name: 'Sumac', origin: 'Collines sèches' },
+    { id: 's4', name: 'Vanille', origin: 'Îles' },
+  ]}
+  caption="Aucune ligne d’en-tête à l’écran. Cliquez une ligne, puis ↑ depuis la première : l’en-tête se montre tant que le focus y est."
+/>
+
+## Voir aussi
+
+- [`label`](../label/) — le nom de la grille, qui dit de quoi parlent les colonnes.
+- [Accessibilité](../../guides/accessibility/).

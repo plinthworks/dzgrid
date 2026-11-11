@@ -20,6 +20,10 @@ const WRITTEN = [
   'guides/columns', 'guides/sort-filter-search', 'guides/selection-ranges', 'guides/editing', 'guides/tree',
   'guides/grouping', 'guides/pivot', 'guides/server-data', 'guides/row-moves', 'guides/dock-panels',
   'guides/export-print', 'guides/state', 'guides/theming-rtl', 'guides/accessibility',
+  // Batch 3 (2026-11-11): one page per option.
+  'settings/index', 'settings/density', 'settings/row-height', 'settings/header-height', 'settings/headers', 'settings/label',
+  'settings/messages', 'settings/locale', 'settings/time-zone', 'settings/numerals', 'settings/direction', 'settings/clock',
+  'settings/motion', 'settings/theme', 'settings/icons', 'settings/row-class', 'settings/overlay', 'settings/busy', 'settings/context',
 ];
 /** The sidebar's sections: a page lives in one of them (or is the home page). */
 const SECTIONS = ['getting-started', 'guides', 'settings', 'column-options', 'features', 'api'];

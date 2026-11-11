@@ -1,0 +1,100 @@
+---
+title: "clock"
+description: "The « now » the date shortcuts and « today » count from."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+The grid's « now », for the few things that depend on the day.
+
+<OptionFacts setting="clock" />
+
+## What it does
+
+A function giving milliseconds since 1970 UTC, as `Date.now` does. The grid asks it when it needs today: a date
+filter's shortcuts (« today », « the last 7 days », « this month »), the day a date editor and the filters panel open
+on, and the moment the filters feature counts the next midnight from, when a shortcut in force must move to the new
+day. The day is the one the clock reads in [`timeZone`](../time-zone/).
+
+Give it to fix « now » in tests and screenshots, or to follow a server's clock rather than the reader's machine. It
+is read when the grid is made: `update()` refuses a new one.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+
+type Visit = { id: string; place: string; on: string };
+
+const serverOffset = 1_250;   // ms the server's clock is ahead, measured by the app
+
+createGrid<Visit>(document.getElementById('visits')!, {
+  rows: [{ id: 'v1', place: 'Herb garden', on: '2026-03-02' }],
+  columns: [{ id: 'place', header: 'Place' }, { id: 'on', header: 'Visited on', type: 'day' }],
+  getRowId: (v) => v.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_FILTERS.text } },
+  timeZone: 'Europe/London',
+  clock: () => Date.now() + serverOffset,
+  features: [filters()],
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { filters } from '@dzgrid/dom/filters';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+
+type Visit = { id: string; place: string; on: string };
+
+@Component({
+  selector: 'app-visits',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features" timeZone="Europe/London" [clock]="clock" />`,
+})
+export class Visits {
+  readonly rows: Visit[] = [{ id: 'v1', place: 'Herb garden', on: '2026-03-02' }];
+  readonly columns: DzgColumnOrGroup<Visit>[] = [{ id: 'place', header: 'Place' }, { id: 'on', header: 'Visited on', type: 'day' }];
+  readonly rowId = (v: Visit) => v.id;
+  readonly messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+  readonly features = [filters()];
+  readonly clock = () => Date.parse('2026-03-02T09:00:00Z');   // a fixed « now », for a screenshot
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Visit = { id: string; place: string; on: string };
+
+const grid = document.querySelector<DzGridElement<Visit>>('dz-grid')!;
+grid.columns = [{ id: 'place', header: 'Place' }, { id: 'on', header: 'Visited on', type: 'day' }];
+grid.getRowId = (v) => v.id;
+grid.messages = EN;
+grid.settings = { clock: () => Date.parse('2026-03-02T09:00:00Z') };
+grid.rows = [{ id: 'v1', place: 'Herb garden', on: '2026-03-02' }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## See also
+
+- [`timeZone`](../time-zone/) — the zone the day is read in.
+- [Sort, filter, search](../../guides/sort-filter-search/).

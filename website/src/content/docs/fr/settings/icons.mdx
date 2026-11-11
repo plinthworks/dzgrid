@@ -1,0 +1,112 @@
+---
+title: "icons"
+description: "Vos propres icônes pour les marques de la grille : tri, filtre, menu, bouton d’ouverture, sous-menu, poignée."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Vos propres icônes à la place des marques de la grille, en SVG.
+
+<OptionFacts setting="icons" />
+
+## Ce qu’il fait
+
+La grille dessine ses marques elle-même, sans fichier. Donnez un SVG — son texte, ou un élément `<svg>` déjà dans la
+page, copié — pour chacune :
+
+| Clé | La marque |
+|---|---|
+| `sortAsc`, `sortDesc` | La flèche d’une colonne triée. |
+| `filter` | Le bouton de filtre de l’en-tête. |
+| `filterActive` | Le bouton de filtre d’une colonne filtrée ; sans lui, `filter` dans la couleur d’accent. |
+| `menu` | Le bouton du menu de colonne. |
+| `chevron` | Le bouton d’ouverture d’un arbre, d’un détail et d’un groupe de colonnes, tourné vers la fin de la ligne quand il est fermé ; tourné et inversé comme celui par défaut. |
+| `submenu` | La marque de sous-menu d’une entrée de menu, inversée de droite à gauche. |
+| `grip` | La poignée par laquelle on déplace une ligne. |
+
+L’icône est dessinée dans la couleur et la taille de la marque (`--dzg-icon-size`), quel que soit son propre
+remplissage. Il faut `theming()` de `@dzgrid/dom/theme`. Une icône qui n’est pas faite de simples formes — un
+`<script>`, un `<style>`, un `<foreignObject>`, un attribut `on…`, un lien hors de l’icône, plus de 20 000 caractères —
+est refusée : celle par défaut reste et un avertissement `invalid-setting` est signalé. Les icônes sont dessinées
+comme images `data:` : une politique de sécurité du contenu doit permettre `img-src data:`.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { theming } from '@dzgrid/dom/theme';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Plant = { id: string; name: string; height: number };
+
+const funnel = document.querySelector<SVGSVGElement>('#my-funnel')!;   // un <svg> déjà dans la page
+
+createGrid<Plant>(document.getElementById('plantes')!, {
+  rows: [{ id: 'p1', name: 'Digitale', height: 120 }],
+  columns: [{ id: 'name', header: 'Plante' }, { id: 'height', header: 'Hauteur (cm)', type: 'number' }],
+  getRowId: (p) => p.id,
+  messages: FR,
+  icons: { sortAsc: '<svg viewBox="0 0 16 16"><path d="M8 3l5 8H3z"/></svg>', filter: funnel },
+  features: [theming()],
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { theming } from '@dzgrid/dom/theme';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Plant = { id: string; name: string; height: number };
+
+@Component({
+  selector: 'app-plantes',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features" [icons]="icons" />`,
+})
+export class Plants {
+  readonly rows: Plant[] = [{ id: 'p1', name: 'Digitale', height: 120 }];
+  readonly columns: DzgColumnOrGroup<Plant>[] = [{ id: 'name', header: 'Plante' }, { id: 'height', header: 'Hauteur (cm)', type: 'number' }];
+  readonly rowId = (p: Plant) => p.id;
+  readonly messages = FR;
+  readonly features = [theming()];
+  readonly icons = { sortAsc: '<svg viewBox="0 0 16 16"><path d="M8 3l5 8H3z"/></svg>' };
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { theming } from '@dzgrid/dom/theme';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Plant = { id: string; name: string; height: number };
+
+const grid = document.querySelector<DzGridElement<Plant>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Plante' }, { id: 'height', header: 'Hauteur (cm)', type: 'number' }];
+grid.getRowId = (p) => p.id;
+grid.messages = FR;
+grid.features = [theming()];
+grid.icons = { sortAsc: '<svg viewBox="0 0 16 16"><path d="M8 3l5 8H3z"/></svg>' };
+grid.rows = [{ id: 'p1', name: 'Digitale', height: 120 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+Avec `injectStyles: false`, chargez `ICONS_CSS` de `@dzgrid/dom/theme` avec le reste du CSS de mise en page.
+
+## Voir aussi
+
+- [`theme`](../theme/) — les couleurs et les tailles.
+- [Thèmes et droite à gauche](../../guides/theming-rtl/#icônes).

@@ -1,0 +1,119 @@
+---
+title: "headers"
+description: "The column headers on screen, or hidden from the eyes and kept for screen readers."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+For a small grid whose meaning is clear without titles — a list of names, a key and its value.
+
+<OptionFacts setting="headers" />
+
+## What it does
+
+`'hidden'`: no header row on screen — not the column headers, not the group rows above them, not the filter row —
+and the rows start at the top of the grid, which draws as many more as fit.
+
+The header rows are hidden from the eyes only. They stay in the grid with their roles and names, so a screen reader
+still says each cell's column. While the keyboard is in them, they show: ↑ from the first row puts the focus on a
+header cell, the headers appear at their usual place, Enter still sorts and the menu and filter keys still work; ↓
+back into the rows hides them again. The mouse has no header to click: sorting and filtering stay on the keyboard, the
+cell menu, the dock's panels and your own code.
+
+Print and the CSV and Excel exports keep their header row; `header: false` on them leaves it out. The grid's root says
+`data-headers="hidden"`.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Spice = { id: string; name: string; origin: string };
+
+const grid = createGrid<Spice>(document.getElementById('spices')!, {
+  rows: [{ id: 's1', name: 'Saffron', origin: 'Highlands' }],
+  columns: [{ id: 'name', header: 'Spice' }, { id: 'origin', header: 'Origin' }],
+  getRowId: (s) => s.id,
+  messages: EN,
+  label: 'Spices',
+  headers: 'hidden',
+});
+
+grid.update({ headers: 'shown' });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Spice = { id: string; name: string; origin: string };
+
+@Component({
+  selector: 'app-spices',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" label="Spices" headers="hidden" />`,
+})
+export class Spices {
+  readonly rows: Spice[] = [{ id: 's1', name: 'Saffron', origin: 'Highlands' }];
+  readonly columns: DzgColumnOrGroup<Spice>[] = [{ id: 'name', header: 'Spice' }, { id: 'origin', header: 'Origin' }];
+  readonly rowId = (s: Spice) => s.id;
+  readonly messages = EN;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid headers="hidden" label="Spices"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Spice = { id: string; name: string; origin: string };
+
+const grid = document.querySelector<DzGridElement<Spice>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Spice' }, { id: 'origin', header: 'Origin' }];
+grid.getRowId = (s) => s.id;
+grid.messages = EN;
+grid.rows = [{ id: 's1', name: 'Saffron', origin: 'Highlands' }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Live demo
+
+<LiveDemo
+  height={200}
+  settings={{ label: 'Spices', headers: 'hidden' }}
+  columns={[
+    { id: 'name', header: 'Spice', flex: 1 },
+    { id: 'origin', header: 'Origin', flex: 1 },
+  ]}
+  rows={[
+    { id: 's1', name: 'Saffron', origin: 'Highlands' },
+    { id: 's2', name: 'Cardamom', origin: 'Rain forest' },
+    { id: 's3', name: 'Sumac', origin: 'Dry hills' },
+    { id: 's4', name: 'Vanilla', origin: 'Islands' },
+  ]}
+  caption="No header row on screen. Click a row, then press ↑ from the first one: the headers show while the focus is in them."
+/>
+
+## See also
+
+- [`label`](../label/) — the grid's name, which says what the columns are about.
+- [Accessibility](../../guides/accessibility/).

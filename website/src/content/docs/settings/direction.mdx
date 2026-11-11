@@ -1,0 +1,97 @@
+---
+title: "direction"
+description: "Left to right, right to left, or the page's direction and its changes."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Which way the grid reads: left to right, or right to left.
+
+<OptionFacts setting="direction" />
+
+## What it does
+
+`'auto'` follows the direction the grid's host is in — its nearest `dir` attribute, or the page's — and its changes:
+switch `<html dir>` and the grid turns with it. `'ltr'` and `'rtl'` set it whatever the page says.
+
+Everything turns with the direction: the columns' order, the side pinned columns stick to, the scrolling, the arrow
+keys (→ still moves to the right, which in Arabic is toward the start of the line), popups, a tree's indent, the theme's
+lines and shadows. That is why the options speak of `start` and `end`, never of left and right: `pinned: 'start'`
+is on the right in right to left. A change keeps the horizontal scroll where it was, in the reading order.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { AR } from '@dzgrid/dom/locales/ar';
+
+type Souk = { id: string; name: string; stalls: number };
+
+const grid = createGrid<Souk>(document.getElementById('souks')!, {
+  rows: [{ id: 's1', name: 'سوق النجوم', stalls: 48 }],
+  columns: [{ id: 'name', header: 'السوق', pinned: 'start' }, { id: 'stalls', header: 'الدكاكين', type: 'number' }],
+  getRowId: (s) => s.id,
+  messages: AR,
+  direction: 'rtl',
+});
+
+grid.update({ direction: 'auto' });   // follow the page instead
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { AR } from '@dzgrid/dom/locales/ar';
+
+type Souk = { id: string; name: string; stalls: number };
+
+@Component({
+  selector: 'app-souks',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" direction="rtl" />`,
+})
+export class Souks {
+  readonly rows: Souk[] = [{ id: 's1', name: 'سوق النجوم', stalls: 48 }];
+  readonly columns: DzgColumnOrGroup<Souk>[] = [{ id: 'name', header: 'السوق', pinned: 'start' }, { id: 'stalls', header: 'الدكاكين', type: 'number' }];
+  readonly rowId = (s: Souk) => s.id;
+  readonly messages = AR;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid direction="rtl"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { AR } from '@dzgrid/dom/locales/ar';
+
+type Souk = { id: string; name: string; stalls: number };
+
+const grid = document.querySelector<DzGridElement<Souk>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'السوق', pinned: 'start' }, { id: 'stalls', header: 'الدكاكين', type: 'number' }];
+grid.getRowId = (s) => s.id;
+grid.messages = AR;
+grid.rows = [{ id: 's1', name: 'سوق النجوم', stalls: 48 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+A grid in Arabic, live: [Theming and right to left](../../guides/theming-rtl/#right-to-left).
+
+## See also
+
+- [`numerals`](../numerals/) — the language's own digits.
+- [`messages`](../messages/) — the Arabic texts.

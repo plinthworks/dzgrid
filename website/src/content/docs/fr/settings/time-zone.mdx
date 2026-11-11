@@ -1,0 +1,126 @@
+---
+title: "timeZone"
+description: "Le fuseau horaire où les instants sont affichés, filtrés et modifiés."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Le fuseau horaire où la grille affiche les instants — et où elle compte « aujourd’hui ».
+
+<OptionFacts setting="timeZone" />
+
+## Ce qu’il fait
+
+Un nom de fuseau IANA (`'Europe/Paris'`, `'Pacific/Auckland'`). Une colonne `instant` contient des moments
+(millisecondes depuis 1970, ou texte ISO avec un décalage) ; la grille écrit chacun comme l’horloge le lit dans ce
+fuseau, et ses filtres, ses éditeurs et ses raccourcis de date (« aujourd’hui », « 7 derniers jours ») y comptent aussi
+les jours. Une colonne `day` contient des jours du calendrier (`'2026-03-02'`), qui n’appartiennent à aucun fuseau :
+le fuseau ne les déplace jamais.
+
+Par défaut, UTC, pas le fuseau du lecteur : les mêmes lignes montrent le même texte sur chaque machine. Pour suivre
+le lecteur, donnez-lui le sien : `Intl.DateTimeFormat().resolvedOptions().timeZone`. Un nom qui n’est pas un fuseau
+lève une `RangeError` : depuis `createGrid`, ou depuis `update()`, qui laisse alors la grille comme elle était.
+L’attribut de `<dz-grid>` ne lève rien : il écarte la valeur et signale un avertissement `invalid-setting`.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Flight = { id: string; route: string; lands: number };
+
+const grid = createGrid<Flight>(document.getElementById('vols')!, {
+  rows: [{ id: 'f1', route: 'Port → Sommet', lands: 1772442000000 }],
+  columns: [
+    { id: 'route', header: 'Trajet' },
+    { id: 'lands', header: 'Atterrit', type: 'instant', instantFormat: { date: true, time: true } },
+  ],
+  getRowId: (f) => f.id,
+  messages: FR,
+  timeZone: 'Pacific/Auckland',
+});
+
+grid.update({ timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });   // celui du lecteur
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Flight = { id: string; route: string; lands: number };
+
+@Component({
+  selector: 'app-vols',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" timeZone="Pacific/Auckland" />`,
+})
+export class Flights {
+  readonly rows: Flight[] = [{ id: 'f1', route: 'Port → Sommet', lands: 1772442000000 }];
+  readonly columns: DzgColumnOrGroup<Flight>[] = [
+    { id: 'route', header: 'Trajet' },
+    { id: 'lands', header: 'Atterrit', type: 'instant', instantFormat: { date: true, time: true } },
+  ];
+  readonly rowId = (f: Flight) => f.id;
+  readonly messages = FR;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid time-zone="Pacific/Auckland"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Flight = { id: string; route: string; lands: number };
+
+const grid = document.querySelector<DzGridElement<Flight>>('dz-grid')!;
+grid.columns = [
+  { id: 'route', header: 'Trajet' },
+  { id: 'lands', header: 'Atterrit', type: 'instant', instantFormat: { date: true, time: true } },
+];
+grid.getRowId = (f) => f.id;
+grid.messages = FR;
+grid.rows = [{ id: 'f1', route: 'Port → Sommet', lands: 1772442000000 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Vols', timeZone: 'Pacific/Auckland' }}
+  columns={[
+    { id: 'route', header: 'Trajet', flex: 1 },
+    { id: 'lands', header: 'Atterrit (Auckland)', type: 'instant', width: 200, instantFormat: { date: true, time: true } },
+  ]}
+  rows={[
+    { id: 'f1', route: 'Port → Sommet', lands: 1772442000000 },
+    { id: 'f2', route: 'Sommet → Baie', lands: 1772537400000 },
+    { id: 'f3', route: 'Baie → Port', lands: 1772010000000 },
+  ]}
+  caption="Les mêmes instants sur chaque machine : écrits comme l’horloge les lit à Auckland."
+/>
+
+## Voir aussi
+
+- [`locale`](../locale/) — comment la date et l’heure s’écrivent.
+- [`clock`](../clock/) — le « maintenant » d’où comptent les raccourcis de date.
+- [Colonnes](../../guides/columns/) — les jours et les instants.

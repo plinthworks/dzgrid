@@ -46,7 +46,7 @@ describe('1.11.0 as npm would receive it', () => {
   const local = V !== '1.11.0';
   it.skipIf(!existsSync(packed))('the packed tarballs: no test sources, sideEffects as declared, version 1.11.0, every exported file present', () => {
     const tgz = readdirSync(packed).filter((f) => f.endsWith('.tgz'));
-    expect(V).toMatch(/^(1\.10\.1|1\.10\.2-local\.\d{14})$/);
+    expect(V).toMatch(/^(1\.11\.0|1\.11\.1-local\.\d{14})$/);
     // `@dzgrid/element` (Phase 11 L7) is packed from the first pack made after it: an older pack has the four.
     const element = tgz.some((f) => f.startsWith('dzgrid-element-'));
     expect(tgz.sort()).toEqual(['angular', 'core', 'dom', ...(element ? ['element'] : []), 'theme'].map((n) => `dzgrid-${n}-${V}.tgz`));

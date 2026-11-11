@@ -1,0 +1,109 @@
+---
+title: "context"
+description: "The application's own context, handed to every callback and part."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+What the application knows that the rows do not — the user's role, today's prices — handed to the grid's callbacks.
+
+<OptionFacts setting="context" />
+
+## What it does
+
+Any value, which the grid never reads: it hands it on. The column options `editable`, `validate`, `tooltip` and an
+editor's `options` get it as an argument; so do [`rowClass`](../row-class/), `cellClass`, every part, the selection's
+`canSelect` and the export's `canExport`. One rule can then say « a manager may edit this column » without a closure
+over global state.
+
+A new value is a new identity: give a new object, not the same one changed. With `update({ context })`, what depends on
+it is asked again — the rows' classes, which cells may be edited.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Shift = { id: string; nurse: string; ward: string };
+type Ctx = { role: 'manager' | 'staff' };
+
+const isManager = (context: unknown) => (context as Ctx).role === 'manager';
+
+const grid = createGrid<Shift>(document.getElementById('shifts')!, {
+  rows: [{ id: 's1', nurse: 'A. Moreau', ward: 'North' }],
+  columns: [
+    { id: 'nurse', header: 'Nurse' },
+    { id: 'ward', header: 'Ward', editable: (_row, context) => isManager(context) },
+  ],
+  getRowId: (s) => s.id,
+  messages: EN,
+  context: { role: 'staff' } satisfies Ctx,
+});
+
+grid.update({ context: { role: 'manager' } satisfies Ctx });   // the ward column's rule now says yes
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Shift = { id: string; nurse: string; ward: string };
+type Ctx = { role: 'manager' | 'staff' };
+
+@Component({
+  selector: 'app-shifts',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [context]="context()" />`,
+})
+export class Shifts {
+  readonly context = signal<Ctx>({ role: 'staff' });
+  readonly rows: Shift[] = [{ id: 's1', nurse: 'A. Moreau', ward: 'North' }];
+  readonly columns: DzgColumnOrGroup<Shift>[] = [
+    { id: 'nurse', header: 'Nurse' },
+    { id: 'ward', header: 'Ward', editable: (_row, context) => (context as Ctx).role === 'manager' },
+  ];
+  readonly rowId = (s: Shift) => s.id;
+  readonly messages = EN;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Shift = { id: string; nurse: string; ward: string };
+type Ctx = { role: 'manager' | 'staff' };
+
+const grid = document.querySelector<DzGridElement<Shift>>('dz-grid')!;
+grid.columns = [
+  { id: 'nurse', header: 'Nurse' },
+  { id: 'ward', header: 'Ward', editable: (_row, context) => (context as Ctx).role === 'manager' },
+];
+grid.getRowId = (s) => s.id;
+grid.messages = EN;
+grid.settings = { context: { role: 'staff' } satisfies Ctx };
+grid.rows = [{ id: 's1', nurse: 'A. Moreau', ward: 'North' }];
+```
+
+</Fragment>
+</CodeTabs>
+
+Editing a cell needs the edit features: see [Editing](../../guides/editing/).
+
+## See also
+
+- [`rowClass`](../row-class/) — classes from the row and the context.
+- [Editing](../../guides/editing/) — `editable` and `validate`.

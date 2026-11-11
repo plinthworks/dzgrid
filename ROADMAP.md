@@ -1416,4 +1416,6 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   `docs/guide/` is a README pointing to the site; `guide.test.ts` retired into `website/test/` (`llms.test.ts` new);
   `llms.txt` / `llms-full.txt` built from the site's English pages. Found, not fixed: see `docs/STATUS.md`
   « site, lot 2 ».
-- Next: batch 3 (one page per option), 4 (API from `api/*.api.txt`), 5 (Chrome pass, the owner enables Pages).
+- Batch 3, part 1 (2026-11-11): 19 settings pages (en + fr), facts generated from the sources (`gen-options.mjs`,
+  `@default` tags), `options.test.ts`. Next: the other 19 settings, column options, features; then batch 4 (API from
+  `api/*.api.txt`), 5 (Chrome pass, the owner enables Pages).

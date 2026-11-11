@@ -1,0 +1,39 @@
+---
+/**
+ * Every setting (or column option) in one table, from the sources (src/generated/options.json): its name — a link
+ * when its page is written —, its type, and its page's description. An option without a page yet shows its name
+ * alone, so the list is whole from the start.
+ *
+ *   <OptionList of="settings" />
+ *   <OptionList of="columns" />
+ */
+import { getCollection } from 'astro:content';
+import data from '../generated/options.json';
+
+interface Props {
+  of: 'settings' | 'columns';
+}
+const { of } = Astro.props;
+const fr = Astro.currentLocale === 'fr';
+const dir = of === 'settings' ? 'settings' : 'column-options';
+const kebab = (name: string) => name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+const docs = await getCollection('docs');
+const page = (name: string) => docs.find((d) => d.id === `${fr ? 'fr/' : ''}${dir}/${kebab(name)}`);
+const rows = data[of].map((o) => ({ name: o.name, type: o.type, required: o.required, page: page(o.name) }));
+const words = fr ? { name: 'Nom', type: 'Type', what: 'Rôle', required: 'obligatoire' } : { name: 'Name', type: 'Type', what: 'What it does', required: 'required' };
+---
+
+<div class="dzg-option-list">
+  <table>
+    <thead><tr><th scope="col">{words.name}</th><th scope="col">{words.type}</th><th scope="col">{words.what}</th></tr></thead>
+    <tbody>
+      {rows.map((r) => (
+        <tr>
+          <th scope="row">{r.page ? <a href={`./${kebab(r.name)}/`}><code>{r.name}</code></a> : <code>{r.name}</code>}{r.required && <> <small>({words.required})</small></>}</th>
+          <td><code>{r.type.length > 60 ? `${r.type.slice(0, 57)}…` : r.type}</code></td>
+          <td>{r.page?.data.description ?? ''}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

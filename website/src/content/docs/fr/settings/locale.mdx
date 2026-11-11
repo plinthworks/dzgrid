@@ -1,0 +1,129 @@
+---
+title: "locale"
+description: "L’écriture des nombres et des dates et l’ordre du texte trié, à part de la langue des textes."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Comment les cellules écrivent les nombres et les dates, et comment le texte se trie — à part de la langue des textes.
+
+<OptionFacts setting="locale" />
+
+## Ce qu’il fait
+
+Une étiquette de langue (`'en-GB'`, `'fr-CH'`, `'ar-DZ'`) : `1 234,5` ou `1,234.5`, `03/02/2026` ou `2026-03-02`, et
+la place du « é » parmi les autres lettres quand une colonne de texte est triée. Sans lui, la grille prend le
+`locale` du paquet [`messages`](../messages/) — des textes français avec des nombres suisses, c’est
+`messages: FR, locale: 'fr-CH'`.
+
+Le calendrier est toujours le grégorien, quoi que dise l’étiquette, et les chiffres sont latins sauf si
+[`numerals`](../numerals/) demande ceux de la langue. Une étiquette mal formée lève une `RangeError` :
+depuis `createGrid`, ou depuis `update()`, qui laisse alors la grille comme elle était.
+L’attribut de `<dz-grid>` ne lève rien : il écarte la valeur et signale un avertissement `invalid-setting`.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Cheese = { id: string; name: string; price: number; aged: string };
+
+const grid = createGrid<Cheese>(document.getElementById('fromages')!, {
+  rows: [{ id: 'c1', name: 'Meule des alpages', price: 1234.5, aged: '2025-11-02' }],
+  columns: [
+    { id: 'name', header: 'Fromage' },
+    { id: 'price', header: 'Prix', type: 'number' },
+    { id: 'aged', header: 'Affiné depuis', type: 'day' },
+  ],
+  getRowId: (c) => c.id,
+  messages: FR,
+  locale: 'fr-CH',
+});
+
+grid.update({ locale: 'fr-FR' });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Cheese = { id: string; name: string; price: number; aged: string };
+
+@Component({
+  selector: 'app-fromages',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" locale="fr-CH" />`,
+})
+export class Cheeses {
+  readonly rows: Cheese[] = [{ id: 'c1', name: 'Meule des alpages', price: 1234.5, aged: '2025-11-02' }];
+  readonly columns: DzgColumnOrGroup<Cheese>[] = [
+    { id: 'name', header: 'Fromage' },
+    { id: 'price', header: 'Prix', type: 'number' },
+    { id: 'aged', header: 'Affiné depuis', type: 'day' },
+  ];
+  readonly rowId = (c: Cheese) => c.id;
+  readonly messages = FR;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid locale="fr-CH"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Cheese = { id: string; name: string; price: number; aged: string };
+
+const grid = document.querySelector<DzGridElement<Cheese>>('dz-grid')!;
+grid.columns = [
+  { id: 'name', header: 'Fromage' },
+  { id: 'price', header: 'Prix', type: 'number' },
+  { id: 'aged', header: 'Affiné depuis', type: 'day' },
+];
+grid.getRowId = (c) => c.id;
+grid.messages = FR;
+grid.rows = [{ id: 'c1', name: 'Meule des alpages', price: 1234.5, aged: '2025-11-02' }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Fromages', locale: 'fr-CH' }}
+  columns={[
+    { id: 'name', header: 'Fromage', flex: 1 },
+    { id: 'price', header: 'Prix', type: 'number', width: 130, numberFormat: { minimumFractionDigits: 2 } },
+    { id: 'aged', header: 'Affiné depuis', type: 'day', width: 140 },
+  ]}
+  rows={[
+    { id: 'c1', name: 'Meule des alpages', price: 1234.5, aged: '2025-11-02' },
+    { id: 'c2', name: 'Bleu du vallon', price: 87.2, aged: '2026-01-15' },
+    { id: 'c3', name: 'Tomme fumée', price: 412, aged: '2025-08-30' },
+  ]}
+  caption="Textes français, nombres et dates suisses (fr-CH)."
+/>
+
+## Voir aussi
+
+- [`numerals`](../numerals/) — les chiffres propres à la langue.
+- [`timeZone`](../time-zone/) — le fuseau où s’affichent les instants.
+- [`messages`](../messages/) — la langue des textes.

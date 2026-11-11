@@ -1,0 +1,103 @@
+---
+title: "rowClass"
+description: "Des classes CSS pour une ligne de données, d’après ses données."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Des classes sur une ligne d’après ce qu’elle contient — une commande en retard, une ligne à vérifier — que votre CSS
+habille.
+
+<OptionFacts setting="rowClass" />
+
+## Ce qu’il fait
+
+Une fonction qui reçoit `{ row, key, context, pinned }` et rend des noms de classes séparés par des espaces, ou `null`
+pour aucune. Elles vont sur l’élément de la ligne, à côté du `.dzg-row` de la grille ; `pinned` vaut `'top'` ou
+`'bottom'` pour une ligne figée et manque dans le corps. `context` est le [`context`](../context/) de la grille.
+
+La grille redemande quand une ligne est dessinée avec d’autres données : une autre ligne à la même place pendant le
+défilement, un changement de la ligne, des colonnes, de la langue, du contexte. Gardez la même fonction d’un
+`update()` à l’autre : une nouvelle — une flèche écrite dans un template — redessine toutes les lignes. Une classe
+nomme un aspect ; les couleurs restent des variables CSS, pour que le thème sombre et les couleurs forcées
+s’appliquent encore.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Order = { id: string; client: string; daysLate: number };
+
+createGrid<Order>(document.getElementById('commandes')!, {
+  rows: [{ id: 'o1', client: 'Moulin Bleu', daysLate: 3 }],
+  columns: [{ id: 'client', header: 'Client' }, { id: 'daysLate', header: 'Jours de retard', type: 'number' }],
+  getRowId: (o) => o.id,
+  messages: FR,
+  rowClass: ({ row }) => (row.daysLate > 0 ? 'late' : null),
+});
+```
+
+```css
+/* La ligne et ses parties figées : chacune peint son propre fond. */
+.dzg-row.late,
+.dzg-row.late :is(.dzg-seg-start, .dzg-seg-end) {
+  background: color-mix(in srgb, var(--tz-warning) 14%, var(--tz-bg));
+}
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import type { RowClassContext } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Order = { id: string; client: string; daysLate: number };
+
+@Component({
+  selector: 'app-commandes',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [rowClass]="rowClass" />`,
+})
+export class Orders {
+  readonly rows: Order[] = [{ id: 'o1', client: 'Moulin Bleu', daysLate: 3 }];
+  readonly columns: DzgColumnOrGroup<Order>[] = [{ id: 'client', header: 'Client' }, { id: 'daysLate', header: 'Jours de retard', type: 'number' }];
+  readonly rowId = (o: Order) => o.id;
+  readonly messages = FR;
+  readonly rowClass = ({ row }: RowClassContext<Order>) => (row.daysLate > 0 ? 'late' : null);
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Order = { id: string; client: string; daysLate: number };
+
+const grid = document.querySelector<DzGridElement<Order>>('dz-grid')!;
+grid.columns = [{ id: 'client', header: 'Client' }, { id: 'daysLate', header: 'Jours de retard', type: 'number' }];
+grid.getRowId = (o) => o.id;
+grid.messages = FR;
+grid.settings = { rowClass: ({ row }) => (row.daysLate > 0 ? 'late' : null) };
+grid.rows = [{ id: 'o1', client: 'Moulin Bleu', daysLate: 3 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Voir aussi
+
+- [`context`](../context/) — ce que la fonction reçoit aussi.
+- [Thèmes et droite à gauche](../../guides/theming-rtl/).

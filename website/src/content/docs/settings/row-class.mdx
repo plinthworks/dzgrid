@@ -1,0 +1,101 @@
+---
+title: "rowClass"
+description: "CSS classes for a data row, from its data."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Classes on a row from what it holds — a late order, a row to check — for your CSS to style.
+
+<OptionFacts setting="rowClass" />
+
+## What it does
+
+A function given `{ row, key, context, pinned }` that returns class names, separated by spaces, or `null` for none.
+They go on the row's element, next to the grid's own `.dzg-row`; `pinned` says `'top'` or `'bottom'` for a pinned row
+and is absent in the body. `context` is the grid's [`context`](../context/).
+
+The grid asks again when a row is drawn with other data: another row in the same place while scrolling, a change to
+the row, the columns, the language, the context. Keep the same function from one `update()` to the next: a new one —
+an arrow written inline in a template — draws every row again. A class names a look; the colours stay CSS
+variables, so a dark theme and forced colours still apply.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Order = { id: string; client: string; daysLate: number };
+
+createGrid<Order>(document.getElementById('orders')!, {
+  rows: [{ id: 'o1', client: 'Blue Mill', daysLate: 3 }],
+  columns: [{ id: 'client', header: 'Client' }, { id: 'daysLate', header: 'Days late', type: 'number' }],
+  getRowId: (o) => o.id,
+  messages: EN,
+  rowClass: ({ row }) => (row.daysLate > 0 ? 'late' : null),
+});
+```
+
+```css
+/* The row and its pinned parts: each paints its own background. */
+.dzg-row.late,
+.dzg-row.late :is(.dzg-seg-start, .dzg-seg-end) {
+  background: color-mix(in srgb, var(--tz-warning) 14%, var(--tz-bg));
+}
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import type { RowClassContext } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Order = { id: string; client: string; daysLate: number };
+
+@Component({
+  selector: 'app-orders',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [rowClass]="rowClass" />`,
+})
+export class Orders {
+  readonly rows: Order[] = [{ id: 'o1', client: 'Blue Mill', daysLate: 3 }];
+  readonly columns: DzgColumnOrGroup<Order>[] = [{ id: 'client', header: 'Client' }, { id: 'daysLate', header: 'Days late', type: 'number' }];
+  readonly rowId = (o: Order) => o.id;
+  readonly messages = EN;
+  readonly rowClass = ({ row }: RowClassContext<Order>) => (row.daysLate > 0 ? 'late' : null);
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Order = { id: string; client: string; daysLate: number };
+
+const grid = document.querySelector<DzGridElement<Order>>('dz-grid')!;
+grid.columns = [{ id: 'client', header: 'Client' }, { id: 'daysLate', header: 'Days late', type: 'number' }];
+grid.getRowId = (o) => o.id;
+grid.messages = EN;
+grid.settings = { rowClass: ({ row }) => (row.daysLate > 0 ? 'late' : null) };
+grid.rows = [{ id: 'o1', client: 'Blue Mill', daysLate: 3 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## See also
+
+- [`context`](../context/) — what the function is also given.
+- [Theming and right to left](../../guides/theming-rtl/).

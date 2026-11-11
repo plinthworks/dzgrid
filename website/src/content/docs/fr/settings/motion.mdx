@@ -1,0 +1,98 @@
+---
+title: "motion"
+description: "Couper tout mouvement de la grille, quoi que demande le système du lecteur."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Un interrupteur pour tous les mouvements de la grille : votre propre réglage « réduire les animations », ou un écran
+calme.
+
+<OptionFacts setting="motion" />
+
+## Ce qu’il fait
+
+`false` arrête tout mouvement : les transitions du thème (la couleur d’une ligne survolée, un bouton qui tourne, le
+segment qui glisse dans la barre d’activité) et les animations de `@dzgrid/dom/motion-gsap` (les lignes qui glissent
+vers leur nouvelle place, l’éclat d’une valeur, les fenêtres qui apparaissent en fondu). La racine de la grille porte
+`data-motion="off"`, que votre CSS peut suivre. `true` les rend.
+
+Le système du lecteur l’emporte aussi : avec « réduire les animations » (`prefers-reduced-motion: reduce`), la grille
+bouge aussi peu quoi que dise `motion`. `motion: false` sert à une application qui offre ce choix elle-même, ou à un
+écran qui doit rester immobile — un affichage mural, une capture.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Lamp = { id: string; street: string; watts: number };
+
+const grid = createGrid<Lamp>(document.getElementById('lampadaires')!, {
+  rows: [{ id: 'l1', street: 'Rue du Moulin', watts: 40 }],
+  columns: [{ id: 'street', header: 'Rue' }, { id: 'watts', header: 'Watts', type: 'number' }],
+  getRowId: (l) => l.id,
+  messages: FR,
+  motion: false,
+});
+
+grid.update({ motion: true });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Lamp = { id: string; street: string; watts: number };
+
+@Component({
+  selector: 'app-lampadaires',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [motion]="motion()" />`,
+})
+export class Lamps {
+  readonly motion = signal(false);
+  readonly rows: Lamp[] = [{ id: 'l1', street: 'Rue du Moulin', watts: 40 }];
+  readonly columns: DzgColumnOrGroup<Lamp>[] = [{ id: 'street', header: 'Rue' }, { id: 'watts', header: 'Watts', type: 'number' }];
+  readonly rowId = (l: Lamp) => l.id;
+  readonly messages = FR;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid motion="false"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Lamp = { id: string; street: string; watts: number };
+
+const grid = document.querySelector<DzGridElement<Lamp>>('dz-grid')!;
+grid.columns = [{ id: 'street', header: 'Rue' }, { id: 'watts', header: 'Watts', type: 'number' }];
+grid.getRowId = (l) => l.id;
+grid.messages = FR;
+grid.rows = [{ id: 'l1', street: 'Rue du Moulin', watts: 40 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Voir aussi
+
+- [`busy`](../busy/) — la barre d’activité, immobile sous `motion: false`.
+- [Accessibilité](../../guides/accessibility/).
