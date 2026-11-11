@@ -68,6 +68,10 @@ feature reads. Nothing of 1.10.0 is removed (`npm run check:api`, now over every
   known limit `header-wrap.md` noted in 1.10.0 is gone.
 
 ### Tooling
+- **`npm run check:types`** (in `gate:step` and `release:check`): the declarations npm receives compile, as an app's
+  compiler reads them (`skipLibCheck` off, `@dzgrid/*` from the built packages). Found before publishing: the Angular
+  package's `.d.ts` named a type parameter declared nowhere (`T_1`, the inferred type of `(modelUpdated)`), which would
+  have failed every app's build; that output is now typed by hand.
 - **`npm run check:api` guards every published entry.** The baselines (`api/*.api.txt`) had no section for entries
   published after they were written — 7 of `@dzgrid/core` (`grouping`, `pivot`, `dock`, `compare`, `totals`,
   `import`, `row-gaps`) and 36 of `@dzgrid/dom` (28 French and Arabic locale bundles, `statusbar`, `row-numbers`,

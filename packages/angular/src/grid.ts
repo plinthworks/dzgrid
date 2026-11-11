@@ -211,7 +211,8 @@ export class DzGrid<T> implements AfterContentInit {
   /** Rows moved (`rowDrag()`, Phase 9): give `[rows]` back in the new order (`moveRows`), unless the feature applied it. */
   readonly rowMove = output<Ev<T, 'rowMove'>>();
   /** 1.11.0: an output for every other grid event too, each its own events only (`(gridEvent)` still has them all). */
-  readonly modelUpdated = output<Ev<T, 'modelUpdated'>>();
+  // Typed by hand: inferred, its event's `ModelChange<T>['kind']` reached the published .d.ts as `T_1` (scripts/check-types.mjs).
+  readonly modelUpdated: OutputEmitterRef<Ev<T, 'modelUpdated'>> = output<Ev<T, 'modelUpdated'>>();
   readonly sortChanged = output<Ev<T, 'sortChanged'>>();
   readonly filterChanged = output<Ev<T, 'filterChanged'>>();
   readonly quickChanged = output<Ev<T, 'quickChanged'>>();

@@ -5,6 +5,7 @@
 # history: 1.8.0 fix (owner found on 1.7.0): DzGrid's selectionChanged reason typed through @dzgrid/core's exported SelectionReason instead of the unpublished @dzgrid/core/kernel — same type, nothing narrowed — @dzgrid/angular#DzGrid
 # history: owner 2026-11-10: baseline extended to every published entry
 # history: owner 2026-11-10 « ok comme ça, 1.11.0 juste après »: [motion] and an output for every grid event — @dzgrid/angular#DzGrid
+# history: 1.11.0 before publishing: modelUpdated typed by hand (its inferred type named T_1, declared nowhere — scripts/check-types.mjs); numerals, direction, headers: the same unions printed in another order — @dzgrid/angular#DzGrid
 
 @ @dzgrid/angular
 ## DZGRID_ANGULAR_VERSION
@@ -26,10 +27,10 @@
       readonly messages: _angular_core.InputSignal<GridMessages | undefined>;
       readonly locale: _angular_core.InputSignal<string | undefined>;
       readonly timeZone: _angular_core.InputSignal<string | undefined>;
-      readonly numerals: _angular_core.InputSignal<"locale" | "latn" | undefined>;
-      readonly direction: _angular_core.InputSignal<"ltr" | "rtl" | "auto" | undefined>;
+      readonly numerals: _angular_core.InputSignal<"latn" | "locale" | undefined>;
+      readonly direction: _angular_core.InputSignal<"auto" | "ltr" | "rtl" | undefined>;
       readonly density: _angular_core.InputSignal<"compact" | "comfortable" | "spacious" | undefined>;
-      readonly headers: _angular_core.InputSignal<"hidden" | "shown" | undefined>;
+      readonly headers: _angular_core.InputSignal<"shown" | "hidden" | undefined>;
       readonly rowHeight: _angular_core.InputSignal<number | undefined>;
       readonly headerHeight: _angular_core.InputSignal<number | _dzgrid_dom.HeaderHeights | undefined>;
       readonly theme: _angular_core.InputSignal<_dzgrid_dom.GridTheme | undefined>;
@@ -204,12 +205,7 @@
           readonly parent: RowKey | null;
           readonly applied: boolean;
       }>;
-      readonly modelUpdated: OutputEmitterRef<{
-          readonly type: "modelUpdated";
-          readonly source: _dzgrid_core.ChangeSource;
-          readonly displayed: _dzgrid_core.DisplayedRows<T>;
-          readonly kind: _dzgrid_core.ModelChange<T_1>["kind"];
-      }>;
+      readonly modelUpdated: OutputEmitterRef<Ev<T, 'modelUpdated'>>;
       readonly sortChanged: OutputEmitterRef<{
           readonly type: "sortChanged";
           readonly source: _dzgrid_core.ChangeSource;

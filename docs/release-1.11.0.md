@@ -62,4 +62,4 @@ Puis `npm run publish:verify`, et dans les applications `npm update @dzgrid/core
 - **Un titre de colonne de nombres coupé à `maxLines`** est maintenant au début de sa cellule (les autres restent à la
   fin).
 
-Tailles : K.8 90 105 / 91 000 (1.10.0 : 90 077) ; base DOM 24 749 / 24 750.
+Tailles : K.8 90 566 / 91 000 (1.10.0 : 90 077) ; base DOM 24 921 / 24 950 ; Angular 8 590 / 8 650 (ton accord) ; appli Angular réelle 101 661 / 101 700.
