@@ -1,0 +1,54 @@
+---
+title: "validate"
+description: "Your own check of an edited value: a refusal code, or null."
+---
+
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+A rule of your own that a kept value must pass.
+
+<OptionFacts column="validate" />
+
+## What it does
+
+`validate(value, row, context)` returns null (or nothing) when the value is fine, or a code that says why
+not. It runs after the codec has read the value and after the column's [`edit`](../edit/) checks; it is synchronous.
+
+Give the code's sentence in the messages as `validation.<code>`; without it, « invalid value » is said. A refused
+value stays in the open field, which blinks, and the refusal is said to screen readers with the column's name. It
+needs the `edit()` feature, which runs it; a `validate` that is not a function is told there.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Gnome = { id: string; name: string; hat: string; height: number };
+
+// Not typed `GridMessages`: an app's own `validation.<code>` keys are extra keys.
+const messages = {
+  ...EN,
+  text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text, 'validation.whole': 'a whole number' },
+};
+
+createGrid<Gnome>(document.getElementById('gnomes')!, {
+  rows: [{ id: 'g1', name: 'Barnaby', hat: 'red', height: 31 }],
+  columns: [
+    { id: 'name', header: 'Name', editable: true },
+    { id: 'height', header: 'Height (cm)', type: 'number', editable: true, validate: (v) => (v !== null && !Number.isInteger(v) ? 'whole' : null) },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [edit<Gnome>(), editors()],
+});
+```
+
+## See also
+
+- [`edit`](../edit/), [`editable`](../editable/).
+- [Editing](../../guides/editing/#checks).

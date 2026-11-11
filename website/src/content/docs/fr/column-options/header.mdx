@@ -1,0 +1,42 @@
+---
+title: "header"
+description: "Le titre de la colonne, déjà traduit."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Le titre au-dessus de la colonne, dans la langue de votre page.
+
+<OptionFacts column="header" />
+
+## Ce qu’il fait
+
+La grille n’embarque aucune langue : donnez le titre déjà traduit. C’est le texte de la cellule d’en-tête,
+et le nom de la colonne partout où la grille la nomme — le menu de colonne, les filtres, les messages du lecteur
+d’écran, la première ligne d’un fichier CSV, le tableau imprimé. Sans lui, l’`id` le remplace.
+
+Redonnez les colonnes avec un nouveau `header` quand la langue change (`update({ columns })`).
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Plant = { id: string; name: string; height: number };
+
+createGrid<Plant>(document.getElementById('plantes')!, {
+  rows: [{ id: 'p1', name: 'Digitale', height: 120 }],
+  columns: [
+    { id: 'name', header: 'Plante' },
+    { id: 'height', header: 'Hauteur (cm)', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Voir aussi
+
+- [`headerShort`](../header-short/), [`headerTooltip`](../header-tooltip/), [`headerAlign`](../header-align/).
+- [Colonnes](../../guides/columns/).

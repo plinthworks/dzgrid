@@ -1,0 +1,70 @@
+---
+title: "movable"
+description: "Whether the column may change place or side."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+`false` keeps the column where you put it.
+
+<OptionFacts column="movable" />
+
+## What it does
+
+With the `columns()` feature, the user moves a column by dragging its header or from the keyboard; the
+column menu moves and pins it; the columns chooser reorders it. `movable: false` refuses all of these for this
+column: its header does not drag, the menu's « Pin » and moves are disabled, the chooser shows it locked. A saved
+state that places it elsewhere is told and its place is kept.
+
+Other columns still move around it. To keep a column first, put it first in the list and give it
+`movable: false` (often with [`pinned`](../pinned/)).
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { columns } from '@dzgrid/dom/columns';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_COLUMNS.text } };
+
+createGrid<Tool>(document.getElementById('tools')!, {
+  rows: [{ id: 't1', name: 'Hammer', shelf: 2, notes: 'Claw, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Tool', movable: false },
+    { id: 'shelf', header: 'Shelf', type: 'number' },
+    { id: 'notes', header: 'Notes' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [columns()],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Tools' }}
+  features={['columns']}
+  columns={[
+    { id: 'name', header: 'Tool', width: 160, movable: false },
+    { id: 'shelf', header: 'Shelf', type: 'number', width: 90 },
+    { id: 'notes', header: 'Notes', flex: 1 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Hammer', shelf: 2, notes: 'Claw, 450 g' },
+    { id: 't2', name: 'Hand saw', shelf: 3, notes: 'Fine teeth, keep dry' },
+    { id: 't3', name: 'Spirit level', shelf: 1, notes: '60 cm' },
+  ]}
+  caption="Drag Notes before Tool: it moves. Tool stays where it is."
+/>
+
+## See also
+
+- [`pinned`](../pinned/), [`resizable`](../resizable/).
+- [Columns](../../guides/columns/#moving-resizing-hiding).

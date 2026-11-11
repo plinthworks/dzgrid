@@ -1,0 +1,53 @@
+---
+title: "codec"
+description: "Your own way to read, show, sort and export the column’s values."
+---
+
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+A whole value codec in place of the one the type brings.
+
+<OptionFacts column="codec" />
+
+## What it does
+
+A codec says how one kind of value is read from the row (`coerce`), read from typed or pasted text
+(`parse`), shown (`format`), sorted (`sortKey`, `compare`), compared (`equals`, `isEmpty`) and written to files and
+the clipboard (`toExport`). Every type brings its own; `codec` replaces it for this column, and a `'custom'` type
+needs one.
+
+`@dzgrid/core` exports the built-in codecs, ready to adjust: `booleanCodecWith({ true, false })` shows your own words
+for yes and no, `enumCodec(options, { sort: 'option-order' })` sorts a list in its own order rather than by label.
+Spread one to change a single function, as `{ ...textCodec, format: … }`.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { booleanCodecWith, enumCodec, textCodec } from '@dzgrid/core';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Order = { id: string; ref: string; stage: string; paid: boolean };
+
+const STAGES = [
+  { value: 'new', label: 'New' },
+  { value: 'packed', label: 'Packed' },
+  { value: 'sent', label: 'Sent' },
+];
+
+createGrid<Order>(document.getElementById('orders')!, {
+  rows: [{ id: 'o1', ref: 'ord-311', stage: 'packed', paid: false }],
+  columns: [
+    { id: 'ref', header: 'Order', codec: { ...textCodec, format: (v: string) => v.toUpperCase() } },
+    { id: 'stage', header: 'Stage', type: 'enum', codec: enumCodec(STAGES, { sort: 'option-order' }) },
+    { id: 'paid', header: 'Payment', type: 'boolean', codec: booleanCodecWith({ true: 'Paid', false: 'Due' }) },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+});
+```
+
+## See also
+
+- [`type`](../type/), [`enumOptions`](../enum-options/).
+- [Columns](../../guides/columns/#value-and-type).

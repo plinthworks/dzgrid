@@ -459,10 +459,10 @@ property still hears them.
 
 # Columns
 
-A column is a plain object (`ColumnDef<T>` from `@dzgrid/core`). Only the keys described here exist; an unknown key
-is reported as a problem, never guessed. Angular's `DzgColumnDef<T>` is the same object, and also takes component
-classes in `ui`. Each key will have its own page under [Column options](https://plinthworks.github.io/dzgrid/column-options/); this guide shows how
-they work together.
+A column is a plain object (`ColumnDef<T>` from `@dzgrid/core`). Only the keys described here exist; TypeScript
+flags an unknown key, and the grid ignores it. Angular's `DzgColumnDef<T>` is the same object, and also takes
+component classes in `ui`. Each key has its own page under [Column options](https://plinthworks.github.io/dzgrid/column-options/); this guide shows
+how they work together.
 
 ## Value and type
 
@@ -938,7 +938,7 @@ grid.kernel.dispatch({ type: 'selection.all' }, 'api');
 - `canSelect(row, selection, context)` returns `false`, or a reason code, to refuse a row; it needs the `rules()`
   feature from `@dzgrid/dom/rules` (texts `-rules`), which says why to the user.
 
-The `selection` setting's every key will be on its own page under [Settings](https://plinthworks.github.io/dzgrid/settings/).
+Every key of the `selection` setting is on its page: [`selection`](https://plinthworks.github.io/dzgrid/settings/selection/).
 
 ## Blocks of cells and the clipboard
 
@@ -1046,7 +1046,8 @@ const grid = createGrid<Gnome>(document.getElementById('gnomes')!, {
   `messages` as `validation.<code>`; without it, a generic « invalid » is said.
 - A refused value stays in the open field, blinks, and is said to screen readers with the column's name and the reason.
 
-These keys will each have their page under [Column options](https://plinthworks.github.io/dzgrid/column-options/).
+Each key has its page under Column options: [`editable`](https://plinthworks.github.io/dzgrid/column-options/editable/),
+[`edit`](https://plinthworks.github.io/dzgrid/column-options/edit/), [`validate`](https://plinthworks.github.io/dzgrid/column-options/validate/).
 
 ## Saving
 

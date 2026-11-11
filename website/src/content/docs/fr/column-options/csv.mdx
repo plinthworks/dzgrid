@@ -1,0 +1,45 @@
+---
+title: "csv"
+description: "`'text'` : une valeur faite de chiffres garde ses zéros de tête dans Excel."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Pour des codes faits de chiffres — un code postal, une référence — qu’un tableur lirait comme des nombres.
+
+<OptionFacts column="csv" />
+
+## Ce qu’il fait
+
+Un tableur qui ouvre un fichier CSV lit `'01234'` comme le nombre 1234. Avec `csv: 'text'`, une valeur
+faite seulement de chiffres est écrite `="01234"`, qu’Excel garde comme texte, zéros compris ; dans un fichier Excel
+(`.xlsx`), la cellule est écrite comme texte. Les autres valeurs sont écrites comme d’habitude.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { csvExport } from '@dzgrid/dom/export';
+import { FR_EXPORT } from '@dzgrid/dom/locales/fr-export';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Shop = { id: string; town: string; postcode: string };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_EXPORT.text } };
+
+createGrid<Shop>(document.getElementById('boutiques')!, {
+  rows: [{ id: 's1', town: 'Champalouette', postcode: '01234' }],
+  columns: [
+    { id: 'town', header: 'Ville' },
+    { id: 'postcode', header: 'Code postal', csv: 'text' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [csvExport({ canExport: true })],
+});
+```
+
+## Voir aussi
+
+- [`type`](../type/).
+- [Export et impression](../../guides/export-print/#csv-et-excel).

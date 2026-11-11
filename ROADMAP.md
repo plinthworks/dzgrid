@@ -1417,5 +1417,5 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   `llms.txt` / `llms-full.txt` built from the site's English pages. Found, not fixed: see `docs/STATUS.md`
   « site, lot 2 ».
 - Batch 3, part 1 (2026-11-11): 19 settings pages (en + fr), facts generated from the sources (`gen-options.mjs`,
-  `@default` tags), `options.test.ts`. Part 2 (same day): the other 19 settings — every setting has its page. Next: column options, features; then batch 4 (API from
+  `@default` tags), `options.test.ts`. Part 2 (same day): the other 19 settings — every setting has its page. Part 3 (same day): the 44 column options, each with its page. Next: features; then batch 4 (API from
   `api/*.api.txt`), 5 (Chrome pass, the owner enables Pages).

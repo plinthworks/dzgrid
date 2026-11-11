@@ -1,0 +1,66 @@
+---
+title: "flex"
+description: "Une part de la place que laissent les colonnes fixes."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Fait s’étirer la colonne avec la grille.
+
+<OptionFacts column="flex" />
+
+## Ce qu’il fait
+
+Les colonnes avec un `flex` se partagent la largeur que laissent les autres colonnes, chacune en proportion
+de son nombre : `flex: 2` prend deux fois ce que prend `flex: 1`. Elles suivent la largeur de la grille quand la
+fenêtre change de taille, et restent entre leurs [`minWidth`](../min-width/) et [`maxWidth`](../max-width/). Quand
+toutes les colonnes sont flexibles, elles remplissent toujours exactement la grille ; il n’y a pas d’interrupteur
+« ajuster à la largeur » à part.
+
+Une fois qu’une colonne flexible est redimensionnée par l’utilisateur, elle garde cette largeur ; le « Réinitialiser les
+colonnes » du menu de colonne la rend de nouveau flexible. Une valeur qui n’est pas un nombre positif ou nul est
+refusée avec une erreur `invalid-column` ; `0` n’est pas flexible.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+createGrid<Tool>(document.getElementById('outils')!, {
+  rows: [{ id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Outil', flex: 1, minWidth: 120 },
+    { id: 'shelf', header: 'Étagère', type: 'number', width: 90 },
+    { id: 'notes', header: 'Notes', flex: 2, minWidth: 160 },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Outils' }}
+  columns={[
+    { id: 'name', header: 'Outil', flex: 1, minWidth: 120 },
+    { id: 'shelf', header: 'Étagère', type: 'number', width: 90 },
+    { id: 'notes', header: 'Notes', flex: 2, minWidth: 160 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' },
+    { id: 't2', name: 'Scie égoïne', shelf: 3, notes: 'Denture fine, au sec' },
+    { id: 't3', name: 'Niveau à bulle', shelf: 1, notes: '60 cm' },
+  ]}
+  caption="Changez la taille de la page : Outil et Notes se partagent la place, Notes deux fois plus."
+/>
+
+## Voir aussi
+
+- [`width`](../width/), [`minWidth`](../min-width/), [`maxWidth`](../max-width/).
+- [Colonnes](../../guides/columns/#taille-et-place).

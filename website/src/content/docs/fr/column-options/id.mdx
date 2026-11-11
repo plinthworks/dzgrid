@@ -1,0 +1,45 @@
+---
+title: "id"
+description: "Le nom de la colonne pour la grille : obligatoire, unique et stable."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Le nom sous lequel la grille connaît une colonne.
+
+<OptionFacts column="id" />
+
+## Ce qu’il fait
+
+L’`id` nomme la colonne partout où la grille en parle : le tri, les filtres, l’état enregistré, les
+événements, le menu de colonne. Gardez-le stable d’une version de votre application à l’autre, sinon un état
+enregistré ne retrouve plus sa colonne. Sans `field` ni `value`, la cellule lit la propriété de ce nom dans la ligne.
+
+Une colonne sans `id` (ou avec un `id` vide) est refusée avec une erreur `invalid-column` ; une deuxième colonne du
+même `id` est refusée avec `duplicate-column-id`, et la première est gardée. Les autres colonnes continuent. Un `id`
+avec un point et sans `field` lit d’abord la propriété de la ligne qui porte exactement ce nom (un id fait d’une date
+et d’une heure), puis le chemin.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Book = { id: string; title: string; pages: number };
+
+createGrid<Book>(document.getElementById('livres')!, {
+  rows: [{ id: 'b1', title: 'La Route du sel', pages: 312 }],
+  columns: [
+    { id: 'title', header: 'Titre' },
+    { id: 'pages', header: 'Pages', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Voir aussi
+
+- [`field`](../field/), [`value`](../value/).
+- [Colonnes](../../guides/columns/).

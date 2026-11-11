@@ -1,0 +1,63 @@
+---
+title: "hidden"
+description: "The column starts hidden."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+A column that exists but is not shown when the grid starts.
+
+<OptionFacts column="hidden" />
+
+## What it does
+
+A hidden column is still a column: it keeps its sort and its filter, and it can be shown again.
+The user shows it from the columns chooser; your code from the grid state or by giving the columns again. What the user
+chose wins over `hidden` and is part of the saved state; the column menu's « Reset columns » gives the definition's
+back.
+
+By default, hidden columns are left out of the files and of print, which show the visible columns.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+createGrid<Tool>(document.getElementById('tools')!, {
+  rows: [{ id: 't1', name: 'Hammer', shelf: 2, notes: 'Claw, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Tool' },
+    { id: 'shelf', header: 'Shelf', type: 'number', hidden: true },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Tools' }}
+  features={['columns', 'chooser', 'columnMenu']}
+  columns={[
+    { id: 'name', header: 'Tool', width: 160 },
+    { id: 'shelf', header: 'Shelf', type: 'number', width: 110, hidden: true },
+    { id: 'notes', header: 'Notes', flex: 1 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Hammer', shelf: 2, notes: 'Claw, 450 g' },
+    { id: 't2', name: 'Hand saw', shelf: 3, notes: 'Fine teeth, keep dry' },
+    { id: 't3', name: 'Spirit level', shelf: 1, notes: '60 cm' },
+  ]}
+  caption="Shelf is hidden: open a menu (⋮), then « Choose columns… » to show it."
+/>
+
+## See also
+
+- [`hideable`](../hideable/), [`chooser`](../chooser/).
+- [Columns](../../guides/columns/#moving-resizing-hiding).

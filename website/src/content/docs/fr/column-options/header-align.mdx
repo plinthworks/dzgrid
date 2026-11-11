@@ -1,0 +1,58 @@
+---
+title: "headerAlign"
+description: "L’endroit où le titre se place dans l’en-tête, quand ce n’est pas celui du texte des cellules."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+La place du titre de l’en-tête, par-dessus l’`align` de la colonne.
+
+<OptionFacts column="headerAlign" />
+
+## Ce qu’il fait
+
+`'start'`, `'center'` ou `'end'`, des côtés logiques. Sans lui, le titre suit [`align`](../align/) : le
+titre d’une colonne `number` se place à la fin, comme ses cellules. Donnez `headerAlign: 'start'` pour garder tous les
+titres au début pendant que les nombres restent à la fin.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+createGrid<Tool>(document.getElementById('outils')!, {
+  rows: [{ id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Outil' },
+    { id: 'shelf', header: 'Étagère', type: 'number', headerAlign: 'start' },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Outils' }}
+  columns={[
+    { id: 'name', header: 'Outil', width: 160 },
+    { id: 'shelf', header: 'Étagère', type: 'number', width: 140, headerAlign: 'start' },
+    { id: 'notes', header: 'Notes', flex: 1 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' },
+    { id: 't2', name: 'Scie égoïne', shelf: 3, notes: 'Denture fine, au sec' },
+    { id: 't3', name: 'Niveau à bulle', shelf: 1, notes: '60 cm' },
+  ]}
+/>
+
+## Voir aussi
+
+- [`align`](../align/), [`header`](../header/).
+- [Colonnes](../../guides/columns/#taille-et-place).

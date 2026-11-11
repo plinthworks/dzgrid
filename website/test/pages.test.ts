@@ -28,6 +28,19 @@ const WRITTEN = [
   'settings/source', 'settings/operations', 'settings/pagination', 'settings/selection', 'settings/tooltips', 'settings/on-event',
   'settings/full-width', 'settings/parts', 'settings/features', 'settings/search-warmup', 'settings/overscan',
   'settings/inject-styles', 'settings/nonce',
+  // Batch 3 (2026-11-11): one page per column option.
+  'column-options/index', 'column-options/agg-func', 'column-options/align', 'column-options/assume-zone',
+  'column-options/chooser', 'column-options/codec', 'column-options/col-span', 'column-options/collapse-priority',
+  'column-options/csv', 'column-options/edit', 'column-options/editable', 'column-options/enum-options',
+  'column-options/field', 'column-options/filter', 'column-options/flex', 'column-options/group-show',
+  'column-options/groupable', 'column-options/header', 'column-options/header-align', 'column-options/header-short',
+  'column-options/header-tooltip', 'column-options/header-vertical', 'column-options/header-wrap',
+  'column-options/hidden', 'column-options/hideable', 'column-options/id', 'column-options/instant-format',
+  'column-options/max-width', 'column-options/menu', 'column-options/merge', 'column-options/min-width',
+  'column-options/movable', 'column-options/number-format', 'column-options/pinned', 'column-options/resizable',
+  'column-options/row-span', 'column-options/sortable', 'column-options/tooltip', 'column-options/total',
+  'column-options/type', 'column-options/ui', 'column-options/validate', 'column-options/value',
+  'column-options/width', 'column-options/wrap',
 ];
 /** The sidebar's sections: a page lives in one of them (or is the home page). */
 const SECTIONS = ['getting-started', 'guides', 'settings', 'column-options', 'features', 'api'];

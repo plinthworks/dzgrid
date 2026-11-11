@@ -1,0 +1,44 @@
+---
+title: "value"
+description: "Une fonction qui calcule la cellule à partir de toute la ligne."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Une valeur calculée à partir de la ligne, pour une cellule qu’aucune propriété ne contient seule.
+
+<OptionFacts column="value" />
+
+## Ce qu’il fait
+
+`value(row)` renvoie la valeur brute de la cellule ; le type de la colonne la lit ensuite comme pour
+toute autre colonne. Le résultat est ce que la grille affiche, trie, filtre, recherche et exporte : c’est donc une
+fonction pure de la ligne, rapide, sans effet de bord, qui donne la même réponse pour la même ligne. Elle l’emporte
+sur [`field`](../field/).
+
+La grille ne voit pas un changement hors de la ligne : une valeur qui dépend d’autre chose (l’heure, une autre liste)
+est relue quand les lignes sont redonnées.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Room = { id: string; name: string; width: number; length: number };
+
+createGrid<Room>(document.getElementById('pieces')!, {
+  rows: [{ id: 'r1', name: 'Cuisine', width: 3.2, length: 4.5 }],
+  columns: [
+    { id: 'name', header: 'Pièce' },
+    { id: 'area', header: 'Surface (m²)', type: 'number', value: (r) => r.width * r.length },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Voir aussi
+
+- [`field`](../field/), [`type`](../type/).
+- [Colonnes](../../guides/columns/#valeur-et-type).

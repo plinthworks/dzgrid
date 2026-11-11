@@ -1,0 +1,41 @@
+---
+title: "tooltip"
+description: "Le texte affiché sur une cellule, d’après sa valeur et sa ligne."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Une infobulle sur chaque cellule, calculée à partir des données.
+
+<OptionFacts column="tooltip" />
+
+## Ce qu’il fait
+
+`tooltip(value, row, context)` renvoie le texte, déjà traduit, ou null pour aucun ; `context` est le
+[`context`](../../settings/context/) de la grille. La grille n’en devine jamais un d’après le contenu de la cellule.
+Elle s’affiche quand le pointeur reste sur la cellule (après le délai des [`tooltips`](../../settings/tooltips/) de
+la grille) et dès que le focus du clavier l’atteint.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Bee = { id: string; hive: string; honey: number };
+
+createGrid<Bee>(document.getElementById('ruches')!, {
+  rows: [{ id: 'h1', hive: 'Colline aux trèfles', honey: 12.5 }],
+  columns: [
+    { id: 'hive', header: 'Ruche', tooltip: (v) => (v ? `Ruche ${v}` : null) },
+    { id: 'honey', header: 'Miel', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Voir aussi
+
+- [`headerTooltip`](../header-tooltip/), [`ui`](../ui/).
+- [`tooltips`](../../settings/tooltips/).

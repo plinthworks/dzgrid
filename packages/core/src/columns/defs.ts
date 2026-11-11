@@ -31,24 +31,38 @@ export type AggFn<V = unknown> = { agg(values: readonly (V | null)[], ctx: AggCt
 export interface ColumnDef<T, V = unknown> {
   /** Required and stable: the key of the column's state. */
   readonly id: string;
-  /** A path into the row (`a.b.c`); defaults to the id when no `value` is given. */
+  /**
+   * A path into the row (`a.b.c`); defaults to the id when no `value` is given.
+   * @default {idPath}
+   */
   readonly field?: string;
   readonly value?: (row: Readonly<T>) => V;
-  /** Already translated by the host. */
+  /**
+   * Already translated by the host.
+   * @default {columnId}
+   */
   readonly header?: string;
-  /** A shorter header, without unit, where room is short (the pivot's created headers and chips, pivot.md 38); absent: `header`. */
+  /**
+   * A shorter header, without unit, where room is short (the pivot's created headers and chips, pivot.md 38); absent: `header`.
+   * @default {header}
+   */
   readonly headerShort?: string;
+  /** @default 'text' */
   readonly type?: ColumnType;
   readonly codec?: ValueCodec<V>;
   readonly enumOptions?: readonly EnumOption[];
   readonly assumeZone?: string;
   readonly numberFormat?: NumberFormatSpec;
   readonly instantFormat?: InstantFormatSpec;
+  /** @default 150 */
   readonly width?: number;
+  /** @default 40 */
   readonly minWidth?: number;
   readonly maxWidth?: number;
   readonly flex?: number;
+  /** @default true */
   readonly resizable?: boolean;
+  /** @default true */
   readonly movable?: boolean;
   /** `false`: the column menu's « Hide » is disabled for it (Phase 6 step 3, column-menu.md 13). */
   readonly hideable?: false;
@@ -56,8 +70,12 @@ export interface ColumnDef<T, V = unknown> {
   readonly menu?: false;
   /** `false`: left out of the column chooser's list (still hideable by the menu). Phase 6 step 4, columns-chooser.md 6. */
   readonly chooser?: false;
+  /** @default true */
   readonly sortable?: boolean;
-  /** `false`: rows are never grouped by it (`@dzgrid/core/grouping`, row-grouping.md 14; the zone and the menu refuse it). Phase 7. */
+  /**
+   * `false`: rows are never grouped by it (`@dzgrid/core/grouping`, row-grouping.md 14; the zone and the menu refuse it). Phase 7.
+   * @default true
+   */
   readonly groupable?: boolean;
   /**
    * Its total on group rows, footers and the grand total (`@dzgrid/core/grouping`, aggregation.md 2–3): a built-in, or a
@@ -72,16 +90,19 @@ export interface ColumnDef<T, V = unknown> {
   /**
    * Its header's title written upwards (`@dzgrid/dom/vertical-headers`, docs/behaviors/vertical-headers.md; 1.9.0): the
    * header row grows to the longest such title. Needs that feature; keys and screen readers unchanged.
+   * @default false
    */
   readonly headerVertical?: boolean;
   /**
    * Its header's title on several lines (`@dzgrid/dom/wrapped-headers`, docs/behaviors/header-wrap.md; 1.10.0): the
    * column headers' row grows to the tallest wrapped title, at most `maxLines`. Needs that feature.
+   * @default false
    */
   readonly headerWrap?: boolean;
   /**
    * With `@dzgrid/dom/responsive` (docs/behaviors/responsive-columns.md; 1.9.0): when the columns do not fit the view, which
    * collapse under their rows first — the highest first, the last on screen among equals; 0 never. Default 1.
+   * @default 1
    */
   readonly collapsePriority?: number;
   /**
@@ -97,19 +118,25 @@ export interface ColumnDef<T, V = unknown> {
    * Phase 9 (docs/behaviors/filter-combined.md, filter-multi.md): `maxConditions` 1 to 5, the rows its popup offers
    * (over `filters({ maxConditions })`); `matchCase`: a « Match case » box on each text row; `condition` (a set
    * column): a condition above the list, both stored as a `combined` AND.
+   * @default {filterByType}
    */
   readonly filter?: false | { readonly kind?: string; readonly floating?: boolean; readonly debounceMs?: number; readonly ops?: readonly string[]; readonly optionPart?: string; readonly exclude?: false; readonly start?: 'all' | 'empty'; readonly selectAll?: boolean; readonly maxConditions?: number; readonly matchCase?: boolean; readonly condition?: boolean };
+  /** @default null */
   readonly pinned?: Side | null;
+  /** @default false */
   readonly hidden?: boolean;
+  /** @default {alignByType} */
   readonly align?: 'start' | 'center' | 'end';
   /**
    * The header title's place (presentation-settings.md 3, 1.9.0): over `align`, which the title follows by default
    * (a number column's title at the end, as its cells).
+   * @default {align}
    */
   readonly headerAlign?: 'start' | 'center' | 'end';
   /**
    * The cells' text wraps on several lines (Phase 6 step 9, docs/behaviors/auto-height.md 1): with `@dzgrid/dom/auto-height`
    * the row grows to its tallest wrapped cell; without it, or under a fixed `rowHeight`, the text wraps and is clipped.
+   * @default false
    */
   readonly wrap?: boolean;
   /**
@@ -145,6 +172,7 @@ export interface ColumnDef<T, V = unknown> {
   /**
    * Whether a data row's cell can be edited (editing.md 1): `true`, or a rule told the row and the
    * grid's `settings.context`; only `true` means yes. Never a detail, filler or loading row.
+   * @default false
    */
   readonly editable?: EditableRule<T>;
   /**

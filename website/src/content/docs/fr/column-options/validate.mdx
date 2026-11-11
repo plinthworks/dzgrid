@@ -1,0 +1,55 @@
+---
+title: "validate"
+description: "Votre propre contrôle d’une valeur modifiée : un code de refus, ou null."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Une règle à vous qu’une valeur gardée doit passer.
+
+<OptionFacts column="validate" />
+
+## Ce qu’il fait
+
+`validate(value, row, context)` renvoie null (ou rien) quand la valeur convient, ou un code qui dit
+pourquoi elle ne convient pas. Elle passe après que le codec a lu la valeur et après les contrôles
+[`edit`](../edit/) de la colonne ; elle est synchrone.
+
+Donnez la phrase du code dans les messages sous `validation.<code>` ; sans elle, « valeur invalide » est dit.
+Une valeur refusée reste dans le champ ouvert, qui clignote, et le refus est dit aux lecteurs d’écran avec le nom de
+la colonne. Il faut la fonction `edit()`, qui la lance ; une `validate` qui n’est pas une fonction y est signalée.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors';
+import { FR_EDIT } from '@dzgrid/dom/locales/fr-edit';
+import { FR_EDITORS } from '@dzgrid/dom/locales/fr-editors';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Gnome = { id: string; name: string; hat: string; height: number };
+
+// Pas typé `GridMessages` : les clés `validation.<code>` d’une application sont des clés en plus.
+const messages = {
+  ...FR,
+  text: { ...FR.text, ...FR_EDIT.text, ...FR_EDITORS.text, 'validation.whole': 'un nombre entier' },
+};
+
+createGrid<Gnome>(document.getElementById('nains')!, {
+  rows: [{ id: 'g1', name: 'Barnaby', hat: 'red', height: 31 }],
+  columns: [
+    { id: 'name', header: 'Nom', editable: true },
+    { id: 'height', header: 'Taille (cm)', type: 'number', editable: true, validate: (v) => (v !== null && !Number.isInteger(v) ? 'whole' : null) },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [edit<Gnome>(), editors()],
+});
+```
+
+## Voir aussi
+
+- [`edit`](../edit/), [`editable`](../editable/).
+- [Édition](../../guides/editing/#contrôles).

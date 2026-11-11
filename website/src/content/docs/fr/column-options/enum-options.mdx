@@ -1,0 +1,70 @@
+---
+title: "enumOptions"
+description: "La liste fermée d’une colonne `enum` : chaque valeur, son libellé, ses autres noms."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Les valeurs qu’une colonne `enum` peut contenir, avec les mots affichés pour elles.
+
+<OptionFacts column="enumOptions" />
+
+## Ce qu’il fait
+
+Chaque option a une `value` (ce que contient la ligne), un `label` déjà traduit (ce qu’affiche la
+cellule ; la valeur elle-même sans lui) et des `aliases` (d’autres mots qu’une personne peut taper ou coller pour
+elle). Un texte tapé correspond à une valeur, un libellé ou un alias, quels que soient sa casse et ses accents.
+
+La colonne trie par libellé (dans l’ordre de la liste avec [`codec`](../codec/)). Une valeur absente de la liste est
+affichée telle quelle. Une colonne `enum` sans `enumOptions` (et sans [`codec`](../codec/)) est
+refusée avec une erreur `invalid-column`. En édition, l’éditeur de liste (`editors({ list: listEditor })`) propose les options (`edit.options` peut
+les restreindre ligne par ligne).
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Task = { id: string; title: string; status: string };
+
+createGrid<Task>(document.getElementById('taches')!, {
+  rows: [{ id: 't1', title: 'Huiler le portail', status: 'todo' }],
+  columns: [
+    { id: 'title', header: 'Tâche' },
+    {
+      id: 'status',
+      header: 'État',
+      type: 'enum',
+      enumOptions: [
+        { value: 'todo', label: 'À faire', aliases: ['ouvert'] },
+        { value: 'done', label: 'Fait', aliases: ['fermé'] },
+      ],
+    },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Tâches' }}
+  columns={[
+    { id: 'title', header: 'Tâche', flex: 1 },
+    { id: 'status', header: 'État', type: 'enum', width: 140, enumOptions: [{ value: 'todo', label: 'À faire' }, { value: 'done', label: 'Fait' }] },
+  ]}
+  rows={[
+    { id: 't1', title: 'Huiler le portail', status: 'todo' },
+    { id: 't2', title: 'Balayer la cour', status: 'done' },
+    { id: 't3', title: 'Réparer la clôture', status: 'todo' },
+  ]}
+/>
+
+## Voir aussi
+
+- [`type`](../type/), [`codec`](../codec/), [`edit`](../edit/).
+- [Colonnes](../../guides/columns/#valeur-et-type).

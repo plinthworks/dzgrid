@@ -1,0 +1,46 @@
+---
+title: "groupable"
+description: "`false` : les lignes ne sont jamais groupées par cette colonne."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Garde une colonne hors des groupes de lignes et des colonnes du tableau croisé.
+
+<OptionFacts column="groupable" />
+
+## Ce qu’il fait
+
+Avec la fonction `grouping()`, les lignes peuvent être groupées par les valeurs d’une colonne : depuis le
+menu de colonne, la zone de groupement, la barre du tableau croisé ou votre code. `groupable: false` refuse cette
+colonne partout — un texte libre, un montant, un identifiant. Votre code qui la nomme dans `grouping.by` (ou comme
+colonne du tableau croisé) est signalé par un avertissement `invalid-setting`, et la colonne est ignorée.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { grouping } from '@dzgrid/dom/grouping';
+import { FR_GROUP } from '@dzgrid/dom/locales/fr-group';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_GROUP.text } };
+
+createGrid<Tool>(document.getElementById('outils')!, {
+  rows: [{ id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Outil', groupable: false },
+    { id: 'shelf', header: 'Étagère', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [grouping({ by: ['shelf'] })],
+});
+```
+
+## Voir aussi
+
+- [`aggFunc`](../agg-func/).
+- [Groupes](../../guides/grouping/), [Tableau croisé](../../guides/pivot/).

@@ -1,9 +1,9 @@
 // @vitest-environment node
 /**
  * One page per option (docs/website-plan.md, batch 3): the facts in `src/generated/options.json` are what
- * scripts/gen-options.mjs reads in the sources today; a page under `settings/` is the setting its slug names
- * (`row-height` → `rowHeight`) and shows that setting's facts, in both languages, and every setting has one; every default the sources write as
- * a `{token}` has its words in both languages.
+ * scripts/gen-options.mjs reads in the sources today; a page under `settings/` or `column-options/` is the option its
+ * slug names (`row-height` → `rowHeight`) and shows that option's facts, in both languages, and every option has one;
+ * every default the sources write as a `{token}` has its words in both languages.
  */
 import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
@@ -28,23 +28,25 @@ describe('one page per option', () => {
     for (const lang of ['en', 'fr'] as const) expect(tokens.filter((t) => !FACTS[lang].tokens[t])).toEqual([]);
   });
 
-  it('a settings page is the setting its slug names, with its facts', () => {
-    const slugs = new Map(data.settings.map((s) => [kebab(s.name), s.name]));
-    const wrong: string[] = [];
-    for (const dir of ['settings', 'fr/settings']) {
-      for (const file of pagesIn(join(DOCS, dir))) {
-        const slug = file.replace(/\.mdx?$/, '');
-        const name = slugs.get(slug);
-        const text = readFileSync(join(DOCS, dir, file), 'utf8');
-        if (!name) wrong.push(`${dir}/${file}: no setting of that name`);
-        else if (!text.includes(`title: "${name}"`) || !text.includes(`<OptionFacts setting="${name}" />`)) wrong.push(`${dir}/${file}: not titled ${name}, or no <OptionFacts setting="${name}" />`);
+  for (const [what, dir, list, attr] of [['settings', 'settings', data.settings, 'setting'], ['column options', 'column-options', data.columns, 'column']] as const) {
+    it(`a ${what} page is the option its slug names, with its facts`, () => {
+      const slugs = new Map(list.map((s) => [kebab(s.name), s.name]));
+      const wrong: string[] = [];
+      for (const d of [dir, `fr/${dir}`]) {
+        for (const file of pagesIn(join(DOCS, d))) {
+          const slug = file.replace(/\.mdx?$/, '');
+          const name = slugs.get(slug);
+          const text = readFileSync(join(DOCS, d, file), 'utf8');
+          if (!name) wrong.push(`${d}/${file}: no option of that name`);
+          else if (!text.includes(`title: "${name}"`) || !text.includes(`<OptionFacts ${attr}="${name}" />`)) wrong.push(`${d}/${file}: not titled ${name}, or no <OptionFacts ${attr}="${name}" />`);
+        }
       }
-    }
-    expect(wrong).toEqual([]);
-  });
+      expect(wrong).toEqual([]);
+    });
 
-  it('every setting has its page, in both languages', () => {
-    const missing = data.settings.flatMap((o) => ['settings', 'fr/settings'].filter((dir) => !existsSync(join(DOCS, dir, `${kebab(o.name)}.mdx`))).map((dir) => `${dir}/${kebab(o.name)}`));
-    expect(missing).toEqual([]);
-  });
+    it(`every ${what.replace(/s$/, '')} has its page, in both languages`, () => {
+      const missing = list.flatMap((o) => [dir, `fr/${dir}`].filter((d) => !existsSync(join(DOCS, d, `${kebab(o.name)}.mdx`))).map((d) => `${d}/${kebab(o.name)}`));
+      expect(missing).toEqual([]);
+    });
+  }
 });

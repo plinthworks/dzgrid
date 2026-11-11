@@ -1,0 +1,60 @@
+---
+title: "instantFormat"
+description: "Ce qu’une colonne `instant` affiche de chaque moment : la date, l’heure, les secondes."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Les parties de la date et de l’heure qu’affiche une colonne `instant`.
+
+<OptionFacts column="instantFormat" />
+
+## Ce qu’il fait
+
+`date: false` n’affiche que l’heure, `time: false` que la date, `seconds: true` ajoute les secondes. Par
+défaut, la date et l’heure sont affichées, sans secondes, sur 24 heures, dans l’ordre de la
+[`locale`](../../settings/locale/) de la grille et dans son [`timeZone`](../../settings/time-zone/).
+
+Il ne change que ce qu’affiche la cellule : le tri et le filtre utilisent le moment lui-même.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Lap = { id: string; runner: string; start: number; finish: number };
+
+createGrid<Lap>(document.getElementById('tours')!, {
+  rows: [{ id: 'l1', runner: 'Maud Hesketh', start: 1772442000000, finish: 1772442754000 }],
+  columns: [
+    { id: 'runner', header: 'Coureur' },
+    { id: 'start', header: 'Départ', type: 'instant', instantFormat: { date: false } },
+    { id: 'finish', header: 'Arrivée', type: 'instant', instantFormat: { date: false, seconds: true } },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Tours', timeZone: 'Europe/London' }}
+  columns={[
+    { id: 'runner', header: 'Coureur', flex: 1 },
+    { id: 'start', header: 'Départ', type: 'instant', width: 180 },
+    { id: 'finish', header: 'Arrivée', type: 'instant', width: 140, instantFormat: { date: false, seconds: true } },
+  ]}
+  rows={[
+    { id: 'l1', runner: 'Maud Hesketh', start: 1772442000000, finish: 1772442754000 },
+    { id: 'l2', runner: 'Felix Tarrant', start: 1772442000000, finish: 1772442811000 },
+  ]}
+/>
+
+## Voir aussi
+
+- [`type`](../type/), [`assumeZone`](../assume-zone/).
+- [`timeZone`](../../settings/time-zone/).

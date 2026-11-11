@@ -1,0 +1,44 @@
+---
+title: "wrap"
+description: "Le texte des cellules passe sur plusieurs lignes."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Un texte long sur plusieurs lignes au lieu d’être coupé par « … ».
+
+<OptionFacts column="wrap" />
+
+## Ce qu’il fait
+
+Avec la fonction `autoHeight()` de `@dzgrid/dom/auto-height`, chaque ligne grandit jusqu’à sa plus haute
+cellule. Sans cette fonction — ou avec une
+[`rowHeight`](../../settings/row-height/) fixe — le texte passe à la ligne mais la ligne garde sa hauteur, et les
+lignes en trop sont coupées ; la grille signale un avertissement `missing-feature` quand la fonction manque.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { autoHeight } from '@dzgrid/dom/auto-height';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+createGrid<Tool>(document.getElementById('outils')!, {
+  rows: [{ id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Outil' },
+    { id: 'notes', header: 'Notes', width: 200, wrap: true },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+  features: [autoHeight()],
+});
+```
+
+## Voir aussi
+
+- [`headerWrap`](../header-wrap/).
+- [`rowHeight`](../../settings/row-height/).
+- [Colonnes](../../guides/columns/#taille-et-place).

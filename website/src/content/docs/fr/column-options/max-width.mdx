@@ -1,0 +1,43 @@
+---
+title: "maxWidth"
+description: "La largeur la plus grande que la colonne peut prendre, en pixels."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Un plafond au-dessus de la largeur de la colonne.
+
+<OptionFacts column="maxWidth" />
+
+## Ce qu’il fait
+
+Aucune largeur ne passe au-dessus : celle de la définition, le glisser de l’utilisateur, l’« Élargir » du
+menu, un ajustement au contenu, une part de [`flex`](../flex/). La place qu’une colonne flexible plafonnée ne peut pas
+prendre va aux autres colonnes flexibles. Sans elle, pas de plafond. Quand elle est sous [`minWidth`](../min-width/),
+`minWidth` l’emporte.
+
+Une valeur qui n’est pas un nombre positif ou nul est refusée avec une erreur `invalid-column`.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+createGrid<Tool>(document.getElementById('outils')!, {
+  rows: [{ id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Outil', flex: 1, maxWidth: 220 },
+    { id: 'notes', header: 'Notes', flex: 1 },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Voir aussi
+
+- [`width`](../width/), [`minWidth`](../min-width/), [`flex`](../flex/).
+- [Colonnes](../../guides/columns/#taille-et-place).

@@ -1,0 +1,46 @@
+---
+title: "rowSpan"
+description: "How many rows a cell covers, decided from the data."
+---
+
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+A cell taller than its row, the height told by your function.
+
+<OptionFacts column="rowSpan" />
+
+## What it does
+
+`rowSpan(ctx)` returns how many rows the cell covers, 1 when absent. It is told the row, the raw `value`, the
+row's `key`, its `index` among the displayed rows, the `column`, and the rows before and after it (`prev`, `next`; null
+at the ends). The object is reused from call to call: read it during the call only.
+
+It needs the `spans()` feature. A span over another is dropped to one cell (`span-overlap`); a span cut by a pinned
+edge or the end of the rows is told once (`span-clipped`); a number that is not whole, or a function that throws, is
+`invalid-span`.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { spans } from '@dzgrid/dom/spans';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Visit = { id: string; region: string; regionRows: number; town: string };
+
+createGrid<Visit>(document.getElementById('visits')!, {
+  rows: [{ id: 'v1', region: 'North', regionRows: 2, town: 'Ashby' }, { id: 'v2', region: 'North', regionRows: 0, town: 'Brill' }],
+  columns: [
+    { id: 'region', header: 'Region', rowSpan: (c) => Math.max(1, c.row.regionRows) },
+    { id: 'town', header: 'Town' },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+  features: [spans()],
+});
+```
+
+## See also
+
+- [`colSpan`](../col-span/), [`merge`](../merge/).
+- [Columns](../../guides/columns/#column-groups).

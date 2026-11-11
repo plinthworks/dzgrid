@@ -1,0 +1,64 @@
+---
+title: "flex"
+description: "A share of the room the fixed columns leave."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Makes the column stretch with the grid.
+
+<OptionFacts column="flex" />
+
+## What it does
+
+The columns with a `flex` share the width the other columns leave, each in proportion to its number:
+`flex: 2` takes twice what `flex: 1` takes. They follow the grid's width when the window is resized, and stay within
+their [`minWidth`](../min-width/) and [`maxWidth`](../max-width/). With every column flexible, the columns always fill
+the grid exactly; there is no separate « fit to width » switch.
+
+Once the user resizes a flexible column, it keeps that width; the column menu's « Reset columns » makes it flexible
+again. A value that is not a number of zero or more is refused with an `invalid-column` error; `0` is not flexible.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+createGrid<Tool>(document.getElementById('tools')!, {
+  rows: [{ id: 't1', name: 'Hammer', shelf: 2, notes: 'Claw, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Tool', flex: 1, minWidth: 120 },
+    { id: 'shelf', header: 'Shelf', type: 'number', width: 90 },
+    { id: 'notes', header: 'Notes', flex: 2, minWidth: 160 },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Tools' }}
+  columns={[
+    { id: 'name', header: 'Tool', flex: 1, minWidth: 120 },
+    { id: 'shelf', header: 'Shelf', type: 'number', width: 90 },
+    { id: 'notes', header: 'Notes', flex: 2, minWidth: 160 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Hammer', shelf: 2, notes: 'Claw, 450 g' },
+    { id: 't2', name: 'Hand saw', shelf: 3, notes: 'Fine teeth, keep dry' },
+    { id: 't3', name: 'Spirit level', shelf: 1, notes: '60 cm' },
+  ]}
+  caption="Resize the page: Tool and Notes share the room, Notes twice as much."
+/>
+
+## See also
+
+- [`width`](../width/), [`minWidth`](../min-width/), [`maxWidth`](../max-width/).
+- [Columns](../../guides/columns/#size-and-place).

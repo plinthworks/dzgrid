@@ -1,0 +1,46 @@
+---
+title: "colSpan"
+description: "How many columns a cell covers, decided from the data."
+---
+
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+A cell wider than its column, the width told by your function.
+
+<OptionFacts column="colSpan" />
+
+## What it does
+
+`colSpan(ctx)` returns how many columns the cell covers to its end side, 1 when absent; it is told the same
+`ctx` as [`rowSpan`](../row-span/). The covered cells are not drawn. A span does not cross a pinned edge.
+
+It needs the `spans()` feature, with the same problems as `rowSpan`. For a row drawn across every column, see the
+grid's [`fullWidth`](../../settings/full-width/).
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { spans } from '@dzgrid/dom/spans';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Visit = { id: string; region: string; town: string; day: string };
+
+createGrid<Visit>(document.getElementById('visits')!, {
+  rows: [{ id: 'v1', region: 'North', town: 'Ashby', day: '2026-04-01' }],
+  columns: [
+    { id: 'region', header: 'Region' },
+    { id: 'town', header: 'Town', colSpan: (c) => (c.row.day === '' ? 2 : 1) },
+    { id: 'day', header: 'Day', type: 'day' },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+  features: [spans()],
+});
+```
+
+## See also
+
+- [`rowSpan`](../row-span/), [`merge`](../merge/).
+- [`fullWidth`](../../settings/full-width/).
+- [Columns](../../guides/columns/#column-groups).

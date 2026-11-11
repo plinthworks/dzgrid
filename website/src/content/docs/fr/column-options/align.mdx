@@ -1,0 +1,58 @@
+---
+title: "align"
+description: "L’endroit où le texte se place dans les cellules : début, centre ou fin."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+La place du texte des cellules, et du titre par défaut.
+
+<OptionFacts column="align" />
+
+## Ce qu’il fait
+
+`'start'`, `'center'` ou `'end'`, des côtés logiques : de droite à gauche, `'end'` est la gauche. Une
+colonne `number` se place à la fin pour aligner ses chiffres ; tout autre type au début. Le titre de l’en-tête suit,
+sauf si [`headerAlign`](../header-align/) dit autre chose.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+createGrid<Tool>(document.getElementById('outils')!, {
+  rows: [{ id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Outil' },
+    { id: 'shelf', header: 'Étagère', type: 'number', align: 'center' },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Outils' }}
+  columns={[
+    { id: 'name', header: 'Outil', width: 160 },
+    { id: 'shelf', header: 'Étagère', type: 'number', width: 110, align: 'center' },
+    { id: 'notes', header: 'Notes', flex: 1, align: 'end' },
+  ]}
+  rows={[
+    { id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' },
+    { id: 't2', name: 'Scie égoïne', shelf: 3, notes: 'Denture fine, au sec' },
+    { id: 't3', name: 'Niveau à bulle', shelf: 1, notes: '60 cm' },
+  ]}
+/>
+
+## Voir aussi
+
+- [`headerAlign`](../header-align/), [`numberFormat`](../number-format/).
+- [Colonnes](../../guides/columns/#taille-et-place).

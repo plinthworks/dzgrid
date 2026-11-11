@@ -1,0 +1,41 @@
+---
+title: "headerShort"
+description: "A shorter title, without unit, where room is short."
+---
+
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+A shorter title for the places where the full one would not fit.
+
+<OptionFacts column="headerShort" />
+
+## What it does
+
+The pivot names what it makes from your columns — the label column, the chips of its bar, the headers of
+its value columns (« Sum(Weight) ») — with `headerShort`: a title such as « Weight (kg) » then gives « Sum(Weight) »
+rather than « Sum(Weight (kg)) ». Everywhere else the column keeps its [`header`](../header/). Without
+`headerShort`, the pivot uses `header`.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Crate = { id: string; farm: string; weight: number };
+
+createGrid<Crate>(document.getElementById('crates')!, {
+  rows: [{ id: 'c1', farm: 'Hollow Brook', weight: 18.5 }],
+  columns: [
+    { id: 'farm', header: 'Farm' },
+    { id: 'weight', header: 'Weight (kg)', headerShort: 'Weight', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+});
+```
+
+## See also
+
+- [`header`](../header/).
+- [Pivot](../../guides/pivot/).

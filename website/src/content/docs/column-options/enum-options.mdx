@@ -1,0 +1,70 @@
+---
+title: "enumOptions"
+description: "The closed list of an `enum` column: each value, its label, its other names."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+The values an `enum` column may hold, with the words shown for them.
+
+<OptionFacts column="enumOptions" />
+
+## What it does
+
+Each option has a `value` (what the row holds), a `label` already translated (what the cell shows; the
+value itself without it) and `aliases` (other words a person may type or paste for it). Typed text matches a value,
+a label or an alias whatever its case and accents.
+
+The column sorts by label (by the list's own order with [`codec`](../codec/)). A value that is not in the list is
+shown as it is. An `enum` column without `enumOptions` (and without a [`codec`](../codec/)) is
+refused with an `invalid-column` error. When editing, the list editor (`editors({ list: listEditor })`) offers the options (`edit.options` can narrow
+them per row).
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Task = { id: string; title: string; status: string };
+
+createGrid<Task>(document.getElementById('tasks')!, {
+  rows: [{ id: 't1', title: 'Oil the gate', status: 'todo' }],
+  columns: [
+    { id: 'title', header: 'Task' },
+    {
+      id: 'status',
+      header: 'Status',
+      type: 'enum',
+      enumOptions: [
+        { value: 'todo', label: 'To do', aliases: ['open'] },
+        { value: 'done', label: 'Done', aliases: ['closed'] },
+      ],
+    },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Tasks' }}
+  columns={[
+    { id: 'title', header: 'Task', flex: 1 },
+    { id: 'status', header: 'Status', type: 'enum', width: 140, enumOptions: [{ value: 'todo', label: 'To do' }, { value: 'done', label: 'Done' }] },
+  ]}
+  rows={[
+    { id: 't1', title: 'Oil the gate', status: 'todo' },
+    { id: 't2', title: 'Sweep the yard', status: 'done' },
+    { id: 't3', title: 'Mend the fence', status: 'todo' },
+  ]}
+/>
+
+## See also
+
+- [`type`](../type/), [`codec`](../codec/), [`edit`](../edit/).
+- [Columns](../../guides/columns/#value-and-type).

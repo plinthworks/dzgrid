@@ -1,0 +1,50 @@
+---
+title: "collapsePriority"
+description: "On a narrow screen, which columns fold under their rows first."
+---
+
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+With the `responsive()` feature: the order in which columns leave the row when they do not fit.
+
+<OptionFacts column="collapsePriority" />
+
+## What it does
+
+With `responsive()` from `@dzgrid/dom/responsive`, columns that do not fit the view are taken out of the
+rows instead of making the grid scroll sideways, and shown as « Title: value » lines under each row. The highest
+`collapsePriority` goes first; among equals, the last on screen. `0` never collapses. Without it a column counts 1.
+
+The first column and pinned columns never collapse; a flexible column counts its [`minWidth`](../min-width/).
+`responsive({ priority: { id: n } })` gives the same numbers from the feature, and wins.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { responsive } from '@dzgrid/dom/responsive';
+import { EN_DETAIL } from '@dzgrid/dom/locales/en-detail';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Hive = { id: string; name: string; apiary: string; frames: number; queen: string };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_DETAIL.text } };
+
+createGrid<Hive>(document.getElementById('hives')!, {
+  rows: [{ id: 'h1', name: 'Clover', apiary: 'Hill', frames: 9, queen: 'Marked blue' }],
+  columns: [
+    { id: 'name', header: 'Hive', width: 160 },
+    { id: 'apiary', header: 'Apiary', width: 140, collapsePriority: 2 },
+    { id: 'frames', header: 'Frames', type: 'number', width: 100, collapsePriority: 0 },
+    { id: 'queen', header: 'Queen', width: 180 },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [responsive()],
+});
+```
+
+## See also
+
+- [`minWidth`](../min-width/), [`pinned`](../pinned/).
+- [Columns](../../guides/columns/#columns-that-collapse-on-narrow-screens).

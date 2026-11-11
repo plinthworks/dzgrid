@@ -1,0 +1,73 @@
+---
+title: "merge"
+description: "Consecutive rows with the same value show one tall cell."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Merges a column’s equal neighbours into one cell, as in a spreadsheet.
+
+<OptionFacts column="merge" />
+
+## What it does
+
+It needs the `spans()` feature from `@dzgrid/dom/spans`; without it the grid tells a `missing-feature`
+warning and draws plain cells.
+
+- `true` merges rows whose values have the same stable text (`e` and `é` stay apart); blank cells never merge.
+- A function `(a, b) => boolean` decides whether two neighbours merge.
+- `{ same, within }`: `same` as the function, `within` a list of columns whose change cuts a run (a town merges only
+  inside its region).
+
+Merges follow the rows on screen: after a sort or a filter, the rows now side by side merge again. A merge never
+crosses a page, a pinned edge or a group of rows. A column cannot have `merge` together with `rowSpan` or `colSpan`
+(`invalid-span`). In a CSV file the value is written on every row it covers.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { spans } from '@dzgrid/dom/spans';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Visit = { id: string; region: string; town: string; day: string };
+
+createGrid<Visit>(document.getElementById('visits')!, {
+  rows: [{ id: 'v1', region: 'North', town: 'Ashby', day: '2026-04-01' }],
+  columns: [
+    { id: 'region', header: 'Region', merge: true },
+    { id: 'town', header: 'Town', merge: { within: ['region'] } },
+    { id: 'day', header: 'Day', type: 'day' },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+  features: [spans()],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Visits' }}
+  features={['spans']}
+  columns={[
+    { id: 'region', header: 'Region', width: 140, merge: true },
+    { id: 'town', header: 'Town', width: 140, merge: { within: ['region'] } },
+    { id: 'day', header: 'Day', type: 'day', flex: 1 },
+  ]}
+  rows={[
+    { id: 'v1', region: 'North', town: 'Ashby', day: '2026-04-01' },
+    { id: 'v2', region: 'North', town: 'Ashby', day: '2026-04-02' },
+    { id: 'v3', region: 'North', town: 'Brill', day: '2026-04-03' },
+    { id: 'v4', region: 'South', town: 'Corfe', day: '2026-04-03' },
+    { id: 'v5', region: 'South', town: 'Corfe', day: '2026-04-04' },
+  ]}
+  caption="Region and Town merge; Town only inside its region."
+/>
+
+## See also
+
+- [`rowSpan`](../row-span/), [`colSpan`](../col-span/).
+- [Columns](../../guides/columns/#column-groups).

@@ -1,0 +1,63 @@
+---
+title: "numberFormat"
+description: "Comment une colonne `number` affiche ses nombres : décimales, pourcentage, devise, séparateurs."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+L’apparence des nombres d’une colonne `number`.
+
+<OptionFacts column="numberFormat" />
+
+## Ce qu’il fait
+
+Ses clés sont celles du format de nombre du navigateur : `style` (`'decimal'`, `'percent'`,
+`'currency'`), `currency` (`'EUR'`), `minimumFractionDigits`, `maximumFractionDigits` et `useGrouping`. Les chiffres
+et les séparateurs suivent la [`locale`](../../settings/locale/) et les [`numerals`](../../settings/numerals/) de la
+grille. Sans décimales données (et hors devise), un nombre montre jusqu’à 15 chiffres significatifs : `0.1 + 0.2`
+affiche 0,3. Un pourcentage multiplie par 100 : `0.25` affiche 25 %.
+
+Il ne change que ce qu’affiche la cellule : le tri et le filtre utilisent le nombre lui-même.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Fund = { id: string; name: string; price: number; change: number };
+
+createGrid<Fund>(document.getElementById('fonds')!, {
+  rows: [{ id: 'f1', name: 'Vallée verte', price: 1234.5, change: 0.042 }],
+  columns: [
+    { id: 'name', header: 'Fonds' },
+    { id: 'price', header: 'Prix', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
+    { id: 'change', header: 'Variation', type: 'number', numberFormat: { style: 'percent', maximumFractionDigits: 1 } },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Fonds' }}
+  columns={[
+    { id: 'name', header: 'Fonds', flex: 1 },
+    { id: 'price', header: 'Prix', type: 'number', width: 140, numberFormat: { style: 'currency', currency: 'EUR' } },
+    { id: 'change', header: 'Variation', type: 'number', width: 120, numberFormat: { style: 'percent', maximumFractionDigits: 1 } },
+  ]}
+  rows={[
+    { id: 'f1', name: 'Vallée verte', price: 1234.5, change: 0.042 },
+    { id: 'f2', name: 'Feux du port', price: 87.25, change: -0.013 },
+    { id: 'f3', name: 'Pont de pierre', price: 15020, change: 0 },
+  ]}
+/>
+
+## Voir aussi
+
+- [`type`](../type/), [`align`](../align/).
+- [`locale`](../../settings/locale/).

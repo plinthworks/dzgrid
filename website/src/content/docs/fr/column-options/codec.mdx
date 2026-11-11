@@ -1,0 +1,53 @@
+---
+title: "codec"
+description: "Votre propre façon de lire, afficher, trier et exporter les valeurs de la colonne."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Un codec de valeurs entier à la place de celui qu’apporte le type.
+
+<OptionFacts column="codec" />
+
+## Ce qu’il fait
+
+Un codec dit comment une sorte de valeur est lue dans la ligne (`coerce`), lue dans un texte tapé ou collé
+(`parse`), affichée (`format`), triée (`sortKey`, `compare`), comparée (`equals`, `isEmpty`) et écrite dans les
+fichiers et le presse-papiers (`toExport`). Chaque type apporte le sien ; `codec` le remplace pour cette colonne, et un
+type `'custom'` en demande un.
+
+`@dzgrid/core` exporte les codecs fournis, prêts à ajuster : `booleanCodecWith({ true, false })` affiche vos propres
+mots pour oui et non, `enumCodec(options, { sort: 'option-order' })` trie une liste dans son propre ordre plutôt que
+par libellé. Étalez-en un pour changer une seule fonction, comme `{ ...textCodec, format: … }`.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { booleanCodecWith, enumCodec, textCodec } from '@dzgrid/core';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Order = { id: string; ref: string; stage: string; paid: boolean };
+
+const STAGES = [
+  { value: 'new', label: 'Nouvelle' },
+  { value: 'packed', label: 'Emballée' },
+  { value: 'sent', label: 'Envoyée' },
+];
+
+createGrid<Order>(document.getElementById('commandes')!, {
+  rows: [{ id: 'o1', ref: 'ord-311', stage: 'packed', paid: false }],
+  columns: [
+    { id: 'ref', header: 'Commande', codec: { ...textCodec, format: (v: string) => v.toUpperCase() } },
+    { id: 'stage', header: 'Étape', type: 'enum', codec: enumCodec(STAGES, { sort: 'option-order' }) },
+    { id: 'paid', header: 'Paiement', type: 'boolean', codec: booleanCodecWith({ true: 'Payée', false: 'À payer' }) },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Voir aussi
+
+- [`type`](../type/), [`enumOptions`](../enum-options/).
+- [Colonnes](../../guides/columns/#valeur-et-type).

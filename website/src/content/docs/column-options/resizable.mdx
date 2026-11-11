@@ -1,0 +1,66 @@
+---
+title: "resizable"
+description: "Whether the user may change the column’s width."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+`false` keeps the column at the width you give it.
+
+<OptionFacts column="resizable" />
+
+## What it does
+
+With the `columns()` feature, the user resizes a column by dragging its header's edge or from the keyboard, and
+« Fit this column » sizes it to its content; the column menu also offers « Widen » and « Narrow ». `resizable: false`
+takes the edge away, and none of these changes this column. Your code still sets its width (`update({ columns })`, a
+saved state).
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { columns } from '@dzgrid/dom/columns';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_COLUMNS.text } };
+
+createGrid<Tool>(document.getElementById('tools')!, {
+  rows: [{ id: 't1', name: 'Hammer', shelf: 2, notes: 'Claw, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Tool' },
+    { id: 'shelf', header: 'Shelf', type: 'number', width: 90, resizable: false },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [columns()],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Tools' }}
+  features={['columns']}
+  columns={[
+    { id: 'name', header: 'Tool', width: 160 },
+    { id: 'shelf', header: 'Shelf', type: 'number', width: 90, resizable: false },
+    { id: 'notes', header: 'Notes', flex: 1 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Hammer', shelf: 2, notes: 'Claw, 450 g' },
+    { id: 't2', name: 'Hand saw', shelf: 3, notes: 'Fine teeth, keep dry' },
+    { id: 't3', name: 'Spirit level', shelf: 1, notes: '60 cm' },
+  ]}
+  caption="Drag the edge of Tool’s title: it resizes. Shelf’s has no edge to drag."
+/>
+
+## See also
+
+- [`width`](../width/), [`movable`](../movable/).
+- [Columns](../../guides/columns/#moving-resizing-hiding).

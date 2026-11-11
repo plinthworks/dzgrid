@@ -1,0 +1,44 @@
+---
+title: "field"
+description: "A path into the row, `a.b.c`, where the column reads its value."
+---
+
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Where in the row the column reads its value, when that is not the property named by its `id`.
+
+<OptionFacts column="field" />
+
+## What it does
+
+A dotted path: `'author.name'` reads `row.author.name`. Only the row's own properties are read, so a row
+that is a class instance with getters needs a [`value`](../value/) function instead. A missing step gives an empty
+cell, never an error.
+
+A path with an empty step (`'a..b'`) or a prototype key (`__proto__`, `constructor`, `prototype`) is refused with
+an `invalid-field-path` error, and the column is left out. When the column has a `value`, `field` is not read.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Book = { id: string; title: string; author: { name: string; born: number } };
+
+createGrid<Book>(document.getElementById('books')!, {
+  rows: [{ id: 'b1', title: 'The Salt Road', author: { name: 'Ines Calloway', born: 1961 } }],
+  columns: [
+    { id: 'title', header: 'Title' },
+    { id: 'author', header: 'Author', field: 'author.name' },
+    { id: 'born', header: 'Born', type: 'number', field: 'author.born' },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+});
+```
+
+## See also
+
+- [`id`](../id/), [`value`](../value/).
+- [Columns](../../guides/columns/#value-and-type).

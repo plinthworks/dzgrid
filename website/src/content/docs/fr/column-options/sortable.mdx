@@ -1,0 +1,59 @@
+---
+title: "sortable"
+description: "`false` : la colonne ne peut pas être triée."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Si les lignes peuvent être triées par cette colonne.
+
+<OptionFacts column="sortable" />
+
+## Ce qu’il fait
+
+Un clic sur le titre d’une colonne triable (ou Entrée dessus) trie par elle. `sortable: false` en fait un
+titre simple : pas de clic, pas de flèche de tri, pas de « Trier » dans le menu de colonne. Un tri que votre code
+demande sur elle (`sort.set`, un état enregistré) est refusé avec une erreur `invalid-sort`.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+createGrid<Tool>(document.getElementById('outils')!, {
+  rows: [{ id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Outil' },
+    { id: 'notes', header: 'Notes', sortable: false },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Outils' }}
+  columns={[
+    { id: 'name', header: 'Outil', width: 160 },
+    { id: 'shelf', header: 'Étagère', type: 'number', width: 110 },
+    { id: 'notes', header: 'Notes', flex: 1, sortable: false },
+  ]}
+  rows={[
+    { id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' },
+    { id: 't2', name: 'Scie égoïne', shelf: 3, notes: 'Denture fine, au sec' },
+    { id: 't3', name: 'Niveau à bulle', shelf: 1, notes: '60 cm' },
+  ]}
+  caption="Cliquez Outil : les lignes sont triées. Cliquez Notes : rien ne se passe."
+/>
+
+## Voir aussi
+
+- [`multiSort`](../../settings/multi-sort/), [`filter`](../filter/).
+- [Trier, filtrer, rechercher](../../guides/sort-filter-search/#trier).

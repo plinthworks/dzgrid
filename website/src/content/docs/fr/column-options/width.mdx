@@ -1,0 +1,65 @@
+---
+title: "width"
+description: "La largeur de la colonne, en pixels."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+La largeur de la colonne, en pixels CSS.
+
+<OptionFacts column="width" />
+
+## Ce qu’il fait
+
+Une colonne fait 150 px de large, sauf indication contraire. La largeur reste entre
+[`minWidth`](../min-width/) et [`maxWidth`](../max-width/). Une largeur donnée par l’utilisateur (en tirant le bord du
+titre, par le menu, au clavier) l’emporte sur celle-ci et fait partie de l’état enregistré ; le « Réinitialiser
+les colonnes » du menu de colonne redonne celle-ci.
+
+Une colonne avec un [`flex`](../flex/) partage plutôt la place restante, et `width` n’est sa part que tant que la
+largeur de la grille n’est pas encore connue. Une largeur qui n’est pas un nombre positif ou nul est refusée avec une
+erreur `invalid-column`, et la colonne est écartée.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+createGrid<Tool>(document.getElementById('outils')!, {
+  rows: [{ id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Outil', width: 160 },
+    { id: 'shelf', header: 'Étagère', type: 'number', width: 90 },
+    { id: 'notes', header: 'Notes', flex: 1 },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Outils' }}
+  columns={[
+    { id: 'name', header: 'Outil', width: 160 },
+    { id: 'shelf', header: 'Étagère', type: 'number', width: 90 },
+    { id: 'notes', header: 'Notes', flex: 1 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' },
+    { id: 't2', name: 'Scie égoïne', shelf: 3, notes: 'Denture fine, au sec' },
+    { id: 't3', name: 'Niveau à bulle', shelf: 1, notes: '60 cm' },
+  ]}
+  caption="Outil fait 160 px, Étagère 90 px, Notes prend le reste."
+/>
+
+## Voir aussi
+
+- [`flex`](../flex/), [`minWidth`](../min-width/), [`maxWidth`](../max-width/), [`resizable`](../resizable/).
+- [Colonnes](../../guides/columns/#taille-et-place).

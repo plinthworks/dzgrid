@@ -6,9 +6,9 @@ description: "Les définitions de colonnes : valeurs, types, formats, largeurs, 
 import CodeTabs from '../../../../components/CodeTabs.astro';
 import LiveDemo from '../../../../components/LiveDemo.astro';
 
-Une colonne est un simple objet (`ColumnDef<T>` de `@dzgrid/core`). Seules les clés décrites ici existent ; une clé
-inconnue est signalée comme un problème, jamais devinée. Le `DzgColumnDef<T>` d’Angular est le même objet, et accepte
-aussi des classes de composants dans `ui`. Chaque clé aura sa propre page sous [Options de colonne](../../column-options/) ;
+Une colonne est un simple objet (`ColumnDef<T>` de `@dzgrid/core`). Seules les clés décrites ici existent ; TypeScript
+signale une clé inconnue, et la grille l’ignore. Le `DzgColumnDef<T>` d’Angular est le même objet, et accepte aussi
+des classes de composants dans `ui`. Chaque clé a sa propre page sous [Options de colonne](../../column-options/) ;
 ce guide montre comment elles fonctionnent ensemble.
 
 ## Valeur et type

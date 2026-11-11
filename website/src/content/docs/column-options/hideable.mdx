@@ -1,0 +1,67 @@
+---
+title: "hideable"
+description: "`false`: the user cannot hide the column."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+For a column that must stay on screen.
+
+<OptionFacts column="hideable" />
+
+## What it does
+
+`hideable: false` disables the column menu's « Hide column » for it, and the columns chooser cannot untick
+it. A saved state that hides it is told, and the column stays shown. Your code can still hide it with
+[`hidden`](../hidden/).
+
+The grid never lets the user hide the last shown column, whatever this option says.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { EN_COLUMN_MENU } from '@dzgrid/dom/locales/en-column-menu';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_COLUMN_MENU.text } };
+
+createGrid<Tool>(document.getElementById('tools')!, {
+  rows: [{ id: 't1', name: 'Hammer', shelf: 2, notes: 'Claw, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Tool', hideable: false },
+    { id: 'notes', header: 'Notes' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [columnMenu()],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Tools' }}
+  features={['columns', 'chooser', 'columnMenu']}
+  columns={[
+    { id: 'name', header: 'Tool', width: 160, hideable: false },
+    { id: 'shelf', header: 'Shelf', type: 'number', width: 110 },
+    { id: 'notes', header: 'Notes', flex: 1 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Hammer', shelf: 2, notes: 'Claw, 450 g' },
+    { id: 't2', name: 'Hand saw', shelf: 3, notes: 'Fine teeth, keep dry' },
+    { id: 't3', name: 'Spirit level', shelf: 1, notes: '60 cm' },
+  ]}
+  caption="Open Tool’s menu (⋮): « Hide column » is disabled. Notes’ is not."
+/>
+
+## See also
+
+- [`hidden`](../hidden/), [`chooser`](../chooser/), [`menu`](../menu/).
+- [Columns](../../guides/columns/#moving-resizing-hiding).

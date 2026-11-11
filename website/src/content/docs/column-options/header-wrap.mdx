@@ -1,0 +1,60 @@
+---
+title: "headerWrap"
+description: "A long title on several lines."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+A long title wrapped rather than cut.
+
+<OptionFacts column="headerWrap" />
+
+## What it does
+
+With the `wrappedHeaders()` feature from `@dzgrid/dom/wrapped-headers` (no stylesheet), the title goes on
+several lines, at most the feature's `maxLines` (3 by default, then « … »), and the column headers' row grows to the
+tallest. It is measured again when a column is resized or the text size changes, never while scrolling. With
+[`headerHeight`](../../settings/header-height/), the taller wins.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { wrappedHeaders } from '@dzgrid/dom/wrapped-headers';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Parcel = { id: string; route: string; days: number };
+
+createGrid<Parcel>(document.getElementById('parcels')!, {
+  rows: [{ id: 'p1', route: 'Harbour – Hill farm', days: 3 }],
+  columns: [
+    { id: 'route', header: 'Route', flex: 1 },
+    { id: 'days', header: 'Average delivery time in days', type: 'number', width: 90, headerWrap: true },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+  features: [wrappedHeaders({ maxLines: 2 })],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Watering' }}
+  features={[['wrappedHeaders', { maxLines: 2 }]]}
+  columns={[
+    { id: 'bed', header: 'Bed', flex: 1 },
+    { id: 'litres', header: 'Average water in litres a week', type: 'number', width: 110, headerWrap: true },
+  ]}
+  rows={[
+    { id: 'p1', bed: 'Herb spiral', litres: 12 },
+    { id: 'p2', bed: 'Bean tunnel', litres: 30 },
+  ]}
+/>
+
+## See also
+
+- [`headerVertical`](../header-vertical/), [`wrap`](../wrap/).
+- [Columns](../../guides/columns/#titles-on-several-lines).

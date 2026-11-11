@@ -6,10 +6,10 @@ description: "Column definitions: values, types, formats, widths, pinning, group
 import CodeTabs from '../../../components/CodeTabs.astro';
 import LiveDemo from '../../../components/LiveDemo.astro';
 
-A column is a plain object (`ColumnDef<T>` from `@dzgrid/core`). Only the keys described here exist; an unknown key
-is reported as a problem, never guessed. Angular's `DzgColumnDef<T>` is the same object, and also takes component
-classes in `ui`. Each key will have its own page under [Column options](../../column-options/); this guide shows how
-they work together.
+A column is a plain object (`ColumnDef<T>` from `@dzgrid/core`). Only the keys described here exist; TypeScript
+flags an unknown key, and the grid ignores it. Angular's `DzgColumnDef<T>` is the same object, and also takes
+component classes in `ui`. Each key has its own page under [Column options](../../column-options/); this guide shows
+how they work together.
 
 ## Value and type
 

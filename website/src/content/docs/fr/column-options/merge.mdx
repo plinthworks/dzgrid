@@ -1,0 +1,75 @@
+---
+title: "merge"
+description: "Des lignes consécutives de même valeur montrent une seule grande cellule."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Fusionne les voisines égales d’une colonne en une seule cellule, comme dans un tableur.
+
+<OptionFacts column="merge" />
+
+## Ce qu’il fait
+
+Il faut la fonction `spans()` de `@dzgrid/dom/spans` ; sans elle, la grille signale un avertissement
+`missing-feature` et dessine des cellules simples.
+
+- `true` fusionne les lignes dont les valeurs ont le même texte stable (`e` et `é` restent à part) ; les cellules
+  vides ne fusionnent jamais.
+- Une fonction `(a, b) => boolean` décide si deux voisines fusionnent.
+- `{ same, within }` : `same` comme la fonction, `within` une liste de colonnes dont le changement coupe une suite
+  (une ville ne fusionne que dans sa région).
+
+Les fusions suivent les lignes à l’écran : après un tri ou un filtre, les lignes désormais voisines fusionnent de
+nouveau. Une fusion ne traverse jamais une page, un bord épinglé ou un groupe de lignes. Une colonne ne peut pas avoir
+`merge` avec `rowSpan` ou `colSpan` (`invalid-span`). Dans un fichier CSV, la valeur est écrite sur chaque ligne
+qu’elle couvre.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { spans } from '@dzgrid/dom/spans';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Visit = { id: string; region: string; town: string; day: string };
+
+createGrid<Visit>(document.getElementById('visites')!, {
+  rows: [{ id: 'v1', region: 'Nord', town: 'Aubergny', day: '2026-04-01' }],
+  columns: [
+    { id: 'region', header: 'Région', merge: true },
+    { id: 'town', header: 'Ville', merge: { within: ['region'] } },
+    { id: 'day', header: 'Jour', type: 'day' },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+  features: [spans()],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Visites' }}
+  features={['spans']}
+  columns={[
+    { id: 'region', header: 'Région', width: 140, merge: true },
+    { id: 'town', header: 'Ville', width: 140, merge: { within: ['region'] } },
+    { id: 'day', header: 'Jour', type: 'day', flex: 1 },
+  ]}
+  rows={[
+    { id: 'v1', region: 'Nord', town: 'Aubergny', day: '2026-04-01' },
+    { id: 'v2', region: 'Nord', town: 'Aubergny', day: '2026-04-02' },
+    { id: 'v3', region: 'Nord', town: 'Brillac', day: '2026-04-03' },
+    { id: 'v4', region: 'Sud', town: 'Corfeuil', day: '2026-04-03' },
+    { id: 'v5', region: 'Sud', town: 'Corfeuil', day: '2026-04-04' },
+  ]}
+  caption="Région et Ville fusionnent ; Ville seulement dans sa région."
+/>
+
+## Voir aussi
+
+- [`rowSpan`](../row-span/), [`colSpan`](../col-span/).
+- [Colonnes](../../guides/columns/#groupes-de-colonnes).

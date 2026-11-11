@@ -1,0 +1,44 @@
+---
+title: "minWidth"
+description: "La largeur la plus étroite que la colonne peut prendre, en pixels."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Un plancher sous la largeur de la colonne.
+
+<OptionFacts column="minWidth" />
+
+## Ce qu’il fait
+
+Aucune largeur ne passe en dessous : ni celle de la définition, ni le glisser de l’utilisateur, ni le
+« Rétrécir » du menu, ni une part de [`flex`](../flex/) quand la grille est étroite (la grille défile alors de côté).
+Elle vaut 40 px si elle n’est pas donnée. Donnez une `minWidth` à une colonne flexible, pour qu’elle ne devienne jamais
+trop étroite pour être lue.
+
+Avec [`collapsePriority`](../collapse-priority/), une colonne flexible compte sa `minWidth` pour savoir si elle tient.
+Une valeur qui n’est pas un nombre positif ou nul est refusée avec une erreur `invalid-column`.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+createGrid<Tool>(document.getElementById('outils')!, {
+  rows: [{ id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Outil', flex: 1, minWidth: 140 },
+    { id: 'notes', header: 'Notes', flex: 2, minWidth: 200 },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Voir aussi
+
+- [`width`](../width/), [`maxWidth`](../max-width/), [`flex`](../flex/).
+- [Colonnes](../../guides/columns/#taille-et-place).

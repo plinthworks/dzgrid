@@ -1,0 +1,45 @@
+---
+title: "assumeZone"
+description: "Le fuseau dans lequel une colonne `instant` lit une date et heure écrite sans décalage."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Pour une colonne `instant` dont les données écrivent la date et l’heure sans décalage.
+
+<OptionFacts column="assumeZone" />
+
+## Ce qu’il fait
+
+Un instant écrit `'2026-03-02T09:30'` peut être l’un de 24 moments : la grille ne devine pas. Sans
+`assumeZone`, la cellule est vide. Avec `assumeZone: 'Europe/Paris'`,
+la colonne lit un tel texte à l’heure de Paris ; un texte avec décalage (`Z`, `+02:00`) ou des millisecondes depuis
+1970 sont lus tels quels.
+
+Le fuseau est un nom IANA. Un nom inconnu est refusé avec une erreur `unknown-zone`, et la colonne est écartée. Une
+heure qu’un changement d’heure saute ou répète est quand même lue. Les cellules sont affichées dans le [`timeZone`](../../settings/time-zone/) de la grille, qui
+peut en être un autre.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Train = { id: string; line: string; leaves: string };
+
+createGrid<Train>(document.getElementById('trains')!, {
+  rows: [{ id: 't1', line: 'Express de la côte', leaves: '2026-03-02T09:30' }],
+  columns: [
+    { id: 'line', header: 'Ligne' },
+    { id: 'leaves', header: 'Départ', type: 'instant', assumeZone: 'Europe/Paris' },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Voir aussi
+
+- [`type`](../type/), [`instantFormat`](../instant-format/).
+- [`timeZone`](../../settings/time-zone/).

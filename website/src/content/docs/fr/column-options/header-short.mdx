@@ -1,0 +1,41 @@
+---
+title: "headerShort"
+description: "Un titre plus court, sans unité, là où la place manque."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Un titre plus court pour les endroits où le titre complet ne tiendrait pas.
+
+<OptionFacts column="headerShort" />
+
+## Ce qu’il fait
+
+Le tableau croisé nomme ce qu’il fabrique à partir de vos colonnes — la colonne des libellés, les
+pastilles de sa barre, les en-têtes de ses colonnes de valeurs (« Somme(Poids) ») — avec `headerShort` : un titre
+comme « Poids (kg) » donne alors « Somme(Poids) » plutôt que « Somme(Poids (kg)) ». Partout ailleurs la colonne garde
+son [`header`](../header/). Sans `headerShort`, le tableau croisé utilise `header`.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Crate = { id: string; farm: string; weight: number };
+
+createGrid<Crate>(document.getElementById('cagettes')!, {
+  rows: [{ id: 'c1', farm: 'Creux-du-Ru', weight: 18.5 }],
+  columns: [
+    { id: 'farm', header: 'Ferme' },
+    { id: 'weight', header: 'Poids (kg)', headerShort: 'Poids', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Voir aussi
+
+- [`header`](../header/).
+- [Tableau croisé](../../guides/pivot/).

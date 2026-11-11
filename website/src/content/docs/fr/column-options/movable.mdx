@@ -1,0 +1,70 @@
+---
+title: "movable"
+description: "Si la colonne peut changer de place ou de côté."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+`false` garde la colonne là où vous la mettez.
+
+<OptionFacts column="movable" />
+
+## Ce qu’il fait
+
+Avec la fonction `columns()`, l’utilisateur déplace une colonne en tirant son titre ou au clavier ; le menu
+de colonne la déplace et l’épingle ; le sélecteur de colonnes la réordonne. `movable: false` refuse tout cela pour
+cette colonne : son titre ne se tire pas, l’« Épinglage » et les déplacements du menu sont désactivés, le sélecteur
+la montre verrouillée. Un état enregistré qui la place ailleurs est signalé et sa place est gardée.
+
+Les autres colonnes bougent toujours autour d’elle. Pour garder une colonne en premier, mettez-la en premier dans la
+liste et donnez-lui `movable: false` (souvent avec [`pinned`](../pinned/)).
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { columns } from '@dzgrid/dom/columns';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_COLUMNS.text } };
+
+createGrid<Tool>(document.getElementById('outils')!, {
+  rows: [{ id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Outil', movable: false },
+    { id: 'shelf', header: 'Étagère', type: 'number' },
+    { id: 'notes', header: 'Notes' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [columns()],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Outils' }}
+  features={['columns']}
+  columns={[
+    { id: 'name', header: 'Outil', width: 160, movable: false },
+    { id: 'shelf', header: 'Étagère', type: 'number', width: 90 },
+    { id: 'notes', header: 'Notes', flex: 1 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' },
+    { id: 't2', name: 'Scie égoïne', shelf: 3, notes: 'Denture fine, au sec' },
+    { id: 't3', name: 'Niveau à bulle', shelf: 1, notes: '60 cm' },
+  ]}
+  caption="Tirez Notes avant Outil : elle se déplace. Outil reste à sa place."
+/>
+
+## Voir aussi
+
+- [`pinned`](../pinned/), [`resizable`](../resizable/).
+- [Colonnes](../../guides/columns/#déplacer-redimensionner-masquer).

@@ -1,0 +1,61 @@
+---
+title: "headerWrap"
+description: "Un titre long sur plusieurs lignes."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Un titre long passé à la ligne plutôt que coupé.
+
+<OptionFacts column="headerWrap" />
+
+## Ce qu’il fait
+
+Avec la fonction `wrappedHeaders()` de `@dzgrid/dom/wrapped-headers` (sans feuille de style), le titre
+passe sur plusieurs lignes, au plus le `maxLines` de la fonction (3 par défaut, puis « … »), et la ligne des titres de
+colonnes grandit jusqu’au plus haut. Il est mesuré de nouveau quand une colonne change de largeur ou que la taille du
+texte change, jamais pendant le défilement. Avec [`headerHeight`](../../settings/header-height/), le plus haut
+l’emporte.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { wrappedHeaders } from '@dzgrid/dom/wrapped-headers';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Parcel = { id: string; route: string; days: number };
+
+createGrid<Parcel>(document.getElementById('colis')!, {
+  rows: [{ id: 'p1', route: 'Port – Ferme de la colline', days: 3 }],
+  columns: [
+    { id: 'route', header: 'Trajet', flex: 1 },
+    { id: 'days', header: 'Délai moyen de livraison en jours', type: 'number', width: 90, headerWrap: true },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+  features: [wrappedHeaders({ maxLines: 2 })],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Arrosage' }}
+  features={[['wrappedHeaders', { maxLines: 2 }]]}
+  columns={[
+    { id: 'bed', header: 'Carré', flex: 1 },
+    { id: 'litres', header: 'Eau moyenne en litres par semaine', type: 'number', width: 110, headerWrap: true },
+  ]}
+  rows={[
+    { id: 'p1', bed: 'Spirale d’herbes', litres: 12 },
+    { id: 'p2', bed: 'Tunnel de haricots', litres: 30 },
+  ]}
+/>
+
+## Voir aussi
+
+- [`headerVertical`](../header-vertical/), [`wrap`](../wrap/).
+- [Colonnes](../../guides/columns/#titres-sur-plusieurs-lignes).

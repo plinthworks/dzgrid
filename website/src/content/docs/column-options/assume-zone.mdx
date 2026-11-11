@@ -1,0 +1,43 @@
+---
+title: "assumeZone"
+description: "The time zone in which an `instant` column reads a date and time written without an offset."
+---
+
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+For an `instant` column whose data writes date and time with no offset.
+
+<OptionFacts column="assumeZone" />
+
+## What it does
+
+An instant written `'2026-03-02T09:30'` could be any of 24 moments: the grid does not guess. Without
+`assumeZone` the cell is empty. With `assumeZone: 'Europe/Paris'` the
+column reads such text as Paris time; a text with an offset (`Z`, `+02:00`) or epoch milliseconds is read as it is.
+
+The zone is an IANA name. An unknown one is refused with an `unknown-zone` error, and the column is left out. A wall
+time that a clock change skips or repeats is still read. The cells are shown in the grid's [`timeZone`](../../settings/time-zone/), which may be another one.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Train = { id: string; line: string; leaves: string };
+
+createGrid<Train>(document.getElementById('trains')!, {
+  rows: [{ id: 't1', line: 'Coast express', leaves: '2026-03-02T09:30' }],
+  columns: [
+    { id: 'line', header: 'Line' },
+    { id: 'leaves', header: 'Leaves', type: 'instant', assumeZone: 'Europe/Paris' },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+});
+```
+
+## See also
+
+- [`type`](../type/), [`instantFormat`](../instant-format/).
+- [`timeZone`](../../settings/time-zone/).

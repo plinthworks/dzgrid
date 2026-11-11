@@ -1,0 +1,41 @@
+---
+title: "tooltip"
+description: "The text shown over a cell, from its value and row."
+---
+
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+A tooltip on each cell, computed from the data.
+
+<OptionFacts column="tooltip" />
+
+## What it does
+
+`tooltip(value, row, context)` returns the text, already translated, or null for none; `context` is the
+grid's [`context`](../../settings/context/). The grid never guesses one from the cell's content. It shows when the
+pointer rests on the cell (after the grid's [`tooltips`](../../settings/tooltips/) delay) and as soon as the keyboard
+focus reaches it.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Bee = { id: string; hive: string; honey: number };
+
+createGrid<Bee>(document.getElementById('hives')!, {
+  rows: [{ id: 'h1', hive: 'Clover hill', honey: 12.5 }],
+  columns: [
+    { id: 'hive', header: 'Hive', tooltip: (v) => (v ? `Hive ${v}` : null) },
+    { id: 'honey', header: 'Honey', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+});
+```
+
+## See also
+
+- [`headerTooltip`](../header-tooltip/), [`ui`](../ui/).
+- [`tooltips`](../../settings/tooltips/).

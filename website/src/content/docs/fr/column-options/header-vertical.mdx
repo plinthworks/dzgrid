@@ -1,0 +1,63 @@
+---
+title: "headerVertical"
+description: "Le titre de la colonne écrit de bas en haut."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Un titre vertical, pour qu’une grille de nombreuses colonnes étroites les garde étroites.
+
+<OptionFacts column="headerVertical" />
+
+## Ce qu’il fait
+
+Avec la fonction `verticalHeaders()` de `@dzgrid/dom/vertical-headers` (feuille de style
+`vertical-headers.css`), le titre est tourné sur le côté (de bas en haut en écriture latine) et la ligne de titres grandit jusqu’au plus long d’entre
+eux, au plus le `maxHeight` de la fonction (240 px par défaut). Le clavier et les lecteurs d’écran ne changent pas.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { verticalHeaders } from '@dzgrid/dom/vertical-headers';
+import '@dzgrid/theme/vertical-headers.css';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Plot = { id: string; bed: string; mon: boolean; tue: boolean };
+
+createGrid<Plot>(document.getElementById('arrosage')!, {
+  rows: [{ id: 'p1', bed: 'Spirale d’herbes', mon: true, tue: false }],
+  columns: [
+    { id: 'bed', header: 'Carré', flex: 1 },
+    { id: 'mon', header: 'Lundi', type: 'boolean', width: 44, headerVertical: true },
+    { id: 'tue', header: 'Mardi', type: 'boolean', width: 44, headerVertical: true },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+  features: [verticalHeaders()],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Arrosage' }}
+  features={['verticalHeaders']}
+  columns={[
+    { id: 'bed', header: 'Carré', flex: 1 },
+    { id: 'mon', header: 'Lundi', type: 'boolean', width: 44, headerVertical: true },
+    { id: 'tue', header: 'Mardi', type: 'boolean', width: 44, headerVertical: true },
+    { id: 'wed', header: 'Mercredi', type: 'boolean', width: 44, headerVertical: true },
+  ]}
+  rows={[
+    { id: 'p1', bed: 'Spirale d’herbes', mon: true, tue: false, wed: true },
+    { id: 'p2', bed: 'Tunnel de haricots', mon: false, tue: true, wed: false },
+  ]}
+/>
+
+## Voir aussi
+
+- [`headerWrap`](../header-wrap/).
+- [Colonnes](../../guides/columns/#titres-verticaux).

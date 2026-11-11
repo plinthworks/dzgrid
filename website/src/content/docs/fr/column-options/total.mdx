@@ -1,0 +1,73 @@
+---
+title: "total"
+description: "Le total de la colonne dans la ligne de totaux d’une grille sans groupes."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Avec la ligne de totaux : ce qu’elle affiche sous cette colonne.
+
+<OptionFacts column="total" />
+
+## Ce qu’il fait
+
+Les mêmes noms fournis qu’[`aggFunc`](../agg-func/) — `'sum'`, `'avg'`, `'min'`, `'max'`, `'count'`,
+`'first'`, `'last'` — ou votre fonction des valeurs de la colonne (avec `level` null). La fonction `totalsRow()` de
+`@dzgrid/dom/totals-row`, avec `pinnedRows()`, affiche la ligne en bas, toujours visible, sur les lignes qui passent
+les filtres ; les modifications comptent aussitôt. Les fichiers CSV et Excel et l’impression finissent par elle.
+
+Un total qui ne va pas à sa colonne (une somme de textes) est signalé une fois comme problème. Avec des pages venues
+du serveur, la grille n’en tient qu’une : donnez les totaux que votre serveur envoie avec l’`api.set(…)` de la
+fonction.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { pinnedRows } from '@dzgrid/dom/pinned-rows';
+import { totalsRow } from '@dzgrid/dom/totals-row';
+import { FR_PINNED } from '@dzgrid/dom/locales/fr-pinned';
+import { FR_TOTALS } from '@dzgrid/dom/locales/fr-totals';
+import '@dzgrid/theme/pinned-rows.css';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Sale = { id: string; market: string; fruit: string; crates: number };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_PINNED.text, ...FR_TOTALS.text } };
+
+createGrid<Sale>(document.getElementById('ventes')!, {
+  rows: [{ id: 's1', market: 'Port', fruit: 'Prunes', crates: 12 }],
+  columns: [
+    { id: 'fruit', header: 'Fruit' },
+    { id: 'crates', header: 'Cagettes', type: 'number', total: 'sum' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [pinnedRows<Sale>(), totalsRow()],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Ventes' }}
+  features={['totals']}
+  columns={[
+    { id: 'market', header: 'Marché', width: 160 },
+    { id: 'fruit', header: 'Fruit', width: 140, total: 'count' },
+    { id: 'crates', header: 'Cagettes', type: 'number', width: 120, total: 'sum' },
+  ]}
+  rows={[
+    { id: 's1', market: 'Port', fruit: 'Prunes', crates: 12 },
+    { id: 's2', market: 'Port', fruit: 'Poires', crates: 7 },
+    { id: 's3', market: 'Vieille ville', fruit: 'Prunes', crates: 9 },
+    { id: 's4', market: 'Vieille ville', fruit: 'Coings', crates: 4 },
+  ]}
+/>
+
+## Voir aussi
+
+- [`aggFunc`](../agg-func/).
+- [Colonnes](../../guides/columns/#ligne-de-totaux).

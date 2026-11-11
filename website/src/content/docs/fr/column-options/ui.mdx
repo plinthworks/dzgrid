@@ -1,0 +1,60 @@
+---
+title: "ui"
+description: "Votre propre dessin et vos classes pour les cellules et le titre de la colonne."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+L’endroit où une colonne nomme ses parties sur mesure et donne ses classes.
+
+<OptionFacts column="ui" />
+
+## Ce qu’il fait
+
+- `cell`, `header`, `tooltip` : le nom d’une partie (enregistrée dans les [`parts`](../../settings/parts/) de
+  la grille) qui dessine les cellules, le titre ou l’infobulle de cette colonne. La grille n’écrit jamais de HTML en
+  texte : une partie construit le DOM dans l’hôte qui lui est donné, et la grille garde le rôle, le focus et les
+  touches de la cellule. Les parties de titre et d’infobulle demandent la fonction `slots()` de `@dzgrid/dom/slots`.
+  En Angular, donnez la classe du composant elle-même.
+- `cellClass(c)` : des classes pour une cellule du corps d’après sa valeur, son texte, sa ligne, sa clé et le
+  `context` de la grille ; null pour aucune.
+- `headerClass` : des classes pour la cellule de titre de la colonne.
+- `data` : vos propres données simples, passées telles quelles à chaque partie de la colonne (`c.column.def.ui.data`).
+
+Les classes sont séparées par des espaces. Toute autre clé est signalée par un avertissement `unknown-ui-key`.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { definePart } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Bee = { id: string; hive: string; honey: number };
+
+const jar = definePart('cell', {
+  mount(host, c) {
+    const span = host.ownerDocument.createElement('span');
+    host.append(span);
+    const draw = (n: typeof c) => { span.textContent = n.value == null ? '' : `${n.text} kg`; };
+    draw(c);
+    return { update: draw, destroy: () => span.remove() };
+  },
+});
+
+createGrid<Bee>(document.getElementById('ruches')!, {
+  rows: [{ id: 'h1', hive: 'Colline aux trèfles', honey: 12.5 }],
+  columns: [
+    { id: 'hive', header: 'Ruche', ui: { headerClass: 'is-key' } },
+    { id: 'honey', header: 'Miel', type: 'number', ui: { cell: 'jar', cellClass: (c) => (Number(c.value) > 10 ? 'is-full' : null) } },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+  parts: { jar },
+});
+```
+
+## Voir aussi
+
+- [`parts`](../../settings/parts/), [`rowClass`](../../settings/row-class/).
+- [Colonnes](../../guides/columns/#classes-infobulles-cellules-sur-mesure).

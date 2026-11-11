@@ -1,0 +1,65 @@
+---
+title: "chooser"
+description: "`false`: the column is left out of the columns chooser."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Keeps a column out of the list where the user shows, hides and orders columns.
+
+<OptionFacts column="chooser" />
+
+## What it does
+
+The columns chooser (`columnsChooser()` from `@dzgrid/dom/columns-panel`) lists every column with a box to
+show or hide it. `chooser: false` leaves this column out of that list — a technical column, one your app shows on its
+own terms. The column menu can still hide it, unless [`hideable`](../hideable/) is `false`.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { columnsChooser } from '@dzgrid/dom/columns-panel';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_COLUMNS.text } };
+
+createGrid<Tool>(document.getElementById('tools')!, {
+  rows: [{ id: 't1', name: 'Hammer', shelf: 2, notes: 'Claw, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Tool' },
+    { id: 'shelf', header: 'Shelf', type: 'number', chooser: false },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [columnsChooser()],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Tools' }}
+  features={['columns', 'chooser', 'columnMenu']}
+  columns={[
+    { id: 'name', header: 'Tool', width: 160 },
+    { id: 'shelf', header: 'Shelf', type: 'number', width: 110, chooser: false },
+    { id: 'notes', header: 'Notes', flex: 1 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Hammer', shelf: 2, notes: 'Claw, 450 g' },
+    { id: 't2', name: 'Hand saw', shelf: 3, notes: 'Fine teeth, keep dry' },
+    { id: 't3', name: 'Spirit level', shelf: 1, notes: '60 cm' },
+  ]}
+  caption="Open a menu (⋮), then « Choose columns… »: Shelf is not in the list."
+/>
+
+## See also
+
+- [`hideable`](../hideable/), [`hidden`](../hidden/).
+- [Dock and panels](../../guides/dock-panels/).

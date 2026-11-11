@@ -1,0 +1,77 @@
+---
+title: "filter"
+description: "Si la colonne peut être filtrée, et l’allure de son filtre."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Le filtre de la colonne : aucun, ou la sorte et les options de son formulaire.
+
+<OptionFacts column="filter" />
+
+## Ce qu’il fait
+
+Avec la fonction `filters()`, chaque colonne reçoit le filtre de son type (texte, nombre, jour, instant,
+oui/non ; une liste de valeurs avec `kind: 'set'`). `filter: false` ne lui en donne aucun. Un objet l’ajuste :
+
+- `kind` : la sorte de filtre qu’elle montre — une sorte fournie, ou le nom de la vôtre (les
+  [`filterKinds`](../../settings/filter-kinds/) de la grille). Un nom inconnu est une erreur `invalid-filter`.
+- `floating` : une case dans la ligne de filtres flottants, ou `false` pour garder cette colonne hors de cette ligne.
+- `debounceMs` : la pause avant que ce qui y est tapé s’applique (150 ms dans le navigateur, 300 ms avec un serveur).
+- `ops` : les opérateurs que propose sa fenêtre, dans cet ordre.
+- `maxConditions` (1 à 5) : le nombre de conditions que propose sa fenêtre ; `matchCase` : une case « Respecter la
+  casse » sur les lignes de texte.
+- Pour une liste de valeurs : `start: 'empty'` l’ouvre sans rien de coché, `selectAll: false` retire la case « Tout
+  sélectionner », `exclude: false` n’écrit jamais de filtre `exclude`, `optionPart` nomme une partie qui dessine
+  chaque ligne, `condition: true` ajoute une condition au-dessus de la liste.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Recipe = { id: string; name: string; cuisine: string; minutes: number };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text } };
+
+createGrid<Recipe>(document.getElementById('recettes')!, {
+  rows: [{ id: 'c1', name: 'Soupe de lune', cuisine: 'Lunaire', minutes: 25 }],
+  columns: [
+    { id: 'name', header: 'Recette', filter: false },
+    { id: 'cuisine', header: 'Cuisine', filter: { kind: 'set', selectAll: false } },
+    { id: 'minutes', header: 'Minutes', type: 'number', filter: { ops: ['lte', 'gte'], maxConditions: 2 } },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [filters()],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Recettes' }}
+  features={['filters']}
+  columns={[
+    { id: 'name', header: 'Recette', flex: 1, filter: false },
+    { id: 'cuisine', header: 'Cuisine', width: 150, filter: { kind: 'set' } },
+    { id: 'minutes', header: 'Minutes', type: 'number', width: 130 },
+  ]}
+  rows={[
+    { id: 'c1', name: 'Soupe de lune', cuisine: 'Lunaire', minutes: 25 },
+    { id: 'c2', name: 'Crumble de comète', cuisine: 'Orbitale', minutes: 50 },
+    { id: 'c3', name: 'Pain de cratère', cuisine: 'Lunaire', minutes: 90 },
+    { id: 'c4', name: 'Nouilles de nébuleuse', cuisine: 'Orbitale', minutes: 15 },
+  ]}
+  caption="Cuisine a une liste de valeurs, Minutes un formulaire de nombre, Recette aucun filtre."
+/>
+
+## Voir aussi
+
+- [`type`](../type/), [`sortable`](../sortable/).
+- [Trier, filtrer, rechercher](../../guides/sort-filter-search/#filtres-de-colonne).

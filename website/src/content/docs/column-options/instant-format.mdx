@@ -1,0 +1,60 @@
+---
+title: "instantFormat"
+description: "What an `instant` column shows of each moment: the date, the time, the seconds."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+The parts of the date and time an `instant` column shows.
+
+<OptionFacts column="instantFormat" />
+
+## What it does
+
+`date: false` shows the time only, `time: false` the date only, `seconds: true` adds the seconds. By
+default the date and the time are shown, without seconds, on a 24-hour clock, in the order of the grid's
+[`locale`](../../settings/locale/) and in its [`timeZone`](../../settings/time-zone/).
+
+It changes what the cell shows only: sorting and filtering use the moment itself.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Lap = { id: string; runner: string; start: number; finish: number };
+
+createGrid<Lap>(document.getElementById('laps')!, {
+  rows: [{ id: 'l1', runner: 'Maud Hesketh', start: 1772442000000, finish: 1772442754000 }],
+  columns: [
+    { id: 'runner', header: 'Runner' },
+    { id: 'start', header: 'Start', type: 'instant', instantFormat: { date: false } },
+    { id: 'finish', header: 'Finish', type: 'instant', instantFormat: { date: false, seconds: true } },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Laps', timeZone: 'Europe/London' }}
+  columns={[
+    { id: 'runner', header: 'Runner', flex: 1 },
+    { id: 'start', header: 'Start', type: 'instant', width: 180 },
+    { id: 'finish', header: 'Finish', type: 'instant', width: 140, instantFormat: { date: false, seconds: true } },
+  ]}
+  rows={[
+    { id: 'l1', runner: 'Maud Hesketh', start: 1772442000000, finish: 1772442754000 },
+    { id: 'l2', runner: 'Felix Tarrant', start: 1772442000000, finish: 1772442811000 },
+  ]}
+/>
+
+## See also
+
+- [`type`](../type/), [`assumeZone`](../assume-zone/).
+- [`timeZone`](../../settings/time-zone/).

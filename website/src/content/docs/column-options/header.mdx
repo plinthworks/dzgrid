@@ -1,0 +1,42 @@
+---
+title: "header"
+description: "The column's title, already translated."
+---
+
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+The title over the column, in the language of your page.
+
+<OptionFacts column="header" />
+
+## What it does
+
+The grid bundles no language: give the title already translated. It is the header cell's text, and the
+column's name wherever the grid names it — the column menu, the filters, the screen reader's messages, the first
+line of a CSV file, the printed table. Without it, the `id` stands in.
+
+Give the columns again with a new `header` when the language changes (`update({ columns })`).
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Plant = { id: string; name: string; height: number };
+
+createGrid<Plant>(document.getElementById('plants')!, {
+  rows: [{ id: 'p1', name: 'Foxglove', height: 120 }],
+  columns: [
+    { id: 'name', header: 'Plant' },
+    { id: 'height', header: 'Height (cm)', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+});
+```
+
+## See also
+
+- [`headerShort`](../header-short/), [`headerTooltip`](../header-tooltip/), [`headerAlign`](../header-align/).
+- [Columns](../../guides/columns/).

@@ -1,0 +1,58 @@
+---
+title: "ui"
+description: "Your own drawing and classes for the column’s cells and header."
+---
+
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Where a column names its custom parts and gives its classes.
+
+<OptionFacts column="ui" />
+
+## What it does
+
+- `cell`, `header`, `tooltip`: the name of a part (registered in the grid's [`parts`](../../settings/parts/))
+  that draws this column's cells, header or tooltip. The grid never writes HTML strings: a part builds DOM in the host
+  it is given, and the grid keeps the cell's role, focus and keys. Header and tooltip parts need the `slots()` feature
+  from `@dzgrid/dom/slots`. In Angular, give the component class itself.
+- `cellClass(c)`: classes for one body cell from its value, text, row, key and the grid's `context`; null for none.
+- `headerClass`: classes for the column's header cell.
+- `data`: your own plain data, handed as is to every part of the column (`c.column.def.ui.data`).
+
+Classes are space-separated. Any other key is told with an `unknown-ui-key` warning.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { definePart } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Bee = { id: string; hive: string; honey: number };
+
+const jar = definePart('cell', {
+  mount(host, c) {
+    const span = host.ownerDocument.createElement('span');
+    host.append(span);
+    const draw = (n: typeof c) => { span.textContent = n.value == null ? '' : `${n.text} kg`; };
+    draw(c);
+    return { update: draw, destroy: () => span.remove() };
+  },
+});
+
+createGrid<Bee>(document.getElementById('hives')!, {
+  rows: [{ id: 'h1', hive: 'Clover hill', honey: 12.5 }],
+  columns: [
+    { id: 'hive', header: 'Hive', ui: { headerClass: 'is-key' } },
+    { id: 'honey', header: 'Honey', type: 'number', ui: { cell: 'jar', cellClass: (c) => (Number(c.value) > 10 ? 'is-full' : null) } },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+  parts: { jar },
+});
+```
+
+## See also
+
+- [`parts`](../../settings/parts/), [`rowClass`](../../settings/row-class/).
+- [Columns](../../guides/columns/#classes-tooltips-custom-cells).

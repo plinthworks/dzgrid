@@ -1,0 +1,17 @@
+---
+title: "Column options"
+description: "Every key of a column definition, one page each."
+sidebar:
+  order: 0
+---
+
+import OptionList from '../../../components/OptionList.astro';
+
+A column is a plain object (`ColumnDef<T>` from `@dzgrid/core`), the same in TypeScript, in Angular's `[columns]` and
+in the Web Component's `columns` property; Angular also takes component classes in `ui`. Each page gives the key's
+facts (its type, its default), what it does, an example and, when it shows something, a live grid. A column's keys
+change when you give the columns again: `update({ columns })`.
+
+One is required: `id`. The rest are optional. TypeScript flags an unknown key; the grid ignores it.
+
+<OptionList of="columns" />

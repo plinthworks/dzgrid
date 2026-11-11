@@ -1,0 +1,19 @@
+---
+title: "Options de colonne"
+description: "Chaque clé d’une définition de colonne, une page par clé."
+sidebar:
+  order: 0
+---
+
+import OptionList from '../../../../components/OptionList.astro';
+
+Une colonne est un objet simple (`ColumnDef<T>` de `@dzgrid/core`), le même en TypeScript, dans les `[columns]`
+d’Angular et dans la propriété `columns` du Web Component ; Angular prend aussi des classes de composants dans `ui`.
+Chaque page donne les faits de la clé (son type, sa valeur par défaut), ce qu’elle fait, un exemple et, quand elle
+montre quelque chose, une grille vivante. Les clés d’une colonne changent quand vous redonnez les colonnes :
+`update({ columns })`.
+
+Une est obligatoire : `id`. Les autres sont facultatives. TypeScript signale une clé inconnue ;
+la grille l’ignore.
+
+<OptionList of="columns" />

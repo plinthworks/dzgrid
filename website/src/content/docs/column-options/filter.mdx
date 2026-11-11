@@ -1,0 +1,76 @@
+---
+title: "filter"
+description: "Whether the column can be filtered, and how its filter looks."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+The column’s filter: none, or the kind and the options of its form.
+
+<OptionFacts column="filter" />
+
+## What it does
+
+With the `filters()` feature, each column gets the filter of its type (text, number, day, instant, yes/no;
+a value list with `kind: 'set'`). `filter: false` gives it none. An object adjusts it:
+
+- `kind`: the filter kind it shows — a built-in, or the name of your own (the grid's
+  [`filterKinds`](../../settings/filter-kinds/)). An unknown name is an `invalid-filter` error.
+- `floating`: a box in the floating filter row, or `false` to keep this column out of that row.
+- `debounceMs`: the pause before what is typed there applies (150 ms in the browser, 300 ms with a server).
+- `ops`: the operators its popup offers, in this order.
+- `maxConditions` (1 to 5): how many conditions its popup offers; `matchCase`: a « Match case » box on text rows.
+- For a value list: `start: 'empty'` opens it with nothing ticked, `selectAll: false` takes the « Select all » box
+  away, `exclude: false` never writes an `exclude` filter, `optionPart` names a part that draws each line,
+  `condition: true` adds a condition above the list.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Recipe = { id: string; name: string; cuisine: string; minutes: number };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+
+createGrid<Recipe>(document.getElementById('recipes')!, {
+  rows: [{ id: 'c1', name: 'Moon soup', cuisine: 'Lunar', minutes: 25 }],
+  columns: [
+    { id: 'name', header: 'Recipe', filter: false },
+    { id: 'cuisine', header: 'Cuisine', filter: { kind: 'set', selectAll: false } },
+    { id: 'minutes', header: 'Minutes', type: 'number', filter: { ops: ['lte', 'gte'], maxConditions: 2 } },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [filters()],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Recipes' }}
+  features={['filters']}
+  columns={[
+    { id: 'name', header: 'Recipe', flex: 1, filter: false },
+    { id: 'cuisine', header: 'Cuisine', width: 150, filter: { kind: 'set' } },
+    { id: 'minutes', header: 'Minutes', type: 'number', width: 130 },
+  ]}
+  rows={[
+    { id: 'c1', name: 'Moon soup', cuisine: 'Lunar', minutes: 25 },
+    { id: 'c2', name: 'Comet crumble', cuisine: 'Orbital', minutes: 50 },
+    { id: 'c3', name: 'Crater bread', cuisine: 'Lunar', minutes: 90 },
+    { id: 'c4', name: 'Nebula noodles', cuisine: 'Orbital', minutes: 15 },
+  ]}
+  caption="Cuisine has a value list, Minutes a number form, Recipe no filter."
+/>
+
+## See also
+
+- [`type`](../type/), [`sortable`](../sortable/).
+- [Sort, filter and search](../../guides/sort-filter-search/#column-filters).

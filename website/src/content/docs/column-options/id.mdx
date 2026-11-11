@@ -1,0 +1,45 @@
+---
+title: "id"
+description: "The column's name for the grid: required, unique and stable."
+---
+
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+The name the grid knows a column by.
+
+<OptionFacts column="id" />
+
+## What it does
+
+The `id` names the column everywhere the grid speaks of it: the sort, the filters, the saved state, the
+events, the column menu. Keep it stable from one release of your app to the next, or a saved state no longer finds
+its column. Without a `field` or a `value`, the cell reads the row's property of that name.
+
+A column without an `id` (or with an empty one) is refused with an `invalid-column` error; a second column with the
+same `id` is refused with `duplicate-column-id`, and the first one is kept. The other columns go on. An `id` with a
+dot and no `field` reads first the row's own property of that exact name (an id made from a date and time), then
+the path.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Book = { id: string; title: string; pages: number };
+
+createGrid<Book>(document.getElementById('books')!, {
+  rows: [{ id: 'b1', title: 'The Salt Road', pages: 312 }],
+  columns: [
+    { id: 'title', header: 'Title' },
+    { id: 'pages', header: 'Pages', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+});
+```
+
+## See also
+
+- [`field`](../field/), [`value`](../value/).
+- [Columns](../../guides/columns/).

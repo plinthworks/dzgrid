@@ -1,0 +1,63 @@
+---
+title: "numberFormat"
+description: "How a `number` column shows its numbers: decimals, percent, currency, grouping."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+The look of the numbers in a `number` column.
+
+<OptionFacts column="numberFormat" />
+
+## What it does
+
+Its keys are the browser's number format's: `style` (`'decimal'`, `'percent'`, `'currency'`), `currency`
+(`'EUR'`), `minimumFractionDigits`, `maximumFractionDigits` and `useGrouping`. Digits and separators follow the
+grid's [`locale`](../../settings/locale/) and [`numerals`](../../settings/numerals/). Without decimals given (and not a
+currency), a number shows up to 15 significant digits, so `0.1 + 0.2` shows 0.3. A percent multiplies by 100: `0.25`
+shows 25%.
+
+It changes what the cell shows only: sorting and filtering use the number itself.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Fund = { id: string; name: string; price: number; change: number };
+
+createGrid<Fund>(document.getElementById('funds')!, {
+  rows: [{ id: 'f1', name: 'Green Valley', price: 1234.5, change: 0.042 }],
+  columns: [
+    { id: 'name', header: 'Fund' },
+    { id: 'price', header: 'Price', type: 'number', numberFormat: { style: 'currency', currency: 'EUR' } },
+    { id: 'change', header: 'Change', type: 'number', numberFormat: { style: 'percent', maximumFractionDigits: 1 } },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Funds' }}
+  columns={[
+    { id: 'name', header: 'Fund', flex: 1 },
+    { id: 'price', header: 'Price', type: 'number', width: 140, numberFormat: { style: 'currency', currency: 'EUR' } },
+    { id: 'change', header: 'Change', type: 'number', width: 120, numberFormat: { style: 'percent', maximumFractionDigits: 1 } },
+  ]}
+  rows={[
+    { id: 'f1', name: 'Green Valley', price: 1234.5, change: 0.042 },
+    { id: 'f2', name: 'Harbour Lights', price: 87.25, change: -0.013 },
+    { id: 'f3', name: 'Stone Bridge', price: 15020, change: 0 },
+  ]}
+/>
+
+## See also
+
+- [`type`](../type/), [`align`](../align/).
+- [`locale`](../../settings/locale/).

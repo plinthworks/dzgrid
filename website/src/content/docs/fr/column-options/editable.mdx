@@ -1,0 +1,72 @@
+---
+title: "editable"
+description: "Si les cellules de la colonne peuvent être modifiées : oui, ou une règle sur la ligne."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Ouvre les cellules de la colonne à la modification.
+
+<OptionFacts column="editable" />
+
+## Ce qu’il fait
+
+`true`, ou une fonction `(row, context, info)` qui répond pour une ligne ; `context` est le
+[`context`](../../settings/context/) de la grille, `info.pinned` le côté d’une ligne épinglée (undefined sur une ligne
+du corps). Seul `true` veut dire oui. Une ligne de détail, de remplissage ou en chargement n’est jamais modifiée. Une
+autre valeur est signalée par un avertissement `invalid-column`, et la colonne reste en lecture seule.
+
+Il faut la fonction `edit()` de `@dzgrid/dom/edit` et `editors()`, qui dessinent les champs : F2, Entrée, un double
+clic ou la frappe d’un caractère en ouvre un. Une cellule qui ne peut pas être modifiée répond « lecture seule ».
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors';
+import { FR_EDIT } from '@dzgrid/dom/locales/fr-edit';
+import { FR_EDITORS } from '@dzgrid/dom/locales/fr-editors';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Gnome = { id: string; name: string; hat: string; height: number };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_EDIT.text, ...FR_EDITORS.text } };
+
+createGrid<Gnome>(document.getElementById('nains')!, {
+  rows: [{ id: 'g1', name: 'Barnaby', hat: 'red', height: 31 }],
+  columns: [
+    { id: 'name', header: 'Nom', editable: true },
+    { id: 'hat', header: 'Bonnet', editable: (g) => g.height < 40 },
+    { id: 'height', header: 'Taille (cm)', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [edit<Gnome>(), editors()],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={240}
+  settings={{ label: 'Nains de jardin' }}
+  features={['edit']}
+  columns={[
+    { id: 'name', header: 'Nom', flex: 1, editable: true },
+    { id: 'hat', header: 'Bonnet', type: 'enum', width: 130, editable: true, enumOptions: [{ value: 'red', label: 'Rouge' }, { value: 'green', label: 'Vert' }] },
+    { id: 'height', header: 'Taille (cm)', type: 'number', width: 130 },
+  ]}
+  rows={[
+    { id: 'g1', name: 'Barnaby', hat: 'red', height: 31 },
+    { id: 'g2', name: 'Pip', hat: 'green', height: 18 },
+    { id: 'g3', name: 'Vieux Chardon', hat: 'red', height: 46 },
+  ]}
+  caption="Double-cliquez un Nom ou un Bonnet ; Taille est en lecture seule."
+/>
+
+## Voir aussi
+
+- [`edit`](../edit/), [`validate`](../validate/).
+- [Édition](../../guides/editing/).

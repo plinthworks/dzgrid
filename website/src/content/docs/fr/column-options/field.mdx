@@ -1,0 +1,44 @@
+---
+title: "field"
+description: "Un chemin dans la ligne, `a.b.c`, où la colonne lit sa valeur."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+L’endroit de la ligne où la colonne lit sa valeur, quand ce n’est pas la propriété nommée par son `id`.
+
+<OptionFacts column="field" />
+
+## Ce qu’il fait
+
+Un chemin à points : `'author.name'` lit `row.author.name`. Seules les propriétés propres de la ligne
+sont lues : une ligne qui est une instance de classe avec des accesseurs demande plutôt une fonction
+[`value`](../value/). Une étape absente donne une cellule vide, jamais une erreur.
+
+Un chemin avec une étape vide (`'a..b'`) ou une clé de prototype (`__proto__`, `constructor`, `prototype`) est refusé
+avec une erreur `invalid-field-path`, et la colonne est écartée. Quand la colonne a une `value`, `field` n’est pas lu.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Book = { id: string; title: string; author: { name: string; born: number } };
+
+createGrid<Book>(document.getElementById('livres')!, {
+  rows: [{ id: 'b1', title: 'La Route du sel', author: { name: 'Ines Calloway', born: 1961 } }],
+  columns: [
+    { id: 'title', header: 'Titre' },
+    { id: 'author', header: 'Autrice', field: 'author.name' },
+    { id: 'born', header: 'Née en', type: 'number', field: 'author.born' },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Voir aussi
+
+- [`id`](../id/), [`value`](../value/).
+- [Colonnes](../../guides/columns/#valeur-et-type).

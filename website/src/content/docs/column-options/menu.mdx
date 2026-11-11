@@ -1,0 +1,65 @@
+---
+title: "menu"
+description: "`false`: the column has no column menu."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Takes the column menu away from one column.
+
+<OptionFacts column="menu" />
+
+## What it does
+
+With the `columnMenu()` feature, every header has a ⋮ button, a right-click menu and the keys
+Alt+ArrowDown and Shift+F10 to open it. `menu: false` removes all three from this column's header; the keys are then
+left to the page. Sorting by a click on the title is unchanged ([`sortable`](../sortable/) says that).
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { EN_COLUMN_MENU } from '@dzgrid/dom/locales/en-column-menu';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_COLUMN_MENU.text } };
+
+createGrid<Tool>(document.getElementById('tools')!, {
+  rows: [{ id: 't1', name: 'Hammer', shelf: 2, notes: 'Claw, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Tool' },
+    { id: 'shelf', header: 'Shelf', type: 'number', menu: false },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [columnMenu()],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Tools' }}
+  features={['columns', 'chooser', 'columnMenu']}
+  columns={[
+    { id: 'name', header: 'Tool', width: 160 },
+    { id: 'shelf', header: 'Shelf', type: 'number', width: 110, menu: false },
+    { id: 'notes', header: 'Notes', flex: 1 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Hammer', shelf: 2, notes: 'Claw, 450 g' },
+    { id: 't2', name: 'Hand saw', shelf: 3, notes: 'Fine teeth, keep dry' },
+    { id: 't3', name: 'Spirit level', shelf: 1, notes: '60 cm' },
+  ]}
+  caption="Shelf has no ⋮ button and no right-click menu."
+/>
+
+## See also
+
+- [`hideable`](../hideable/), [`sortable`](../sortable/).
+- [Columns](../../guides/columns/#moving-resizing-hiding).

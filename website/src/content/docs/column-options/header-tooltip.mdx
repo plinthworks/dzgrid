@@ -1,0 +1,57 @@
+---
+title: "headerTooltip"
+description: "The text shown over the column’s header, already translated."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+A tooltip on the header, to say more than the title can.
+
+<OptionFacts column="headerTooltip" />
+
+## What it does
+
+It shows when the pointer rests on the header (after the grid's [`tooltips`](../../settings/tooltips/)
+delay) and as soon as the keyboard focus reaches it. Give it already translated. To draw it yourself, name a part in
+[`ui`](../ui/)`.tooltip`.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Bee = { id: string; hive: string; honey: number };
+
+createGrid<Bee>(document.getElementById('hives')!, {
+  rows: [{ id: 'h1', hive: 'Clover hill', honey: 12.5 }],
+  columns: [
+    { id: 'hive', header: 'Hive' },
+    { id: 'honey', header: 'Honey', type: 'number', headerTooltip: 'Kilograms this season' },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={200}
+  settings={{ label: 'Hives' }}
+  columns={[
+    { id: 'hive', header: 'Hive', flex: 1 },
+    { id: 'honey', header: 'Honey', type: 'number', width: 140, headerTooltip: 'Kilograms this season' },
+  ]}
+  rows={[
+    { id: 'h1', hive: 'Clover hill', honey: 12.5 },
+    { id: 'h2', hive: 'Lime walk', honey: 8 },
+  ]}
+  caption="Rest the pointer on the Honey title."
+/>
+
+## See also
+
+- [`tooltip`](../tooltip/), [`header`](../header/).
+- [`tooltips`](../../settings/tooltips/).

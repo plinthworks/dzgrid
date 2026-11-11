@@ -1,0 +1,45 @@
+---
+title: "csv"
+description: "`'text'`: a digits-only value keeps its leading zeros in Excel."
+---
+
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+For codes made of digits — a postcode, a part number — that a spreadsheet would read as numbers.
+
+<OptionFacts column="csv" />
+
+## What it does
+
+A spreadsheet opening a CSV file reads `'01234'` as the number 1234. With `csv: 'text'`, a value made only of
+digits is written `="01234"`, which Excel keeps as text, zeros included; in an Excel file (`.xlsx`) the cell is
+written as text. Other values are written as usual.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { csvExport } from '@dzgrid/dom/export';
+import { EN_EXPORT } from '@dzgrid/dom/locales/en-export';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Shop = { id: string; town: string; postcode: string };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_EXPORT.text } };
+
+createGrid<Shop>(document.getElementById('shops')!, {
+  rows: [{ id: 's1', town: 'Larkfield', postcode: '01234' }],
+  columns: [
+    { id: 'town', header: 'Town' },
+    { id: 'postcode', header: 'Postcode', csv: 'text' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [csvExport({ canExport: true })],
+});
+```
+
+## See also
+
+- [`type`](../type/).
+- [Export and print](../../guides/export-print/#csv-and-excel).

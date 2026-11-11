@@ -1,0 +1,72 @@
+---
+title: "editable"
+description: "Whether the column’s cells can be edited: yes, or a rule over the row."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Opens the column’s cells to editing.
+
+<OptionFacts column="editable" />
+
+## What it does
+
+`true`, or a function `(row, context, info)` that answers for one row; `context` is the grid's
+[`context`](../../settings/context/), `info.pinned` the side of a pinned row (undefined on a body row). Only `true`
+means yes. A detail, filler or loading row is never edited. Another value is told with an `invalid-column` warning,
+and the column stays read-only.
+
+It needs the `edit()` feature from `@dzgrid/dom/edit` and `editors()`, which draw the fields: F2, Enter, a double click
+or typing a character opens one. A cell that cannot be edited answers « read-only ».
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Gnome = { id: string; name: string; hat: string; height: number };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text } };
+
+createGrid<Gnome>(document.getElementById('gnomes')!, {
+  rows: [{ id: 'g1', name: 'Barnaby', hat: 'red', height: 31 }],
+  columns: [
+    { id: 'name', header: 'Name', editable: true },
+    { id: 'hat', header: 'Hat', editable: (g) => g.height < 40 },
+    { id: 'height', header: 'Height (cm)', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [edit<Gnome>(), editors()],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={240}
+  settings={{ label: 'Garden gnomes' }}
+  features={['edit']}
+  columns={[
+    { id: 'name', header: 'Name', flex: 1, editable: true },
+    { id: 'hat', header: 'Hat', type: 'enum', width: 130, editable: true, enumOptions: [{ value: 'red', label: 'Red' }, { value: 'green', label: 'Green' }] },
+    { id: 'height', header: 'Height (cm)', type: 'number', width: 130 },
+  ]}
+  rows={[
+    { id: 'g1', name: 'Barnaby', hat: 'red', height: 31 },
+    { id: 'g2', name: 'Pip', hat: 'green', height: 18 },
+    { id: 'g3', name: 'Old Thistle', hat: 'red', height: 46 },
+  ]}
+  caption="Double-click a Name or a Hat; Height is read-only."
+/>
+
+## See also
+
+- [`edit`](../edit/), [`validate`](../validate/).
+- [Editing](../../guides/editing/).

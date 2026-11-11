@@ -549,7 +549,9 @@
       "resolved": null,
       "required": false,
       "doc": "A path into the row (`a.b.c`); defaults to the id when no `value` is given.",
-      "default": null,
+      "default": {
+        "token": "idPath"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -567,7 +569,9 @@
       "resolved": null,
       "required": false,
       "doc": "Already translated by the host.",
-      "default": null,
+      "default": {
+        "token": "columnId"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -576,7 +580,9 @@
       "resolved": null,
       "required": false,
       "doc": "A shorter header, without unit, where room is short (the pivot's created headers and chips, pivot.md 38); absent: `header`.",
-      "default": null,
+      "default": {
+        "token": "header"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -585,7 +591,9 @@
       "resolved": "\"number\" | \"boolean\" | \"text\" | \"day\" | \"instant\" | \"enum\" | \"custom\"",
       "required": false,
       "doc": "",
-      "default": null,
+      "default": {
+        "code": "'text'"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -639,7 +647,9 @@
       "resolved": null,
       "required": false,
       "doc": "",
-      "default": null,
+      "default": {
+        "code": "150"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -648,7 +658,9 @@
       "resolved": null,
       "required": false,
       "doc": "",
-      "default": null,
+      "default": {
+        "code": "40"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -675,7 +687,9 @@
       "resolved": null,
       "required": false,
       "doc": "",
-      "default": null,
+      "default": {
+        "code": "true"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -684,7 +698,9 @@
       "resolved": null,
       "required": false,
       "doc": "",
-      "default": null,
+      "default": {
+        "code": "true"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -720,7 +736,9 @@
       "resolved": null,
       "required": false,
       "doc": "",
-      "default": null,
+      "default": {
+        "code": "true"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -729,7 +747,9 @@
       "resolved": null,
       "required": false,
       "doc": "`false`: rows are never grouped by it (`@dzgrid/core/grouping`, row-grouping.md 14; the zone and the menu refuse it). Phase 7.",
-      "default": null,
+      "default": {
+        "code": "true"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -756,7 +776,9 @@
       "resolved": null,
       "required": false,
       "doc": "Its header's title written upwards (`@dzgrid/dom/vertical-headers`, docs/behaviors/vertical-headers.md; 1.9.0): the header row grows to the longest such title. Needs that feature; keys and screen readers unchanged.",
-      "default": null,
+      "default": {
+        "code": "false"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -765,7 +787,9 @@
       "resolved": null,
       "required": false,
       "doc": "Its header's title on several lines (`@dzgrid/dom/wrapped-headers`, docs/behaviors/header-wrap.md; 1.10.0): the column headers' row grows to the tallest wrapped title, at most `maxLines`. Needs that feature.",
-      "default": null,
+      "default": {
+        "code": "false"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -774,7 +798,9 @@
       "resolved": null,
       "required": false,
       "doc": "With `@dzgrid/dom/responsive` (docs/behaviors/responsive-columns.md; 1.9.0): when the columns do not fit the view, which collapse under their rows first — the highest first, the last on screen among equals; 0 never. Default 1.",
-      "default": null,
+      "default": {
+        "code": "1"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -783,7 +809,9 @@
       "resolved": null,
       "required": false,
       "doc": "`false`: not filterable. `kind`: the filter kind whose UI the column shows (a built-in or a custom kind's name). `floating`: a box in the floating filter row (`@dzgrid/dom/filters`; the grid's `filters({ floating })` otherwise, `false` keeps this column out). `debounceMs`: the pause before what is typed there applies (150 in the browser, 300 on a server by default). `ops`: the operators its popup offers, in this order (the kind's own list when absent). `optionPart`: the `filterOption` part painting each row of a set filter's list (feedback pass C). `exclude: false`: its set filter never writes an `exclude` filter, nor `blanks` (docs/behaviors/filter-set.md « Include only »). `start: 'empty'`: its set list opens with nothing ticked when no filter is in force, and nothing ticked is no filter (default `'all'`); `selectAll: false`: no « Select all » box (filter-set.md « Starting empty »). Phase 9 (docs/behaviors/filter-combined.md, filter-multi.md): `maxConditions` 1 to 5, the rows its popup offers (over `filters({ maxConditions })`); `matchCase`: a « Match case » box on each text row; `condition` (a set column): a condition above the list, both stored as a `combined` AND.",
-      "default": null,
+      "default": {
+        "token": "filterByType"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -792,7 +820,9 @@
       "resolved": null,
       "required": false,
       "doc": "",
-      "default": null,
+      "default": {
+        "code": "null"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -801,7 +831,9 @@
       "resolved": null,
       "required": false,
       "doc": "",
-      "default": null,
+      "default": {
+        "code": "false"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -810,7 +842,9 @@
       "resolved": null,
       "required": false,
       "doc": "",
-      "default": null,
+      "default": {
+        "token": "alignByType"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -819,7 +853,9 @@
       "resolved": null,
       "required": false,
       "doc": "The header title's place (presentation-settings.md 3, 1.9.0): over `align`, which the title follows by default (a number column's title at the end, as its cells).",
-      "default": null,
+      "default": {
+        "token": "align"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -828,7 +864,9 @@
       "resolved": null,
       "required": false,
       "doc": "The cells' text wraps on several lines (Phase 6 step 9, docs/behaviors/auto-height.md 1): with `@dzgrid/dom/auto-height` the row grows to its tallest wrapped cell; without it, or under a fixed `rowHeight`, the text wraps and is clipped.",
-      "default": null,
+      "default": {
+        "code": "false"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {
@@ -909,7 +947,9 @@
       "resolved": null,
       "required": false,
       "doc": "Whether a data row's cell can be edited (editing.md 1): `true`, or a rule told the row and the grid's `settings.context`; only `true` means yes. Never a detail, filler or loading row.",
-      "default": null,
+      "default": {
+        "code": "false"
+      },
       "source": "packages/core/src/columns/defs.ts"
     },
     {

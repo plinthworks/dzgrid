@@ -1,0 +1,64 @@
+---
+title: "pinned"
+description: "Garde la colonne au début ou à la fin, pendant que les autres défilent."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Fixe la colonne d’un côté de la grille.
+
+<OptionFacts column="pinned" />
+
+## Ce qu’il fait
+
+`pinned: 'start'` garde la colonne au début de la ligne (à gauche en français, à droite en arabe),
+`'end'` à l’autre bout ; les autres colonnes défilent entre elles. Les côtés sont logiques, jamais gauche ou droite.
+L’utilisateur épingle et désépingle depuis le menu de colonne, et ce choix fait partie de l’état enregistré.
+
+Toute autre valeur est refusée avec une erreur `invalid-column`, et la colonne est écartée. Plus de six colonnes
+épinglées d’un même côté sont acceptées avec un avertissement `too-many-pinned`. Quand la grille est trop étroite pour
+ses colonnes épinglées, elles défilent avec les autres jusqu’à ce que la place revienne ; l’état ne change pas.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+createGrid<Tool>(document.getElementById('outils')!, {
+  rows: [{ id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Outil', pinned: 'start' },
+    { id: 'shelf', header: 'Étagère', type: 'number' },
+    { id: 'notes', header: 'Notes', width: 600 },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Outils' }}
+  columns={[
+    { id: 'name', header: 'Outil', width: 160, pinned: 'start' },
+    { id: 'shelf', header: 'Étagère', type: 'number', width: 110 },
+    { id: 'notes', header: 'Notes', width: 900 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' },
+    { id: 't2', name: 'Scie égoïne', shelf: 3, notes: 'Denture fine, au sec' },
+    { id: 't3', name: 'Niveau à bulle', shelf: 1, notes: '60 cm' },
+  ]}
+  caption="Faites défiler de côté : Outil reste au début."
+/>
+
+## Voir aussi
+
+- [`movable`](../movable/), [`width`](../width/).
+- [Colonnes](../../guides/columns/#taille-et-place).

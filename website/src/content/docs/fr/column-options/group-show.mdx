@@ -1,0 +1,81 @@
+---
+title: "groupShow"
+description: "Sous un groupe de colonnes repliable : affichée seulement quand il est ouvert, ou seulement quand il est fermé."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Les colonnes qu’un groupe repliable garde quand il se replie.
+
+<OptionFacts column="groupShow" />
+
+## Ce qu’il fait
+
+Un groupe de colonnes avec `collapsible: true` s’ouvre et se ferme par un bouton dans son titre (Entrée ou
+Espace dessus). Ses colonnes marquées `groupShow: 'open'` ne s’affichent que quand il est ouvert, celles marquées
+`'closed'` que quand il est fermé ; les autres toujours. Sans `groupShow`, une colonne s’affiche dans les deux cas. Sous
+un groupe qui ne s’ouvre ni ne se ferme, il est ignoré.
+
+Les lignes de titres de groupes demandent la fonction `spans()`, et le bouton la fonction `groups()` de
+`@dzgrid/dom/groups` (textes `-columns`). Le `open: false` du groupe le fait démarrer fermé.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { spans } from '@dzgrid/dom/spans';
+import { groups } from '@dzgrid/dom/groups';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Station = { id: string; name: string; tempMin: number; tempMax: number; rain: number };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_COLUMNS.text } };
+
+createGrid<Station>(document.getElementById('stations')!, {
+  rows: [{ id: 's1', name: 'Cap Lumière', tempMin: 4, tempMax: 17, rain: 2.5 }],
+  columns: [
+    { id: 'name', header: 'Station' },
+    {
+      id: 'weather',
+      header: 'Météo',
+      collapsible: true,
+      children: [
+        { id: 'tempMin', header: 'Min °C', type: 'number', groupShow: 'open' },
+        { id: 'tempMax', header: 'Max °C', type: 'number' },
+        { id: 'rain', header: 'Pluie (mm)', type: 'number', groupShow: 'open' },
+      ],
+    },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [spans(), groups()],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={240}
+  settings={{ label: 'Stations météo' }}
+  features={['spans', 'groups']}
+  columns={[
+    { id: 'name', header: 'Station', flex: 1 },
+    { id: 'weather', header: 'Météo', collapsible: true, children: [
+      { id: 'tempMin', header: 'Min °C', type: 'number', groupShow: 'open' },
+      { id: 'tempMax', header: 'Max °C', type: 'number' },
+      { id: 'rain', header: 'Pluie (mm)', type: 'number', groupShow: 'open' },
+    ] },
+  ]}
+  rows={[
+    { id: 's1', name: 'Cap Lumière', tempMin: 4, tempMax: 17, rain: 2.5 },
+    { id: 's2', name: 'Roc des Mouettes', tempMin: 7, tempMax: 15, rain: 11 },
+  ]}
+  caption="Le bouton du groupe replie Météo sur sa colonne Max °C."
+/>
+
+## Voir aussi
+
+- [`hidden`](../hidden/).
+- [Colonnes](../../guides/columns/#groupes-de-colonnes).

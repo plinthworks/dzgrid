@@ -1,0 +1,43 @@
+---
+title: "value"
+description: "A function that computes the cell from the whole row."
+---
+
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+A value computed from the row, for a cell no single property holds.
+
+<OptionFacts column="value" />
+
+## What it does
+
+`value(row)` returns the cell's raw value; the column's type then reads it as for any other column. The
+result is what the grid shows, sorts, filters, searches and exports, so it is a pure function of the row: quick,
+with no side effects, the same answer for the same row. It wins over [`field`](../field/).
+
+The grid cannot see a change outside the row: a value that depends on something else (the time, another list) is
+read again when the rows are given again.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Room = { id: string; name: string; width: number; length: number };
+
+createGrid<Room>(document.getElementById('rooms')!, {
+  rows: [{ id: 'r1', name: 'Kitchen', width: 3.2, length: 4.5 }],
+  columns: [
+    { id: 'name', header: 'Room' },
+    { id: 'area', header: 'Area (m²)', type: 'number', value: (r) => r.width * r.length },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+});
+```
+
+## See also
+
+- [`field`](../field/), [`type`](../type/).
+- [Columns](../../guides/columns/#value-and-type).

@@ -1,0 +1,65 @@
+---
+title: "menu"
+description: "`false` : la colonne n’a pas de menu de colonne."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Retire le menu de colonne à une seule colonne.
+
+<OptionFacts column="menu" />
+
+## Ce qu’il fait
+
+Avec la fonction `columnMenu()`, chaque titre a un bouton ⋮, un menu au clic droit et les touches
+Alt+Flèche bas et Maj+F10 pour l’ouvrir. `menu: false` retire les trois du titre de cette colonne ; les touches sont
+alors laissées à la page. Le tri par un clic sur le titre ne change pas ([`sortable`](../sortable/) en décide).
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { FR_COLUMN_MENU } from '@dzgrid/dom/locales/fr-column-menu';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_COLUMN_MENU.text } };
+
+createGrid<Tool>(document.getElementById('outils')!, {
+  rows: [{ id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Outil' },
+    { id: 'shelf', header: 'Étagère', type: 'number', menu: false },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [columnMenu()],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Outils' }}
+  features={['columns', 'chooser', 'columnMenu']}
+  columns={[
+    { id: 'name', header: 'Outil', width: 160 },
+    { id: 'shelf', header: 'Étagère', type: 'number', width: 110, menu: false },
+    { id: 'notes', header: 'Notes', flex: 1 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' },
+    { id: 't2', name: 'Scie égoïne', shelf: 3, notes: 'Denture fine, au sec' },
+    { id: 't3', name: 'Niveau à bulle', shelf: 1, notes: '60 cm' },
+  ]}
+  caption="Étagère n’a ni bouton ⋮ ni menu au clic droit."
+/>
+
+## Voir aussi
+
+- [`hideable`](../hideable/), [`sortable`](../sortable/).
+- [Colonnes](../../guides/columns/#déplacer-redimensionner-masquer).

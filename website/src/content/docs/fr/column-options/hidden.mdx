@@ -1,0 +1,64 @@
+---
+title: "hidden"
+description: "La colonne démarre masquée."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Une colonne qui existe mais n’est pas affichée au démarrage de la grille.
+
+<OptionFacts column="hidden" />
+
+## Ce qu’il fait
+
+Une colonne masquée reste une colonne : elle garde son tri et son filtre, et elle peut être de nouveau
+affichée. L’utilisateur l’affiche depuis le sélecteur de colonnes ; votre code depuis l’état de la grille
+ou en redonnant les colonnes. Le choix de l’utilisateur l’emporte sur `hidden` et fait partie de l’état enregistré ;
+le « Réinitialiser les colonnes » du menu de colonne redonne celui de la définition.
+
+Par défaut, les colonnes masquées sont laissées hors des fichiers et de l’impression, qui montrent les colonnes
+visibles.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+createGrid<Tool>(document.getElementById('outils')!, {
+  rows: [{ id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Outil' },
+    { id: 'shelf', header: 'Étagère', type: 'number', hidden: true },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Outils' }}
+  features={['columns', 'chooser', 'columnMenu']}
+  columns={[
+    { id: 'name', header: 'Outil', width: 160 },
+    { id: 'shelf', header: 'Étagère', type: 'number', width: 110, hidden: true },
+    { id: 'notes', header: 'Notes', flex: 1 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' },
+    { id: 't2', name: 'Scie égoïne', shelf: 3, notes: 'Denture fine, au sec' },
+    { id: 't3', name: 'Niveau à bulle', shelf: 1, notes: '60 cm' },
+  ]}
+  caption="Étagère est masquée : ouvrez un menu (⋮), puis « Choisir les colonnes… » pour l’afficher."
+/>
+
+## Voir aussi
+
+- [`hideable`](../hideable/), [`chooser`](../chooser/).
+- [Colonnes](../../guides/columns/#déplacer-redimensionner-masquer).

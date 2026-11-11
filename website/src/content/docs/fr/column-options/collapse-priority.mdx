@@ -1,0 +1,52 @@
+---
+title: "collapsePriority"
+description: "Sur un écran étroit, les colonnes qui se replient les premières sous leurs lignes."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Avec la fonction `responsive()` : l’ordre dans lequel les colonnes quittent la ligne quand elles ne tiennent pas.
+
+<OptionFacts column="collapsePriority" />
+
+## Ce qu’il fait
+
+Avec `responsive()` de `@dzgrid/dom/responsive`, les colonnes qui ne tiennent pas dans la vue sont retirées
+des lignes au lieu de faire défiler la grille de côté, et montrées en lignes « Titre : valeur » sous chaque ligne. La
+plus haute `collapsePriority` part la première ; à égalité, la dernière à l’écran. `0` ne se replie jamais. Sans elle,
+une colonne compte 1.
+
+La première colonne et les colonnes épinglées ne se replient jamais ; une colonne flexible compte sa
+[`minWidth`](../min-width/). `responsive({ priority: { id: n } })` donne les mêmes nombres depuis la fonction, et
+l’emporte.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { responsive } from '@dzgrid/dom/responsive';
+import { FR_DETAIL } from '@dzgrid/dom/locales/fr-detail';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Hive = { id: string; name: string; apiary: string; frames: number; queen: string };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_DETAIL.text } };
+
+createGrid<Hive>(document.getElementById('ruches')!, {
+  rows: [{ id: 'h1', name: 'Trèfle', apiary: 'Colline', frames: 9, queen: 'Marquée bleu' }],
+  columns: [
+    { id: 'name', header: 'Ruche', width: 160 },
+    { id: 'apiary', header: 'Rucher', width: 140, collapsePriority: 2 },
+    { id: 'frames', header: 'Cadres', type: 'number', width: 100, collapsePriority: 0 },
+    { id: 'queen', header: 'Reine', width: 180 },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [responsive()],
+});
+```
+
+## Voir aussi
+
+- [`minWidth`](../min-width/), [`pinned`](../pinned/).
+- [Colonnes](../../guides/columns/#des-colonnes-qui-se-replient-sur-les-écrans-étroits).

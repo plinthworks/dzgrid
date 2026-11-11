@@ -1,0 +1,63 @@
+---
+title: "headerVertical"
+description: "The column’s title written upwards."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+A vertical title, so a grid of many narrow columns keeps them narrow.
+
+<OptionFacts column="headerVertical" />
+
+## What it does
+
+With the `verticalHeaders()` feature from `@dzgrid/dom/vertical-headers` (stylesheet
+`vertical-headers.css`), the title is turned on its side (from bottom to top in Latin script) and the header row grows to the longest such title,
+up to the feature's `maxHeight` (240 px by default). Keys and screen readers are unchanged.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { verticalHeaders } from '@dzgrid/dom/vertical-headers';
+import '@dzgrid/theme/vertical-headers.css';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Plot = { id: string; bed: string; mon: boolean; tue: boolean };
+
+createGrid<Plot>(document.getElementById('watering')!, {
+  rows: [{ id: 'p1', bed: 'Herb spiral', mon: true, tue: false }],
+  columns: [
+    { id: 'bed', header: 'Bed', flex: 1 },
+    { id: 'mon', header: 'Monday', type: 'boolean', width: 44, headerVertical: true },
+    { id: 'tue', header: 'Tuesday', type: 'boolean', width: 44, headerVertical: true },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+  features: [verticalHeaders()],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Watering' }}
+  features={['verticalHeaders']}
+  columns={[
+    { id: 'bed', header: 'Bed', flex: 1 },
+    { id: 'mon', header: 'Monday', type: 'boolean', width: 44, headerVertical: true },
+    { id: 'tue', header: 'Tuesday', type: 'boolean', width: 44, headerVertical: true },
+    { id: 'wed', header: 'Wednesday', type: 'boolean', width: 44, headerVertical: true },
+  ]}
+  rows={[
+    { id: 'p1', bed: 'Herb spiral', mon: true, tue: false, wed: true },
+    { id: 'p2', bed: 'Bean tunnel', mon: false, tue: true, wed: false },
+  ]}
+/>
+
+## See also
+
+- [`headerWrap`](../header-wrap/).
+- [Columns](../../guides/columns/#vertical-titles).

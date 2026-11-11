@@ -1,0 +1,47 @@
+---
+title: "colSpan"
+description: "Le nombre de colonnes que couvre une cellule, décidé d’après les données."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Une cellule plus large que sa colonne, la largeur dite par votre fonction.
+
+<OptionFacts column="colSpan" />
+
+## Ce qu’il fait
+
+`colSpan(ctx)` renvoie le nombre de colonnes que couvre la cellule vers sa fin, 1 en son absence ; elle
+reçoit le même `ctx` que [`rowSpan`](../row-span/). Les cellules couvertes ne sont pas dessinées. Une étendue ne
+traverse pas un bord épinglé.
+
+Il faut la fonction `spans()`, avec les mêmes problèmes que `rowSpan`. Pour une ligne dessinée sur toutes les
+colonnes, voir le [`fullWidth`](../../settings/full-width/) de la grille.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { spans } from '@dzgrid/dom/spans';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Visit = { id: string; region: string; town: string; day: string };
+
+createGrid<Visit>(document.getElementById('visites')!, {
+  rows: [{ id: 'v1', region: 'Nord', town: 'Aubergny', day: '2026-04-01' }],
+  columns: [
+    { id: 'region', header: 'Région' },
+    { id: 'town', header: 'Ville', colSpan: (c) => (c.row.day === '' ? 2 : 1) },
+    { id: 'day', header: 'Jour', type: 'day' },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+  features: [spans()],
+});
+```
+
+## Voir aussi
+
+- [`rowSpan`](../row-span/), [`merge`](../merge/).
+- [`fullWidth`](../../settings/full-width/).
+- [Colonnes](../../guides/columns/#groupes-de-colonnes).

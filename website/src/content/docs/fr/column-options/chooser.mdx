@@ -1,0 +1,66 @@
+---
+title: "chooser"
+description: "`false` : la colonne est laissée hors du sélecteur de colonnes."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Garde une colonne hors de la liste où l’utilisateur affiche, masque et ordonne les colonnes.
+
+<OptionFacts column="chooser" />
+
+## Ce qu’il fait
+
+Le sélecteur de colonnes (`columnsChooser()` de `@dzgrid/dom/columns-panel`) liste chaque colonne avec une
+case pour l’afficher ou la masquer. `chooser: false` laisse cette colonne hors de la liste — une colonne technique,
+une colonne que votre application affiche à sa façon. Le menu de colonne peut toujours la masquer, sauf si
+[`hideable`](../hideable/) vaut `false`.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { columnsChooser } from '@dzgrid/dom/columns-panel';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_COLUMNS.text } };
+
+createGrid<Tool>(document.getElementById('outils')!, {
+  rows: [{ id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Outil' },
+    { id: 'shelf', header: 'Étagère', type: 'number', chooser: false },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [columnsChooser()],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Outils' }}
+  features={['columns', 'chooser', 'columnMenu']}
+  columns={[
+    { id: 'name', header: 'Outil', width: 160 },
+    { id: 'shelf', header: 'Étagère', type: 'number', width: 110, chooser: false },
+    { id: 'notes', header: 'Notes', flex: 1 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' },
+    { id: 't2', name: 'Scie égoïne', shelf: 3, notes: 'Denture fine, au sec' },
+    { id: 't3', name: 'Niveau à bulle', shelf: 1, notes: '60 cm' },
+  ]}
+  caption="Ouvrez un menu (⋮), puis « Choisir les colonnes… » : Étagère n’est pas dans la liste."
+/>
+
+## Voir aussi
+
+- [`hideable`](../hideable/), [`hidden`](../hidden/).
+- [Volets latéraux](../../guides/dock-panels/).

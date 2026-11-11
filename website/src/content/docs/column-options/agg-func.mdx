@@ -1,0 +1,70 @@
+---
+title: "aggFunc"
+description: "The column’s total on group rows, group footers and the grand total."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+With row grouping: what a group shows in this column.
+
+<OptionFacts column="aggFunc" />
+
+## What it does
+
+A built-in name — `'sum'`, `'avg'`, `'min'`, `'max'`, `'count'`, `'first'`, `'last'` — or your function
+of the group's values. `count` counts the group's rows; the others skip empty values. A function is told the values in
+the group's order (empty ones as null) and `{ column, level }` (`level` null for the grand total); what it returns is
+shown. It must be pure.
+
+It needs the `grouping()` feature. The grouping's own `aggFuncs` option wins over it. For the totals row of a flat
+grid, see [`total`](../total/).
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { grouping } from '@dzgrid/dom/grouping';
+import { EN_GROUP } from '@dzgrid/dom/locales/en-group';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Sale = { id: string; market: string; fruit: string; crates: number };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_GROUP.text } };
+
+createGrid<Sale>(document.getElementById('sales')!, {
+  rows: [{ id: 's1', market: 'Harbour', fruit: 'Plums', crates: 12 }],
+  columns: [
+    { id: 'market', header: 'Market' },
+    { id: 'fruit', header: 'Fruit', aggFunc: 'count' },
+    { id: 'crates', header: 'Crates', type: 'number', aggFunc: 'sum' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [grouping({ by: ['market'] })],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Sales' }}
+  features={[['grouping', { by: ['market'], expanded: 'all' }]]}
+  columns={[
+    { id: 'market', header: 'Market', width: 160 },
+    { id: 'fruit', header: 'Fruit', width: 140, aggFunc: 'count' },
+    { id: 'crates', header: 'Crates', type: 'number', width: 120, aggFunc: 'sum' },
+  ]}
+  rows={[
+    { id: 's1', market: 'Harbour', fruit: 'Plums', crates: 12 },
+    { id: 's2', market: 'Harbour', fruit: 'Pears', crates: 7 },
+    { id: 's3', market: 'Old town', fruit: 'Plums', crates: 9 },
+    { id: 's4', market: 'Old town', fruit: 'Quinces', crates: 4 },
+  ]}
+/>
+
+## See also
+
+- [`total`](../total/), [`groupable`](../groupable/).
+- [Grouping](../../guides/grouping/).

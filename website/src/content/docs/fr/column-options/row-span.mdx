@@ -1,0 +1,47 @@
+---
+title: "rowSpan"
+description: "Le nombre de lignes que couvre une cellule, décidé d’après les données."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Une cellule plus haute que sa ligne, la hauteur dite par votre fonction.
+
+<OptionFacts column="rowSpan" />
+
+## Ce qu’il fait
+
+`rowSpan(ctx)` renvoie le nombre de lignes que couvre la cellule, 1 en son absence. Elle reçoit la ligne, la
+`value` brute, la `key` de la ligne, son `index` parmi les lignes affichées, la `column`, et les lignes d’avant et
+d’après (`prev`, `next` ; null aux bouts). L’objet est réutilisé d’un appel à l’autre : lisez-le pendant l’appel
+seulement.
+
+Il faut la fonction `spans()`. Une étendue posée sur une autre revient à une cellule (`span-overlap`) ; une étendue
+coupée par un bord épinglé ou la fin des lignes est signalée une fois (`span-clipped`) ; un nombre non entier, ou une
+fonction qui lève une erreur, est `invalid-span`.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { spans } from '@dzgrid/dom/spans';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Visit = { id: string; region: string; regionRows: number; town: string };
+
+createGrid<Visit>(document.getElementById('visites')!, {
+  rows: [{ id: 'v1', region: 'Nord', regionRows: 2, town: 'Aubergny' }, { id: 'v2', region: 'Nord', regionRows: 0, town: 'Brillac' }],
+  columns: [
+    { id: 'region', header: 'Région', rowSpan: (c) => Math.max(1, c.row.regionRows) },
+    { id: 'town', header: 'Ville' },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+  features: [spans()],
+});
+```
+
+## Voir aussi
+
+- [`colSpan`](../col-span/), [`merge`](../merge/).
+- [Colonnes](../../guides/columns/#groupes-de-colonnes).

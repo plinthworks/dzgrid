@@ -1,0 +1,67 @@
+---
+title: "hideable"
+description: "`false` : l’utilisateur ne peut pas masquer la colonne."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Pour une colonne qui doit rester à l’écran.
+
+<OptionFacts column="hideable" />
+
+## Ce qu’il fait
+
+`hideable: false` désactive le « Masquer la colonne » du menu de colonne pour elle, et le sélecteur de
+colonnes ne peut pas la décocher. Un état enregistré qui la masque est signalé, et la colonne reste affichée. Votre
+code peut toujours la masquer avec [`hidden`](../hidden/).
+
+La grille ne laisse jamais l’utilisateur masquer la dernière colonne affichée, quoi que dise cette option.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { FR_COLUMN_MENU } from '@dzgrid/dom/locales/fr-column-menu';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_COLUMN_MENU.text } };
+
+createGrid<Tool>(document.getElementById('outils')!, {
+  rows: [{ id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Outil', hideable: false },
+    { id: 'notes', header: 'Notes' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [columnMenu()],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Outils' }}
+  features={['columns', 'chooser', 'columnMenu']}
+  columns={[
+    { id: 'name', header: 'Outil', width: 160, hideable: false },
+    { id: 'shelf', header: 'Étagère', type: 'number', width: 110 },
+    { id: 'notes', header: 'Notes', flex: 1 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' },
+    { id: 't2', name: 'Scie égoïne', shelf: 3, notes: 'Denture fine, au sec' },
+    { id: 't3', name: 'Niveau à bulle', shelf: 1, notes: '60 cm' },
+  ]}
+  caption="Ouvrez le menu d’Outil (⋮) : « Masquer la colonne » est désactivé. Celui de Notes ne l’est pas."
+/>
+
+## Voir aussi
+
+- [`hidden`](../hidden/), [`chooser`](../chooser/), [`menu`](../menu/).
+- [Colonnes](../../guides/columns/#déplacer-redimensionner-masquer).

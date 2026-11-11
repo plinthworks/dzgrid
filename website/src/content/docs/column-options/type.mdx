@@ -1,0 +1,74 @@
+---
+title: "type"
+description: "What the cells hold: text, number, day, instant, boolean, enum or custom."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+The kind of value in the column: how it is read, shown, sorted, filtered and edited.
+
+<OptionFacts column="type" />
+
+## What it does
+
+- `'text'`: any text.
+- `'number'`: a number, shown in the grid's locale ([`numberFormat`](../number-format/)), at the end of the cell.
+- `'day'`: a calendar day, the string `'YYYY-MM-DD'`.
+- `'instant'`: a moment, epoch milliseconds or ISO text **with** an offset (`Z`, `+02:00`), shown in the grid's
+  `timeZone` ([`instantFormat`](../instant-format/), [`assumeZone`](../assume-zone/)). A JavaScript `Date` is not
+  read: give `date.getTime()`.
+- `'boolean'`: yes or no.
+- `'enum'`: one value of a closed list, which [`enumOptions`](../enum-options/) gives.
+- `'custom'`: your own [`codec`](../codec/), which it needs.
+
+A value the type cannot read leaves the cell empty, never guessed; sorting the column tells it with an
+`invalid-cell-value` warning (ten per column at most). An unknown type, an
+`enum` without `enumOptions` or a `custom` without `codec` is refused with an `invalid-column` error, and the column
+is left out. The type also picks the column's filter.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Parcel = { id: string; code: string; weight: number; sentOn: string; arrivedAt: number | null; insured: boolean };
+
+createGrid<Parcel>(document.getElementById('parcels')!, {
+  rows: [{ id: 'p1', code: 'px-104', weight: 2.4, sentOn: '2026-03-02', arrivedAt: 1772442000000, insured: true }],
+  columns: [
+    { id: 'code', header: 'Code' },
+    { id: 'weight', header: 'Weight', type: 'number' },
+    { id: 'sentOn', header: 'Sent on', type: 'day' },
+    { id: 'arrivedAt', header: 'Arrived', type: 'instant' },
+    { id: 'insured', header: 'Insured', type: 'boolean' },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={240}
+  settings={{ label: 'Parcels', timeZone: 'Europe/London' }}
+  columns={[
+    { id: 'code', header: 'Code', width: 100 },
+    { id: 'weight', header: 'Weight', type: 'number', width: 100 },
+    { id: 'sentOn', header: 'Sent on', type: 'day', width: 130 },
+    { id: 'arrivedAt', header: 'Arrived', type: 'instant', width: 170 },
+    { id: 'insured', header: 'Insured', type: 'boolean', width: 100 },
+  ]}
+  rows={[
+    { id: 'p1', code: 'px-104', weight: 2.4, sentOn: '2026-03-02', arrivedAt: 1772442000000, insured: true },
+    { id: 'p2', code: 'px-105', weight: 21.75, sentOn: '2026-02-26', arrivedAt: null, insured: false },
+    { id: 'p3', code: 'px-106', weight: 0.6, sentOn: '2026-02-27', arrivedAt: 1772537400000, insured: true },
+  ]}
+/>
+
+## See also
+
+- [`codec`](../codec/), [`filter`](../filter/).
+- [Columns](../../guides/columns/#value-and-type).

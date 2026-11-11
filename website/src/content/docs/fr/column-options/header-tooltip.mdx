@@ -1,0 +1,57 @@
+---
+title: "headerTooltip"
+description: "Le texte affiché sur le titre de la colonne, déjà traduit."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Une infobulle sur le titre, pour en dire plus que le titre ne peut.
+
+<OptionFacts column="headerTooltip" />
+
+## Ce qu’il fait
+
+Elle s’affiche quand le pointeur reste sur le titre (après le délai des
+[`tooltips`](../../settings/tooltips/) de la grille) et dès que le focus du clavier l’atteint. Donnez-la déjà
+traduite. Pour la dessiner vous-même, nommez une partie dans [`ui`](../ui/)`.tooltip`.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Bee = { id: string; hive: string; honey: number };
+
+createGrid<Bee>(document.getElementById('ruches')!, {
+  rows: [{ id: 'h1', hive: 'Colline aux trèfles', honey: 12.5 }],
+  columns: [
+    { id: 'hive', header: 'Ruche' },
+    { id: 'honey', header: 'Miel', type: 'number', headerTooltip: 'Kilos cette saison' },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={200}
+  settings={{ label: 'Ruches' }}
+  columns={[
+    { id: 'hive', header: 'Ruche', flex: 1 },
+    { id: 'honey', header: 'Miel', type: 'number', width: 140, headerTooltip: 'Kilos cette saison' },
+  ]}
+  rows={[
+    { id: 'h1', hive: 'Colline aux trèfles', honey: 12.5 },
+    { id: 'h2', hive: 'Allée des tilleuls', honey: 8 },
+  ]}
+  caption="Laissez le pointeur sur le titre Miel."
+/>
+
+## Voir aussi
+
+- [`tooltip`](../tooltip/), [`header`](../header/).
+- [`tooltips`](../../settings/tooltips/).

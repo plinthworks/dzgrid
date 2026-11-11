@@ -1,0 +1,66 @@
+---
+title: "resizable"
+description: "Si l’utilisateur peut changer la largeur de la colonne."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+`false` garde la colonne à la largeur que vous lui donnez.
+
+<OptionFacts column="resizable" />
+
+## Ce qu’il fait
+
+Avec la fonction `columns()`, l’utilisateur change la largeur d’une colonne en tirant le bord de son
+titre ou au clavier, et « Ajuster cette colonne » l’adapte à son contenu ; le menu de colonne propose aussi « Élargir »
+et « Rétrécir ». `resizable: false` retire le bord, et aucun de ces gestes ne change cette colonne. Votre code fixe
+toujours sa largeur (`update({ columns })`, un état enregistré).
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { columns } from '@dzgrid/dom/columns';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tool = { id: string; name: string; shelf: number; notes: string };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_COLUMNS.text } };
+
+createGrid<Tool>(document.getElementById('outils')!, {
+  rows: [{ id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' }],
+  columns: [
+    { id: 'name', header: 'Outil' },
+    { id: 'shelf', header: 'Étagère', type: 'number', width: 90, resizable: false },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [columns()],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Outils' }}
+  features={['columns']}
+  columns={[
+    { id: 'name', header: 'Outil', width: 160 },
+    { id: 'shelf', header: 'Étagère', type: 'number', width: 90, resizable: false },
+    { id: 'notes', header: 'Notes', flex: 1 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Marteau', shelf: 2, notes: 'Arrache-clou, 450 g' },
+    { id: 't2', name: 'Scie égoïne', shelf: 3, notes: 'Denture fine, au sec' },
+    { id: 't3', name: 'Niveau à bulle', shelf: 1, notes: '60 cm' },
+  ]}
+  caption="Tirez le bord du titre Outil : il change de largeur. Celui d’Étagère n’a pas de bord à tirer."
+/>
+
+## Voir aussi
+
+- [`width`](../width/), [`movable`](../movable/).
+- [Colonnes](../../guides/columns/#déplacer-redimensionner-masquer).

@@ -1,0 +1,72 @@
+---
+title: "total"
+description: "The column’s total in the totals row of a flat grid."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+With the totals row: what it shows under this column.
+
+<OptionFacts column="total" />
+
+## What it does
+
+The same built-ins as [`aggFunc`](../agg-func/) — `'sum'`, `'avg'`, `'min'`, `'max'`, `'count'`,
+`'first'`, `'last'` — or your function of the column's values (told `level` null). The `totalsRow()` feature from
+`@dzgrid/dom/totals-row`, with `pinnedRows()`, shows the row at the bottom, always in view, over the rows that pass
+the filters; edits are counted at once. The CSV and Excel files and print end with it.
+
+A total that does not fit its column (a sum of text) is told once as a problem. With server pages the grid holds one
+page only: give the totals your server sends with the feature's `api.set(…)`.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { pinnedRows } from '@dzgrid/dom/pinned-rows';
+import { totalsRow } from '@dzgrid/dom/totals-row';
+import { EN_PINNED } from '@dzgrid/dom/locales/en-pinned';
+import { EN_TOTALS } from '@dzgrid/dom/locales/en-totals';
+import '@dzgrid/theme/pinned-rows.css';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Sale = { id: string; market: string; fruit: string; crates: number };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_PINNED.text, ...EN_TOTALS.text } };
+
+createGrid<Sale>(document.getElementById('sales')!, {
+  rows: [{ id: 's1', market: 'Harbour', fruit: 'Plums', crates: 12 }],
+  columns: [
+    { id: 'fruit', header: 'Fruit' },
+    { id: 'crates', header: 'Crates', type: 'number', total: 'sum' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [pinnedRows<Sale>(), totalsRow()],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Sales' }}
+  features={['totals']}
+  columns={[
+    { id: 'market', header: 'Market', width: 160 },
+    { id: 'fruit', header: 'Fruit', width: 140, total: 'count' },
+    { id: 'crates', header: 'Crates', type: 'number', width: 120, total: 'sum' },
+  ]}
+  rows={[
+    { id: 's1', market: 'Harbour', fruit: 'Plums', crates: 12 },
+    { id: 's2', market: 'Harbour', fruit: 'Pears', crates: 7 },
+    { id: 's3', market: 'Old town', fruit: 'Plums', crates: 9 },
+    { id: 's4', market: 'Old town', fruit: 'Quinces', crates: 4 },
+  ]}
+/>
+
+## See also
+
+- [`aggFunc`](../agg-func/).
+- [Columns](../../guides/columns/#totals-row).

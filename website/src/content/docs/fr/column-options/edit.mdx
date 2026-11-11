@@ -1,0 +1,77 @@
+---
+title: "edit"
+description: "Les contrôles simples d’une valeur modifiée, et le champ qui la modifie."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Des contrôles tout prêts pour une colonne modifiable, et son éditeur.
+
+<OptionFacts column="edit" />
+
+## Ce qu’il fait
+
+Contrôlés dans cet ordre, après que le codec a lu la valeur :
+
+- `required` : une valeur vide est refusée.
+- `min`, `max` : comparés par le codec de la colonne — un nombre, un `Day`, un instant.
+- `pattern` : une expression régulière (ou sa source) que tout le texte doit suivre ; les drapeaux `g`, `y` et `m`
+  sont retirés.
+- `options` : les valeurs permises, une liste ou une fonction `(row, context)` ; la valeur actuelle de la cellule
+  passe toujours. Une colonne à liste se choisit dans l’éditeur de liste (`editors({ list: listEditor })`, de
+  `@dzgrid/dom/editors-list`).
+
+`maxLength` limite ce que le champ accepte ; `editor` nomme votre propre partie d’édition. Une règle fautive est
+signalée par un avertissement `invalid-column` à `columns.<id>.edit.<key>`, et cette règle est ignorée.
+[`validate`](../validate/) passe après eux.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors';
+import { FR_EDIT } from '@dzgrid/dom/locales/fr-edit';
+import { FR_EDITORS } from '@dzgrid/dom/locales/fr-editors';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Gnome = { id: string; name: string; hat: string; height: number };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_EDIT.text, ...FR_EDITORS.text } };
+
+createGrid<Gnome>(document.getElementById('nains')!, {
+  rows: [{ id: 'g1', name: 'Barnaby', hat: 'red', height: 31 }],
+  columns: [
+    { id: 'name', header: 'Nom', editable: true, edit: { required: true, maxLength: 40 } },
+    { id: 'height', header: 'Taille (cm)', type: 'number', editable: true, edit: { min: 5, max: 120 } },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [edit<Gnome>(), editors()],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={240}
+  settings={{ label: 'Nains de jardin' }}
+  features={['edit']}
+  columns={[
+    { id: 'name', header: 'Nom', flex: 1, editable: true, edit: { required: true, maxLength: 40 } },
+    { id: 'hat', header: 'Bonnet', type: 'enum', width: 130, enumOptions: [{ value: 'red', label: 'Rouge' }, { value: 'green', label: 'Vert' }] },
+    { id: 'height', header: 'Taille (cm)', type: 'number', width: 130, editable: true, edit: { min: 5, max: 120 } },
+  ]}
+  rows={[
+    { id: 'g1', name: 'Barnaby', hat: 'red', height: 31 },
+    { id: 'g2', name: 'Pip', hat: 'green', height: 18 },
+    { id: 'g3', name: 'Vieux Chardon', hat: 'red', height: 46 },
+  ]}
+  caption="Videz un Nom, ou donnez une Taille de plus de 120 : la valeur est refusée."
+/>
+
+## Voir aussi
+
+- [`editable`](../editable/), [`validate`](../validate/), [`enumOptions`](../enum-options/).
+- [Édition](../../guides/editing/#contrôles).
