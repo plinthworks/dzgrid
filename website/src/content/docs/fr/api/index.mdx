@@ -1,0 +1,19 @@
+---
+title: "Référence de l’API"
+description: "Chaque nom public des cinq paquets, fait depuis la surface de types acceptée."
+sidebar:
+  order: 0
+---
+
+Chaque nom public que DzGrid publie, avec sa déclaration, une page par paquet. Les pages sont faites depuis la surface
+de types acceptée (`api/*.api.txt`), qu’un test empêche de rétrécir d’une version à l’autre : un nom présent ici reste.
+Les déclarations sont du code : elles restent en anglais.
+
+- [`@dzgrid/core`](./core/) : le modèle — lignes, colonnes, tri, filtres, regroupement — sans DOM.
+- [`@dzgrid/dom`](./dom/) : la grille dans le navigateur, et chaque fonction dans son entrée.
+- [`@dzgrid/theme`](./theme/) : les feuilles de style.
+- [`@dzgrid/angular`](./angular/) : le composant Angular et ses aides.
+- [`@dzgrid/element`](./element/) : le composant Web `<dz-grid>`.
+
+Ce que fait chaque nom est dit dans les [guides](../guides/columns/), les [réglages](../settings/), les
+[options de colonne](../column-options/) et les [fonctions](../features/).

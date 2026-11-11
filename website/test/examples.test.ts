@@ -42,7 +42,10 @@ export function imported(code: string): [string, string][] {
   );
 }
 
-const files = pages().map((p) => ({ page: relative(DOCS, p), text: readFileSync(p, 'utf8') }));
+// The API reference (api/, made by scripts/gen-api.mjs) holds declarations, not programs: api.test.ts checks it.
+const files = pages()
+  .map((p) => ({ page: relative(DOCS, p), text: readFileSync(p, 'utf8') }))
+  .filter((f) => !/^(fr\/)?api\//.test(f.page));
 const all = files.flatMap((f) => blocks(f.page, f.text));
 const surface: Record<string, Record<string, string>> = {};
 for (const f of readdirSync(join(ROOT, 'api'))) Object.assign(surface, parse(readFileSync(join(ROOT, 'api', f), 'utf8')).surface);

@@ -43,6 +43,7 @@ const WRITTEN = [
   'column-options/row-span', 'column-options/sortable', 'column-options/tooltip', 'column-options/total',
   'column-options/type', 'column-options/ui', 'column-options/validate', 'column-options/value',
   'column-options/width', 'column-options/wrap',
+  'api/index', 'api/core', 'api/dom', 'api/theme', 'api/angular', 'api/element',
   'features/index', ...FEATURES.map(([, name]: [string, string]) => `features/${name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`),
 ];
 /** The sidebar's sections: a page lives in one of them (or is the home page). */
@@ -203,7 +204,7 @@ describe('the site’s pages', () => {
   it('a written page’s French is written in French', () => {
     // Not the English left in place: no English heading survives on a French page (code names aside).
     for (const slug of WRITTEN) {
-      const en = new Set(headings(read('en', slug)).filter((h) => !/^`?[\w-]+`?$/.test(h) && !['TypeScript', 'Angular', 'Guides'].includes(h)));
+      const en = new Set(headings(read('en', slug)).filter((h) => !/^`?[@\w./-]+`?$/.test(h) && !['TypeScript', 'Angular', 'Guides'].includes(h)));
       expect(headings(read('fr', slug)).filter((h) => en.has(h)), slug).toEqual([]);
     }
   });

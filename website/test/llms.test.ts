@@ -21,7 +21,10 @@ const walk = (dir: string): string[] =>
     const p = join(dir, f);
     return statSync(p).isDirectory() ? walk(p) : /\.mdx?$/.test(f) ? [p] : [];
   });
-const files = walk(DOCS).map((p) => ({ page: relative(DOCS, p), text: readFileSync(p, 'utf8') }));
+// The API reference (api/) is declarations made by scripts/gen-api.mjs, not prose: api.test.ts checks it.
+const files = walk(DOCS)
+  .map((p) => ({ page: relative(DOCS, p), text: readFileSync(p, 'utf8') }))
+  .filter((f) => !/^(fr\/)?api\//.test(f.page));
 const prose = (t: string) => t.replace(/^```[\s\S]*?^```$/gm, '');
 
 describe('llms.txt and the site’s text', () => {

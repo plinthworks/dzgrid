@@ -1,0 +1,102 @@
+---
+title: "@dzgrid/element"
+description: "DzGrid as a Web Component: <dz-grid> for any page or framework, in the page (the theme applies); attributes, properties and dzg-* DOM events."
+tableOfContents:
+  maxHeadingLevel: 2
+---
+
+Every public name of `@dzgrid/element`, entry by entry, with its declaration as the published types give it. Made from [`api/dzgrid-element.api.txt`](https://github.com/plinthworks/dzgrid/blob/main/api/dzgrid-element.api.txt), the surface a test keeps from shrinking between versions; the guides and the option pages say what each name does.
+
+## `@dzgrid/element`
+
+### DzGridElement
+
+```ts
+export declare class DzGridElement<T = unknown> extends Base {
+    #private;
+    static readonly observedAttributes: string[];
+    readonly ready: Promise<void>;
+    constructor();
+    get grid(): GridInstance<T, RowModel<T>> | null;
+    get problems(): readonly Problem[];
+    get rows(): GridSettings<T>['rows'];
+    set rows(v: GridSettings<T>['rows']);
+    get source(): GridSettings<T>['source'];
+    set source(v: GridSettings<T>['source']);
+    get columns(): GridSettings<T>['columns'] | undefined;
+    set columns(v: GridSettings<T>['columns'] | undefined);
+    get getRowId(): GridSettings<T>['getRowId'] | undefined;
+    set getRowId(v: GridSettings<T>['getRowId'] | undefined);
+    get messages(): GridSettings<T>['messages'] | undefined;
+    set messages(v: GridSettings<T>['messages'] | undefined);
+    get features(): GridSettings<T>['features'];
+    set features(v: GridSettings<T>['features']);
+    get parts(): GridSettings<T>['parts'];
+    set parts(v: GridSettings<T>['parts']);
+    get theme(): GridSettings<T>['theme'];
+    set theme(v: GridSettings<T>['theme']);
+    get icons(): GridSettings<T>['icons'];
+    set icons(v: GridSettings<T>['icons']);
+    get settings(): Partial<GridSettings<T>>;
+    set settings(v: Partial<GridSettings<T>>);
+    get env(): GridEnv;
+    set env(v: GridEnv);
+    update(patch: Partial<GridSettings<T>>): void;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    attributeChangedCallback(name: string, was: string | null, now: string | null): void;
+}
+```
+
+### defineDzGrid
+
+```ts
+export declare function defineDzGrid(name?: string): void;
+```
+
+## `@dzgrid/element/define`
+
+### DzGridElement
+
+```ts
+export declare class DzGridElement<T = unknown> extends Base {
+    #private;
+    static readonly observedAttributes: string[];
+    readonly ready: Promise<void>;
+    constructor();
+    get grid(): GridInstance<T, RowModel<T>> | null;
+    get problems(): readonly Problem[];
+    get rows(): GridSettings<T>['rows'];
+    set rows(v: GridSettings<T>['rows']);
+    get source(): GridSettings<T>['source'];
+    set source(v: GridSettings<T>['source']);
+    get columns(): GridSettings<T>['columns'] | undefined;
+    set columns(v: GridSettings<T>['columns'] | undefined);
+    get getRowId(): GridSettings<T>['getRowId'] | undefined;
+    set getRowId(v: GridSettings<T>['getRowId'] | undefined);
+    get messages(): GridSettings<T>['messages'] | undefined;
+    set messages(v: GridSettings<T>['messages'] | undefined);
+    get features(): GridSettings<T>['features'];
+    set features(v: GridSettings<T>['features']);
+    get parts(): GridSettings<T>['parts'];
+    set parts(v: GridSettings<T>['parts']);
+    get theme(): GridSettings<T>['theme'];
+    set theme(v: GridSettings<T>['theme']);
+    get icons(): GridSettings<T>['icons'];
+    set icons(v: GridSettings<T>['icons']);
+    get settings(): Partial<GridSettings<T>>;
+    set settings(v: Partial<GridSettings<T>>);
+    get env(): GridEnv;
+    set env(v: GridEnv);
+    update(patch: Partial<GridSettings<T>>): void;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    attributeChangedCallback(name: string, was: string | null, now: string | null): void;
+}
+```
+
+### defineDzGrid
+
+```ts
+export declare function defineDzGrid(name?: string): void;
+```

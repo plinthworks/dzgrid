@@ -1,0 +1,6369 @@
+---
+title: "@dzgrid/dom"
+description: "DzGrid in the browser: virtualised rows and columns, pinned columns, right to left, keyboard and screen readers. No framework, no dependency."
+tableOfContents:
+  maxHeadingLevel: 2
+---
+
+Every public name of `@dzgrid/dom`, entry by entry, with its declaration as the published types give it. Made from [`api/dzgrid-dom.api.txt`](https://github.com/plinthworks/dzgrid/blob/main/api/dzgrid-dom.api.txt), the surface a test keeps from shrinking between versions; the guides and the option pages say what each name does.
+
+## `@dzgrid/dom`
+
+### ExportMessageKey
+
+```ts
+export type ExportMessageKey = 'export.fileName' | 'announce.exportStarted' | 'announce.exportDone' | 'announce.exportDoneHidden' | 'announce.exportDoneOpen' | 'announce.exportFailed' | 'announce.exportRefused' | 'announce.exportCancelled';
+```
+
+### ExportMessages
+
+```ts
+export interface ExportMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in ExportMessageKey]: MessageValue;
+    };
+}
+```
+
+### FeatureHandle
+
+```ts
+export interface FeatureHandle {
+    readonly edit?: EditSeam;
+    readonly headerRows?: readonly HeaderRowSpec[];
+    readonly bands?: readonly HeaderBandSpec[];
+    readonly spans?: SpanFeature;
+    readonly slots?: SlotDrivers;
+    decorateHeader?(col: ResolvedColumn<unknown>, cell: HTMLElement, label: string | null): string | void;
+    shortcuts?(col: ResolvedColumn<unknown>): string | void;
+    readonly filter?: {
+        edits(col: ResolvedColumn<unknown>, who: object): HeaderFilter | null;
+        flush(column: string): void;
+    };
+    keys?(e: KeyboardEvent, at: FocusPos | null, owner: KeyOwner): boolean;
+    beforeRows?(): void;
+    afterRows?(f: Frame<unknown>): void;
+    destroy(): void;
+}
+```
+
+### FilterMessageKey
+
+```ts
+export type FilterMessageKey = 'filter.inputLabel' | 'filter.summaryActive' | 'filter.clear' | 'filter.invalid' | 'announce.filtered' | 'announce.filteredOpen' | 'filter.popupLabel' | 'header.withFilter' | 'filter.op' | 'filter.value' | 'filter.valueTo' | 'filter.apply' | `filter.op.${FilterOp}` | 'filter.all' | 'filter.yes' | 'filter.no' | 'filter.date' | 'filter.dateTime' | 'filter.period' | 'filter.zone' | 'filter.loadingDates' | 'filter.loadFailed' | 'filter.set.search' | 'filter.set.all' | 'filter.set.allShown' | 'filter.set.blanks' | 'filter.set.option' | 'filter.set.count' | 'filter.set.truncated' | 'filter.set.failed' | 'filter.floatingToggle' | 'announce.floatingHidden' | 'announce.floatingShown';
+```
+
+### FilterMessages
+
+```ts
+export interface FilterMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in FilterMessageKey]: MessageValue;
+    };
+}
+```
+
+### FilterRowsMessageKey
+
+```ts
+export type FilterRowsMessageKey = 'filter.conditionAdd' | 'filter.conditionRemove' | 'filter.joinLabel' | 'filter.joinAnd' | 'filter.joinOr' | 'filter.matchCase' | 'filter.conditionAdded' | 'filter.conditionRemoved' | 'filter.summaryConditions';
+```
+
+### Geometry
+
+```ts
+export interface Geometry {
+    read(): ViewportBox;
+    writeScrollTop(px: number): void;
+    writeScrollInline(px: number): void;
+}
+```
+
+### GridApi
+
+```ts
+export interface GridApi {
+    focusCell(row: RowKey, column: string): void;
+    ensureVisible(row: RowKey, column?: string): void;
+    ensureColumnVisible?(column: string): void;
+    refresh(): void;
+    announce(text: string): void;
+}
+```
+
+### GridEnv
+
+```ts
+export interface GridEnv {
+    readonly geometry?: Geometry;
+    readonly sync?: boolean;
+    readonly maxPhysical?: number;
+    readonly isOnScrollbar?: (e: PointerEvent) => boolean;
+    readonly raf?: Pick<Window, 'requestAnimationFrame' | 'cancelAnimationFrame'>;
+}
+```
+
+### GridFeature
+
+```ts
+export interface GridFeature {
+    readonly id: string;
+    readonly parts?: Readonly<Record<string, SlotPart>>;
+    shape?(): RowShape<unknown>;
+    readonly shapeAfter?: readonly string[];
+    readonly held?: boolean;
+    setup(g: GridContext<unknown>): FeatureHandle;
+}
+```
+
+### GridIcon
+
+```ts
+export type GridIcon = string | SVGElement;
+```
+
+### GridIcons
+
+```ts
+export interface GridIcons {
+    readonly sortAsc?: GridIcon;
+    readonly sortDesc?: GridIcon;
+    readonly filter?: GridIcon;
+    readonly filterActive?: GridIcon;
+    readonly menu?: GridIcon;
+    readonly chevron?: GridIcon;
+    readonly submenu?: GridIcon;
+    readonly grip?: GridIcon;
+}
+```
+
+### GridInstance
+
+```ts
+export interface GridInstance<T, M extends RowModel<T> = ClientModel<T>> {
+    readonly kernel: GridKernel<T, M>;
+    readonly api: GridApi;
+    update(patch: Partial<GridSettings<T>>): void;
+    destroy(): void;
+}
+```
+
+### GridMessages
+
+```ts
+export interface GridMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in MessageKey]: MessageValue;
+    } & {
+        readonly [K in FilterMessageKey | PaginationMessageKey | ExportMessageKey | PartsMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | RangeLoadKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | ColumnsMessageKey | PinnedMessageKey | TotalsMessageKey | ImportMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | RowDragMessageKey | FindHeldKey | ClearFiltersKey | FiltersPanelMessageKey | DockMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey | PivotMessageKey | PivotBarMessageKey]?: MessageValue;
+    };
+}
+```
+
+### GridSettings
+
+```ts
+export interface GridSettings<T> {
+    readonly rows?: Iterable<T>;
+    readonly getRowId: (row: T) => RowIdInput;
+    readonly columns: readonly ColumnOrGroup<T>[];
+    readonly messages: GridMessages;
+    readonly locale?: string;
+    readonly timeZone?: string;
+    readonly numerals?: 'latn' | 'locale';
+    readonly direction?: 'auto' | 'ltr' | 'rtl';
+    readonly density?: 'compact' | 'comfortable' | 'spacious';
+    readonly headers?: 'shown' | 'hidden';
+    readonly multiSort?: boolean;
+    readonly sameRow?: (a: T, b: T) => boolean;
+    readonly rowHeight?: number;
+    readonly headerHeight?: number | HeaderHeights;
+    readonly selection?: {
+        readonly mode: 'none' | 'single' | 'multi';
+        readonly checkbox?: boolean;
+        readonly click?: boolean;
+        readonly keepOnFilter?: boolean;
+        readonly canSelect?: (row: DataNode<T>, selection: SelectionState, context: unknown) => boolean | string;
+    };
+    readonly context?: unknown;
+    readonly rowClass?: (c: RowClassContext<T>) => string | null | undefined;
+    readonly overlay?: 'loading' | 'error' | null;
+    readonly busy?: boolean;
+    readonly label?: string;
+    readonly tooltips?: {
+        readonly delayMs?: number;
+    };
+    readonly onEvent?: (e: GridEvent<T>) => void;
+    readonly injectStyles?: boolean;
+    readonly nonce?: string;
+    readonly overscan?: {
+        readonly rows?: number;
+        readonly cols?: number;
+    };
+    readonly searchWarmup?: 'idle' | 'off';
+    readonly parts?: Readonly<Record<string, SlotPart>>;
+    readonly source?: SourceBinding<T>;
+    readonly operations?: OperationsInput;
+    readonly pagination?: PageOptions;
+    readonly filterKinds?: readonly AnyFilterKind[];
+    readonly clock?: () => number;
+    readonly fullWidth?: (row: Readonly<T>) => boolean | {
+        readonly part?: string;
+    };
+    readonly motion?: boolean;
+    readonly theme?: GridTheme;
+    readonly icons?: GridIcons;
+    readonly features?: readonly GridFeature[];
+}
+```
+
+### GridTheme
+
+```ts
+export interface GridTheme {
+    readonly bg?: ThemeValue;
+    readonly bgRaised?: ThemeValue;
+    readonly fg?: ThemeValue;
+    readonly fgMuted?: ThemeValue;
+    readonly border?: ThemeValue;
+    readonly accent?: ThemeValue;
+    readonly accentFg?: ThemeValue;
+    readonly danger?: ThemeValue;
+    readonly warning?: ThemeValue;
+    readonly success?: ThemeValue;
+    readonly font?: ThemeValue;
+    readonly radius?: ThemeValue;
+    readonly line?: ThemeValue;
+    readonly pillRadius?: ThemeValue;
+    readonly cellPaddingInline?: ThemeValue;
+    readonly cellPaddingBlock?: ThemeValue;
+    readonly space?: ThemeValue;
+    readonly targetMin?: ThemeValue;
+    readonly cellFontSize?: ThemeValue;
+    readonly numFigures?: ThemeValue;
+    readonly cellAlignBlock?: ThemeValue;
+    readonly headerBg?: ThemeValue;
+    readonly headerFg?: ThemeValue;
+    readonly headerSize?: ThemeValue;
+    readonly headerWeight?: ThemeValue;
+    readonly headerFontFamily?: ThemeValue;
+    readonly headerTracking?: ThemeValue;
+    readonly headerCase?: ThemeValue;
+    readonly headerAlignBlock?: ThemeValue;
+    readonly headerHoverBg?: ThemeValue;
+    readonly frame?: ThemeValue;
+    readonly frameRadius?: ThemeValue;
+    readonly rowLine?: ThemeValue;
+    readonly columnLine?: ThemeValue;
+    readonly headerLine?: ThemeValue;
+    readonly headerSeparator?: ThemeValue;
+    readonly headerSeparatorSize?: ThemeValue;
+    readonly headerSeparatorHeight?: ThemeValue;
+    readonly pinnedColumnLine?: ThemeValue;
+    readonly pinnedShadow?: ThemeValue;
+    readonly detailLine?: ThemeValue;
+    readonly rowOddBg?: ThemeValue;
+    readonly rowHoverBg?: ThemeValue;
+    readonly rowSelectedBg?: ThemeValue;
+    readonly rowActiveBg?: ThemeValue;
+    readonly cellActiveBg?: ThemeValue;
+    readonly focusRing?: ThemeValue;
+    readonly focusWidth?: ThemeValue;
+    readonly selectBar?: ThemeValue;
+    readonly staleFg?: ThemeValue;
+    readonly contextFg?: ThemeValue;
+    readonly toggleFg?: ThemeValue;
+    readonly detailBg?: ThemeValue;
+    readonly groupRowBg?: ThemeValue;
+    readonly pinnedBg?: ThemeValue;
+    readonly pinnedLine?: ThemeValue;
+    readonly busyBar?: ThemeValue;
+    readonly flashColor?: ThemeValue;
+    readonly freshColor?: ThemeValue;
+    readonly freshBg?: ThemeValue;
+    readonly freshBar?: ThemeValue;
+    readonly savingColor?: ThemeValue;
+    readonly savedColor?: ThemeValue;
+    readonly refusedColor?: ThemeValue;
+    readonly refusedBg?: ThemeValue;
+    readonly editorBorder?: ThemeValue;
+    readonly rangeBg?: ThemeValue;
+    readonly rangeEdge?: ThemeValue;
+    readonly fillHandle?: ThemeValue;
+    readonly moveBar?: ThemeValue;
+    readonly resizeMode?: ThemeValue;
+    readonly searchMark?: ThemeValue;
+    readonly findColor?: ThemeValue;
+    readonly findBg?: ThemeValue;
+    readonly findCurrentBg?: ThemeValue;
+    readonly findMark?: ThemeValue;
+    readonly findMarkCurrent?: ThemeValue;
+    readonly boxSize?: ThemeValue;
+    readonly boxRadius?: ThemeValue;
+    readonly boxOnBg?: ThemeValue;
+    readonly boxEdge?: ThemeValue;
+    readonly iconSize?: ThemeValue;
+    readonly popupBg?: ThemeValue;
+    readonly popupShadow?: ThemeValue;
+    readonly tooltipBg?: ThemeValue;
+    readonly tooltipFg?: ThemeValue;
+    readonly inputBg?: ThemeValue;
+    readonly inputBorder?: ThemeValue;
+    readonly buttonBg?: ThemeValue;
+    readonly buttonBorder?: ThemeValue;
+    readonly menuItemHeight?: ThemeValue;
+    readonly menuDisabled?: ThemeValue;
+    readonly panelBg?: ThemeValue;
+    readonly chipBg?: ThemeValue;
+    readonly chipHoverBg?: ThemeValue;
+    readonly controlActiveBg?: ThemeValue;
+    readonly scrollbar?: ThemeValue;
+    readonly scrollbarThumb?: ThemeValue;
+    readonly scrollbarThumbActive?: ThemeValue;
+}
+```
+
+### HeaderHeights
+
+```ts
+export interface HeaderHeights {
+    readonly columns?: number;
+    readonly groups?: number;
+}
+```
+
+### HeaderRowSpec
+
+```ts
+export interface HeaderRowSpec {
+    readonly id: string;
+    mount(cell: HTMLElement, column: ResolvedColumn<unknown>): void;
+    update?(cell: HTMLElement, column: ResolvedColumn<unknown>): void;
+    readonly height?: number;
+}
+```
+
+### LAYOUT_CSS
+
+```ts
+export declare const LAYOUT_CSS = "@layer dzgrid.layout {\n:where(.dzg) { position: relative; display: flex; flex-direction: column; box-sizing: border-box; block-size: 100%; flex: 1 1 auto; min-block-size: 0; min-inline-size: 0; }\n:where([data-dzg-host]) { display: contents; }\n:where(.dzg-viewport) { position: relative; flex: 1 1 auto; min-block-size: 0; overflow: auto; overscroll-behavior: contain; overflow-anchor: none; outline: none; }\n:where(.dzg-header) { position: sticky; inset-block-start: 0; z-index: 3; display: flex; flex-direction: column; }\n:where(.dzg-body) { position: relative; overflow: clip; }\n:where(.dzg-layer) { position: absolute; inset-inline-start: 0; }\n:where(.dzg-row) { position: absolute; inset-inline-start: 0; display: flex; contain: content; }\n:where(.dzg-seg) { display: flex; position: relative; }\n:where(.dzg-seg-start) { position: sticky; inset-inline-start: 0; z-index: 2; }\n:where(.dzg-seg-end) { position: sticky; inset-inline-end: 0; z-index: 2; }\n:where(.dzg-hcell, .dzg-cell[data-dzg-editing]) { position: relative; }\n:where([data-dzg-editing] > [data-dzg-owner=editor]) { position: absolute; inset: 0; box-sizing: border-box; }\n:where(.dzg-seg-center > .dzg-cell, .dzg-seg-center > .dzg-hcell) { position: absolute; inset-block: 0; }\n:where(.dzg-resize) { position: absolute; inset-block: 0; inset-inline-end: 0; inline-size: var(--dzg-target-min, 24px); max-inline-size: 50%; cursor: col-resize; touch-action: none; z-index: 1; }\n:where(.dzg-resize-start) { inset-inline-end: auto; inset-inline-start: 0; }\n:where(.dzg-cell, .dzg-hcell) { box-sizing: border-box; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }\n:where(.dzg-cell[data-align=end], .dzg-hcell[data-align=end] > .dzg-hlabel) { text-align: end; }\n:where(.dzg-hcell[data-align] > .dzg-hlabel) { flex: auto; }\n:where(.dzg-cell[data-num]) { font-variant-numeric: var(--dzg-num-figures, tabular-nums); }\n:where(.dzg-row[data-odd]) { --dzg-odd: var(--dzg-row-odd-bg); }\n:where(.dzg[data-density=compact]) { --dzg-density: .75; }\n:where(.dzg[data-density=spacious]) { --dzg-density: 1.25; }\n:where(.dzg[data-under-start] .dzg-seg-start, .dzg[data-under-end] .dzg-seg-end)::after { box-shadow: var(--dzg-pinned-shadow); }\n:where(.dzg-seg-start:dir(rtl), .dzg-seg-end:dir(ltr))::after { scale: -1 1; }\n:where(.dzg-body .dzg-cell[data-wrap], .dzg-sticky .dzg-cell[data-wrap]) { white-space: normal; overflow-wrap: anywhere; }\n:where(.dzg-cell[data-align=center], .dzg-hcell[data-align=center] > .dzg-hlabel) { text-align: center; }\n:where(.dzg-hrow) { display: flex; }\n:where(.dzg-row[data-kind=detail] > .dzg-seg) { display: none; }\n:where(.dzg-dcell) { position: sticky; inset-inline-start: 0; box-sizing: border-box; overflow: hidden; }\n:where(.dzg-free) { unicode-bidi: plaintext; }\n:where(.dzg-num) { unicode-bidi: isolate; direction: ltr; }\n:where(.dzg-overlay) { position: absolute; inset-inline: 0; inset-block-end: var(--dzg-footer-size, 0px); display: grid; place-content: center; place-items: center; pointer-events: none; }\n:where(.dzg-overlay > *) { pointer-events: auto; }\n:where(.dzg-busy) { position: absolute; inset-inline: 0; block-size: 3px; overflow: hidden; z-index: 3; pointer-events: none; }\n:where(.dzg-busy)::before { content: ''; position: absolute; inset: 0; }\n:where(.dzg-tooltip) { position: fixed; margin: 0; z-index: 10; }\n:where(.dzg-overlay[hidden], .dzg-tooltip[hidden]) { display: none; }\n:where(.dzg-popup) { position: fixed; margin: 0; z-index: 10; }\n:where(.dzg-popup, .dzg-tooltip)[popover] { position: fixed; inset: auto; margin: 0; overflow: visible; border: 0; padding: 0; background: transparent; color: inherit; }\n:where(.dzg-sr) { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }\n:where(.dzg-live) { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }\n}\n";
+```
+
+### MESSAGE_KEYS
+
+```ts
+export declare const MESSAGE_KEYS: readonly [
+    "grid.label",
+    "grid.noRows",
+    "grid.noMatches",
+    "grid.loading",
+    "grid.error",
+    "grid.retry",
+    "sort.ascending",
+    "sort.descending",
+    "sort.none",
+    "sort.priority",
+    "announce.sorted",
+    "announce.sortCleared",
+    "announce.rows",
+    "announce.selected",
+    "announce.selectedAll",
+    "announce.selectionCleared",
+    "announce.selectionReduced",
+    "announce.rangeCancelled",
+    "announce.loading",
+    "announce.error",
+    "selection.row",
+    "selection.all",
+    "selection.column",
+    "resize.handle",
+    "pinned.start",
+    "pinned.end",
+    "header.sortHint",
+    "header.withSort"
+];
+```
+
+### MessageKey
+
+```ts
+export type MessageKey = (typeof MESSAGE_KEYS)[number];
+```
+
+### MessageValue
+
+```ts
+export type MessageValue = string | PluralForms;
+```
+
+### PaginationMessageKey
+
+```ts
+export type PaginationMessageKey = 'pager.label' | 'pager.first' | 'pager.prev' | 'pager.next' | 'pager.last' | 'pager.page' | 'pager.pageOpen' | 'pager.size' | 'count.range' | 'count.rangeOpen' | 'count.filtered' | 'selected.hidden' | 'selected.selectAll' | 'selected.clear' | 'announce.page' | 'announce.pageOpen';
+```
+
+### PaginationMessages
+
+```ts
+export interface PaginationMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in PaginationMessageKey]: MessageValue;
+    };
+}
+```
+
+### Part
+
+```ts
+export interface Part<C> {
+    mount(host: HTMLElement, c: C): PartHandle<C>;
+}
+```
+
+### PartBase
+
+```ts
+export interface PartBase {
+    readonly ctx: LocaleCtx;
+    readonly dir: 'ltr' | 'rtl';
+    msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | PartsMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | TotalsMessageKey | ImportMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | ClearFiltersKey | RowDragMessageKey | FiltersPanelMessageKey | DockMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey | PivotMessageKey | PivotBarMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>): string;
+    announce(text: string): void;
+    readonly doc: Document;
+    readonly context?: unknown;
+}
+```
+
+### PartHandle
+
+```ts
+export interface PartHandle<C> {
+    update?(c: C): void;
+    destroy?(): void;
+    focus?(): boolean;
+}
+```
+
+### PartsMessageKey
+
+```ts
+export type PartsMessageKey = 'cell.yes' | 'cell.no';
+```
+
+### PartsMessages
+
+```ts
+export interface PartsMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in PartsMessageKey]: MessageValue;
+    };
+}
+```
+
+### PluralForms
+
+```ts
+export interface PluralForms {
+    readonly zero?: string;
+    readonly one?: string;
+    readonly two?: string;
+    readonly few?: string;
+    readonly many?: string;
+    readonly other: string;
+}
+```
+
+### RowClassContext
+
+```ts
+export interface RowClassContext<T> {
+    readonly row: Readonly<T>;
+    readonly key: RowKey;
+    readonly context: unknown;
+    readonly pinned?: 'top' | 'bottom';
+}
+```
+
+### SlotContext
+
+```ts
+export interface SlotContext {
+    cell: PartBase & {
+        readonly value: unknown;
+        readonly text: string;
+        readonly row: Readonly<unknown>;
+        readonly key: RowKey;
+        readonly column: ResolvedColumn<unknown>;
+        readonly focused: boolean;
+        readonly search?: {
+            readonly quick: string;
+            readonly find: string;
+        };
+    };
+    header: PartBase & {
+        readonly column: ResolvedColumn<unknown>;
+        readonly label: string;
+        readonly sort: SortItem | null;
+        readonly sortIndex: number | null;
+        toggleSort(multi: boolean): void;
+        readonly filter: HeaderFilter | null;
+    };
+    overlay: PartBase & {
+        readonly phase: 'loading' | 'empty' | 'no-match' | 'error';
+        readonly failure: unknown;
+        retry(): void;
+        clearFilters(): void;
+    };
+    busy: PartBase & {
+        readonly active: boolean;
+        readonly reducedMotion: boolean;
+    };
+    floating: PartBase & {
+        readonly column: ResolvedColumn<unknown>;
+        readonly kind: string;
+        readonly state: Json | null;
+        readonly where: Placement;
+        readonly debounceMs: number;
+        readonly dropped: number;
+        set(next: Json | null, o?: {
+            readonly commit?: 'now' | 'debounced' | 'cancel';
+        }): void;
+        readonly canOpen: boolean;
+        openFilter(): void;
+    };
+    filter: PartBase & {
+        readonly column: ResolvedColumn<unknown>;
+        readonly kind: string;
+        readonly state: Json | null;
+        readonly where: Placement;
+        readonly apply?: 'button' | 'live' | undefined;
+        readonly debounceMs: number;
+        readonly dropped: number;
+        readonly ops: readonly string[];
+        readonly today: string;
+        set(next: Json | null, o?: {
+            readonly commit?: 'now' | 'debounced' | 'cancel';
+        }): void;
+        close(): void;
+        values(o?: ValuesOptions): ValuesHandle;
+    };
+    filterOption: PartBase & {
+        readonly value: string | null;
+        readonly label: string;
+        readonly count: number | null;
+        readonly countText: string;
+        readonly selected: boolean;
+        readonly blank: boolean;
+        readonly column: ResolvedColumn<unknown>;
+        toggle(): void;
+    };
+    menuItem: PartBase & {
+        readonly id: string;
+        readonly label: string;
+        readonly kind: 'item' | 'radio' | 'check';
+        readonly checked: boolean;
+        readonly disabled: boolean;
+        readonly column: ResolvedColumn<unknown>;
+        readonly row?: unknown;
+        readonly menu?: 'column' | 'cell';
+    };
+    tooltip: PartBase & {
+        readonly text: string;
+        readonly value: unknown;
+        readonly row: Readonly<unknown> | null;
+        readonly column: ResolvedColumn<unknown>;
+    };
+    footer: PartBase & {
+        readonly page: PageState;
+        readonly counts: RowCounts;
+        readonly status: ModelStatus;
+        readonly range: {
+            readonly from: number;
+            readonly to: number;
+        } | null;
+        readonly selection: {
+            readonly count: number | null;
+            readonly shown: number;
+            readonly all: boolean;
+            readonly canSelectAll: boolean;
+            readonly mode: 'none' | 'single' | 'multi';
+        };
+        go(index: number): void;
+        next(): void;
+        prev(): void;
+        setSize(size: number): void;
+        selectAll(): void;
+        clearSelection(): void;
+    };
+    status: PartBase & {
+        readonly stats: StatusStats | null;
+        readonly busy: boolean;
+        readonly counts: RowCounts;
+        readonly selection: {
+            readonly count: number | null;
+        };
+        figure(name: 'count' | 'sum' | 'avg' | 'min' | 'max'): string | null;
+        format(n: number, column?: string): string;
+    };
+    editor: PartBase & {
+        readonly value: unknown;
+        readonly text: string;
+        readonly row: Readonly<unknown>;
+        readonly key: RowKey;
+        readonly column: ResolvedColumn<unknown>;
+        readonly start: 'f2' | 'enter' | 'key' | 'dblclick' | 'tap' | 'tab';
+        readonly char?: string;
+        keep(input: CellInput): boolean;
+        cancel(): void;
+        refuse(code: string): void;
+        own(el: HTMLElement): () => void;
+    };
+    detail: PartBase & {
+        readonly row: Readonly<unknown>;
+        readonly key: RowKey;
+        readonly master: RowKey;
+        readonly height: number;
+        readonly depth?: number;
+        leave?(): void;
+    };
+}
+```
+
+### SlotPart
+
+```ts
+export interface SlotPart<S extends WiredSlot = WiredSlot> {
+    readonly slot: S;
+    readonly part: Part<SlotContext[S]>;
+}
+```
+
+### ThemeValue
+
+```ts
+export type ThemeValue = string | number;
+```
+
+### UPDATE_POLICY
+
+```ts
+export declare const UPDATE_POLICY: UpdatePolicy;
+```
+
+### UpdatePolicy
+
+```ts
+export type UpdatePolicy = {
+    readonly [K in keyof Required<GridSettings<unknown>>]: 'live' | 'fixed';
+};
+```
+
+### ViewportBox
+
+```ts
+export interface ViewportBox {
+    readonly block: number;
+    readonly inline: number;
+    readonly scrollTop: number;
+    readonly scrollInline: number;
+    readonly remPx?: number;
+    readonly room?: number;
+}
+```
+
+### checkMessages
+
+```ts
+export declare function checkMessages(m: GridMessages): void;
+```
+
+### createGrid
+
+```ts
+export declare function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTMLElement, initial: GridSettings<T>, env?: GridEnv): GridInstance<T, M>;
+```
+
+### definePart
+
+```ts
+export declare function definePart<S extends WiredSlot>(slot: S, part: S extends 'editor' ? {
+    mount(host: HTMLElement, c: SlotContext['editor']): EditorHandle;
+} : Part<SlotContext[S]>): SlotPart<S>;
+```
+
+### injectStyles
+
+```ts
+export declare function injectStyles(target: Document | ShadowRoot, nonce?: string): void;
+```
+
+### msg
+
+```ts
+export declare function msg(m: GridMessages, key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | RangeLoadKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | TotalsMessageKey | ImportMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | RowDragMessageKey | FindHeldKey | ClearFiltersKey | FiltersPanelMessageKey | DockMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey | PivotMessageKey | PivotBarMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>, ctx?: LocaleCtx): string;
+```
+
+## `@dzgrid/dom/popup`
+
+### PopupHost
+
+```ts
+export declare class PopupHost {
+    #private;
+    fallback: () => void;
+    constructor(doc: Document, root: HTMLElement, scope: Scope, dir: () => Dir);
+    sweep(): void;
+    open(anchor: HTMLElement, content: HTMLElement, o: PopupOptions): PopupRef;
+}
+```
+
+### PopupOptions
+
+```ts
+export interface PopupOptions {
+    readonly placement: 'block-end' | 'inline-end';
+    readonly modal?: boolean;
+    readonly label?: string;
+    readonly opener?: (anchor: HTMLElement) => HTMLElement | null;
+    readonly onClose?: () => void;
+    readonly from?: HTMLElement | Point;
+    readonly align?: 'end';
+    readonly back?: () => void;
+    readonly fit?: boolean;
+}
+```
+
+### PopupRef
+
+```ts
+export interface PopupRef {
+    readonly el: HTMLElement;
+    readonly open: boolean;
+    reposition(): void;
+    move(anchor: HTMLElement): void;
+    close(): void;
+}
+```
+
+### popupsFor
+
+```ts
+export declare function popupsFor(g: GridContext<unknown>): PopupHost;
+```
+
+## `@dzgrid/dom/spans`
+
+### spans
+
+```ts
+export declare function spans(o?: {
+    readonly acrossLevels?: boolean;
+}): GridFeature;
+```
+
+## `@dzgrid/dom/groups`
+
+### GroupsApi
+
+```ts
+export interface GroupsApi {
+    collapsible(id: string): boolean;
+    isOpen(id: string): boolean | null;
+    toggle(id: string, open?: boolean, o?: {
+        readonly say?: boolean;
+        readonly user?: boolean;
+    }): boolean;
+    reset(o?: {
+        readonly user?: boolean;
+    }): void;
+    get(): Readonly<Record<string, boolean>>;
+    set(open: Readonly<Record<string, boolean>>): void;
+}
+```
+
+### GroupsFeature
+
+```ts
+export interface GroupsFeature extends GridFeature {
+    api(grid: {
+        readonly kernel: object;
+    }): GroupsApi | null;
+}
+```
+
+### groups
+
+```ts
+export declare function groups(): GroupsFeature;
+```
+
+## `@dzgrid/dom/slots`
+
+### slots
+
+```ts
+export declare function slots(): GridFeature;
+```
+
+## `@dzgrid/dom/search`
+
+### QuickSearch
+
+```ts
+export interface QuickSearch extends GridFeature {
+    bind(input: HTMLInputElement, o?: QuickSearchOptions): () => void;
+}
+```
+
+### QuickSearchOptions
+
+```ts
+export interface QuickSearchOptions {
+    readonly debounceMs?: number;
+}
+```
+
+### QuickSearchSetup
+
+```ts
+export interface QuickSearchSetup {
+    readonly highlight?: boolean;
+}
+```
+
+### quickSearch
+
+```ts
+export declare function quickSearch(o?: QuickSearchSetup): QuickSearch;
+```
+
+## `@dzgrid/dom/pagination`
+
+### PAGINATION_KEYS
+
+```ts
+export declare const PAGINATION_KEYS: ("pager.label" | "pager.first" | "pager.prev" | "pager.next" | "pager.last" | "pager.page" | "pager.pageOpen" | "pager.size" | "count.range" | "count.rangeOpen" | "count.filtered" | "selected.hidden" | "selected.selectAll" | "selected.clear" | "announce.page" | "announce.pageOpen")[];
+```
+
+### PaginationOptions
+
+```ts
+export interface PaginationOptions {
+    readonly footer?: readonly string[];
+}
+```
+
+### pagination
+
+```ts
+export declare function pagination(o?: PaginationOptions): GridFeature;
+```
+
+## `@dzgrid/dom/export`
+
+### CsvExport
+
+```ts
+export interface CsvExport extends GridFeature {
+    run(scope?: CsvScope, o?: {
+        readonly columns?: readonly string[];
+        readonly format?: ExportFormat;
+    }): Promise<ExportOutcome>;
+    cancel(): void;
+    readonly busy: boolean;
+    prefetch(): void;
+    bind(button: HTMLElement, o?: {
+        readonly scope?: CsvScope;
+        readonly format?: ExportFormat;
+    }): () => void;
+    readonly xlsx?: {
+        run(scope?: CsvScope): Promise<ExportOutcome>;
+    };
+}
+```
+
+### CsvExportOptions
+
+```ts
+export interface CsvExportOptions extends Omit<CsvOptions, 'chunkRows'> {
+    readonly canExport: true | ((r: ExportRequest, context: unknown) => Refusal | Promise<Refusal>);
+    readonly exportAll?: (r: ExportRequest, c: ExportAllContext) => Promise<ExportAllResult>;
+    readonly fileName?: (c: {
+        readonly scope: CsvScope;
+        readonly ctx: LocaleCtx;
+        readonly now: number;
+    }) => string;
+    readonly onProgress?: (p: ExportProgress) => void;
+    readonly maxCells?: number;
+    readonly deliver?: (f: {
+        readonly blob?: Blob;
+        readonly url?: string;
+        readonly fileName: string;
+    }) => void | Promise<void>;
+    readonly loadRun?: () => Promise<typeof Chunk>;
+    readonly xlsx?: true | XlsxExportOptions;
+}
+```
+
+### EXPORT_KEYS
+
+```ts
+export declare const EXPORT_KEYS: ("export.fileName" | "announce.exportStarted" | "announce.exportDone" | "announce.exportDoneHidden" | "announce.exportDoneOpen" | "announce.exportFailed" | "announce.exportRefused" | "announce.exportCancelled")[];
+```
+
+### ExportAllContext
+
+```ts
+export interface ExportAllContext {
+    readonly signal: AbortSignal;
+    progress(done: number, total?: number): void;
+    readonly context: unknown;
+}
+```
+
+### ExportAllResult
+
+```ts
+export type ExportAllResult = {
+    readonly url: string;
+    readonly fileName?: string;
+} | {
+    readonly blob: Blob;
+    readonly fileName?: string;
+} | void;
+```
+
+### ExportFormat
+
+```ts
+export type ExportFormat = 'csv' | 'xlsx' | 'json';
+```
+
+### ExportOutcome
+
+```ts
+export type ExportOutcome = 'done' | 'refused' | 'failed' | 'cancelled' | 'busy';
+```
+
+### ExportProgress
+
+```ts
+export interface ExportProgress {
+    readonly phase: 'preparing' | 'building' | 'waiting' | 'saving';
+    readonly rows: number;
+    readonly total: number | null;
+}
+```
+
+### Refusal
+
+```ts
+export type Refusal = boolean | {
+    readonly ok: false;
+    readonly reason?: string;
+};
+```
+
+### XlsxExportOptions
+
+```ts
+export type XlsxExportOptions = Omit<XlsxOptions, 'text' | 'enums' | 'header' | 'columns' | 'levelHeader' | 'treeColumn' | 'chunkRows'>;
+```
+
+### csvExport
+
+```ts
+export declare function csvExport(o: CsvExportOptions): CsvExport;
+```
+
+## `@dzgrid/dom/parts`
+
+### BadgeOptions
+
+```ts
+export interface BadgeOptions {
+    readonly tones?: Readonly<Record<string, Tone>>;
+    readonly fallback?: Tone;
+    readonly classes?: Readonly<Partial<Record<Tone, string>>>;
+}
+```
+
+### PARTS_KEYS
+
+```ts
+export declare const PARTS_KEYS: readonly [
+    "cell.yes",
+    "cell.no"
+];
+```
+
+### Tone
+
+```ts
+export type Tone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+```
+
+### badge
+
+```ts
+export declare const badge: (o?: BadgeOptions) => SlotPart<"cell">;
+```
+
+### cellBoolean
+
+```ts
+export declare const cellBoolean: import("../part.js").SlotPart<"cell">;
+```
+
+## `@dzgrid/dom/rules`
+
+### RULES_KEYS
+
+```ts
+export declare const RULES_KEYS: readonly [
+    "rules.refused",
+    "rules.refusedReason",
+    "rules.partly"
+];
+```
+
+### RulesMessageKey
+
+```ts
+export type RulesMessageKey = 'rules.refused' | 'rules.refusedReason' | 'rules.partly';
+```
+
+### RulesMessages
+
+```ts
+export interface RulesMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in RulesMessageKey]: MessageValue;
+    };
+}
+```
+
+### rules
+
+```ts
+export declare function rules(): GridFeature;
+```
+
+## `@dzgrid/dom/tree`
+
+### TREE_KEYS
+
+```ts
+export declare const TREE_KEYS: readonly [
+    "tree.expanded",
+    "tree.collapsed",
+    "tree.expandedSome",
+    "tree.empty"
+];
+```
+
+### TreeApi
+
+```ts
+export interface TreeApi {
+    state(key: RowKey): 'open' | 'closed' | 'fixed' | null;
+    toggle(key: RowKey, open?: boolean): boolean;
+}
+```
+
+### TreeFeature
+
+```ts
+export interface TreeFeature extends GridFeature {
+    api(grid: {
+        readonly kernel: GridKernel<any, any>;
+    }): TreeApi | null;
+}
+```
+
+### TreeFeatureOptions
+
+```ts
+export interface TreeFeatureOptions<T> extends TreeOptions<T> {
+    readonly column?: string | ((row: T) => string);
+    readonly indent?: number | ((row: T, level: number) => number);
+    readonly lazy?: LazyChildren<T>;
+    readonly sticky?: number;
+    readonly structure?: readonly string[];
+}
+```
+
+### TreeMessageKey
+
+```ts
+export type TreeMessageKey = 'tree.expanded' | 'tree.collapsed' | 'tree.expandedSome' | 'tree.empty';
+```
+
+### TreeMessages
+
+```ts
+export interface TreeMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in TreeMessageKey]: MessageValue;
+    };
+}
+```
+
+### tree
+
+```ts
+export declare function tree<T>(o: TreeFeatureOptions<T>): TreeFeature;
+```
+
+## `@dzgrid/dom/tree-lazy`
+
+### LazyChildren
+
+```ts
+export interface LazyChildren<T> {
+    wrap(s: TreeShape<T>, nested: boolean): TreeShape<T>;
+    setup(g: GridContext<unknown>, s: TreeShape<T> | undefined, say: (key: RowKey) => void): LazyDom | null;
+}
+```
+
+### LazyDom
+
+```ts
+export interface LazyDom {
+    fill(label: HTMLElement, node: LoadingNode): void;
+    said(key: RowKey): void;
+    destroy(): void;
+}
+```
+
+### LazyOptions
+
+```ts
+= @dzgrid/core/tree-lazy#LazyOptions
+```
+
+### lazyChildren
+
+```ts
+export declare function lazyChildren<T>(o: LazyOptions<T>): LazyChildren<T>;
+```
+
+## `@dzgrid/dom/detail`
+
+### DETAIL_KEYS
+
+```ts
+export declare const DETAIL_KEYS: readonly [
+    "detail.label",
+    "detail.expanded",
+    "detail.collapsed"
+];
+```
+
+### DetailFeatureOptions
+
+```ts
+export interface DetailFeatureOptions<T> extends Omit<DetailOptions<T>, 'sizes'> {
+    readonly part: SlotPart<'detail'> | string;
+    readonly column?: string;
+    readonly nested?: number;
+}
+```
+
+### DetailMessageKey
+
+```ts
+export type DetailMessageKey = 'detail.label' | 'detail.expanded' | 'detail.collapsed';
+```
+
+### DetailMessages
+
+```ts
+export interface DetailMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in DetailMessageKey]: MessageValue;
+    };
+}
+```
+
+### NestedContext
+
+```ts
+export type NestedContext = SlotContext['detail'];
+```
+
+### NestedGridOptions
+
+```ts
+export interface NestedGridOptions<C> {
+    readonly settings: (c: NestedContext) => GridSettings<C>;
+    readonly keep?: number;
+    readonly onGrid?: (grid: GridInstance<C, any>, c: NestedContext) => void;
+    readonly env?: (c: NestedContext) => GridEnv;
+}
+```
+
+### detail
+
+```ts
+export declare function detail<T>(o: DetailFeatureOptions<T>): GridFeature;
+```
+
+### nestedGrid
+
+```ts
+export declare function nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<'detail'>;
+```
+
+## `@dzgrid/dom/edit`
+
+### EDIT_KEYS
+
+```ts
+export declare const EDIT_KEYS: readonly [
+    "edit.saving",
+    "edit.saveRefused",
+    "edit.reasonUnknown",
+    "edit.reasonNetwork",
+    "edit.failedMark",
+    "edit.stale",
+    "edit.rowStale",
+    "edit.reapply",
+    "edit.reapplied",
+    "header.withStale",
+    "edit.undone",
+    "edit.undoneMany",
+    "edit.undoSkipped",
+    "edit.nothingToUndo",
+    "edit.redone",
+    "edit.redoneMany",
+    "edit.redoSkipped",
+    "edit.nothingToRedo",
+    "validation.required",
+    "validation.min",
+    "validation.max",
+    "validation.pattern",
+    "validation.options",
+    "validation.invalid"
+];
+```
+
+### EditApi
+
+```ts
+export interface EditApi<T> {
+    readonly commit: EditController<T>['commit'];
+    undo(): UndoResult | null;
+    redo(): UndoResult | null;
+    readonly canUndo: boolean;
+    readonly canRedo: boolean;
+    readonly state: EditController<T>['state'];
+    reapply(): void;
+    setSave(save?: SaveHandler<T>): void;
+    refuse(key: RowKey, column: string): void;
+    alert(text: string): void;
+    reason(column: string, code: string): string;
+}
+```
+
+### EditFeature
+
+```ts
+export interface EditFeature<T> extends GridFeature {
+    api(grid: {
+        readonly kernel: GridKernel<T, any>;
+    }): EditApi<T> | null;
+}
+```
+
+### EditFeatureOptions
+
+```ts
+export interface EditFeatureOptions<T> {
+    readonly save?: SaveHandler<T>;
+    readonly savingBorder?: boolean;
+}
+```
+
+### EditMessageKey
+
+```ts
+export type EditMessageKey = 'edit.saving' | 'edit.saveRefused' | 'edit.reasonUnknown' | 'edit.reasonNetwork' | 'edit.failedMark' | 'edit.stale' | 'edit.rowStale' | 'edit.reapply' | 'edit.reapplied' | 'header.withStale' | 'edit.undone' | 'edit.undoneMany' | 'edit.redone' | 'edit.redoneMany' | 'edit.undoSkipped' | 'edit.redoSkipped' | 'edit.nothingToUndo' | 'edit.nothingToRedo' | `validation.${Exclude<ValidationCode, ParseCode>}`;
+```
+
+### EditMessages
+
+```ts
+export interface EditMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in EditMessageKey]: MessageValue;
+    };
+}
+```
+
+### ValidationCode
+
+```ts
+export type ValidationCode = ParseCode | 'required' | 'min' | 'max' | 'pattern' | 'options' | 'invalid';
+```
+
+### edit
+
+```ts
+export declare function edit<T = unknown>(o?: EditFeatureOptions<T>): EditFeature<T>;
+```
+
+## `@dzgrid/dom/editors`
+
+### CalendarAdapter
+
+```ts
+export interface CalendarAdapter {
+    readonly host: HTMLElement;
+    readonly grid: HTMLElement;
+    readonly inject: boolean;
+    readonly nonce?: string;
+    readonly kind: 'day' | 'instant';
+    readonly ctx: LocaleCtx;
+    readonly today: string;
+    readonly label: string;
+    readonly messages?: Readonly<Record<string, object>>;
+    readonly value: string | number | null;
+    pick(v: string | number): void;
+    close(): void;
+}
+```
+
+### CalendarKit
+
+```ts
+export interface CalendarKit {
+    open(a: CalendarAdapter): CalendarView;
+}
+```
+
+### CalendarView
+
+```ts
+export interface CalendarView {
+    focus(): void;
+    destroy(): void;
+}
+```
+
+### CellInput
+
+```ts
+export type CellInput = {
+    readonly text: string;
+} | {
+    readonly value: unknown;
+};
+```
+
+### EDITORS_KEYS
+
+```ts
+export declare const EDITORS_KEYS: readonly [
+    "edit.refused",
+    "edit.refusedDropped",
+    "editors.fieldName",
+    "validation.parse",
+    "validation.day",
+    "validation.invalid-instant",
+    "validation.wall-time-skipped",
+    "validation.wall-time-ambiguous",
+    "edit.calendar",
+    "edit.calendarLoading",
+    "edit.calendarFailed",
+    "edit.optionNotInList",
+    "edit.rowRemoved",
+    "edit.pageDropped"
+];
+```
+
+### EditorHandle
+
+```ts
+export interface EditorHandle extends PartHandle<SlotContext['editor']> {
+    read?(): CellInput | undefined;
+}
+```
+
+### EditorsMessageKey
+
+```ts
+export type EditorsMessageKey = 'edit.refused' | 'edit.refusedDropped' | 'editors.fieldName' | 'edit.calendar' | 'edit.calendarLoading' | 'edit.calendarFailed' | 'edit.optionNotInList' | 'edit.rowRemoved' | 'edit.pageDropped' | `validation.${ParseCode}`;
+```
+
+### EditorsMessages
+
+```ts
+export interface EditorsMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in EditorsMessageKey]: MessageValue;
+    };
+}
+```
+
+### EditorsOptions
+
+```ts
+export interface EditorsOptions {
+    readonly enterMoves?: 'down' | 'stay';
+    readonly tab?: 'cell' | 'grid';
+    readonly calendar?: boolean;
+    readonly loadCalendar?: () => Promise<CalendarKit>;
+    readonly dateMessages?: Readonly<Record<string, object>>;
+    readonly list?: ListEditor;
+}
+```
+
+### editors
+
+```ts
+export declare function editors(o?: EditorsOptions): GridFeature;
+```
+
+## `@dzgrid/dom/filters-base`
+
+### DateAdapter
+
+```ts
+export interface DateAdapter {
+    readonly host: HTMLElement;
+    readonly grid: HTMLElement;
+    readonly panel: HTMLElement;
+    readonly kind: 'day' | 'instant';
+    readonly op: string;
+    settings(): DateSettings;
+    changed(now: boolean): void;
+    readonly inject: boolean;
+    readonly nonce?: string;
+}
+```
+
+### DateCalendarOptions
+
+```ts
+export interface DateCalendarOptions {
+    readonly months?: number;
+    readonly presets?: readonly RelativeRange[];
+}
+```
+
+### DateField
+
+```ts
+export interface DateField {
+    write(p: DatePart | null): void;
+    read(): DatePart | null | undefined;
+    update(): void;
+    closePanel(): boolean;
+    focus(): void;
+    destroy(): void;
+}
+```
+
+### DateKit
+
+```ts
+export interface DateKit {
+    adapt(a: DateAdapter): DateField;
+}
+```
+
+### DateKitName
+
+```ts
+export type DateKitName = 'date' | 'range' | 'moment';
+```
+
+### DatePart
+
+```ts
+export interface DatePart {
+    readonly value?: string;
+    readonly valueTo?: string;
+    readonly day?: string;
+    readonly dayTo?: string;
+    readonly at?: string;
+    readonly atTo?: string;
+    readonly range?: RelativeRange;
+}
+```
+
+### DateSettings
+
+```ts
+export interface DateSettings {
+    readonly ctx: LocaleCtx;
+    readonly today: string;
+    readonly label: string;
+    readonly messages?: Readonly<Record<string, object>>;
+    readonly calendar?: DateCalendarOptions;
+}
+```
+
+### FILTER_KEYS
+
+```ts
+export declare const FILTER_KEYS: ("filter.op.contains" | "filter.op.notContains" | "filter.op.equals" | "filter.op.notEqual" | "filter.op.startsWith" | "filter.op.endsWith" | "filter.op.blank" | "filter.op.notBlank" | "filter.op.lt" | "filter.op.lte" | "filter.op.gt" | "filter.op.gte" | "filter.op.between" | "filter.op.onDay" | "filter.op.notOnDay" | "filter.op.betweenDays" | "filter.op.before" | "filter.op.after" | "filter.op.onOrBefore" | "filter.op.onOrAfter" | "filter.inputLabel" | "filter.summaryActive" | "filter.clear" | "filter.invalid" | "announce.filtered" | "announce.filteredOpen" | "filter.popupLabel" | "header.withFilter" | "filter.op" | "filter.value" | "filter.valueTo" | "filter.apply" | "filter.all" | "filter.yes" | "filter.no" | "filter.date" | "filter.dateTime" | "filter.period" | "filter.zone" | "filter.loadingDates" | "filter.loadFailed" | "filter.set.search" | "filter.set.all" | "filter.set.allShown" | "filter.set.blanks" | "filter.set.option" | "filter.set.count" | "filter.set.truncated" | "filter.set.failed" | "filter.floatingToggle" | "announce.floatingHidden" | "announce.floatingShown")[];
+```
+
+### FiltersFeature
+
+```ts
+export interface FiltersFeature extends GridFeature {
+    openFilter(column: string): boolean;
+    closeFilter(): void;
+    readonly floating: FloatingToggle;
+}
+```
+
+### FiltersOptions
+
+```ts
+export interface FiltersOptions {
+    readonly floating?: boolean;
+    readonly debounceMs?: number;
+    readonly popup?: boolean;
+    readonly loadDates?: (kit: DateKitName) => Promise<DateKit>;
+    readonly dateMessages?: Readonly<Record<string, object>>;
+    readonly dateCalendar?: DateCalendarOptions;
+    readonly apply?: 'button' | 'live';
+    readonly dateZone?: boolean;
+    readonly busyFlash?: number;
+    readonly loadSet?: () => Promise<SetKit>;
+    readonly maxConditions?: number;
+    readonly matchCase?: boolean;
+    readonly rowHeight?: number;
+}
+```
+
+### SetKit
+
+```ts
+export interface SetKit {
+    body(get: () => C, doc: Document, changed: Changed, note: typeof notice, g: GridContext<unknown>, mount: typeof mounted): Omit<Body, 'edits'>;
+    readonly css: string;
+}
+```
+
+### filters
+
+```ts
+export declare function filters(o?: FiltersOptions): FiltersFeature;
+```
+
+## `@dzgrid/dom/editors-base`
+
+### CalendarAdapter
+
+```ts
+export interface CalendarAdapter {
+    readonly host: HTMLElement;
+    readonly grid: HTMLElement;
+    readonly inject: boolean;
+    readonly nonce?: string;
+    readonly kind: 'day' | 'instant';
+    readonly ctx: LocaleCtx;
+    readonly today: string;
+    readonly label: string;
+    readonly messages?: Readonly<Record<string, object>>;
+    readonly value: string | number | null;
+    pick(v: string | number): void;
+    close(): void;
+}
+```
+
+### CalendarKit
+
+```ts
+export interface CalendarKit {
+    open(a: CalendarAdapter): CalendarView;
+}
+```
+
+### CalendarView
+
+```ts
+export interface CalendarView {
+    focus(): void;
+    destroy(): void;
+}
+```
+
+### CellInput
+
+```ts
+export type CellInput = {
+    readonly text: string;
+} | {
+    readonly value: unknown;
+};
+```
+
+### EDITORS_KEYS
+
+```ts
+export declare const EDITORS_KEYS: readonly [
+    "edit.refused",
+    "edit.refusedDropped",
+    "editors.fieldName",
+    "validation.parse",
+    "validation.day",
+    "validation.invalid-instant",
+    "validation.wall-time-skipped",
+    "validation.wall-time-ambiguous",
+    "edit.calendar",
+    "edit.calendarLoading",
+    "edit.calendarFailed",
+    "edit.optionNotInList",
+    "edit.rowRemoved",
+    "edit.pageDropped"
+];
+```
+
+### EditorHandle
+
+```ts
+export interface EditorHandle extends PartHandle<SlotContext['editor']> {
+    read?(): CellInput | undefined;
+}
+```
+
+### EditorsMessageKey
+
+```ts
+export type EditorsMessageKey = 'edit.refused' | 'edit.refusedDropped' | 'editors.fieldName' | 'edit.calendar' | 'edit.calendarLoading' | 'edit.calendarFailed' | 'edit.optionNotInList' | 'edit.rowRemoved' | 'edit.pageDropped' | `validation.${ParseCode}`;
+```
+
+### EditorsMessages
+
+```ts
+export interface EditorsMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in EditorsMessageKey]: MessageValue;
+    };
+}
+```
+
+### EditorsOptions
+
+```ts
+export interface EditorsOptions {
+    readonly enterMoves?: 'down' | 'stay';
+    readonly tab?: 'cell' | 'grid';
+    readonly calendar?: boolean;
+    readonly loadCalendar?: () => Promise<CalendarKit>;
+    readonly dateMessages?: Readonly<Record<string, object>>;
+    readonly list?: ListEditor;
+}
+```
+
+### editors
+
+```ts
+export declare function editors(o?: EditorsOptions): GridFeature;
+```
+
+## `@dzgrid/dom/editors-list`
+
+### ListEditor
+
+```ts
+export type ListEditor = typeof import('./editors-list/index.js').listEditor;
+```
+
+### listEditor
+
+```ts
+export declare function listEditor(x: EdEnv, value: unknown, opts: readonly EnumOption[], label: (v: unknown) => string, name: string, done: (move: boolean) => void): Ed;
+```
+
+## `@dzgrid/dom/range`
+
+### ClipboardText
+
+```ts
+export interface ClipboardText {
+    readonly text: string;
+    readonly html: string;
+}
+```
+
+### CopyAsk
+
+```ts
+export interface CopyAsk {
+    readonly columns: readonly string[];
+    readonly rows: number;
+    readonly cells: number;
+    readonly cut: boolean;
+}
+```
+
+### PasteCounts
+
+```ts
+export interface PasteCounts {
+    readonly pasted: number;
+    readonly refused: number;
+    readonly readOnly: number;
+    readonly tooLong: number;
+    readonly outside: number;
+    readonly tooBig: boolean;
+}
+```
+
+### RANGE_KEYS
+
+```ts
+export declare const RANGE_KEYS: readonly [
+    "range.rows",
+    "range.cols",
+    "range.size",
+    "range.cleared",
+    "range.reordered",
+    "range.copied",
+    "range.cut",
+    "range.pasted",
+    "range.erased",
+    "range.refused",
+    "range.readOnly",
+    "range.tooLong",
+    "range.outside",
+    "range.tooBig",
+    "range.noCopy"
+];
+```
+
+### RangeApi
+
+```ts
+export interface RangeApi {
+    get(): CellRange | null;
+    set(r: CellRange | null): boolean;
+    clear(): void;
+    box(): RangeBox | null;
+    copy(o?: {
+        readonly headers?: boolean;
+    }): ClipboardText | null;
+    cut(): ClipboardText | null;
+    paste(text: string, html?: string): PasteCounts | null;
+    erase(): PasteCounts | null;
+}
+```
+
+### RangeFeature
+
+```ts
+export interface RangeFeature extends GridFeature {
+    api(grid: {
+        readonly kernel: GridKernel<any, any>;
+    }): RangeApi | null;
+}
+```
+
+### RangeLoadKey
+
+```ts
+export type RangeLoadKey = 'range.notLoaded';
+```
+
+### RangeMessageKey
+
+```ts
+export type RangeMessageKey = 'range.rows' | 'range.cols' | 'range.size' | 'range.cleared' | 'range.reordered' | 'range.copied' | 'range.cut' | 'range.pasted' | 'range.erased' | 'range.refused' | 'range.readOnly' | 'range.tooLong' | 'range.outside' | 'range.tooBig' | 'range.noCopy';
+```
+
+### RangeMessages
+
+```ts
+export interface RangeMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in RangeMessageKey]: MessageValue;
+    } & {
+        readonly [K in RangeLoadKey]?: MessageValue;
+    };
+}
+```
+
+### RangeOptions
+
+```ts
+export interface RangeOptions {
+    readonly drag?: boolean;
+    readonly canCopy?: (c: CopyAsk) => boolean;
+    readonly guard?: boolean;
+    readonly raw?: boolean;
+    readonly maxPaste?: number;
+    readonly clearOnOutside?: boolean;
+}
+```
+
+### range
+
+```ts
+export declare function range(o?: RangeOptions): RangeFeature;
+```
+
+## `@dzgrid/dom/fill`
+
+### FILL_KEYS
+
+```ts
+export declare const FILL_KEYS: readonly [
+    "fill.filled",
+    "fill.bulk",
+    "fill.mode",
+    "fill.pick",
+    "fill.cancel",
+    "fill.down",
+    "fill.up",
+    "fill.end",
+    "fill.start"
+];
+```
+
+### FillApi
+
+```ts
+export interface FillApi {
+    fill(to: CellAddr, o?: {
+        readonly swap?: boolean;
+    }): FillCounts | null;
+    down(o?: {
+        readonly user?: boolean;
+    }): FillCounts | null;
+    end(o?: {
+        readonly user?: boolean;
+    }): FillCounts | null;
+    apply(input: CellInput): FillCounts | null;
+    readonly along?: 'row' | 'column';
+    can?(end: boolean): boolean;
+}
+```
+
+### FillCounts
+
+```ts
+export interface FillCounts {
+    readonly filled: number;
+    readonly refused: number;
+    readonly readOnly: number;
+}
+```
+
+### FillFeature
+
+```ts
+export interface FillFeature extends GridFeature {
+    api(grid: {
+        readonly kernel: GridKernel<any, any>;
+    }): FillApi | null;
+}
+```
+
+### FillFeatureOptions
+
+```ts
+export interface FillFeatureOptions {
+    readonly handle?: boolean;
+    readonly along?: 'row' | 'column';
+}
+```
+
+### FillMessageKey
+
+```ts
+export type FillMessageKey = 'fill.filled' | 'fill.bulk' | 'fill.mode' | 'fill.pick' | 'fill.cancel' | 'fill.down' | 'fill.up' | 'fill.end' | 'fill.start';
+```
+
+### FillMessages
+
+```ts
+export interface FillMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in FillMessageKey]: MessageValue;
+    };
+}
+```
+
+### fill
+
+```ts
+export declare function fill(blocks: RangeFeature, o?: FillFeatureOptions): FillFeature;
+```
+
+## `@dzgrid/dom/columns`
+
+### COLUMNS_KEYS
+
+```ts
+export declare const COLUMNS_KEYS: readonly [
+    "move.placed",
+    "move.edge",
+    "move.locked",
+    "move.cancelled",
+    "size.mode",
+    "size.modeHint",
+    "size.width",
+    "size.min",
+    "size.max",
+    "size.cancelled",
+    "size.autoAll",
+    "size.locked"
+];
+```
+
+### ColumnsApi
+
+```ts
+export interface ColumnsApi {
+    move(column: string, by: -1 | 1 | 'start' | 'end', o?: {
+        readonly say?: boolean;
+    }): MoveResult;
+    readonly dropTargets: {
+        add(el: Element, t: DropTarget): () => void;
+    };
+    autoSize(columns: readonly string[], o?: {
+        readonly say?: boolean;
+    }): void;
+    autoSizeAll(o?: {
+        readonly say?: boolean;
+    }): void;
+    resizeMode(column: string): boolean;
+    fitContent?(): void;
+}
+```
+
+### ColumnsFeature
+
+```ts
+export interface ColumnsFeature extends GridFeature {
+    api(grid: {
+        readonly kernel: GridKernel<any, any>;
+    }): ColumnsApi | null;
+}
+```
+
+### ColumnsMessageKey
+
+```ts
+export type ColumnsMessageKey = 'move.placed' | 'move.edge' | 'move.locked' | 'move.cancelled' | `size.${'mode' | 'modeHint' | 'width' | 'min' | 'max' | 'cancelled' | 'autoAll' | 'locked'}` | `group.${'toggle' | 'open' | 'closed' | 'closedSaid' | 'openedSaid'}`;
+```
+
+### ColumnsMessages
+
+```ts
+export interface ColumnsMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in ColumnsMessageKey | ColumnsChooserMessageKey]: MessageValue;
+    };
+}
+```
+
+### ColumnsOptions
+
+```ts
+export interface ColumnsOptions {
+    readonly drag?: boolean;
+    readonly fitOnLoad?: 'content';
+}
+```
+
+### DropTarget
+
+```ts
+export interface DropTarget {
+    accept(column: string): boolean;
+    drop(column: string): void;
+    readonly label?: string;
+}
+```
+
+### MoveResult
+
+```ts
+export type MoveResult = 'moved' | 'edge' | 'locked' | 'unknown';
+```
+
+### columns
+
+```ts
+export declare function columns(o?: ColumnsOptions): ColumnsFeature;
+```
+
+## `@dzgrid/dom/column-menu`
+
+### COLUMN_MENU_KEYS
+
+```ts
+export declare const COLUMN_MENU_KEYS: readonly ColumnMenuMessageKey[];
+```
+
+### ColumnMenuApi
+
+```ts
+export interface ColumnMenuApi {
+    open(column: string): boolean;
+    close(): void;
+    current(): string | null;
+}
+```
+
+### ColumnMenuFeature
+
+```ts
+export interface ColumnMenuFeature extends GridFeature {
+    api(grid: Grid): ColumnMenuApi | null;
+}
+```
+
+### ColumnMenuMessageKey
+
+```ts
+export type ColumnMenuMessageKey = 'menu.button' | 'menu.label' | 'menu.sort' | 'menu.sortAsc' | 'menu.sortDesc' | 'menu.sortNone' | 'menu.pin' | 'menu.pinStart' | 'menu.pinEnd' | 'menu.pinNone' | 'menu.sizeAuto' | 'menu.sizeAutoAll' | 'menu.sizeResize' | 'menu.sizeWiden' | 'menu.sizeNarrow' | 'menu.width' | 'menu.moveStart' | 'menu.moveEnd' | 'menu.fillDown' | 'menu.fillEnd' | 'menu.filter' | 'menu.hide' | 'menu.choose' | 'menu.reset' | 'menu.pinnedStart' | 'menu.pinnedEnd' | 'menu.unpinned' | 'menu.hidden' | 'menu.resetDone' | 'density.label' | 'density.compact' | 'density.comfortable' | 'density.spacious' | 'density.changed';
+```
+
+### ColumnMenuMessages
+
+```ts
+export interface ColumnMenuMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in ColumnMenuMessageKey]: MessageValue;
+    };
+}
+```
+
+### ColumnMenuOptions
+
+```ts
+export interface ColumnMenuOptions {
+    readonly use?: {
+        readonly columns?: {
+            api(grid: Grid): ColumnsApiLike | null;
+        };
+        readonly range?: {
+            api(grid: Grid): {
+                get(): unknown;
+            } | null;
+        };
+        readonly fill?: {
+            api(grid: Grid): {
+                down(o?: {
+                    readonly user?: boolean;
+                }): unknown;
+                end(o?: {
+                    readonly user?: boolean;
+                }): unknown;
+            } | null;
+        };
+        readonly chooser?: {
+            api(grid: Grid): {
+                open(anchor?: HTMLElement): boolean;
+            } | null;
+        };
+        readonly grouping?: {
+            api(grid: Grid): {
+                by(): readonly string[];
+                setBy(by: readonly string[], o?: {
+                    readonly user?: boolean;
+                }): void;
+            } | null;
+        };
+        readonly pivot?: {
+            api(grid: Grid): {
+                on(): boolean;
+                by(): readonly string[];
+                setBy(by: readonly string[], o?: {
+                    readonly user?: boolean;
+                }): void;
+                accepts(id: string): boolean;
+                values(): Readonly<Record<string, unknown>>;
+                setValues(v: Readonly<Record<string, any>>, o?: {
+                    readonly user?: boolean;
+                }): void;
+                valueColumn(id: string): string | undefined;
+            } | null;
+        };
+    };
+    readonly density?: boolean;
+    readonly onDensity?: (density: Density) => void;
+    readonly items?: (column: ResolvedColumn<unknown>, defaults: readonly MenuEntry[], c: MenuContext) => readonly MenuEntry[];
+    readonly classes?: {
+        readonly menu?: string;
+        readonly item?: string;
+    };
+}
+```
+
+### ColumnsApiLike
+
+```ts
+export interface ColumnsApiLike {
+    move(column: string, by: -1 | 1, o?: {
+        readonly say?: boolean;
+    }): unknown;
+    autoSize?(ids: readonly string[], o?: {
+        readonly say?: boolean;
+    }): void;
+    autoSizeAll?(o?: {
+        readonly say?: boolean;
+    }): void;
+    resizeMode?(column: string): boolean;
+}
+```
+
+### MenuContext
+
+```ts
+export interface MenuContext {
+    readonly column: string;
+    readonly grid: Grid;
+    say(text: string): void;
+}
+```
+
+### MenuEntry
+
+```ts
+export type MenuEntry<C = MenuContext> = MenuItem<C> | {
+    readonly separator: true;
+};
+```
+
+### MenuItem
+
+```ts
+export interface MenuItem<C = MenuContext> {
+    readonly id: string;
+    readonly label: string;
+    readonly kind?: 'item' | 'radio' | 'check';
+    readonly group?: string;
+    readonly checked?: boolean;
+    readonly disabled?: boolean;
+    readonly keys?: string;
+    readonly keepOpen?: boolean;
+    readonly icon?: string;
+    readonly part?: string;
+    readonly submenu?: readonly MenuEntry<C>[];
+    readonly action?: (c: C) => void;
+}
+```
+
+### columnMenu
+
+```ts
+export declare function columnMenu(o?: ColumnMenuOptions): ColumnMenuFeature;
+```
+
+## `@dzgrid/dom/context-menu`
+
+### CONTEXT_MENU_KEYS
+
+```ts
+export declare const CONTEXT_MENU_KEYS: readonly ContextMenuMessageKey[];
+```
+
+### CellMenuContext
+
+```ts
+export interface CellMenuContext<T = unknown> {
+    readonly row: T;
+    readonly key: RowKey;
+    readonly column: ResolvedColumn<T>;
+    readonly value: unknown;
+    readonly block: CellRange | null;
+    readonly band: 'top' | 'bottom' | null;
+    readonly kernel: GridKernel<T, any>;
+    readonly grid: Grid;
+    say(text: string): void;
+}
+```
+
+### ContextMenuApi
+
+```ts
+export interface ContextMenuApi {
+    open(at: {
+        readonly row: RowKey;
+        readonly column: string;
+    }, point?: Point): boolean;
+    close(): void;
+    current(): {
+        readonly row: RowKey;
+        readonly column: string;
+    } | null;
+}
+```
+
+### ContextMenuFeature
+
+```ts
+export interface ContextMenuFeature<T = unknown> extends GridFeature {
+    api(grid: Grid): ContextMenuApi | null;
+    readonly __rows?: T;
+}
+```
+
+### ContextMenuMessageKey
+
+```ts
+export type ContextMenuMessageKey = 'cmenu.label' | 'cmenu.copy' | 'cmenu.copyHeaders' | 'cmenu.cut' | 'cmenu.paste' | 'cmenu.useCopyKey' | 'cmenu.usePasteKey' | 'cmenu.fillDown' | 'cmenu.fillEnd' | 'cmenu.undo' | 'cmenu.redo' | 'cmenu.expand' | 'cmenu.collapse' | 'cmenu.pinTop' | 'cmenu.pinBottom' | 'cmenu.unpin' | 'cmenu.pinnedTop' | 'cmenu.pinnedBottom' | 'cmenu.unpinned' | 'cmenu.exportCsv';
+```
+
+### ContextMenuMessages
+
+```ts
+export interface ContextMenuMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in ContextMenuMessageKey]: MessageValue;
+    };
+}
+```
+
+### ContextMenuOptions
+
+```ts
+export interface ContextMenuOptions<T = unknown> {
+    readonly use?: {
+        readonly range?: {
+            api(grid: Grid): RangeApiLike | null;
+        };
+        readonly fill?: {
+            api(grid: Grid): FillApiLike | null;
+        };
+        readonly edit?: {
+            api(grid: Grid): EditApiLike | null;
+        };
+        readonly csv?: {
+            run(scope?: 'displayed'): Promise<unknown>;
+        };
+        readonly xlsx?: {
+            run(scope?: 'displayed'): Promise<unknown>;
+        } | undefined;
+        readonly tree?: {
+            api(grid: Grid): TreeApiLike | null;
+        };
+        readonly pinned?: {
+            api(grid: Grid): PinnedRowsApiLike<T> | null;
+        };
+        readonly status?: {
+            api(grid: Grid): StatusApiLike | null;
+        };
+    };
+    readonly items?: (c: CellMenuContext<T>, defaults: readonly MenuEntry<CellMenuContext<T>>[]) => readonly MenuEntry<CellMenuContext<T>>[];
+    readonly classes?: {
+        readonly menu?: string;
+        readonly item?: string;
+    };
+    readonly onPin?: (rows: {
+        readonly top: readonly T[];
+        readonly bottom: readonly T[];
+    }) => void;
+}
+```
+
+### ContextMenuXlsxKey
+
+```ts
+export type ContextMenuXlsxKey = 'cmenu.exportXlsx';
+```
+
+### EditApiLike
+
+```ts
+export interface EditApiLike {
+    undo(): unknown;
+    redo(): unknown;
+    readonly canUndo: boolean;
+    readonly canRedo: boolean;
+}
+```
+
+### FillApiLike
+
+```ts
+export interface FillApiLike {
+    down(o?: {
+        readonly user?: boolean;
+    }): unknown;
+    end(o?: {
+        readonly user?: boolean;
+    }): unknown;
+    readonly along?: 'row' | 'column';
+    can?(end: boolean): boolean;
+}
+```
+
+### MenuEntry
+
+```ts
+export type MenuEntry<C = MenuContext> = MenuItem<C> | {
+    readonly separator: true;
+};
+```
+
+### MenuItem
+
+```ts
+export interface MenuItem<C = MenuContext> {
+    readonly id: string;
+    readonly label: string;
+    readonly kind?: 'item' | 'radio' | 'check';
+    readonly group?: string;
+    readonly checked?: boolean;
+    readonly disabled?: boolean;
+    readonly keys?: string;
+    readonly keepOpen?: boolean;
+    readonly icon?: string;
+    readonly part?: string;
+    readonly submenu?: readonly MenuEntry<C>[];
+    readonly action?: (c: C) => void;
+}
+```
+
+### PinnedRowsApiLike
+
+```ts
+export interface PinnedRowsApiLike<T> {
+    set(rows: {
+        readonly top?: readonly T[];
+        readonly bottom?: readonly T[];
+    }): void;
+    get(): {
+        readonly top: readonly T[];
+        readonly bottom: readonly T[];
+    };
+}
+```
+
+### RangeApiLike
+
+```ts
+export interface RangeApiLike {
+    get(): CellRange | null;
+    box(): {
+        readonly top: number;
+        readonly bottom: number;
+        readonly start: number;
+        readonly end: number;
+    } | null;
+    copy(o?: {
+        readonly headers?: boolean;
+    }): {
+        readonly text: string;
+        readonly html: string;
+    } | null;
+    cut(): unknown;
+    paste(text: string): unknown;
+}
+```
+
+### StatusApiLike
+
+```ts
+export interface StatusApiLike {
+    announce(): void;
+    stats(): object | null;
+}
+```
+
+### TreeApiLike
+
+```ts
+export interface TreeApiLike {
+    state(key: RowKey): 'open' | 'closed' | 'fixed' | null;
+    toggle(key: RowKey, open?: boolean): boolean;
+}
+```
+
+### contextMenu
+
+```ts
+export declare function contextMenu<T = unknown>(o?: ContextMenuOptions<T>): ContextMenuFeature<T>;
+```
+
+## `@dzgrid/dom/statusbar`
+
+### STATUS_KEYS
+
+```ts
+export declare const STATUS_KEYS: readonly StatusMessageKey[];
+```
+
+### StatusBarApi
+
+```ts
+export interface StatusBarApi {
+    announce(): void;
+    stats(): StatusStats | null;
+}
+```
+
+### StatusBarFeature
+
+```ts
+export interface StatusBarFeature extends GridFeature {
+    api(grid: {
+        readonly kernel: GridKernel<any, any>;
+    }): StatusBarApi | null;
+}
+```
+
+### StatusBarOptions
+
+```ts
+export interface StatusBarOptions {
+    readonly items?: readonly string[];
+    readonly maxCells?: number;
+}
+```
+
+### StatusMessageKey
+
+```ts
+export type StatusMessageKey = `status.${'label' | 'rows' | 'filtered' | 'selected' | 'all' | 'count' | 'sum' | 'avg' | 'min' | 'max' | 'partial' | 'read' | 'none' | 'sep'}`;
+```
+
+### StatusMessages
+
+```ts
+export interface StatusMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in StatusMessageKey]: MessageValue;
+    };
+}
+```
+
+### StatusStats
+
+```ts
+export interface StatusStats {
+    readonly cells: number;
+    readonly filled: number;
+    readonly numbers: number;
+    readonly sum: number;
+    readonly min: number | null;
+    readonly max: number | null;
+    readonly avg: number | null;
+    readonly partial: boolean;
+    readonly formats: readonly NumberFormatSpec[];
+}
+```
+
+### statusBar
+
+```ts
+export declare function statusBar(o?: StatusBarOptions): StatusBarFeature;
+```
+
+## `@dzgrid/dom/find`
+
+### FIND_KEYS
+
+```ts
+export declare const FIND_KEYS: readonly FindMessageKey[];
+```
+
+### FindApi
+
+```ts
+export interface FindApi {
+    open(text?: string): boolean;
+    close(): void;
+    next(): boolean;
+    previous(): boolean;
+    state(): FindState;
+}
+```
+
+### FindFeature
+
+```ts
+export interface FindFeature extends GridFeature {
+    api(grid: {
+        readonly kernel: GridKernel<any, any>;
+    }): FindApi | null;
+}
+```
+
+### FindHeldKey
+
+```ts
+export type FindHeldKey = 'find.held';
+```
+
+### FindHit
+
+```ts
+export interface FindHit {
+    readonly row: RowKey;
+    readonly column: string;
+}
+```
+
+### FindMessageKey
+
+```ts
+export type FindMessageKey = `find.${'label' | 'count' | 'said' | 'none' | 'prev' | 'next' | 'close' | 'page'}`;
+```
+
+### FindMessages
+
+```ts
+export interface FindMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in FindMessageKey]: MessageValue;
+    } & {
+        readonly [K in FindHeldKey]?: MessageValue;
+    };
+}
+```
+
+### FindOptions
+
+```ts
+export interface FindOptions {
+    readonly debounceMs?: number;
+    readonly highlight?: boolean;
+}
+```
+
+### FindState
+
+```ts
+export interface FindState {
+    readonly open: boolean;
+    readonly text: string;
+    readonly count: number;
+    readonly index: number;
+    readonly current: FindHit | null;
+}
+```
+
+### find
+
+```ts
+export declare function find(o?: FindOptions): FindFeature;
+```
+
+## `@dzgrid/dom/row-drag`
+
+### DropWhere
+
+```ts
+= @dzgrid/core/row-drag#DropWhere
+```
+
+### MoveStep
+
+```ts
+= @dzgrid/core/row-drag#MoveStep
+```
+
+### ROW_DRAG_KEYS
+
+```ts
+export declare const ROW_DRAG_KEYS: readonly RowDragMessageKey[];
+```
+
+### RowDragApi
+
+```ts
+export interface RowDragApi {
+    move(keys: readonly RowKey[], target: RowDrop, o?: {
+        readonly say?: boolean;
+    }): RowMoveResult;
+    step(key: RowKey, by: MoveStep, o?: {
+        readonly say?: boolean;
+    }): RowMoveResult;
+    readonly dropTargets: {
+        add(el: Element, t: RowDropTarget): () => void;
+    };
+}
+```
+
+### RowDragFeature
+
+```ts
+export interface RowDragFeature<T = unknown> extends GridFeature {
+    api(grid: {
+        readonly kernel: GridKernel<any, any>;
+    }): RowDragApi | null;
+    menuItems<C extends {
+        readonly key: RowKey;
+        readonly grid: MenuGrid;
+    }>(c: C): MenuEntry<C>[];
+    readonly __rows?: T;
+}
+```
+
+### RowDragMessageKey
+
+```ts
+export type RowDragMessageKey = `rmove.${'placed' | 'placedLevel' | 'many' | 'hidden' | 'edge' | 'locked' | 'sorted' | 'grouped' | 'refused' | 'tooMany' | 'cancelled' | 'ghost' | 'up' | 'down' | 'top' | 'bottom' | 'in' | 'out'}`;
+```
+
+### RowDragMessages
+
+```ts
+export interface RowDragMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in RowDragMessageKey]: MessageValue;
+    };
+}
+```
+
+### RowDragOptions
+
+```ts
+export interface RowDragOptions<T = unknown> {
+    readonly column?: string;
+    readonly apply?: boolean;
+    readonly whenSorted?: 'refuse' | 'allow';
+    readonly canDrag?: (row: T) => boolean;
+    readonly canDrop?: (m: RowDropInfo<T>) => boolean;
+    readonly maxRows?: number;
+    readonly drag?: boolean;
+}
+```
+
+### RowDrop
+
+```ts
+= @dzgrid/core/row-drag#RowDrop
+```
+
+### RowDropInfo
+
+```ts
+export interface RowDropInfo<T> {
+    readonly keys: readonly RowKey[];
+    readonly rows: readonly T[];
+    readonly target: RowDrop;
+    readonly parent: RowKey | null;
+}
+```
+
+### RowDropTarget
+
+```ts
+export interface RowDropTarget {
+    accept(keys: readonly RowKey[]): boolean;
+    drop(keys: readonly RowKey[]): void;
+    readonly label?: string;
+}
+```
+
+### RowMove
+
+```ts
+= @dzgrid/core/row-drag#RowMove
+```
+
+### RowMoveResult
+
+```ts
+export type RowMoveResult = 'moved' | 'edge' | 'locked' | 'sorted' | 'grouped' | 'refused' | 'tooMany' | 'unknown';
+```
+
+### rowDrag
+
+```ts
+export declare function rowDrag<T = unknown>(o?: RowDragOptions<T>): RowDragFeature<T>;
+```
+
+## `@dzgrid/dom/dock`
+
+### DOCK_KEYS
+
+```ts
+export declare const DOCK_KEYS: readonly DockMessageKey[];
+```
+
+### DockApi
+
+```ts
+export interface DockApi {
+    show(id: string, area?: DockArea): boolean;
+    hide(id: string): boolean;
+    move(id: string, area: DockArea): boolean;
+    collapse(area: DockArea, on?: boolean): boolean;
+    resize(area: DockArea, px: number): boolean;
+    layout(): DockState;
+    setLayout(layout: unknown): Problem[];
+}
+```
+
+### DockArea
+
+```ts
+= @dzgrid/core/dock#DockArea
+```
+
+### DockAreaState
+
+```ts
+= @dzgrid/core/dock#DockAreaState
+```
+
+### DockFeature
+
+```ts
+export interface DockFeature extends GridFeature {
+    api(grid: {
+        readonly kernel: GridKernel<any, any>;
+    }): DockApi | null;
+}
+```
+
+### DockMessageKey
+
+```ts
+export type DockMessageKey = `dock.${'region' | 'tabs' | 'collapse' | 'expand' | 'close' | 'place' | 'start' | 'end' | 'bottom' | 'width' | 'height'}`;
+```
+
+### DockMessages
+
+```ts
+export interface DockMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in DockMessageKey]: MessageValue;
+    };
+}
+```
+
+### DockOptions
+
+```ts
+export interface DockOptions {
+    readonly open?: Readonly<Record<string, DockArea>>;
+    readonly panels?: readonly DockPanel[];
+    readonly sizes?: {
+        readonly min?: number;
+        readonly max?: number;
+    };
+    readonly onChange?: (layout: DockState) => void;
+}
+```
+
+### DockPanel
+
+```ts
+export interface DockPanel {
+    readonly id: string;
+    readonly title: string | (() => string);
+    readonly area?: DockArea;
+    mount(host: HTMLElement): void | (() => void);
+}
+```
+
+### DockPanelState
+
+```ts
+= @dzgrid/core/dock#DockPanelState
+```
+
+### DockState
+
+```ts
+= @dzgrid/core/dock#DockState
+```
+
+### dock
+
+```ts
+export declare function dock(o?: DockOptions): DockFeature;
+```
+
+## `@dzgrid/dom/pivot`
+
+### PIVOT_KEYS
+
+```ts
+export declare const PIVOT_KEYS: readonly [
+    "pivot.total",
+    "pivot.subtotal",
+    "pivot.count",
+    "pivot.tooMany",
+    "pivot.switch",
+    "pivot.valueChip"
+];
+```
+
+### PivotApi
+
+```ts
+export interface PivotApi {
+    on(): boolean;
+    setOn(on: boolean, o?: {
+        readonly user?: boolean;
+    }): void;
+    by(): readonly string[];
+    setBy(by: readonly string[], o?: {
+        readonly user?: boolean;
+    }): void;
+    desc(): readonly string[];
+    setDesc(ids: readonly string[], o?: {
+        readonly user?: boolean;
+    }): void;
+    name(id: string): string;
+    accepts(id: string): boolean;
+    values(): Fns;
+    setValues(values: Fns, o?: {
+        readonly user?: boolean;
+    }): void;
+    valueColumn(id: string): string | undefined;
+    count(): number;
+    series(o?: {
+        readonly value?: string;
+        readonly level?: number;
+    }): PivotSeries;
+}
+```
+
+### PivotFeature
+
+```ts
+export interface PivotFeature {
+    readonly id: 'pivot';
+    api(grid: Grid): PivotApi | null;
+    make(o: GroupingOptions): GroupShape<unknown>;
+    setup(g: GridContext<unknown>, s: GroupShape<unknown>): (FeatureHandle & {
+        column(): string | undefined;
+        by(): readonly string[];
+    }) | null;
+}
+```
+
+### PivotFeatureOptions
+
+```ts
+export interface PivotFeatureOptions extends Omit<PivotOptions, keyof GroupingOptions | 'labels'> {
+    readonly toggle?: boolean | 'inside' | HTMLElement;
+    readonly valueHeaders?: 'auto' | 'fn' | 'name';
+    readonly labelWidth?: number;
+}
+```
+
+### PivotMessageKey
+
+```ts
+export type PivotMessageKey = `pivot.${'label' | 'empty' | 'remove' | 'grouped' | 'removed' | 'placed' | 'add' | 'total' | 'subtotal' | 'count' | 'tooMany' | 'switch' | 'fnSaid' | 'valueChip'}` | 'zone.add' | 'menu.pivotBy' | 'menu.pivotOff' | 'menu.total' | `fn.${'sum' | 'avg' | 'min' | 'max' | 'count'}`;
+```
+
+### PivotMessages
+
+```ts
+export interface PivotMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in PivotMessageKey]: MessageValue;
+    };
+}
+```
+
+### PivotSeries
+
+```ts
+= @dzgrid/core/pivot#PivotSeries
+```
+
+### pivot
+
+```ts
+export declare function pivot(o?: PivotFeatureOptions): PivotFeature;
+```
+
+## `@dzgrid/dom/pivot-bar`
+
+### PIVOT_BAR_CSS
+
+```ts
+export declare const PIVOT_BAR_CSS: string;
+```
+
+### PIVOT_BAR_KEYS
+
+```ts
+export declare const PIVOT_BAR_KEYS: readonly PivotBarMessageKey[];
+```
+
+### PivotBarMessageKey
+
+```ts
+export type PivotBarMessageKey = `pivot.${'rows' | 'columns' | 'values' | 'valuesEmpty' | 'addValue' | 'removeValue' | 'valueAdded' | 'valueRemoved' | 'valuePlaced' | 'order' | 'reversed' | 'ordered' | 'refused' | 'mode'}`;
+```
+
+### PivotBarMessages
+
+```ts
+export interface PivotBarMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in PivotBarMessageKey]: MessageValue;
+    };
+}
+```
+
+### PivotBarOptions
+
+```ts
+export interface PivotBarOptions {
+    readonly use: {
+        readonly grouping: {
+            api(grid: Grid): {
+                by(): readonly string[];
+                setBy(by: readonly string[], o?: {
+                    readonly user?: boolean;
+                }): void;
+            } | null;
+        };
+        readonly pivot: {
+            api(grid: Grid): PivotApi | null;
+        };
+        readonly columns?: {
+            api(grid: Grid): {
+                readonly dropTargets: {
+                    add(el: Element, t: {
+                        accept(column: string): boolean;
+                        drop(column: string): void;
+                        readonly label?: string;
+                    }): () => void;
+                };
+            } | null;
+        };
+    };
+    readonly panel?: boolean;
+}
+```
+
+### pivotBar
+
+```ts
+export declare function pivotBar(o: PivotBarOptions): GridFeature;
+```
+
+## `@dzgrid/dom/row-numbers`
+
+### ROW_NUMBERS_KEYS
+
+```ts
+export declare const ROW_NUMBERS_KEYS: readonly [
+    "rownum.header"
+];
+```
+
+### RowNumbersMessageKey
+
+```ts
+export type RowNumbersMessageKey = 'rownum.header';
+```
+
+### RowNumbersMessages
+
+```ts
+export interface RowNumbersMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in RowNumbersMessageKey]: MessageValue;
+    };
+}
+```
+
+### rowNumbers
+
+```ts
+export declare function rowNumbers(): GridFeature;
+```
+
+## `@dzgrid/dom/grouping`
+
+### GROUP_KEYS
+
+```ts
+export declare const GROUP_KEYS: readonly [
+    "group.label",
+    "group.blank",
+    "group.total",
+    "group.grandTotal",
+    "group.expanded",
+    "group.collapsed",
+    "group.expandedSome"
+];
+```
+
+### GroupMessageKey
+
+```ts
+export type GroupMessageKey = 'group.label' | 'group.blank' | 'group.total' | 'group.grandTotal' | 'group.expanded' | 'group.collapsed' | 'group.expandedSome' | 'zone.label' | 'zone.empty' | 'zone.remove' | 'zone.grouped' | 'zone.removed' | 'zone.placed' | 'menu.groupBy' | 'menu.groupOff';
+```
+
+### GroupMessages
+
+```ts
+export interface GroupMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in GroupMessageKey]: MessageValue;
+    };
+}
+```
+
+### GroupingApi
+
+```ts
+export interface GroupingApi {
+    by(): readonly string[];
+    setBy(by: readonly string[], o?: {
+        readonly user?: boolean;
+        readonly host?: boolean;
+    }): void;
+    expandAll(depth?: number): void;
+    collapseAll(): void;
+    totals(): Readonly<Record<string, unknown>>;
+    accepts?(id: string): boolean;
+}
+```
+
+### GroupingFeature
+
+```ts
+export interface GroupingFeature extends GridFeature {
+    api(grid: {
+        readonly kernel: GridKernel<any, any>;
+    }): GroupingApi | null;
+}
+```
+
+### GroupingFeatureOptions
+
+```ts
+export interface GroupingFeatureOptions extends GroupingOptions {
+    readonly column?: string;
+    readonly indent?: number;
+    readonly sticky?: number;
+    readonly pivot?: {
+        make(o: GroupingOptions): GroupShape<unknown>;
+        setup(g: GridContext<unknown>, s: GroupShape<unknown>): (FeatureHandle & {
+            column(): string | undefined;
+            by(): readonly string[];
+        }) | null;
+    };
+}
+```
+
+### grouping
+
+```ts
+export declare function grouping(o?: GroupingFeatureOptions): GroupingFeature;
+```
+
+## `@dzgrid/dom/group-zone`
+
+### GroupZoneOptions
+
+```ts
+export interface GroupZoneOptions {
+    readonly use: {
+        readonly grouping: {
+            api(grid: Grid): GroupingApiLike | null;
+        };
+        readonly columns?: {
+            api(grid: Grid): {
+                readonly dropTargets: {
+                    add(el: Element, t: {
+                        accept(column: string): boolean;
+                        drop(column: string): void;
+                        readonly label?: string;
+                    }): () => void;
+                };
+            } | null;
+        };
+    };
+    readonly texts?: 'pivot';
+}
+```
+
+### GroupingApiLike
+
+```ts
+export interface GroupingApiLike {
+    by(): readonly string[];
+    setBy(by: readonly string[], o?: {
+        readonly user?: boolean;
+    }): void;
+    accepts?(id: string): boolean;
+}
+```
+
+### ZONE_CSS
+
+```ts
+export declare const ZONE_CSS: string;
+```
+
+### ZONE_KEYS
+
+```ts
+export declare const ZONE_KEYS: readonly [
+    "zone.label",
+    "zone.empty",
+    "zone.remove",
+    "zone.grouped",
+    "zone.removed",
+    "zone.placed"
+];
+```
+
+### groupZone
+
+```ts
+export declare function groupZone(o: GroupZoneOptions): GridFeature;
+```
+
+## `@dzgrid/dom/filters-panel`
+
+### FILTERS_PANEL_KEYS
+
+```ts
+export declare const FILTERS_PANEL_KEYS: readonly FiltersPanelMessageKey[];
+```
+
+### FiltersPanelApi
+
+```ts
+export interface FiltersPanelApi {
+    open(column?: string): boolean;
+    close(): void;
+    toggle(): boolean;
+    readonly isOpen: boolean;
+}
+```
+
+### FiltersPanelFeature
+
+```ts
+export interface FiltersPanelFeature extends GridFeature {
+    api(grid: {
+        readonly kernel: GridKernel<any, any>;
+    }): FiltersPanelApi | null;
+}
+```
+
+### FiltersPanelMessageKey
+
+```ts
+export type FiltersPanelMessageKey = `fpanel.${'title' | 'close' | 'clearAll' | 'search' | 'none' | 'matches' | 'active' | 'count'}`;
+```
+
+### FiltersPanelMessages
+
+```ts
+export interface FiltersPanelMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in FiltersPanelMessageKey]: MessageValue;
+    };
+}
+```
+
+### FiltersPanelOptions
+
+```ts
+export interface FiltersPanelOptions {
+    readonly side?: 'start' | 'end';
+    readonly open?: boolean;
+    readonly button?: boolean;
+}
+```
+
+### filtersPanel
+
+```ts
+export declare function filtersPanel(o?: FiltersPanelOptions): FiltersPanelFeature;
+```
+
+## `@dzgrid/dom/columns-panel`
+
+### COLUMNS_CHOOSER_KEYS
+
+```ts
+export declare const COLUMNS_CHOOSER_KEYS: readonly ColumnsChooserMessageKey[];
+```
+
+### ColumnsChooserApi
+
+```ts
+export interface ColumnsChooserApi {
+    open(anchor?: HTMLElement): boolean;
+    close(): void;
+    readonly isOpen: boolean;
+}
+```
+
+### ColumnsChooserFeature
+
+```ts
+export interface ColumnsChooserFeature extends GridFeature {
+    api(grid: Grid): ColumnsChooserApi | null;
+}
+```
+
+### ColumnsChooserMessageKey
+
+```ts
+export type ColumnsChooserMessageKey = `chooser.${'title' | 'search' | 'list' | 'handle' | 'up' | 'down' | 'placed' | 'showAll' | 'reset' | 'close' | 'none' | 'matches' | 'shown' | 'hidden' | 'allShown' | 'resetDone' | 'pinnedStart' | 'pinnedEnd' | 'last' | 'clearToMove' | 'inClosedGroup'}`;
+```
+
+### ColumnsChooserOptions
+
+```ts
+export interface ColumnsChooserOptions {
+    readonly onClose?: () => void;
+}
+```
+
+### ColumnsMessages
+
+```ts
+export interface ColumnsMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in ColumnsMessageKey | ColumnsChooserMessageKey]: MessageValue;
+    };
+}
+```
+
+### columnsChooser
+
+```ts
+export declare function columnsChooser(o?: ColumnsChooserOptions): ColumnsChooserFeature;
+```
+
+## `@dzgrid/dom/state`
+
+### Density
+
+```ts
+= @dzgrid/core/state#Density
+```
+
+### GridState
+
+```ts
+= @dzgrid/core/state#GridState
+```
+
+### GridStateApi
+
+```ts
+export interface GridStateApi {
+    state(): GridState;
+    setState(state: unknown): Problem[];
+    reset(): Problem[];
+}
+```
+
+### GridStateColumn
+
+```ts
+= @dzgrid/core/state#GridStateColumn
+```
+
+### GridStateFeature
+
+```ts
+export interface GridStateFeature extends GridFeature {
+    api(grid: {
+        readonly kernel: GridKernel<any>;
+    }): GridStateApi | null;
+}
+```
+
+### GridStateOptions
+
+```ts
+export interface GridStateOptions {
+    readonly debounce?: number;
+    readonly persist?: {
+        readonly key: string;
+        readonly include?: readonly StatePart[];
+    };
+    readonly initial?: {
+        readonly v: 1;
+    } & Partial<GridState>;
+}
+```
+
+### StatePart
+
+```ts
+= @dzgrid/core/state#StatePart
+```
+
+### fromSearchParams
+
+```ts
+export declare function fromSearchParams(params: URLSearchParams, o?: {
+    readonly name?: string;
+    readonly include?: readonly ('filter' | 'quick')[];
+}): {
+    state: GridState | null;
+    problems: Problem[];
+};
+```
+
+### gridState
+
+```ts
+export declare function gridState(o?: GridStateOptions): GridStateFeature;
+```
+
+### persistLocal
+
+```ts
+export declare function persistLocal(grid: {
+    readonly kernel: GridKernel<any>;
+}, key: string, o?: {
+    readonly include?: readonly StatePart[];
+}): () => void;
+```
+
+### toSearchParams
+
+```ts
+export declare function toSearchParams(state: GridState, o?: {
+    readonly name?: string;
+    readonly include?: readonly ('filter' | 'quick')[];
+}): {
+    params: URLSearchParams;
+    problems: Problem[];
+};
+```
+
+## `@dzgrid/dom/pinned-rows`
+
+### PINNED_KEYS
+
+```ts
+export declare const PINNED_KEYS: readonly [
+    "pinned.top",
+    "pinned.bottom"
+];
+```
+
+### PinnedMessageKey
+
+```ts
+export type PinnedMessageKey = 'pinned.top' | 'pinned.bottom';
+```
+
+### PinnedMessages
+
+```ts
+export interface PinnedMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in PinnedMessageKey]: MessageValue;
+    };
+}
+```
+
+### PinnedRowsApi
+
+```ts
+export interface PinnedRowsApi<T> {
+    set(rows: PinnedRowsOptions<T>): void;
+    get(): {
+        readonly top: readonly T[];
+        readonly bottom: readonly T[];
+    };
+    rows(side: PinnedSide): DisplayedRows<T>;
+}
+```
+
+### PinnedRowsFeature
+
+```ts
+export interface PinnedRowsFeature<T> extends GridFeature {
+    api(grid: {
+        readonly kernel: GridKernel<T, any>;
+    }): PinnedRowsApi<T> | null;
+}
+```
+
+### PinnedRowsOptions
+
+```ts
+export interface PinnedRowsOptions<T> {
+    readonly top?: readonly T[];
+    readonly bottom?: readonly T[];
+}
+```
+
+### PinnedSide
+
+```ts
+export type PinnedSide = 'top' | 'bottom';
+```
+
+### pinnedRows
+
+```ts
+export declare function pinnedRows<T = unknown>(o?: PinnedRowsOptions<T>): PinnedRowsFeature<T>;
+```
+
+## `@dzgrid/dom/auto-height`
+
+### autoHeight
+
+```ts
+export declare function autoHeight(): GridFeature;
+```
+
+## `@dzgrid/dom/row-gaps`
+
+### GapCtx
+
+```ts
+= @dzgrid/core/row-gaps#GapCtx
+```
+
+### GapRule
+
+```ts
+= @dzgrid/core/row-gaps#GapRule
+```
+
+### RowGapsOptions
+
+```ts
+export interface RowGapsOptions<T> {
+    readonly before: GapRule<T>;
+    readonly size?: number;
+}
+```
+
+### roots
+
+```ts
+= ./row-gaps/index.js#roots
+```
+
+### rowGaps
+
+```ts
+export declare function rowGaps<T>(o: RowGapsOptions<T>): GridFeature;
+```
+
+## `@dzgrid/dom/print`
+
+### PRINT_KEYS
+
+```ts
+export declare const PRINT_KEYS: readonly [
+    "print.truncated",
+    "print.page"
+];
+```
+
+### PrintMessageKey
+
+```ts
+export type PrintMessageKey = 'print.truncated' | 'print.page';
+```
+
+### PrintMessages
+
+```ts
+export interface PrintMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in PrintMessageKey]: MessageValue;
+    };
+}
+```
+
+### PrintOptions
+
+```ts
+export interface PrintOptions {
+    readonly maxRows?: number;
+    readonly title?: string;
+    readonly header?: false;
+}
+```
+
+### PrintableGrid
+
+```ts
+export type PrintableGrid = {
+    readonly kernel: GridKernel<any, any>;
+};
+```
+
+### preparePrint
+
+```ts
+export declare function preparePrint(grid: PrintableGrid, o?: PrintOptions): Promise<(() => void) | null>;
+```
+
+### print
+
+```ts
+export declare function print(grid: PrintableGrid, o?: PrintOptions): Promise<void>;
+```
+
+## `@dzgrid/dom/print-menu`
+
+### printOnMenu
+
+```ts
+export declare function printOnMenu(grid: PrintableGrid, o?: PrintOptions): void;
+```
+
+## `@dzgrid/dom/fresh-rows`
+
+### FRESH_KEYS
+
+```ts
+export declare const FRESH_KEYS: readonly [
+    "announce.fresh"
+];
+```
+
+### FreshMessageKey
+
+```ts
+export type FreshMessageKey = 'announce.fresh';
+```
+
+### FreshMessages
+
+```ts
+export interface FreshMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in FreshMessageKey]: MessageValue;
+    };
+}
+```
+
+### FreshRowsOptions
+
+```ts
+export interface FreshRowsOptions {
+    readonly ms?: number;
+    readonly rowsArrived?: (keys: readonly RowKey[], source: ChangeSource) => void;
+}
+```
+
+### freshRows
+
+```ts
+export declare function freshRows(o?: FreshRowsOptions): GridFeature;
+```
+
+## `@dzgrid/dom/motion-gsap`
+
+### CellMotion
+
+```ts
+export interface CellMotion {
+    readonly key: RowKey;
+    readonly column: string;
+    readonly value: unknown;
+    readonly text: string;
+    readonly previousText: string;
+    readonly row: unknown;
+    readonly context: unknown;
+    readonly reduced: boolean;
+}
+```
+
+### Gsap
+
+```ts
+export type Gsap = typeof gsap;
+```
+
+### Motion
+
+```ts
+export interface Motion extends GridFeature {
+    load(): Promise<boolean>;
+    readonly loaded: boolean;
+}
+```
+
+### MotionEffects
+
+```ts
+export interface MotionEffects {
+    readonly flip?: boolean;
+    readonly enter?: boolean;
+    readonly flash?: boolean | {
+        readonly hold?: number;
+        readonly fade?: number;
+    };
+    readonly page?: boolean;
+    readonly popup?: boolean;
+    readonly expand?: boolean;
+}
+```
+
+### MotionOptions
+
+```ts
+export interface MotionOptions {
+    readonly preset?: 'sober';
+    readonly effects?: MotionEffects;
+    readonly gsap?: Gsap;
+    readonly onCell?: (el: HTMLElement, c: CellMotion, reason: 'changed' | 'saving' | 'saved' | 'failed') => void | false;
+    readonly onRow?: (el: HTMLElement, c: RowMotion, reason: 'entered' | 'moved') => void | false;
+}
+```
+
+### RowMotion
+
+```ts
+export interface RowMotion {
+    readonly key: RowKey;
+    readonly row: unknown;
+    readonly index: number;
+    readonly context: unknown;
+    readonly reduced: boolean;
+}
+```
+
+### motion
+
+```ts
+export declare function motion(o?: MotionOptions): Motion;
+```
+
+## `@dzgrid/dom/filters`
+
+### DateAdapter
+
+```ts
+export interface DateAdapter {
+    readonly host: HTMLElement;
+    readonly grid: HTMLElement;
+    readonly panel: HTMLElement;
+    readonly kind: 'day' | 'instant';
+    readonly op: string;
+    settings(): DateSettings;
+    changed(now: boolean): void;
+    readonly inject: boolean;
+    readonly nonce?: string;
+}
+```
+
+### DateCalendarOptions
+
+```ts
+export interface DateCalendarOptions {
+    readonly months?: number;
+    readonly presets?: readonly RelativeRange[];
+}
+```
+
+### DateField
+
+```ts
+export interface DateField {
+    write(p: DatePart | null): void;
+    read(): DatePart | null | undefined;
+    update(): void;
+    closePanel(): boolean;
+    focus(): void;
+    destroy(): void;
+}
+```
+
+### DateKit
+
+```ts
+export interface DateKit {
+    adapt(a: DateAdapter): DateField;
+}
+```
+
+### DateKitName
+
+```ts
+export type DateKitName = 'date' | 'range' | 'moment';
+```
+
+### DatePart
+
+```ts
+export interface DatePart {
+    readonly value?: string;
+    readonly valueTo?: string;
+    readonly day?: string;
+    readonly dayTo?: string;
+    readonly at?: string;
+    readonly atTo?: string;
+    readonly range?: RelativeRange;
+}
+```
+
+### DateSettings
+
+```ts
+export interface DateSettings {
+    readonly ctx: LocaleCtx;
+    readonly today: string;
+    readonly label: string;
+    readonly messages?: Readonly<Record<string, object>>;
+    readonly calendar?: DateCalendarOptions;
+}
+```
+
+### FILTER_KEYS
+
+```ts
+export declare const FILTER_KEYS: ("filter.op.contains" | "filter.op.notContains" | "filter.op.equals" | "filter.op.notEqual" | "filter.op.startsWith" | "filter.op.endsWith" | "filter.op.blank" | "filter.op.notBlank" | "filter.op.lt" | "filter.op.lte" | "filter.op.gt" | "filter.op.gte" | "filter.op.between" | "filter.op.onDay" | "filter.op.notOnDay" | "filter.op.betweenDays" | "filter.op.before" | "filter.op.after" | "filter.op.onOrBefore" | "filter.op.onOrAfter" | "filter.inputLabel" | "filter.summaryActive" | "filter.clear" | "filter.invalid" | "announce.filtered" | "announce.filteredOpen" | "filter.popupLabel" | "header.withFilter" | "filter.op" | "filter.value" | "filter.valueTo" | "filter.apply" | "filter.all" | "filter.yes" | "filter.no" | "filter.date" | "filter.dateTime" | "filter.period" | "filter.zone" | "filter.loadingDates" | "filter.loadFailed" | "filter.set.search" | "filter.set.all" | "filter.set.allShown" | "filter.set.blanks" | "filter.set.option" | "filter.set.count" | "filter.set.truncated" | "filter.set.failed" | "filter.floatingToggle" | "announce.floatingHidden" | "announce.floatingShown")[];
+```
+
+### FiltersFeature
+
+```ts
+export interface FiltersFeature extends GridFeature {
+    openFilter(column: string): boolean;
+    closeFilter(): void;
+    readonly floating: FloatingToggle;
+}
+```
+
+### FiltersOptions
+
+```ts
+export interface FiltersOptions {
+    readonly floating?: boolean;
+    readonly debounceMs?: number;
+    readonly popup?: boolean;
+    readonly loadDates?: (kit: DateKitName) => Promise<DateKit>;
+    readonly dateMessages?: Readonly<Record<string, object>>;
+    readonly dateCalendar?: DateCalendarOptions;
+    readonly apply?: 'button' | 'live';
+    readonly dateZone?: boolean;
+    readonly busyFlash?: number;
+    readonly loadSet?: () => Promise<SetKit>;
+    readonly maxConditions?: number;
+    readonly matchCase?: boolean;
+    readonly rowHeight?: number;
+}
+```
+
+### SetKit
+
+```ts
+export interface SetKit {
+    body(get: () => C, doc: Document, changed: Changed, note: typeof notice, g: GridContext<unknown>, mount: typeof mounted): Omit<Body, 'edits'>;
+    readonly css: string;
+}
+```
+
+### filters
+
+```ts
+export declare function filters(o?: FiltersOptions): FiltersFeature;
+```
+
+## `@dzgrid/dom/totals-row`
+
+### TOTALS_KEYS
+
+```ts
+export declare const TOTALS_KEYS: readonly [
+    "totals.label"
+];
+```
+
+### TotalsMessageKey
+
+```ts
+export type TotalsMessageKey = 'totals.label';
+```
+
+### TotalsMessages
+
+```ts
+export interface TotalsMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in TotalsMessageKey]: MessageValue;
+    };
+}
+```
+
+### TotalsRowApi
+
+```ts
+export interface TotalsRowApi {
+    set(values: Readonly<Record<string, unknown>> | null): void;
+    values(): Readonly<Record<string, unknown>>;
+}
+```
+
+### TotalsRowFeature
+
+```ts
+export interface TotalsRowFeature extends GridFeature {
+    api(grid: {
+        readonly kernel: GridKernel<any, any>;
+    }): TotalsRowApi | null;
+}
+```
+
+### totalsRow
+
+```ts
+export declare function totalsRow(): TotalsRowFeature;
+```
+
+## `@dzgrid/dom/vertical-headers`
+
+### VerticalHeadersOptions
+
+```ts
+export interface VerticalHeadersOptions {
+    readonly maxHeight?: number;
+}
+```
+
+### verticalHeaders
+
+```ts
+export declare function verticalHeaders(o?: VerticalHeadersOptions): GridFeature;
+```
+
+## `@dzgrid/dom/theme`
+
+### ICONS_CSS
+
+```ts
+export declare const ICONS_CSS: string;
+```
+
+### THEME_KEYS
+
+```ts
+export declare const THEME_KEYS: readonly (keyof GridTheme)[];
+```
+
+### injectIconStyles
+
+```ts
+export declare function injectIconStyles(target: Document | ShadowRoot, nonce?: string): void;
+```
+
+### theming
+
+```ts
+export declare function theming(): GridFeature;
+```
+
+## `@dzgrid/dom/wrapped-headers`
+
+### WRAPPED_HEADERS_CSS
+
+```ts
+export declare const WRAPPED_HEADERS_CSS: string;
+```
+
+### WrappedHeadersOptions
+
+```ts
+export interface WrappedHeadersOptions {
+    readonly maxLines?: number;
+}
+```
+
+### wrappedHeaders
+
+```ts
+export declare function wrappedHeaders(o?: WrappedHeadersOptions): GridFeature;
+```
+
+## `@dzgrid/dom/column-hover`
+
+### COLUMN_HOVER_CSS
+
+```ts
+export declare const COLUMN_HOVER_CSS = "@layer dzgrid.skin{.dzg-cell[data-col-hover]:not(:focus),.dzg-hcell[data-col-hover]{background-image:linear-gradient(var(--dzg-column-hover-bg),var(--dzg-column-hover-bg))}}";
+```
+
+### columnHover
+
+```ts
+export declare function columnHover(): GridFeature;
+```
+
+## `@dzgrid/dom/responsive`
+
+### ResponsiveOptions
+
+```ts
+export interface ResponsiveOptions {
+    readonly priority?: Readonly<Record<string, number>>;
+}
+```
+
+### responsive
+
+```ts
+export declare function responsive(o?: ResponsiveOptions): GridFeature;
+```
+
+## `@dzgrid/dom/import`
+
+### FileImportApi
+
+```ts
+export interface FileImportApi {
+    bind(button: HTMLElement): () => void;
+    open(): void;
+    read(file: Blob & {
+        readonly name?: string;
+    }): Promise<void>;
+}
+```
+
+### FileImportFeature
+
+```ts
+export interface FileImportFeature extends GridFeature {
+    api(grid: {
+        readonly kernel: GridKernel<any, any>;
+    }): FileImportApi | null;
+}
+```
+
+### FileImportOptions
+
+```ts
+export interface FileImportOptions {
+    readonly accept?: readonly ImportFormat[];
+    readonly onRows: (rows: Record<string, unknown>[], problems: readonly Problem[], file: ImportedFile) => void;
+    readonly drop?: boolean;
+}
+```
+
+### IMPORT_KEYS
+
+```ts
+export declare const IMPORT_KEYS: readonly [
+    "import.drop",
+    "import.read",
+    "import.failed"
+];
+```
+
+### ImportFormat
+
+```ts
+export type ImportFormat = 'csv' | 'xlsx';
+```
+
+### ImportMessageKey
+
+```ts
+export type ImportMessageKey = 'import.drop' | 'import.read' | 'import.failed';
+```
+
+### ImportMessages
+
+```ts
+export interface ImportMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in ImportMessageKey]: MessageValue;
+    };
+}
+```
+
+### ImportedFile
+
+```ts
+export interface ImportedFile {
+    readonly name: string;
+    readonly format: ImportFormat | null;
+}
+```
+
+### fileImport
+
+```ts
+export declare function fileImport(o: FileImportOptions): FileImportFeature;
+```
+
+## Texts bundles
+
+One bundle per language and feature, spread into the grid's `messages` (see [Features](../../features/)).
+
+### `@dzgrid/dom/locales/en`
+
+```ts
+export declare const EN: {
+    locale: string;
+    text: {
+        'grid.label': string;
+        'grid.noRows': string;
+        'grid.noMatches': string;
+        'grid.loading': string;
+        'grid.error': string;
+        'grid.retry': string;
+        'sort.ascending': string;
+        'sort.descending': string;
+        'sort.none': string;
+        'sort.priority': string;
+        'announce.sorted': string;
+        'announce.sortCleared': string;
+        'announce.rows': {
+            one: string;
+            other: string;
+        };
+        'announce.selected': {
+            one: string;
+            other: string;
+        };
+        'announce.selectedAll': string;
+        'announce.selectionCleared': string;
+        'announce.selectionReduced': {
+            one: string;
+            other: string;
+        };
+        'announce.rangeCancelled': string;
+        'announce.loading': string;
+        'announce.error': string;
+        'selection.row': string;
+        'selection.all': string;
+        'selection.column': string;
+        'resize.handle': string;
+        'pinned.start': string;
+        'pinned.end': string;
+        'header.withSort': string;
+        'header.sortHint': string;
+        'cell.yes': string;
+        'cell.no': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr`
+
+```ts
+export declare const FR: {
+    locale: string;
+    text: {
+        'grid.label': string;
+        'grid.noRows': string;
+        'grid.noMatches': string;
+        'grid.loading': string;
+        'grid.error': string;
+        'grid.retry': string;
+        'sort.ascending': string;
+        'sort.descending': string;
+        'sort.none': string;
+        'sort.priority': string;
+        'announce.sorted': string;
+        'announce.sortCleared': string;
+        'announce.rows': {
+            one: string;
+            many: string;
+            other: string;
+        };
+        'announce.selected': {
+            one: string;
+            many: string;
+            other: string;
+        };
+        'announce.selectedAll': string;
+        'announce.selectionCleared': string;
+        'announce.selectionReduced': {
+            one: string;
+            many: string;
+            other: string;
+        };
+        'announce.rangeCancelled': string;
+        'announce.loading': string;
+        'announce.error': string;
+        'selection.row': string;
+        'selection.all': string;
+        'selection.column': string;
+        'resize.handle': string;
+        'pinned.start': string;
+        'pinned.end': string;
+        'header.withSort': string;
+        'header.sortHint': string;
+        'cell.yes': string;
+        'cell.no': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar`
+
+```ts
+export declare const AR: {
+    locale: string;
+    text: {
+        'grid.label': string;
+        'grid.noRows': string;
+        'grid.noMatches': string;
+        'grid.loading': string;
+        'grid.error': string;
+        'grid.retry': string;
+        'sort.ascending': string;
+        'sort.descending': string;
+        'sort.none': string;
+        'sort.priority': string;
+        'announce.sorted': string;
+        'announce.sortCleared': string;
+        'announce.rows': {
+            zero: string;
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        'announce.selected': {
+            zero: string;
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        'announce.selectedAll': string;
+        'announce.selectionCleared': string;
+        'announce.selectionReduced': {
+            zero: string;
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        'announce.rangeCancelled': string;
+        'announce.loading': string;
+        'announce.error': string;
+        'selection.row': string;
+        'selection.all': string;
+        'selection.column': string;
+        'resize.handle': string;
+        'pinned.start': string;
+        'pinned.end': string;
+        'header.withSort': string;
+        'header.sortHint': string;
+        'cell.yes': string;
+        'cell.no': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-filters`
+
+```ts
+export declare const EN_FILTERS: {
+    locale: string;
+    text: {
+        "filter.conditionAdd"?: MessageValue;
+        "filter.conditionRemove"?: MessageValue;
+        "filter.joinLabel"?: MessageValue;
+        "filter.joinAnd"?: MessageValue;
+        "filter.joinOr"?: MessageValue;
+        "filter.matchCase"?: MessageValue;
+        "filter.conditionAdded"?: MessageValue;
+        "filter.conditionRemoved"?: MessageValue;
+        "filter.summaryConditions"?: MessageValue;
+        'filter.inputLabel': string;
+        'filter.summaryActive': string;
+        'filter.clear': string;
+        'filter.invalid': string;
+        'announce.filtered': string;
+        'announce.filteredOpen': string;
+        'filter.popupLabel': string;
+        'header.withFilter': string;
+        'filter.op': string;
+        'filter.value': string;
+        'filter.valueTo': string;
+        'filter.apply': string;
+        'filter.op.contains': string;
+        'filter.op.notContains': string;
+        'filter.op.equals': string;
+        'filter.op.notEqual': string;
+        'filter.op.startsWith': string;
+        'filter.op.endsWith': string;
+        'filter.op.blank': string;
+        'filter.op.notBlank': string;
+        'filter.op.lt': string;
+        'filter.op.lte': string;
+        'filter.op.gt': string;
+        'filter.op.gte': string;
+        'filter.op.between': string;
+        'filter.all': string;
+        'filter.yes': string;
+        'filter.no': string;
+        'filter.op.onDay': string;
+        'filter.op.notOnDay': string;
+        'filter.op.betweenDays': string;
+        'filter.op.before': string;
+        'filter.op.after': string;
+        'filter.op.onOrBefore': string;
+        'filter.op.onOrAfter': string;
+        'filter.date': string;
+        'filter.dateTime': string;
+        'filter.period': string;
+        'filter.zone': string;
+        'filter.loadingDates': string;
+        'filter.loadFailed': string;
+        'filter.set.search': string;
+        'filter.set.all': string;
+        'filter.set.allShown': string;
+        'filter.set.blanks': string;
+        'filter.set.option': string;
+        'filter.set.count': {
+            one: string;
+            other: string;
+        };
+        'filter.set.truncated': string;
+        'filter.set.failed': string;
+        'filter.floatingToggle': string;
+        'announce.floatingHidden': string;
+        'announce.floatingShown': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-filters`
+
+```ts
+export declare const FR_FILTERS: {
+    locale: string;
+    text: {
+        "filter.conditionAdd"?: MessageValue;
+        "filter.conditionRemove"?: MessageValue;
+        "filter.joinLabel"?: MessageValue;
+        "filter.joinAnd"?: MessageValue;
+        "filter.joinOr"?: MessageValue;
+        "filter.matchCase"?: MessageValue;
+        "filter.conditionAdded"?: MessageValue;
+        "filter.conditionRemoved"?: MessageValue;
+        "filter.summaryConditions"?: MessageValue;
+        'filter.inputLabel': string;
+        'filter.summaryActive': string;
+        'filter.clear': string;
+        'filter.invalid': string;
+        'announce.filtered': string;
+        'announce.filteredOpen': string;
+        'filter.popupLabel': string;
+        'header.withFilter': string;
+        'filter.op': string;
+        'filter.value': string;
+        'filter.valueTo': string;
+        'filter.apply': string;
+        'filter.op.contains': string;
+        'filter.op.notContains': string;
+        'filter.op.equals': string;
+        'filter.op.notEqual': string;
+        'filter.op.startsWith': string;
+        'filter.op.endsWith': string;
+        'filter.op.blank': string;
+        'filter.op.notBlank': string;
+        'filter.op.lt': string;
+        'filter.op.lte': string;
+        'filter.op.gt': string;
+        'filter.op.gte': string;
+        'filter.op.between': string;
+        'filter.all': string;
+        'filter.yes': string;
+        'filter.no': string;
+        'filter.op.onDay': string;
+        'filter.op.notOnDay': string;
+        'filter.op.betweenDays': string;
+        'filter.op.before': string;
+        'filter.op.after': string;
+        'filter.op.onOrBefore': string;
+        'filter.op.onOrAfter': string;
+        'filter.date': string;
+        'filter.dateTime': string;
+        'filter.period': string;
+        'filter.zone': string;
+        'filter.loadingDates': string;
+        'filter.loadFailed': string;
+        'filter.set.search': string;
+        'filter.set.all': string;
+        'filter.set.allShown': string;
+        'filter.set.blanks': string;
+        'filter.set.option': string;
+        'filter.set.count': {
+            one: string;
+            many: string;
+            other: string;
+        };
+        'filter.set.truncated': string;
+        'filter.set.failed': string;
+        'filter.floatingToggle': string;
+        'announce.floatingHidden': string;
+        'announce.floatingShown': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-filters`
+
+```ts
+export declare const AR_FILTERS: {
+    locale: string;
+    text: {
+        "filter.conditionAdd"?: MessageValue;
+        "filter.conditionRemove"?: MessageValue;
+        "filter.joinLabel"?: MessageValue;
+        "filter.joinAnd"?: MessageValue;
+        "filter.joinOr"?: MessageValue;
+        "filter.matchCase"?: MessageValue;
+        "filter.conditionAdded"?: MessageValue;
+        "filter.conditionRemoved"?: MessageValue;
+        "filter.summaryConditions"?: MessageValue;
+        'filter.inputLabel': string;
+        'filter.summaryActive': string;
+        'filter.clear': string;
+        'filter.invalid': string;
+        'announce.filtered': string;
+        'announce.filteredOpen': string;
+        'filter.popupLabel': string;
+        'header.withFilter': string;
+        'filter.op': string;
+        'filter.value': string;
+        'filter.valueTo': string;
+        'filter.apply': string;
+        'filter.op.contains': string;
+        'filter.op.notContains': string;
+        'filter.op.equals': string;
+        'filter.op.notEqual': string;
+        'filter.op.startsWith': string;
+        'filter.op.endsWith': string;
+        'filter.op.blank': string;
+        'filter.op.notBlank': string;
+        'filter.op.lt': string;
+        'filter.op.lte': string;
+        'filter.op.gt': string;
+        'filter.op.gte': string;
+        'filter.op.between': string;
+        'filter.all': string;
+        'filter.yes': string;
+        'filter.no': string;
+        'filter.op.onDay': string;
+        'filter.op.notOnDay': string;
+        'filter.op.betweenDays': string;
+        'filter.op.before': string;
+        'filter.op.after': string;
+        'filter.op.onOrBefore': string;
+        'filter.op.onOrAfter': string;
+        'filter.date': string;
+        'filter.dateTime': string;
+        'filter.period': string;
+        'filter.zone': string;
+        'filter.loadingDates': string;
+        'filter.loadFailed': string;
+        'filter.set.search': string;
+        'filter.set.all': string;
+        'filter.set.allShown': string;
+        'filter.set.blanks': string;
+        'filter.set.option': string;
+        'filter.set.count': {
+            zero: string;
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        'filter.set.truncated': string;
+        'filter.set.failed': string;
+        'filter.floatingToggle': string;
+        'announce.floatingHidden': string;
+        'announce.floatingShown': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-pagination`
+
+```ts
+export declare const EN_PAGINATION: {
+    locale: string;
+    text: {
+        'pager.label': string;
+        'pager.first': string;
+        'pager.prev': string;
+        'pager.next': string;
+        'pager.last': string;
+        'pager.page': string;
+        'pager.pageOpen': string;
+        'pager.size': string;
+        'count.range': string;
+        'count.rangeOpen': string;
+        'count.filtered': string;
+        'selected.hidden': string;
+        'selected.selectAll': {
+            one: string;
+            other: string;
+        };
+        'selected.clear': string;
+        'announce.page': string;
+        'announce.pageOpen': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-pagination`
+
+```ts
+export declare const FR_PAGINATION: {
+    locale: string;
+    text: {
+        'pager.label': string;
+        'pager.first': string;
+        'pager.prev': string;
+        'pager.next': string;
+        'pager.last': string;
+        'pager.page': string;
+        'pager.pageOpen': string;
+        'pager.size': string;
+        'count.range': string;
+        'count.rangeOpen': string;
+        'count.filtered': string;
+        'selected.hidden': string;
+        'selected.selectAll': {
+            one: string;
+            many: string;
+            other: string;
+        };
+        'selected.clear': string;
+        'announce.page': string;
+        'announce.pageOpen': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-pagination`
+
+```ts
+export declare const AR_PAGINATION: {
+    locale: string;
+    text: {
+        'pager.label': string;
+        'pager.first': string;
+        'pager.prev': string;
+        'pager.next': string;
+        'pager.last': string;
+        'pager.page': string;
+        'pager.pageOpen': string;
+        'pager.size': string;
+        'count.range': string;
+        'count.rangeOpen': string;
+        'count.filtered': string;
+        'selected.hidden': string;
+        'selected.selectAll': {
+            zero: string;
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        'selected.clear': string;
+        'announce.page': string;
+        'announce.pageOpen': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-export`
+
+```ts
+export declare const EN_EXPORT: {
+    locale: string;
+    text: {
+        'export.fileName': string;
+        'announce.exportStarted': string;
+        'announce.exportDone': string;
+        'announce.exportDoneHidden': string;
+        'announce.exportDoneOpen': string;
+        'announce.exportFailed': string;
+        'announce.exportRefused': string;
+        'announce.exportCancelled': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-export`
+
+```ts
+export declare const FR_EXPORT: {
+    locale: string;
+    text: {
+        'export.fileName': string;
+        'announce.exportStarted': string;
+        'announce.exportDone': string;
+        'announce.exportDoneHidden': string;
+        'announce.exportDoneOpen': string;
+        'announce.exportFailed': string;
+        'announce.exportRefused': string;
+        'announce.exportCancelled': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-export`
+
+```ts
+export declare const AR_EXPORT: {
+    locale: string;
+    text: {
+        'export.fileName': string;
+        'announce.exportStarted': string;
+        'announce.exportDone': string;
+        'announce.exportDoneHidden': string;
+        'announce.exportDoneOpen': string;
+        'announce.exportFailed': string;
+        'announce.exportRefused': string;
+        'announce.exportCancelled': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-parts`
+
+```ts
+export declare const EN_PARTS: {
+    locale: string;
+    text: {
+        'cell.yes': string;
+        'cell.no': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-parts`
+
+```ts
+export declare const FR_PARTS: {
+    locale: string;
+    text: {
+        'cell.yes': string;
+        'cell.no': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-parts`
+
+```ts
+export declare const AR_PARTS: {
+    locale: string;
+    text: {
+        'cell.yes': string;
+        'cell.no': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-rules`
+
+```ts
+export declare const EN_RULES: {
+    locale: string;
+    text: {
+        'rules.refused': {
+            one: string;
+            other: string;
+        };
+        'rules.refusedReason': string;
+        'rules.partly': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-rules`
+
+```ts
+export declare const FR_RULES: {
+    locale: string;
+    text: {
+        'rules.refused': {
+            one: string;
+            other: string;
+        };
+        'rules.refusedReason': string;
+        'rules.partly': {
+            one: string;
+            other: string;
+        };
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-rules`
+
+```ts
+export declare const AR_RULES: {
+    locale: string;
+    text: {
+        'rules.refused': {
+            one: string;
+            other: string;
+        };
+        'rules.refusedReason': string;
+        'rules.partly': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-tree`
+
+```ts
+export declare const EN_TREE: {
+    locale: string;
+    text: {
+        'tree.expanded': {
+            one: string;
+            other: string;
+        };
+        'tree.empty': string;
+        'tree.collapsed': string;
+        'tree.expandedSome': {
+            one: string;
+            other: string;
+        };
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-tree`
+
+```ts
+export declare const FR_TREE: {
+    locale: string;
+    text: {
+        'tree.expanded': {
+            one: string;
+            many: string;
+            other: string;
+        };
+        'tree.empty': string;
+        'tree.collapsed': string;
+        'tree.expandedSome': {
+            one: string;
+            many: string;
+            other: string;
+        };
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-tree`
+
+```ts
+export declare const AR_TREE: {
+    locale: string;
+    text: {
+        'tree.expanded': {
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        'tree.empty': string;
+        'tree.collapsed': string;
+        'tree.expandedSome': {
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-detail`
+
+```ts
+export declare const EN_DETAIL: {
+    locale: string;
+    text: {
+        'detail.label': string;
+        'detail.expanded': string;
+        'detail.collapsed': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-detail`
+
+```ts
+export declare const FR_DETAIL: {
+    locale: string;
+    text: {
+        'detail.label': string;
+        'detail.expanded': string;
+        'detail.collapsed': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-detail`
+
+```ts
+export declare const AR_DETAIL: {
+    locale: string;
+    text: {
+        'detail.label': string;
+        'detail.expanded': string;
+        'detail.collapsed': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-edit`
+
+```ts
+export declare const EN_EDIT: {
+    locale: string;
+    text: {
+        'edit.saving': string;
+        'edit.saveRefused': string;
+        'edit.reasonUnknown': string;
+        'edit.reasonNetwork': string;
+        'edit.failedMark': string;
+        'edit.stale': string;
+        'edit.rowStale': string;
+        'edit.reapply': string;
+        'edit.reapplied': {
+            one: string;
+            other: string;
+        };
+        'edit.undone': string;
+        'edit.undoneMany': {
+            one: string;
+            other: string;
+        };
+        'edit.redone': string;
+        'edit.redoneMany': {
+            one: string;
+            other: string;
+        };
+        'edit.undoSkipped': string;
+        'edit.redoSkipped': string;
+        'edit.nothingToUndo': string;
+        'edit.nothingToRedo': string;
+        'header.withStale': string;
+        'validation.required': string;
+        'validation.min': string;
+        'validation.max': string;
+        'validation.pattern': string;
+        'validation.options': string;
+        'validation.invalid': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-edit`
+
+```ts
+export declare const FR_EDIT: {
+    locale: string;
+    text: {
+        'edit.saving': string;
+        'edit.saveRefused': string;
+        'edit.reasonUnknown': string;
+        'edit.reasonNetwork': string;
+        'edit.failedMark': string;
+        'edit.stale': string;
+        'edit.rowStale': string;
+        'edit.reapply': string;
+        'edit.reapplied': {
+            one: string;
+            other: string;
+        };
+        'edit.undone': string;
+        'edit.undoneMany': {
+            one: string;
+            other: string;
+        };
+        'edit.redone': string;
+        'edit.redoneMany': {
+            one: string;
+            other: string;
+        };
+        'edit.undoSkipped': {
+            one: string;
+            other: string;
+        };
+        'edit.redoSkipped': {
+            one: string;
+            other: string;
+        };
+        'edit.nothingToUndo': string;
+        'edit.nothingToRedo': string;
+        'header.withStale': string;
+        'validation.required': string;
+        'validation.min': string;
+        'validation.max': string;
+        'validation.pattern': string;
+        'validation.options': string;
+        'validation.invalid': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-edit`
+
+```ts
+export declare const AR_EDIT: {
+    locale: string;
+    text: {
+        'edit.saving': string;
+        'edit.saveRefused': string;
+        'edit.reasonUnknown': string;
+        'edit.reasonNetwork': string;
+        'edit.failedMark': string;
+        'edit.stale': string;
+        'edit.rowStale': string;
+        'edit.reapply': string;
+        'edit.reapplied': {
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        'edit.undone': string;
+        'edit.undoneMany': {
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        'edit.redone': string;
+        'edit.redoneMany': {
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        'edit.undoSkipped': {
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        'edit.redoSkipped': {
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        'edit.nothingToUndo': string;
+        'edit.nothingToRedo': string;
+        'header.withStale': string;
+        'validation.required': string;
+        'validation.min': string;
+        'validation.max': string;
+        'validation.pattern': string;
+        'validation.options': string;
+        'validation.invalid': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-editors`
+
+```ts
+export declare const EN_EDITORS: {
+    locale: string;
+    text: {
+        'edit.refused': string;
+        'edit.refusedDropped': string;
+        'editors.fieldName': string;
+        'validation.parse': string;
+        'validation.day': string;
+        'validation.invalid-instant': string;
+        'validation.wall-time-skipped': string;
+        'validation.wall-time-ambiguous': string;
+        'edit.calendar': string;
+        'edit.calendarLoading': string;
+        'edit.calendarFailed': string;
+        'edit.optionNotInList': string;
+        'edit.rowRemoved': string;
+        'edit.pageDropped': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-editors`
+
+```ts
+export declare const FR_EDITORS: {
+    locale: string;
+    text: {
+        'edit.refused': string;
+        'edit.refusedDropped': string;
+        'editors.fieldName': string;
+        'validation.parse': string;
+        'validation.day': string;
+        'validation.invalid-instant': string;
+        'validation.wall-time-skipped': string;
+        'validation.wall-time-ambiguous': string;
+        'edit.calendar': string;
+        'edit.calendarLoading': string;
+        'edit.calendarFailed': string;
+        'edit.optionNotInList': string;
+        'edit.rowRemoved': string;
+        'edit.pageDropped': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-editors`
+
+```ts
+export declare const AR_EDITORS: {
+    locale: string;
+    text: {
+        'edit.refused': string;
+        'edit.refusedDropped': string;
+        'editors.fieldName': string;
+        'validation.parse': string;
+        'validation.day': string;
+        'validation.invalid-instant': string;
+        'validation.wall-time-skipped': string;
+        'validation.wall-time-ambiguous': string;
+        'edit.calendar': string;
+        'edit.calendarLoading': string;
+        'edit.calendarFailed': string;
+        'edit.optionNotInList': string;
+        'edit.rowRemoved': string;
+        'edit.pageDropped': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-range`
+
+```ts
+export declare const EN_RANGE: {
+    locale: string;
+    text: {
+        'range.rows': {
+            one: string;
+            other: string;
+        };
+        'range.cols': {
+            one: string;
+            other: string;
+        };
+        'range.size': string;
+        'range.cleared': string;
+        'range.reordered': string;
+        'range.copied': string;
+        'range.cut': string;
+        'range.pasted': string;
+        'range.erased': string;
+        'range.refused': string;
+        'range.readOnly': string;
+        'range.tooLong': string;
+        'range.outside': string;
+        'range.tooBig': string;
+        'range.noCopy': string;
+        'range.notLoaded': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-range`
+
+```ts
+export declare const FR_RANGE: {
+    locale: string;
+    text: {
+        'range.rows': {
+            one: string;
+            other: string;
+        };
+        'range.cols': {
+            one: string;
+            other: string;
+        };
+        'range.size': string;
+        'range.cleared': string;
+        'range.reordered': string;
+        'range.copied': string;
+        'range.cut': string;
+        'range.pasted': string;
+        'range.erased': string;
+        'range.refused': string;
+        'range.readOnly': string;
+        'range.tooLong': string;
+        'range.outside': string;
+        'range.tooBig': string;
+        'range.noCopy': string;
+        'range.notLoaded': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-range`
+
+```ts
+export declare const AR_RANGE: {
+    locale: string;
+    text: {
+        'range.rows': {
+            zero: string;
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        'range.cols': {
+            zero: string;
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        'range.size': string;
+        'range.cleared': string;
+        'range.reordered': string;
+        'range.copied': string;
+        'range.cut': string;
+        'range.pasted': string;
+        'range.erased': string;
+        'range.refused': string;
+        'range.readOnly': string;
+        'range.tooLong': string;
+        'range.outside': string;
+        'range.tooBig': string;
+        'range.noCopy': string;
+        'range.notLoaded': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-fill`
+
+```ts
+export declare const EN_FILL: {
+    locale: string;
+    text: {
+        'fill.filled': string;
+        'fill.bulk': string;
+        'fill.mode': string;
+        'fill.pick': string;
+        'fill.cancel': string;
+        'fill.down': string;
+        'fill.up': string;
+        'fill.end': string;
+        'fill.start': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-fill`
+
+```ts
+export declare const FR_FILL: {
+    locale: string;
+    text: {
+        'fill.filled': string;
+        'fill.bulk': string;
+        'fill.mode': string;
+        'fill.pick': string;
+        'fill.cancel': string;
+        'fill.down': string;
+        'fill.up': string;
+        'fill.end': string;
+        'fill.start': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-fill`
+
+```ts
+export declare const AR_FILL: {
+    locale: string;
+    text: {
+        'fill.filled': string;
+        'fill.bulk': string;
+        'fill.mode': string;
+        'fill.pick': string;
+        'fill.cancel': string;
+        'fill.down': string;
+        'fill.up': string;
+        'fill.end': string;
+        'fill.start': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-columns`
+
+```ts
+export declare const EN_COLUMNS: {
+    locale: string;
+    text: {
+        'move.placed': string;
+        'move.edge': string;
+        'move.locked': string;
+        'move.cancelled': string;
+        'size.mode': string;
+        'size.modeHint': string;
+        'size.width': string;
+        'size.min': string;
+        'size.max': string;
+        'size.cancelled': string;
+        'size.autoAll': string;
+        'size.locked': string;
+        'chooser.title': string;
+        'chooser.search': string;
+        'chooser.list': string;
+        'chooser.handle': string;
+        'chooser.up': string;
+        'chooser.down': string;
+        'chooser.placed': string;
+        'chooser.showAll': string;
+        'chooser.reset': string;
+        'chooser.close': string;
+        'chooser.none': string;
+        'chooser.matches': string;
+        'chooser.shown': string;
+        'chooser.hidden': string;
+        'chooser.allShown': string;
+        'chooser.resetDone': string;
+        'chooser.pinnedStart': string;
+        'chooser.pinnedEnd': string;
+        'chooser.last': string;
+        'chooser.clearToMove': string;
+        'chooser.inClosedGroup': string;
+        'group.toggle': string;
+        'group.open': string;
+        'group.closed': string;
+        'group.closedSaid': string;
+        'group.openedSaid': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-columns`
+
+```ts
+export declare const FR_COLUMNS: {
+    locale: string;
+    text: {
+        'move.placed': string;
+        'move.edge': string;
+        'move.locked': string;
+        'move.cancelled': string;
+        'size.mode': string;
+        'size.modeHint': string;
+        'size.width': string;
+        'size.min': string;
+        'size.max': string;
+        'size.cancelled': string;
+        'size.autoAll': string;
+        'size.locked': string;
+        'chooser.title': string;
+        'chooser.search': string;
+        'chooser.list': string;
+        'chooser.handle': string;
+        'chooser.up': string;
+        'chooser.down': string;
+        'chooser.placed': string;
+        'chooser.showAll': string;
+        'chooser.reset': string;
+        'chooser.close': string;
+        'chooser.none': string;
+        'chooser.matches': string;
+        'chooser.shown': string;
+        'chooser.hidden': string;
+        'chooser.allShown': string;
+        'chooser.resetDone': string;
+        'chooser.pinnedStart': string;
+        'chooser.pinnedEnd': string;
+        'chooser.last': string;
+        'chooser.clearToMove': string;
+        'chooser.inClosedGroup': string;
+        'group.toggle': string;
+        'group.open': string;
+        'group.closed': string;
+        'group.closedSaid': string;
+        'group.openedSaid': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-columns`
+
+```ts
+export declare const AR_COLUMNS: {
+    locale: string;
+    text: {
+        'move.placed': string;
+        'move.edge': string;
+        'move.locked': string;
+        'move.cancelled': string;
+        'size.mode': string;
+        'size.modeHint': string;
+        'size.width': string;
+        'size.min': string;
+        'size.max': string;
+        'size.cancelled': string;
+        'size.autoAll': string;
+        'size.locked': string;
+        'chooser.title': string;
+        'chooser.search': string;
+        'chooser.list': string;
+        'chooser.handle': string;
+        'chooser.up': string;
+        'chooser.down': string;
+        'chooser.placed': string;
+        'chooser.showAll': string;
+        'chooser.reset': string;
+        'chooser.close': string;
+        'chooser.none': string;
+        'chooser.matches': string;
+        'chooser.shown': string;
+        'chooser.hidden': string;
+        'chooser.allShown': string;
+        'chooser.resetDone': string;
+        'chooser.pinnedStart': string;
+        'chooser.pinnedEnd': string;
+        'chooser.last': string;
+        'chooser.clearToMove': string;
+        'chooser.inClosedGroup': string;
+        'group.toggle': string;
+        'group.open': string;
+        'group.closed': string;
+        'group.closedSaid': string;
+        'group.openedSaid': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-column-menu`
+
+```ts
+export declare const EN_COLUMN_MENU: {
+    locale: string;
+    text: {
+        "menu.clearFilters"?: MessageValue;
+        "cmenu.clearFilters"?: MessageValue;
+        'menu.button': string;
+        'menu.label': string;
+        'menu.sort': string;
+        'menu.sortAsc': string;
+        'menu.sortDesc': string;
+        'menu.sortNone': string;
+        'menu.pin': string;
+        'menu.pinStart': string;
+        'menu.pinEnd': string;
+        'menu.pinNone': string;
+        'menu.sizeAuto': string;
+        'menu.sizeAutoAll': string;
+        'menu.sizeResize': string;
+        'menu.sizeWiden': string;
+        'menu.sizeNarrow': string;
+        'menu.width': string;
+        'menu.moveStart': string;
+        'menu.moveEnd': string;
+        'menu.fillDown': string;
+        'menu.fillEnd': string;
+        'menu.filter': string;
+        'menu.hide': string;
+        'menu.choose': string;
+        'menu.reset': string;
+        'menu.pinnedStart': string;
+        'menu.pinnedEnd': string;
+        'menu.unpinned': string;
+        'menu.hidden': string;
+        'menu.resetDone': string;
+        'density.label': string;
+        'density.compact': string;
+        'density.comfortable': string;
+        'density.spacious': string;
+        'density.changed': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-column-menu`
+
+```ts
+export declare const FR_COLUMN_MENU: {
+    locale: string;
+    text: {
+        "menu.clearFilters"?: MessageValue;
+        "cmenu.clearFilters"?: MessageValue;
+        'menu.button': string;
+        'menu.label': string;
+        'menu.sort': string;
+        'menu.sortAsc': string;
+        'menu.sortDesc': string;
+        'menu.sortNone': string;
+        'menu.pin': string;
+        'menu.pinStart': string;
+        'menu.pinEnd': string;
+        'menu.pinNone': string;
+        'menu.sizeAuto': string;
+        'menu.sizeAutoAll': string;
+        'menu.sizeResize': string;
+        'menu.sizeWiden': string;
+        'menu.sizeNarrow': string;
+        'menu.width': string;
+        'menu.moveStart': string;
+        'menu.moveEnd': string;
+        'menu.fillDown': string;
+        'menu.fillEnd': string;
+        'menu.filter': string;
+        'menu.hide': string;
+        'menu.choose': string;
+        'menu.reset': string;
+        'menu.pinnedStart': string;
+        'menu.pinnedEnd': string;
+        'menu.unpinned': string;
+        'menu.hidden': string;
+        'menu.resetDone': string;
+        'density.label': string;
+        'density.compact': string;
+        'density.comfortable': string;
+        'density.spacious': string;
+        'density.changed': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-column-menu`
+
+```ts
+export declare const AR_COLUMN_MENU: {
+    locale: string;
+    text: {
+        "menu.clearFilters"?: MessageValue;
+        "cmenu.clearFilters"?: MessageValue;
+        'menu.button': string;
+        'menu.label': string;
+        'menu.sort': string;
+        'menu.sortAsc': string;
+        'menu.sortDesc': string;
+        'menu.sortNone': string;
+        'menu.pin': string;
+        'menu.pinStart': string;
+        'menu.pinEnd': string;
+        'menu.pinNone': string;
+        'menu.sizeAuto': string;
+        'menu.sizeAutoAll': string;
+        'menu.sizeResize': string;
+        'menu.sizeWiden': string;
+        'menu.sizeNarrow': string;
+        'menu.width': string;
+        'menu.moveStart': string;
+        'menu.moveEnd': string;
+        'menu.fillDown': string;
+        'menu.fillEnd': string;
+        'menu.filter': string;
+        'menu.hide': string;
+        'menu.choose': string;
+        'menu.reset': string;
+        'menu.pinnedStart': string;
+        'menu.pinnedEnd': string;
+        'menu.unpinned': string;
+        'menu.hidden': string;
+        'menu.resetDone': string;
+        'density.label': string;
+        'density.compact': string;
+        'density.comfortable': string;
+        'density.spacious': string;
+        'density.changed': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-context-menu`
+
+```ts
+export declare const EN_CONTEXT_MENU: {
+    locale: string;
+    text: {
+        "menu.clearFilters"?: MessageValue;
+        "cmenu.clearFilters"?: MessageValue;
+        "cmenu.exportXlsx"?: MessageValue;
+        'cmenu.label': string;
+        'cmenu.copy': string;
+        'cmenu.copyHeaders': string;
+        'cmenu.cut': string;
+        'cmenu.paste': string;
+        'cmenu.useCopyKey': string;
+        'cmenu.usePasteKey': string;
+        'cmenu.fillDown': string;
+        'cmenu.fillEnd': string;
+        'cmenu.undo': string;
+        'cmenu.redo': string;
+        'cmenu.expand': string;
+        'cmenu.collapse': string;
+        'cmenu.pinTop': string;
+        'cmenu.pinBottom': string;
+        'cmenu.unpin': string;
+        'cmenu.pinnedTop': string;
+        'cmenu.pinnedBottom': string;
+        'cmenu.unpinned': string;
+        'cmenu.exportCsv': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-context-menu`
+
+```ts
+export declare const FR_CONTEXT_MENU: {
+    locale: string;
+    text: {
+        "menu.clearFilters"?: MessageValue;
+        "cmenu.clearFilters"?: MessageValue;
+        "cmenu.exportXlsx"?: MessageValue;
+        'cmenu.label': string;
+        'cmenu.copy': string;
+        'cmenu.copyHeaders': string;
+        'cmenu.cut': string;
+        'cmenu.paste': string;
+        'cmenu.useCopyKey': string;
+        'cmenu.usePasteKey': string;
+        'cmenu.fillDown': string;
+        'cmenu.fillEnd': string;
+        'cmenu.undo': string;
+        'cmenu.redo': string;
+        'cmenu.expand': string;
+        'cmenu.collapse': string;
+        'cmenu.pinTop': string;
+        'cmenu.pinBottom': string;
+        'cmenu.unpin': string;
+        'cmenu.pinnedTop': string;
+        'cmenu.pinnedBottom': string;
+        'cmenu.unpinned': string;
+        'cmenu.exportCsv': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-context-menu`
+
+```ts
+export declare const AR_CONTEXT_MENU: {
+    locale: string;
+    text: {
+        "menu.clearFilters"?: MessageValue;
+        "cmenu.clearFilters"?: MessageValue;
+        "cmenu.exportXlsx"?: MessageValue;
+        'cmenu.label': string;
+        'cmenu.copy': string;
+        'cmenu.copyHeaders': string;
+        'cmenu.cut': string;
+        'cmenu.paste': string;
+        'cmenu.useCopyKey': string;
+        'cmenu.usePasteKey': string;
+        'cmenu.fillDown': string;
+        'cmenu.fillEnd': string;
+        'cmenu.undo': string;
+        'cmenu.redo': string;
+        'cmenu.expand': string;
+        'cmenu.collapse': string;
+        'cmenu.pinTop': string;
+        'cmenu.pinBottom': string;
+        'cmenu.unpin': string;
+        'cmenu.pinnedTop': string;
+        'cmenu.pinnedBottom': string;
+        'cmenu.unpinned': string;
+        'cmenu.exportCsv': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-pinned`
+
+```ts
+export declare const EN_PINNED: {
+    locale: string;
+    text: {
+        'pinned.top': string;
+        'pinned.bottom': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-pinned`
+
+```ts
+export declare const FR_PINNED: {
+    locale: string;
+    text: {
+        'pinned.top': string;
+        'pinned.bottom': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-pinned`
+
+```ts
+export declare const AR_PINNED: {
+    locale: string;
+    text: {
+        'pinned.top': string;
+        'pinned.bottom': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-print`
+
+```ts
+export declare const EN_PRINT: {
+    locale: string;
+    text: {
+        'print.truncated': string;
+        'print.page': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-print`
+
+```ts
+export declare const FR_PRINT: {
+    locale: string;
+    text: {
+        'print.truncated': string;
+        'print.page': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-print`
+
+```ts
+export declare const AR_PRINT: {
+    locale: string;
+    text: {
+        'print.truncated': string;
+        'print.page': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-fresh`
+
+```ts
+export declare const EN_FRESH: {
+    locale: string;
+    text: {
+        'announce.fresh': {
+            one: string;
+            other: string;
+        };
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-fresh`
+
+```ts
+export declare const FR_FRESH: {
+    locale: string;
+    text: {
+        'announce.fresh': {
+            one: string;
+            many: string;
+            other: string;
+        };
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-fresh`
+
+```ts
+export declare const AR_FRESH: {
+    locale: string;
+    text: {
+        'announce.fresh': {
+            zero: string;
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-status`
+
+```ts
+export declare const EN_STATUS: {
+    locale: string;
+    text: {
+        'status.label': string;
+        'status.rows': string;
+        'status.filtered': string;
+        'status.selected': string;
+        'status.all': string;
+        'status.count': string;
+        'status.sum': string;
+        'status.avg': string;
+        'status.min': string;
+        'status.max': string;
+        'status.partial': string;
+        'status.read': string;
+        'status.none': string;
+        'status.sep': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-status`
+
+```ts
+export declare const FR_STATUS: {
+    locale: string;
+    text: {
+        'status.label': string;
+        'status.rows': string;
+        'status.filtered': string;
+        'status.selected': string;
+        'status.all': string;
+        'status.count': string;
+        'status.sum': string;
+        'status.avg': string;
+        'status.min': string;
+        'status.max': string;
+        'status.partial': string;
+        'status.read': string;
+        'status.none': string;
+        'status.sep': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-status`
+
+```ts
+export declare const AR_STATUS: {
+    locale: string;
+    text: {
+        'status.label': string;
+        'status.rows': string;
+        'status.filtered': string;
+        'status.selected': string;
+        'status.all': string;
+        'status.count': string;
+        'status.sum': string;
+        'status.avg': string;
+        'status.min': string;
+        'status.max': string;
+        'status.partial': string;
+        'status.read': string;
+        'status.none': string;
+        'status.sep': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-find`
+
+```ts
+export declare const EN_FIND: {
+    locale: string;
+    text: {
+        'find.label': string;
+        'find.count': string;
+        'find.said': string;
+        'find.none': string;
+        'find.prev': string;
+        'find.next': string;
+        'find.close': string;
+        'find.page': string;
+        'find.held': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-find`
+
+```ts
+export declare const FR_FIND: {
+    locale: string;
+    text: {
+        'find.label': string;
+        'find.count': string;
+        'find.said': string;
+        'find.none': string;
+        'find.prev': string;
+        'find.next': string;
+        'find.close': string;
+        'find.page': string;
+        'find.held': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-find`
+
+```ts
+export declare const AR_FIND: {
+    locale: string;
+    text: {
+        'find.label': string;
+        'find.count': string;
+        'find.said': string;
+        'find.none': string;
+        'find.prev': string;
+        'find.next': string;
+        'find.close': string;
+        'find.page': string;
+        'find.held': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-row-drag`
+
+```ts
+export declare const EN_ROW_DRAG: {
+    locale: string;
+    text: {
+        'rmove.placed': string;
+        'rmove.placedLevel': string;
+        'rmove.many': string;
+        'rmove.hidden': string;
+        'rmove.edge': string;
+        'rmove.locked': string;
+        'rmove.sorted': string;
+        'rmove.grouped': string;
+        'rmove.refused': string;
+        'rmove.tooMany': string;
+        'rmove.cancelled': string;
+        'rmove.ghost': string;
+        'rmove.up': string;
+        'rmove.down': string;
+        'rmove.top': string;
+        'rmove.bottom': string;
+        'rmove.in': string;
+        'rmove.out': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-row-drag`
+
+```ts
+export declare const FR_ROW_DRAG: {
+    locale: string;
+    text: {
+        'rmove.placed': string;
+        'rmove.placedLevel': string;
+        'rmove.many': string;
+        'rmove.hidden': string;
+        'rmove.edge': string;
+        'rmove.locked': string;
+        'rmove.sorted': string;
+        'rmove.grouped': string;
+        'rmove.refused': string;
+        'rmove.tooMany': string;
+        'rmove.cancelled': string;
+        'rmove.ghost': string;
+        'rmove.up': string;
+        'rmove.down': string;
+        'rmove.top': string;
+        'rmove.bottom': string;
+        'rmove.in': string;
+        'rmove.out': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-row-drag`
+
+```ts
+export declare const AR_ROW_DRAG: {
+    locale: string;
+    text: {
+        'rmove.placed': string;
+        'rmove.placedLevel': string;
+        'rmove.many': string;
+        'rmove.hidden': string;
+        'rmove.edge': string;
+        'rmove.locked': string;
+        'rmove.sorted': string;
+        'rmove.grouped': string;
+        'rmove.refused': string;
+        'rmove.tooMany': string;
+        'rmove.cancelled': string;
+        'rmove.ghost': string;
+        'rmove.up': string;
+        'rmove.down': string;
+        'rmove.top': string;
+        'rmove.bottom': string;
+        'rmove.in': string;
+        'rmove.out': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-dock`
+
+```ts
+export declare const EN_DOCK: {
+    locale: string;
+    text: {
+        'dock.region': string;
+        'dock.tabs': string;
+        'dock.collapse': string;
+        'dock.expand': string;
+        'dock.close': string;
+        'dock.place': string;
+        'dock.start': string;
+        'dock.end': string;
+        'dock.bottom': string;
+        'dock.width': string;
+        'dock.height': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-dock`
+
+```ts
+export declare const FR_DOCK: {
+    locale: string;
+    text: {
+        'dock.region': string;
+        'dock.tabs': string;
+        'dock.collapse': string;
+        'dock.expand': string;
+        'dock.close': string;
+        'dock.place': string;
+        'dock.start': string;
+        'dock.end': string;
+        'dock.bottom': string;
+        'dock.width': string;
+        'dock.height': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-dock`
+
+```ts
+export declare const AR_DOCK: {
+    locale: string;
+    text: {
+        'dock.region': string;
+        'dock.tabs': string;
+        'dock.collapse': string;
+        'dock.expand': string;
+        'dock.close': string;
+        'dock.place': string;
+        'dock.start': string;
+        'dock.end': string;
+        'dock.bottom': string;
+        'dock.width': string;
+        'dock.height': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-pivot`
+
+```ts
+export declare const EN_PIVOT: {
+    locale: string;
+    text: {
+        'pivot.label': string;
+        'pivot.empty': string;
+        'pivot.remove': string;
+        'pivot.grouped': string;
+        'pivot.removed': string;
+        'pivot.placed': string;
+        'pivot.add': string;
+        'zone.add': string;
+        'pivot.total': string;
+        'pivot.subtotal': string;
+        'pivot.count': {
+            one: string;
+            other: string;
+        };
+        'pivot.tooMany': string;
+        'pivot.switch': string;
+        'pivot.fnSaid': string;
+        'pivot.valueChip': string;
+        'menu.pivotBy': string;
+        'menu.pivotOff': string;
+        'menu.total': string;
+        'fn.sum': string;
+        'fn.avg': string;
+        'fn.min': string;
+        'fn.max': string;
+        'fn.count': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-pivot`
+
+```ts
+export declare const FR_PIVOT: {
+    locale: string;
+    text: {
+        'pivot.label': string;
+        'pivot.empty': string;
+        'pivot.remove': string;
+        'pivot.grouped': string;
+        'pivot.removed': string;
+        'pivot.placed': string;
+        'pivot.add': string;
+        'zone.add': string;
+        'pivot.total': string;
+        'pivot.subtotal': string;
+        'pivot.count': {
+            one: string;
+            many: string;
+            other: string;
+        };
+        'pivot.tooMany': string;
+        'pivot.switch': string;
+        'pivot.fnSaid': string;
+        'pivot.valueChip': string;
+        'menu.pivotBy': string;
+        'menu.pivotOff': string;
+        'menu.total': string;
+        'fn.sum': string;
+        'fn.avg': string;
+        'fn.min': string;
+        'fn.max': string;
+        'fn.count': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-pivot`
+
+```ts
+export declare const AR_PIVOT: {
+    locale: string;
+    text: {
+        'pivot.label': string;
+        'pivot.empty': string;
+        'pivot.remove': string;
+        'pivot.grouped': string;
+        'pivot.removed': string;
+        'pivot.placed': string;
+        'pivot.add': string;
+        'zone.add': string;
+        'pivot.total': string;
+        'pivot.subtotal': string;
+        'pivot.count': {
+            zero: string;
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        'pivot.tooMany': string;
+        'pivot.switch': string;
+        'pivot.fnSaid': string;
+        'pivot.valueChip': string;
+        'menu.pivotBy': string;
+        'menu.pivotOff': string;
+        'menu.total': string;
+        'fn.sum': string;
+        'fn.avg': string;
+        'fn.min': string;
+        'fn.max': string;
+        'fn.count': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-pivot-bar`
+
+```ts
+export declare const EN_PIVOT_BAR: {
+    locale: string;
+    text: {
+        'pivot.rows': string;
+        'pivot.columns': string;
+        'pivot.values': string;
+        'pivot.valuesEmpty': string;
+        'pivot.addValue': string;
+        'pivot.removeValue': string;
+        'pivot.valueAdded': string;
+        'pivot.valueRemoved': string;
+        'pivot.valuePlaced': string;
+        'pivot.order': string;
+        'pivot.reversed': string;
+        'pivot.ordered': string;
+        'pivot.refused': string;
+        'pivot.mode': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-pivot-bar`
+
+```ts
+export declare const FR_PIVOT_BAR: {
+    locale: string;
+    text: {
+        'pivot.rows': string;
+        'pivot.columns': string;
+        'pivot.values': string;
+        'pivot.valuesEmpty': string;
+        'pivot.addValue': string;
+        'pivot.removeValue': string;
+        'pivot.valueAdded': string;
+        'pivot.valueRemoved': string;
+        'pivot.valuePlaced': string;
+        'pivot.order': string;
+        'pivot.reversed': string;
+        'pivot.ordered': string;
+        'pivot.refused': string;
+        'pivot.mode': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-pivot-bar`
+
+```ts
+export declare const AR_PIVOT_BAR: {
+    locale: string;
+    text: {
+        'pivot.rows': string;
+        'pivot.columns': string;
+        'pivot.values': string;
+        'pivot.valuesEmpty': string;
+        'pivot.addValue': string;
+        'pivot.removeValue': string;
+        'pivot.valueAdded': string;
+        'pivot.valueRemoved': string;
+        'pivot.valuePlaced': string;
+        'pivot.order': string;
+        'pivot.reversed': string;
+        'pivot.ordered': string;
+        'pivot.refused': string;
+        'pivot.mode': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-row-numbers`
+
+```ts
+export declare const EN_ROW_NUMBERS: {
+    locale: string;
+    text: {
+        'rownum.header': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-row-numbers`
+
+```ts
+export declare const FR_ROW_NUMBERS: {
+    locale: string;
+    text: {
+        'rownum.header': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-row-numbers`
+
+```ts
+export declare const AR_ROW_NUMBERS: {
+    locale: string;
+    text: {
+        'rownum.header': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-group`
+
+```ts
+export declare const EN_GROUP: {
+    locale: string;
+    text: {
+        'group.label': string;
+        'group.blank': string;
+        'group.total': string;
+        'group.grandTotal': string;
+        'group.expanded': {
+            one: string;
+            other: string;
+        };
+        'group.collapsed': string;
+        'group.expandedSome': {
+            one: string;
+            other: string;
+        };
+        'zone.label': string;
+        'zone.empty': string;
+        'zone.remove': string;
+        'zone.grouped': string;
+        'zone.removed': string;
+        'zone.placed': string;
+        'menu.groupBy': string;
+        'menu.groupOff': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-group`
+
+```ts
+export declare const FR_GROUP: {
+    locale: string;
+    text: {
+        'group.label': string;
+        'group.blank': string;
+        'group.total': string;
+        'group.grandTotal': string;
+        'group.expanded': {
+            one: string;
+            many: string;
+            other: string;
+        };
+        'group.collapsed': string;
+        'group.expandedSome': {
+            one: string;
+            many: string;
+            other: string;
+        };
+        'zone.label': string;
+        'zone.empty': string;
+        'zone.remove': string;
+        'zone.grouped': string;
+        'zone.removed': string;
+        'zone.placed': string;
+        'menu.groupBy': string;
+        'menu.groupOff': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-group`
+
+```ts
+export declare const AR_GROUP: {
+    locale: string;
+    text: {
+        'group.label': string;
+        'group.blank': string;
+        'group.total': string;
+        'group.grandTotal': string;
+        'group.expanded': {
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        'group.collapsed': string;
+        'group.expandedSome': {
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        'zone.label': string;
+        'zone.empty': string;
+        'zone.remove': string;
+        'zone.grouped': string;
+        'zone.removed': string;
+        'zone.placed': string;
+        'menu.groupBy': string;
+        'menu.groupOff': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-filters-panel`
+
+```ts
+export declare const EN_FILTERS_PANEL: {
+    locale: string;
+    text: {
+        'fpanel.title': string;
+        'fpanel.close': string;
+        'fpanel.clearAll': string;
+        'fpanel.search': string;
+        'fpanel.none': string;
+        'fpanel.matches': string;
+        'fpanel.active': string;
+        'fpanel.count': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-filters-panel`
+
+```ts
+export declare const FR_FILTERS_PANEL: {
+    locale: string;
+    text: {
+        'fpanel.title': string;
+        'fpanel.close': string;
+        'fpanel.clearAll': string;
+        'fpanel.search': string;
+        'fpanel.none': string;
+        'fpanel.matches': string;
+        'fpanel.active': string;
+        'fpanel.count': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-filters-panel`
+
+```ts
+export declare const AR_FILTERS_PANEL: {
+    locale: string;
+    text: {
+        'fpanel.title': string;
+        'fpanel.close': string;
+        'fpanel.clearAll': string;
+        'fpanel.search': string;
+        'fpanel.none': string;
+        'fpanel.matches': string;
+        'fpanel.active': string;
+        'fpanel.count': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-totals`
+
+```ts
+export declare const EN_TOTALS: {
+    locale: string;
+    text: {
+        'totals.label': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-totals`
+
+```ts
+export declare const FR_TOTALS: {
+    locale: string;
+    text: {
+        'totals.label': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-totals`
+
+```ts
+export declare const AR_TOTALS: {
+    locale: string;
+    text: {
+        'totals.label': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-import`
+
+```ts
+export declare const EN_IMPORT: {
+    locale: string;
+    text: {
+        'import.drop': string;
+        'import.read': string;
+        'import.failed': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-import`
+
+```ts
+export declare const FR_IMPORT: {
+    locale: string;
+    text: {
+        'import.drop': string;
+        'import.read': string;
+        'import.failed': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-import`
+
+```ts
+export declare const AR_IMPORT: {
+    locale: string;
+    text: {
+        'import.drop': string;
+        'import.read': string;
+        'import.failed': string;
+    };
+};
+```

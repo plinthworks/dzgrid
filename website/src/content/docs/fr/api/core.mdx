@@ -1,0 +1,4800 @@
+---
+title: "@dzgrid/core"
+description: "Data grid model, from scratch: typed row identities, calendar days kept apart from instants, sorting and filtering. No DOM, no framework, no Date, no dependency."
+tableOfContents:
+  maxHeadingLevel: 2
+---
+
+Chaque nom public de `@dzgrid/core`, entrée par entrée, avec sa déclaration telle que les types publiés la donnent. Fait depuis [`api/dzgrid-core.api.txt`](https://github.com/plinthworks/dzgrid/blob/main/api/dzgrid-core.api.txt), la surface qu’un test empêche de rétrécir d’une version à l’autre ; les guides et les pages d’options disent ce que fait chaque nom. Les déclarations sont du code : elles restent en anglais.
+
+## `@dzgrid/core`
+
+### AbortHandle
+
+```ts
+export interface AbortHandle {
+    readonly signal: AbortSignalLike;
+    abort(reason?: unknown): void;
+}
+```
+
+### AbortSignalLike
+
+```ts
+export interface AbortSignalLike {
+    readonly aborted: boolean;
+    readonly reason?: unknown;
+}
+```
+
+### AggCtx
+
+```ts
+export interface AggCtx {
+    readonly column: string;
+    readonly level: number | null;
+}
+```
+
+### AggFn
+
+```ts
+export type AggFn<V = unknown> = {
+    agg(values: readonly (V | null)[], ctx: AggCtx): unknown;
+}['agg'];
+```
+
+### AggFuncName
+
+```ts
+export type AggFuncName = 'sum' | 'avg' | 'min' | 'max' | 'count' | 'first' | 'last';
+```
+
+### AnyFilterKind
+
+```ts
+export type AnyFilterKind = FilterKind<any, any>;
+```
+
+### BlockLoadingNode
+
+```ts
+export interface BlockLoadingNode {
+    readonly key: RowKey;
+    readonly kind: 'loading';
+    readonly level: number;
+    readonly parent: null;
+    readonly failed: boolean;
+}
+```
+
+### CellAddr
+
+```ts
+export interface CellAddr {
+    readonly row: RowKey;
+    readonly column: string;
+}
+```
+
+### CellClassContext
+
+```ts
+export interface CellClassContext<T, V = unknown> {
+    readonly value: V | null;
+    readonly text: string;
+    readonly row: Readonly<T>;
+    readonly key: RowKey;
+    readonly column: string;
+    readonly context: unknown;
+}
+```
+
+### CellFocus
+
+```ts
+export type CellFocus = Extract<FocusPos, {
+    readonly kind: 'cell';
+}>;
+```
+
+### CellRange
+
+```ts
+export interface CellRange {
+    readonly anchor: CellAddr;
+    readonly focus: CellAddr;
+}
+```
+
+### ChangeSource
+
+```ts
+export type ChangeSource = 'user' | 'host' | 'api' | 'data';
+```
+
+### ClientModel
+
+```ts
+export interface ClientModel<T> extends RowModel<T> {
+    readonly kind: 'client';
+    readonly allRows: DisplayedRows<T>;
+    row(key: RowKey): DataNode<T> | undefined;
+    readonly query: Query;
+    readonly counts: {
+        readonly total: number;
+        readonly filtered: number;
+        readonly displayed: number;
+    };
+    readonly problems: readonly Problem[];
+    setRows(rows: Iterable<T>, source?: ChangeSource): TransactionResult;
+    applyTransaction(tx: RowTransaction<T>, source?: ChangeSource): TransactionResult;
+    setColumns(columns: ColumnLookup<T>, source?: ChangeSource): void;
+    setContext(ctx: LocaleCtx, source?: ChangeSource): void;
+    setReader(reader: ValueReader<T>, changed?: readonly string[]): void;
+    reapply(source?: ChangeSource): void;
+    readonly orderStale: boolean;
+    setApp(context: unknown, source?: ChangeSource): void;
+    setValues(column: string, o?: ValuesOptions): ValuesHandle;
+    warmSearch(): SearchWarmup;
+    tick(): void;
+    isExpanded(key: RowKey): boolean;
+    setExpansion(set: ReadonlySet<RowKey>, source?: ChangeSource): void;
+    expand(rows: readonly RowKey[], expanded: boolean, source?: ChangeSource): readonly RowKey[];
+    expandable(depth?: number): readonly RowKey[];
+    expandAll(expanded: boolean, depth?: number, source?: ChangeSource): readonly RowKey[];
+    readonly diagnostics: {
+        readonly foldBuilds: number;
+        readonly filterRuns: number;
+        readonly sortRuns: number;
+        readonly displayedBuilds: number;
+        readonly retested: number;
+        readonly keyBuilds: number;
+        readonly rankBuilds: number;
+        readonly quickScanned: number;
+        readonly displayBuilds: number;
+        readonly pageCuts: number;
+        readonly indexBuilds: number;
+        readonly countBuilds: number;
+    };
+}
+```
+
+### ClientOptions
+
+```ts
+export interface ClientOptions<T> {
+    readonly rows: Iterable<T>;
+    readonly getRowId: (row: T) => RowIdInput;
+    readonly columns: ColumnLookup<T>;
+    readonly ctx: LocaleCtx;
+    readonly reader?: ValueReader<T>;
+    readonly page?: PageOptions;
+    readonly filterKinds?: (name: string) => AnyFilterKind | undefined;
+    readonly now?: () => number;
+    readonly shape?: RowShape<T>;
+    readonly app?: unknown;
+    readonly sameRow?: ((a: T, b: T) => boolean) | undefined;
+}
+```
+
+### CollatorSpec
+
+```ts
+export interface CollatorSpec {
+    readonly sensitivity?: 'base' | 'accent' | 'variant';
+    readonly numeric?: boolean;
+}
+```
+
+### ColumnChange
+
+```ts
+export interface ColumnChange {
+    readonly changed: readonly string[];
+    readonly layoutChanged: boolean;
+    readonly problems: readonly Problem[];
+}
+```
+
+### ColumnDef
+
+```ts
+export interface ColumnDef<T, V = unknown> {
+    readonly id: string;
+    readonly field?: string;
+    readonly value?: (row: Readonly<T>) => V;
+    readonly header?: string;
+    readonly headerShort?: string;
+    readonly type?: ColumnType;
+    readonly codec?: ValueCodec<V>;
+    readonly enumOptions?: readonly EnumOption[];
+    readonly assumeZone?: string;
+    readonly numberFormat?: NumberFormatSpec;
+    readonly instantFormat?: InstantFormatSpec;
+    readonly width?: number;
+    readonly minWidth?: number;
+    readonly maxWidth?: number;
+    readonly flex?: number;
+    readonly resizable?: boolean;
+    readonly movable?: boolean;
+    readonly hideable?: false;
+    readonly menu?: false;
+    readonly chooser?: false;
+    readonly sortable?: boolean;
+    readonly groupable?: boolean;
+    readonly aggFunc?: AggFuncName | AggFn<V>;
+    readonly total?: AggFuncName | AggFn<V>;
+    readonly headerVertical?: boolean;
+    readonly headerWrap?: boolean;
+    readonly collapsePriority?: number;
+    readonly filter?: false | {
+        readonly kind?: string;
+        readonly floating?: boolean;
+        readonly debounceMs?: number;
+        readonly ops?: readonly string[];
+        readonly optionPart?: string;
+        readonly exclude?: false;
+        readonly start?: 'all' | 'empty';
+        readonly selectAll?: boolean;
+        readonly maxConditions?: number;
+        readonly matchCase?: boolean;
+        readonly condition?: boolean;
+    };
+    readonly pinned?: Side | null;
+    readonly hidden?: boolean;
+    readonly align?: 'start' | 'center' | 'end';
+    readonly headerAlign?: 'start' | 'center' | 'end';
+    readonly wrap?: boolean;
+    readonly ui?: {
+        readonly cell?: string;
+        readonly header?: string;
+        readonly tooltip?: string;
+        readonly cellClass?: (c: CellClassContext<T, V>) => string | null | undefined;
+        readonly headerClass?: string;
+        readonly data?: Readonly<Record<string, unknown>>;
+    };
+    readonly headerTooltip?: string;
+    readonly tooltip?: (value: V | null, row: Readonly<T>, context: unknown) => string | null;
+    readonly merge?: true | ((a: SpanCtx<T>, b: SpanCtx<T>) => boolean) | {
+        readonly same?: (a: SpanCtx<T>, b: SpanCtx<T>) => boolean;
+        readonly within?: readonly string[];
+    };
+    readonly rowSpan?: (ctx: SpanCtx<T>) => number;
+    readonly colSpan?: (ctx: SpanCtx<T>) => number;
+    readonly groupShow?: 'open' | 'closed';
+    readonly csv?: 'text';
+    readonly editable?: EditableRule<T>;
+    readonly validate?: (value: V | null, row: Readonly<T>, context: unknown) => string | null | undefined;
+    readonly edit?: EditChecks<T, V>;
+}
+```
+
+### ColumnFilter
+
+```ts
+export type ColumnFilter = {
+    readonly type: 'text';
+    readonly op: TextOp;
+    readonly value?: string;
+    readonly caseSensitive?: boolean;
+} | {
+    readonly type: 'number';
+    readonly op: NumOp;
+    readonly value?: number;
+    readonly valueTo?: number;
+} | {
+    readonly type: 'day';
+    readonly op: NumOp | 'relative';
+    readonly value?: Day | string;
+    readonly valueTo?: Day | string;
+    readonly range?: RelativeRange;
+} | {
+    readonly type: 'instant';
+    readonly op: InstantOp | 'relative';
+    readonly day?: Day | string;
+    readonly dayTo?: Day | string;
+    readonly at?: string;
+    readonly atTo?: string;
+    readonly range?: RelativeRange;
+} | {
+    readonly type: 'boolean';
+    readonly value: boolean | null;
+} | {
+    readonly type: 'set';
+    readonly include?: readonly string[];
+    readonly exclude?: readonly string[];
+    readonly blanks?: 'include' | 'exclude';
+} | {
+    readonly type: 'combined';
+    readonly join: 'and' | 'or';
+    readonly conditions: readonly ColumnFilter[];
+} | {
+    readonly type: 'custom';
+    readonly kind: string;
+    readonly state: Json;
+};
+```
+
+### ColumnGroupDef
+
+```ts
+export interface ColumnGroupDef<T> {
+    readonly id: string;
+    readonly header?: string;
+    readonly children: readonly ColumnOrGroup<T>[];
+    readonly collapsible?: boolean;
+    readonly open?: boolean;
+}
+```
+
+### ColumnLayout
+
+```ts
+export interface ColumnLayout {
+    readonly start: ColumnSlice;
+    readonly center: ColumnSlice;
+    readonly end: ColumnSlice;
+    readonly totalWidth: number;
+}
+```
+
+### ColumnLookup
+
+```ts
+export interface ColumnLookup<T> {
+    get(id: string): ResolvedColumn<T> | undefined;
+    visible(): readonly ResolvedColumn<T>[];
+    readonly version: number;
+    readonly dataVersion: number;
+    withCollapsed?(): readonly ResolvedColumn<T>[];
+}
+```
+
+### ColumnModel
+
+```ts
+export interface ColumnModel<T> extends ColumnLookup<T> {
+    readonly layout: ColumnLayout;
+    readonly problems: readonly Problem[];
+    state(): readonly ColumnState[];
+    apply(patch: readonly ColumnState[], source: ChangeSource): ColumnChange;
+    setDefs(defs: readonly ColumnOrGroup<T>[]): ColumnChange;
+    setAvailableInline(px: number): ColumnChange;
+    readonly folded: ReadonlySet<string>;
+    fold(ids: ReadonlySet<string>): ColumnChange;
+    readonly collapsed?: ReadonlySet<string>;
+    collapse?(rank: ((c: ResolvedColumn<T>) => number) | null): ColumnChange;
+}
+```
+
+### ColumnOrGroup
+
+```ts
+export type ColumnOrGroup<T> = ColumnDef<T, any> | ColumnGroupDef<T>;
+```
+
+### ColumnSlice
+
+```ts
+export interface ColumnSlice {
+    readonly columns: readonly ResolvedColumn<any>[];
+    readonly widths: PrefixSums;
+    readonly width: number;
+}
+```
+
+### ColumnState
+
+```ts
+export interface ColumnState {
+    readonly id: string;
+    readonly width?: number | null;
+    readonly hidden?: boolean;
+    readonly pinned?: Side | null;
+    readonly order?: number;
+}
+```
+
+### ColumnType
+
+```ts
+export type ColumnType = 'text' | 'number' | 'day' | 'instant' | 'boolean' | 'enum' | 'custom';
+```
+
+### DEFAULT_PAGE_SIZE
+
+```ts
+export declare const DEFAULT_PAGE_SIZE = 50;
+```
+
+### DEFAULT_PAGE_SIZES
+
+```ts
+export declare const DEFAULT_PAGE_SIZES: readonly number[];
+```
+
+### DataNode
+
+```ts
+export interface DataNode<T> {
+    readonly key: RowKey;
+    readonly kind: 'data';
+    readonly level: number;
+    readonly id: RowIdInput;
+    readonly data: Readonly<T>;
+    readonly pinned?: 'top' | 'bottom';
+}
+```
+
+### Day
+
+```ts
+export type Day = string & {
+    readonly [dayBrand]: true;
+};
+```
+
+### DetailNode
+
+```ts
+export interface DetailNode<T> {
+    readonly key: RowKey;
+    readonly kind: 'detail';
+    readonly level: number;
+    readonly master: RowKey;
+    readonly data: Readonly<T>;
+}
+```
+
+### Disambiguation
+
+```ts
+export type Disambiguation = 'compatible' | 'earlier' | 'later' | 'reject';
+```
+
+### DisplayIndex
+
+```ts
+export type DisplayIndex = number & {
+    readonly [displayIndexBrand]: true;
+};
+```
+
+### DisplayedRows
+
+```ts
+export interface DisplayedRows<T> {
+    readonly version: number;
+    readonly count: number;
+    nodeAt(i: DisplayIndex): RowNode<T>;
+    keyAt(i: DisplayIndex): RowKey;
+    indexOf(key: RowKey): DisplayIndex | -1;
+    index(n: number): DisplayIndex | null;
+    nextData(i: DisplayIndex, delta: 1 | -1): DataNode<T> | null;
+    readonly dataCount?: number;
+    matchedAt?(i: DisplayIndex): boolean;
+    parentOf?(key: RowKey): RowKey | null;
+    levelAt?(i: DisplayIndex): number;
+    held?(): Iterable<DisplayIndex>;
+}
+```
+
+### EMPTY_QUERY
+
+```ts
+export declare const EMPTY_QUERY: Query;
+```
+
+### EditChecks
+
+```ts
+export interface EditChecks<T, V = unknown> {
+    readonly required?: boolean;
+    readonly min?: V;
+    readonly max?: V;
+    readonly pattern?: string | RegExp;
+    readonly options?: readonly EnumOption[] | ((row: Readonly<T>, context: unknown) => readonly EnumOption[]);
+    readonly maxLength?: number;
+    readonly editor?: string;
+}
+```
+
+### EditableInfo
+
+```ts
+export interface EditableInfo {
+    readonly pinned?: 'top' | 'bottom' | undefined;
+}
+```
+
+### EditableRule
+
+```ts
+export type EditableRule<T> = boolean | ((row: Readonly<T>, context: unknown, info: EditableInfo) => boolean);
+```
+
+### EnumOption
+
+```ts
+export interface EnumOption {
+    readonly value: string;
+    readonly label?: string;
+    readonly aliases?: readonly string[];
+}
+```
+
+### ExportScope
+
+```ts
+export type ExportScope = 'displayed' | 'selected' | 'all';
+```
+
+### ExportServerPart
+
+```ts
+export interface ExportServerPart {
+    readonly filter?: Readonly<Record<string, unknown>>;
+    readonly quick?: string;
+    readonly sort?: readonly SortItem[];
+    readonly params: Readonly<Record<string, Json>>;
+    readonly zone: string;
+    readonly key: string;
+}
+```
+
+### ExportTrace
+
+```ts
+export interface ExportTrace {
+    readonly source: ChangeSource;
+    readonly id: string;
+    readonly at: string;
+    readonly scope: ExportScope;
+    readonly format?: 'csv' | 'xlsx' | 'json';
+}
+```
+
+### FilterKind
+
+```ts
+export interface FilterKind<S extends Json = Json, V = unknown> {
+    readonly name: string;
+    readonly types?: readonly ColumnType[];
+    read(state: unknown): S | 'invalid';
+    active(s: S): boolean;
+    test?(s: S, ctx: LocaleCtx, context?: unknown): (value: V | null, row: Readonly<unknown>) => boolean;
+    wire?(s: S, ctx: LocaleCtx, zone: string, context?: unknown): Json;
+}
+```
+
+### FilterModel
+
+```ts
+export type FilterModel = Readonly<Record<string, ColumnFilter>>;
+```
+
+### FocusOwner
+
+```ts
+export type FocusOwner<T> = (f: CellFocus, rows: DisplayedRows<T>) => FocusPos;
+```
+
+### FocusPos
+
+```ts
+export type FocusPos = {
+    readonly kind: 'cell';
+    readonly row: RowKey;
+    readonly column: string;
+} | {
+    readonly kind: 'header';
+    readonly column: string;
+    readonly level?: number;
+};
+```
+
+### FooterNode
+
+```ts
+export interface FooterNode {
+    readonly key: RowKey;
+    readonly kind: 'footer';
+    readonly level: number;
+    readonly group: RowKey | null;
+    readonly label: string;
+    readonly count: number;
+    readonly aggs: Readonly<Record<string, unknown>>;
+}
+```
+
+### Formatters
+
+```ts
+export interface Formatters {
+    number(spec?: NumberFormatSpec): (n: number) => string;
+    day(): (d: Day) => string;
+    instant(spec?: InstantFormatSpec): (ms: InstantMs) => string;
+}
+```
+
+### GridCommand
+
+```ts
+export type GridCommand = {
+    readonly type: 'sort.toggle';
+    readonly column: string;
+    readonly multi: boolean;
+} | {
+    readonly type: 'sort.set';
+    readonly sort: readonly SortItem[];
+} | {
+    readonly type: 'query.set';
+    readonly query: Query;
+} | {
+    readonly type: 'selection.toggle';
+    readonly row: RowKey;
+} | {
+    readonly type: 'selection.only';
+    readonly row: RowKey;
+} | {
+    readonly type: 'selection.range';
+    readonly target: RowKey;
+    readonly additive: boolean;
+} | {
+    readonly type: 'selection.allDisplayed';
+} | {
+    readonly type: 'selection.clear';
+} | {
+    readonly type: 'selection.set';
+    readonly selection: SelectionState;
+} | {
+    readonly type: 'column.resize';
+    readonly column: string;
+    readonly width: number;
+    readonly finished: boolean;
+} | {
+    readonly type: 'column.state';
+    readonly patch: readonly ColumnState[];
+} | {
+    readonly type: 'focus.set';
+    readonly focus: FocusPos | null;
+} | {
+    readonly type: 'filter.set';
+    readonly filter: FilterModel;
+} | {
+    readonly type: 'filter.column';
+    readonly column: string;
+    readonly filter: ColumnFilter | null;
+} | {
+    readonly type: 'quick.set';
+    readonly text: string;
+} | {
+    readonly type: 'selection.all';
+} | {
+    readonly type: 'selection.allFiltered';
+} | {
+    readonly type: 'selection.keepOnFilter';
+    readonly keep: boolean;
+} | {
+    readonly type: 'rows.refresh';
+} | {
+    readonly type: 'columns.set';
+    readonly defs: readonly ColumnOrGroup<any>[];
+} | {
+    readonly type: 'context.set';
+    readonly ctx: LocaleCtx;
+} | {
+    readonly type: 'page.go';
+    readonly index: number;
+} | {
+    readonly type: 'page.size';
+    readonly size: number;
+} | {
+    readonly type: 'rows.expand';
+    readonly rows: readonly RowKey[];
+    readonly expanded: boolean;
+} | {
+    readonly type: 'rows.expandAll';
+    readonly expanded: boolean;
+    readonly depth?: number;
+} | {
+    readonly type: 'edits.reader';
+    readonly reader: ValueReader<any>;
+    readonly columns?: readonly string[];
+} | {
+    readonly type: 'rows.reapply';
+} | {
+    readonly type: 'context.app';
+    readonly value: unknown;
+};
+```
+
+### GridCommandResult
+
+```ts
+export type GridCommandResult = {
+    readonly ok: true;
+} | {
+    readonly ok: false;
+    readonly reason: string;
+    readonly problems: readonly Problem[];
+};
+```
+
+### GridEvent
+
+```ts
+export type GridEvent<T> = {
+    readonly type: 'modelUpdated';
+    readonly source: ChangeSource;
+    readonly displayed: DisplayedRows<T>;
+    readonly kind: ModelChange<T>['kind'];
+} | {
+    readonly type: 'sortChanged';
+    readonly source: ChangeSource;
+    readonly sort: readonly SortItem[];
+} | {
+    readonly type: 'selectionChanged';
+    readonly source: ChangeSource;
+    readonly selection: SelectionState;
+    readonly count: number | null;
+    readonly query: Query | null;
+    readonly scope: RowScope | null;
+    readonly reason: SelectionReason | null;
+} | ({
+    readonly type: 'selectionRefused';
+    readonly source: ChangeSource;
+} & SelectionRefusal) | {
+    readonly type: 'filterChanged';
+    readonly source: ChangeSource;
+    readonly filter: FilterModel;
+} | {
+    readonly type: 'quickChanged';
+    readonly source: ChangeSource;
+    readonly text: string;
+} | {
+    readonly type: 'columnResized';
+    readonly source: ChangeSource;
+    readonly column: string;
+    readonly width: number;
+    readonly finished: boolean;
+} | {
+    readonly type: 'columnsChanged';
+    readonly source: ChangeSource;
+    readonly changed: readonly string[];
+    readonly layoutChanged: boolean;
+} | {
+    readonly type: 'focusChanged';
+    readonly source: ChangeSource;
+    readonly focus: FocusPos | null;
+} | {
+    readonly type: 'cellClicked';
+    readonly source: 'user';
+    readonly row: RowNode<T>;
+    readonly column: string;
+} | {
+    readonly type: 'rowClicked';
+    readonly source: 'user';
+    readonly row: RowNode<T>;
+} | {
+    readonly type: 'problems';
+    readonly source: ChangeSource;
+    readonly problems: readonly Problem[];
+} | {
+    readonly type: 'firstDataRendered';
+    readonly source: 'data';
+} | {
+    readonly type: 'rowExpanded';
+    readonly source: ChangeSource;
+    readonly rows: readonly RowKey[];
+    readonly expanded: boolean;
+} | {
+    readonly type: 'pageChanged';
+    readonly source: ChangeSource;
+    readonly page: PageState;
+} | {
+    readonly type: 'fetchFailed';
+    readonly source: 'data';
+    readonly error: unknown;
+    readonly key: string;
+    readonly page: number | null;
+} | {
+    readonly type: 'orderStale';
+    readonly source: ChangeSource;
+    readonly stale: boolean;
+} | {
+    readonly type: 'cellEdited';
+    readonly source: ChangeSource;
+    readonly key: RowKey;
+    readonly column: string;
+    readonly value: unknown;
+    readonly previous: unknown;
+    readonly origin: SaveOrigin;
+} | {
+    readonly type: 'saveFailed';
+    readonly source: 'data';
+    readonly key: RowKey;
+    readonly column: string;
+    readonly value: unknown;
+    readonly error: unknown;
+    readonly reason: string | null;
+    readonly code: string | null;
+} | {
+    readonly type: 'editStates';
+    readonly source: ChangeSource;
+    readonly cells: readonly {
+        readonly key: RowKey;
+        readonly column: string;
+    }[];
+} | {
+    readonly type: 'editingStarted';
+    readonly source: 'user';
+    readonly key: RowKey;
+    readonly column: string;
+    readonly start: 'f2' | 'enter' | 'key' | 'dblclick' | 'tap' | 'tab';
+} | {
+    readonly type: 'editingStopped';
+    readonly source: 'user';
+    readonly key: RowKey;
+    readonly column: string;
+    readonly kept: boolean;
+    readonly via: 'enter' | 'tab' | 'escape' | 'blur' | 'lost';
+} | {
+    readonly type: 'rangeChanged';
+    readonly source: ChangeSource;
+    readonly range: CellRange | null;
+} | {
+    readonly type: 'rangeCopied';
+    readonly source: ChangeSource;
+    readonly rows: number;
+    readonly columns: number;
+    readonly cells: number;
+    readonly cut: boolean;
+} | {
+    readonly type: 'stateChanged';
+    readonly source: ChangeSource;
+    readonly state: GridState;
+} | {
+    readonly type: 'stateRestored';
+    readonly source: ChangeSource;
+    readonly problems: readonly Problem[];
+} | {
+    readonly type: 'densityChanged';
+    readonly source: ChangeSource;
+    readonly density: 'compact' | 'comfortable' | 'spacious';
+} | {
+    readonly type: 'undoChanged';
+    readonly source: ChangeSource;
+    readonly canUndo: boolean;
+    readonly canRedo: boolean;
+} | {
+    readonly type: 'groupByChanged';
+    readonly source: ChangeSource;
+    readonly by: readonly string[];
+} | {
+    readonly type: 'pinnedChanged';
+    readonly source: ChangeSource;
+} | {
+    readonly type: 'rowMove';
+    readonly source: ChangeSource;
+    readonly via: 'pointer' | 'keys' | 'menu' | 'api';
+    readonly keys: readonly RowKey[];
+    readonly rows: readonly T[];
+    readonly target: {
+        readonly key: RowKey | null;
+        readonly where: 'before' | 'after' | 'inside';
+    };
+    readonly parent: RowKey | null;
+    readonly applied: boolean;
+} | {
+    readonly type: 'cellAction';
+    readonly source: 'user';
+    readonly column: string;
+    readonly key: RowKey;
+    readonly name: string;
+    readonly detail: unknown;
+} | {
+    readonly type: 'partAction';
+    readonly source: 'user';
+    readonly slot: string;
+    readonly column: string | null;
+    readonly name: string;
+    readonly detail: unknown;
+} | ({
+    readonly type: 'exportRequested';
+} & ExportTrace & {
+    readonly columns: readonly string[];
+    readonly query: Query;
+    readonly queryKey: string;
+    readonly server?: ExportServerPart;
+    readonly count: number | null;
+    readonly selection?: {
+        readonly mode: 'include' | 'exclude';
+        readonly count: number | null;
+    };
+    readonly zone: string;
+    readonly locale: string;
+}) | ({
+    readonly type: 'exportRefused';
+} & ExportTrace & {
+    readonly refusal: 'host' | 'too-large' | 'error';
+    readonly reason?: string;
+}) | ({
+    readonly type: 'exportFinished';
+} & ExportTrace & {
+    readonly outcome: 'done' | 'failed' | 'cancelled';
+    readonly via: 'browser' | 'server';
+    readonly rows: number | null;
+    readonly columns: number;
+    readonly bytes: number | null;
+    readonly fileName: string | null;
+    readonly hidden?: number;
+    readonly durationMs: number;
+    readonly blank?: number;
+    readonly invalid?: number;
+    readonly failure?: {
+        readonly stage: 'load' | 'rows' | 'canExport' | 'exportAll' | 'build' | 'download';
+        readonly name: string;
+    };
+});
+```
+
+### GridKernel
+
+```ts
+export interface GridKernel<T, M extends RowModel<T> = RowModel<T>> {
+    readonly rows: M;
+    readonly columns: ColumnModel<T>;
+    readonly query: Query;
+    readonly selection: SelectionState;
+    readonly anchor: RowKey | null;
+    readonly focus: FocusPos | null;
+    readonly expansion: ReadonlySet<RowKey>;
+    readonly selectionScope: SelectionScope | null;
+    readonly headerState: HeaderSelection;
+    dispatch(cmd: GridCommand, source: ChangeSource): GridCommandResult;
+    values(column: string, o?: ValuesOptions): ValuesHandle;
+    readonly reader: ValueReader<T>;
+    readonly app: unknown;
+    readonly orderStale: boolean;
+    editable(key: RowKey, column: string): boolean;
+    rowOf(key: RowKey): DataNode<T> | undefined;
+    tick(): void;
+    subscribe(fn: (e: GridEvent<T>) => void): () => void;
+    destroy(): void;
+}
+```
+
+### GroupNode
+
+```ts
+export interface GroupNode {
+    readonly key: RowKey;
+    readonly kind: 'group';
+    readonly level: number;
+    readonly label: string;
+    readonly path: readonly string[];
+    readonly column?: string;
+    readonly value?: unknown;
+    readonly count?: number;
+    readonly aggs?: Readonly<Record<string, unknown>>;
+}
+```
+
+### GroupProblemCode
+
+```ts
+export type GroupProblemCode = 'agg-type' | 'agg-threw' | 'pivot-too-many';
+```
+
+### HeaderSelection
+
+```ts
+export type HeaderSelection = 'none' | 'some' | 'all';
+```
+
+### INTENT_OWNERS
+
+```ts
+export declare const INTENT_OWNERS: {
+    readonly [K in Intent['kind']]: readonly KeyOwner[];
+};
+```
+
+### InstantFilter
+
+```ts
+export type InstantFilter = Extract<ColumnFilter, {
+    type: 'instant';
+}>;
+```
+
+### InstantFormatSpec
+
+```ts
+export interface InstantFormatSpec {
+    readonly seconds?: boolean;
+    readonly date?: boolean;
+    readonly time?: boolean;
+}
+```
+
+### InstantMs
+
+```ts
+export type InstantMs = number & {
+    readonly [instantBrand]: true;
+};
+```
+
+### InstantOp
+
+```ts
+export type InstantOp = 'onDay' | 'betweenDays' | 'before' | 'after' | 'between' | 'blank' | 'notBlank';
+```
+
+### InstantOptions
+
+```ts
+export interface InstantOptions {
+    readonly assumeZone?: string;
+    readonly disambiguation?: Disambiguation;
+}
+```
+
+### InstantRange
+
+```ts
+export interface InstantRange {
+    readonly from: number | null;
+    readonly to: number | null;
+}
+```
+
+### InstantReading
+
+```ts
+export type InstantReading = {
+    readonly ok: true;
+    readonly value: InstantMs;
+    readonly warning?: 'wall-time-skipped' | 'wall-time-ambiguous';
+} | {
+    readonly ok: false;
+    readonly code: 'invalid-instant' | 'ambiguous-instant' | 'unknown-zone' | 'wall-time-skipped' | 'wall-time-ambiguous';
+};
+```
+
+### Intent
+
+```ts
+export type Intent = {
+    readonly kind: 'move';
+    readonly axis: 'row' | 'col';
+    readonly delta: -1 | 1;
+} | {
+    readonly kind: 'edge';
+    readonly axis: 'row' | 'col' | 'both';
+    readonly to: 'first' | 'last';
+} | {
+    readonly kind: 'page';
+    readonly delta: -1 | 1;
+} | {
+    readonly kind: 'toggleSelect';
+} | {
+    readonly kind: 'selectAll';
+} | {
+    readonly kind: 'sort';
+    readonly multi: boolean;
+} | {
+    readonly kind: 'enter';
+} | {
+    readonly kind: 'leave';
+};
+```
+
+### IntentContext
+
+```ts
+export interface IntentContext {
+    readonly dir: 'ltr' | 'rtl';
+    readonly owner: KeyOwner;
+    readonly mac: boolean;
+}
+```
+
+### Json
+
+```ts
+export type Json = null | boolean | number | string | readonly Json[] | {
+    readonly [k: string]: Json;
+};
+```
+
+### KeyLike
+
+```ts
+export interface KeyLike {
+    readonly key: string;
+    readonly ctrlKey: boolean;
+    readonly metaKey: boolean;
+    readonly shiftKey: boolean;
+    readonly altKey: boolean;
+    readonly code?: string;
+}
+```
+
+### KeyOwner
+
+```ts
+export type KeyOwner = 'cell' | 'header' | 'editor' | 'filter-input' | 'popup' | 'cell-widget' | 'outside';
+```
+
+### LayerPlacement
+
+```ts
+export interface LayerPlacement {
+    readonly base: number;
+    readonly layerTop: number;
+}
+```
+
+### LoadingNode
+
+```ts
+export interface LoadingNode {
+    readonly key: RowKey;
+    readonly kind: 'loading';
+    readonly level: number;
+    readonly parent: RowKey;
+    readonly failed: boolean;
+}
+```
+
+### LocaleCtx
+
+```ts
+export interface LocaleCtx {
+    readonly locale: string;
+    readonly numerals: 'latn' | 'locale';
+    readonly timeZone: string;
+    readonly calendar: 'gregory';
+    readonly yesNo?: readonly [
+        yes: string,
+        no: string
+    ];
+}
+```
+
+### MAX_INSTANT
+
+```ts
+export declare const MAX_INSTANT = 8640000000000000;
+```
+
+### MAX_PHYSICAL
+
+```ts
+export declare const MAX_PHYSICAL = 4000000;
+```
+
+### ModelChange
+
+```ts
+export interface ModelChange<T> {
+    readonly source: ChangeSource;
+    readonly displayed: DisplayedRows<T>;
+    readonly kind: 'rows' | 'order' | 'query' | 'context' | 'page' | 'status' | 'expand';
+    readonly transaction?: TransactionResult;
+    readonly problems: readonly Problem[];
+    readonly told?: readonly Problem[];
+    readonly failure?: {
+        readonly error: unknown;
+        readonly key: string;
+        readonly page: number | null;
+    };
+}
+```
+
+### ModelEnv
+
+```ts
+export interface ModelEnv<T> {
+    readonly getRowId: (row: T) => RowIdInput;
+    readonly columns: ColumnLookup<T>;
+    readonly ctx: LocaleCtx;
+    readonly page?: PageOptions;
+    readonly operations?: OperationsInput;
+    readonly query?: Query;
+    readonly abort?: () => AbortHandle;
+    readonly filterKinds?: (name: string) => AnyFilterKind | undefined;
+    readonly now?: () => number;
+    readonly shape?: RowShape<T>;
+    readonly app?: unknown;
+    readonly held?: boolean | undefined;
+    readonly sameRow?: ((a: T, b: T) => boolean) | undefined;
+    readonly timer?: ((fn: () => void, ms: number) => () => void) | undefined;
+    readonly frame?: ((fn: () => void) => void) | undefined;
+}
+```
+
+### ModelStatus
+
+```ts
+export type ModelStatus = {
+    readonly phase: 'idle';
+} | {
+    readonly phase: 'loading';
+} | {
+    readonly phase: 'error';
+    readonly failure: unknown;
+    readonly key?: string;
+    readonly page?: number | null;
+};
+```
+
+### NO_OVERLAY
+
+```ts
+export declare const NO_OVERLAY: ValueReader<never>;
+```
+
+### NO_SELECTION
+
+```ts
+export declare const NO_SELECTION: SelectionState;
+```
+
+### NumOp
+
+```ts
+export type NumOp = 'equals' | 'notEqual' | 'lt' | 'lte' | 'gt' | 'gte' | 'between' | 'blank' | 'notBlank';
+```
+
+### NumberFormatSpec
+
+```ts
+export interface NumberFormatSpec {
+    readonly style?: 'decimal' | 'percent' | 'currency';
+    readonly currency?: string;
+    readonly minimumFractionDigits?: number;
+    readonly maximumFractionDigits?: number;
+    readonly useGrouping?: boolean;
+}
+```
+
+### NumberSeparators
+
+```ts
+export interface NumberSeparators {
+    readonly group: string;
+    readonly decimal: string;
+}
+```
+
+### Operation
+
+```ts
+export type Operation = 'filter' | 'quick' | 'sort' | 'page';
+```
+
+### Operations
+
+```ts
+export interface Operations {
+    readonly filter: Placement;
+    readonly quick: Placement;
+    readonly sort: Placement;
+    readonly page: Placement | 'off';
+}
+```
+
+### OperationsInput
+
+```ts
+export type OperationsInput = 'client' | 'server' | Partial<Operations>;
+```
+
+### PROBLEM_CODES
+
+```ts
+export declare const PROBLEM_CODES: readonly [
+    "invalid-row-id",
+    "duplicate-row-id",
+    "unknown-row-id",
+    "invalid-transaction",
+    "invalid-day",
+    "invalid-instant",
+    "ambiguous-instant",
+    "unknown-zone",
+    "wall-time-skipped",
+    "wall-time-ambiguous",
+    "invalid-column",
+    "duplicate-column-id",
+    "invalid-field-path",
+    "unknown-column",
+    "invalid-sort",
+    "invalid-filter",
+    "filter-needs-server",
+    "invalid-cell-value",
+    "too-many-pinned",
+    "invalid-operations",
+    "unsupported-live-change",
+    "unknown-part",
+    "missing-message",
+    "invalid-page",
+    "invalid-page-response",
+    "fetched-set-large",
+    "invalid-values-response",
+    "invalid-span",
+    "span-overlap",
+    "span-clipped",
+    "invalid-column-group",
+    "missing-feature",
+    "selection-refused",
+    "part-shadowed",
+    "unsupported-combination",
+    "tree-orphan",
+    "tree-cycle",
+    "tree-column-not-first",
+    "tree-shape",
+    "edit-structure",
+    "invalid-setting"
+];
+```
+
+### PageOptions
+
+```ts
+export interface PageOptions {
+    readonly pageSize?: number;
+    readonly pageSizes?: readonly number[];
+}
+```
+
+### PageState
+
+```ts
+export interface PageState {
+    readonly index: number;
+    readonly size: number;
+    readonly sizes: readonly number[];
+    readonly total: number | null;
+    readonly pageCount: number | null;
+    readonly hasNext: boolean;
+    readonly canJump: boolean;
+}
+```
+
+### PartColumn
+
+```ts
+export interface PartColumn {
+    readonly id: string;
+    readonly type: ColumnType;
+    readonly ui?: {
+        readonly cell?: string;
+        readonly header?: string;
+        readonly tooltip?: string;
+    };
+    readonly filter?: false | {
+        readonly kind?: string;
+        readonly floating?: boolean;
+        readonly debounceMs?: number;
+        readonly ops?: readonly string[];
+    };
+}
+```
+
+### PartSlot
+
+```ts
+export type PartSlot = 'cell' | 'header' | 'filter' | 'floating' | 'overlay' | 'tooltip' | 'footer' | 'detail' | 'filterOption';
+```
+
+### Placement
+
+```ts
+export type Placement = 'client' | 'server';
+```
+
+### PrefixSums
+
+```ts
+export declare class PrefixSums {
+    #private;
+    constructor(sizes: ArrayLike<number>);
+    get length(): number;
+    get total(): number;
+    sizeAt(i: number): number;
+    set(i: number, size: number): boolean;
+    offsetOf(i: number): number;
+    indexAt(offset: number): number;
+    rebuild(): void;
+}
+```
+
+### Problem
+
+```ts
+export interface Problem {
+    readonly code: ProblemCode;
+    readonly severity: Severity;
+    readonly path: string;
+    readonly detail?: string;
+}
+```
+
+### ProblemCode
+
+```ts
+export type ProblemCode = (typeof PROBLEM_CODES)[number] | GroupProblemCode | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | GapProblemCode | XlsxProblemCode | ImportProblemCode | 'print-too-many' | 'unknown-ui-key' | 'rows-not-loaded' | 'unbounded-viewport';
+```
+
+### Query
+
+```ts
+export interface Query {
+    readonly sort: readonly SortItem[];
+    readonly filter: FilterModel;
+    readonly quick: string;
+    readonly key: string;
+}
+```
+
+### REBASE
+
+```ts
+export declare const REBASE: number;
+```
+
+### REJECTED
+
+```ts
+export declare const REJECTED: unique symbol;
+```
+
+### RELATIVE_RANGES
+
+```ts
+export declare const RELATIVE_RANGES: ReadonlySet<RelativeRange>;
+```
+
+### RangeResult
+
+```ts
+export type RangeResult = {
+    readonly ok: true;
+    readonly state: SelectionState;
+} | {
+    readonly ok: false;
+    readonly reason: 'anchor-not-displayed' | 'target-not-displayed' | 'rows-not-loaded';
+};
+```
+
+### Rejected
+
+```ts
+export type Rejected = typeof REJECTED;
+```
+
+### RelativeRange
+
+```ts
+export type RelativeRange = 'today' | 'yesterday' | 'last7Days' | 'last30Days' | 'thisMonth' | 'lastMonth';
+```
+
+### ResolvedColumn
+
+```ts
+export interface ResolvedColumn<T> {
+    readonly id: string;
+    readonly def: ColumnDef<T, any>;
+    readonly type: ColumnType;
+    readonly codec: ValueCodec<any>;
+    readonly read: (row: Readonly<T>) => unknown;
+    readonly sortable: boolean;
+    readonly filterable: boolean;
+}
+```
+
+### RowCounts
+
+```ts
+export interface RowCounts {
+    readonly total: number | null;
+    readonly filtered: number | null;
+    readonly displayed: number;
+}
+```
+
+### RowIdInput
+
+```ts
+export type RowIdInput = string | number;
+```
+
+### RowKey
+
+```ts
+export type RowKey = string & {
+    readonly [rowKeyBrand]: true;
+};
+```
+
+### RowKind
+
+```ts
+export type RowKind = 'data' | 'group' | 'footer' | 'detail' | 'full-width' | 'loading';
+```
+
+### RowLayout
+
+```ts
+export interface RowLayout {
+    readonly count: number;
+    readonly total: number;
+    readonly uniform: boolean;
+    offsetOf(i: DisplayIndex): number;
+    heightOf(i: DisplayIndex): number;
+    indexAt(offset: number): DisplayIndex;
+    setHeight(i: DisplayIndex, h: number): boolean;
+}
+```
+
+### RowModel
+
+```ts
+export interface RowModel<T> {
+    readonly kind: 'client' | 'source';
+    readonly ops: Operations;
+    readonly displayed: DisplayedRows<T>;
+    readonly status: ModelStatus;
+    readonly counts: RowCounts;
+    readonly problems: readonly Problem[];
+    readonly selectAll: 'displayed' | 'query';
+    readonly allRows?: DisplayedRows<T> | undefined;
+    keeps(key: RowKey): boolean;
+    membershipOf(q: Query): string;
+    matches?(key: RowKey): boolean;
+    readonly scope: RowScope;
+    row(key: RowKey): DataNode<T> | undefined;
+    setQuery(q: Query, source?: ChangeSource): void;
+    setColumns(columns: ColumnLookup<T>, source?: ChangeSource): void;
+    setContext(ctx: LocaleCtx, source?: ChangeSource): void;
+    invalidate(o?: {
+        readonly purge?: boolean;
+    }): void;
+    readonly page: PageState | null;
+    warmSearch?(): SearchWarmup;
+    setPage(p: {
+        readonly index?: number;
+        readonly size?: number;
+    }, source?: ChangeSource): void;
+    setValues?(column: string, o?: ValuesOptions): ValuesHandle;
+    tick?(): void;
+    readonly expansion?: ReadonlySet<RowKey>;
+    isExpanded?(key: RowKey): boolean;
+    setExpansion?(set: ReadonlySet<RowKey>, source?: ChangeSource): void;
+    expand?(rows: readonly RowKey[], expanded: boolean, source?: ChangeSource): readonly RowKey[];
+    expandable?(depth?: number): readonly RowKey[];
+    expandAll?(expanded: boolean, depth?: number, source?: ChangeSource): readonly RowKey[];
+    setReader?(reader: ValueReader<T>, changed?: readonly string[]): void;
+    reapply?(source?: ChangeSource): void;
+    readonly orderStale?: boolean;
+    setApp?(context: unknown, source?: ChangeSource): void;
+    want?(first: number, last: number, keep?: readonly number[]): void;
+    hold?(fn: () => void): void;
+    subscribe(fn: (c: ModelChange<T>) => void): () => void;
+    destroy(): void;
+}
+```
+
+### RowNode
+
+```ts
+export type RowNode<T> = DataNode<T> | GroupNode | DetailNode<T> | LoadingNode | FooterNode | BlockLoadingNode;
+```
+
+### RowScope
+
+```ts
+export interface RowScope {
+    readonly params: Readonly<Record<string, Json>>;
+    readonly zone: string;
+}
+```
+
+### RowShape
+
+```ts
+export interface RowShape<T> {
+    readonly kind: 'tree' | 'detail' | 'group';
+    readonly initial?: 'none' | 'all' | number;
+    build(input: ShapeInput<T>): DisplayedRows<T>;
+    all?(): DisplayedRows<T>;
+    parents?(snap: RowSnapshot<T>, depth: number, shown?: boolean, env?: ColumnEnv<T>): readonly RowKey[];
+    isOpen?(key: RowKey): boolean;
+    opens?(key: RowKey): boolean;
+    readonly problems: readonly Problem[];
+    load?(rows: Iterable<T>, id: (row: T) => RowIdInput): Iterable<T>;
+    tx?(tx: RowTransaction<T>, id: (row: T) => RowIdInput, snap: RowSnapshot<T>): RowTransaction<T>;
+    rekey?(snap: RowSnapshot<T>): ((key: RowKey) => RowKey) | null;
+    attach?(model: ClientModel<T>, redraw: (kind?: 'rows' | 'expand', source?: ChangeSource) => void): void;
+    reads?(): readonly string[];
+    values?(changed?: readonly string[]): void;
+    refresh?(): void;
+}
+```
+
+### RowTransaction
+
+```ts
+export interface RowTransaction<T> {
+    readonly add?: readonly T[];
+    readonly addAt?: number;
+    readonly update?: readonly T[];
+    readonly patch?: readonly {
+        readonly id: RowIdInput;
+        readonly set: Partial<T>;
+    }[];
+    readonly remove?: readonly RowIdInput[];
+}
+```
+
+### SaveOrigin
+
+```ts
+export type SaveOrigin = 'edit' | 'undo' | 'redo' | 'paste' | 'fill' | 'bulk' | 'cut';
+```
+
+### ScrollAnchor
+
+```ts
+export type ScrollAnchor = {
+    readonly kind: 'row';
+    readonly index: DisplayIndex;
+    readonly delta: number;
+} | {
+    readonly kind: 'end';
+};
+```
+
+### ScrollMapper
+
+```ts
+export interface ScrollMapper {
+    readonly scaled: boolean;
+    readonly logicalHeight: number;
+    readonly physicalHeight: number;
+    readonly ratio: number;
+    readonly maxLogical: number;
+    readonly maxPhysical: number;
+    toLogical(physicalTop: number): number;
+    toPhysical(logicalTop: number): number;
+}
+```
+
+### SelectionGate
+
+```ts
+export interface SelectionGate {
+    readonly on: boolean;
+    vet(prev: SelectionState, next: SelectionState): {
+        readonly state: SelectionState;
+        readonly refused: SelectionRefusal | null;
+    } | null;
+    readonly skip: (key: RowKey) => boolean;
+    rowsChanged?(): void;
+}
+```
+
+### SelectionReason
+
+```ts
+export type SelectionReason = 'scope-changed' | 'rows-dropped';
+```
+
+### SelectionRefusal
+
+```ts
+export interface SelectionRefusal {
+    readonly rows: readonly RowKey[];
+    readonly reason: string | null;
+    readonly cause: 'rule' | 'unknown-row' | 'needs-rows';
+}
+```
+
+### SelectionScope
+
+```ts
+export interface SelectionScope extends RowScope {
+    readonly query: Query;
+}
+```
+
+### SelectionState
+
+```ts
+export type SelectionState = {
+    readonly mode: 'include';
+    readonly keys: ReadonlySet<RowKey>;
+} | {
+    readonly mode: 'exclude';
+    readonly keys: ReadonlySet<RowKey>;
+};
+```
+
+### ServerQuery
+
+```ts
+export interface ServerQuery {
+    readonly filter?: FilterModel;
+    readonly quick?: string;
+    readonly sort?: readonly SortItem[];
+    readonly key: string;
+}
+```
+
+### SetValue
+
+```ts
+export interface SetValue {
+    readonly value: string;
+    readonly label: string;
+    readonly count: number | null;
+    readonly selected?: boolean;
+}
+```
+
+### Severity
+
+```ts
+export type Severity = 'error' | 'warning';
+```
+
+### ShapeInput
+
+```ts
+export interface ShapeInput<T> {
+    readonly snap: RowSnapshot<T>;
+    readonly order: Uint32Array | null;
+    readonly matched: Uint8Array | null;
+    readonly filterActive: boolean;
+    readonly expansion: ReadonlySet<RowKey>;
+    readonly layer: ReadonlyMap<RowKey, boolean> | null;
+    readonly changed?: readonly RowKey[];
+    readonly version: number;
+    readonly env?: ColumnEnv<T>;
+}
+```
+
+### Side
+
+```ts
+export type Side = 'start' | 'end';
+```
+
+### SortItem
+
+```ts
+export interface SortItem {
+    readonly column: string;
+    readonly dir: 'asc' | 'desc';
+    readonly nulls?: 'first' | 'last';
+}
+```
+
+### SourceBinding
+
+```ts
+export interface SourceBinding<T> {
+    create(env: ModelEnv<T>): SourceHandle<T>;
+}
+```
+
+### SourceHandle
+
+```ts
+export interface SourceHandle<T> extends RowModel<T> {
+    readonly kind: 'source';
+    setSource(next: SourceBinding<T>, source?: ChangeSource): void;
+    tick(): void;
+}
+```
+
+### SpanCtx
+
+```ts
+export interface SpanCtx<T> {
+    readonly row: Readonly<T>;
+    readonly value: unknown;
+    readonly key: RowKey;
+    readonly index: number;
+    readonly column: string;
+    readonly prev: Readonly<T> | null;
+    readonly next: Readonly<T> | null;
+}
+```
+
+### TextOp
+
+```ts
+export type TextOp = 'contains' | 'notContains' | 'equals' | 'notEqual' | 'startsWith' | 'endsWith' | 'blank' | 'notBlank';
+```
+
+### TransactionResult
+
+```ts
+export interface TransactionResult {
+    readonly kind: 'reset' | 'delta' | 'none';
+    readonly version: number;
+    readonly added: readonly RowKey[];
+    readonly updated: readonly RowKey[];
+    readonly removed: readonly RowKey[];
+    readonly problems: readonly Problem[];
+}
+```
+
+### VALUES_MAX
+
+```ts
+export declare const VALUES_MAX = 2000;
+```
+
+### ValueCodec
+
+```ts
+export interface ValueCodec<V> {
+    readonly kind: ColumnType;
+    readonly keyKind: 'number' | 'text';
+    coerce(raw: unknown, ctx: LocaleCtx): V | null;
+    why?(raw: unknown, ctx: LocaleCtx): string;
+    warning?(raw: unknown, ctx: LocaleCtx): 'wall-time-skipped' | 'wall-time-ambiguous' | null;
+    parse(text: string, ctx: LocaleCtx): V | Rejected;
+    format(v: V, ctx: LocaleCtx): string;
+    sortKey(v: V, ctx: LocaleCtx): number | string;
+    compare(a: V, b: V, ctx: LocaleCtx): number;
+    isEmpty(v: unknown): boolean;
+    equals(a: V, b: V): boolean;
+    toExport(v: V): string;
+}
+```
+
+### ValueList
+
+```ts
+export interface ValueList {
+    readonly values: readonly SetValue[];
+    readonly blanks: number | null;
+    readonly truncated: boolean;
+}
+```
+
+### ValueReader
+
+```ts
+export interface ValueReader<T> {
+    readonly version: number;
+    readonly overlay: boolean;
+    value(col: ResolvedColumn<T>, row: Readonly<T>, id: string): unknown;
+}
+```
+
+### ValuesHandle
+
+```ts
+export interface ValuesHandle {
+    readonly status: 'idle' | 'loading' | 'error';
+    readonly result: ValueList | null;
+    readonly available: boolean;
+    readonly failure?: unknown;
+    readonly problems: readonly Problem[];
+    search(text: string): void;
+    refresh(): void;
+    subscribe(fn: () => void): () => void;
+    close(): void;
+}
+```
+
+### ValuesOptions
+
+```ts
+export interface ValuesOptions {
+    readonly search?: string;
+    readonly max?: number;
+}
+```
+
+### WallResolution
+
+```ts
+export type WallResolution = {
+    readonly ok: true;
+    readonly value: InstantMs;
+    readonly warning?: 'wall-time-skipped' | 'wall-time-ambiguous';
+} | {
+    readonly ok: false;
+    readonly code: 'unknown-zone' | 'invalid-instant' | 'wall-time-skipped' | 'wall-time-ambiguous';
+};
+```
+
+### Window2D
+
+```ts
+export interface Window2D {
+    readonly rows: {
+        readonly first: DisplayIndex;
+        readonly last: DisplayIndex;
+    } | null;
+    readonly cols: {
+        readonly first: number;
+        readonly last: number;
+    } | null;
+    readonly placement: LayerPlacement;
+}
+```
+
+### WindowView
+
+```ts
+export interface WindowView {
+    readonly block: number;
+    readonly inline: number;
+}
+```
+
+### addDays
+
+```ts
+export declare const addDays: (day: Day, n: number) => Day | null;
+```
+
+### anchorFor
+
+```ts
+export declare function anchorFor(layout: RowLayout, scrollTop: number, viewBlock: number, isMeasured: (i: DisplayIndex) => boolean): ScrollAnchor | null;
+```
+
+### assignKeys
+
+```ts
+export declare function assignKeys(ids: readonly unknown[], path?: string, make?: (id: unknown) => RowKey | null): {
+    readonly keys: readonly (RowKey | null)[];
+    readonly problems: readonly Problem[];
+};
+```
+
+### booleanCodec
+
+```ts
+export declare const booleanCodec: ValueCodec<boolean>;
+```
+
+### booleanCodecWith
+
+```ts
+export declare function booleanCodecWith(labels?: {
+    readonly true: string;
+    readonly false: string;
+}): ValueCodec<boolean>;
+```
+
+### canonicalId
+
+```ts
+export declare function canonicalId(id: unknown): string | null;
+```
+
+### civilToEpochDay
+
+```ts
+export declare function civilToEpochDay(y: number, m: number, d: number): number;
+```
+
+### clearSelection
+
+```ts
+export declare const clearSelection: () => SelectionState;
+```
+
+### clientRows
+
+```ts
+export declare function clientRows<T>(o: ClientOptions<T>): ClientModel<T>;
+```
+
+### collatorFor
+
+```ts
+export declare function collatorFor(ctx: Pick<LocaleCtx, 'locale'>, spec?: CollatorSpec): Intl.Collator;
+```
+
+### compareDays
+
+```ts
+export declare const compareDays: (a: Day, b: Day) => number;
+```
+
+### compilePath
+
+```ts
+export declare function compilePath(path: string): ((row: unknown) => unknown) | null;
+```
+
+### createColumnModel
+
+```ts
+export declare function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o?: {
+    availableInline?: number;
+}): ColumnModel<T>;
+```
+
+### createKernel
+
+```ts
+export declare function createKernel<T, M extends RowModel<T> = RowModel<T>>(o: {
+    readonly rows: M;
+    readonly columns: ColumnModel<T>;
+    readonly query?: Query;
+    readonly keepSelectionOnFilter?: boolean;
+    readonly multiSort?: boolean | undefined;
+}): GridKernel<T, M>;
+```
+
+### dataKey
+
+```ts
+export declare function dataKey(id: unknown): RowKey | null;
+```
+
+### dayAt
+
+```ts
+export declare function dayAt(now: number, zone: string): {
+    readonly day: Day;
+    readonly until: number;
+} | null;
+```
+
+### dayCodec
+
+```ts
+export declare const dayCodec: ValueCodec<Day>;
+```
+
+### dayFieldOrder
+
+```ts
+export declare function dayFieldOrder(ctx: LocaleCtx): readonly [
+    'd' | 'm' | 'y',
+    'd' | 'm' | 'y',
+    'd' | 'm' | 'y'
+];
+```
+
+### dayToEpochDay
+
+```ts
+export declare function dayToEpochDay(day: Day): number;
+```
+
+### daysInMonth
+
+```ts
+export declare function daysInMonth(y: number, m: number): number;
+```
+
+### detailKey
+
+```ts
+export declare function detailKey(master: RowKey): RowKey;
+```
+
+### editableAt
+
+```ts
+export declare function editableAt<T>(node: RowNode<T> | undefined, col: ResolvedColumn<T> | undefined, context: unknown, locked?: ReadonlySet<string>, threw?: (column: string) => void): boolean;
+```
+
+### enumCodec
+
+```ts
+export declare function enumCodec(options: readonly EnumOption[], o?: {
+    sort?: 'label' | 'option-order';
+}): ValueCodec<string>;
+```
+
+### epochDayToCivil
+
+```ts
+export declare function epochDayToCivil(n: number): {
+    y: number;
+    m: number;
+    d: number;
+};
+```
+
+### epochDayToDay
+
+```ts
+export declare function epochDayToDay(n: number): Day | null;
+```
+
+### filterKindOf
+
+```ts
+export declare const filterKindOf: (c: PartColumn) => string;
+```
+
+### fold
+
+```ts
+export declare function fold(s: string): string;
+```
+
+### formattersFor
+
+```ts
+export declare function formattersFor(ctx: LocaleCtx): Formatters;
+```
+
+### groupKey
+
+```ts
+export declare function groupKey(path: readonly string[]): RowKey;
+```
+
+### headerSelection
+
+```ts
+export declare function headerSelection<T>(s: SelectionState, d: DisplayedRows<T>): HeaderSelection;
+```
+
+### idOfDataKey
+
+```ts
+export declare function idOfDataKey(key: RowKey): string | null;
+```
+
+### instantCodec
+
+```ts
+export declare function instantCodec(o?: {
+    assumeZone?: string;
+    format?: InstantFormatSpec;
+}): ValueCodec<InstantMs>;
+```
+
+### instantToDayIn
+
+```ts
+export declare function instantToDayIn(instant: InstantMs, zone: string): Day | null;
+```
+
+### instantToIso
+
+```ts
+export declare function instantToIso(ms: InstantMs): string;
+```
+
+### intentFor
+
+```ts
+export declare function intentFor(e: KeyLike, ctx: IntentContext): Intent | null;
+```
+
+### isAscii
+
+```ts
+export declare const isAscii: (s: string) => boolean;
+```
+
+### isBlank
+
+```ts
+export declare const isBlank: (v: unknown) => boolean;
+```
+
+### isKnownZone
+
+```ts
+export declare function isKnownZone(zone: string): boolean;
+```
+
+### isLeapYear
+
+```ts
+export declare const isLeapYear: (y: number) => boolean;
+```
+
+### isSelected
+
+```ts
+export declare function isSelected(s: SelectionState, k: RowKey): boolean;
+```
+
+### layerPlacement
+
+```ts
+export declare function layerPlacement(logicalTop: number, physicalTop: number, rebase?: number): LayerPlacement;
+```
+
+### liveChangeProblems
+
+```ts
+export declare function liveChangeProblems(policy: Readonly<Record<string, 'live' | 'fixed'>>, prev: Readonly<Record<string, unknown>>, patch: Readonly<Record<string, unknown>>): Problem[];
+```
+
+### localeCtx
+
+```ts
+export declare function localeCtx(o: {
+    locale: string;
+    numerals?: 'latn' | 'locale';
+    timeZone?: string;
+}): LocaleCtx;
+```
+
+### makeQuery
+
+```ts
+export declare function makeQuery(q?: Partial<Pick<Query, 'sort' | 'filter' | 'quick'>>): Query;
+```
+
+### messageProblems
+
+```ts
+export declare function messageProblems(key: string, available: ReadonlySet<string>): Problem[];
+```
+
+### nextSort
+
+```ts
+export declare function nextSort(sort: readonly SortItem[], column: string, multi: boolean): readonly SortItem[];
+```
+
+### normalizeDigits
+
+```ts
+export declare function normalizeDigits(s: string): string;
+```
+
+### numberCodec
+
+```ts
+export declare const numberCodec: ValueCodec<number>;
+```
+
+### numberCodecWith
+
+```ts
+export declare function numberCodecWith(spec?: NumberFormatSpec): ValueCodec<number>;
+```
+
+### offsetAt
+
+```ts
+export declare function offsetAt(instant: number, zone: string): number;
+```
+
+### overscanRows
+
+```ts
+export declare function overscanRows(speedPxPerSec: number, rowHeight: number, o?: {
+    readonly min?: number;
+    readonly max?: number;
+}): number;
+```
+
+### parseDay
+
+```ts
+export declare function parseDay(s: unknown): Day | null;
+```
+
+### parseInstant
+
+```ts
+export declare function parseInstant(v: unknown, o?: InstantOptions): InstantMs | null;
+```
+
+### partNameFor
+
+```ts
+export declare function partNameFor(slot: PartSlot, column: PartColumn, available: ReadonlySet<string>): {
+    readonly name: string | null;
+    readonly problems: readonly Problem[];
+};
+```
+
+### pinnedKey
+
+```ts
+export declare function pinnedKey(side: 'top' | 'bottom', id: unknown): RowKey | null;
+```
+
+### problem
+
+```ts
+export declare const problem: (code: ProblemCode, severity: Severity, path: string, detail?: string) => Problem;
+```
+
+### quickWords
+
+```ts
+export declare function quickWords(text: string): readonly string[];
+```
+
+### readDayText
+
+```ts
+export declare function readDayText(text: string, order: readonly [
+    'd' | 'm' | 'y',
+    'd' | 'm' | 'y',
+    'd' | 'm' | 'y'
+]): Day | null;
+```
+
+### readInstant
+
+```ts
+export declare function readInstant(v: unknown, o?: InstantOptions): InstantReading;
+```
+
+### readMachineNumber
+
+```ts
+export declare function readMachineNumber(raw: unknown): number | null;
+```
+
+### readNumber
+
+```ts
+export declare function readNumber(text: string, ctx: LocaleCtx): number | null;
+```
+
+### reconcileFocus
+
+```ts
+export declare function reconcileFocus<T>(f: FocusPos | null, before: DisplayedRows<T>, after: DisplayedRows<T>, columns: ColumnLookup<T>, owner?: FocusOwner<T>, held?: (key: RowKey) => unknown): FocusPos | null;
+```
+
+### reconcileSelection
+
+```ts
+export declare function reconcileSelection(s: SelectionState, has: (k: RowKey) => boolean): SelectionState;
+```
+
+### relativeDays
+
+```ts
+export declare function relativeDays(range: RelativeRange, today: Day): {
+    readonly from: Day;
+    readonly to: Day;
+} | null;
+```
+
+### resolveColumns
+
+```ts
+export declare function resolveColumns<T>(tree: readonly ColumnOrGroup<T>[]): {
+    readonly columns: readonly ResolvedColumn<T>[];
+    readonly problems: readonly Problem[];
+};
+```
+
+### resolveInstantRange
+
+```ts
+export declare function resolveInstantRange(f: InstantFilter, zone: string, path?: string, now?: number): {
+    range: InstantRange | null;
+    problems: readonly Problem[];
+    days?: {
+        readonly from: Day;
+        readonly to: Day;
+    };
+};
+```
+
+### resolveOperations
+
+```ts
+export declare function resolveOperations(input: OperationsInput | undefined, hasSource: boolean): {
+    readonly ops: Operations;
+    readonly problems: readonly Problem[];
+};
+```
+
+### resolveWall
+
+```ts
+export declare function resolveWall(wallMs: number, zone: string, disambiguation?: Disambiguation): WallResolution;
+```
+
+### scrollMapper
+
+```ts
+export declare function scrollMapper(logicalHeight: number, maxPhysical: number, viewportBlockSize: number): ScrollMapper;
+```
+
+### scrollTopFor
+
+```ts
+export declare function scrollTopFor(anchor: ScrollAnchor, layout: RowLayout, viewBlock: number): number;
+```
+
+### selectAll
+
+```ts
+export declare const selectAll: () => SelectionState;
+```
+
+### selectOnly
+
+```ts
+export declare const selectOnly: (keys: Iterable<RowKey>) => SelectionState;
+```
+
+### selectRange
+
+```ts
+export declare function selectRange<T>(s: SelectionState, displayed: DisplayedRows<T>, anchor: RowKey, target: RowKey, o?: {
+    readonly additive?: boolean;
+}): RangeResult;
+```
+
+### selectionCount
+
+```ts
+export declare function selectionCount(s: SelectionState, total: number | null): number | null;
+```
+
+### splitQuery
+
+```ts
+export declare function splitQuery(q: Query, ops: Operations): {
+    readonly server: ServerQuery;
+    readonly client: Query;
+};
+```
+
+### stripMarks
+
+```ts
+export declare function stripMarks(s: string): string;
+```
+
+### textCodec
+
+```ts
+export declare const textCodec: ValueCodec<string>;
+```
+
+### toggle
+
+```ts
+export declare function toggle(s: SelectionState, k: RowKey): SelectionState;
+```
+
+### uniformRowLayout
+
+```ts
+export declare function uniformRowLayout(rows: IndexMint, height: number): RowLayout;
+```
+
+### variableRowLayout
+
+```ts
+export declare function variableRowLayout(rows: IndexMint, estimate: number, heights?: ArrayLike<number>): RowLayout;
+```
+
+### visibleWindow
+
+```ts
+export declare function visibleWindow(rows: RowLayout, centerCols: PrefixSums, mapper: ScrollMapper, physicalScrollTop: number, scrollInline: number, view: WindowView, o: {
+    readonly overscanRows: number;
+    readonly overscanCols: number;
+}): Window2D;
+```
+
+### windowAt
+
+```ts
+export declare function windowAt(rows: RowLayout, centerCols: PrefixSums, logicalTop: number, physicalScrollTop: number, scrollInline: number, view: WindowView, o: {
+    readonly overscanRows: number;
+    readonly overscanCols: number;
+}): Window2D;
+```
+
+### zoneDayBounds
+
+```ts
+export declare function zoneDayBounds(day: Day, zone: string): {
+    readonly from: InstantMs;
+    readonly to: InstantMs;
+};
+```
+
+## `@dzgrid/core/server`
+
+### AbortHandle
+
+```ts
+export interface AbortHandle {
+    readonly signal: AbortSignalLike;
+    abort(reason?: unknown): void;
+}
+```
+
+### AbortSignalLike
+
+```ts
+export interface AbortSignalLike {
+    readonly aborted: boolean;
+    readonly reason?: unknown;
+}
+```
+
+### ChildRequest
+
+```ts
+export interface ChildRequest<T> {
+    readonly parent: RowKey;
+    readonly id: string;
+    readonly row: T;
+    readonly filter?: WireFilterModel;
+    readonly quick?: string;
+    readonly sort?: readonly SortItem[];
+    readonly params: Readonly<Record<string, Json>>;
+    readonly zone: string;
+    readonly epoch: number;
+    readonly key: string;
+    readonly signal: AbortSignalLike;
+}
+```
+
+### ChildResponse
+
+```ts
+export type ChildResponse<T> = readonly T[] | {
+    readonly rows: readonly T[];
+};
+```
+
+### DataRequest
+
+```ts
+export interface DataRequest {
+    readonly filter?: WireFilterModel;
+    readonly quick?: string;
+    readonly sort?: readonly SortItem[];
+    readonly page?: PageWindow;
+    readonly blocks?: true;
+    readonly group?: GroupPart;
+    readonly params: Readonly<Record<string, Json>>;
+    readonly zone: string;
+    readonly key: string;
+    readonly signal: AbortSignalLike;
+}
+```
+
+### DataResponse
+
+```ts
+export interface DataResponse<T> {
+    readonly rows: readonly T[];
+    readonly total?: number;
+    readonly hasNext?: boolean;
+    readonly nextCursor?: string | null;
+}
+```
+
+### DataSource
+
+```ts
+export interface DataSource<T> {
+    readonly fetch: (req: DataRequest) => Promise<DataResponse<T>> | PromiseLike<DataResponse<T>> | DataResponse<T>;
+    readonly values?: (req: ValuesRequest) => Promise<ValuesResponse> | PromiseLike<ValuesResponse> | ValuesResponse;
+    readonly children?: (req: ChildRequest<T>) => Promise<ChildResponse<T>> | PromiseLike<ChildResponse<T>> | ChildResponse<T>;
+}
+```
+
+### DropReason
+
+```ts
+export type DropReason = 'superseded' | 'stale-epoch' | 'aborted' | 'destroyed';
+```
+
+### GateDiagnostics
+
+```ts
+export interface GateDiagnostics {
+    readonly begun: number;
+    readonly accepted: number;
+    readonly dropped: Readonly<Record<DropReason, number>>;
+}
+```
+
+### Json
+
+```ts
+export type Json = null | boolean | number | string | readonly Json[] | {
+    readonly [k: string]: Json;
+};
+```
+
+### PageWindow
+
+```ts
+export interface PageWindow {
+    readonly index: number;
+    readonly size: number;
+    readonly offset: number;
+    readonly cursor: string | null;
+}
+```
+
+### RequestGate
+
+```ts
+export interface RequestGate {
+    begin(channel: string, key: string): {
+        readonly ticket: Ticket;
+        readonly signal: AbortSignalLike;
+    };
+    accepts(t: Ticket): DropReason | null;
+    settle(t: Ticket): DropReason | null;
+    cancel(channel: string): void;
+    forget?(channel: string): void;
+    newEpoch(): void;
+    destroy(): void;
+    readonly epoch: number;
+    readonly diagnostics: GateDiagnostics;
+}
+```
+
+### SourceModel
+
+```ts
+export interface SourceModel<T> extends SourceHandle<T> {
+    readonly diagnostics: {
+        readonly fetches: number;
+        readonly valueFetches: number;
+        readonly childFetches?: number;
+        readonly gate: GateDiagnostics;
+    };
+}
+```
+
+### SourceRows
+
+```ts
+export interface SourceRows<T> extends SourceBinding<T> {
+    create(env: ModelEnv<T>): SourceModel<T>;
+}
+```
+
+### SourceRowsOptions
+
+```ts
+export interface SourceRowsOptions {
+    readonly paging?: 'offset' | 'cursor';
+    readonly maxRows?: number;
+    readonly params?: Readonly<Record<string, Json>>;
+    readonly abort?: () => AbortHandle;
+}
+```
+
+### Ticket
+
+```ts
+export interface Ticket {
+    readonly seq: number;
+    readonly epoch: number;
+    readonly channel: string;
+    readonly key: string;
+}
+```
+
+### ValuesRequest
+
+```ts
+export interface ValuesRequest {
+    readonly column: string;
+    readonly search: string;
+    readonly limit: number;
+    readonly filter?: WireFilterModel;
+    readonly quick?: string;
+    readonly params: Readonly<Record<string, Json>>;
+    readonly zone: string;
+    readonly key: string;
+    readonly signal: AbortSignalLike;
+}
+```
+
+### ValuesResponse
+
+```ts
+export type ValuesResponse = readonly SetValue[] | {
+    readonly values: readonly SetValue[];
+    readonly blanks?: number | null;
+    readonly truncated?: boolean;
+};
+```
+
+### WireEnv
+
+```ts
+export interface WireEnv<T> {
+    readonly ctx: LocaleCtx;
+    readonly columns: ColumnLookup<T>;
+    readonly kinds?: (name: string) => WireKind | undefined;
+    readonly now?: number;
+    readonly app?: unknown;
+}
+```
+
+### WireFilter
+
+```ts
+export type WireFilter = {
+    readonly type: 'text';
+    readonly op: TextOp;
+    readonly value?: string;
+    readonly caseSensitive?: true;
+} | {
+    readonly type: 'number';
+    readonly op: NumOp;
+    readonly value?: number;
+    readonly valueTo?: number;
+} | {
+    readonly type: 'day';
+    readonly op: NumOp;
+    readonly value?: Day;
+    readonly valueTo?: Day;
+    readonly relative?: RelativeRange;
+    readonly zone?: string;
+} | {
+    readonly type: 'instant';
+    readonly op: 'blank' | 'notBlank';
+} | {
+    readonly type: 'instant';
+    readonly op: 'onDay' | 'betweenDays' | 'before' | 'after' | 'between';
+    readonly day?: string;
+    readonly dayTo?: string;
+    readonly at?: string | number;
+    readonly atTo?: string | number;
+    readonly resolved: {
+        readonly from: WireInstant | null;
+        readonly to: WireInstant | null;
+    };
+    readonly zone: string;
+    readonly relative?: RelativeRange;
+} | {
+    readonly type: 'boolean';
+    readonly value: boolean;
+} | {
+    readonly type: 'set';
+    readonly include?: readonly string[];
+    readonly exclude?: readonly string[];
+    readonly blanks?: 'include' | 'exclude';
+} | {
+    readonly type: 'combined';
+    readonly join: 'and' | 'or';
+    readonly conditions: readonly WireFilter[];
+} | {
+    readonly type: 'custom';
+    readonly kind: string;
+    readonly value: Json;
+};
+```
+
+### WireFilterModel
+
+```ts
+export type WireFilterModel = Readonly<Record<string, WireFilter>>;
+```
+
+### WireInstant
+
+```ts
+export type WireInstant = string;
+```
+
+### WireKind
+
+```ts
+export interface WireKind {
+    read(state: Json): Json | 'invalid';
+    active(state: Json): boolean;
+    wire?(state: Json, ctx: LocaleCtx, zone: string, context?: unknown): Json;
+    readonly types?: readonly ColumnType[];
+}
+```
+
+### createGate
+
+```ts
+export declare function createGate(abort: () => AbortHandle): RequestGate;
+```
+
+### sourceRows
+
+```ts
+export declare function sourceRows<T>(data: DataSource<T>, o?: SourceRowsOptions): SourceRows<T>;
+```
+
+### toWire
+
+```ts
+export declare function toWire<T>(f: FilterModel, env: WireEnv<T>): {
+    readonly filter: WireFilterModel;
+    readonly problems: readonly Problem[];
+};
+```
+
+## `@dzgrid/core/spans`
+
+### BandFragment
+
+```ts
+export interface BandFragment {
+    readonly group: string;
+    readonly first: number;
+    readonly count: number;
+    readonly label: string;
+}
+```
+
+### GroupEntry
+
+```ts
+export interface GroupEntry {
+    readonly open: boolean;
+    readonly leaves: readonly string[];
+    readonly shownOpen: readonly string[];
+    readonly shownClosed: readonly string[];
+}
+```
+
+### GroupTable
+
+```ts
+export interface GroupTable {
+    readonly groups: ReadonlyMap<string, GroupEntry>;
+    readonly problems: readonly Problem[];
+}
+```
+
+### HeaderBands
+
+```ts
+export interface HeaderBands {
+    readonly depth: number;
+    readonly levels: readonly (readonly BandFragment[])[];
+    readonly problems: readonly Problem[];
+}
+```
+
+### NavMove
+
+```ts
+export interface NavMove {
+    readonly to: Slot;
+    readonly goal: Slot;
+}
+```
+
+### NavShape
+
+```ts
+export interface NavShape {
+    readonly rows: number;
+    readonly cols: number;
+    readonly page: number;
+}
+```
+
+### RowSpanPlan
+
+```ts
+export interface RowSpanPlan {
+    readonly covered: ReadonlySet<number>;
+    readonly cells: ReadonlyMap<number, {
+        readonly rows: number;
+        readonly cols: number;
+        readonly width: number;
+    }>;
+    readonly mount: readonly number[];
+    readonly spans: boolean;
+    readonly full: boolean;
+    readonly tall: readonly (readonly [
+        string,
+        SpanCell
+    ])[];
+    readonly pinned: readonly (readonly [
+        string,
+        number,
+        boolean
+    ])[];
+}
+```
+
+### Slot
+
+```ts
+export interface Slot {
+    readonly row: number;
+    readonly col: number;
+}
+```
+
+### SpanCell
+
+```ts
+export interface SpanCell {
+    readonly row: number;
+    readonly col: number;
+    readonly rows: number;
+    readonly cols: number;
+}
+```
+
+### SpanColumns
+
+```ts
+export interface SpanColumns<T> {
+    readonly layout: {
+        readonly start: {
+            readonly columns: readonly ResolvedColumn<T>[];
+        };
+        readonly center: {
+            readonly columns: readonly ResolvedColumn<T>[];
+        };
+        readonly end: {
+            readonly columns: readonly ResolvedColumn<T>[];
+        };
+    };
+    get(id: string): ResolvedColumn<T> | undefined;
+}
+```
+
+### SpanInput
+
+```ts
+export interface SpanInput<T> {
+    readonly rows: DisplayedRows<T>;
+    readonly columns: SpanColumns<T>;
+    readonly ctx: LocaleCtx;
+    readonly fullWidth?: ((row: Readonly<T>) => boolean | {
+        readonly part?: string;
+    }) | null | undefined;
+    readonly text?: ((col: ResolvedColumn<T>, row: Readonly<T>, index: number) => string | null) | undefined;
+    readonly apart?: ((row: number) => boolean) | undefined;
+    readonly treeColumn?: string | ((row: T) => string | undefined) | undefined;
+    readonly acrossLevels?: boolean | undefined;
+}
+```
+
+### SpanLookup
+
+```ts
+export interface SpanLookup {
+    ownerAt(row: number, col: number): SpanCell | null;
+}
+```
+
+### SpanMap
+
+```ts
+export interface SpanMap extends SpanLookup {
+    readonly version: number;
+    readonly none: boolean;
+    coveringAbove(firstRow: number): SpanCell[];
+    inRow(row: number, colFirst: number, colLast: number): SpanCell[];
+    fullWidth(row: number): boolean;
+    readonly problems: readonly Problem[];
+}
+```
+
+### buildSpanMap
+
+```ts
+export declare function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): SpanMap;
+```
+
+### diffState
+
+```ts
+export declare function diffState(t: GroupTable, state: ReadonlyMap<string, boolean>): Record<string, boolean>;
+```
+
+### foldedColumns
+
+```ts
+export declare function foldedColumns(t: GroupTable, state: ReadonlyMap<string, boolean>): Set<string>;
+```
+
+### groupTable
+
+```ts
+export declare function groupTable<T>(tree: readonly ColumnOrGroup<T>[]): GroupTable;
+```
+
+### headerBands
+
+```ts
+export declare function headerBands<T>(tree: readonly ColumnOrGroup<T>[], layout: Segments): HeaderBands;
+```
+
+### land
+
+```ts
+export declare const land: (map: SpanLookup | null, row: number, col: number) => Slot;
+```
+
+### navigate
+
+```ts
+export declare function navigate(map: SpanLookup | null, s: NavShape, from: Slot, goal: Slot | null, intent: Intent): NavMove | null;
+```
+
+### ownerFocus
+
+```ts
+export declare function ownerFocus<T>(map: SpanMap, columns: readonly string[]): FocusOwner<T>;
+```
+
+### rowPlanner
+
+```ts
+export declare function rowPlanner(map: SpanMap, layout: ColumnLayout): (row: number) => RowSpanPlan | null;
+```
+
+### spanAt
+
+```ts
+export declare const spanAt: (map: SpanMap | null, row: number, col: number) => SpanCell | null;
+```
+
+## `@dzgrid/core/csv`
+
+### CsvInput
+
+```ts
+export interface CsvInput<T> {
+    readonly rows: DisplayedRows<T>;
+    readonly at?: Uint32Array | null;
+    readonly columns: ColumnLookup<T>;
+    readonly ctx: LocaleCtx;
+    readonly reader?: ValueReader<T>;
+    readonly spans?: SpanMap | null;
+    readonly spanColumns?: readonly string[];
+    readonly groupLabel?: ((node: GroupNode | FooterNode) => string) | undefined;
+    readonly aggFuncs?: Readonly<Record<string, AggFuncName | AggFn>> | undefined;
+}
+```
+
+### CsvOptions
+
+```ts
+export interface CsvOptions {
+    readonly text?: 'value' | 'display';
+    readonly separator?: ',' | ';' | '\t';
+    readonly bom?: boolean;
+    readonly header?: boolean;
+    readonly numbers?: 'excel' | 'raw';
+    readonly instants?: 'wall' | 'iso';
+    readonly enums?: 'label' | 'code';
+    readonly sanitizeFormulas?: boolean;
+    readonly spans?: 'repeat' | 'first';
+    readonly columns?: readonly string[];
+    readonly chunkRows?: number;
+    readonly tree?: 'none' | 'level' | 'indent';
+    readonly levelHeader?: string;
+    readonly treeColumn?: string;
+    readonly groupRows?: boolean;
+}
+```
+
+### CsvScope
+
+```ts
+export type CsvScope = ExportScope;
+```
+
+### CsvSummary
+
+```ts
+export interface CsvSummary {
+    readonly rows: number;
+    readonly columns: number;
+    readonly blank: number;
+    readonly invalid: number;
+}
+```
+
+### ExportRequest
+
+```ts
+export interface ExportRequest {
+    readonly scope: CsvScope;
+    readonly columns: readonly string[];
+    readonly query: Query;
+    readonly count: number | null;
+    readonly selection?: SelectionState;
+    readonly server?: Omit<DataRequest, 'page' | 'signal'>;
+    readonly format?: 'csv' | 'xlsx' | 'json';
+}
+```
+
+### csvChunks
+
+```ts
+export declare function csvChunks<T>(i: CsvInput<T>, o?: CsvOptions): Generator<string, CsvSummary>;
+```
+
+### csvColumns
+
+```ts
+export declare function csvColumns<T>(cols: ColumnLookup<T>, ids?: readonly string[]): {
+    columns: ResolvedColumn<T>[];
+    problems: Problem[];
+};
+```
+
+### csvRows
+
+```ts
+export declare function csvRows<T>(model: Pick<RowModel<T>, 'displayed' | 'allRows'>, scope: CsvScope, selection: SelectionState): {
+    rows: DisplayedRows<T>;
+    at: Uint32Array | null;
+    count: number;
+} | null;
+```
+
+### csvSeparatorFor
+
+```ts
+export declare const csvSeparatorFor: (ctx: LocaleCtx) => "," | ";";
+```
+
+### toCsv
+
+```ts
+export declare function toCsv<T>(i: CsvInput<T>, o?: CsvOptions): string;
+```
+
+## `@dzgrid/core/xlsx`
+
+### XLSX_COLUMNS
+
+```ts
+export declare const XLSX_COLUMNS = 16384;
+```
+
+### XLSX_MIME
+
+```ts
+export declare const XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+```
+
+### XLSX_ROWS
+
+```ts
+export declare const XLSX_ROWS = 1048576;
+```
+
+### XlsxInput
+
+```ts
+export interface XlsxInput<T> extends CsvInput<T> {
+    readonly widths?: Readonly<Record<string, number>>;
+    readonly pinned?: readonly string[];
+    readonly groups?: readonly ColumnOrGroup<T>[];
+}
+```
+
+### XlsxOptions
+
+```ts
+export interface XlsxOptions<T = any> {
+    readonly text?: 'value' | 'display' | undefined;
+    readonly enums?: 'label' | 'code' | undefined;
+    readonly header?: boolean | undefined;
+    readonly columns?: readonly string[];
+    readonly levelHeader?: string | undefined;
+    readonly treeColumn?: string | undefined;
+    readonly sheetName?: string;
+    readonly groups?: boolean;
+    readonly freeze?: boolean;
+    readonly spans?: 'repeat' | 'merge';
+    readonly tree?: 'outline' | 'level' | 'none';
+    readonly instants?: 'wall' | 'utc';
+    readonly rtl?: boolean;
+    readonly xlsxStyle?: (c: XlsxStyleContext<T>) => XlsxStyle | null | undefined;
+    readonly chunkRows?: number;
+    readonly groupRows?: boolean | undefined;
+}
+```
+
+### XlsxPiece
+
+```ts
+export interface XlsxPiece {
+    readonly entry: string;
+    readonly text: string;
+}
+```
+
+### XlsxStyle
+
+```ts
+export interface XlsxStyle {
+    readonly fill?: string;
+    readonly color?: string;
+    readonly bold?: boolean;
+    readonly italic?: boolean;
+}
+```
+
+### XlsxStyleContext
+
+```ts
+export interface XlsxStyleContext<T> {
+    readonly column: string;
+    readonly value: unknown;
+    readonly row: Readonly<T> | null;
+    readonly header: boolean;
+}
+```
+
+### XlsxSummary
+
+```ts
+export interface XlsxSummary extends CsvSummary {
+    readonly problems: readonly Problem[];
+}
+```
+
+### ZipEntry
+
+```ts
+export interface ZipEntry {
+    readonly name: string;
+    readonly crc: number;
+    readonly size: number;
+    readonly method: 0 | 8;
+    readonly data: readonly Uint8Array[];
+}
+```
+
+### crc32
+
+```ts
+export declare function crc32(b: Uint8Array, crc?: number): number;
+```
+
+### numFmtFor
+
+```ts
+export declare function numFmtFor(spec: NumberFormatSpec | undefined, ctx: LocaleCtx): string | 0;
+```
+
+### serialOfDay
+
+```ts
+export declare const serialOfDay: (d: Day) => number | null;
+```
+
+### sheetNameOf
+
+```ts
+export declare function sheetNameOf(name: unknown): string;
+```
+
+### toXlsx
+
+```ts
+export declare function toXlsx<T>(i: XlsxInput<T>, o?: XlsxOptions<T>, deflate?: (b: Uint8Array) => Uint8Array): {
+    readonly parts: Uint8Array[];
+    readonly summary: XlsxSummary;
+};
+```
+
+### utf8
+
+```ts
+export declare function utf8(s: string): Uint8Array;
+```
+
+### xlsxParts
+
+```ts
+export declare function xlsxParts<T>(i: XlsxInput<T>, o?: XlsxOptions<T>): Generator<XlsxPiece, XlsxSummary>;
+```
+
+### zipFile
+
+```ts
+export declare function zipFile(entries: readonly ZipEntry[]): {
+    readonly parts: Uint8Array[];
+    readonly problems: Problem[];
+};
+```
+
+## `@dzgrid/core/rules`
+
+### SelectionRule
+
+```ts
+export type SelectionRule<T> = (row: DataNode<T>, selection: SelectionState) => boolean | string;
+```
+
+### refusalProblems
+
+```ts
+export declare const refusalProblems: (r: SelectionRefusal) => Problem[];
+```
+
+### ruleGate
+
+```ts
+export declare function ruleGate<T>(rule: () => ((row: DataNode<T>, selection: SelectionState, context: unknown) => boolean | string) | undefined, rowOf: (key: RowKey) => DataNode<T> | undefined, selection: () => SelectionState, context: () => unknown, report: (err: unknown) => void): SelectionGate & {
+    refused(key: RowKey): boolean;
+};
+```
+
+### vetSelection
+
+```ts
+export declare function vetSelection<T>(rule: SelectionRule<T>, rowOf: (key: RowKey) => DataNode<T> | undefined, prev: SelectionState, next: SelectionState): {
+    readonly state: SelectionState;
+    readonly refused: SelectionRefusal | null;
+};
+```
+
+## `@dzgrid/core/tree`
+
+### TreeOptions
+
+```ts
+export interface TreeOptions<T> {
+    readonly parentId?: (row: T) => RowIdInput | null | undefined;
+    readonly children?: (row: T) => readonly T[] | undefined;
+    readonly path?: (row: T) => readonly string[];
+    readonly filter?: 'ancestors' | 'subtree';
+    readonly initial?: 'none' | 'all' | number;
+    readonly fixedOpen?: (row: T) => boolean;
+}
+```
+
+### TreeRows
+
+```ts
+export interface TreeRows<T> extends DisplayedRows<T> {
+    parentOf(key: RowKey): RowKey | null;
+    levelAt(i: DisplayIndex): number;
+    posAt(i: DisplayIndex): number;
+    sizeAt(i: DisplayIndex): number;
+    childrenAt(i: DisplayIndex): number;
+    kidsOf(key: RowKey): number;
+    expandedAt(i: DisplayIndex): boolean;
+    matchedAt(i: DisplayIndex): boolean;
+}
+```
+
+### TreeShape
+
+```ts
+export interface TreeShape<T> extends RowShape<T> {
+    readonly kind: 'tree';
+    readonly diagnostics: {
+        readonly builds: number;
+        readonly orders: number;
+        readonly filters: number;
+        readonly flattens: number;
+    };
+}
+```
+
+### treeColumnProblems
+
+```ts
+export declare function treeColumnProblems(visible: readonly string[], column: string | undefined): Problem[];
+```
+
+### treeConflicts
+
+```ts
+export declare function treeConflicts(o: {
+    readonly spans?: boolean;
+    readonly detail?: boolean;
+    readonly page?: boolean;
+}): Problem[];
+```
+
+### treeShape
+
+```ts
+export declare function treeShape<T>(o: TreeOptions<T>): TreeShape<T>;
+```
+
+## `@dzgrid/core/tree-lazy`
+
+### ChildLoader
+
+```ts
+export type ChildLoader<T> = (parent: RowKey, row: T, answer: (ok: boolean, value: unknown) => void) => () => void;
+```
+
+### LazyControl
+
+```ts
+export interface LazyControl<T> {
+    loader: ChildLoader<T> | null;
+    abort: (() => AbortHandle) | null;
+    retry(parent: RowKey): void;
+    sync(): void;
+    reset(again?: boolean): void;
+    on(fn: (parent: RowKey, ok: boolean, request: number) => void): () => void;
+    readonly diagnostics: {
+        readonly started: number;
+        readonly answered: number;
+        readonly failed: number;
+        readonly aborted: number;
+        readonly live: number;
+    };
+}
+```
+
+### LazyOptions
+
+```ts
+export interface LazyOptions<T> {
+    readonly has: (row: T) => boolean;
+    readonly load?: (row: T, o: {
+        readonly signal: AbortSignalLike;
+    }) => PromiseLike<readonly T[]> | readonly T[];
+}
+```
+
+### LazyShape
+
+```ts
+export interface LazyShape<T> extends TreeShape<T> {
+    readonly lazy: LazyControl<T>;
+}
+```
+
+### lazyShape
+
+```ts
+export declare function lazyShape<T>(inner: TreeShape<T>, o: LazyOptions<T>): LazyShape<T>;
+```
+
+## `@dzgrid/core/detail`
+
+### DetailOptions
+
+```ts
+export interface DetailOptions<T> {
+    readonly height?: number | ((master: Readonly<T>) => number) | 'auto';
+    readonly initial?: 'none' | 'all';
+    readonly sizes?: ReadonlyMap<RowKey, number>;
+    readonly isMaster?: (master: Readonly<T>) => boolean;
+}
+```
+
+### DetailRows
+
+```ts
+export interface DetailRows<T> extends DisplayedRows<T> {
+    readonly dataCount: number;
+    readonly details: Uint32Array;
+    readonly heights: readonly number[];
+    parentOf(key: RowKey): RowKey | null;
+    isMaster?(key: RowKey): boolean;
+}
+```
+
+### DetailShape
+
+```ts
+export interface DetailShape<T> extends RowShape<T> {
+    readonly kind: 'detail';
+}
+```
+
+### SparseExtras
+
+```ts
+export interface SparseExtras {
+    readonly at: ArrayLike<number>;
+    readonly heights: ArrayLike<number>;
+}
+```
+
+### SparseLayout
+
+```ts
+export interface SparseLayout extends RowLayout {
+    setHeights(changes: Iterable<readonly [
+        DisplayIndex,
+        number
+    ]>): boolean;
+}
+```
+
+### detailConflicts
+
+```ts
+export declare function detailConflicts(o: {
+    readonly spans?: boolean;
+    readonly tree?: boolean;
+    readonly depth?: number;
+}): Problem[];
+```
+
+### detailShape
+
+```ts
+export declare function detailShape<T>(o?: DetailOptions<T>): DetailShape<T>;
+```
+
+### sparseRowLayout
+
+```ts
+export declare function sparseRowLayout(rows: Pick<DisplayedRows<unknown>, 'count' | 'index'>, h: number, x: SparseExtras): SparseLayout;
+```
+
+## `@dzgrid/core/grouping`
+
+### AggCtx
+
+```ts
+export interface AggCtx {
+    readonly column: string;
+    readonly level: number | null;
+}
+```
+
+### AggFn
+
+```ts
+export type AggFn<V = unknown> = {
+    agg(values: readonly (V | null)[], ctx: AggCtx): unknown;
+}['agg'];
+```
+
+### AggFuncName
+
+```ts
+export type AggFuncName = 'sum' | 'avg' | 'min' | 'max' | 'count' | 'first' | 'last';
+```
+
+### FooterNode
+
+```ts
+export interface FooterNode {
+    readonly key: RowKey;
+    readonly kind: 'footer';
+    readonly level: number;
+    readonly group: RowKey | null;
+    readonly label: string;
+    readonly count: number;
+    readonly aggs: Readonly<Record<string, unknown>>;
+}
+```
+
+### GroupShape
+
+```ts
+export interface GroupShape<T> extends RowShape<T> {
+    readonly kind: 'group';
+    readonly options?: GroupingOptions;
+    readonly by: readonly string[];
+    setBy(by: readonly string[], source?: ChangeSource): void;
+    totals(): Readonly<Record<string, unknown>>;
+    off(): void;
+    readonly diagnostics: {
+        readonly builds: number;
+        readonly aggs: number;
+        readonly flattens: number;
+    };
+}
+```
+
+### GroupedRows
+
+```ts
+export type GroupedRows<T> = TreeRows<T>;
+```
+
+### GroupingOptions
+
+```ts
+export interface GroupingOptions {
+    readonly by?: readonly string[];
+    readonly aggFuncs?: Readonly<Record<string, AggFuncName | AggFn>>;
+    readonly expanded?: 'none' | 'all' | number;
+    readonly footers?: 'none' | 'group' | 'grand' | 'both';
+    readonly grandTotal?: 'top' | 'bottom';
+}
+```
+
+### checkRowGroups
+
+```ts
+export declare function checkRowGroups<T>(raw: unknown, columns: Pick<ColumnLookup<T>, 'get'>): {
+    readonly by: readonly string[] | null;
+    readonly problems: readonly Problem[];
+};
+```
+
+### groupConflicts
+
+```ts
+export declare function groupConflicts(o: {
+    readonly tree?: boolean;
+    readonly detail?: boolean;
+    readonly spans?: boolean;
+    readonly page?: boolean;
+    readonly server?: boolean;
+}): Problem[];
+```
+
+### groupShape
+
+```ts
+export declare function groupShape<T>(o?: GroupingOptions): GroupShape<T>;
+```
+
+## `@dzgrid/core/infinite`
+
+### InfiniteDiagnostics
+
+```ts
+export interface InfiniteDiagnostics {
+    readonly fetches: number;
+    readonly valueFetches: number;
+    readonly gate: GateDiagnostics;
+    readonly blocks: {
+        readonly held: number;
+        readonly asked: number;
+        readonly evicted: number;
+        readonly max: number;
+        readonly failed: number;
+    };
+}
+```
+
+### InfiniteModel
+
+```ts
+export interface InfiniteModel<T> extends SourceHandle<T> {
+    readonly diagnostics: InfiniteDiagnostics;
+    want(first: number, last: number, keep?: readonly number[]): void;
+    applyTransaction(tx: RowTransaction<T>, source?: ChangeSource): TransactionResult;
+    applyTransactionAsync(tx: RowTransaction<T>, done?: (r: TransactionResult) => void): void;
+}
+```
+
+### InfiniteOptions
+
+```ts
+export interface InfiniteOptions {
+    readonly blockSize?: number;
+    readonly maxBlocks?: number;
+    readonly ahead?: number;
+    readonly concurrency?: number;
+    readonly restMs?: number;
+    readonly batchMs?: number;
+    readonly params?: Readonly<Record<string, Json>>;
+    readonly abort?: () => AbortHandle;
+}
+```
+
+### InfiniteRows
+
+```ts
+export interface InfiniteRows<T> extends SourceBinding<T> {
+    create(env: ModelEnv<T>): InfiniteModel<T>;
+}
+```
+
+### infiniteRows
+
+```ts
+export declare function infiniteRows<T>(data: DataSource<T>, o?: InfiniteOptions): InfiniteRows<T>;
+```
+
+## `@dzgrid/core/server-side`
+
+### GroupPart
+
+```ts
+export interface GroupPart {
+    readonly by: readonly string[];
+    readonly path: readonly GroupValue[];
+    readonly aggs: readonly {
+        readonly column: string;
+        readonly fn: AggFuncName;
+    }[];
+    readonly pivot?: PivotPart;
+}
+```
+
+### GroupResponse
+
+```ts
+export interface GroupResponse {
+    readonly groups: readonly {
+        readonly value: GroupValue;
+        readonly count?: number;
+        readonly aggs?: Readonly<Record<string, Json>>;
+    }[];
+    readonly total?: number;
+    readonly hasNext?: boolean;
+    readonly totals?: Readonly<Record<string, Json>>;
+}
+```
+
+### GroupValue
+
+```ts
+export type GroupValue = string | number | boolean | null;
+```
+
+### PivotCells
+
+```ts
+export type PivotCells = Readonly<Record<string, Readonly<Record<string, Json>>>>;
+```
+
+### PivotPart
+
+```ts
+export interface PivotPart {
+    readonly columns: readonly string[];
+    readonly desc?: readonly string[];
+    readonly subtotals?: true;
+    readonly limit: number;
+    readonly sort?: {
+        readonly crossing: readonly GroupValue[];
+        readonly column: string;
+        readonly dir: 'asc' | 'desc';
+    };
+    readonly crossings?: readonly (readonly GroupValue[])[];
+}
+```
+
+### PivotResponse
+
+```ts
+export interface PivotResponse extends Omit<GroupResponse, 'groups'> {
+    readonly groups: readonly (GroupResponse['groups'][number] & {
+        readonly cells?: PivotCells;
+    })[];
+    readonly pivot?: {
+        readonly crossings?: readonly (readonly GroupValue[])[];
+        readonly count?: number;
+        readonly totals?: PivotCells;
+    };
+}
+```
+
+### ServerPivotPlug
+
+```ts
+export interface ServerPivotPlug {
+    link(env: ModelEnv<any>, model: ServerPivotHooks): ServerPivotLink | null;
+}
+```
+
+### ServerSideDiagnostics
+
+```ts
+export interface ServerSideDiagnostics {
+    readonly fetches: number;
+    readonly valueFetches: number;
+    readonly gate: GateDiagnostics;
+    readonly blocks: {
+        readonly held: number;
+        readonly asked: number;
+        readonly evicted: number;
+        readonly max: number;
+        readonly failed: number;
+    };
+    readonly levels: number;
+    readonly flattens: number;
+}
+```
+
+### ServerSideModel
+
+```ts
+export interface ServerSideModel<T> extends SourceHandle<T> {
+    readonly diagnostics: ServerSideDiagnostics;
+    want(first: number, last: number, keep?: readonly number[]): void;
+    readonly by: readonly string[];
+    readonly pivot?: boolean;
+    readonly wireSort?: readonly SortItem[] | undefined;
+    setBy(by: readonly string[], source?: ChangeSource): void;
+    totals(): Readonly<Record<string, unknown>>;
+    readonly group: GroupPart | null;
+    readonly expansion: ReadonlySet<RowKey>;
+    isExpanded(key: RowKey): boolean;
+    setExpansion(set: ReadonlySet<RowKey>, source?: ChangeSource): void;
+    expand(rows: readonly RowKey[], expanded: boolean, source?: ChangeSource): readonly RowKey[];
+    expandable(depth?: number): readonly RowKey[];
+    expandAll(expanded: boolean, depth?: number, source?: ChangeSource): readonly RowKey[];
+    applyTransaction(tx: RowTransaction<T>, source?: ChangeSource): TransactionResult;
+    applyTransactionAsync(tx: RowTransaction<T>, done?: (r: TransactionResult) => void): void;
+}
+```
+
+### ServerSideOptions
+
+```ts
+export interface ServerSideOptions {
+    readonly blockSize?: number;
+    readonly maxBlocks?: number;
+    readonly ahead?: number;
+    readonly concurrency?: number;
+    readonly restMs?: number;
+    readonly batchMs?: number;
+    readonly by?: readonly string[];
+    readonly aggFuncs?: Readonly<Record<string, AggFuncName>>;
+    readonly footers?: 'none' | 'group' | 'grand' | 'both';
+    readonly grandTotal?: 'top' | 'bottom';
+    readonly params?: Readonly<Record<string, Json>>;
+    readonly abort?: () => AbortHandle;
+    readonly pivot?: ServerPivotPlug;
+}
+```
+
+### ServerSideRows
+
+```ts
+export interface ServerSideRows<T> extends SourceBinding<T> {
+    create(env: ModelEnv<T>): ServerSideModel<T>;
+}
+```
+
+### serverSideRows
+
+```ts
+export declare function serverSideRows<T>(data: DataSource<T>, o?: ServerSideOptions): ServerSideRows<T>;
+```
+
+## `@dzgrid/core/row-drag`
+
+### DropWhere
+
+```ts
+export type DropWhere = 'before' | 'after' | 'inside';
+```
+
+### MoveRowsOptions
+
+```ts
+export interface MoveRowsOptions<T> {
+    readonly parentId?: (row: T) => RowIdInput | null | undefined;
+    readonly setParent?: (row: T, parent: RowIdInput | null) => T;
+}
+```
+
+### MoveStep
+
+```ts
+export type MoveStep = -1 | 1 | 'start' | 'end' | 'in' | 'out';
+```
+
+### RowDrop
+
+```ts
+export interface RowDrop {
+    readonly key: RowKey | null;
+    readonly where: DropWhere;
+}
+```
+
+### RowMove
+
+```ts
+export interface RowMove {
+    readonly keys: readonly RowKey[];
+    readonly target: RowDrop;
+}
+```
+
+### dropPlace
+
+```ts
+export declare function dropPlace(d: Rows, i: number, frac: number, moving: readonly RowKey[], tree: boolean): RowDrop | null;
+```
+
+### movableAt
+
+```ts
+export declare const movableAt: (d: Rows, i: number) => RowKey | null;
+```
+
+### moveRows
+
+```ts
+export declare function moveRows<T>(rows: readonly T[], move: RowMove, getRowId: (row: T) => RowIdInput, o?: MoveRowsOptions<T>): T[];
+```
+
+### movingRows
+
+```ts
+export declare function movingRows(d: Rows, keys: readonly RowKey[]): RowKey[];
+```
+
+### nextPlace
+
+```ts
+export declare function nextPlace(d: Rows, keys: readonly RowKey[], focus: RowKey, by: MoveStep, tree: boolean): RowDrop | null;
+```
+
+### parentAfter
+
+```ts
+export declare const parentAfter: (d: Rows, t: RowDrop) => RowKey | null;
+```
+
+### placeOf
+
+```ts
+export declare function placeOf(d: Rows, key: RowKey, tree: boolean): {
+    readonly n: number;
+    readonly total: number;
+    readonly level: number;
+} | null;
+```
+
+### siblings
+
+```ts
+export declare function siblings(d: Rows, parent: RowKey | null, tree: boolean): RowKey[];
+```
+
+### unchanged
+
+```ts
+export declare function unchanged(d: Rows, keys: readonly RowKey[], t: RowDrop, tree: boolean): boolean;
+```
+
+### within
+
+```ts
+export declare function within(d: Rows, key: RowKey, set: ReadonlySet<RowKey>): boolean;
+```
+
+## `@dzgrid/core/dock`
+
+### DOCK_AREAS
+
+```ts
+export declare const DOCK_AREAS: readonly DockArea[];
+```
+
+### DockArea
+
+```ts
+export type DockArea = 'start' | 'end' | 'bottom' | 'float';
+```
+
+### DockAreaState
+
+```ts
+export interface DockAreaState {
+    readonly active?: string;
+    readonly size?: number;
+    readonly collapsed?: boolean;
+}
+```
+
+### DockPanelState
+
+```ts
+export interface DockPanelState {
+    readonly area: DockArea;
+    readonly open: boolean;
+    readonly at?: {
+        readonly inline: number;
+        readonly block: number;
+    };
+}
+```
+
+### DockState
+
+```ts
+export interface DockState {
+    readonly panels: Readonly<Record<string, DockPanelState>>;
+    readonly areas: {
+        readonly start?: DockAreaState;
+        readonly end?: DockAreaState;
+        readonly bottom?: DockAreaState;
+    };
+}
+```
+
+### checkDock
+
+```ts
+export declare function checkDock(raw: unknown, lim: {
+    readonly min: number;
+    readonly max: number;
+}): {
+    dock: DockState | null;
+    problems: Problem[];
+};
+```
+
+## `@dzgrid/core/pivot`
+
+### PivotColumns
+
+```ts
+export interface PivotColumns<T> {
+    readonly columns: readonly ColumnOrGroup<T>[];
+    readonly key: string;
+    readonly count: number;
+}
+```
+
+### PivotOptions
+
+```ts
+export interface PivotOptions extends GroupingOptions {
+    readonly on?: boolean;
+    readonly columns?: readonly string[];
+    readonly desc?: readonly string[];
+    readonly values?: Fns;
+    readonly subtotals?: boolean;
+    readonly maxColumns?: number;
+    readonly width?: number;
+    readonly labels?: {
+        readonly blank?: string;
+        readonly total?: string;
+    };
+}
+```
+
+### PivotSeries
+
+```ts
+export interface PivotSeries {
+    readonly categories: readonly string[];
+    readonly series: readonly {
+        readonly id: string;
+        readonly name: string;
+        readonly values: readonly (number | null)[];
+    }[];
+}
+```
+
+### PivotShape
+
+```ts
+export interface PivotShape<T> extends GroupShape<T> {
+    readonly on: boolean;
+    setOn(on: boolean, source?: ChangeSource): void;
+    readonly pivotBy: readonly string[];
+    setPivotBy(columns: readonly string[], source?: ChangeSource): void;
+    readonly pivotDesc: readonly string[];
+    valueFns(): Fns;
+    setValueFns(values: Fns, source?: ChangeSource): void;
+    set(p: {
+        readonly on?: boolean;
+        readonly columns?: readonly string[];
+        readonly desc?: readonly string[];
+        readonly values?: Fns;
+    }, source?: ChangeSource): void;
+    generated(): PivotColumns<T>;
+    made(id: string): boolean;
+    valueColumn(id: string): string | undefined;
+    rows(key: RowKey): readonly T[];
+    series(o?: {
+        readonly value?: string;
+        readonly level?: number;
+    }): PivotSeries;
+    readonly passes: number;
+    serve?(link: PivotServe): (C: PivotCrossings | null, values: readonly {
+        readonly col: ResolvedColumn<T>;
+        readonly fn: AggFuncName;
+    }[], depth: number, told: Problem[], count?: number) => {
+        readonly n: number;
+        readonly slot: ArrayLike<number>;
+        readonly ids: readonly string[];
+    };
+}
+```
+
+### checkPivot
+
+```ts
+export declare function checkPivot<T>(raw: unknown, columns: Pick<ColumnLookup<T>, 'get'>): {
+    readonly pivot: {
+        readonly on?: boolean;
+        readonly columns?: readonly string[];
+        readonly desc?: readonly string[];
+        readonly values?: Readonly<Record<string, AggFuncName>>;
+    } | null;
+    readonly problems: readonly Problem[];
+};
+```
+
+### pivotShape
+
+```ts
+export declare function pivotShape<T>(o?: PivotOptions): PivotShape<T>;
+```
+
+### pivotState
+
+```ts
+export declare function pivotState<T>(shape: PivotShape<T>, columns: Pick<ColumnLookup<T>, 'get'>): {
+    get(): PivotState;
+    set(raw: unknown): readonly Problem[];
+    made(id: string): boolean;
+};
+```
+
+## `@dzgrid/core/server-pivot`
+
+### serverPivot
+
+```ts
+export declare function serverPivot(): ServerPivotPlug;
+```
+
+## `@dzgrid/core/edit`
+
+### CellInput
+
+```ts
+export type CellInput = {
+    readonly text: string;
+} | {
+    readonly value: unknown;
+};
+```
+
+### CellState
+
+```ts
+export interface CellState {
+    readonly status: 'pending' | 'saving' | 'saved' | 'failed';
+    readonly generation: number;
+    readonly refused?: unknown;
+    readonly reason: string | null;
+    readonly code: string | null;
+}
+```
+
+### Checked
+
+```ts
+export type Checked = {
+    readonly ok: true;
+    readonly value: unknown;
+} | {
+    readonly ok: false;
+    readonly code: string;
+};
+```
+
+### CommitResult
+
+```ts
+export interface CommitResult {
+    readonly generation: number | null;
+    readonly staged: number;
+    readonly refused: readonly {
+        readonly key: RowKey;
+        readonly column: string;
+        readonly code: string;
+    }[];
+}
+```
+
+### EditController
+
+```ts
+export interface EditController<T> {
+    readonly reader: ValueReader<T>;
+    check(key: RowKey, column: string, input: CellInput): Checked;
+    commit(cells: readonly {
+        readonly key: RowKey;
+        readonly column: string;
+        readonly input: CellInput;
+    }[], o?: {
+        readonly origin?: SaveOrigin;
+        readonly source?: ChangeSource;
+    }): CommitResult;
+    state(key: RowKey, column: string): CellState | undefined;
+    readonly dirty: boolean;
+    undo(source?: ChangeSource): UndoResult | null;
+    redo(source?: ChangeSource): UndoResult | null;
+    readonly canUndo: boolean;
+    readonly canRedo: boolean;
+    setSave(save?: SaveHandler<T>): void;
+    destroy(): number;
+}
+```
+
+### EditOptions
+
+```ts
+export interface EditOptions<T> {
+    readonly ctx: () => LocaleCtx;
+    readonly save?: SaveHandler<T>;
+    readonly abort?: () => AbortHandle;
+}
+```
+
+### SaveChange
+
+```ts
+export interface SaveChange<T> {
+    readonly key: RowKey;
+    readonly column: string;
+    readonly value: unknown;
+    readonly previous: unknown;
+    readonly row: Readonly<T>;
+    readonly pinned?: 'top' | 'bottom' | undefined;
+}
+```
+
+### SaveHandler
+
+```ts
+export type SaveHandler<T> = (req: SaveRequest<T>, signal: AbortSignalLike) => unknown;
+```
+
+### SaveRequest
+
+```ts
+export interface SaveRequest<T> {
+    readonly origin: SaveOrigin;
+    readonly generation: number;
+    readonly changes: readonly SaveChange<T>[];
+}
+```
+
+### UndoResult
+
+```ts
+export interface UndoResult {
+    readonly cells: readonly {
+        readonly key: RowKey;
+        readonly column: string;
+    }[];
+    readonly skipped: number;
+}
+```
+
+### checkValue
+
+```ts
+export declare function checkValue<T>(col: ResolvedColumn<T>, value: unknown, o: {
+    readonly row: Readonly<T>;
+    readonly app: unknown;
+    readonly ctx: LocaleCtx;
+    readonly current?: unknown;
+    readonly threw?: (column: string, rule: string) => void;
+}): Checked;
+```
+
+### createEdits
+
+```ts
+export declare function createEdits<T>(kernel: GridKernel<T>, o: EditOptions<T>): EditController<T>;
+```
+
+### parseInput
+
+```ts
+export declare function parseInput<T>(col: ResolvedColumn<T>, input: CellInput, ctx: LocaleCtx): Checked;
+```
+
+## `@dzgrid/core/range`
+
+### CopyOptions
+
+```ts
+export interface CopyOptions<T> {
+    readonly ctx: LocaleCtx;
+    readonly reader: ValueReader<T>;
+    readonly guard?: boolean;
+    readonly raw?: boolean;
+    readonly headers?: boolean;
+}
+```
+
+### FillOptions
+
+```ts
+export interface FillOptions<T> {
+    readonly ctx: LocaleCtx;
+    readonly reader: ValueReader<T>;
+    readonly mode?: 'auto' | 'copy';
+    readonly swap?: boolean;
+}
+```
+
+### FillWay
+
+```ts
+export type FillWay = 'down' | 'up' | 'end' | 'start';
+```
+
+### PASTE_MAX
+
+```ts
+export declare const PASTE_MAX = 100000;
+```
+
+### PastePlan
+
+```ts
+export interface PastePlan {
+    readonly cells: readonly PlannedCell[];
+    readonly outside: number;
+    readonly tooBig: boolean;
+    readonly box: RangeBox | null;
+}
+```
+
+### PlannedCell
+
+```ts
+export interface PlannedCell {
+    readonly key: RowKey;
+    readonly column: string;
+    readonly input: CellInput;
+}
+```
+
+### RangeBox
+
+```ts
+export interface RangeBox {
+    readonly top: number;
+    readonly bottom: number;
+    readonly start: number;
+    readonly end: number;
+}
+```
+
+### RangeStats
+
+```ts
+export interface RangeStats {
+    readonly cells: number;
+    readonly filled: number;
+    readonly numbers: number;
+    readonly sum: number;
+    readonly min: number | null;
+    readonly max: number | null;
+    readonly partial: boolean;
+    readonly formats: readonly NumberFormatSpec[];
+}
+```
+
+### boxHeld
+
+```ts
+export declare function boxHeld(b: RangeBox, d: DisplayedRows<unknown>): boolean;
+```
+
+### boxRows
+
+```ts
+export declare function boxRows<T>(b: RangeBox, displayed: DisplayedRows<T>): DataNode<T>[];
+```
+
+### boxSize
+
+```ts
+export declare function boxSize(b: RangeBox, displayed: DisplayedRows<unknown>): {
+    rows: number;
+    cols: number;
+    cells: number;
+};
+```
+
+### copyMatrix
+
+```ts
+export declare function copyMatrix<T>(b: RangeBox, displayed: DisplayedRows<T>, columns: readonly ResolvedColumn<T>[], o: CopyOptions<T>): {
+    readonly text: string[][];
+    readonly values: unknown[][];
+};
+```
+
+### decodeTsv
+
+```ts
+export declare function decodeTsv(text: string, o?: {
+    readonly pad?: boolean;
+    readonly sep?: string;
+}): string[][];
+```
+
+### encodeTsv
+
+```ts
+export declare function encodeTsv(m: readonly (readonly string[])[]): string;
+```
+
+### fillTarget
+
+```ts
+export declare function fillTarget(src: RangeBox, to: {
+    readonly row: number;
+    readonly col: number;
+}, along?: 'row' | 'column'): {
+    readonly box: RangeBox;
+    readonly way: FillWay;
+} | null;
+```
+
+### pasteText
+
+```ts
+export declare function pasteText<T>(text: string, col: ResolvedColumn<T>): string;
+```
+
+### planFill
+
+```ts
+export declare function planFill<T>(src: RangeBox, target: RangeBox, way: FillWay, displayed: DisplayedRows<T>, columns: readonly ResolvedColumn<T>[], o: FillOptions<T>): PlannedCell[];
+```
+
+### planPaste
+
+```ts
+export declare function planPaste<T>(src: readonly (readonly CellInput[])[], at: RangeBox, displayed: DisplayedRows<T>, columns: readonly ResolvedColumn<T>[], o?: {
+    readonly max?: number;
+}): PastePlan;
+```
+
+### rangeBox
+
+```ts
+export declare function rangeBox(r: CellRange, displayed: DisplayedRows<unknown>, columns: readonly string[]): RangeBox | null;
+```
+
+### rangeStats
+
+```ts
+export declare function rangeStats<T>(b: RangeBox, displayed: DisplayedRows<T>, columns: readonly ResolvedColumn<T>[], o: {
+    readonly ctx: LocaleCtx;
+    readonly reader: ValueReader<T>;
+}): RangeStats;
+```
+
+## `@dzgrid/core/state`
+
+### Density
+
+```ts
+export type Density = 'compact' | 'comfortable' | 'spacious';
+```
+
+### GridState
+
+```ts
+export interface GridState {
+    readonly v: 1;
+    readonly columns: readonly GridStateColumn[];
+    readonly groups?: Readonly<Record<string, boolean>>;
+    readonly sort: readonly SortItem[];
+    readonly filter: FilterModel;
+    readonly quick: string;
+    readonly page?: number;
+    readonly pageSize?: number;
+    readonly density?: Density;
+    readonly rowGroups?: readonly string[];
+    readonly dock?: DockState;
+    readonly pivot?: PivotState;
+}
+```
+
+### GridStateColumn
+
+```ts
+export interface GridStateColumn {
+    readonly id: string;
+    readonly width?: number;
+    readonly hidden?: boolean;
+    readonly pinned: Side | null;
+    readonly order: number;
+}
+```
+
+### GroupsAdapter
+
+```ts
+export interface GroupsAdapter {
+    collapsible(id: string): boolean;
+    get(): Readonly<Record<string, boolean>>;
+    set(open: Readonly<Record<string, boolean>>): void;
+}
+```
+
+### PivotState
+
+```ts
+export interface PivotState {
+    readonly on?: boolean;
+    readonly columns?: readonly string[];
+    readonly desc?: readonly string[];
+    readonly values?: Readonly<Record<string, AggFuncName>>;
+}
+```
+
+### RowGroupsAdapter
+
+```ts
+export interface RowGroupsAdapter {
+    get(): readonly string[];
+    set(raw: unknown): readonly Problem[];
+}
+```
+
+### STATE_UPGRADES
+
+```ts
+export declare const STATE_UPGRADES: readonly ((s: any) => any)[];
+```
+
+### STATE_VERSION
+
+```ts
+export declare const STATE_VERSION = 1;
+```
+
+### StateEnv
+
+```ts
+export interface StateEnv {
+    density?(): Density | undefined;
+    setDensity?(d: unknown): boolean | void;
+    readonly groups?: GroupsAdapter | undefined;
+    readonly rowGroups?: RowGroupsAdapter | undefined;
+    readonly dock?: {
+        get(): DockState | undefined;
+        set(raw: unknown): readonly Problem[];
+    } | undefined;
+    readonly pivot?: {
+        get(): PivotState | undefined;
+        set(raw: unknown): readonly Problem[];
+        made(id: string): boolean;
+    } | undefined;
+}
+```
+
+### StateOptions
+
+```ts
+export interface StateOptions {
+    readonly include?: readonly StatePart[];
+    readonly exclude?: readonly StatePart[];
+}
+```
+
+### StatePart
+
+```ts
+export type StatePart = 'columns' | 'groups' | 'sort' | 'filter' | 'quick' | 'page' | 'density' | 'rowGroups' | 'dock' | 'pivot';
+```
+
+### StateProblemCode
+
+```ts
+export type StateProblemCode = 'state-version' | 'state-column' | 'state-group' | 'state-field' | 'state-storage';
+```
+
+### captureState
+
+```ts
+export declare function captureState<T>(k: GridKernel<T>, env?: StateEnv, opts?: StateOptions): GridState;
+```
+
+### checkState
+
+```ts
+export declare function checkState(raw: unknown, upgrades?: readonly ((s: any) => any)[]): {
+    state: GridState | null;
+    problems: Problem[];
+};
+```
+
+### restoreState
+
+```ts
+export declare function restoreState<T>(k: GridKernel<T>, raw: unknown, env?: StateEnv, source?: ChangeSource): Problem[];
+```
+
+### stateText
+
+```ts
+export declare const stateText: (s: GridState) => string;
+```
+
+## `@dzgrid/core/row-gaps`
+
+### GapCtx
+
+```ts
+export interface GapCtx<T> {
+    readonly row: Readonly<T> | null;
+    readonly key: RowKey;
+    readonly index: number;
+    readonly level: number;
+    readonly prev: Readonly<T> | null;
+}
+```
+
+### GapRule
+
+```ts
+export type GapRule<T> = (c: GapCtx<T>) => boolean | number | null | undefined;
+```
+
+### gapLayout
+
+```ts
+export declare function gapLayout(inner: RowLayout, at: readonly number[], sizes: readonly number[]): RowLayout;
+```
+
+### gapsOf
+
+```ts
+export declare function gapsOf<T>(rows: DisplayedRows<T>, rule: GapRule<T>, size: number): {
+    at: number[];
+    sizes: number[];
+    problems: Problem[];
+};
+```
+
+### roots
+
+```ts
+export declare const roots: (c: GapCtx<unknown>) => boolean;
+```
+
+## `@dzgrid/core/compare`
+
+### sameValues
+
+```ts
+export declare function sameValues(a: unknown, b: unknown): boolean;
+```
+
+## `@dzgrid/core/auto-columns`
+
+### AutoColumnsOptions
+
+```ts
+export interface AutoColumnsOptions<T> {
+    readonly sample?: number;
+    readonly header?: (field: string) => string;
+    readonly override?: Readonly<Record<string, Partial<ColumnDef<T>>>>;
+    readonly merge?: Readonly<Record<string, MergedColumn<T>>>;
+    readonly hide?: readonly string[];
+    readonly add?: readonly ColumnDef<T>[];
+    readonly order?: readonly string[];
+}
+```
+
+### MergedColumn
+
+```ts
+export type MergedColumn<T> = Partial<Omit<ColumnDef<T>, 'id'>> & {
+    readonly from: readonly string[];
+};
+```
+
+### autoColumns
+
+```ts
+export declare function autoColumns<T>(rows: readonly T[], o?: AutoColumnsOptions<T>): {
+    columns: ColumnDef<T>[];
+    problems: Problem[];
+};
+```
+
+## `@dzgrid/core/totals`
+
+### ColumnTotals
+
+```ts
+export interface ColumnTotals {
+    readonly values: Readonly<Record<string, unknown>>;
+    readonly columns: readonly string[];
+    readonly problems: readonly Problem[];
+}
+```
+
+### columnTotals
+
+```ts
+export declare function columnTotals<T>(rows: DisplayedRows<T>, columns: readonly ResolvedColumn<T>[], o: {
+    readonly ctx: LocaleCtx;
+    readonly reader: ValueReader<T>;
+}): ColumnTotals;
+```
+
+## `@dzgrid/core/import`
+
+### ImportCell
+
+```ts
+export type ImportCell = string | number | boolean | null | {
+    readonly error: true;
+};
+```
+
+### ImportResult
+
+```ts
+export interface ImportResult {
+    readonly rows: Record<string, unknown>[];
+    readonly problems: Problem[];
+}
+```
+
+### ZipEntry
+
+```ts
+export interface ZipEntry {
+    readonly method: number;
+    readonly data: Uint8Array;
+    readonly size: number;
+}
+```
+
+### importRows
+
+```ts
+export declare function importRows<T>(table: readonly (readonly ImportCell[])[], columns: readonly ResolvedColumn<T>[], ctx: LocaleCtx): ImportResult;
+```
+
+### readCsv
+
+```ts
+export declare function readCsv(text: string): string[][];
+```
+
+### readSheet
+
+```ts
+export declare function readSheet(xml: string, shared: readonly string[]): ImportCell[][];
+```
+
+### sharedStrings
+
+```ts
+export declare const sharedStrings: (xml: string) => string[];
+```
+
+### sheetPath
+
+```ts
+export declare function sheetPath(workbook: string, rels: string): string | null;
+```
+
+### zipEntries
+
+```ts
+export declare function zipEntries(b: Uint8Array): Map<string, ZipEntry> | null;
+```

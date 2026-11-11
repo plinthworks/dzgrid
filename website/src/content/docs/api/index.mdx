@@ -1,0 +1,18 @@
+---
+title: "API reference"
+description: "Every public name of the five packages, made from the accepted type surface."
+sidebar:
+  order: 0
+---
+
+Every public name DzGrid publishes, with its declaration, one page per package. The pages are made from the accepted
+type surface (`api/*.api.txt`), which a test keeps from shrinking between versions: a name here stays.
+
+- [`@dzgrid/core`](./core/): the model — rows, columns, sorting, filtering, grouping — with no DOM.
+- [`@dzgrid/dom`](./dom/): the grid in the browser, and each feature in its own entry.
+- [`@dzgrid/theme`](./theme/): the style sheets.
+- [`@dzgrid/angular`](./angular/): the Angular component and its helpers.
+- [`@dzgrid/element`](./element/): the `<dz-grid>` Web Component.
+
+What each name does is told in the [guides](../guides/columns/), the [settings](../settings/), the
+[column options](../column-options/) and the [features](../features/).
