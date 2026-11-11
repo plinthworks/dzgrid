@@ -1,0 +1,127 @@
+---
+title: "selection"
+description: "Laisser l’utilisateur sélectionner des lignes : une ou plusieurs, par cases ou par clics, selon vos règles."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Les lignes que choisit l’utilisateur — pour supprimer, envoyer, comparer. Aucune fonction n’est nécessaire.
+
+<OptionFacts setting="selection" />
+
+## Ce qu’il fait
+
+- `mode` : `'none'`, `'single'` (une ligne à la fois) ou `'multi'`.
+- `checkbox: true` : une colonne de cases ; en `'multi'`, une case dans son titre sélectionne toutes les lignes (sur
+  des pages dans le navigateur, la page affichée).
+- `click: true` : un clic sélectionne la ligne (Ctrl/Cmd+clic l’ajoute ou la retire, Maj+clic une suite dans l’ordre
+  de l’écran). Sans lui, un clic ne fait que déplacer le focus, et les lignes se sélectionnent par Espace ou par leur
+  case. Avec les blocs de cellules (`range()`), Maj+clic appartient au bloc : les lignes se cochent alors par leur
+  case.
+- `keepOnFilter` : `true` par défaut, une ligne sélectionnée le reste quand un filtre ou la recherche la cache ;
+  `false` vide la sélection quand ils changent. Un tri ou une page jamais.
+- `canSelect(row, selection, context)` : votre règle pour qu’une ligne rejoigne la sélection. `true` permet, `false`
+  refuse, un texte refuse et est dit à l’utilisateur. Elle n’est jamais consultée pour décocher. Il faut `rules()` de
+  `@dzgrid/dom/rules` (textes `-rules`) : sans elle, aucune ligne ne peut être sélectionnée, et une erreur
+  `missing-feature` dit pourquoi.
+
+Espace bascule la ligne qui a le focus et Ctrl+A (Cmd+A) sélectionne tout. La sélection contient des clés de ligne,
+pas des identifiants : l’événement `selectionChanged` la donne avec son nombre, et `idOfDataKey(key)` rend un
+identifiant. Après « tout sélectionner » sur les pages d’un serveur, elle se lit « toutes les lignes que retient la
+requête, sauf celles-ci ».
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { idOfDataKey } from '@dzgrid/core';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Seed = { id: string; plant: string; packets: number };
+
+createGrid<Seed>(document.getElementById('graines')!, {
+  rows: [{ id: 's1', plant: 'Courge de lune', packets: 12 }, { id: 's2', plant: 'Haricot de verre', packets: 0 }],
+  columns: [{ id: 'plant', header: 'Plante' }, { id: 'packets', header: 'Sachets', type: 'number' }],
+  getRowId: (s) => s.id,
+  messages: FR,
+  selection: { mode: 'multi', checkbox: true, click: true },
+  onEvent: (e) => {
+    if (e.type === 'selectionChanged' && e.selection.mode === 'include') console.log([...e.selection.keys].map(idOfDataKey));
+  },
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Seed = { id: string; plant: string; packets: number };
+
+@Component({
+  selector: 'app-graines',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+    [selection]="{ mode: 'multi', checkbox: true, click: true }" (selectionChanged)="count = $event.count" />
+    <p>{{ count ?? 'Des lignes' }} sélectionnée(s)</p>`,
+})
+export class Seeds {
+  count: number | null = 0;
+  readonly rows: Seed[] = [{ id: 's1', plant: 'Courge de lune', packets: 12 }, { id: 's2', plant: 'Haricot de verre', packets: 0 }];
+  readonly columns: DzgColumnOrGroup<Seed>[] = [{ id: 'plant', header: 'Plante' }, { id: 'packets', header: 'Sachets', type: 'number' }];
+  readonly rowId = (s: Seed) => s.id;
+  readonly messages = FR;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Seed = { id: string; plant: string; packets: number };
+
+const grid = document.querySelector<DzGridElement<Seed>>('dz-grid')!;
+grid.columns = [{ id: 'plant', header: 'Plante' }, { id: 'packets', header: 'Sachets', type: 'number' }];
+grid.getRowId = (s) => s.id;
+grid.messages = FR;
+grid.settings = { selection: { mode: 'multi', checkbox: true, click: true } };
+grid.rows = [{ id: 's1', plant: 'Courge de lune', packets: 12 }, { id: 's2', plant: 'Haricot de verre', packets: 0 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Démo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Sachets de graines', selection: { mode: 'multi', checkbox: true, click: true } }}
+  columns={[
+    { id: 'plant', header: 'Plante', flex: 1 },
+    { id: 'packets', header: 'Sachets', type: 'number', width: 120 },
+  ]}
+  rows={[
+    { id: 's1', plant: 'Courge de lune', packets: 12 },
+    { id: 's2', plant: 'Haricot de verre', packets: 0 },
+    { id: 's3', plant: 'Radis de velours', packets: 7 },
+    { id: 's4', plant: 'Piment lanterne', packets: 4 },
+  ]}
+  caption="Cliquez une ligne, Ctrl/Cmd+clic sur une autre, Maj+clic sur une troisième ; la case du titre sélectionne tout."
+/>
+
+## Voir aussi
+
+- [`context`](../context/) — ce que reçoit aussi `canSelect`.
+- [Sélection et plages](../../guides/selection-ranges/#sélectionner-des-lignes).

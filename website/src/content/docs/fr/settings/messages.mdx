@@ -20,7 +20,8 @@ prêts, un import par langue et par fonction, pour qu’une page ne charge que l
 
 Le `locale` du paquet donne la grammaire de ses phrases (une ligne, deux lignes) et, sauf si [`locale`](../locale/)
 est réglé, le format des nombres et des dates. Un paquet auquel manque un texte de la base est refusé aussitôt :
-`createGrid` (ou `update()`) lève une `TypeError` qui nomme les clés manquantes. Votre propre paquet peut changer
+`createGrid` (ou `update()`) lève une `TypeError` qui nomme les clés manquantes ;
+une fonction dont les textes manquent fait aussi lever `createGrid`, en se nommant avec ses clés. Votre propre paquet peut changer
 n’importe quel texte, comme `grid.label` ou le `cell.yes` et le `cell.no` d’une colonne booléenne.
 
 Changer de paquet par `update()` redessine tous les textes, et les cellules quand la langue ou son oui et son non

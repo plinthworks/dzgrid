@@ -19,7 +19,8 @@ package, one import per language and per feature, so a page loads only the texts
 
 The bundle's `locale` gives the grammar of its sentences (one row, two rows) and, unless [`locale`](../locale/) is set,
 the formatting of numbers and dates. A bundle missing one of the base's texts is refused at once: `createGrid` (or
-`update()`) throws a `TypeError` naming the missing keys. Your own bundle can change any text, as `grid.label` or a
+`update()`) throws a `TypeError` naming the missing keys; a feature
+whose texts are missing makes `createGrid` throw too, naming itself and its keys. Your own bundle can change any text, as `grid.label` or a
 boolean column's `cell.yes` and `cell.no`.
 
 Changing the bundle with `update()` redraws every text, and the cells when the language or its yes and no change.

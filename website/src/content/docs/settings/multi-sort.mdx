@@ -1,0 +1,110 @@
+---
+title: "multiSort"
+description: "Let the user sort by several columns, or by one only."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Whether Shift adds a column to the sort, or a grid sorts by one column at a time.
+
+<OptionFacts setting="multiSort" />
+
+## What it does
+
+By default a click on a header sorts by that column alone, and Shift+click (Shift+Enter from the keyboard) adds it
+after the others: by town, then by name. `false` keeps one sort only: Shift+click, Shift+Enter and a header part's
+`toggleSort(true)` act as a plain click, replacing the sort.
+
+It limits the user, not your code: a sort of several columns that the application sets itself
+(`sort.set`, a saved state) is kept. It is read once: `update()` refuses a change.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Shop = { id: string; town: string; name: string };
+
+createGrid<Shop>(document.getElementById('shops')!, {
+  rows: [{ id: 's1', town: 'Larkfield', name: 'The Copper Kettle' }],
+  columns: [{ id: 'town', header: 'Town' }, { id: 'name', header: 'Shop' }],
+  getRowId: (s) => s.id,
+  messages: EN,
+  multiSort: false,
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Shop = { id: string; town: string; name: string };
+
+@Component({
+  selector: 'app-shops',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [multiSort]="false" />`,
+})
+export class Shops {
+  readonly rows: Shop[] = [{ id: 's1', town: 'Larkfield', name: 'The Copper Kettle' }];
+  readonly columns: DzgColumnOrGroup<Shop>[] = [{ id: 'town', header: 'Town' }, { id: 'name', header: 'Shop' }];
+  readonly rowId = (s: Shop) => s.id;
+  readonly messages = EN;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid multi-sort="false"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Shop = { id: string; town: string; name: string };
+
+const grid = document.querySelector<DzGridElement<Shop>>('dz-grid')!;
+grid.columns = [{ id: 'town', header: 'Town' }, { id: 'name', header: 'Shop' }];
+grid.getRowId = (s) => s.id;
+grid.messages = EN;
+grid.rows = [{ id: 's1', town: 'Larkfield', name: 'The Copper Kettle' }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Live demo
+
+<LiveDemo
+  height={240}
+  settings={{ label: 'Shops', multiSort: false }}
+  columns={[
+    { id: 'town', header: 'Town', width: 160 },
+    { id: 'name', header: 'Shop', flex: 1 },
+  ]}
+  rows={[
+    { id: 's1', town: 'Larkfield', name: 'The Copper Kettle' },
+    { id: 's2', town: 'Brookmere', name: 'Paper and Thread' },
+    { id: 's3', town: 'Larkfield', name: 'Ash and Oak' },
+    { id: 's4', town: 'Brookmere', name: 'The Green Door' },
+  ]}
+  caption="Click Town, then Shift+click Shop: the sort is replaced, never added to."
+/>
+
+## See also
+
+- [Sort, filter, search](../../guides/sort-filter-search/#sorting).

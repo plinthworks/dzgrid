@@ -106,7 +106,7 @@ grid.addEventListener('dzg-selection-changed', (e) => {
 
 <LiveDemo
   height={300}
-  settings={{ label: 'Seed packets', selection: { mode: 'multi', checkbox: true } }}
+  settings={{ label: 'Seed packets', selection: { mode: 'multi', checkbox: true, click: true } }}
   columns={[
     { id: 'plant', header: 'Plant', flex: 1 },
     { id: 'packets', header: 'Packets', type: 'number', width: 120 },
@@ -122,9 +122,9 @@ grid.addEventListener('dzg-selection-changed', (e) => {
   caption="Click selects one row, Ctrl/Cmd+click adds or removes, Shift+click selects a run; the header's box selects all."
 />
 
-- `mode`: `none`, `single` or `multi`. `checkbox: true` adds a tick column with a header box; `click: false` leaves
-  clicks to focus only (select with Space or the box).
-- Click selects one row, Ctrl/Cmd+click toggles, Shift+click selects a run in screen order; Space toggles the focused
+- `mode`: `none`, `single` or `multi`. `checkbox: true` adds a tick column with a header box; `click: true` lets a
+  click select; without it a click only moves the focus (select with Space or the box).
+- With `click: true`, a click selects one row, Ctrl/Cmd+click toggles, Shift+click selects a run in screen order; Space toggles the focused
   row, Ctrl+A selects all. The selection survives sorting and filtering.
 - The selection holds **row keys**, not your ids. `idOfDataKey(key)` gives the id back; in Angular,
   `selectedIds(controller)` gives the ids of the whole selection with the query.

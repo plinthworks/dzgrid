@@ -1,0 +1,99 @@
+---
+title: "injectStyles"
+description: "Si la grille écrit elle-même son CSS de mise en page dans la page, ou si votre page le charge."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Pour une page dont la politique de sécurité du contenu interdit les éléments `<style>` qu’elle n’a pas écrits.
+
+<OptionFacts setting="injectStyles" />
+
+## Ce qu’il fait
+
+La grille a besoin de quelques règles de mise en page pour fonctionner : des lignes placées en absolu, des titres et
+des colonnes figées qui collent. Par défaut elle les écrit elle-même, une fois par document ou racine fantôme, dans un
+élément `<style>` — comme chaque fonction qui a sa propre mise en page (filtres, pages, barre d’état…). Une politique
+qui les permet avec un nonce : donnez-le par [`nonce`](../nonce/) et gardez le défaut.
+
+`false` : ni la grille ni ses fonctions n’écrivent de `<style>`, votre page charge les règles à la place — sauf les
+panneaux de date, dont les feuilles sont écrites si la page ne les a pas déjà sous les mêmes identifiants
+`data-tzslot`. Celles de la
+base sont `LAYOUT_CSS` de `@dzgrid/dom`, dans la couche `dzgrid.layout` ; quelques fonctions exportent aussi les
+leurs (`ICONS_CSS`, `WRAPPED_HEADERS_CSS`, `COLUMN_HOVER_CSS`, `PIVOT_BAR_CSS`, `ZONE_CSS`). L’apparence elle-même,
+`@dzgrid/theme`, est toujours à charger par vous. Le réglage est lu une fois : `update()` refuse un changement.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Log = { id: string; message: string; level: number };
+
+createGrid<Log>(document.getElementById('journal')!, {
+  rows: [{ id: 'l1', message: 'Pompe démarrée', level: 1 }],
+  columns: [{ id: 'message', header: 'Message' }, { id: 'level', header: 'Niveau', type: 'number' }],
+  getRowId: (l) => l.id,
+  messages: FR,
+  injectStyles: false,
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Log = { id: string; message: string; level: number };
+
+@Component({
+  selector: 'app-journal',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [injectStyles]="false" />`,
+})
+export class Logs {
+  readonly rows: Log[] = [{ id: 'l1', message: 'Pompe démarrée', level: 1 }];
+  readonly columns: DzgColumnOrGroup<Log>[] = [{ id: 'message', header: 'Message' }, { id: 'level', header: 'Niveau', type: 'number' }];
+  readonly rowId = (l: Log) => l.id;
+  readonly messages = FR;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Log = { id: string; message: string; level: number };
+
+const grid = document.querySelector<DzGridElement<Log>>('dz-grid')!;
+grid.columns = [{ id: 'message', header: 'Message' }, { id: 'level', header: 'Niveau', type: 'number' }];
+grid.getRowId = (l) => l.id;
+grid.messages = FR;
+grid.settings = { injectStyles: false };
+grid.rows = [{ id: 'l1', message: 'Pompe démarrée', level: 1 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+```css
+/* Mis dans votre propre feuille, par exemple depuis LAYOUT_CSS à la construction. */
+@layer dzgrid.layout { /* … les règles de mise en page de la grille … */ }
+```
+
+## Voir aussi
+
+- [`nonce`](../nonce/) — garder les styles de la grille sous une politique à nonce.
+- [Thèmes et droite à gauche](../../guides/theming-rtl/).

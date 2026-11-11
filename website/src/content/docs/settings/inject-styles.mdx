@@ -1,0 +1,98 @@
+---
+title: "injectStyles"
+description: "Whether the grid writes its own layout CSS into the page, or your page loads it."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+For a page whose Content Security Policy forbids `<style>` elements it did not write.
+
+<OptionFacts setting="injectStyles" />
+
+## What it does
+
+The grid needs a few layout rules to work at all: rows placed absolutely, sticky headers and pinned columns. By
+default it writes them itself, once per document or shadow root, in a `<style>` element — and so does each feature
+with layout of its own (filters, pages, the status bar…). A policy that allows them with a nonce: give it with
+[`nonce`](../nonce/) and keep the default.
+
+`false`: neither the grid nor its features write any `<style>`, your page loads the rules instead — except the date
+panels, whose own sheets are written unless the page already holds them under the same `data-tzslot` ids. The base's are
+`LAYOUT_CSS` from `@dzgrid/dom`, in the `dzgrid.layout` layer; a few features export theirs too (`ICONS_CSS`,
+`WRAPPED_HEADERS_CSS`, `COLUMN_HOVER_CSS`, `PIVOT_BAR_CSS`, `ZONE_CSS`). The look itself, `@dzgrid/theme`, is always
+yours to load. The setting is read once: `update()` refuses a change.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Log = { id: string; message: string; level: number };
+
+createGrid<Log>(document.getElementById('logs')!, {
+  rows: [{ id: 'l1', message: 'Pump started', level: 1 }],
+  columns: [{ id: 'message', header: 'Message' }, { id: 'level', header: 'Level', type: 'number' }],
+  getRowId: (l) => l.id,
+  messages: EN,
+  injectStyles: false,
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Log = { id: string; message: string; level: number };
+
+@Component({
+  selector: 'app-logs',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [injectStyles]="false" />`,
+})
+export class Logs {
+  readonly rows: Log[] = [{ id: 'l1', message: 'Pump started', level: 1 }];
+  readonly columns: DzgColumnOrGroup<Log>[] = [{ id: 'message', header: 'Message' }, { id: 'level', header: 'Level', type: 'number' }];
+  readonly rowId = (l: Log) => l.id;
+  readonly messages = EN;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Log = { id: string; message: string; level: number };
+
+const grid = document.querySelector<DzGridElement<Log>>('dz-grid')!;
+grid.columns = [{ id: 'message', header: 'Message' }, { id: 'level', header: 'Level', type: 'number' }];
+grid.getRowId = (l) => l.id;
+grid.messages = EN;
+grid.settings = { injectStyles: false };
+grid.rows = [{ id: 'l1', message: 'Pump started', level: 1 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+```css
+/* Built into your own stylesheet, e.g. from LAYOUT_CSS at build time. */
+@layer dzgrid.layout { /* … the grid's layout rules … */ }
+```
+
+## See also
+
+- [`nonce`](../nonce/) — keep the grid's styles under a nonce policy.
+- [Theming and right to left](../../guides/theming-rtl/).

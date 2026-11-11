@@ -2,7 +2,7 @@
 /**
  * One page per option (docs/website-plan.md, batch 3): the facts in `src/generated/options.json` are what
  * scripts/gen-options.mjs reads in the sources today; a page under `settings/` is the setting its slug names
- * (`row-height` → `rowHeight`) and shows that setting's facts, in both languages; every default the sources write as
+ * (`row-height` → `rowHeight`) and shows that setting's facts, in both languages, and every setting has one; every default the sources write as
  * a `{token}` has its words in both languages.
  */
 import { describe, expect, it } from 'vitest';
@@ -41,5 +41,10 @@ describe('one page per option', () => {
       }
     }
     expect(wrong).toEqual([]);
+  });
+
+  it('every setting has its page, in both languages', () => {
+    const missing = data.settings.flatMap((o) => ['settings', 'fr/settings'].filter((dir) => !existsSync(join(DOCS, dir, `${kebab(o.name)}.mdx`))).map((dir) => `${dir}/${kebab(o.name)}`));
+    expect(missing).toEqual([]);
   });
 });

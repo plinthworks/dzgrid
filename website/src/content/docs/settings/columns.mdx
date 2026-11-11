@@ -1,0 +1,106 @@
+---
+title: "columns"
+description: "The columns, or groups of them: required."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+What the grid shows of each row, and how: one definition per column.
+
+<OptionFacts setting="columns" />
+
+## What it does
+
+A list of column definitions, in their order on screen. Each has an `id`, unique and stable, and says where its value
+comes from (`field`, a dotted path, or `value(row)`), its title (`header`, already translated) and its type (`text`,
+`number`, `day`, `instant`, `boolean`, `enum`, `custom`). Every key of a definition has its page under
+[Column options](../../column-options/).
+
+An entry with `children` is a group: a title over the columns it holds. Its title row needs `spans()` from
+`@dzgrid/dom/spans`; without it the grid keeps the columns and leaves out the group row.
+
+Give the columns again with `update({ columns })` to add, remove or change one: what the user did to a column kept by
+its id — resized, moved, hidden — stays. A definition the grid cannot read is left out and told
+(`invalid-column`); a second column with an id already seen too (`duplicate-column-id`).
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Hike = { id: string; trail: string; km: number; walked: string };
+
+const grid = createGrid<Hike>(document.getElementById('hikes')!, {
+  rows: [{ id: 'h1', trail: 'Ridge path', km: 11.5, walked: '2026-05-03' }],
+  columns: [
+    { id: 'trail', header: 'Trail', flex: 1 },
+    { id: 'km', header: 'Distance (km)', type: 'number', width: 140 },
+    { id: 'walked', header: 'Walked on', type: 'day', width: 140 },
+  ],
+  getRowId: (h) => h.id,
+  messages: EN,
+});
+
+grid.update({ columns: [{ id: 'trail', header: 'Trail', flex: 1 }, { id: 'km', header: 'Distance (km)', type: 'number' }] });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Hike = { id: string; trail: string; km: number; walked: string };
+
+@Component({
+  selector: 'app-hikes',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" />`,
+})
+export class Hikes {
+  readonly rows: Hike[] = [{ id: 'h1', trail: 'Ridge path', km: 11.5, walked: '2026-05-03' }];
+  readonly columns: DzgColumnOrGroup<Hike>[] = [
+    { id: 'trail', header: 'Trail', flex: 1 },
+    { id: 'km', header: 'Distance (km)', type: 'number', width: 140 },
+    { id: 'walked', header: 'Walked on', type: 'day', width: 140 },
+  ];
+  readonly rowId = (h: Hike) => h.id;
+  readonly messages = EN;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Hike = { id: string; trail: string; km: number; walked: string };
+
+const grid = document.querySelector<DzGridElement<Hike>>('dz-grid')!;
+grid.columns = [
+  { id: 'trail', header: 'Trail', flex: 1 },
+  { id: 'km', header: 'Distance (km)', type: 'number', width: 140 },
+  { id: 'walked', header: 'Walked on', type: 'day', width: 140 },
+];
+grid.getRowId = (h) => h.id;
+grid.messages = EN;
+grid.rows = [{ id: 'h1', trail: 'Ridge path', km: 11.5, walked: '2026-05-03' }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## See also
+
+- [Column options](../../column-options/) — every key of a definition.
+- [Columns](../../guides/columns/) — types, sizes, groups, custom cells.

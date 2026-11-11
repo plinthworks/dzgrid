@@ -1,0 +1,97 @@
+---
+title: "getRowId"
+description: "Comment la grille distingue une ligne d’une autre : obligatoire."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+L’identifiant d’une ligne : ce qui dit à la grille que c’est la même ligne après un tri, un rechargement ou une
+modification.
+
+<OptionFacts setting="getRowId" />
+
+## Ce qu’il fait
+
+Une fonction qui donne l’identifiant d’une ligne : une chaîne non vide ou un nombre fini, unique parmi les lignes et
+stable dans le temps — la clé de l’enregistrement dans votre base, jamais sa position. `1` et `'1'` sont le même
+identifiant : un JSON qui envoie l’un puis l’autre ne montre pas la ligne deux fois.
+
+Tout ce qui suit une ligne passe par cet identifiant : le focus, la sélection, les lignes ouvertes d’un arbre, une
+modification en cours, l’éclat d’une valeur changée. Une ligne dont l’identifiant est vide, non fini, ou ni chaîne ni
+nombre est écartée (`invalid-row-id`) ; une deuxième ligne avec un identifiant déjà vu l’est aussi
+(`duplicate-row-id`), la première gardée. Les problèmes nomment la place de la ligne, jamais ses données.
+
+La sélection et l’API parlent de clés de ligne, pas d’identifiants : `dataKey(id)` et `idOfDataKey(key)` de
+`@dzgrid/core` passent de l’un à l’autre. La fonction est lue une fois : `update()` en refuse une nouvelle.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { dataKey } from '@dzgrid/core';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Book = { isbn: string; title: string };
+
+const grid = createGrid<Book>(document.getElementById('livres')!, {
+  rows: [{ isbn: '978-0-00-000001-1', title: 'La Route du sel' }],
+  columns: [{ id: 'title', header: 'Titre' }],
+  getRowId: (b) => b.isbn,
+  messages: FR,
+});
+
+const key = dataKey('978-0-00-000001-1');
+if (key) grid.api.focusCell(key, 'title');
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Book = { isbn: string; title: string };
+
+@Component({
+  selector: 'app-livres',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" />`,
+})
+export class Books {
+  readonly rows: Book[] = [{ isbn: '978-0-00-000001-1', title: 'La Route du sel' }];
+  readonly columns: DzgColumnOrGroup<Book>[] = [{ id: 'title', header: 'Titre' }];
+  readonly rowId = (b: Book) => b.isbn;
+  readonly messages = FR;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Book = { isbn: string; title: string };
+
+const grid = document.querySelector<DzGridElement<Book>>('dz-grid')!;
+grid.columns = [{ id: 'title', header: 'Titre' }];
+grid.getRowId = (b) => b.isbn;
+grid.messages = FR;
+grid.rows = [{ isbn: '978-0-00-000001-1', title: 'La Route du sel' }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Voir aussi
+
+- [`rows`](../rows/) — les lignes elles-mêmes.
+- [`sameRow`](../same-row/) — une ligne gardée par son identifiant, comparée par valeur.

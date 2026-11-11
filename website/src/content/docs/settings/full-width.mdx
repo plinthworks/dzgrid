@@ -1,0 +1,108 @@
+---
+title: "fullWidth"
+description: "Rows drawn as one cell across the whole width: a title, a note."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Rows that are not records but titles or notes between them: one cell across the grid.
+
+<OptionFacts setting="fullWidth" />
+
+## What it does
+
+A function asked for each row: `true` makes it full width, an object `{ part }` names the part that draws it,
+anything false leaves it a normal row. A full-width row shows the value of the first visible column — put the title
+there, with a `value` getter if need be. Its cell sticks to the start of the view and stays readable while the grid
+scrolls sideways; the selection box, when there is one, stays beside it. Its whole text is in the cell for screen
+readers.
+
+It needs `spans()` from `@dzgrid/dom/spans`: without it, the setting is told as a missing feature and every row stays
+normal. Something other than a function is refused (`invalid-span`). It is not offered beside a tree (`tree()`): one
+`unsupported-combination` problem, and no row is full width.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { spans } from '@dzgrid/dom/spans';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Line = { id: string; kind: 'day' | 'talk'; title: string; room?: string };
+
+createGrid<Line>(document.getElementById('programme')!, {
+  rows: [
+    { id: 'd1', kind: 'day', title: 'Monday' },
+    { id: 't1', kind: 'talk', title: 'Grids that read aloud', room: 'Hall A' },
+  ],
+  columns: [{ id: 'title', header: 'Talk' }, { id: 'room', header: 'Room' }],
+  getRowId: (l) => l.id,
+  messages: EN,
+  fullWidth: (l) => l.kind === 'day',
+  features: [spans()],
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { spans } from '@dzgrid/dom/spans';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Line = { id: string; kind: 'day' | 'talk'; title: string; room?: string };
+
+@Component({
+  selector: 'app-programme',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features" [fullWidth]="dayRow" />`,
+})
+export class Programme {
+  readonly rows: Line[] = [
+    { id: 'd1', kind: 'day', title: 'Monday' },
+    { id: 't1', kind: 'talk', title: 'Grids that read aloud', room: 'Hall A' },
+  ];
+  readonly columns: DzgColumnOrGroup<Line>[] = [{ id: 'title', header: 'Talk' }, { id: 'room', header: 'Room' }];
+  readonly rowId = (l: Line) => l.id;
+  readonly messages = EN;
+  readonly features = [spans()];
+  readonly dayRow = (l: Readonly<Line>) => l.kind === 'day';
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { spans } from '@dzgrid/dom/spans';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Line = { id: string; kind: 'day' | 'talk'; title: string; room?: string };
+
+const grid = document.querySelector<DzGridElement<Line>>('dz-grid')!;
+grid.columns = [{ id: 'title', header: 'Talk' }, { id: 'room', header: 'Room' }];
+grid.getRowId = (l) => l.id;
+grid.messages = EN;
+grid.features = [spans()];
+grid.settings = { fullWidth: (l) => l.kind === 'day' };
+grid.rows = [
+  { id: 'd1', kind: 'day', title: 'Monday' },
+  { id: 't1', kind: 'talk', title: 'Grids that read aloud', room: 'Hall A' },
+];
+```
+
+</Fragment>
+</CodeTabs>
+
+## See also
+
+- [`parts`](../parts/) — a part to draw the row.
+- [Columns](../../guides/columns/#column-groups) — `spans()` and cells over several rows.

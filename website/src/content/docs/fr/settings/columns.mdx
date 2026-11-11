@@ -1,0 +1,107 @@
+---
+title: "columns"
+description: "Les colonnes, ou leurs groupes : obligatoire."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Ce que la grille montre de chaque ligne, et comment : une définition par colonne.
+
+<OptionFacts setting="columns" />
+
+## Ce qu’il fait
+
+Une liste de définitions de colonnes, dans leur ordre à l’écran. Chacune a un `id`, unique et stable, et dit d’où
+vient sa valeur (`field`, un chemin à points, ou `value(row)`), son titre (`header`, déjà traduit) et son type
+(`text`, `number`, `day`, `instant`, `boolean`, `enum`, `custom`). Chaque clé d’une définition a sa page sous
+[Options de colonne](../../column-options/).
+
+Une entrée avec `children` est un groupe : un titre au-dessus des colonnes qu’il contient. Sa ligne de titre demande
+`spans()` de `@dzgrid/dom/spans` ; sans lui, la grille garde les colonnes et laisse de côté la ligne de groupes.
+
+Redonnez les colonnes par `update({ columns })` pour en ajouter, en retirer ou en changer une : ce que l’utilisateur a
+fait d’une colonne gardée par son identifiant — redimensionnée, déplacée, cachée — reste. Une définition que la
+grille ne sait pas lire est écartée et signalée (`invalid-column`) ; une deuxième colonne d’un identifiant déjà vu
+aussi (`duplicate-column-id`).
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Hike = { id: string; trail: string; km: number; walked: string };
+
+const grid = createGrid<Hike>(document.getElementById('randonnees')!, {
+  rows: [{ id: 'h1', trail: 'Sentier des crêtes', km: 11.5, walked: '2026-05-03' }],
+  columns: [
+    { id: 'trail', header: 'Sentier', flex: 1 },
+    { id: 'km', header: 'Distance (km)', type: 'number', width: 140 },
+    { id: 'walked', header: 'Parcouru le', type: 'day', width: 140 },
+  ],
+  getRowId: (h) => h.id,
+  messages: FR,
+});
+
+grid.update({ columns: [{ id: 'trail', header: 'Sentier', flex: 1 }, { id: 'km', header: 'Distance (km)', type: 'number' }] });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Hike = { id: string; trail: string; km: number; walked: string };
+
+@Component({
+  selector: 'app-randonnees',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" />`,
+})
+export class Hikes {
+  readonly rows: Hike[] = [{ id: 'h1', trail: 'Sentier des crêtes', km: 11.5, walked: '2026-05-03' }];
+  readonly columns: DzgColumnOrGroup<Hike>[] = [
+    { id: 'trail', header: 'Sentier', flex: 1 },
+    { id: 'km', header: 'Distance (km)', type: 'number', width: 140 },
+    { id: 'walked', header: 'Parcouru le', type: 'day', width: 140 },
+  ];
+  readonly rowId = (h: Hike) => h.id;
+  readonly messages = FR;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Hike = { id: string; trail: string; km: number; walked: string };
+
+const grid = document.querySelector<DzGridElement<Hike>>('dz-grid')!;
+grid.columns = [
+  { id: 'trail', header: 'Sentier', flex: 1 },
+  { id: 'km', header: 'Distance (km)', type: 'number', width: 140 },
+  { id: 'walked', header: 'Parcouru le', type: 'day', width: 140 },
+];
+grid.getRowId = (h) => h.id;
+grid.messages = FR;
+grid.rows = [{ id: 'h1', trail: 'Sentier des crêtes', km: 11.5, walked: '2026-05-03' }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Voir aussi
+
+- [Options de colonne](../../column-options/) — chaque clé d’une définition.
+- [Colonnes](../../guides/columns/) — types, tailles, groupes, cellules sur mesure.

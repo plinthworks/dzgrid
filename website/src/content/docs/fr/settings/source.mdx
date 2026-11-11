@@ -1,0 +1,92 @@
+---
+title: "source"
+description: "Des lignes qui vivent sur un serveur : la grille demande ce qu’elle montre."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Pour des lignes trop nombreuses pour être envoyées d’un coup : la grille demande à votre serveur ce dont elle a
+besoin, au fil du travail de l’utilisateur.
+
+<OptionFacts setting="source" />
+
+## Ce qu’il fait
+
+Une liaison faite de votre fonction de chargement, à la place de [`rows`](../rows/) :
+
+- `sourceRows(data, options)` de `@dzgrid/core/server` : une requête par changement de filtre, de recherche, de tri
+  ou de page, chacune avec tout ce qu’il faut au serveur (le filtre sous une forme transmissible, le tri, la page, le
+  fuseau et vos `params`). Avec [`pagination`](../pagination/) et la fonction `pagination()`, une pagination.
+- `infiniteRows(data, options)` de `@dzgrid/core/infinite` : des blocs de lignes demandés à mesure que
+  l’utilisateur fait défiler une longue liste.
+
+Avec une source, les filtres, la recherche, le tri et les pages se font sur le serveur, sauf si
+[`operations`](../operations/) dit autrement (avec `infiniteRows`, toujours le serveur, en une seule liste). La grille s’occupe seule du reste : le message de chargement, la fine
+barre pendant que des lignes à l’écran se rechargent, une erreur avec « Réessayer », les réponses qui arrivent dans le
+désordre (seule la dernière compte), une sélection sur toutes les pages. Une nouvelle source donnée par `update()`
+redemande depuis le début.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
+import { pagination } from '@dzgrid/dom/pagination';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_PAGINATION } from '@dzgrid/dom/locales/fr-pagination';
+
+type Asteroid = { id: string; name: string; diameter: number };
+
+async function page(req: DataRequest): Promise<DataResponse<Asteroid>> {
+  const answer = await fetch('/api/asteroids', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ filter: req.filter, sort: req.sort, page: req.page }),
+    signal: req.signal as AbortSignal,
+  });
+  return answer.json();   // { rows, total }
+}
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_PAGINATION.text } };
+
+createGrid<Asteroid>(document.getElementById('asteroides')!, {
+  source: sourceRows<Asteroid>({ fetch: page }),
+  columns: [{ id: 'name', header: 'Astéroïde' }, { id: 'diameter', header: 'Diamètre (km)', type: 'number' }],
+  getRowId: (a) => a.id,
+  messages,
+  pagination: { pageSize: 100 },
+  features: [pagination()],
+});
+```
+
+</Fragment>
+</CodeTabs>
+
+Les versions Angular et Web Component, et chaque partie de la requête : [Données du serveur et défilement
+infini](../../guides/server-data/#pages).
+
+## Démo
+
+<LiveDemo
+  height={380}
+  server={{ kind: 'pages', data: 'asteroids', count: 5000, delay: 350 }}
+  settings={{ label: 'Catalogue d’astéroïdes', pagination: { pageSize: 50 } }}
+  features={['pagination']}
+  columns={[
+    { id: 'name', header: 'Astéroïde', flex: 1 },
+    { id: 'found', header: 'Découvert', type: 'day', width: 150 },
+    { id: 'diameter', header: 'Diamètre (km)', type: 'number', width: 160 },
+  ]}
+  caption="Un serveur inventé dans cette page : chaque tri ou page est une requête, servie après une courte attente."
+/>
+
+## Voir aussi
+
+- [`operations`](../operations/) — ce qui se fait sur le serveur, ce qui se fait dans le navigateur.
+- [`pagination`](../pagination/) — la taille des pages.
+- [Données du serveur et défilement infini](../../guides/server-data/).

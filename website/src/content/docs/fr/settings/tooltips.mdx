@@ -1,0 +1,118 @@
+---
+title: "tooltips"
+description: "Combien de temps le pointeur reste avant qu’une infobulle apparaisse."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+L’attente avant qu’une infobulle apparaisse sous le pointeur.
+
+<OptionFacts setting="tooltips" />
+
+## Ce qu’il fait
+
+`delayMs` : combien de temps le pointeur reste sur un titre ou une cellule avant que son infobulle apparaisse, 500 ms
+par défaut. Le clavier n’attend pas : une infobulle apparaît dès que le focus atteint sa cellule.
+
+Le texte vient des colonnes, jamais deviné depuis la cellule : `tooltip(value, row, context)` pour une cellule,
+`headerTooltip` pour un titre. Le pointeur peut passer sur l’infobulle sans qu’elle parte ; Échap la ferme. Elle
+reste dans la fenêtre, ne couvre jamais ce qu’elle décrit, et s’ouvre vers le début de la ligne de droite à gauche.
+La cellule qui a le focus la désigne par `aria-describedby` tant qu’elle est affichée.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Peak = { id: string; name: string; metres: number };
+
+const grid = createGrid<Peak>(document.getElementById('sommets')!, {
+  rows: [{ id: 'p1', name: 'Dent Grise', metres: 3120 }],
+  columns: [
+    { id: 'name', header: 'Sommet', tooltip: (_v, p) => `${p.name}, ${p.metres} m` },
+    { id: 'metres', header: 'Altitude', type: 'number', headerTooltip: 'Altitude au-dessus du niveau de la mer, en mètres' },
+  ],
+  getRowId: (p) => p.id,
+  messages: FR,
+  tooltips: { delayMs: 200 },
+});
+
+grid.update({ tooltips: { delayMs: 800 } });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Peak = { id: string; name: string; metres: number };
+
+@Component({
+  selector: 'app-sommets',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [tooltips]="{ delayMs: 200 }" />`,
+})
+export class Peaks {
+  readonly rows: Peak[] = [{ id: 'p1', name: 'Dent Grise', metres: 3120 }];
+  readonly columns: DzgColumnOrGroup<Peak>[] = [
+    { id: 'name', header: 'Sommet', tooltip: (_v, p) => `${p.name}, ${p.metres} m` },
+    { id: 'metres', header: 'Altitude', type: 'number', headerTooltip: 'Altitude au-dessus du niveau de la mer, en mètres' },
+  ];
+  readonly rowId = (p: Peak) => p.id;
+  readonly messages = FR;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Peak = { id: string; name: string; metres: number };
+
+const grid = document.querySelector<DzGridElement<Peak>>('dz-grid')!;
+grid.columns = [
+  { id: 'name', header: 'Sommet', tooltip: (_v, p) => `${p.name}, ${p.metres} m` },
+  { id: 'metres', header: 'Altitude', type: 'number', headerTooltip: 'Altitude au-dessus du niveau de la mer, en mètres' },
+];
+grid.getRowId = (p) => p.id;
+grid.messages = FR;
+grid.settings = { tooltips: { delayMs: 200 } };
+grid.rows = [{ id: 'p1', name: 'Dent Grise', metres: 3120 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Sommets', tooltips: { delayMs: 200 } }}
+  columns={[
+    { id: 'name', header: 'Sommet', flex: 1 },
+    { id: 'metres', header: 'Altitude', type: 'number', width: 140, headerTooltip: 'Altitude au-dessus du niveau de la mer, en mètres' },
+  ]}
+  rows={[
+    { id: 'p1', name: 'Dent Grise', metres: 3120 },
+    { id: 'p2', name: 'Selle des Nuages', metres: 2875 },
+    { id: 'p3', name: 'Vieux Berger', metres: 2410 },
+  ]}
+  caption="Laissez le pointeur sur le titre Altitude : son infobulle après 200 ms."
+/>
+
+## Voir aussi
+
+- [Colonnes](../../guides/columns/#classes-infobulles-cellules-sur-mesure) — `tooltip` et `headerTooltip`.

@@ -1,0 +1,88 @@
+---
+title: "overscan"
+description: "How many rows and columns the grid draws beyond the view."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+How far beyond the visible edge the grid keeps rows and columns drawn.
+
+<OptionFacts setting="overscan" />
+
+## What it does
+
+The grid draws only what is on screen, plus a margin: the overscan. `rows`: rows above and below the view; by default
+2, and more while the user scrolls fast (up to 40), so a fling shows no blank rows. `cols`: columns on each side of
+the view; 1 by default. Giving a number fixes it, whatever the speed.
+
+There is rarely a reason to change it. More overscan draws more cells at each step — slower on a big screen, but fewer
+blanks on a slow machine scrolling fast; less does the reverse. Measure before and after.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Log = { id: string; message: string; level: number };
+
+createGrid<Log>(document.getElementById('logs')!, {
+  rows: [{ id: 'l1', message: 'Pump started', level: 1 }],
+  columns: [{ id: 'message', header: 'Message' }, { id: 'level', header: 'Level', type: 'number' }],
+  getRowId: (l) => l.id,
+  messages: EN,
+  overscan: { rows: 10, cols: 2 },
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Log = { id: string; message: string; level: number };
+
+@Component({
+  selector: 'app-logs',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [overscan]="{ rows: 10, cols: 2 }" />`,
+})
+export class Logs {
+  readonly rows: Log[] = [{ id: 'l1', message: 'Pump started', level: 1 }];
+  readonly columns: DzgColumnOrGroup<Log>[] = [{ id: 'message', header: 'Message' }, { id: 'level', header: 'Level', type: 'number' }];
+  readonly rowId = (l: Log) => l.id;
+  readonly messages = EN;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Log = { id: string; message: string; level: number };
+
+const grid = document.querySelector<DzGridElement<Log>>('dz-grid')!;
+grid.columns = [{ id: 'message', header: 'Message' }, { id: 'level', header: 'Level', type: 'number' }];
+grid.getRowId = (l) => l.id;
+grid.messages = EN;
+grid.settings = { overscan: { rows: 10, cols: 2 } };
+grid.rows = [{ id: 'l1', message: 'Pump started', level: 1 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## See also
+
+- [`rowHeight`](../row-height/) — the rows' height.

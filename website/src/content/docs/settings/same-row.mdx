@@ -1,0 +1,103 @@
+---
+title: "sameRow"
+description: "On a full reload, keep a row that did not really change as it was."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+For an application that reloads all its rows — a poll, a server's answer — when most of them have not changed.
+
+<OptionFacts setting="sameRow" />
+
+## What it does
+
+A full reload brings new objects, even for rows whose values are the same. Without `sameRow`, every row whose object
+differs counts as updated; with more than half the rows updated, the grid takes it for a new data set: nothing
+flashes.
+
+`sameRow(old, new)` is asked for each row kept by its id with a new object. Equal: the row is unchanged and keeps its
+old object, so what the grid remembers about it stays (the search's text, the selection rule's answer, `rowClass`).
+Only the rows that really changed count as updated, and their changed cells flash. `sameValues` from
+`@dzgrid/core/compare` compares plain data deeply; your own function can compare a version field instead.
+
+A `sameRow` that throws counts that row as changed, with one `invalid-setting` warning per load. It is read once:
+`update()` refuses a new one.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { sameValues } from '@dzgrid/core/compare';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Sensor = { id: string; room: string; celsius: number };
+
+const grid = createGrid<Sensor>(document.getElementById('sensors')!, {
+  rows: [{ id: 's1', room: 'Greenhouse', celsius: 24.5 }],
+  columns: [{ id: 'room', header: 'Room' }, { id: 'celsius', header: '°C', type: 'number' }],
+  getRowId: (s) => s.id,
+  messages: EN,
+  sameRow: sameValues,
+});
+
+setInterval(async () => {
+  const rows = (await (await fetch('/api/sensors')).json()) as Sensor[];
+  grid.update({ rows });   // only the rooms whose temperature moved are updated
+}, 10_000);
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { sameValues } from '@dzgrid/core/compare';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Sensor = { id: string; room: string; celsius: number };
+
+@Component({
+  selector: 'app-sensors',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [sameRow]="same" />`,
+})
+export class Sensors {
+  readonly rows: Sensor[] = [{ id: 's1', room: 'Greenhouse', celsius: 24.5 }];
+  readonly columns: DzgColumnOrGroup<Sensor>[] = [{ id: 'room', header: 'Room' }, { id: 'celsius', header: '°C', type: 'number' }];
+  readonly rowId = (s: Sensor) => s.id;
+  readonly messages = EN;
+  readonly same = sameValues;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { sameValues } from '@dzgrid/core/compare';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Sensor = { id: string; room: string; celsius: number };
+
+const grid = document.querySelector<DzGridElement<Sensor>>('dz-grid')!;
+grid.columns = [{ id: 'room', header: 'Room' }, { id: 'celsius', header: '°C', type: 'number' }];
+grid.getRowId = (s) => s.id;
+grid.messages = EN;
+grid.settings = { sameRow: sameValues };
+grid.rows = [{ id: 's1', room: 'Greenhouse', celsius: 24.5 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## See also
+
+- [`rows`](../rows/) — giving the rows again.
+- [`getRowId`](../get-row-id/) — how a row is kept by id.

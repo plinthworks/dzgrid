@@ -927,9 +927,9 @@ function describe(s: SelectionState): string {
 grid.kernel.dispatch({ type: 'selection.all' }, 'api');
 ```
 
-- `mode`: `none`, `single` or `multi`. `checkbox: true` adds a tick column with a header box; `click: false` leaves
-  clicks to focus only (select with Space or the box).
-- Click selects one row, Ctrl/Cmd+click toggles, Shift+click selects a run in screen order; Space toggles the focused
+- `mode`: `none`, `single` or `multi`. `checkbox: true` adds a tick column with a header box; `click: true` lets a
+  click select; without it a click only moves the focus (select with Space or the box).
+- With `click: true`, a click selects one row, Ctrl/Cmd+click toggles, Shift+click selects a run in screen order; Space toggles the focused
   row, Ctrl+A selects all. The selection survives sorting and filtering.
 - The selection holds **row keys**, not your ids. `idOfDataKey(key)` gives the id back; in Angular,
   `selectedIds(controller)` gives the ids of the whole selection with the query.
@@ -2185,8 +2185,8 @@ keep a mark that is not colour alone), `menu`, `chevron` (trees, details, header
 default), `submenu`, `grip`. An SVG string or element (copied). Its shape is drawn in the mark's colour and size
 (`--dzg-icon-size`), whatever its own fill. Refused, the default kept and `invalid-setting` told: anything but `<svg>`
 with shapes, groups, gradients, `use` and `title`; a `<script>`, `<style>` or `<foreignObject>`; an `on…` attribute; a
-link or `url()` outside the icon (only `#…`); more than 20 000 characters. Drawn as a `data:` image: a CSP without
-`img-src data:` keeps the defaults. With `injectStyles: false`, load `ICONS_CSS` from `@dzgrid/dom/theme` too.
+link or `url()` outside the icon (only `#…`); more than 20 000 characters. Drawn as a `data:` image: a CSP must allow
+`img-src data:`. With `injectStyles: false`, load `ICONS_CSS` from `@dzgrid/dom/theme` too.
 
 ### Alternate rows, lines, the pinned edge
 

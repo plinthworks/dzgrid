@@ -1,0 +1,89 @@
+---
+title: "overscan"
+description: "Combien de lignes et de colonnes la grille dessine au-delà de la vue."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Jusqu’où, au-delà du bord visible, la grille garde des lignes et des colonnes dessinées.
+
+<OptionFacts setting="overscan" />
+
+## Ce qu’il fait
+
+La grille ne dessine que ce qui est à l’écran, plus une marge : le débord. `rows` : des lignes au-dessus et au-dessous
+de la vue ; 2 par défaut, et davantage pendant un défilement rapide (jusqu’à 40), pour qu’un coup de défilement ne
+montre pas de lignes vides. `cols` : des colonnes de chaque côté de la vue ; 1 par défaut. Un nombre le fixe, quelle
+que soit la vitesse.
+
+Il y a rarement lieu de le changer. Plus de débord dessine plus de cellules à chaque pas — plus lent sur un grand
+écran, mais moins de vides sur une machine lente qui défile vite ; moins fait l’inverse. Mesurez avant et après.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Log = { id: string; message: string; level: number };
+
+createGrid<Log>(document.getElementById('journal')!, {
+  rows: [{ id: 'l1', message: 'Pompe démarrée', level: 1 }],
+  columns: [{ id: 'message', header: 'Message' }, { id: 'level', header: 'Niveau', type: 'number' }],
+  getRowId: (l) => l.id,
+  messages: FR,
+  overscan: { rows: 10, cols: 2 },
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Log = { id: string; message: string; level: number };
+
+@Component({
+  selector: 'app-journal',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [overscan]="{ rows: 10, cols: 2 }" />`,
+})
+export class Logs {
+  readonly rows: Log[] = [{ id: 'l1', message: 'Pompe démarrée', level: 1 }];
+  readonly columns: DzgColumnOrGroup<Log>[] = [{ id: 'message', header: 'Message' }, { id: 'level', header: 'Niveau', type: 'number' }];
+  readonly rowId = (l: Log) => l.id;
+  readonly messages = FR;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Log = { id: string; message: string; level: number };
+
+const grid = document.querySelector<DzGridElement<Log>>('dz-grid')!;
+grid.columns = [{ id: 'message', header: 'Message' }, { id: 'level', header: 'Niveau', type: 'number' }];
+grid.getRowId = (l) => l.id;
+grid.messages = FR;
+grid.settings = { overscan: { rows: 10, cols: 2 } };
+grid.rows = [{ id: 'l1', message: 'Pompe démarrée', level: 1 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Voir aussi
+
+- [`rowHeight`](../row-height/) — la hauteur des lignes.

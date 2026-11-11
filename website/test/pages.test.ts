@@ -24,6 +24,10 @@ const WRITTEN = [
   'settings/index', 'settings/density', 'settings/row-height', 'settings/header-height', 'settings/headers', 'settings/label',
   'settings/messages', 'settings/locale', 'settings/time-zone', 'settings/numerals', 'settings/direction', 'settings/clock',
   'settings/motion', 'settings/theme', 'settings/icons', 'settings/row-class', 'settings/overlay', 'settings/busy', 'settings/context',
+  'settings/rows', 'settings/get-row-id', 'settings/columns', 'settings/same-row', 'settings/filter-kinds', 'settings/multi-sort',
+  'settings/source', 'settings/operations', 'settings/pagination', 'settings/selection', 'settings/tooltips', 'settings/on-event',
+  'settings/full-width', 'settings/parts', 'settings/features', 'settings/search-warmup', 'settings/overscan',
+  'settings/inject-styles', 'settings/nonce',
 ];
 /** The sidebar's sections: a page lives in one of them (or is the home page). */
 const SECTIONS = ['getting-started', 'guides', 'settings', 'column-options', 'features', 'api'];

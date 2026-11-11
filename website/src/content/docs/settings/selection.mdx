@@ -1,0 +1,124 @@
+---
+title: "selection"
+description: "Let the user select rows: one or several, with boxes or clicks, under your rules."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Rows the user picks — to delete, to send, to compare. No feature is needed.
+
+<OptionFacts setting="selection" />
+
+## What it does
+
+- `mode`: `'none'`, `'single'` (one row at a time) or `'multi'`.
+- `checkbox: true`: a column of boxes; in `'multi'`, a box in its header selects every row (on browser pages, the
+  page shown).
+- `click: true`: a click selects the row (Ctrl/Cmd+click adds or removes it, Shift+click a run in screen order).
+  Without it a click only moves the focus, and rows are selected with Space or their box. With blocks of cells
+  (`range()`), Shift+click belongs to the block: rows are then ticked by their box.
+- `keepOnFilter`: `true` by default, a selected row stays selected while a filter or the search hides it; `false`
+  clears the selection when they change. A sort or a page never does.
+- `canSelect(row, selection, context)`: your rule for a row joining the selection. `true` allows, `false` refuses, a
+  text refuses and is said to the user. It is never asked to untick a row. It needs `rules()` from `@dzgrid/dom/rules`
+  (texts `-rules`): without it, no row can be selected, and a `missing-feature` error says why.
+
+Space toggles the focused row and Ctrl+A (Cmd+A) selects all. The selection holds row keys, not ids: the
+`selectionChanged` event gives it with its count, and `idOfDataKey(key)` gives an id back. After « select all » on a
+server's pages it reads « every row the query matches, but these ».
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { idOfDataKey } from '@dzgrid/core';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Seed = { id: string; plant: string; packets: number };
+
+createGrid<Seed>(document.getElementById('seeds')!, {
+  rows: [{ id: 's1', plant: 'Moon squash', packets: 12 }, { id: 's2', plant: 'Glass bean', packets: 0 }],
+  columns: [{ id: 'plant', header: 'Plant' }, { id: 'packets', header: 'Packets', type: 'number' }],
+  getRowId: (s) => s.id,
+  messages: EN,
+  selection: { mode: 'multi', checkbox: true, click: true },
+  onEvent: (e) => {
+    if (e.type === 'selectionChanged' && e.selection.mode === 'include') console.log([...e.selection.keys].map(idOfDataKey));
+  },
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Seed = { id: string; plant: string; packets: number };
+
+@Component({
+  selector: 'app-seeds',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+    [selection]="{ mode: 'multi', checkbox: true, click: true }" (selectionChanged)="count = $event.count" />
+    <p>{{ count ?? 'Some' }} selected</p>`,
+})
+export class Seeds {
+  count: number | null = 0;
+  readonly rows: Seed[] = [{ id: 's1', plant: 'Moon squash', packets: 12 }, { id: 's2', plant: 'Glass bean', packets: 0 }];
+  readonly columns: DzgColumnOrGroup<Seed>[] = [{ id: 'plant', header: 'Plant' }, { id: 'packets', header: 'Packets', type: 'number' }];
+  readonly rowId = (s: Seed) => s.id;
+  readonly messages = EN;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Seed = { id: string; plant: string; packets: number };
+
+const grid = document.querySelector<DzGridElement<Seed>>('dz-grid')!;
+grid.columns = [{ id: 'plant', header: 'Plant' }, { id: 'packets', header: 'Packets', type: 'number' }];
+grid.getRowId = (s) => s.id;
+grid.messages = EN;
+grid.settings = { selection: { mode: 'multi', checkbox: true, click: true } };
+grid.rows = [{ id: 's1', plant: 'Moon squash', packets: 12 }, { id: 's2', plant: 'Glass bean', packets: 0 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Live demo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Seed packets', selection: { mode: 'multi', checkbox: true, click: true } }}
+  columns={[
+    { id: 'plant', header: 'Plant', flex: 1 },
+    { id: 'packets', header: 'Packets', type: 'number', width: 120 },
+  ]}
+  rows={[
+    { id: 's1', plant: 'Moon squash', packets: 12 },
+    { id: 's2', plant: 'Glass bean', packets: 0 },
+    { id: 's3', plant: 'Velvet radish', packets: 7 },
+    { id: 's4', plant: 'Lantern pepper', packets: 4 },
+  ]}
+  caption="Click a row, Ctrl/Cmd+click another, Shift+click a third; the header's box selects all."
+/>
+
+## See also
+
+- [`context`](../context/) — what `canSelect` is also given.
+- [Selection and ranges](../../guides/selection-ranges/#selecting-rows).

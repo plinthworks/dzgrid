@@ -1,0 +1,73 @@
+---
+title: "filterKinds"
+description: "Your own kinds of column filter, for the browser and for a server."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Filters the grid does not ship — a range on a score, « within 5 km » — written for your own data.
+
+<OptionFacts setting="filterKinds" />
+
+## What it does
+
+Each kind is a plain object, registered once with the grid. A column filter then names it:
+`{ type: 'custom', kind: 'between', state: { min: 3, max: 7 } }`.
+
+- `name`: what a filter names. Not empty, no dot, not a built-in name (`text`, `number`, `day`, `instant`, `boolean`,
+  `set`, `custom`, `combined`).
+- `types`: the column types it accepts; any when left out.
+- `read(state)`: checks a state (from your code, a saved view, an address) and returns it tidied, or `'invalid'`.
+- `active(state)`: false for a half-typed state — nothing filters, nothing is said.
+- `test(state, ctx, context)`: the browser's rule, a function of `(value, row)`; `context` is the grid's
+  [`context`](../context/).
+- `wire(state, ctx, zone, context)`: what a server receives; the state itself when left out.
+
+Where it runs follows [`operations`](../operations/): in the browser a kind needs `test` (else the filter is dropped,
+`filter-needs-server`); on a server it needs only `wire`. An unknown kind, a column of the wrong type, a state refused
+or a function that throws: the filter is ignored and told (`invalid-filter`), never a crash. The popup and the
+floating box of a custom kind are parts you give (`filter.<name>`, `floating.<name>` in [`parts`](../parts/)).
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import type { FilterKind } from '@dzgrid/core';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Dive = { id: string; site: string; depth: number };
+type Range = { min: number; max: number };
+
+const between: FilterKind<Range, number> = {
+  name: 'between',
+  types: ['number'],
+  read: (s) => {
+    const r = s as Partial<Range> | null;
+    return r && typeof r.min === 'number' && typeof r.max === 'number' ? { min: r.min, max: r.max } : 'invalid';
+  },
+  active: (s) => s.min <= s.max,
+  test: (s) => (value) => value !== null && value >= s.min && value <= s.max,
+};
+
+const grid = createGrid<Dive>(document.getElementById('dives')!, {
+  rows: [{ id: 'd1', site: 'Blue hole', depth: 18 }],
+  columns: [{ id: 'site', header: 'Site' }, { id: 'depth', header: 'Depth (m)', type: 'number' }],
+  getRowId: (d) => d.id,
+  messages: EN,
+  filterKinds: [between],
+});
+
+grid.kernel.dispatch({ type: 'filter.column', column: 'depth', filter: { type: 'custom', kind: 'between', state: { min: 10, max: 20 } } }, 'api');
+```
+
+</Fragment>
+</CodeTabs>
+
+## See also
+
+- [`operations`](../operations/) — where the filters run.
+- [Sort, filter, search](../../guides/sort-filter-search/#column-filters).

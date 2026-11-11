@@ -1,0 +1,90 @@
+---
+title: "source"
+description: "Rows that live on a server: the grid asks for what it shows."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+For rows too many to send at once: the grid asks your server for what it needs, as the user works.
+
+<OptionFacts setting="source" />
+
+## What it does
+
+A binding made from your fetch function, in place of [`rows`](../rows/):
+
+- `sourceRows(data, options)` from `@dzgrid/core/server`: one request per change of filter, search, sort or page,
+  each with everything the server needs (the filter in a wire form, the sort, the page, the time zone and your
+  `params`). With [`pagination`](../pagination/) and the `pagination()` feature, a pager.
+- `infiniteRows(data, options)` from `@dzgrid/core/infinite`: blocks of rows asked for as the user scrolls through
+  one long list.
+
+With a source, filter, search, sort and pages run on the server unless [`operations`](../operations/) says otherwise
+(with `infiniteRows`, always the server, in one list).
+The grid handles the rest by itself: the loading message, the thin bar while rows on screen reload, an error with
+« Retry », answers that arrive out of order (only the latest counts), a selection across every page. A new source
+given with `update()` asks again from the start.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
+import { pagination } from '@dzgrid/dom/pagination';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_PAGINATION } from '@dzgrid/dom/locales/en-pagination';
+
+type Asteroid = { id: string; name: string; diameter: number };
+
+async function page(req: DataRequest): Promise<DataResponse<Asteroid>> {
+  const answer = await fetch('/api/asteroids', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ filter: req.filter, sort: req.sort, page: req.page }),
+    signal: req.signal as AbortSignal,
+  });
+  return answer.json();   // { rows, total }
+}
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_PAGINATION.text } };
+
+createGrid<Asteroid>(document.getElementById('asteroids')!, {
+  source: sourceRows<Asteroid>({ fetch: page }),
+  columns: [{ id: 'name', header: 'Asteroid' }, { id: 'diameter', header: 'Diameter (km)', type: 'number' }],
+  getRowId: (a) => a.id,
+  messages,
+  pagination: { pageSize: 100 },
+  features: [pagination()],
+});
+```
+
+</Fragment>
+</CodeTabs>
+
+The Angular and Web Component versions, and every part of the request: [Server data](../../guides/server-data/#pages).
+
+## Live demo
+
+<LiveDemo
+  height={380}
+  server={{ kind: 'pages', data: 'asteroids', count: 5000, delay: 350 }}
+  settings={{ label: 'Asteroid catalogue', pagination: { pageSize: 50 } }}
+  features={['pagination']}
+  columns={[
+    { id: 'name', header: 'Asteroid', flex: 1 },
+    { id: 'found', header: 'Found', type: 'day', width: 150 },
+    { id: 'diameter', header: 'Diameter (km)', type: 'number', width: 160 },
+  ]}
+  caption="A made-up server inside this page: each sort or page is one request, answered after a short wait."
+/>
+
+## See also
+
+- [`operations`](../operations/) — what runs on the server, what in the browser.
+- [`pagination`](../pagination/) — the page size.
+- [Server data](../../guides/server-data/).

@@ -1,0 +1,90 @@
+---
+title: "nonce"
+description: "The nonce the grid puts on the <style> elements it writes, for a strict Content Security Policy."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+For a page whose Content Security Policy allows styles only with the nonce it gives.
+
+<OptionFacts setting="nonce" />
+
+## What it does
+
+The grid and its features write their layout rules in `<style>` elements. Under a policy such as
+`style-src 'nonce-r4nd0m'`, the browser ignores a `<style>` without that nonce. Give the page's nonce: the grid puts
+it on every `<style>` it writes, its features' included, and the browser applies them.
+
+The nonce is the server's, new for each page served; the grid only passes it on. It is read once, when the grid is
+made: `update()` refuses a change. A policy that allows no `<style>` at all needs
+[`injectStyles: false`](../inject-styles/) instead.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Log = { id: string; message: string; level: number };
+
+createGrid<Log>(document.getElementById('logs')!, {
+  rows: [{ id: 'l1', message: 'Pump started', level: 1 }],
+  columns: [{ id: 'message', header: 'Message' }, { id: 'level', header: 'Level', type: 'number' }],
+  getRowId: (l) => l.id,
+  messages: EN,
+  nonce: document.querySelector<HTMLMetaElement>('meta[name=csp-nonce]')?.content ?? '', // your server writes it in the page
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Log = { id: string; message: string; level: number };
+
+@Component({
+  selector: 'app-logs',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [nonce]="nonce" />`,
+})
+export class Logs {
+  readonly rows: Log[] = [{ id: 'l1', message: 'Pump started', level: 1 }];
+  readonly columns: DzgColumnOrGroup<Log>[] = [{ id: 'message', header: 'Message' }, { id: 'level', header: 'Level', type: 'number' }];
+  readonly rowId = (l: Log) => l.id;
+  readonly messages = EN;
+  readonly nonce = document.querySelector<HTMLMetaElement>('meta[name=csp-nonce]')?.content ?? '';
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Log = { id: string; message: string; level: number };
+
+const grid = document.querySelector<DzGridElement<Log>>('dz-grid')!;
+grid.columns = [{ id: 'message', header: 'Message' }, { id: 'level', header: 'Level', type: 'number' }];
+grid.getRowId = (l) => l.id;
+grid.messages = EN;
+grid.settings = { nonce: document.querySelector<HTMLMetaElement>('meta[name=csp-nonce]')?.content ?? '' };
+grid.rows = [{ id: 'l1', message: 'Pump started', level: 1 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## See also
+
+- [`injectStyles`](../inject-styles/) — your page loads the styles itself.

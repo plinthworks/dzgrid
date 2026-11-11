@@ -1,0 +1,103 @@
+---
+title: "parts"
+description: "Votre propre dessin pour une cellule, un titre, une infobulle, le message : des parties par nom."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Quand le texte de la grille ne suffit pas — un badge, une barre, un bouton dans une cellule — votre code le dessine,
+en partie.
+
+<OptionFacts setting="parts" />
+
+## Ce qu’il fait
+
+Un registre de parties par nom, un par grille. Chaque partie est `definePart(slot, { mount })` :
+`mount(host, context)` écrit son propre DOM dans l’élément que donne la grille et rend `{ update, destroy }`. La
+grille n’écrit jamais de chaînes HTML et garde le rôle, le focus et les touches de la cellule.
+
+Une colonne trouve sa partie par le nom qu’elle donne (`ui: { cell: 'jar' }`, `ui.header`, `ui.tooltip`), sinon par
+`slot.type` — une partie nommée `'cell.number'` dessine chaque colonne de nombres — sinon le texte de la grille. Les
+parties de titre, d’infobulle, de message et d’activité demandent `slots()` de `@dzgrid/dom/slots`. Des cellules
+toutes faites sont dans `@dzgrid/dom/parts` (`badge`, `cellBoolean`) ; en Angular, une classe de composant dans
+`ui.cell` est aussi une partie.
+
+Une partie se monte une fois dans une cellule et se met à jour quand la cellule montre d’autres lignes. Un nom que
+personne n’a inscrit est une erreur `unknown-part`, dite une fois, et la colonne garde son texte. Une partie qui lève
+une erreur coûte sa cellule pour cette ligne seulement : la cellule reste vide et l’erreur est signalée. Donner un
+nouveau registre par `update()` résout à nouveau chaque colonne.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, definePart } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Bee = { id: string; hive: string; honey: number };
+
+const jar = definePart('cell', {
+  mount(host, c) {
+    const span = host.ownerDocument.createElement('span');
+    host.append(span);
+    const draw = (n: typeof c) => { span.textContent = n.value == null ? '' : `${n.text} kg`; };
+    draw(c);
+    return { update: draw, destroy: () => span.remove() };
+  },
+});
+
+createGrid<Bee>(document.getElementById('ruches')!, {
+  rows: [{ id: 'h1', hive: 'Colline aux trèfles', honey: 12.5 }],
+  columns: [{ id: 'hive', header: 'Ruche' }, { id: 'honey', header: 'Miel', type: 'number', ui: { cell: 'jar' } }],
+  getRowId: (b) => b.id,
+  messages: FR,
+  parts: { jar },
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { definePart } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Bee = { id: string; hive: string; honey: number };
+
+const jar = definePart('cell', {
+  mount(host, c) {
+    const span = host.ownerDocument.createElement('span');
+    host.append(span);
+    const draw = (n: typeof c) => { span.textContent = n.value == null ? '' : `${n.text} kg`; };
+    draw(c);
+    return { update: draw, destroy: () => span.remove() };
+  },
+});
+
+@Component({
+  selector: 'app-ruches',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [parts]="parts" />`,
+})
+export class Hives {
+  readonly rows: Bee[] = [{ id: 'h1', hive: 'Colline aux trèfles', honey: 12.5 }];
+  readonly columns: DzgColumnOrGroup<Bee>[] = [{ id: 'hive', header: 'Ruche' }, { id: 'honey', header: 'Miel', type: 'number', ui: { cell: 'jar' } }];
+  readonly rowId = (b: Bee) => b.id;
+  readonly messages = FR;
+  readonly parts = { jar };
+}
+```
+
+</Fragment>
+</CodeTabs>
+
+## Voir aussi
+
+- [Colonnes](../../guides/columns/#classes-infobulles-cellules-sur-mesure) — les parties dans les colonnes, les composants
+  Angular.
+- [`overlay`](../overlay/), [`busy`](../busy/) — ce que remplace une partie de message ou d’activité.

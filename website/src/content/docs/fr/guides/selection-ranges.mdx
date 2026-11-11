@@ -106,7 +106,7 @@ grid.addEventListener('dzg-selection-changed', (e) => {
 
 <LiveDemo
   height={300}
-  settings={{ label: 'Sachets de graines', selection: { mode: 'multi', checkbox: true } }}
+  settings={{ label: 'Sachets de graines', selection: { mode: 'multi', checkbox: true, click: true } }}
   columns={[
     { id: 'plant', header: 'Plante', flex: 1 },
     { id: 'packets', header: 'Sachets', type: 'number', width: 120 },
@@ -123,8 +123,9 @@ grid.addEventListener('dzg-selection-changed', (e) => {
 />
 
 - `mode` : `none`, `single` ou `multi`. `checkbox: true` ajoute une colonne de cases avec une case dans le titre ;
-  `click: false` laisse les clics au seul focus (sélection par Espace ou par la case).
-- Un clic sélectionne une ligne, Ctrl/Cmd+clic bascule, Maj+clic sélectionne une suite dans l’ordre de l’écran ; Espace
+  `click: true` permet au clic de sélectionner ; sans lui, un clic ne fait que déplacer le focus (sélection par
+  Espace ou par la case).
+- Avec `click: true`, un clic sélectionne une ligne, Ctrl/Cmd+clic bascule, Maj+clic sélectionne une suite dans l’ordre de l’écran ; Espace
   bascule la ligne qui a le focus, Ctrl+A sélectionne tout. La sélection survit au tri et au filtrage.
 - La sélection contient des **clés de ligne**, pas vos identifiants. `idOfDataKey(key)` rend l’identifiant ; en
   Angular, `selectedIds(controller)` rend les identifiants de toute la sélection avec la requête.

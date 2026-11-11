@@ -1,0 +1,99 @@
+---
+title: "parts"
+description: "Your own drawing for a cell, a header, a tooltip, the overlay: parts by name."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+When the grid's text is not enough — a badge, a bar, a button in a cell — your code draws it, as a part.
+
+<OptionFacts setting="parts" />
+
+## What it does
+
+A record of parts by name, one registry per grid. Each part is `definePart(slot, { mount })`: `mount(host, context)`
+writes its own DOM into the element the grid gives and returns `{ update, destroy }`. The grid never writes HTML
+strings and keeps the cell's role, focus and keys.
+
+A column finds its part by the name it gives (`ui: { cell: 'jar' }`, `ui.header`, `ui.tooltip`), else by
+`slot.type` — a part named `'cell.number'` draws every number column — else the grid's own text. Header, tooltip,
+overlay and busy parts need `slots()` from `@dzgrid/dom/slots`. Ready-made cells are in `@dzgrid/dom/parts` (`badge`,
+`cellBoolean`); in Angular, a component class in `ui.cell` is a part too.
+
+A part mounts once into a cell and is updated as the cell shows other rows. A name nobody registered is an
+`unknown-part` error, told once, and the column keeps its text. A part that throws costs its cell for that row only:
+the cell stays empty and the error is reported. Giving a new record with `update()` resolves every column again.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, definePart } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Bee = { id: string; hive: string; honey: number };
+
+const jar = definePart('cell', {
+  mount(host, c) {
+    const span = host.ownerDocument.createElement('span');
+    host.append(span);
+    const draw = (n: typeof c) => { span.textContent = n.value == null ? '' : `${n.text} kg`; };
+    draw(c);
+    return { update: draw, destroy: () => span.remove() };
+  },
+});
+
+createGrid<Bee>(document.getElementById('hives')!, {
+  rows: [{ id: 'h1', hive: 'Clover hill', honey: 12.5 }],
+  columns: [{ id: 'hive', header: 'Hive' }, { id: 'honey', header: 'Honey', type: 'number', ui: { cell: 'jar' } }],
+  getRowId: (b) => b.id,
+  messages: EN,
+  parts: { jar },
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { definePart } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Bee = { id: string; hive: string; honey: number };
+
+const jar = definePart('cell', {
+  mount(host, c) {
+    const span = host.ownerDocument.createElement('span');
+    host.append(span);
+    const draw = (n: typeof c) => { span.textContent = n.value == null ? '' : `${n.text} kg`; };
+    draw(c);
+    return { update: draw, destroy: () => span.remove() };
+  },
+});
+
+@Component({
+  selector: 'app-hives',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [parts]="parts" />`,
+})
+export class Hives {
+  readonly rows: Bee[] = [{ id: 'h1', hive: 'Clover hill', honey: 12.5 }];
+  readonly columns: DzgColumnOrGroup<Bee>[] = [{ id: 'hive', header: 'Hive' }, { id: 'honey', header: 'Honey', type: 'number', ui: { cell: 'jar' } }];
+  readonly rowId = (b: Bee) => b.id;
+  readonly messages = EN;
+  readonly parts = { jar };
+}
+```
+
+</Fragment>
+</CodeTabs>
+
+## See also
+
+- [Columns](../../guides/columns/#classes-tooltips-custom-cells) — parts in columns, Angular components.
+- [`overlay`](../overlay/), [`busy`](../busy/) — what an overlay or busy part replaces.

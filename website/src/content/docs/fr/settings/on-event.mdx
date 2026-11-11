@@ -1,0 +1,112 @@
+---
+title: "onEvent"
+description: "Une fonction qui entend chaque événement de la grille."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Ce que la grille dit à l’application : un clic, un nouveau tri, une sélection, un problème.
+
+<OptionFacts setting="onEvent" />
+
+## Ce qu’il fait
+
+Une fonction qui reçoit chaque événement de la grille ; aiguillez sur `type`. Chaque événement dit qui l’a causé
+(`source` : l’utilisateur, votre code, le serveur) et porte ce dont il parle. Les principaux :
+
+| Événement | Quand |
+|---|---|
+| `rowClicked`, `cellClicked` | Une ligne ou une cellule est cliquée. |
+| `selectionChanged` | La sélection change : la sélection, son nombre. |
+| `sortChanged`, `filterChanged`, `quickChanged`, `pageChanged` | Le tri, les filtres, la recherche, la page. |
+| `columnsChanged`, `columnResized`, `pinnedChanged` | Des colonnes déplacées, redimensionnées, montrées, cachées, figées. |
+| `focusChanged` | Le focus passe à une autre cellule. |
+| `cellEdited`, `saveFailed` | Une valeur est modifiée ; un enregistrement a échoué. |
+| `fetchFailed` | La requête d’un serveur a échoué. |
+| `problems` | Une chose donnée à la grille a été refusée : une mauvaise colonne, un mauvais filtre, une réponse illisible. |
+
+La liste complète est le type `GridEvent`, dans la [référence de l’API](../../api/). En Angular, chaque événement est
+une sortie de `<dz-grid>` du même nom, `(selectionChanged)` ; le Web Component l’envoie comme événement DOM, `dzg-` et
+le nom en minuscules à tirets (`dzg-selection-changed`). Journalisez `problems` pendant le développement : c’est là
+que chaque refus est dit.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tea = { id: string; name: string };
+
+createGrid<Tea>(document.getElementById('thes')!, {
+  rows: [{ id: 't1', name: 'Oolong fumé' }],
+  columns: [{ id: 'name', header: 'Thé' }],
+  getRowId: (t) => t.id,
+  messages: FR,
+  onEvent: (e) => {
+    if (e.type === 'rowClicked' && e.row.kind === 'data') console.log('cliqué', e.row.data.name);
+    if (e.type === 'sortChanged') console.log('trié par', e.sort);
+    if (e.type === 'problems') for (const p of e.problems) console.warn('dzgrid', p.code, p.path, p.detail);
+  },
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import type { Problem } from '@dzgrid/core';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tea = { id: string; name: string };
+
+@Component({
+  selector: 'app-thes',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" (problems)="onProblems($event)" />`,
+})
+export class Teas {
+  readonly rows: Tea[] = [{ id: 't1', name: 'Oolong fumé' }];
+  readonly columns: DzgColumnOrGroup<Tea>[] = [{ id: 'name', header: 'Thé' }];
+  readonly rowId = (t: Tea) => t.id;
+  readonly messages = FR;
+  onProblems(problems: readonly Problem[]): void {
+    for (const p of problems) console.warn('dzgrid', p.code, p.path, p.detail);
+  }
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import type { GridEvent } from '@dzgrid/core';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tea = { id: string; name: string };
+
+const grid = document.querySelector<DzGridElement<Tea>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Thé' }];
+grid.getRowId = (t) => t.id;
+grid.messages = FR;
+grid.rows = [{ id: 't1', name: 'Oolong fumé' }];
+grid.addEventListener('dzg-sort-changed', (e) => {
+  const event = (e as CustomEvent<GridEvent<Tea>>).detail;
+  if (event.type === 'sortChanged') console.log('trié par', event.sort);
+});
+```
+
+</Fragment>
+</CodeTabs>
+
+## Voir aussi
+
+- [Prise en main](../../getting-started/typescript/#événements).

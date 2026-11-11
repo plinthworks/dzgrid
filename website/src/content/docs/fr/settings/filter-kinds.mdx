@@ -1,0 +1,76 @@
+---
+title: "filterKinds"
+description: "Vos propres sortes de filtre de colonne, pour le navigateur et pour un serveur."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Des filtres que la grille ne fournit pas — un intervalle sur une note, « à moins de 5 km » — écrits pour vos
+propres données.
+
+<OptionFacts setting="filterKinds" />
+
+## Ce qu’il fait
+
+Chaque sorte est un simple objet, inscrit une fois auprès de la grille. Un filtre de colonne la nomme alors :
+`{ type: 'custom', kind: 'between', state: { min: 3, max: 7 } }`.
+
+- `name` : ce que nomme un filtre. Non vide, sans point, pas un nom déjà pris (`text`, `number`, `day`, `instant`,
+  `boolean`, `set`, `custom`, `combined`).
+- `types` : les types de colonne qu’elle accepte ; tous s’il manque.
+- `read(state)` : vérifie un état (de votre code, d’une vue enregistrée, d’une adresse) et le rend rangé, ou
+  `'invalid'`.
+- `active(state)` : faux pour un état à moitié saisi — rien ne filtre, rien n’est dit.
+- `test(state, ctx, context)` : la règle du navigateur, une fonction de `(value, row)` ; `context` est le
+  [`context`](../context/) de la grille.
+- `wire(state, ctx, zone, context)` : ce que reçoit un serveur ; l’état lui-même s’il manque.
+
+Où elle s’exécute suit [`operations`](../operations/) : dans le navigateur, une sorte demande `test` (sinon le filtre
+est écarté, `filter-needs-server`) ; sur un serveur, seulement `wire`. Une sorte inconnue, une colonne du mauvais
+type, un état refusé ou une fonction qui lève une erreur : le filtre est ignoré et signalé (`invalid-filter`), jamais
+un plantage. La fenêtre et la case flottante d’une sorte à vous sont des parties que vous donnez (`filter.<name>`,
+`floating.<name>` dans [`parts`](../parts/)).
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import type { FilterKind } from '@dzgrid/core';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Dive = { id: string; site: string; depth: number };
+type Range = { min: number; max: number };
+
+const between: FilterKind<Range, number> = {
+  name: 'between',
+  types: ['number'],
+  read: (s) => {
+    const r = s as Partial<Range> | null;
+    return r && typeof r.min === 'number' && typeof r.max === 'number' ? { min: r.min, max: r.max } : 'invalid';
+  },
+  active: (s) => s.min <= s.max,
+  test: (s) => (value) => value !== null && value >= s.min && value <= s.max,
+};
+
+const grid = createGrid<Dive>(document.getElementById('plongees')!, {
+  rows: [{ id: 'd1', site: 'Trou bleu', depth: 18 }],
+  columns: [{ id: 'site', header: 'Site' }, { id: 'depth', header: 'Profondeur (m)', type: 'number' }],
+  getRowId: (d) => d.id,
+  messages: FR,
+  filterKinds: [between],
+});
+
+grid.kernel.dispatch({ type: 'filter.column', column: 'depth', filter: { type: 'custom', kind: 'between', state: { min: 10, max: 20 } } }, 'api');
+```
+
+</Fragment>
+</CodeTabs>
+
+## Voir aussi
+
+- [`operations`](../operations/) — où s’exécutent les filtres.
+- [Trier, filtrer, rechercher](../../guides/sort-filter-search/#filtres-de-colonne).

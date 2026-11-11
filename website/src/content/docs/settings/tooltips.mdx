@@ -1,0 +1,118 @@
+---
+title: "tooltips"
+description: "How long the pointer rests before a tooltip shows."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+The wait before a tooltip appears under the pointer.
+
+<OptionFacts setting="tooltips" />
+
+## What it does
+
+`delayMs`: how long the pointer rests on a header or a cell before its tooltip shows, 500 ms by default. The
+keyboard does not wait: a tooltip shows as soon as the focus reaches its cell.
+
+The text comes from the columns, never guessed from the cell: `tooltip(value, row, context)` for a cell,
+`headerTooltip` for a header. The pointer can move onto the tooltip without it going; Escape closes it. It stays
+inside the window, never covers what it describes, and opens toward the start of the line in right to left. The
+focused cell points to it with `aria-describedby` while it shows.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Peak = { id: string; name: string; metres: number };
+
+const grid = createGrid<Peak>(document.getElementById('peaks')!, {
+  rows: [{ id: 'p1', name: 'Grey Tooth', metres: 3120 }],
+  columns: [
+    { id: 'name', header: 'Peak', tooltip: (_v, p) => `${p.name}, ${p.metres} m` },
+    { id: 'metres', header: 'Height', type: 'number', headerTooltip: 'Height above sea level, in metres' },
+  ],
+  getRowId: (p) => p.id,
+  messages: EN,
+  tooltips: { delayMs: 200 },
+});
+
+grid.update({ tooltips: { delayMs: 800 } });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Peak = { id: string; name: string; metres: number };
+
+@Component({
+  selector: 'app-peaks',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [tooltips]="{ delayMs: 200 }" />`,
+})
+export class Peaks {
+  readonly rows: Peak[] = [{ id: 'p1', name: 'Grey Tooth', metres: 3120 }];
+  readonly columns: DzgColumnOrGroup<Peak>[] = [
+    { id: 'name', header: 'Peak', tooltip: (_v, p) => `${p.name}, ${p.metres} m` },
+    { id: 'metres', header: 'Height', type: 'number', headerTooltip: 'Height above sea level, in metres' },
+  ];
+  readonly rowId = (p: Peak) => p.id;
+  readonly messages = EN;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Peak = { id: string; name: string; metres: number };
+
+const grid = document.querySelector<DzGridElement<Peak>>('dz-grid')!;
+grid.columns = [
+  { id: 'name', header: 'Peak', tooltip: (_v, p) => `${p.name}, ${p.metres} m` },
+  { id: 'metres', header: 'Height', type: 'number', headerTooltip: 'Height above sea level, in metres' },
+];
+grid.getRowId = (p) => p.id;
+grid.messages = EN;
+grid.settings = { tooltips: { delayMs: 200 } };
+grid.rows = [{ id: 'p1', name: 'Grey Tooth', metres: 3120 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Peaks', tooltips: { delayMs: 200 } }}
+  columns={[
+    { id: 'name', header: 'Peak', flex: 1 },
+    { id: 'metres', header: 'Height', type: 'number', width: 140, headerTooltip: 'Height above sea level, in metres' },
+  ]}
+  rows={[
+    { id: 'p1', name: 'Grey Tooth', metres: 3120 },
+    { id: 'p2', name: 'Cloud Saddle', metres: 2875 },
+    { id: 'p3', name: 'Old Shepherd', metres: 2410 },
+  ]}
+  caption="Rest the pointer on the Height header: its tooltip after 200 ms."
+/>
+
+## See also
+
+- [Columns](../../guides/columns/#classes-tooltips-custom-cells) — `tooltip` and `headerTooltip`.

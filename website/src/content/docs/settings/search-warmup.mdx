@@ -1,0 +1,97 @@
+---
+title: "searchWarmup"
+description: "Prepare the quick search in idle time, so the first keystroke is instant."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+For a large grid with a search box: the first letter typed answers at once.
+
+<OptionFacts setting="searchWarmup" />
+
+## What it does
+
+The quick search reads every row's text once, then keeps it. By default (`'off'`) it does so in idle time once a search box
+takes the focus — a reader who types at once may still wait on a large grid. `'idle'` does it after each load, in
+the browser's idle time, without holding up the page: the first keystroke then finds everything ready.
+
+The cost is memory: the prepared texts stay held, about 600 bytes a row for ten text columns. Leave it off for a
+small grid or a page with no search box. It only matters with the search feature (`quickSearch()` from
+`@dzgrid/dom/search`), and in the browser: a server's search reads nothing.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { quickSearch } from '@dzgrid/dom/search';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Cloud = { id: string; name: string; height: number };
+
+const search = quickSearch();
+createGrid<Cloud>(document.getElementById('clouds')!, {
+  rows: [{ id: 'n1', name: 'Cirrus feather', height: 9000 }],
+  columns: [{ id: 'name', header: 'Cloud' }, { id: 'height', header: 'Height (m)', type: 'number' }],
+  getRowId: (c) => c.id,
+  messages: EN,
+  searchWarmup: 'idle',
+  features: [search],
+});
+search.bind(document.querySelector<HTMLInputElement>('#cloud-search')!);
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { quickSearch } from '@dzgrid/dom/search';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Cloud = { id: string; name: string; height: number };
+
+@Component({
+  selector: 'app-clouds',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features" searchWarmup="idle" />`,
+})
+export class Clouds {
+  readonly rows: Cloud[] = [{ id: 'n1', name: 'Cirrus feather', height: 9000 }];
+  readonly columns: DzgColumnOrGroup<Cloud>[] = [{ id: 'name', header: 'Cloud' }, { id: 'height', header: 'Height (m)', type: 'number' }];
+  readonly rowId = (c: Cloud) => c.id;
+  readonly messages = EN;
+  readonly features = [quickSearch()];
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { quickSearch } from '@dzgrid/dom/search';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Cloud = { id: string; name: string; height: number };
+
+const grid = document.querySelector<DzGridElement<Cloud>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Cloud' }, { id: 'height', header: 'Height (m)', type: 'number' }];
+grid.getRowId = (c) => c.id;
+grid.messages = EN;
+grid.features = [quickSearch()];
+grid.settings = { searchWarmup: 'idle' };
+grid.rows = [{ id: 'n1', name: 'Cirrus feather', height: 9000 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## See also
+
+- [Sort, filter, search](../../guides/sort-filter-search/#quick-search).

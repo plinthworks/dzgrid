@@ -1,0 +1,107 @@
+---
+title: "features"
+description: "The optional features the grid is made with: filters, pages, editing, export…"
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+What the grid does beyond showing, sorting and selecting rows: each feature is added on purpose, and a page loads
+only the code of those it uses.
+
+<OptionFacts setting="features" />
+
+## What it does
+
+A list of features, each made by a function from its own entry: `filters()` from `@dzgrid/dom/filters`,
+`pagination()` from `@dzgrid/dom/pagination`, `spans()`, `edit()`, `csvExport()`… The base alone shows rows, sorts
+them, selects them and moves the focus; every other gesture comes with its feature. Every feature has its page under
+[Features](../../features/).
+
+A feature that shows text needs its bundle merged into [`messages`](../messages/): without it, the grid is not made
+and a `TypeError` names the feature and the missing keys. A feature that draws more than the base usually has a sheet
+in `@dzgrid/theme` (`menu.css`, `columns.css`…). A setting or a column option that asks for a feature the grid lacks
+is told as a `missing-feature` problem, naming it.
+
+The list is read once, when the grid is made: `update()` refuses a new one.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters';
+import { pagination } from '@dzgrid/dom/pagination';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { EN_PAGINATION } from '@dzgrid/dom/locales/en-pagination';
+
+type Plant = { id: number; name: string; height: number };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text, ...EN_PAGINATION.text } };
+
+createGrid<Plant>(document.getElementById('plants')!, {
+  rows: [{ id: 1, name: 'Foxglove', height: 120 }],
+  columns: [{ id: 'name', header: 'Plant' }, { id: 'height', header: 'Height (cm)', type: 'number' }],
+  getRowId: (p) => p.id,
+  messages,
+  pagination: { pageSize: 25 },
+  features: [filters({ floating: true }), pagination()],
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { filters } from '@dzgrid/dom/filters';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+
+type Plant = { id: number; name: string; height: number };
+
+@Component({
+  selector: 'app-plants',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features" />`,
+})
+export class Plants {
+  readonly rows: Plant[] = [{ id: 1, name: 'Foxglove', height: 120 }];
+  readonly columns: DzgColumnOrGroup<Plant>[] = [{ id: 'name', header: 'Plant' }, { id: 'height', header: 'Height (cm)', type: 'number' }];
+  readonly rowId = (p: Plant) => p.id;
+  readonly messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+  readonly features = [filters({ floating: true })];
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { filters } from '@dzgrid/dom/filters';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+
+type Plant = { id: number; name: string; height: number };
+
+const grid = document.querySelector<DzGridElement<Plant>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Plant' }, { id: 'height', header: 'Height (cm)', type: 'number' }];
+grid.getRowId = (p) => p.id;
+grid.messages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+grid.features = [filters({ floating: true })];
+grid.rows = [{ id: 1, name: 'Foxglove', height: 120 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## See also
+
+- [Features](../../features/) — every feature, its options, its texts, its sheet.
+- [Getting started](../../getting-started/typescript/#features-and-their-texts).

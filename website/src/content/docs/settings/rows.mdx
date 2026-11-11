@@ -1,0 +1,102 @@
+---
+title: "rows"
+description: "The rows the grid shows, when the browser holds them all."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+The rows, when your application has them all in the browser — an array, or anything iterable.
+
+<OptionFacts setting="rows" />
+
+## What it does
+
+Any iterable of your objects: an array, a `Set`, a generator. The grid reads each value through the columns and
+identifies each row with [`getRowId`](../get-row-id/); it never changes your objects. Sorting, filtering, the search
+and the pages then run in the browser.
+
+To change the rows, give a new array with `update({ rows })`, never the same one changed: the rows are matched by
+their id, so the ones still there keep their focus, their selection and their open state, and a value that changed
+can flash. For a few rows at a time, a transaction is cheaper: `grid.kernel.rows.applyTransaction({ add, patch,
+remove })`. With [`sameRow`](../same-row/), a reload keeps the old object of a row that did not really change.
+
+A row whose id is missing or repeats is left out and told (`invalid-row-id`, `duplicate-row-id`). Rows that live on a
+server come through [`source`](../source/) instead.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Bird = { id: string; name: string; seen: number };
+
+let birds: Bird[] = [{ id: 'b1', name: 'Robin', seen: 3 }];
+
+const grid = createGrid<Bird>(document.getElementById('birds')!, {
+  rows: birds,
+  columns: [{ id: 'name', header: 'Bird' }, { id: 'seen', header: 'Seen', type: 'number' }],
+  getRowId: (b) => b.id,
+  messages: EN,
+});
+
+birds = [...birds, { id: 'b2', name: 'Wren', seen: 1 }];
+grid.update({ rows: birds });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Bird = { id: string; name: string; seen: number };
+
+@Component({
+  selector: 'app-birds',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="birds()" [columns]="columns" [getRowId]="rowId" [messages]="messages" />
+    <button type="button" (click)="add()">Add a wren</button>`,
+})
+export class Birds {
+  readonly birds = signal<Bird[]>([{ id: 'b1', name: 'Robin', seen: 3 }]);
+  readonly columns: DzgColumnOrGroup<Bird>[] = [{ id: 'name', header: 'Bird' }, { id: 'seen', header: 'Seen', type: 'number' }];
+  readonly rowId = (b: Bird) => b.id;
+  readonly messages = EN;
+  add(): void {
+    this.birds.update((list) => [...list, { id: 'b2', name: 'Wren', seen: 1 }]);
+  }
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Bird = { id: string; name: string; seen: number };
+
+const grid = document.querySelector<DzGridElement<Bird>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Bird' }, { id: 'seen', header: 'Seen', type: 'number' }];
+grid.getRowId = (b) => b.id;
+grid.messages = EN;
+grid.rows = [{ id: 'b1', name: 'Robin', seen: 3 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## See also
+
+- [`getRowId`](../get-row-id/) — how a row is told apart.
+- [`source`](../source/) — rows from a server.
+- [Getting started](../../getting-started/typescript/#updating-and-driving-the-grid).

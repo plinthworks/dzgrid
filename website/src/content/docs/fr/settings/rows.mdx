@@ -1,0 +1,103 @@
+---
+title: "rows"
+description: "Les lignes que montre la grille, quand le navigateur les a toutes."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Les lignes, quand votre application les a toutes dans le navigateur — un tableau, ou tout ce qui s’itère.
+
+<OptionFacts setting="rows" />
+
+## Ce qu’il fait
+
+N’importe quel itérable de vos objets : un tableau, un `Set`, un générateur. La grille lit chaque valeur par les
+colonnes et reconnaît chaque ligne par [`getRowId`](../get-row-id/) ; elle ne modifie jamais vos objets. Le tri, les
+filtres, la recherche et les pages se font alors dans le navigateur.
+
+Pour changer les lignes, donnez un nouveau tableau par `update({ rows })`, jamais le même modifié : les lignes sont
+reconnues par leur identifiant, celles qui restent gardent leur focus, leur sélection et leur ouverture, et une valeur
+qui a changé peut briller. Pour quelques lignes à la fois, une transaction coûte moins :
+`grid.kernel.rows.applyTransaction({ add, patch, remove })`. Avec [`sameRow`](../same-row/), un rechargement garde
+l’ancien objet d’une ligne qui n’a pas vraiment changé.
+
+Une ligne dont l’identifiant manque ou se répète est écartée et signalée (`invalid-row-id`, `duplicate-row-id`). Des
+lignes qui vivent sur un serveur passent plutôt par [`source`](../source/).
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Bird = { id: string; name: string; seen: number };
+
+let birds: Bird[] = [{ id: 'b1', name: 'Rouge-gorge', seen: 3 }];
+
+const grid = createGrid<Bird>(document.getElementById('oiseaux')!, {
+  rows: birds,
+  columns: [{ id: 'name', header: 'Oiseau' }, { id: 'seen', header: 'Vus', type: 'number' }],
+  getRowId: (b) => b.id,
+  messages: FR,
+});
+
+birds = [...birds, { id: 'b2', name: 'Troglodyte', seen: 1 }];
+grid.update({ rows: birds });
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Bird = { id: string; name: string; seen: number };
+
+@Component({
+  selector: 'app-oiseaux',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="birds()" [columns]="columns" [getRowId]="rowId" [messages]="messages" />
+    <button type="button" (click)="add()">Ajouter un troglodyte</button>`,
+})
+export class Birds {
+  readonly birds = signal<Bird[]>([{ id: 'b1', name: 'Rouge-gorge', seen: 3 }]);
+  readonly columns: DzgColumnOrGroup<Bird>[] = [{ id: 'name', header: 'Oiseau' }, { id: 'seen', header: 'Vus', type: 'number' }];
+  readonly rowId = (b: Bird) => b.id;
+  readonly messages = FR;
+  add(): void {
+    this.birds.update((list) => [...list, { id: 'b2', name: 'Troglodyte', seen: 1 }]);
+  }
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Bird = { id: string; name: string; seen: number };
+
+const grid = document.querySelector<DzGridElement<Bird>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Oiseau' }, { id: 'seen', header: 'Vus', type: 'number' }];
+grid.getRowId = (b) => b.id;
+grid.messages = FR;
+grid.rows = [{ id: 'b1', name: 'Rouge-gorge', seen: 3 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Voir aussi
+
+- [`getRowId`](../get-row-id/) — comment une ligne est reconnue.
+- [`source`](../source/) — des lignes venues d’un serveur.
+- [Prise en main](../../getting-started/typescript/#mettre-à-jour-et-piloter-la-grille).

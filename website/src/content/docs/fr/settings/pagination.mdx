@@ -1,0 +1,128 @@
+---
+title: "pagination"
+description: "Montrer les lignes page par page : la taille d’une page et les tailles proposées."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Les lignes page par page, plutôt qu’en une longue liste qui défile.
+
+<OptionFacts setting="pagination" />
+
+## Ce qu’il fait
+
+`pageSize` : le nombre de lignes d’une page, 50 par défaut. `pageSizes` : les tailles que propose la pagination,
+`[25, 50, 100]` par défaut ; la taille en cours est ajoutée si la liste ne l’a pas. Chacune doit être un nombre
+entier à partir de 1 : toute autre valeur est signalée (`invalid-page`) et la valeur par défaut est prise.
+
+Avec des lignes dans le navigateur, le réglage active les pages : chaque page est une part des lignes filtrées et
+triées. Avec une [`source`](../source/), le serveur envoie une page par requête. La fonction `pagination()` de
+`@dzgrid/dom/pagination` dessine la pagination sous les lignes — première, précédente, « Page 2 sur 5 »,
+suivante, dernière, et la liste des tailles — avec ses textes `-pagination` ; sans elle, les pages marchent encore
+depuis le code (`page.go`, `page.size`) et un avertissement `missing-feature` dit qu’il manque la pagination. Le
+réglage est lu une fois : `update()` refuse un changement.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { pagination } from '@dzgrid/dom/pagination';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_PAGINATION } from '@dzgrid/dom/locales/fr-pagination';
+
+type Shell = { id: string; name: string; beach: string };
+
+const rows: Shell[] = Array.from({ length: 230 }, (_, i) => ({ id: `s${i}`, name: `Coquillage ${i + 1}`, beach: i % 2 ? 'Nord' : 'Sud' }));
+
+createGrid<Shell>(document.getElementById('coquillages')!, {
+  rows,
+  columns: [{ id: 'name', header: 'Coquillage' }, { id: 'beach', header: 'Plage' }],
+  getRowId: (s) => s.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_PAGINATION.text } },
+  pagination: { pageSize: 50, pageSizes: [25, 50, 100] },
+  features: [pagination()],
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { pagination } from '@dzgrid/dom/pagination';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_PAGINATION } from '@dzgrid/dom/locales/fr-pagination';
+
+type Shell = { id: string; name: string; beach: string };
+
+@Component({
+  selector: 'app-coquillages',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features" [pagination]="{ pageSize: 50 }" />`,
+})
+export class Shells {
+  readonly rows: Shell[] = Array.from({ length: 230 }, (_, i) => ({ id: `s${i}`, name: `Coquillage ${i + 1}`, beach: i % 2 ? 'Nord' : 'Sud' }));
+  readonly columns: DzgColumnOrGroup<Shell>[] = [{ id: 'name', header: 'Coquillage' }, { id: 'beach', header: 'Plage' }];
+  readonly rowId = (s: Shell) => s.id;
+  readonly messages = { ...FR, text: { ...FR.text, ...FR_PAGINATION.text } };
+  readonly features = [pagination()];
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { pagination } from '@dzgrid/dom/pagination';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_PAGINATION } from '@dzgrid/dom/locales/fr-pagination';
+
+type Shell = { id: string; name: string; beach: string };
+
+const grid = document.querySelector<DzGridElement<Shell>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Coquillage' }, { id: 'beach', header: 'Plage' }];
+grid.getRowId = (s) => s.id;
+grid.messages = { ...FR, text: { ...FR.text, ...FR_PAGINATION.text } };
+grid.features = [pagination()];
+grid.settings = { pagination: { pageSize: 50 } };
+grid.rows = Array.from({ length: 230 }, (_, i) => ({ id: `s${i}`, name: `Coquillage ${i + 1}`, beach: i % 2 ? 'Nord' : 'Sud' }));
+```
+
+</Fragment>
+</CodeTabs>
+
+## Démo
+
+<LiveDemo
+  height={340}
+  settings={{ label: 'Coquillages', pagination: { pageSize: 5, pageSizes: [5, 10] } }}
+  features={['pagination']}
+  columns={[
+    { id: 'name', header: 'Coquillage', flex: 1 },
+    { id: 'beach', header: 'Plage', width: 140 },
+  ]}
+  rows={[
+    { id: 's1', name: 'Porcelaine', beach: 'Nord' },
+    { id: 's2', name: 'Coque', beach: 'Sud' },
+    { id: 's3', name: 'Bulot', beach: 'Nord' },
+    { id: 's4', name: 'Patelle', beach: 'Sud' },
+    { id: 's5', name: 'Couteau', beach: 'Nord' },
+    { id: 's6', name: 'Coquille Saint-Jacques', beach: 'Sud' },
+    { id: 's7', name: 'Bigorneau', beach: 'Nord' },
+    { id: 's8', name: 'Telline', beach: 'Sud' },
+  ]}
+  caption="Cinq lignes par page ; la pagination sous les lignes."
+/>
+
+## Voir aussi
+
+- [`source`](../source/) — des pages envoyées par un serveur.
+- [`operations`](../operations/) — où les pages sont découpées.

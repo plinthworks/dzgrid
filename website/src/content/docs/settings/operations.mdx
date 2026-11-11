@@ -1,0 +1,65 @@
+---
+title: "operations"
+description: "Where filtering, search, sorting and paging run: the browser or the server."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+With a [`source`](../source/), which of the four steps your server does and which the browser does.
+
+<OptionFacts setting="operations" />
+
+## What it does
+
+Four steps, always in this order: `filter` and `quick` (the search), then `sort`, then `page`. Each runs on
+`'client'` (the browser) or `'server'`; `page` can also be `'off'`, one long list with no pager.
+
+- Left out: with [`rows`](../rows/), everything in the browser and no pages; with a source, all four on the server.
+- `'server'`: all four on the server. `'client'`: all four in the browser — with a source, the server sends its rows
+  once and the browser pages them.
+- An object places each step: `{ filter: 'server', sort: 'client', page: 'off' }`. A step left out follows the pages:
+  server pages, server; otherwise the browser.
+
+One rule holds: **server pages mean filter, search and sort on the server too** — sorting one page of 50 rows in the
+browser would present them as the whole result. With pages off or in the browser and a step on the server, the server
+sends everything its part matches and the browser does the rest; a change in the browser then costs no request.
+
+A placement that breaks a rule is never silent: an `invalid-operations` error, and the only sensible reading taken (a
+browser step under server pages is read as server; a server step without a source as the browser). The setting is
+read once: to change it, make the grid again.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Plant = { id: string; name: string; family: string };
+
+async function load(req: DataRequest): Promise<DataResponse<Plant>> {
+  const answer = await fetch('/api/plants', { method: 'POST', body: JSON.stringify({ filter: req.filter }) });
+  return answer.json();   // every plant the filter keeps: { rows, total }
+}
+
+createGrid<Plant>(document.getElementById('plants')!, {
+  source: sourceRows<Plant>({ fetch: load }),
+  columns: [{ id: 'name', header: 'Plant' }, { id: 'family', header: 'Family' }],
+  getRowId: (p) => p.id,
+  messages: EN,
+  operations: { filter: 'server', quick: 'client', sort: 'client', page: 'off' },
+});
+```
+
+</Fragment>
+</CodeTabs>
+
+## See also
+
+- [`source`](../source/) — the rows from a server.
+- [`pagination`](../pagination/) — the page size.
+- [Server data](../../guides/server-data/#who-does-what).

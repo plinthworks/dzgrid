@@ -252,7 +252,7 @@ groupes d’en-têtes : tournée et mise en miroir comme celle par défaut), `su
 remplissage. Refusé, avec la marque par défaut gardée et `invalid-setting` signalé : tout ce qui n’est pas un `<svg>`
 fait de formes, groupes, dégradés, `use` et `title` ; un `<script>`, `<style>` ou `<foreignObject>` ; un attribut
 `on…` ; un lien ou un `url()` qui sort de l’icône (seulement `#…`) ; plus de 20 000 caractères. Dessinée comme une
-image `data:` : une CSP sans `img-src data:` garde les marques par défaut. Avec `injectStyles: false`, chargez aussi
+image `data:` : une CSP doit permettre `img-src data:`. Avec `injectStyles: false`, chargez aussi
 `ICONS_CSS` de `@dzgrid/dom/theme`.
 
 ### Lignes alternées, traits, le bord figé

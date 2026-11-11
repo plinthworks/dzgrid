@@ -1,0 +1,67 @@
+---
+title: "operations"
+description: "Où se font les filtres, la recherche, le tri et les pages : le navigateur ou le serveur."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Avec une [`source`](../source/), quelles étapes fait votre serveur et lesquelles fait le navigateur.
+
+<OptionFacts setting="operations" />
+
+## Ce qu’il fait
+
+Quatre étapes, toujours dans cet ordre : `filter` et `quick` (la recherche), puis `sort`, puis `page`. Chacune se fait
+sur `'client'` (le navigateur) ou `'server'` ; `page` peut aussi valoir `'off'`, une longue liste sans pagination.
+
+- Sans lui : avec [`rows`](../rows/), tout dans le navigateur et pas de pages ; avec une source, les quatre sur le
+  serveur.
+- `'server'` : les quatre sur le serveur. `'client'` : les quatre dans le navigateur — avec une source, le serveur
+  envoie ses lignes une fois et le navigateur les découpe en pages.
+- Un objet place chaque étape : `{ filter: 'server', sort: 'client', page: 'off' }`. Une étape absente suit les
+  pages : pages sur le serveur, serveur ; sinon le navigateur.
+
+Une règle tient : **des pages sur le serveur veulent les filtres, la recherche et le tri sur le serveur aussi** — trier
+dans le navigateur une page de 50 lignes les ferait passer pour le résultat entier. Avec des pages absentes ou dans le
+navigateur et une étape sur le serveur, le serveur envoie tout ce que sa part retient et le navigateur fait le reste ;
+un changement dans le navigateur ne coûte alors aucune requête.
+
+Un placement qui enfreint une règle n’est jamais tu : une erreur `invalid-operations`, et la seule lecture sensée est
+prise (une étape du navigateur sous des pages du serveur est lue serveur ; une étape serveur sans source, navigateur).
+Le réglage est lu une fois : pour le changer, refaites la grille.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { sourceRows, type DataRequest, type DataResponse } from '@dzgrid/core/server';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Plant = { id: string; name: string; family: string };
+
+async function load(req: DataRequest): Promise<DataResponse<Plant>> {
+  const answer = await fetch('/api/plants', { method: 'POST', body: JSON.stringify({ filter: req.filter }) });
+  return answer.json();   // chaque plante que garde le filtre : { rows, total }
+}
+
+createGrid<Plant>(document.getElementById('plantes')!, {
+  source: sourceRows<Plant>({ fetch: load }),
+  columns: [{ id: 'name', header: 'Plante' }, { id: 'family', header: 'Famille' }],
+  getRowId: (p) => p.id,
+  messages: FR,
+  operations: { filter: 'server', quick: 'client', sort: 'client', page: 'off' },
+});
+```
+
+</Fragment>
+</CodeTabs>
+
+## Voir aussi
+
+- [`source`](../source/) — les lignes d’un serveur.
+- [`pagination`](../pagination/) — la taille des pages.
+- [Données du serveur et défilement infini](../../guides/server-data/#qui-fait-quoi).

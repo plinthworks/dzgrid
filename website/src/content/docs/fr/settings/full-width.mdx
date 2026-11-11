@@ -1,0 +1,109 @@
+---
+title: "fullWidth"
+description: "Des lignes dessinées en une seule cellule sur toute la largeur : un titre, une note."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Des lignes qui ne sont pas des enregistrements mais des titres ou des notes entre eux : une cellule à travers la
+grille.
+
+<OptionFacts setting="fullWidth" />
+
+## Ce qu’il fait
+
+Une fonction consultée pour chaque ligne : `true` la met sur toute la largeur, un objet `{ part }` nomme la partie qui
+la dessine, une valeur fausse la laisse normale. Une ligne pleine largeur montre la valeur de la première colonne
+visible — mettez-y le titre, par un `value` au besoin. Sa cellule colle au début de la vue et reste lisible quand la
+grille défile de côté ; la case de sélection, s’il y en a une, reste à côté. Tout son texte est dans la cellule pour
+les lecteurs d’écran.
+
+Il demande `spans()` de `@dzgrid/dom/spans` : sans elle, le réglage est signalé comme fonction manquante et chaque
+ligne reste normale. Autre chose qu’une fonction est refusé (`invalid-span`). Il n’est pas offert à côté d’un arbre
+(`tree()`) : un problème `unsupported-combination`, et aucune ligne n’est pleine largeur.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { spans } from '@dzgrid/dom/spans';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Line = { id: string; kind: 'day' | 'talk'; title: string; room?: string };
+
+createGrid<Line>(document.getElementById('programme')!, {
+  rows: [
+    { id: 'd1', kind: 'day', title: 'Lundi' },
+    { id: 't1', kind: 'talk', title: 'Des grilles qui se lisent à voix haute', room: 'Salle A' },
+  ],
+  columns: [{ id: 'title', header: 'Exposé' }, { id: 'room', header: 'Salle' }],
+  getRowId: (l) => l.id,
+  messages: FR,
+  fullWidth: (l) => l.kind === 'day',
+  features: [spans()],
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { spans } from '@dzgrid/dom/spans';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Line = { id: string; kind: 'day' | 'talk'; title: string; room?: string };
+
+@Component({
+  selector: 'app-programme',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features" [fullWidth]="dayRow" />`,
+})
+export class Programme {
+  readonly rows: Line[] = [
+    { id: 'd1', kind: 'day', title: 'Lundi' },
+    { id: 't1', kind: 'talk', title: 'Des grilles qui se lisent à voix haute', room: 'Salle A' },
+  ];
+  readonly columns: DzgColumnOrGroup<Line>[] = [{ id: 'title', header: 'Exposé' }, { id: 'room', header: 'Salle' }];
+  readonly rowId = (l: Line) => l.id;
+  readonly messages = FR;
+  readonly features = [spans()];
+  readonly dayRow = (l: Readonly<Line>) => l.kind === 'day';
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { spans } from '@dzgrid/dom/spans';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Line = { id: string; kind: 'day' | 'talk'; title: string; room?: string };
+
+const grid = document.querySelector<DzGridElement<Line>>('dz-grid')!;
+grid.columns = [{ id: 'title', header: 'Exposé' }, { id: 'room', header: 'Salle' }];
+grid.getRowId = (l) => l.id;
+grid.messages = FR;
+grid.features = [spans()];
+grid.settings = { fullWidth: (l) => l.kind === 'day' };
+grid.rows = [
+  { id: 'd1', kind: 'day', title: 'Lundi' },
+  { id: 't1', kind: 'talk', title: 'Des grilles qui se lisent à voix haute', room: 'Salle A' },
+];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Voir aussi
+
+- [`parts`](../parts/) — une partie pour dessiner la ligne.
+- [Colonnes](../../guides/columns/#groupes-de-colonnes) — `spans()` et les cellules sur plusieurs lignes.

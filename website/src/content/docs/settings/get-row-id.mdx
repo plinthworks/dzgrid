@@ -1,0 +1,96 @@
+---
+title: "getRowId"
+description: "How the grid tells one row from another: required."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+The id of a row: how the grid knows a row is the same one after a sort, a reload or an edit.
+
+<OptionFacts setting="getRowId" />
+
+## What it does
+
+A function from a row to its id: a non-empty string or a finite number, unique among the rows and stable over time —
+the record's key in your database, never its position. `1` and `'1'` are the same id: a JSON payload that sends one
+then the other does not show the row twice.
+
+Everything that follows a row goes by this id: the focus, the selection, the open rows of a tree, an edit in
+progress, the flash of a changed value. A row whose id is empty, not finite or not a string or number is left out
+(`invalid-row-id`); a second row with an id already seen is left out too (`duplicate-row-id`), the first one kept.
+Problems name the row's place, never its data.
+
+The selection and the API speak of row keys, not ids: `dataKey(id)` and `idOfDataKey(key)` from `@dzgrid/core` turn
+one into the other. The function is read once: `update()` refuses a new one.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { dataKey } from '@dzgrid/core';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Book = { isbn: string; title: string };
+
+const grid = createGrid<Book>(document.getElementById('books')!, {
+  rows: [{ isbn: '978-0-00-000001-1', title: 'The Salt Road' }],
+  columns: [{ id: 'title', header: 'Title' }],
+  getRowId: (b) => b.isbn,
+  messages: EN,
+});
+
+const key = dataKey('978-0-00-000001-1');
+if (key) grid.api.focusCell(key, 'title');
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Book = { isbn: string; title: string };
+
+@Component({
+  selector: 'app-books',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" />`,
+})
+export class Books {
+  readonly rows: Book[] = [{ isbn: '978-0-00-000001-1', title: 'The Salt Road' }];
+  readonly columns: DzgColumnOrGroup<Book>[] = [{ id: 'title', header: 'Title' }];
+  readonly rowId = (b: Book) => b.isbn;
+  readonly messages = EN;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Book = { isbn: string; title: string };
+
+const grid = document.querySelector<DzGridElement<Book>>('dz-grid')!;
+grid.columns = [{ id: 'title', header: 'Title' }];
+grid.getRowId = (b) => b.isbn;
+grid.messages = EN;
+grid.rows = [{ isbn: '978-0-00-000001-1', title: 'The Salt Road' }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## See also
+
+- [`rows`](../rows/) — the rows themselves.
+- [`sameRow`](../same-row/) — a row kept by id, compared by value.

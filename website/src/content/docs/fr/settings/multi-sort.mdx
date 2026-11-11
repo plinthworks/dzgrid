@@ -1,0 +1,110 @@
+---
+title: "multiSort"
+description: "Laisser l’utilisateur trier par plusieurs colonnes, ou par une seule."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Si Maj ajoute une colonne au tri, ou si une grille trie par une colonne à la fois.
+
+<OptionFacts setting="multiSort" />
+
+## Ce qu’il fait
+
+Par défaut, un clic sur un titre trie par cette seule colonne, et Maj+clic (Maj+Entrée au clavier) l’ajoute après
+les autres : par ville, puis par nom. `false` garde un seul tri : Maj+clic, Maj+Entrée et le `toggleSort(true)`
+d’une partie d’en-tête agissent comme un clic simple, qui remplace le tri.
+
+Il limite l’utilisateur, pas votre code : un tri sur plusieurs colonnes que l’application pose elle-même
+(`sort.set`, un état enregistré) est gardé. Il est lu une fois : `update()` refuse un changement.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Shop = { id: string; town: string; name: string };
+
+createGrid<Shop>(document.getElementById('boutiques')!, {
+  rows: [{ id: 's1', town: 'Champalouette', name: 'La Bouilloire de cuivre' }],
+  columns: [{ id: 'town', header: 'Ville' }, { id: 'name', header: 'Boutique' }],
+  getRowId: (s) => s.id,
+  messages: FR,
+  multiSort: false,
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Shop = { id: string; town: string; name: string };
+
+@Component({
+  selector: 'app-boutiques',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [multiSort]="false" />`,
+})
+export class Shops {
+  readonly rows: Shop[] = [{ id: 's1', town: 'Champalouette', name: 'La Bouilloire de cuivre' }];
+  readonly columns: DzgColumnOrGroup<Shop>[] = [{ id: 'town', header: 'Ville' }, { id: 'name', header: 'Boutique' }];
+  readonly rowId = (s: Shop) => s.id;
+  readonly messages = FR;
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid multi-sort="false"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Shop = { id: string; town: string; name: string };
+
+const grid = document.querySelector<DzGridElement<Shop>>('dz-grid')!;
+grid.columns = [{ id: 'town', header: 'Ville' }, { id: 'name', header: 'Boutique' }];
+grid.getRowId = (s) => s.id;
+grid.messages = FR;
+grid.rows = [{ id: 's1', town: 'Champalouette', name: 'La Bouilloire de cuivre' }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Démo
+
+<LiveDemo
+  height={240}
+  settings={{ label: 'Boutiques', multiSort: false }}
+  columns={[
+    { id: 'town', header: 'Ville', width: 160 },
+    { id: 'name', header: 'Boutique', flex: 1 },
+  ]}
+  rows={[
+    { id: 's1', town: 'Champalouette', name: 'La Bouilloire de cuivre' },
+    { id: 's2', town: 'Rivemare', name: 'Papier et Fil' },
+    { id: 's3', town: 'Champalouette', name: 'Frêne et Chêne' },
+    { id: 's4', town: 'Rivemare', name: 'La Porte verte' },
+  ]}
+  caption="Cliquez Ville, puis Maj+clic sur Boutique : le tri est remplacé, jamais complété."
+/>
+
+## Voir aussi
+
+- [Trier, filtrer, rechercher](../../guides/sort-filter-search/#trier).

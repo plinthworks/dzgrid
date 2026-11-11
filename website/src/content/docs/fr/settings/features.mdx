@@ -1,0 +1,107 @@
+---
+title: "features"
+description: "Les fonctions facultatives avec lesquelles la grille est faite : filtres, pages, édition, export…"
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Ce que fait la grille au-delà de montrer, trier et sélectionner des lignes : chaque fonction s’ajoute exprès, et une
+page ne charge que le code de celles qu’elle emploie.
+
+<OptionFacts setting="features" />
+
+## Ce qu’il fait
+
+Une liste de fonctions, chacune faite par une fonction de son propre point d’entrée : `filters()` de
+`@dzgrid/dom/filters`, `pagination()` de `@dzgrid/dom/pagination`, `spans()`, `edit()`, `csvExport()`… La base seule
+montre les lignes, les trie, les sélectionne et déplace le focus ; tout autre geste vient avec sa fonction. Chaque
+fonction a sa page sous [Fonctions](../../features/).
+
+Une fonction qui affiche du texte demande son paquet fusionné dans [`messages`](../messages/) : sans lui, la grille
+n’est pas faite et une `TypeError` nomme la fonction et les clés manquantes. Une fonction qui dessine plus que la base
+a en général une feuille dans `@dzgrid/theme` (`menu.css`, `columns.css`…). Un réglage ou une option de colonne qui
+demande une fonction absente est signalé par un problème `missing-feature` qui la nomme.
+
+La liste est lue une fois, à la création de la grille : `update()` en refuse une nouvelle.
+
+## Exemple
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters';
+import { pagination } from '@dzgrid/dom/pagination';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { FR_PAGINATION } from '@dzgrid/dom/locales/fr-pagination';
+
+type Plant = { id: number; name: string; height: number };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text, ...FR_PAGINATION.text } };
+
+createGrid<Plant>(document.getElementById('plantes')!, {
+  rows: [{ id: 1, name: 'Digitale', height: 120 }],
+  columns: [{ id: 'name', header: 'Plante' }, { id: 'height', header: 'Hauteur (cm)', type: 'number' }],
+  getRowId: (p) => p.id,
+  messages,
+  pagination: { pageSize: 25 },
+  features: [filters({ floating: true }), pagination()],
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { filters } from '@dzgrid/dom/filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+
+type Plant = { id: number; name: string; height: number };
+
+@Component({
+  selector: 'app-plantes',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [features]="features" />`,
+})
+export class Plants {
+  readonly rows: Plant[] = [{ id: 1, name: 'Digitale', height: 120 }];
+  readonly columns: DzgColumnOrGroup<Plant>[] = [{ id: 'name', header: 'Plante' }, { id: 'height', header: 'Hauteur (cm)', type: 'number' }];
+  readonly rowId = (p: Plant) => p.id;
+  readonly messages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text } };
+  readonly features = [filters({ floating: true })];
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { filters } from '@dzgrid/dom/filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+
+type Plant = { id: number; name: string; height: number };
+
+const grid = document.querySelector<DzGridElement<Plant>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Plante' }, { id: 'height', header: 'Hauteur (cm)', type: 'number' }];
+grid.getRowId = (p) => p.id;
+grid.messages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text } };
+grid.features = [filters({ floating: true })];
+grid.rows = [{ id: 1, name: 'Digitale', height: 120 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Voir aussi
+
+- [Fonctions](../../features/) — chaque fonction, ses options, ses textes, sa feuille.
+- [Prise en main](../../getting-started/typescript/#les-fonctions-et-leurs-textes).

@@ -1,0 +1,111 @@
+---
+title: "onEvent"
+description: "One function that hears every grid event."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+What the grid tells the application: a click, a new sort, a selection, a problem.
+
+<OptionFacts setting="onEvent" />
+
+## What it does
+
+A function given every event the grid sends; switch on `type`. Each event says who caused it (`source`: the user, your
+code, the server) and carries what it is about. The main ones:
+
+| Event | When |
+|---|---|
+| `rowClicked`, `cellClicked` | A row or a cell is clicked. |
+| `selectionChanged` | The selection changes: the selection, its count. |
+| `sortChanged`, `filterChanged`, `quickChanged`, `pageChanged` | The sort, the filters, the search, the page. |
+| `columnsChanged`, `columnResized`, `pinnedChanged` | Columns moved, resized, shown, hidden, pinned. |
+| `focusChanged` | The focus moves to another cell. |
+| `cellEdited`, `saveFailed` | A value is edited; a save failed. |
+| `fetchFailed` | A server's request failed. |
+| `problems` | Something given to the grid was refused: a bad column, a bad filter, an answer it cannot read. |
+
+The full list is the `GridEvent` type, in the [API reference](../../api/). In Angular each event is an output of
+`<dz-grid>` of the same name, `(selectionChanged)`; the Web Component sends it as a DOM event, `dzg-` and the name in
+kebab case (`dzg-selection-changed`). Log `problems` while you develop: it is where every refusal is told.
+
+## Example
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Tea = { id: string; name: string };
+
+createGrid<Tea>(document.getElementById('teas')!, {
+  rows: [{ id: 't1', name: 'Smoked oolong' }],
+  columns: [{ id: 'name', header: 'Tea' }],
+  getRowId: (t) => t.id,
+  messages: EN,
+  onEvent: (e) => {
+    if (e.type === 'rowClicked' && e.row.kind === 'data') console.log('clicked', e.row.data.name);
+    if (e.type === 'sortChanged') console.log('sorted by', e.sort);
+    if (e.type === 'problems') for (const p of e.problems) console.warn('dzgrid', p.code, p.path, p.detail);
+  },
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import type { Problem } from '@dzgrid/core';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Tea = { id: string; name: string };
+
+@Component({
+  selector: 'app-teas',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" (problems)="onProblems($event)" />`,
+})
+export class Teas {
+  readonly rows: Tea[] = [{ id: 't1', name: 'Smoked oolong' }];
+  readonly columns: DzgColumnOrGroup<Tea>[] = [{ id: 'name', header: 'Tea' }];
+  readonly rowId = (t: Tea) => t.id;
+  readonly messages = EN;
+  onProblems(problems: readonly Problem[]): void {
+    for (const p of problems) console.warn('dzgrid', p.code, p.path, p.detail);
+  }
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import type { GridEvent } from '@dzgrid/core';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Tea = { id: string; name: string };
+
+const grid = document.querySelector<DzGridElement<Tea>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Tea' }];
+grid.getRowId = (t) => t.id;
+grid.messages = EN;
+grid.rows = [{ id: 't1', name: 'Smoked oolong' }];
+grid.addEventListener('dzg-sort-changed', (e) => {
+  const event = (e as CustomEvent<GridEvent<Tea>>).detail;
+  if (event.type === 'sortChanged') console.log('sorted by', event.sort);
+});
+```
+
+</Fragment>
+</CodeTabs>
+
+## See also
+
+- [Getting started](../../getting-started/typescript/#events).

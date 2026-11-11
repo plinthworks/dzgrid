@@ -245,8 +245,8 @@ keep a mark that is not colour alone), `menu`, `chevron` (trees, details, header
 default), `submenu`, `grip`. An SVG string or element (copied). Its shape is drawn in the mark's colour and size
 (`--dzg-icon-size`), whatever its own fill. Refused, the default kept and `invalid-setting` told: anything but `<svg>`
 with shapes, groups, gradients, `use` and `title`; a `<script>`, `<style>` or `<foreignObject>`; an `on…` attribute; a
-link or `url()` outside the icon (only `#…`); more than 20 000 characters. Drawn as a `data:` image: a CSP without
-`img-src data:` keeps the defaults. With `injectStyles: false`, load `ICONS_CSS` from `@dzgrid/dom/theme` too.
+link or `url()` outside the icon (only `#…`); more than 20 000 characters. Drawn as a `data:` image: a CSP must allow
+`img-src data:`. With `injectStyles: false`, load `ICONS_CSS` from `@dzgrid/dom/theme` too.
 
 ### Alternate rows, lines, the pinned edge
 
