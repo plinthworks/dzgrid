@@ -1,0 +1,87 @@
+---
+title: "responsive"
+description: "Les colonnes qui ne tiennent pas passent en lignes sous chaque ligne au lieu de défiler de côté."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Sur un écran étroit, retire des lignes les colonnes qui ne tiennent pas et les montre sous chaque ligne.
+
+<FeatureFacts name="responsive" />
+
+## Ce qu’elle fait
+
+Quand les colonnes ne tiennent pas dans la vue, `responsive()` retire des lignes des colonnes du centre au lieu de
+faire défiler la grille de côté. Un chevron dans la première cellule de chaque ligne ouvre alors des lignes « Titre :
+valeur » sous la ligne, une par colonne retirée. La colonne au plus grand
+[`collapsePriority`](../../column-options/collapse-priority/) part en premier (une colonne sans priorité compte 1) ; à
+égalité, la dernière à l’écran. La première colonne, les colonnes figées et une priorité de 0 ne partent jamais. Une
+colonne flexible compte son `minWidth`. Tout suit chaque changement de taille.
+
+Sur la première cellule d’une ligne, Entrée ou Espace ouvre et ferme ses lignes. La recherche rapide, les filtres,
+les fichiers et l’impression voient toujours toutes les colonnes, et rien n’est gardé dans l’état de la grille.
+
+Les lignes sont un panneau de lignes de détail : il faut donc les textes `-detail`. Elle ne se combine pas avec un
+arbre, le regroupement de lignes ou votre propre [`detail()`](../detail/) : la grille signale
+`unsupported-combination`. Une colonne avec `collapsePriority` dans une grille sans cette fonction signale un
+avertissement `missing-feature`.
+
+## Options
+
+- `priority` : une priorité de repli par identifiant de colonne, au-dessus du `collapsePriority` des colonnes. La plus
+  haute se replie en premier ; 0 jamais.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { responsive } from '@dzgrid/dom/responsive';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_DETAIL } from '@dzgrid/dom/locales/fr-detail';
+
+type Hive = { id: string; name: string; apiary: string; frames: number; queen: string; checked: string };
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_DETAIL.text } };
+
+createGrid<Hive>(document.getElementById('hives')!, {
+  rows: [{ id: 'h1', name: 'Trèfle', apiary: 'Colline', frames: 9, queen: 'Marquée bleu', checked: '2026-05-02' }],
+  columns: [
+    { id: 'name', header: 'Ruche', width: 160 },
+    { id: 'apiary', header: 'Rucher', width: 140, collapsePriority: 2 },
+    { id: 'frames', header: 'Cadres', type: 'number', width: 100, collapsePriority: 0 },
+    { id: 'queen', header: 'Reine', width: 180 },
+    { id: 'checked', header: 'Visitée le', type: 'day', width: 140 },
+  ],
+  getRowId: (h) => h.id,
+  messages,
+  features: [responsive({ priority: { queen: 3 } })],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Ruches' }}
+  features={['responsive']}
+  columns={[
+    { id: 'name', header: 'Ruche', width: 160 },
+    { id: 'apiary', header: 'Rucher', width: 160, collapsePriority: 2 },
+    { id: 'frames', header: 'Cadres', type: 'number', width: 120, collapsePriority: 0 },
+    { id: 'queen', header: 'Reine', width: 200 },
+    { id: 'checked', header: 'Visitée le', type: 'day', width: 160 },
+    { id: 'honey', header: 'Miel (kg)', type: 'number', width: 140 },
+  ]}
+  rows={[
+    { id: 'h1', name: 'Trèfle', apiary: 'Colline', frames: 9, queen: 'Marquée bleu', checked: '2026-05-02', honey: 12 },
+    { id: 'h2', name: 'Bruyère', apiary: 'Lande', frames: 10, queen: 'Marquée blanc', checked: '2026-05-09', honey: 8 },
+    { id: 'h3', name: 'Tilleul', apiary: 'Colline', frames: 8, queen: 'Pas vue', checked: '2026-04-28', honey: 15 },
+  ]}
+  caption="Rétrécissez la fenêtre : Rucher quitte les lignes en premier, puis les dernières colonnes ; le chevron les montre sous chaque ligne."
+/>
+
+## Voir aussi
+
+- L’option de colonne [`collapsePriority`](../../column-options/collapse-priority/).
+- La fonction [`detail`](../detail/) : les panneaux sous les lignes.
+- [Colonnes](../../guides/columns/) : le guide.

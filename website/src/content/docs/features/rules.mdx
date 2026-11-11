@@ -1,0 +1,58 @@
+---
+title: "rules"
+description: "Selection rules: some rows cannot be ticked, and the user is told why."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Applies the selection setting’s canSelect rule to every way of selecting rows.
+
+<FeatureFacts name="rules" />
+
+## What it does
+
+`rules()` makes the [`selection`](../../settings/selection/) setting's `canSelect(row, selection, context)` apply to
+every way in: a click, Ctrl/Cmd+click, Shift+click, Space, Ctrl+A, the header box and the API. `true` allows a row,
+`false` refuses it, and a string refuses it and is said as it is (your app translates it). Unticking is always allowed.
+
+A refused row stays unticked and what was ticked stays ticked. In a run or a « select all », the allowed rows are
+ticked and the others skipped. Before the user tries, the box of a row the rule refuses looks greyed; it stays
+focusable and readable. When they try, a screen reader hears « Not selectable », the rule's own sentence, or « 6 rows
+selected, 2 not selectable ».
+
+The rule and the [`context`](../../settings/context/) setting are read live; a change applies from the next addition and
+never unticks a row. A rule that throws refuses that row and the error is reported. A refusal made by your code is told
+as a problem, not said. « Select all matching » rows the browser does not hold is refused under a rule. `canSelect` on a
+grid without this feature is a `missing-feature` error. Without the `-rules` texts, the grid is not made: an error names
+the missing keys.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { rules } from '@dzgrid/dom/rules';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_RULES } from '@dzgrid/dom/locales/en-rules';
+
+type Seed = { id: string; name: string; packets: number };
+
+createGrid<Seed>(document.getElementById('seeds')!, {
+  rows: [
+    { id: 's1', name: 'Basil', packets: 40 },
+    { id: 's2', name: 'Fennel', packets: 0 },
+  ],
+  columns: [
+    { id: 'name', header: 'Seed' },
+    { id: 'packets', header: 'Packets', type: 'number' },
+  ],
+  getRowId: (s) => s.id,
+  selection: { mode: 'multi', checkbox: true, canSelect: (row) => row.data.packets > 0 || 'No packets left' },
+  messages: { ...EN, text: { ...EN.text, ...EN_RULES.text } },
+  features: [rules()],
+});
+```
+
+## See also
+
+- The [`selection`](../../settings/selection/) setting: `canSelect` and the other keys.
+- [Selection and ranges](../../guides/selection-ranges/#selecting-rows): selecting rows in the guide.

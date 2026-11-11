@@ -1,0 +1,95 @@
+---
+title: "find"
+description: "Ctrl+F inside the grid: a find bar that marks every match and walks from one to the next."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Replaces the browser’s Ctrl+F while the focus is in the grid.
+
+<FeatureFacts name="find" />
+
+## What it does
+
+With the focus in the grid, Ctrl+F (⌘F on a Mac) opens a bar above the headers: a field, the count (« 3 / 12 »), ↑, ↓
+and ×. It searches the text each cell shows, in the visible columns, case and accents ignored. Anywhere else on the
+page, Ctrl+F stays the browser's.
+
+Find never hides a row: it marks every matching cell, the current one more strongly, scrolls to it and makes it the
+grid's focused cell. Enter or ↓ goes to the next match, Shift+Enter or ↑ to the previous one, wrapping at the ends;
+Escape closes the bar and leaves the focus on the last match. It searches the rows the filters and the quick search
+keep, rows inside closed tree nodes too (their parents open to show a match). With a server, only the rows loaded are
+searched, and the bar says so.
+
+Your application can drive it with `api(grid)`: `open(text)`, `next()`, `previous()`, `close()` and `state()`. A
+`debounceMs` that is not a number of 0 or more gives 150 ms and an `invalid-setting` warning. Its texts are in the
+`-find` bundle.
+
+## Options
+
+- `debounceMs`: the pause before the typed text is searched, a number of 0 or more; 150 ms by default.
+- `highlight`: the letters found tinted inside the cells, the current match's more strongly. On by default.
+
+Read when the grid is made.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { find } from '@dzgrid/dom/find';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FIND } from '@dzgrid/dom/locales/en-find';
+import '@dzgrid/theme/find.css';
+
+type River = { id: string; name: string; region: string; length: number };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_FIND.text } };
+const finder = find({ debounceMs: 100 });
+
+const grid = createGrid<River>(document.getElementById('rivers')!, {
+  rows: [
+    { id: 'r1', name: 'Heron Brook', region: 'North', length: 42 },
+    { id: 'r2', name: 'Oxbow', region: 'East', length: 96 },
+  ],
+  columns: [
+    { id: 'name', header: 'River' },
+    { id: 'region', header: 'Region' },
+    { id: 'length', header: 'Length (km)', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [finder],
+});
+
+const bar = finder.api(grid);
+bar?.open('heron');
+console.log(bar?.state().count);
+```
+
+## Live demo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Rivers' }}
+  features={['find']}
+  columns={[
+    { id: 'name', header: 'River', flex: 1 },
+    { id: 'region', header: 'Region', width: 130 },
+    { id: 'length', header: 'Length (km)', type: 'number', width: 140 },
+  ]}
+  rows={[
+    { id: 'r1', name: 'Silverrun', region: 'North', length: 412 },
+    { id: 'r2', name: 'Heron Brook', region: 'North', length: 42 },
+    { id: 'r3', name: 'Oxbow', region: 'East', length: 96 },
+    { id: 'r4', name: 'Little Heron', region: 'South', length: 18 },
+    { id: 'r5', name: 'Mill Race', region: 'West', length: 7 },
+    { id: 'r6', name: 'Old Heron Creek', region: 'West', length: 33 },
+  ]}
+  caption="Click a cell, press Ctrl+F (Cmd+F on a Mac) and type « heron »: Enter goes to the next one."
+/>
+
+## See also
+
+- [`quickSearch()`](../quick-search/): a search that hides the rows without a match.
+- [Find (Ctrl+F)](../../guides/sort-filter-search/#find-ctrlf) in the guide.

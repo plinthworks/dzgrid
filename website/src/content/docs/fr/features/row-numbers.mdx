@@ -1,0 +1,54 @@
+---
+title: "rowNumbers"
+description: "Des numéros 1, 2, 3 au début de chaque ligne, dans l’ordre affiché ; un clic prend la ligne."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Numérote les lignes affichées, dans une bande étroite au début de chaque ligne.
+
+<FeatureFacts name="rowNumbers" />
+
+## Ce qu’elle fait
+
+`rowNumbers()` ajoute une bande étroite au début de chaque ligne (à droite en arabe), figée : elle ne défile jamais de
+côté. Elle compte 1, 2, 3… dans l’ordre affiché, après le tri, les filtres et la recherche ; sur une grille paginée
+elle continue après les pages d’avant (la page 2 de 50 lignes commence à 51). Un panneau de détail et une
+[ligne épinglée](../pinned-rows/) n’ont pas de numéro. La bande est aussi large que son plus grand numéro.
+
+Un clic sur un numéro prend toute la ligne comme bloc quand [`range`](../range/) est là, Maj+clic les lignes entre
+deux, et un clic sur le coin toutes les cellules. Sans `range`, un clic sélectionne la ligne comme le ferait sa case
+(avec le réglage [`selection`](../../settings/selection/)) ; sans l’un ni l’autre, un clic ne fait rien.
+
+Ce n’est jamais une colonne : ni triée, ni filtrée, ni modifiée, ni déplacée, ni redimensionnée, jamais cherchée,
+jamais dans un export, l’impression, le presse-papiers ou l’état de la grille. Un lecteur d’écran entend « N° de
+ligne, 12 ». La fonction ne prend pas d’options.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { range } from '@dzgrid/dom/range';
+import { rowNumbers } from '@dzgrid/dom/row-numbers';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_RANGE } from '@dzgrid/dom/locales/fr-range';
+import { FR_ROW_NUMBERS } from '@dzgrid/dom/locales/fr-row-numbers';
+
+type Shell = { id: string; shell: string; beach: string };
+
+createGrid<Shell>(document.getElementById('shells')!, {
+  rows: [{ id: 's1', shell: 'Porcelaine', beach: 'Anse du nord' }, { id: 's2', shell: 'Bulot', beach: 'Grande grève' }],
+  columns: [
+    { id: 'shell', header: 'Coquillage' },
+    { id: 'beach', header: 'Plage' },
+  ],
+  getRowId: (s) => s.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_RANGE.text, ...FR_ROW_NUMBERS.text } },
+  features: [range(), rowNumbers()],
+});
+```
+
+## Voir aussi
+
+- [`range`](../range/) : un clic sur un numéro prend la ligne.
+- [`selection`](../../settings/selection/) : la sélection de lignes qu’utilise un clic sans `range`.

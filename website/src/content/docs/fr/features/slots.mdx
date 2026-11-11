@@ -1,0 +1,70 @@
+---
+title: "slots"
+description: "Laisse vos parties dessiner les titres de colonnes, le message de la grille, la marque d’attente et l’infobulle."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Laisse vos propres parties dessiner les titres de colonnes, le message de la grille, la marque d’attente et l’infobulle.
+
+<FeatureFacts name="slots" />
+
+## Ce qu’elle fait
+
+Les parties de cellule marchent sans aucune fonction. `slots()` ajoute quatre autres endroits où une partie peut
+dessiner, à la place de la grille :
+
+- le libellé d’un titre de colonne : le `ui.header` de la colonne, sinon une partie nommée `header.<type>`
+  (`header.number`), sinon une partie nommée `header` pour toutes les colonnes ;
+- le message par-dessus les lignes (chargement, vide, aucun résultat, erreur) : une partie nommée `overlay` ;
+- la marque d’attente : une partie nommée `busy` ;
+- l’infobulle : le `ui.tooltip` de la colonne, sinon `tooltip.<type>`, sinon `tooltip`.
+
+La grille garde le reste : le rôle du titre, l’état et la marque du tri, la poignée de redimensionnement et le clic qui
+trie ; la place du message et son bouton « Réessayer » ; l’élément de l’infobulle, son délai, Échap et sa position. Une
+partie de titre reçoit la colonne, son `label` et son tri.
+
+Une partie de titre, de message, d’attente ou d’infobulle enregistrée dans une grille sans cette fonction, ou le
+`ui.header` ou `ui.tooltip` d’une colonne, signale un avertissement `missing-feature`. Un nom que personne n’a
+enregistré pour cet endroit signale `unknown-part`, et le dessin de la grille est gardé.
+
+## Exemple
+
+```ts
+import { createGrid, definePart } from '@dzgrid/dom';
+import { slots } from '@dzgrid/dom/slots';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Crate = { id: string; fruit: string; weight: number };
+
+// Un libellé de titre avec son unité dans un texte plus léger.
+const withUnit = definePart('header', {
+  mount(host, c) {
+    const name = host.ownerDocument.createElement('span');
+    const unit = host.ownerDocument.createElement('small');
+    unit.textContent = ' kg';
+    host.append(name, unit);
+    const draw = (n: typeof c) => { name.textContent = n.label; };
+    draw(c);
+    return { update: draw, destroy: () => { name.remove(); unit.remove(); } };
+  },
+});
+
+createGrid<Crate>(document.getElementById('crates')!, {
+  rows: [{ id: 'c1', fruit: 'Poires', weight: 18.5 }],
+  columns: [
+    { id: 'fruit', header: 'Fruit' },
+    { id: 'weight', header: 'Poids', type: 'number', ui: { header: 'withUnit' } },
+  ],
+  getRowId: (c) => c.id,
+  messages: FR,
+  parts: { withUnit },
+  features: [slots()],
+});
+```
+
+## Voir aussi
+
+- Le réglage [`parts`](../../settings/parts/) et l’option de colonne [`ui`](../../column-options/ui/).
+- Les réglages [`overlay`](../../settings/overlay/) et [`tooltips`](../../settings/tooltips/).
+- [Colonnes](../../guides/columns/) : les cellules sur mesure dans le guide.

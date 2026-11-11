@@ -1,0 +1,95 @@
+---
+title: "filtersPanel"
+description: "Every column’s filter in one side panel, with a column search and Clear all filters."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Adds a side panel that lists every filterable column with its filter.
+
+<FeatureFacts name="filtersPanel" />
+
+## What it does
+
+`filtersPanel()` puts a narrow strip on one side of the grid with a « Filters » button, which shows how many filters
+are active. The button opens a panel beside the rows: the rows take the room left, nothing is covered (on a narrow
+screen, 30 rem or less, the open panel covers the rows). From the top: its title and ×, « Clear all filters », a search
+on the column names, then every column that has a filter, hidden ones too.
+
+Unfolding a column shows the popup's own form; several can be open at once. A dot marks each filtered column. Changes
+apply as in the popups (`filters({ apply })`), and a filter set anywhere else shows at once. « Clear all filters »
+empties every column filter and the quick search, and keeps the sort. On a column button, ↑ ↓ go to the previous and
+next column, Enter or Space unfolds it; Escape in the search empties it.
+
+It needs [`filters()`](../filters/), from either entry: without it nothing is drawn and a `missing-feature` warning is
+told. Its texts are required: an error names any missing key. Inside a [dock](../dock/) it becomes the dock's
+`filters` panel, with the same options.
+
+## Options
+
+- `side`: the side it stands on, `'end'` (the default) or `'start'`; right to left puts `end` at the left.
+- `open`: open when the grid starts; closed by default.
+- `button`: the strip with the « Filters » button, on by default. `false`: your application opens the panel with
+  `api(grid).open()`, `close()` or `toggle()`.
+
+Read when the grid is made.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters-base';
+import { filtersPanel } from '@dzgrid/dom/filters-panel';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { EN_FILTERS_PANEL } from '@dzgrid/dom/locales/en-filters-panel';
+import '@dzgrid/theme/filters-panel.css';
+
+type Tool = { id: string; name: string; shed: string; weight: number };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text, ...EN_FILTERS_PANEL.text } };
+const panel = filtersPanel({ side: 'end', button: true });
+
+const grid = createGrid<Tool>(document.getElementById('tools')!, {
+  rows: [{ id: 't1', name: 'Rake', shed: 'North shed', weight: 1.4 }],
+  columns: [
+    { id: 'name', header: 'Tool' },
+    { id: 'shed', header: 'Shed', filter: { kind: 'set' } },
+    { id: 'weight', header: 'Weight (kg)', type: 'number' },
+  ],
+  getRowId: (t) => t.id,
+  messages,
+  features: [filters(), panel],
+});
+
+panel.api(grid)?.open('shed');   // the panel open, the Shed filter unfolded
+```
+
+## Live demo
+
+<LiveDemo
+  height={380}
+  settings={{ label: 'Tools' }}
+  features={['filters', 'filtersPanel']}
+  columns={[
+    { id: 'name', header: 'Tool', flex: 1, minWidth: 140 },
+    { id: 'shed', header: 'Shed', width: 140, filter: { kind: 'set' } },
+    { id: 'weight', header: 'Weight (kg)', type: 'number', width: 130 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Rake', shed: 'North shed', weight: 1.4 },
+    { id: 't2', name: 'Spade', shed: 'North shed', weight: 2.1 },
+    { id: 't3', name: 'Hoe', shed: 'South shed', weight: 1.2 },
+    { id: 't4', name: 'Shears', shed: 'South shed', weight: 0.9 },
+    { id: 't5', name: 'Trowel', shed: 'North shed', weight: 0.3 },
+    { id: 't6', name: 'Wheelbarrow', shed: 'South shed', weight: 14 },
+  ]}
+  caption="The « Filters » button at the end of the grid opens the panel."
+/>
+
+## See also
+
+- [`filters()`](../filters/): the filters the panel shows.
+- [`dock()`](../dock/): the panel among other side panels.
+- [The filters panel](../../guides/sort-filter-search/#the-filters-panel) in the guide.

@@ -1,0 +1,86 @@
+---
+title: "totalsRow"
+description: "Une ligne Total toujours visible en bas de la grille, d’après le total de chaque colonne."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Ajoute une ligne de totaux au pied de la grille, d’après l’option `total` des colonnes.
+
+<FeatureFacts name="totalsRow" />
+
+## Ce qu’elle fait
+
+`totalsRow()` ajoute une ligne tout en bas de la bande épinglée du bas, toujours visible pendant que les lignes
+défilent. Chaque colonne avec un [`total`](../../column-options/total/) l’y montre : `'sum'`, `'avg'`, `'min'`,
+`'max'`, `'count'`, `'first'`, `'last'`, ou votre fonction des valeurs. La première colonne affichée sans total dit
+« Total ». Aucune colonne avec un total : pas de ligne.
+
+Les totaux comptent les lignes qui passent les filtres et la recherche (toutes les pages d’une grille paginée, tous
+les niveaux d’un arbre), les éditions comptées dès qu’elles sont tapées. Ils suivent les règles des totaux de
+groupe : des sommes sans dérive, des moyennes sur les nombres présents, `count` qui compte chaque ligne. La ligne n’est
+pas une donnée : elle n’est jamais sélectionnée ni éditée. Le CSV, Excel et l’impression finissent par elle (sauf
+l’export des lignes sélectionnées) ; un fichier JSON non.
+
+C’est une ligne de la bande épinglée du bas : [`pinnedRows()`](../pinned-rows/) doit donc être parmi les fonctions,
+avec ses textes ; sans elle, un avertissement `missing-feature` et pas de ligne. Un total qui ne convient pas à sa
+colonne signale `agg-type` ; un nom inconnu, `invalid-setting` ; une fonction qui lève une exception, `agg-threw`.
+Avec des pages serveur, la grille ne tient qu’une page et ne calcule donc rien : donnez les totaux que votre serveur
+envoie avec `api(grid).set({ … })` ; `set(null)` revient au calcul.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { pinnedRows } from '@dzgrid/dom/pinned-rows';
+import { totalsRow } from '@dzgrid/dom/totals-row';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_PINNED } from '@dzgrid/dom/locales/fr-pinned';
+import { FR_TOTALS } from '@dzgrid/dom/locales/fr-totals';
+import '@dzgrid/theme/pinned-rows.css';
+
+type Hive = { id: string; name: string; honey: number; frames: number };
+
+const totals = totalsRow();
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_PINNED.text, ...FR_TOTALS.text } };
+
+const grid = createGrid<Hive>(document.getElementById('hives')!, {
+  rows: [{ id: 'h1', name: 'Trèfle', honey: 18.5, frames: 9 }, { id: 'h2', name: 'Bruyère', honey: 12, frames: 7 }],
+  columns: [
+    { id: 'name', header: 'Ruche' },
+    { id: 'honey', header: 'Miel (kg)', type: 'number', total: 'sum' },
+    { id: 'frames', header: 'Cadres', type: 'number', total: 'avg' },
+  ],
+  getRowId: (h) => h.id,
+  messages,
+  features: [pinnedRows<Hive>(), totals],
+});
+
+console.log(totals.api(grid)?.values());
+```
+
+## Démo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Ruches' }}
+  features={['totals']}
+  columns={[
+    { id: 'name', header: 'Ruche', flex: 1 },
+    { id: 'honey', header: 'Miel (kg)', type: 'number', width: 140, total: 'sum' },
+    { id: 'frames', header: 'Cadres', type: 'number', width: 120, total: 'avg', numberFormat: { maximumFractionDigits: 1 } },
+  ]}
+  rows={[
+    { id: 'h1', name: 'Trèfle', honey: 18.5, frames: 9 },
+    { id: 'h2', name: 'Bruyère', honey: 12, frames: 7 },
+    { id: 'h3', name: 'Tilleul', honey: 21.4, frames: 10 },
+    { id: 'h4', name: 'Verger', honey: 9.8, frames: 6 },
+  ]}
+/>
+
+## Voir aussi
+
+- L’option de colonne [`total`](../../column-options/total/).
+- [`pinnedRows()`](../pinned-rows/) : la bande où elle se tient.
+- [Ligne de totaux](../../guides/columns/#ligne-de-totaux) dans le guide.

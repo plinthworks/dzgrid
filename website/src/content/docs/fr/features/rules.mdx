@@ -1,0 +1,59 @@
+---
+title: "rules"
+description: "Des règles de sélection : certaines lignes ne peuvent pas être cochées, et l’utilisateur apprend pourquoi."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Applique la règle canSelect du réglage selection à toutes les façons de sélectionner des lignes.
+
+<FeatureFacts name="rules" />
+
+## Ce qu’elle fait
+
+`rules()` applique le `canSelect(row, selection, context)` du réglage [`selection`](../../settings/selection/) à toutes
+les façons d’entrer : un clic, Ctrl/Cmd+clic, Maj+clic, Espace, Ctrl+A, la case du titre et l’API. `true` autorise une
+ligne, `false` la refuse, et une chaîne la refuse et est dite telle quelle (votre application la traduit). Décocher est
+toujours permis.
+
+Une ligne refusée reste décochée, et ce qui était coché le reste. Dans une plage ou un « tout sélectionner », les lignes
+permises sont cochées et les autres passées. Avant que l’utilisateur essaie, la case d’une ligne que la règle refuse
+paraît grisée ; elle reste atteignable et lisible. Quand il essaie, un lecteur d’écran entend « Non sélectionnable »,
+la phrase de la règle, ou « 6 lignes sélectionnées, 2 non sélectionnables ».
+
+La règle et le réglage [`context`](../../settings/context/) sont lus en direct ; un changement s’applique à partir du
+prochain ajout et ne décoche jamais une ligne. Une règle qui lève une erreur refuse la ligne et l’erreur est signalée.
+Un refus venu de votre code est signalé comme un problème, pas dit. Sélectionner « toutes les lignes correspondantes »
+que le navigateur ne tient pas est refusé sous une règle. `canSelect` dans une grille sans cette fonction est une
+erreur `missing-feature`. Sans les textes `-rules`, la grille n’est pas créée : une erreur nomme les clés qui manquent.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { rules } from '@dzgrid/dom/rules';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_RULES } from '@dzgrid/dom/locales/fr-rules';
+
+type Seed = { id: string; name: string; packets: number };
+
+createGrid<Seed>(document.getElementById('seeds')!, {
+  rows: [
+    { id: 's1', name: 'Basilic', packets: 40 },
+    { id: 's2', name: 'Fenouil', packets: 0 },
+  ],
+  columns: [
+    { id: 'name', header: 'Graine' },
+    { id: 'packets', header: 'Sachets', type: 'number' },
+  ],
+  getRowId: (s) => s.id,
+  selection: { mode: 'multi', checkbox: true, canSelect: (row) => row.data.packets > 0 || 'Plus aucun sachet' },
+  messages: { ...FR, text: { ...FR.text, ...FR_RULES.text } },
+  features: [rules()],
+});
+```
+
+## Voir aussi
+
+- Le réglage [`selection`](../../settings/selection/) : `canSelect` et les autres clés.
+- [Sélection et plages](../../guides/selection-ranges/) : sélectionner des lignes dans le guide.

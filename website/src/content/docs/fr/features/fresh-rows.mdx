@@ -1,0 +1,71 @@
+---
+title: "freshRows"
+description: "Les lignes qu’a apportées un rafraîchissement sont marquées quelques secondes et comptées une fois au lecteur d’écran."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Marque les lignes qu’un changement en direct vient d’ajouter, quelques secondes, et dit combien sont arrivées.
+
+<FeatureFacts name="freshRows" />
+
+## Ce qu’elle fait
+
+`freshRows()` marque les lignes qui n’étaient pas là avant un changement en direct : une teinte et une barre au début
+de la ligne (à droite en arabe), donc pas la couleur seule. La marque reste 5 secondes par défaut, puis s’en va ; elle
+est immobile, sans fondu ni clignotement. Une ligne garde sa marque le reste de son temps où qu’elle s’affiche : après
+un tri, quand on la fait défiler à la vue, sur une autre page. Un lecteur d’écran entend une phrase pour le
+rafraîchissement, « 3 nouvelles lignes ».
+
+Nouveau veut dire ajouté par une transaction ou une mise à jour des lignes, ou par la réponse d’un serveur pour la
+même page et la même requête. Rien n’est marqué au premier chargement, quand l’utilisateur change de page, trie ou
+filtre, ou quand plus de la moitié des lignes ont changé (une nouvelle liste). Un rechargement complet ou une réponse
+de serveur ne comptent qu’avec le réglage [`sameRow`](../../settings/same-row/) ; une source serveur sans lui signale
+un avertissement `missing-feature` (détail `sameRow`), et la fonction reste active.
+
+La marque est pour l’écran seulement : jamais exportée, imprimée ni copiée, jamais dans l’état. Sa couleur est
+`--dzg-fresh-color` (vert par défaut) dans `fresh-rows.css`.
+
+## Options
+
+- `ms` : combien de temps une nouvelle ligne reste marquée, en ms, de 0 à 60 000. Par défaut 5 000 ; une autre valeur
+  y revient, avec un avertissement `invalid-setting`.
+- `rowsArrived(keys, source)` : appelée une fois par rafraîchissement avec les clés des lignes marquées (jamais de
+  données de lignes) et qui a changé les lignes. Une exception est signalée.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import type { ClientModel } from '@dzgrid/core';
+import { sameValues } from '@dzgrid/core/compare';
+import { freshRows } from '@dzgrid/dom/fresh-rows';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FRESH } from '@dzgrid/dom/locales/fr-fresh';
+
+type Buoy = { id: string; sea: string; wave: number };
+
+const grid = createGrid<Buoy, ClientModel<Buoy>>(document.getElementById('buoys')!, {
+  rows: [
+    { id: 'y1', sea: 'Mer de verre', wave: 1.2 },
+    { id: 'y2', sea: 'Baie salée', wave: 0.4 },
+    { id: 'y3', sea: 'Détroit gris', wave: 2.1 },
+  ],
+  columns: [
+    { id: 'sea', header: 'Mer' },
+    { id: 'wave', header: 'Vague (m)', type: 'number' },
+  ],
+  getRowId: (b) => b.id,
+  sameRow: sameValues,
+  messages: { ...FR, text: { ...FR.text, ...FR_FRESH.text } },
+  features: [freshRows({ ms: 8000, rowsArrived: (keys) => console.log(keys.length) })],
+});
+
+grid.kernel.rows.applyTransaction({ add: [{ id: 'y4', sea: 'Rade d’ambre', wave: 0.9 }] });
+```
+
+## Voir aussi
+
+- [`sameRow`](../../settings/same-row/) : un rechargement complet comparé ligne à ligne.
+- [Données serveur](../../guides/server-data/#des-lignes-qui-changent) : transactions et rechargements.
+- [`motion`](../motion/) : l’éclat d’une valeur changée.

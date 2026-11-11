@@ -1,0 +1,103 @@
+---
+title: "columnMenu"
+description: "The ⋮ menu on each column header: sort, pin, size, move, hide, choose, reset."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Puts a menu on each column header, with one item per thing the user can do to that column.
+
+<FeatureFacts name="columnMenu" />
+
+## What it does
+
+`columnMenu()` adds a ⋮ button to each column header 96 px wide or more. The menu also opens by a right-click on the
+header (Shift+right-click keeps the browser's), by Shift+F10 or the Menu key, by Alt+ArrowDown where the column has no
+filter popup, and by Ctrl+click on a Mac. Its items: sort, pin to the start or the end, size, move, filter, hide,
+choose columns, reset the columns, and the density when asked. Each item is said when it acts. Opened by a pointer,
+the menu leaves the grid's focus where it was.
+
+Some items come from other features, given in `use`: « Fit this column », « Fit all columns », « Resize with the
+keyboard » and the moves need [`columns()`](../columns/); « Choose columns… » needs
+[`columnsChooser()`](../columns-chooser/); grouping, the pivot and the fill have their items when
+[`grouping()`](../grouping/), [`pivot()`](../pivot/) or [`range()`](../range/) with [`fill()`](../fill/) are given.
+Without them, those items are absent. « Filter… » shows with [`filters()`](../filters/). « Widen » and « Narrow »
+change the width by 10 px and keep the menu open: a way to resize without dragging.
+
+[`menu: false`](../../column-options/menu/) on a column takes the menu away from it. A locked column
+(`movable: false`) has its move and pin items disabled; « Hide column » is disabled for a column with `hideable: false` and
+for the last one shown. Without the `-column-menu` texts, the grid is not made: an error names the missing keys.
+
+## Options
+
+- `use`: the features the items drive (`columns`, `chooser`, `grouping`, `pivot`, `range`, `fill`), reached through
+  their api. A feature not given: its items are absent.
+- `density`: a « Compact / Normal / Spacious » line. Off by default; absent when `rowHeight` is a number.
+- `onDensity`: called after that line changed the grid's density.
+- `items`: your items, from the column and the default entries: reorder, remove or add. If it throws, the defaults
+  are shown and the error is reported.
+- `classes`: your classes on the menu (`menu`) and on every item (`item`), for Tailwind or Bootstrap.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { columns } from '@dzgrid/dom/columns';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import { EN_COLUMN_MENU } from '@dzgrid/dom/locales/en-column-menu';
+import '@dzgrid/theme/columns.css';
+import '@dzgrid/theme/menu.css';
+
+type River = { id: string; name: string; sea: string; length: number };
+
+const moves = columns();
+
+createGrid<River>(document.getElementById('rivers')!, {
+  rows: [{ id: 'r1', name: 'Silverbrook', sea: 'North Sea', length: 212 }],
+  columns: [
+    { id: 'name', header: 'River' },
+    { id: 'sea', header: 'Flows into', menu: false },
+    { id: 'length', header: 'Length (km)', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_COLUMNS.text, ...EN_COLUMN_MENU.text } },
+  features: [
+    moves,
+    columnMenu({
+      use: { columns: moves },
+      density: true,
+      // No « Hide column » on the river's name.
+      items: (column, defaults) => (column.id === 'name' ? defaults.filter((e) => 'separator' in e || e.id !== 'hide') : defaults),
+    }),
+  ],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Rivers' }}
+  features={['columns', 'chooser', ['columnMenu', { density: true }]]}
+  columns={[
+    { id: 'name', header: 'River', flex: 1, minWidth: 140 },
+    { id: 'sea', header: 'Flows into', width: 150 },
+    { id: 'length', header: 'Length (km)', type: 'number', width: 140 },
+  ]}
+  rows={[
+    { id: 'r1', name: 'Silverbrook', sea: 'North Sea', length: 212 },
+    { id: 'r2', name: 'Alderwater', sea: 'Lake Merrow', length: 87 },
+    { id: 'r3', name: 'Stonefall', sea: 'North Sea', length: 341 },
+    { id: 'r4', name: 'Reedmere', sea: 'Grey Bay', length: 56 },
+  ]}
+  caption="Open a column’s menu with its ⋮ button or a right-click on its title."
+/>
+
+## See also
+
+- The [`menu`](../../column-options/menu/) column option: no menu for one column.
+- The [`columns`](../columns/) and [`columnsChooser`](../columns-chooser/) features, which the menu drives.
+- The [`density`](../../settings/density/) setting.

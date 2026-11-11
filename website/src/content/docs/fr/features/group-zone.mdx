@@ -1,0 +1,101 @@
+---
+title: "groupZone"
+description: "La bande Regrouper par au-dessus des lignes : une puce par colonne de regroupement, à glisser, déplacer ou retirer."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Montre le regroupement comme une bande de puces au-dessus des lignes, que l’utilisateur peut changer.
+
+<FeatureFacts name="groupZone" />
+
+## Ce qu’elle fait
+
+`groupZone({ use })` ajoute une bande au-dessus des lignes. Vide, elle dit « Glissez une colonne ici pour regrouper ».
+Chaque colonne de regroupement y est une puce avec son nom et un bouton ×, dans l’ordre du regroupement. Un titre
+glissé sur la bande regroupe par sa colonne ; × ou Suppr en retire une ; Ctrl+Maj+← → ou un glisser à la souris en
+déplace une ; chaque changement est annoncé. La bande est un seul arrêt de tabulation : les flèches passent d’un
+élément à l’autre, en miroir en arabe.
+
+Elle pilote le [`grouping()`](../grouping/) donné dans `use.grouping`, par son API ; cette fonction doit aussi être
+dans la grille. Le dépôt d’un titre demande [`columns()`](../columns/) dans `use.columns` : sans lui, pas de dépôt,
+mais « Regrouper par cette colonne » dans le [menu de colonne](../column-menu/) et les touches marchent toujours. Une
+colonne avec `groupable: false` ne se dépose pas et n’a pas de puce. Une colonne déposée reste visible.
+
+Ses textes (le paquet `-group`) sont obligatoires : une erreur nomme chaque clé manquante. À côté d’un tableau croisé,
+prenez plutôt [`pivotBar()`](../pivot-bar/).
+
+## Options
+
+- `use` (obligatoire) : `grouping`, la fonction dont la bande montre et change les colonnes ; `columns`, facultatif,
+  le déplacement des colonnes qui permet de déposer un titre dessus.
+- `texts` : `'pivot'` lit les textes du tableau croisé (`pivot.label`, `pivot.empty`…) au lieu de `zone.*`, pour une
+  seconde bande qui tient les colonnes du tableau croisé.
+
+Lues à la création de la grille.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { grouping } from '@dzgrid/dom/grouping';
+import { groupZone } from '@dzgrid/dom/group-zone';
+import { columns } from '@dzgrid/dom/columns';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_GROUP } from '@dzgrid/dom/locales/fr-group';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+import '@dzgrid/theme/grouping.css';
+import '@dzgrid/theme/columns.css';
+
+type Packet = { id: string; kind: string; colour: string; name: string; packets: number };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_GROUP.text, ...FR_COLUMNS.text } };
+const groups = grouping({ by: ['kind'] });
+const moves = columns();
+
+createGrid<Packet>(document.getElementById('packets')!, {
+  rows: [{ id: 'p1', kind: 'Aromatique', colour: 'Vert', name: 'Basilic', packets: 40 }],
+  columns: [
+    { id: 'kind', header: 'Type' },
+    { id: 'colour', header: 'Couleur' },
+    { id: 'name', header: 'Graine', groupable: false },
+    { id: 'packets', header: 'Sachets', type: 'number', aggFunc: 'sum' },
+  ],
+  getRowId: (p) => p.id,
+  messages,
+  features: [moves, groups, groupZone({ use: { grouping: groups, columns: moves } })],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={420}
+  settings={{ label: 'Sachets de graines' }}
+  features={['columns', ['grouping', { by: ['kind'] }], 'groupZone']}
+  columns={[
+    { id: 'kind', header: 'Type', flex: 1, minWidth: 190 },
+    { id: 'colour', header: 'Couleur', width: 120 },
+    { id: 'name', header: 'Graine', width: 130, aggFunc: 'count' },
+    { id: 'packets', header: 'Sachets', type: 'number', width: 110, aggFunc: 'sum' },
+  ]}
+  rows={[
+    { id: 'p1', kind: 'Aromatique', colour: 'Vert', name: 'Basilic', packets: 40 },
+    { id: 'p2', kind: 'Fleur', colour: 'Orange', name: 'Souci', packets: 12 },
+    { id: 'p3', kind: 'Légume', colour: 'Orange', name: 'Carotte', packets: 55 },
+    { id: 'p4', kind: 'Aromatique', colour: 'Vert', name: 'Thym', packets: 18 },
+    { id: 'p5', kind: 'Fleur', colour: 'Jaune', name: 'Tournesol', packets: 30 },
+    { id: 'p6', kind: 'Légume', colour: 'Orange', name: 'Potiron', packets: 9 },
+    { id: 'p7', kind: 'Aromatique', colour: 'Violet', name: 'Ciboulette', packets: 22 },
+    { id: 'p8', kind: 'Fleur', colour: 'Rouge', name: 'Coquelicot', packets: 16 },
+    { id: 'p9', kind: 'Légume', colour: 'Rouge', name: 'Tomate', packets: 35 },
+  ]}
+  caption="Glissez le titre Couleur dans la bande au-dessus des titres ; × sur une puce la retire."
+/>
+
+## Voir aussi
+
+- [`grouping()`](../grouping/) : le regroupement qu’elle montre.
+- L’option de colonne [`groupable`](../../column-options/groupable/).
+- Le guide [Groupes](../../guides/grouping/).

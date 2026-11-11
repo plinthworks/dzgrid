@@ -1,0 +1,71 @@
+---
+title: "verticalHeaders"
+description: "Column titles written upwards, so narrow columns stay narrow."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Turns the titles of the columns marked headerVertical a quarter turn, reading upwards.
+
+<FeatureFacts name="verticalHeaders" />
+
+## What it does
+
+A column with [`headerVertical: true`](../../column-options/header-vertical/) has its title written upwards. The row
+of column titles grows to the longest such title, at least a row's height and at most `maxHeight`; a longer title is
+cut with « … ». It is measured again when the titles, the row height or the density change, never while scrolling.
+
+Names, roles and keys are unchanged: a screen reader reads the title as any other. The turn comes from the style sheet
+`vertical-headers.css`. A column with `headerVertical` on a grid without this feature keeps a flat title and the grid
+tells a `missing-feature` warning.
+
+## Options
+
+- `maxHeight`: the title row's height at most, in px. By default 240. Read once, when the feature is made.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { verticalHeaders } from '@dzgrid/dom/vertical-headers';
+import { EN } from '@dzgrid/dom/locales/en';
+import '@dzgrid/theme/vertical-headers.css';
+
+type Bed = { id: string; name: string; mon: boolean; tue: boolean; wed: boolean };
+const day = (id: 'mon' | 'tue' | 'wed', header: string) => ({ id, header, type: 'boolean' as const, width: 44, headerVertical: true });
+
+createGrid<Bed>(document.getElementById('watering')!, {
+  rows: [{ id: 'p1', name: 'Herb spiral', mon: true, tue: false, wed: true }],
+  columns: [{ id: 'name', header: 'Bed', flex: 1, minWidth: 140 }, day('mon', 'Monday'), day('tue', 'Tuesday'), day('wed', 'Wednesday')],
+  getRowId: (b) => b.id,
+  messages: EN,
+  features: [verticalHeaders({ maxHeight: 120 })],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={240}
+  settings={{ label: 'Watering' }}
+  features={[['verticalHeaders', { maxHeight: 120 }]]}
+  columns={[
+    { id: 'name', header: 'Bed', flex: 1, minWidth: 140 },
+    { id: 'mon', header: 'Monday', type: 'boolean', width: 44, headerVertical: true },
+    { id: 'tue', header: 'Tuesday', type: 'boolean', width: 44, headerVertical: true },
+    { id: 'wed', header: 'Wednesday', type: 'boolean', width: 44, headerVertical: true },
+    { id: 'thu', header: 'Thursday', type: 'boolean', width: 44, headerVertical: true },
+  ]}
+  rows={[
+    { id: 'p1', name: 'Herb spiral', mon: true, tue: false, wed: true, thu: false },
+    { id: 'p2', name: 'Bean tunnel', mon: false, tue: true, wed: false, thu: true },
+    { id: 'p3', name: 'Strawberry tower', mon: true, tue: true, wed: true, thu: false },
+  ]}
+/>
+
+## See also
+
+- The [`headerVertical`](../../column-options/header-vertical/) column option.
+- The [`wrappedHeaders`](../wrapped-headers/) feature: long titles on several lines instead.
+- [Columns](../../guides/columns/#vertical-titles): vertical titles in the guide.

@@ -1,0 +1,91 @@
+---
+title: "columnsChooser"
+description: "Une fenêtre pour afficher, masquer et ordonner les colonnes, avec un champ de recherche."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Ouvre « Choisir les colonnes » : chaque colonne avec une case pour l’afficher ou la masquer, et de quoi changer sa place.
+
+<FeatureFacts name="columnsChooser" />
+
+## Ce qu’elle fait
+
+`columnsChooser()` montre une fenêtre sous le bouton qui l’a ouverte : un champ de recherche, puis toutes les colonnes
+dans l’ordre de la grille — figées au début, au centre, figées à la fin, masquées comprises — dans leurs groupes de
+titres. Chaque colonne a une case (cochée : affichée), des boutons ▲ et ▼ et une poignée pour la faire glisser. Chaque
+changement s’applique tout de suite : décocher masque la colonne, déplacer une ligne déplace la colonne. « Tout
+afficher » et « Réinitialiser » agissent sur toutes les colonnes. La recherche ignore la casse et les accents.
+
+La liste est un seul arrêt de tabulation : les flèches vont de case en case, Alt+Flèche haut / bas déplacent d’une
+place la colonne qui a le focus. Échap vide d’abord le champ de recherche, puis ferme ; le bouton de fermeture et un
+appui ailleurs aussi. Le focus revient où il était. La dernière colonne affichée ne peut jamais être masquée, ni une
+colonne en [`hideable: false`](../../column-options/hideable/) ; une colonne en
+[`chooser: false`](../../column-options/chooser/) n’est pas listée.
+
+Elle s’ouvre depuis le [`columnMenu()`](../column-menu/) quand le menu la reçoit dans `use` (« Choisir les
+colonnes… »), ou depuis votre propre bouton avec `chooserFeature.api(grid).open(button)`. Avec [`dock()`](../dock/),
+c’est un panneau latéral au lieu d’une fenêtre. Sans les textes `-columns`, la grille n’est pas créée : une erreur
+nomme les clés qui manquent.
+
+## Options
+
+- `onClose` : appelée après la fermeture de la fenêtre (le focus est déjà revenu).
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { columnsChooser } from '@dzgrid/dom/columns-panel';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+import '@dzgrid/theme/columns-panel.css';
+
+type Fruit = { id: string; name: string; colour: string; weight: number; code: string };
+
+const chooser = columnsChooser({ onClose: () => console.log('choix des colonnes fermé') });
+
+const grid = createGrid<Fruit>(document.getElementById('fruit')!, {
+  rows: [{ id: 'f1', name: 'Coing', colour: 'Jaune', weight: 320, code: 'Q-01' }],
+  columns: [
+    { id: 'name', header: 'Fruit', hideable: false },
+    { id: 'colour', header: 'Couleur' },
+    { id: 'weight', header: 'Poids (g)', type: 'number', hidden: true },
+    { id: 'code', header: 'Code', chooser: false },
+  ],
+  getRowId: (f) => f.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_COLUMNS.text } },
+  features: [chooser],
+});
+
+const button = document.getElementById('choose')!;
+button.addEventListener('click', () => chooser.api(grid)?.open(button));
+```
+
+## Démo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Fruits' }}
+  features={['chooser', 'columnMenu']}
+  columns={[
+    { id: 'name', header: 'Fruit', flex: 1, minWidth: 140 },
+    { id: 'colour', header: 'Couleur', width: 130 },
+    { id: 'weight', header: 'Poids (g)', type: 'number', width: 130, hidden: true },
+    { id: 'season', header: 'Saison', width: 130 },
+  ]}
+  rows={[
+    { id: 'f1', name: 'Coing', colour: 'Jaune', weight: 320, season: 'Automne' },
+    { id: 'f2', name: 'Prune', colour: 'Violet', weight: 60, season: 'Été' },
+    { id: 'f3', name: 'Poire', colour: 'Vert', weight: 180, season: 'Automne' },
+    { id: 'f4', name: 'Cerise', colour: 'Rouge', weight: 8, season: 'Été' },
+  ]}
+  caption="Ouvrez le menu ⋮ d’une colonne et choisissez « Choisir les colonnes… » : cochez, décochez, ou déplacez une colonne par ses boutons ▲ ▼."
+/>
+
+## Voir aussi
+
+- Les options de colonne [`chooser`](../../column-options/chooser/) et [`hideable`](../../column-options/hideable/).
+- La fonction [`dock`](../dock/) : le choix des colonnes en panneau latéral.
+- [Dock et panneaux](../../guides/dock-panels/) : le guide.

@@ -1,0 +1,91 @@
+---
+title: "rowDrag"
+description: "Move rows by a grip, by the keys or by the menu; the grid tells where, your data decides."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Lets the user move rows: a grip to drag, keys, and menu items.
+
+<FeatureFacts name="rowDrag" />
+
+## What it does
+
+`rowDrag()` puts a grip at the start of a cell in each row. Drag it with a mouse, a pen or a finger; or press
+Alt+Shift+↑ / ↓ (Option+Shift on a Mac), Alt+Shift+Home / End, and in a tree Alt+Shift+→ / ← to indent or outdent.
+`menuItems(c)` gives Move up, Move down, to the top, to the bottom (and Indent / Outdent in a tree) for the
+[`contextMenu`](../context-menu/). The grip of a selected row drags every selected row shown.
+
+The grid sends a `rowMove` event saying where the rows go; your data decides. `moveRows` from `@dzgrid/core/row-drag`
+applies it to your array. While the rows are sorted or grouped, a move is refused and the grid says why. With a server
+source the grid only sends the event: `apply: true` there is ignored, with an `invalid-setting` warning.
+
+`api(grid)` gives `move(keys, target)`, `step(key, by)` and `dropTargets.add(element, target)`, which makes any
+element of yours a place to drop rows.
+
+## Options
+
+- `column`: the column whose cells show the grip. Default: the first visible column; hidden, no grip.
+- `apply`: the grid reorders its rows itself (flat rows held in the browser only). Default `false`: the event only.
+- `whenSorted`: sorted or grouped rows — `'refuse'` (default), or `'allow'`: the event is sent and your application
+  decides; the grid never applies it.
+- `canDrag(row)`: a row that may not move. A throw counts as no, reported once a gesture.
+- `canDrop(info)`: a place a move may not go. Asked at most once a frame during a drag; a throw counts as no.
+- `maxRows`: the most rows one gesture moves. Default 1 000; more is refused, and said.
+- `drag`: `false` removes the grip and the pointer drag; the keys, the menu and the API stay. Default `true`.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { rowDrag } from '@dzgrid/dom/row-drag';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_ROW_DRAG } from '@dzgrid/dom/locales/en-row-drag';
+
+type Tool = { id: string; name: string; hung: boolean };
+
+createGrid<Tool>(document.getElementById('tools')!, {
+  rows: [
+    { id: 't1', name: 'Hand saw', hung: false },
+    { id: 't2', name: 'Spirit level', hung: true },
+    { id: 't3', name: 'Mallet', hung: false },
+  ],
+  columns: [
+    { id: 'name', header: 'Tool' },
+    { id: 'hung', header: 'On the wall', type: 'boolean' },
+  ],
+  getRowId: (t) => t.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_ROW_DRAG.text } },
+  features: [rowDrag<Tool>({ column: 'name', apply: true, canDrag: (t) => !t.hung })],
+  onEvent: (e) => {
+    if (e.type === 'rowMove') console.log(e.applied);
+  },
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Tools' }}
+  features={[['rowDrag', { column: 'name', apply: true }]]}
+  columns={[
+    { id: 'name', header: 'Tool', flex: 1 },
+    { id: 'drawer', header: 'Drawer', type: 'number', width: 120 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Hand saw', drawer: 1 },
+    { id: 't2', name: 'Spirit level', drawer: 2 },
+    { id: 't3', name: 'Mallet', drawer: 2 },
+    { id: 't4', name: 'Bradawl', drawer: 3 },
+    { id: 't5', name: 'Spokeshave', drawer: 4 },
+  ]}
+  caption="Drag a tool by its grip, or focus it and press Alt+Shift+↓."
+/>
+
+## See also
+
+- [Row moves](../../guides/row-moves/): applying a move to your data, in a tree too.
+- [`contextMenu`](../context-menu/): where `menuItems(c)` goes.
+- [`tree`](../tree/): indent and outdent.

@@ -1,0 +1,93 @@
+---
+title: "nestedGrid"
+description: "Une partie de détail toute prête : toute une grille à elle dans le volet de chaque maître."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Crée une grille dans chaque volet de détail, à partir de réglages faits pour sa ligne maître.
+
+<FeatureFacts name="nestedGrid" />
+
+## Ce qu’elle fait
+
+`nestedGrid({ settings })` est une partie pour [`detail()`](../detail/). Pour chaque volet affiché, elle appelle
+`settings(c)` avec le contexte du volet (`c.row` est la ligne maître) et crée une grille d’après la réponse : ses
+lignes, ses colonnes, ses textes, son libellé, ses propres fonctions. Cette grille a ses propres touches, son
+défilement, son tri, ses filtres et son focus. Entrée ou F2 sur le volet entre dedans (sa cellule active, sinon la
+première ligne en vue) ; Échap sur une de ses cellules revient au volet, d’un seul niveau.
+
+Quand un volet s’en va (fermé ou sorti de la vue), le tri, les filtres, la recherche rapide, les lignes ouvertes, la
+cellule active et le défilement de sa grille sont retenus, et rendus quand il revient, pour les `keep` derniers
+maîtres. Une nouvelle ligne maître ou une nouvelle langue met la grille à jour sur place ; seul un réglage fixe changé
+(comme `getRowId` ou `features`) la recrée.
+
+Une grille imbriquée n’a pas de hauteur à elle : donnez à `detail()` un nombre ou une fonction comme `height`. Des
+grilles peuvent s’imbriquer dans des grilles imbriquées ; au-delà de trois niveaux, la grille créée signale
+`unsupported-combination` et marche quand même.
+
+## Options
+
+- `settings` (obligatoire) : la grille d’un maître, d’après le contexte du volet : ses lignes, colonnes, textes,
+  libellé, ses propres fonctions.
+- `keep` : combien de grilles de maîtres sont retenues, la moins récemment utilisée oubliée d’abord : 20 par défaut.
+- `onGrid` : appelée avec chaque grille créée, une fois montée, pour brancher votre propre barre d’outils ou vos
+  événements.
+- `env` : les points d’accroche de test de la grille, pour les tests seulement.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { detail, nestedGrid } from '@dzgrid/dom/detail';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_DETAIL } from '@dzgrid/dom/locales/fr-detail';
+
+type Visit = { id: string; day: string; frogs: number };
+type Pond = { id: string; name: string; visits: Visit[] };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_DETAIL.text } };
+const visits = nestedGrid<Visit>({
+  settings: (c) => ({
+    rows: (c.row as Pond).visits,
+    columns: [{ id: 'day', header: 'Jour', type: 'day' }, { id: 'frogs', header: 'Grenouilles', type: 'number' }],
+    getRowId: (v) => v.id,
+    label: `Visites de ${(c.row as Pond).name}`,
+    messages,
+  }),
+  keep: 50,
+  onGrid: (grid) => console.log(grid.kernel.query.sort),
+});
+
+createGrid<Pond>(document.getElementById('ponds')!, {
+  rows: [{ id: 'n1', name: 'Mare aux nénuphars', visits: [{ id: 'v1', day: '2026-05-04', frogs: 12 }] }],
+  columns: [{ id: 'name', header: 'Mare' }],
+  getRowId: (p) => p.id,
+  messages,
+  features: [detail<Pond>({ part: visits, height: 180 })],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={360}
+  settings={{ label: 'Mares' }}
+  features={[['detail', { field: 'visits', height: 170, columns: [{ id: 'day', header: 'Jour', type: 'day', flex: 1 }, { id: 'frogs', header: 'Grenouilles', type: 'number', width: 130 }] }]]}
+  columns={[
+    { id: 'name', header: 'Mare', flex: 1 },
+    { id: 'depth', header: 'Profondeur (m)', type: 'number', width: 130 },
+  ]}
+  rows={[
+    { id: 'n1', name: 'Mare aux nénuphars', depth: 1.2, visits: [{ id: 'v1', day: '2026-05-04', frogs: 12 }, { id: 'v2', day: '2026-05-18', frogs: 21 }, { id: 'v3', day: '2026-06-01', frogs: 9 }] },
+    { id: 'n2', name: 'Bassin des roseaux', depth: 0.6, visits: [{ id: 'v4', day: '2026-05-11', frogs: 4 }, { id: 'v5', day: '2026-05-25', frogs: 7 }] },
+    { id: 'n3', name: 'Bassin de pierre', depth: 0.4, visits: [{ id: 'v6', day: '2026-06-08', frogs: 2 }] },
+  ]}
+  caption="Ouvrez une mare, triez ses visites, fermez-la et rouvrez-la : le tri est gardé."
+/>
+
+## Voir aussi
+
+- [`detail()`](../detail/) : les volets qu’elle remplit.
+- [Maître et détail](../../guides/tree/#maître-et-détail) dans le guide.

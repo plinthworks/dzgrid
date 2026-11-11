@@ -1,0 +1,51 @@
+---
+title: "cellBoolean"
+description: "Une partie de cellule toute prête pour les colonnes oui / non : une marque et le mot, dans la langue de la grille."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Une partie de cellule qui montre ✓ Oui ou ✗ Non dans toutes les colonnes booléennes.
+
+<FeatureFacts name="cellBoolean" />
+
+## Ce qu’elle fait
+
+`cellBoolean` de `@dzgrid/dom/parts` est une partie de cellule toute prête, pas une fonction à appeler. Enregistrez-la
+dans le réglage [`parts`](../../settings/parts/) sous le nom `'cell.boolean'` : toutes les colonnes de type `boolean`
+la prennent alors, sans rien écrire dans les colonnes. Vrai montre ✓ et « Oui », faux ✗ et « Non », dans la langue de
+la grille ; une valeur vide ne montre rien. Il n’y a pas de couleur de ton : un « non » n’est pas une erreur. Un lecteur
+d’écran lit « Oui » ou « Non ».
+
+Sans la partie, une colonne booléenne montre déjà le mot (Oui / Non) venu du paquet de base ; la partie ajoute les
+marques. Ses mots viennent des textes `-parts` (`cell.yes`, `cell.no`). Sans eux, les cellules oui / non restent vides
+et l’erreur est signalée. Le tri, les filtres et les fichiers ne changent pas : un fichier CSV écrit toujours `true` /
+`false`.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { cellBoolean } from '@dzgrid/dom/parts';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_PARTS } from '@dzgrid/dom/locales/fr-parts';
+
+type Plant = { id: string; name: string; perennial: boolean; edible: boolean };
+
+createGrid<Plant>(document.getElementById('plants')!, {
+  rows: [{ id: 'p1', name: 'Romarin', perennial: true, edible: true }],
+  columns: [
+    { id: 'name', header: 'Plante' },
+    { id: 'perennial', header: 'Vivace', type: 'boolean' },
+    { id: 'edible', header: 'Comestible', type: 'boolean' },
+  ],
+  getRowId: (p) => p.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_PARTS.text } },
+  parts: { 'cell.boolean': cellBoolean },
+});
+```
+
+## Voir aussi
+
+- La partie [`badge`](../badge/), de la même entrée.
+- Le réglage [`parts`](../../settings/parts/) et l’option de colonne [`type`](../../column-options/type/).

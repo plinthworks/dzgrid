@@ -1,0 +1,54 @@
+---
+title: "autoHeight"
+description: "Des lignes aussi hautes que leur plus haute cellule à la ligne."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Rend chaque ligne aussi haute que sa plus haute cellule dans une colonne marquée wrap.
+
+<FeatureFacts name="autoHeight" />
+
+## Ce qu’elle fait
+
+Une colonne avec [`wrap: true`](../../column-options/wrap/) met son texte sur plusieurs lignes. Avec `autoHeight()`,
+chaque ligne grandit jusqu’à sa plus haute cellule à la ligne ; les lignes courtes gardent la hauteur normale. Les
+lignes sont mesurées après chaque dessin, avant que le navigateur les montre, et la ligne en haut de la vue reste où
+elle était : le défilement ne saute jamais.
+
+Les hauteurs sont mesurées de nouveau quand les données d’une ligne changent, que la largeur d’une colonne change, que
+des colonnes sont affichées, masquées ou déplacées, que la langue ou le sens change, que la taille du texte ou la
+densité change, ou que des polices arrivent en retard. Les panneaux de détail gardent leur propre hauteur ; la ligne de
+données au-dessus est mesurée comme les autres.
+
+Un [`rowHeight`](../../settings/row-height/) fixe l’emporte : rien n’est mesuré et les lignes en trop sont coupées.
+Sans cette fonction, le texte `wrap` est coupé aussi, avec un avertissement `missing-feature`. Au-delà de 10 000
+lignes affichées avec une colonne à la ligne, la grille signale un avertissement `auto-height-large` ; cela marche
+quand même.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { autoHeight } from '@dzgrid/dom/auto-height';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Tool = { id: string; name: string; notes: string };
+
+createGrid<Tool>(document.getElementById('tools')!, {
+  rows: [{ id: 't1', name: 'Rabot', notes: 'Affûter la lame avant chaque usage ; la garder huilée, et ranger le rabot sur le côté.' }],
+  columns: [
+    { id: 'name', header: 'Outil', width: 140 },
+    { id: 'notes', header: 'Notes', width: 220, wrap: true },
+  ],
+  getRowId: (t) => t.id,
+  messages: FR,
+  features: [autoHeight()],
+});
+```
+
+## Voir aussi
+
+- L’option de colonne [`wrap`](../../column-options/wrap/).
+- Le réglage [`rowHeight`](../../settings/row-height/).
+- [Colonnes](../../guides/columns/) : les tailles dans le guide.

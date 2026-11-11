@@ -1,0 +1,95 @@
+---
+title: "gridState"
+description: "Read and restore the grid's state — columns, sort, filters, page, dock — in storage or in the address."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Reads and restores the grid's state, keeps it in the browser's storage, writes it in the address.
+
+<FeatureFacts name="gridState" />
+
+## What it does
+
+`gridState()` reads and restores the columns (order, width, hidden, pinned), header groups, sort, filters, quick
+search, page and page size, density, grouped columns, the [`dock`](../dock/)'s layout and the pivot. A state is a
+plain, versioned object (`{ v: 1, … }`) you can store anywhere. It never holds row data, but it does hold what the
+user typed into filters. Not saved: open rows, the selection, the focus, the scroll, edits in progress.
+
+`api(grid)` gives `state()`, `setState(state)` (it returns the problems of a state it could not fully read) and
+`reset()` (back to the grid as it was defined: columns, sort, filters, search, grouping, dock and pivot). The `stateChanged` event comes after a user's change. A
+restore never throws: unknown columns are skipped (`state-column`), a field of the wrong type is skipped
+(`state-field`), a state from a newer version is refused whole (`state-version`).
+
+The same entry has three helpers. `persistLocal(grid, key)` keeps the state in the browser's storage for a grid
+made without `persist` (it needs `gridState()` in `features`, else `missing-feature`). `toSearchParams(state)` and
+`fromSearchParams(params)` write the state in the page's address and read it back; typed filter values and the
+search are left out unless you ask with `include: ['filter', 'quick']`.
+
+## Options
+
+- `debounce`: the pause after a gesture before `stateChanged`, in ms. Default 300.
+- `persist`: `{ key, include? }` keeps the state in `localStorage` under that key, read before the first request and
+  written after each gesture (`include`: the parts kept). Blocked or full storage throws nothing: one
+  `state-storage` warning.
+- `initial`: what the grid starts with (`{ v: 1, sort: [...] }`), applied before the first request — a server is
+  asked once. A stored state applies over it; `reset()` still goes back to the grid as defined.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { gridState, toSearchParams, fromSearchParams } from '@dzgrid/dom/state';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Orchard = { id: string; orchard: string; trees: number };
+
+const state = gridState({
+  initial: { v: 1, sort: [{ column: 'orchard', dir: 'asc' }] },
+  persist: { key: 'orchards-grid' },
+  debounce: 500,
+});
+
+const grid = createGrid<Orchard>(document.getElementById('orchards')!, {
+  rows: [{ id: 'o1', orchard: 'Hollow hill', trees: 120 }, { id: 'o2', orchard: 'Bee meadow', trees: 64 }],
+  columns: [
+    { id: 'orchard', header: 'Orchard' },
+    { id: 'trees', header: 'Trees', type: 'number' },
+  ],
+  getRowId: (o) => o.id,
+  messages: EN,
+  features: [state],
+  onEvent: (e) => {
+    if (e.type === 'stateChanged') history.replaceState(null, '', `?${toSearchParams(e.state).params.toString()}`);
+  },
+});
+
+const fromAddress = fromSearchParams(new URLSearchParams(location.search)).state;
+if (fromAddress) state.api(grid)?.setState(fromAddress);
+```
+
+## Live demo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Orchards' }}
+  features={['columns', 'filters', ['state', { initial: { v: 1, sort: [{ column: 'orchard', dir: 'asc' }] }, persist: { key: 'dzgrid-site-orchards' } }]]}
+  columns={[
+    { id: 'orchard', header: 'Orchard', flex: 1 },
+    { id: 'trees', header: 'Trees', type: 'number', width: 110 },
+    { id: 'fruit', header: 'Fruit', width: 140 },
+  ]}
+  rows={[
+    { id: 'o1', orchard: 'Hollow hill', trees: 120, fruit: 'Apple' },
+    { id: 'o2', orchard: 'Bee meadow', trees: 64, fruit: 'Pear' },
+    { id: 'o3', orchard: 'Old mill', trees: 210, fruit: 'Cherry' },
+    { id: 'o4', orchard: 'River bend', trees: 38, fruit: 'Plum' },
+  ]}
+  caption="Sort, filter or resize a column, then reload the page: the grid comes back as you left it."
+/>
+
+## See also
+
+- [State](../../guides/state/#in-the-address): the state in the address, step by step.
+- [`dock`](../dock/): the panels' layout, saved with the state.

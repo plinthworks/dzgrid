@@ -1,0 +1,79 @@
+---
+title: "wrappedHeaders"
+description: "Les longs titres de colonnes sur plusieurs lignes ; la ligne des titres grandit jusqu’au plus haut."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Met sur plusieurs lignes les longs titres des colonnes marquées headerWrap.
+
+<FeatureFacts name="wrappedHeaders" />
+
+## Ce qu’elle fait
+
+Une colonne avec [`headerWrap: true`](../../column-options/header-wrap/) a son titre coupé entre les mots sur
+plusieurs lignes, au plus `maxLines` ; au-delà, la dernière ligne finit par « … ». La ligne des titres de colonnes
+grandit jusqu’au plus haut de ces titres. La mesure est refaite quand les titres, les largeurs, la taille du texte, la
+densité ou le sens changent, jamais pendant le défilement. Avec le réglage
+[`headerHeight`](../../settings/header-height/), le plus haut l’emporte.
+
+Ajuster une telle colonne à son contenu prend ses cellules et le mot le plus long du titre. Un titre coupé à la limite
+se place au début de sa cellule, même dans une colonne de nombres, pour que son « … » se voie dans tous les
+navigateurs. Les noms, les rôles et les touches ne changent pas.
+
+Aucune feuille de style n’est nécessaire : la fonction ajoute ses quelques règles (`WRAPPED_HEADERS_CSS`, à charger
+soi-même avec `injectStyles: false`). Un `maxLines` qui n’est pas un nombre entier de 1 à 10 est signalé par un
+avertissement `invalid-setting`, et 3 est pris. Une colonne en `headerWrap` dans une grille sans cette fonction garde
+une ligne, et la grille signale un avertissement `missing-feature`.
+
+## Options
+
+- `maxLines` : le nombre de lignes qu’un titre peut prendre, de 1 à 10. Par défaut 3. Lu une fois, à la création de
+  la fonction.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { wrappedHeaders } from '@dzgrid/dom/wrapped-headers';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Parcel = { id: string; route: string; days: number };
+
+createGrid<Parcel>(document.getElementById('parcels')!, {
+  rows: [{ id: 'p1', route: 'Port – Ferme de la colline', days: 3 }],
+  columns: [
+    { id: 'route', header: 'Trajet', flex: 1 },
+    { id: 'days', header: 'Délai moyen de livraison en jours', type: 'number', width: 90, headerWrap: true },
+  ],
+  getRowId: (p) => p.id,
+  messages: FR,
+  features: [wrappedHeaders({ maxLines: 2 })],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Colis' }}
+  features={[['wrappedHeaders', { maxLines: 2 }]]}
+  columns={[
+    { id: 'route', header: 'Trajet', flex: 1, minWidth: 160 },
+    { id: 'parcels', header: 'Colis', type: 'number', width: 110 },
+    { id: 'days', header: 'Délai moyen de livraison en jours', type: 'number', width: 110, headerWrap: true },
+  ]}
+  rows={[
+    { id: 'p1', route: 'Port – Ferme de la colline', parcels: 42, days: 3 },
+    { id: 'p2', route: 'Moulin – Vieux pont', parcels: 17, days: 1 },
+    { id: 'p3', route: 'Marché – Phare', parcels: 29, days: 2 },
+  ]}
+  caption="Le dernier titre prend deux lignes ; les autres restent sur une."
+/>
+
+## Voir aussi
+
+- L’option de colonne [`headerWrap`](../../column-options/header-wrap/).
+- La fonction [`verticalHeaders`](../vertical-headers/) : des titres écrits vers le haut.
+- [Colonnes](../../guides/columns/) : les titres sur plusieurs lignes dans le guide.

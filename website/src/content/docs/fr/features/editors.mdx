@@ -1,0 +1,96 @@
+---
+title: "editors"
+description: "Les champs qui modifient une cellule : texte, nombre, jour, date et heure, oui / non, une liste, ou le vôtre."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Dessine le champ qui modifie une cellule, choisi selon le type de la colonne, et ses touches.
+
+<FeatureFacts name="editors" />
+
+## Ce qu’elle fait
+
+`editors()` ouvre un champ dans une cellule modifiable : par F2, Entrée, un caractère tapé ou un double-clic. Les
+colonnes de texte et de nombres ont un champ de texte ; les colonnes `day` et `instant` un champ de date avec un bouton
+de calendrier (Alt+Flèche bas l’ouvre aussi) ; une liste (une colonne `enum` ou `edit.options`) la liste de
+[`listEditor`](../list-editor/) ; une cellule oui / non n’ouvre aucun champ — Espace, Entrée ou un double-clic
+l’inverse. Votre propre éditeur est une partie nommée dans le `edit.editor` de la colonne. Entrée garde la valeur, Tab
+la garde et ouvre la cellule modifiable suivante, Échap rend l’ancienne valeur, Suppr vide. Une valeur refusée reste
+dans le champ ouvert, sous une petite bulle qui dit pourquoi.
+
+Elle vient de deux entrées avec la même fonction. `@dzgrid/dom/editors` a le calendrier, venu de `@tzslot/*`, chargé
+à la première utilisation. `@dzgrid/dom/editors-base` n’en a pas : pour une application sans `@tzslot/*` installé, un
+jour se tape (sauf si `loadCalendar` apporte un calendrier).
+
+Elle a besoin d’[`edit()`](../edit/), qui tient les valeurs : sans elle, rien ne s’ouvre et la grille signale un
+avertissement `missing-feature`. Une colonne liste sans `list` ouvre un champ de texte, avec un avertissement
+`missing-feature` par colonne ; une liste de plus de 500 choix ouvre aussi un champ de texte, avec un avertissement
+`invalid-column`. Un nom `edit.editor` que personne n’a enregistré signale `unknown-part`. Sans les textes `-editors`,
+la grille n’est pas créée : une erreur nomme les clés qui manquent.
+
+## Options
+
+- `enterMoves` : après Entrée (Maj+Entrée), rester dans la même cellule (`'stay'`, par défaut) ou aller à la cellule
+  du dessous (du dessus) avec `'down'`.
+- `tab` : Tab ouvre la cellule modifiable suivante (`'cell'`, par défaut) ou quitte la grille (`'grid'`).
+- `calendar` : le bouton de calendrier et Alt+Flèche bas sur les champs de jour et de date et heure. Par défaut
+  `true` ; `false` ne fait que taper et ne charge rien.
+- `loadCalendar` : d’où vient le code du calendrier, pour une application qui sert ses propres fichiers.
+- `dateMessages` : les mots du calendrier par langue, par-dessus ses propres anglais, français et arabe.
+- `list` : l’éditeur de liste, `listEditor` de `@dzgrid/dom/editors-list`.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors';
+import { listEditor } from '@dzgrid/dom/editors-list';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_EDIT } from '@dzgrid/dom/locales/fr-edit';
+import { FR_EDITORS } from '@dzgrid/dom/locales/fr-editors';
+import '@dzgrid/theme/edit.css';
+
+type Gnome = { id: string; name: string; hat: string; painted: string; fishing: boolean };
+
+createGrid<Gnome>(document.getElementById('gnomes')!, {
+  rows: [{ id: 'g1', name: 'Barnabé', hat: 'red', painted: '2025-04-02', fishing: true }],
+  columns: [
+    { id: 'name', header: 'Nom', editable: true },
+    { id: 'hat', header: 'Bonnet', type: 'enum', editable: true, enumOptions: [{ value: 'red', label: 'Rouge' }, { value: 'green', label: 'Vert' }] },
+    { id: 'painted', header: 'Peint le', type: 'day', editable: true },
+    { id: 'fishing', header: 'Pêcheur', type: 'boolean', editable: true },
+  ],
+  getRowId: (g) => g.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_EDIT.text, ...FR_EDITORS.text } },
+  features: [edit<Gnome>(), editors({ enterMoves: 'down', tab: 'cell', list: listEditor })],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Nains de jardin' }}
+  features={['edit']}
+  columns={[
+    { id: 'name', header: 'Nom', flex: 1, minWidth: 140, editable: true },
+    { id: 'hat', header: 'Bonnet', type: 'enum', width: 110, editable: true, enumOptions: [{ value: 'red', label: 'Rouge' }, { value: 'green', label: 'Vert' }, { value: 'blue', label: 'Bleu' }] },
+    { id: 'painted', header: 'Peint le', type: 'day', width: 140, editable: true },
+    { id: 'fishing', header: 'Pêcheur', type: 'boolean', width: 100, editable: true },
+  ]}
+  rows={[
+    { id: 'g1', name: 'Barnabé', hat: 'red', painted: '2025-04-02', fishing: true },
+    { id: 'g2', name: 'Pépin', hat: 'green', painted: '2024-09-14', fishing: false },
+    { id: 'g3', name: 'Vieux Chardon', hat: 'blue', painted: '2023-06-30', fishing: true },
+  ]}
+  caption="Choisissez un bonnet dans la liste, un jour dans le calendrier, inversez Pêcheur avec Espace."
+/>
+
+## Voir aussi
+
+- La fonction [`edit`](../edit/) : enregistrer, annuler et rétablir.
+- Le [`listEditor`](../list-editor/) : le champ liste.
+- [Édition](../../guides/editing/) : votre propre éditeur dans le guide.

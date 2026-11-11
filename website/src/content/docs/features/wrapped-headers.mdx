@@ -1,0 +1,76 @@
+---
+title: "wrappedHeaders"
+description: "Long column titles on several lines; the title row grows to the tallest."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Puts the long titles of the columns marked headerWrap on several lines.
+
+<FeatureFacts name="wrappedHeaders" />
+
+## What it does
+
+A column with [`headerWrap: true`](../../column-options/header-wrap/) has its title broken between words onto several
+lines, at most `maxLines`; past them, the last line ends with « … ». The row of column titles grows to the tallest such
+title. It is measured again when the titles, the widths, the text size, the density or the direction change, never
+while scrolling. With the [`headerHeight`](../../settings/header-height/) setting, the taller wins.
+
+Fitting such a column to its content takes its cells and the title's longest word. A title cut at the limit sits at the
+start of its cell, even in a number column, so its « … » shows in every browser. Names, roles and keys are unchanged.
+
+No style sheet is needed: the feature adds its own few rules (`WRAPPED_HEADERS_CSS`, to load yourself with
+`injectStyles: false`). A `maxLines` that is not a whole number from 1 to 10 is told as an `invalid-setting` warning and
+3 is used. A column with `headerWrap` on a grid without this feature keeps one line and the grid tells a
+`missing-feature` warning.
+
+## Options
+
+- `maxLines`: the lines a title may take, 1 to 10. By default 3. Read once, when the feature is made.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { wrappedHeaders } from '@dzgrid/dom/wrapped-headers';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Parcel = { id: string; route: string; days: number };
+
+createGrid<Parcel>(document.getElementById('parcels')!, {
+  rows: [{ id: 'p1', route: 'Harbour – Hill farm', days: 3 }],
+  columns: [
+    { id: 'route', header: 'Route', flex: 1 },
+    { id: 'days', header: 'Average delivery time in days', type: 'number', width: 90, headerWrap: true },
+  ],
+  getRowId: (p) => p.id,
+  messages: EN,
+  features: [wrappedHeaders({ maxLines: 2 })],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Parcels' }}
+  features={[['wrappedHeaders', { maxLines: 2 }]]}
+  columns={[
+    { id: 'route', header: 'Route', flex: 1, minWidth: 160 },
+    { id: 'parcels', header: 'Parcels', type: 'number', width: 110 },
+    { id: 'days', header: 'Average delivery time in days', type: 'number', width: 110, headerWrap: true },
+  ]}
+  rows={[
+    { id: 'p1', route: 'Harbour – Hill farm', parcels: 42, days: 3 },
+    { id: 'p2', route: 'Mill – Old bridge', parcels: 17, days: 1 },
+    { id: 'p3', route: 'Market – Lighthouse', parcels: 29, days: 2 },
+  ]}
+  caption="The last title takes two lines; the others stay on one."
+/>
+
+## See also
+
+- The [`headerWrap`](../../column-options/header-wrap/) column option.
+- The [`verticalHeaders`](../vertical-headers/) feature: titles written upwards.
+- [Columns](../../guides/columns/#titles-on-several-lines): titles on several lines in the guide.

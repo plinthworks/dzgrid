@@ -1,0 +1,97 @@
+---
+title: "gridState"
+description: "Lire et restaurer l’état de la grille — colonnes, tri, filtres, page, volets — dans le stockage ou dans l’adresse."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Lit et restaure l’état de la grille, le garde dans le stockage du navigateur, l’écrit dans l’adresse.
+
+<FeatureFacts name="gridState" />
+
+## Ce qu’elle fait
+
+`gridState()` lit et restaure les colonnes (ordre, largeur, masquées, figées), les groupes d’en-têtes, le tri, les
+filtres, la recherche rapide, la page et la taille de page, la densité, les colonnes groupées, la disposition du
+[`dock`](../dock/) et le pivot. Un état est un objet simple et versionné (`{ v: 1, … }`) à ranger où vous voulez. Il
+ne contient jamais de données de lignes, mais il contient ce que l’utilisateur a tapé dans les filtres. Pas gardés :
+les lignes ouvertes, la sélection, le focus, le défilement, les saisies en cours.
+
+`api(grid)` donne `state()`, `setState(state)` (il rend les problèmes d’un état qu’il n’a pas pu lire en entier) et
+`reset()` (retour à la grille telle que définie : colonnes, tri, filtres, recherche, regroupement, panneaux et pivot). L’événement `stateChanged` arrive après un changement fait
+par l’utilisateur. Une restauration ne lève jamais d’exception : les colonnes inconnues sont ignorées
+(`state-column`), un champ du mauvais type est ignoré (`state-field`), un état d’une version plus récente est refusé
+en entier (`state-version`).
+
+La même entrée a trois aides. `persistLocal(grid, key)` garde l’état dans le stockage du navigateur pour une grille
+faite sans `persist` (il faut `gridState()` dans `features`, sinon `missing-feature`). `toSearchParams(state)` et
+`fromSearchParams(params)` écrivent l’état dans l’adresse de la page et le relisent ; les valeurs tapées dans les
+filtres et la recherche en sont exclues sauf si vous le demandez avec `include: ['filter', 'quick']`.
+
+## Options
+
+- `debounce` : la pause après un geste avant `stateChanged`, en ms. Par défaut 300.
+- `persist` : `{ key, include? }` garde l’état dans `localStorage` sous cette clé, lu avant la première requête et
+  écrit après chaque geste (`include` : les parties gardées). Un stockage bloqué ou plein ne lève rien : un
+  avertissement `state-storage`.
+- `initial` : ce avec quoi la grille démarre (`{ v: 1, sort: [...] }`), appliqué avant la première requête — un
+  serveur n’est appelé qu’une fois. Un état stocké s’applique par-dessus ; `reset()` revient toujours à la grille telle que définie.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { gridState, toSearchParams, fromSearchParams } from '@dzgrid/dom/state';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Orchard = { id: string; orchard: string; trees: number };
+
+const state = gridState({
+  initial: { v: 1, sort: [{ column: 'orchard', dir: 'asc' }] },
+  persist: { key: 'orchards-grid' },
+  debounce: 500,
+});
+
+const grid = createGrid<Orchard>(document.getElementById('orchards')!, {
+  rows: [{ id: 'o1', orchard: 'Colline creuse', trees: 120 }, { id: 'o2', orchard: 'Pré aux abeilles', trees: 64 }],
+  columns: [
+    { id: 'orchard', header: 'Verger' },
+    { id: 'trees', header: 'Arbres', type: 'number' },
+  ],
+  getRowId: (o) => o.id,
+  messages: FR,
+  features: [state],
+  onEvent: (e) => {
+    if (e.type === 'stateChanged') history.replaceState(null, '', `?${toSearchParams(e.state).params.toString()}`);
+  },
+});
+
+const fromAddress = fromSearchParams(new URLSearchParams(location.search)).state;
+if (fromAddress) state.api(grid)?.setState(fromAddress);
+```
+
+## Démo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Vergers' }}
+  features={['columns', 'filters', ['state', { initial: { v: 1, sort: [{ column: 'orchard', dir: 'asc' }] }, persist: { key: 'dzgrid-site-orchards' } }]]}
+  columns={[
+    { id: 'orchard', header: 'Verger', flex: 1 },
+    { id: 'trees', header: 'Arbres', type: 'number', width: 110 },
+    { id: 'fruit', header: 'Fruit', width: 140 },
+  ]}
+  rows={[
+    { id: 'o1', orchard: 'Colline creuse', trees: 120, fruit: 'Pomme' },
+    { id: 'o2', orchard: 'Pré aux abeilles', trees: 64, fruit: 'Poire' },
+    { id: 'o3', orchard: 'Vieux moulin', trees: 210, fruit: 'Cerise' },
+    { id: 'o4', orchard: 'Méandre', trees: 38, fruit: 'Prune' },
+  ]}
+  caption="Triez, filtrez ou redimensionnez une colonne, puis rechargez la page : la grille revient comme vous l’avez laissée."
+/>
+
+## Voir aussi
+
+- [État](../../guides/state/#dans-ladresse) : l’état dans l’adresse, pas à pas.
+- [`dock`](../dock/) : la disposition des volets, gardée avec l’état.

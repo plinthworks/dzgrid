@@ -970,5 +970,2293 @@
       "default": null,
       "source": "packages/core/src/columns/defs.ts"
     }
+  ],
+  "features": [
+    {
+      "name": "pagination",
+      "entry": "@dzgrid/dom/pagination",
+      "signature": "pagination(o?: PaginationOptions): GridFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "footer",
+          "type": "readonly string[]",
+          "resolved": null,
+          "required": false,
+          "doc": "The footer's parts, in order (fixed): `footer.*` names, or a host's own `footer` parts.",
+          "default": null,
+          "source": "packages/dom/src/pagination/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "pagination",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": null,
+      "css": [],
+      "doc": "`pagination()`: a footer under the rows (docs/behaviors/pagination-footer.md, step 17) — what is selected, where the user is, and the pager in a named `<nav>`. Its parts `footer.selected`, `footer.count` and `footer.pager` are replaced by a host's of the same name.",
+      "source": "packages/dom/src/pagination/index.ts"
+    },
+    {
+      "name": "quickSearch",
+      "entry": "@dzgrid/dom/search",
+      "signature": "quickSearch(o?: QuickSearchSetup): QuickSearch",
+      "param": "o",
+      "options": [
+        {
+          "name": "highlight",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "The words searched tinted inside the cells shown (docs/behaviors/search-highlight.md); default true.",
+          "default": null,
+          "source": "packages/dom/src/search/index.ts"
+        }
+      ],
+      "texts": null,
+      "sheet": "@dzgrid/theme/search.css",
+      "css": [],
+      "doc": "`quickSearch()`: the page's own search fields drive the grid's quick search (docs/behaviors/quick-search-box.md, step 16, owner decisions Q1–Q3).",
+      "source": "packages/dom/src/search/index.ts"
+    },
+    {
+      "name": "csvExport",
+      "entry": "@dzgrid/dom/export",
+      "signature": "csvExport(o: CsvExportOptions): CsvExport",
+      "param": "o",
+      "options": [
+        {
+          "name": "canExport",
+          "type": "true | ((r: ExportRequest, context: unknown) => Refusal | Promise<Refusal>)",
+          "resolved": null,
+          "required": true,
+          "doc": "`context`: the grid's `settings.context`, read when the export runs (step 21).",
+          "default": null,
+          "source": "packages/dom/src/export/index.ts"
+        },
+        {
+          "name": "exportAll",
+          "type": "(r: ExportRequest, c: ExportAllContext) => Promise<ExportAllResult>",
+          "resolved": null,
+          "required": false,
+          "doc": "Server pages' `all` and `selected`: the host's export of the whole query.",
+          "default": null,
+          "source": "packages/dom/src/export/index.ts"
+        },
+        {
+          "name": "fileName",
+          "type": "(c: { readonly scope: CsvScope; readonly ctx: LocaleCtx; readonly now: number }) => string",
+          "resolved": null,
+          "required": false,
+          "doc": "The file's name (`.csv` added, cleaned); default `${export.fileName}-YYYY-MM-DD-HHmm.csv` in the display zone.",
+          "default": null,
+          "source": "packages/dom/src/export/index.ts"
+        },
+        {
+          "name": "onProgress",
+          "type": "(p: ExportProgress) => void",
+          "resolved": null,
+          "required": false,
+          "doc": "For a host's progress bar: the grid says no progress sentences.",
+          "default": null,
+          "source": "packages/dom/src/export/index.ts"
+        },
+        {
+          "name": "maxCells",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "A browser export above this many cells (rows × columns) is refused; 10 000 000 by default (owner Q4).",
+          "default": null,
+          "source": "packages/dom/src/export/index.ts"
+        },
+        {
+          "name": "deliver",
+          "type": "(f: { readonly blob?: Blob; readonly url?: string; readonly fileName: string }) => void | Promise<void>",
+          "resolved": null,
+          "required": false,
+          "doc": "Takes the file instead of the grid's `<a download>` (tests, a host's own saving).",
+          "default": null,
+          "source": "packages/dom/src/export/index.ts"
+        },
+        {
+          "name": "loadRun",
+          "type": "() => Promise<typeof Chunk>",
+          "resolved": null,
+          "required": false,
+          "doc": "Where the export's code comes from (`import()` of the chunk otherwise).",
+          "default": null,
+          "source": "packages/dom/src/export/index.ts"
+        },
+        {
+          "name": "xlsx",
+          "type": "true | XlsxExportOptions",
+          "resolved": null,
+          "required": false,
+          "doc": "Excel files too (Phase 9): `run(scope, { format: 'xlsx' })`, `bind(button, { format: 'xlsx' })`, `xlsx.run()`. Absent: CSV only.",
+          "default": null,
+          "source": "packages/dom/src/export/index.ts"
+        },
+        {
+          "name": "text",
+          "type": "'value' | 'display'",
+          "resolved": null,
+          "required": false,
+          "doc": "`value` (default): machine values Excel can compute with; `display`: each cell as the grid formats it.",
+          "default": null,
+          "source": "packages/core/src/csv/chunks.ts"
+        },
+        {
+          "name": "separator",
+          "type": "',' | ';' | '\\t'",
+          "resolved": null,
+          "required": false,
+          "doc": "Default: `csvSeparatorFor(ctx)`.",
+          "default": null,
+          "source": "packages/core/src/csv/chunks.ts"
+        },
+        {
+          "name": "bom",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "A BOM first, so Excel reads UTF-8 (Arabic); default true.",
+          "default": null,
+          "source": "packages/core/src/csv/chunks.ts"
+        },
+        {
+          "name": "header",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "A line of column labels first; default true.",
+          "default": null,
+          "source": "packages/core/src/csv/chunks.ts"
+        },
+        {
+          "name": "numbers",
+          "type": "'excel' | 'raw'",
+          "resolved": null,
+          "required": false,
+          "doc": "`excel` (default): the locale's decimal mark unless the separator is `,`; `raw`: the machine form.",
+          "default": null,
+          "source": "packages/core/src/csv/chunks.ts"
+        },
+        {
+          "name": "instants",
+          "type": "'wall' | 'iso'",
+          "resolved": null,
+          "required": false,
+          "doc": "`wall` (default): the display zone's clock, seconds; `iso`: UTC with `Z`, exact.",
+          "default": null,
+          "source": "packages/core/src/csv/chunks.ts"
+        },
+        {
+          "name": "enums",
+          "type": "'label' | 'code'",
+          "resolved": null,
+          "required": false,
+          "doc": "",
+          "default": null,
+          "source": "packages/core/src/csv/chunks.ts"
+        },
+        {
+          "name": "sanitizeFormulas",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "The formula guard; default true.",
+          "default": null,
+          "source": "packages/core/src/csv/chunks.ts"
+        },
+        {
+          "name": "spans",
+          "type": "'repeat' | 'first'",
+          "resolved": null,
+          "required": false,
+          "doc": "A spanned cell: its value in every slot it covers (`repeat`, default) or in its first only.",
+          "default": null,
+          "source": "packages/core/src/csv/chunks.ts"
+        },
+        {
+          "name": "columns",
+          "type": "readonly string[]",
+          "resolved": null,
+          "required": false,
+          "doc": "Column ids, in order; default the visible columns. A hidden one named is written.",
+          "default": null,
+          "source": "packages/core/src/csv/chunks.ts"
+        },
+        {
+          "name": "tree",
+          "type": "'none' | 'level' | 'indent'",
+          "resolved": null,
+          "required": false,
+          "doc": "A tree's depth (csv-export.md): `level` (default) a first column, 1 for the roots; `indent` two spaces per level before the tree column's text; `none` flat rows. Only when the rows are a tree's.",
+          "default": null,
+          "source": "packages/core/src/csv/chunks.ts"
+        },
+        {
+          "name": "levelHeader",
+          "type": "string",
+          "resolved": null,
+          "required": false,
+          "doc": "The level column's header; default `Level`.",
+          "default": null,
+          "source": "packages/core/src/csv/chunks.ts"
+        },
+        {
+          "name": "treeColumn",
+          "type": "string",
+          "resolved": null,
+          "required": false,
+          "doc": "The column that carries the indent and a filler's label; absent or not written: the first written.",
+          "default": null,
+          "source": "packages/core/src/csv/chunks.ts"
+        },
+        {
+          "name": "groupRows",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "A grouped grid's group, footer and grand total lines (Phase 7, csv-export.md « Grouped rows »): written (default), or `false` for the data rows only, flat (no level, no indent).",
+          "default": null,
+          "source": "packages/core/src/csv/chunks.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "export",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": null,
+      "css": [],
+      "doc": "`csvExport()`: the CSV export (docs/behaviors/csv-export.md, step 19) — no button of its own: the host's, bound with `bind`. This part is small; the code that builds and saves the file is a chunk loaded at the first export (or a hover). One feature object per grid.",
+      "source": "packages/dom/src/export/index.ts"
+    },
+    {
+      "name": "badge",
+      "entry": "@dzgrid/dom/parts",
+      "signature": "badge(o?: BadgeOptions): SlotPart<\"cell\">",
+      "param": "o",
+      "options": [
+        {
+          "name": "tones",
+          "type": "Readonly<Record<string, Tone>>",
+          "resolved": null,
+          "required": false,
+          "doc": "The tone of each value, by the value as a string (`String(value)`): `{ done: 'success', late: 'danger' }`.",
+          "default": null,
+          "source": "packages/dom/src/parts/badge.ts"
+        },
+        {
+          "name": "fallback",
+          "type": "Tone",
+          "resolved": "\"neutral\" | \"info\" | \"success\" | \"warning\" | \"danger\"",
+          "required": false,
+          "doc": "The tone of a value the map does not name; default `neutral`.",
+          "default": null,
+          "source": "packages/dom/src/parts/badge.ts"
+        },
+        {
+          "name": "classes",
+          "type": "Readonly<Partial<Record<Tone, string>>>",
+          "resolved": null,
+          "required": false,
+          "doc": "The host's classes per tone (showcase themes step 6), beside `dzg-badge`: `{ danger: 'bg-red-100 text-red-800' }`.",
+          "default": null,
+          "source": "packages/dom/src/parts/badge.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "parts",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": null,
+      "css": [],
+      "doc": "A status badge (docs/behaviors/badge-boolean.md), registered by name and used through `ui.cell`: `parts: { statusBadge: badge({ tones: { done: 'success' } }) }`. The label is the cell's text (an enum's label; an unknown value shows the value), the tone `tones[String(value)]` (own keys only) or `fallback`; a blank shows nothing. The tone is never in the accessible name.",
+      "source": "packages/dom/src/parts/badge.ts"
+    },
+    {
+      "name": "cellBoolean",
+      "entry": "@dzgrid/dom/parts",
+      "signature": "cellBoolean: SlotPart<\"cell\">",
+      "param": null,
+      "options": [],
+      "texts": {
+        "bundle": "parts",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": null,
+      "css": [],
+      "doc": "Yes/no cells (owner Q2), registered as `'cell.boolean'`: every boolean column takes it. True shows `✓` and `cell.yes`, false `✗` and `cell.no`, in the grid's language (the codec's `true` / `false` is not translated); a blank shows nothing. No tone: a \"no\" is not an error. A bundle without the texts throws here, which the grid reports.",
+      "source": "packages/dom/src/parts/boolean.ts"
+    },
+    {
+      "name": "rules",
+      "entry": "@dzgrid/dom/rules",
+      "signature": "rules(): GridFeature",
+      "param": null,
+      "options": [],
+      "texts": {
+        "bundle": "rules",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": null,
+      "css": [],
+      "doc": "`rules()`: selection rules (docs/behaviors/selection-rules.md, step 21). Reads `settings.selection.canSelect` and `settings.context` live: every addition is vetted through the kernel's gate, a refusal is said (a host's is told as a problem), and the boxes of rows the rule refuses now are greyed (`data-dzg-refused` on `.dzg-check`, never `aria-disabled`).",
+      "source": "packages/dom/src/rules/index.ts"
+    },
+    {
+      "name": "tree",
+      "entry": "@dzgrid/dom/tree",
+      "signature": "tree<T>(o: TreeFeatureOptions<T>): TreeFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "column",
+          "type": "string | ((row: T) => string)",
+          "resolved": null,
+          "required": false,
+          "doc": "The column that shows the hierarchy: the first visible one by default (screen readers expect it first). A function (1.2.0) names it per data row: that row's chevron, indent and keys go there (tree-view.md « row by row »); an answer that is not a visible column's id, or a throw: the default, told once (`invalid-setting`, `tree.column`).",
+          "default": null,
+          "source": "packages/dom/src/tree/index.ts"
+        },
+        {
+          "name": "indent",
+          "type": "number | ((row: T, level: number) => number)",
+          "resolved": null,
+          "required": false,
+          "doc": "Pixels per level of indent (16 by default), or a data row's indent (1.2.0), for display only: an answer that is not a number from 0 to 1 000, or a throw: `level × 16`, told once (`invalid-setting`, `tree.indent`).",
+          "default": null,
+          "source": "packages/dom/src/tree/index.ts"
+        },
+        {
+          "name": "lazy",
+          "type": "LazyChildren<T>",
+          "resolved": null,
+          "required": false,
+          "doc": "Children loaded when their parent opens: `lazyChildren({ has, load })` from `@dzgrid/dom/tree-lazy` (tree-lazy.md).",
+          "default": null,
+          "source": "packages/dom/src/tree/index.ts"
+        },
+        {
+          "name": "sticky",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "Parents kept pinned under the header while their children scroll, the nearest first (tree-sticky.md): 0 none, 3 by default.",
+          "default": null,
+          "source": "packages/dom/src/tree/index.ts"
+        },
+        {
+          "name": "structure",
+          "type": "readonly string[]",
+          "resolved": null,
+          "required": false,
+          "doc": "The columns that feed the tree, read-only this phase (owner Q13, O7; the core's `edit-structure` told once for one marked editable). Default: a path tree's own column (its labels are the path), none for `parentId` or `children`; given, it replaces the default (`[]` frees a path tree's column).",
+          "default": null,
+          "source": "packages/dom/src/tree/index.ts"
+        },
+        {
+          "name": "parentId",
+          "type": "(row: T) => RowIdInput | null | undefined",
+          "resolved": null,
+          "required": false,
+          "doc": "The id of a row's parent; null, undefined or '' for a root.",
+          "default": null,
+          "source": "packages/core/src/tree/shape.ts"
+        },
+        {
+          "name": "children",
+          "type": "(row: T) => readonly T[] | undefined",
+          "resolved": null,
+          "required": false,
+          "doc": "A row's children (nested data): every level becomes rows of the grid, ids unique over all of them.",
+          "default": null,
+          "source": "packages/core/src/tree/shape.ts"
+        },
+        {
+          "name": "path",
+          "type": "(row: T) => readonly string[]",
+          "resolved": null,
+          "required": false,
+          "doc": "A row's path of labels, root first: a level no row has becomes a filler row (a label, never data).",
+          "default": null,
+          "source": "packages/core/src/tree/shape.ts"
+        },
+        {
+          "name": "filter",
+          "type": "'ancestors' | 'subtree'",
+          "resolved": null,
+          "required": false,
+          "doc": "What a filter keeps: matches and their ancestors (default), or their whole subtrees too (tree-filter.md).",
+          "default": null,
+          "source": "packages/core/src/tree/shape.ts"
+        },
+        {
+          "name": "initial",
+          "type": "'none' | 'all' | number",
+          "resolved": null,
+          "required": false,
+          "doc": "What is open at the first non-empty load: nothing (default), everything, or the levels above a depth (1: the roots).",
+          "default": null,
+          "source": "packages/core/src/tree/shape.ts"
+        },
+        {
+          "name": "fixedOpen",
+          "type": "(row: T) => boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "The data rows always open (1.1.0, tree-view.md): open whatever the expansion, never closed by the kernel, never listed by expand-all / collapse-all; the DOM draws them no chevron. A throw counts as false; a value that is not a function is ignored, told (`invalid-setting`).",
+          "default": null,
+          "source": "packages/core/src/tree/shape.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "tree",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": null,
+      "css": [],
+      "doc": "`tree(options)`: the rows as a tree (docs/behaviors/tree-view.md, tree-keys.md, tree-filter.md; WAI-ARIA 1.2 treegrid). Hands `treeShape` from `@dzgrid/core/tree` to the grid's rows at creation; draws the tree column (indent, a decorative toggle), the rows' level, place and open state; opens and closes by the pointer on the toggle and by the keys of the tree column; says each opening.",
+      "source": "packages/dom/src/tree/index.ts"
+    },
+    {
+      "name": "lazyChildren",
+      "entry": "@dzgrid/dom/tree-lazy",
+      "signature": "lazyChildren<T>(o: LazyOptions<T>): LazyChildren<T>",
+      "param": "o",
+      "options": [
+        {
+          "name": "has",
+          "type": "(row: T) => boolean",
+          "resolved": null,
+          "required": true,
+          "doc": "Whether a row has children not loaded yet: read for the rows shown and a row being opened.",
+          "default": null,
+          "source": "packages/core/src/tree/lazy.ts"
+        },
+        {
+          "name": "load",
+          "type": "(row: T, o: { readonly signal: AbortSignalLike }) => PromiseLike<readonly T[]> | readonly T[]",
+          "resolved": null,
+          "required": false,
+          "doc": "The host's loader (A): the row's children, a list or a Promise of one. A server's `children` (B) takes its place.",
+          "default": null,
+          "source": "packages/core/src/tree/lazy.ts"
+        }
+      ],
+      "texts": null,
+      "sheet": null,
+      "css": [],
+      "doc": "`lazyChildren({ has, load })`: for `tree({ parentId, lazy })` (docs/behaviors/tree-lazy.md). A row `has` declares shows a closed toggle; opening it shows a loading row (`aria-busy`, the base's « Loading… ») while `load(row, { signal })` runs — or a server's `children` when the rows come from `sourceRows` — then its children; a failure shows the error and a Retry button (Enter on the row retries too). Nested arrays (`children`) are refused: a loaded row could not name its parent.",
+      "source": "packages/dom/src/tree/lazy.ts"
+    },
+    {
+      "name": "detail",
+      "entry": "@dzgrid/dom/detail",
+      "signature": "detail<T>(o: DetailFeatureOptions<T>): GridFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "part",
+          "type": "SlotPart<'detail'> | string",
+          "resolved": null,
+          "required": true,
+          "doc": "What a panel shows: a `'detail'` part (`nestedGrid(…)`, `definePart('detail', …)`), or its name in `settings.parts`.",
+          "default": null,
+          "source": "packages/dom/src/detail/index.ts"
+        },
+        {
+          "name": "column",
+          "type": "string",
+          "resolved": null,
+          "required": false,
+          "doc": "The column whose cells carry the chevron: the first visible one by default.",
+          "default": null,
+          "source": "packages/dom/src/detail/index.ts"
+        },
+        {
+          "name": "nested",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "This grid's depth, 1 on the page; by default one more than the grids around it in the page.",
+          "default": null,
+          "source": "packages/dom/src/detail/index.ts"
+        },
+        {
+          "name": "height",
+          "type": "number | ((master: Readonly<T>) => number) | 'auto'",
+          "resolved": null,
+          "required": false,
+          "doc": "A detail's height: a number (default 240, owner Q4), a function of the master's row, or `'auto'` (240 until measured).",
+          "default": null,
+          "source": "packages/core/src/detail/shape.ts"
+        },
+        {
+          "name": "initial",
+          "type": "'none' | 'all'",
+          "resolved": null,
+          "required": false,
+          "doc": "What is open at the first non-empty load: nothing (default) or every row.",
+          "default": null,
+          "source": "packages/core/src/detail/shape.ts"
+        },
+        {
+          "name": "isMaster",
+          "type": "(master: Readonly<T>) => boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "Whether a row has a detail (master-detail.md « Rows without a detail »): asked once per row and version of the rows; a throw is no. Default: every row.",
+          "default": null,
+          "source": "packages/core/src/detail/shape.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "detail",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": null,
+      "css": [],
+      "doc": "`detail(options)`: a panel under each open master (docs/behaviors/master-detail.md, D8, owner Q4–Q5). Hands `detailShape` from `@dzgrid/core/detail` to the grid's rows at creation and places them with its sparse layout; draws a chevron in the masters' first column (forward opens, back closes); mounts the `part` in a panel at the first paint showing it (the base destroys it when its row goes); measures `'auto'` heights; names each panel « Details of » its master; says each opening by the user.",
+      "source": "packages/dom/src/detail/index.ts"
+    },
+    {
+      "name": "nestedGrid",
+      "entry": "@dzgrid/dom/detail",
+      "signature": "nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<\"detail\">",
+      "param": "o",
+      "options": [
+        {
+          "name": "settings",
+          "type": "(c: NestedContext) => GridSettings<C>",
+          "resolved": null,
+          "required": true,
+          "doc": "The grid for a master: its rows, columns, messages, label (« Visits of … »), its own features.",
+          "default": null,
+          "source": "packages/dom/src/detail/nested.ts"
+        },
+        {
+          "name": "keep",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "How many masters' grids are remembered (sort, filters, quick search, open rows, focused cell, scroll), the least recently used forgotten first: 20.",
+          "default": null,
+          "source": "packages/dom/src/detail/nested.ts"
+        },
+        {
+          "name": "onGrid",
+          "type": "(grid: GridInstance<C, any>, c: NestedContext) => void",
+          "resolved": null,
+          "required": false,
+          "doc": "Called with each grid made, once it is mounted (a host wiring its own toolbar or events).",
+          "default": null,
+          "source": "packages/dom/src/detail/nested.ts"
+        },
+        {
+          "name": "env",
+          "type": "(c: NestedContext) => GridEnv",
+          "resolved": null,
+          "required": false,
+          "doc": "The grid's test seams (`createGrid`'s third argument): tests only.",
+          "default": null,
+          "source": "packages/dom/src/detail/nested.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "detail",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": null,
+      "css": [],
+      "doc": "`nestedGrid(options)`: a ready `'detail'` part that makes a grid in each panel (master-detail.md): its own keys, scroll and focus; Enter or F2 on the panel focuses it (its focus, else the first row in view); Escape it leaves goes back to the panel's cell, one level only. Each master's sort, filters, open rows, focused cell and scroll (its top row and the offset into it) are remembered when its panel goes (closed, scrolled away) and given back when it comes again, for the last `keep` masters. A new master row or language updates the grid in place (`grid.update`); only a change of a fixed setting makes it again. Past 3 levels, the grid made tells `unsupported-combination` (`detail.depth`, owner Q5). A nested grid needs a fixed or function height (it has no natural height of its own).",
+      "source": "packages/dom/src/detail/nested.ts"
+    },
+    {
+      "name": "edit",
+      "entry": "@dzgrid/dom/edit",
+      "signature": "edit<T = unknown>(o?: EditFeatureOptions<T>): EditFeature<T>",
+      "param": "o",
+      "options": [
+        {
+          "name": "save",
+          "type": "SaveHandler<T>",
+          "resolved": null,
+          "required": false,
+          "doc": "The application's save (`@dzgrid/core/edit`, edit-save.md 1–5b); absent: a kept value is saved locally at once.",
+          "default": null,
+          "source": "packages/dom/src/edit/index.ts"
+        },
+        {
+          "name": "savingBorder",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "The line running round a cell while it saves (Q10 amended): true by default; false, a still border.",
+          "default": null,
+          "source": "packages/dom/src/edit/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "edit",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/edit.css",
+      "css": [],
+      "doc": "`edit(options)`: editing wired to the grid (Phase 5 step 4, docs/phase-5-steps/step04-plan.md): the edit controller of `@dzgrid/core/edit` on the grid's rows, what the cells show read through it, the save marks and their clocks, the rows out of the order shown, the header's reapply mark, the sentences. One feature object may serve several grids, each its own controller.",
+      "source": "packages/dom/src/edit/index.ts"
+    },
+    {
+      "name": "editors",
+      "entry": "@dzgrid/dom/editors",
+      "signature": "editors(o?: EditorsOptions): GridFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "enterMoves",
+          "type": "'down' | 'stay'",
+          "resolved": null,
+          "required": false,
+          "doc": "Q3 (revised by the owner, step 7): after Enter / Shift+Enter, the same cell (`'stay'`, default) or the cell below / above (`'down'`).",
+          "default": null,
+          "source": "packages/dom/src/editors/index.ts"
+        },
+        {
+          "name": "tab",
+          "type": "'cell' | 'grid'",
+          "resolved": null,
+          "required": false,
+          "doc": "D5: Tab opens the next editable cell (`'cell'`, default) or leaves the grid (`'grid'`).",
+          "default": null,
+          "source": "packages/dom/src/editors/index.ts"
+        },
+        {
+          "name": "calendar",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "The calendar button and Alt+Down on day and instant fields (default true); false: typing only, nothing loaded.",
+          "default": null,
+          "source": "packages/dom/src/editors/index.ts"
+        },
+        {
+          "name": "loadCalendar",
+          "type": "() => Promise<CalendarKit>",
+          "resolved": null,
+          "required": false,
+          "doc": "Where the calendar's chunk comes from (a host serving its own chunks), as `filters({ loadDates })`.",
+          "default": null,
+          "source": "packages/dom/src/editors/index.ts"
+        },
+        {
+          "name": "dateMessages",
+          "type": "Readonly<Record<string, object>>",
+          "resolved": null,
+          "required": false,
+          "doc": "tzslot's words by language, over its own EN / FR / AR (as `filters({ dateMessages })`).",
+          "default": null,
+          "source": "packages/dom/src/editors/index.ts"
+        },
+        {
+          "name": "list",
+          "type": "ListEditor",
+          "resolved": null,
+          "required": false,
+          "doc": "The list editor, `listEditor` of `@dzgrid/dom/editors-list` (owner S6-O7: its own entry). Without it a list column opens a text field read by its codec, and one warning `missing-feature` per column.",
+          "default": null,
+          "source": "packages/dom/src/editors/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "editors",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/edit.css",
+      "css": [],
+      "doc": "`editors(options)`: the editors of a cell (editing.md, editors.md, edit-validation.md 3–9): text and number fields; day and instant fields with tzslot's calendar loaded on demand (`loadCalendar` replaces that import); a yes/no cell toggled in place; a list; the application's own editor (a part of slot `editor`).",
+      "source": "packages/dom/src/editors.ts"
+    },
+    {
+      "name": "listEditor",
+      "entry": "@dzgrid/dom/editors-list",
+      "signature": "listEditor(x: EdEnv, value: unknown, opts: readonly EnumOption[], label: (v: unknown) => string, name: string, done: (move: boolean) => void): Ed",
+      "param": null,
+      "options": [],
+      "texts": null,
+      "sheet": null,
+      "css": [],
+      "doc": "The list editor (editors.md 12–17, step06-plan « Behaviour » 12–17; owner S6-O2: an APG select-only combobox): the combobox in the cell keeps the focus; its listbox in a non-modal popup under the cell (above when no room), the active option by `aria-activedescendant`. Keys: Up/Down, Home/End, PageUp/PageDown (clamped); letters within 500 ms make a folded prefix, the same letter again cycles; Space picks and keeps (a letter during a prefix); a press on an option picks and keeps. A value not among the options comes first, marked. `done(move)` keeps. A blur keeps the active option: unmoved, it is the cell's own value (nothing saved, Q5). Its own entry, `@dzgrid/dom/editors-list` (owner S6-O7): an application with list columns hands it to `editors({ list: listEditor })`; one without pays nothing for it.",
+      "source": "packages/dom/src/editors-list/index.ts"
+    },
+    {
+      "name": "filters",
+      "entry": "@dzgrid/dom/filters",
+      "signature": "filters(o?: FiltersOptions): FiltersFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "floating",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "A floating row under the headers, for every filterable column (a column's `filter.floating` wins); shown or hidden live by `floating`.",
+          "default": null,
+          "source": "packages/dom/src/filters/index.ts"
+        },
+        {
+          "name": "debounceMs",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "The pause before a typed filter applies; 150 ms in the browser, 300 on a server by default.",
+          "default": null,
+          "source": "packages/dom/src/filters/index.ts"
+        },
+        {
+          "name": "popup",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "The header's filter button and the popup (step 13); `false`: neither. On by default.",
+          "default": null,
+          "source": "packages/dom/src/filters/index.ts"
+        },
+        {
+          "name": "loadDates",
+          "type": "(kit: DateKitName) => Promise<DateKit>",
+          "resolved": null,
+          "required": false,
+          "doc": "Advanced (step 14): where the date kits come from, instead of DzGrid's own `import()` of its lazy chunks (tests; a host serving its chunks its own way). A rejected promise shows the failure and Retry; a module without `adapt` is a failure.",
+          "default": null,
+          "source": "packages/dom/src/filters/index.ts"
+        },
+        {
+          "name": "dateMessages",
+          "type": "Readonly<Record<string, object>>",
+          "resolved": null,
+          "required": false,
+          "doc": "tzslot's words for a language beyond English, French and Arabic, or over them: `{ es: {...} }` (its `TzslotMessages`, in part).",
+          "default": null,
+          "source": "packages/dom/src/filters/index.ts"
+        },
+        {
+          "name": "dateCalendar",
+          "type": "DateCalendarOptions",
+          "resolved": null,
+          "required": false,
+          "doc": "The period widget's calendar: `{ months: 2 }` for two months (1 by default), `{ presets: [] }` for no shortcuts, `{ presets: ['today', 'last7Days'] }` for these, in this order (the six by default). A value it cannot take is dropped with an `invalid-setting` warning. Between two moments: no shortcuts, still.",
+          "default": null,
+          "source": "packages/dom/src/filters/index.ts"
+        },
+        {
+          "name": "apply",
+          "type": "'button' | 'live'",
+          "resolved": null,
+          "required": false,
+          "doc": "When the popup's fields apply (owner's look, app-feedback 20): `'live'` (the default) as they change, after the pause; `'button'` only at Apply or Enter, closing without drops the draft (as on a server). The floating row and a header box stay live.",
+          "default": null,
+          "source": "packages/dom/src/filters/index.ts"
+        },
+        {
+          "name": "dateZone",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "The instant form says its zone (`filter.zone`); `false` for an application with one zone.",
+          "default": null,
+          "source": "packages/dom/src/filters/index.ts"
+        },
+        {
+          "name": "busyFlash",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "A brief busy state after each filter change, in milliseconds (owner's third look, app-feedback 32; off by default): `aria-busy` on the grid's root for that long, the theme's spinner over the rows (static under reduced motion). Nothing waits for it: the rows are filtered at once. For a client grid, whose filtering is instant.",
+          "default": null,
+          "source": "packages/dom/src/filters/index.ts"
+        },
+        {
+          "name": "loadSet",
+          "type": "() => Promise<SetKit>",
+          "resolved": null,
+          "required": false,
+          "doc": "Advanced (step 15): where the set filter's chunk comes from, instead of DzGrid's own `import()` (as `loadDates`).",
+          "default": null,
+          "source": "packages/dom/src/filters/index.ts"
+        },
+        {
+          "name": "maxConditions",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "Phase 9 (docs/behaviors/filter-combined.md, owner Q-F2 A): the condition rows a popup offers, 1 to 5 (1 by default: today's popup); « Add condition » and one AND/OR join from 2. A column's `filter.maxConditions` wins.",
+          "default": null,
+          "source": "packages/dom/src/filters/index.ts"
+        },
+        {
+          "name": "matchCase",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "Phase 9: a « Match case » box on each text row (off by default); a column's `filter.matchCase` wins.",
+          "default": null,
+          "source": "packages/dom/src/filters/index.ts"
+        },
+        {
+          "name": "rowHeight",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "The floating row's height in px at 16 px text (1.10.0, filter-ui.md « Floating row height »): 24 to 1 000, grown with the text size; absent or anything else (told): the row height.",
+          "default": null,
+          "source": "packages/dom/src/filters/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "filters",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": null,
+      "css": [],
+      "doc": "`filters()`: the filter UI (docs/behaviors/filter-ui.md): the floating row, the popup (text, number, yes/no, the value list, tzslot's date forms loaded on demand; `loadDates` replaces that import).",
+      "source": "packages/dom/src/filters.ts"
+    },
+    {
+      "name": "range",
+      "entry": "@dzgrid/dom/range",
+      "signature": "range(o?: RangeOptions): RangeFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "drag",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "A press and a drag of the mouse or a pen makes a block (range-selection.md 8); false: the keys, Shift+click and the API only. Default true.",
+          "default": null,
+          "source": "packages/dom/src/range/index.ts"
+        },
+        {
+          "name": "canCopy",
+          "type": "(c: CopyAsk) => boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "May refuse a copy or a cut (health data): column ids and counts, never values; false or a throw refuses (clipboard.md 9).",
+          "default": null,
+          "source": "packages/dom/src/range/index.ts"
+        },
+        {
+          "name": "guard",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "The formula guard on copy (owner QB3); default true.",
+          "default": null,
+          "source": "packages/dom/src/range/index.ts"
+        },
+        {
+          "name": "raw",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "Numbers copied with a point whatever the locale (QB9); default false.",
+          "default": null,
+          "source": "packages/dom/src/range/index.ts"
+        },
+        {
+          "name": "maxPaste",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "Over this many cells a paste writes nothing (owner QB4); default 100 000.",
+          "default": null,
+          "source": "packages/dom/src/range/index.ts"
+        },
+        {
+          "name": "clearOnOutside",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "A press outside the grid clears the block, said (owner S12-Q13); not inside an element marked `data-dzg-keep-range`, nor on the page's scrollbar. false: kept (Escape clears it). Default true.",
+          "default": null,
+          "source": "packages/dom/src/range/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "range",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/range.css",
+      "css": [],
+      "doc": "`range(options)`: blocks of cells (docs/behaviors/range-selection.md; owner QB1, QB2, QB7, S11-Q1…Q4). Shift with the grid's own moves (mirrored right to left), Ctrl+A (every cell shown), Shift+Space (the row), the pointer (a drag, Shift+click, the auto-scroll); the tint and its logical edges on the mounted cells at each paint, aria-selected on the block's data cells only; the size said after a pause; the block dropped, said once, when the order or the rows shown change. One feature object may serve several grids, each its own block.",
+      "source": "packages/dom/src/range/index.ts"
+    },
+    {
+      "name": "fill",
+      "entry": "@dzgrid/dom/fill",
+      "signature": "fill(blocks: RangeFeature, o?: FillFeatureOptions): FillFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "handle",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "The handle drawn, dragged and clicked (the mouse drags it; a pen only clicks it, S12-Q12); false: the keys and the API only. Default true.",
+          "default": null,
+          "source": "packages/dom/src/fill/index.ts"
+        },
+        {
+          "name": "along",
+          "type": "'row' | 'column'",
+          "resolved": null,
+          "required": false,
+          "doc": "The one way a fill may go (1.1.0, fill.md 26): `row` along the row (toward the inline end or start), `column` up or down; every gesture's target brought back onto it. Default: both. Another value: both, an `invalid-setting` warning.",
+          "default": null,
+          "source": "packages/dom/src/fill/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "fill",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/fill.css",
+      "css": [],
+      "doc": "`fill(blocks, options)`: the fill over `range()`'s block (docs/behaviors/fill.md 11–20; owner S12-Q1–Q8). The handle on the block's corner cell, or on the focused data cell (S12-Q8), re-appended at each paint; its drag (the mouse only, S12-Q12; the target outlined; the block drag's geometry and auto-scroll); a click on it then a click on a cell (WCAG 2.5.7); the keyboard mode (Ctrl/Cmd+Shift+Enter, the arrows); Ctrl/Cmd+D and Ctrl/Cmd+R; bulk edit's seam (`g.bulk`, Ctrl+Enter in the editors' field). Every way plans with `@dzgrid/core/range` (`fillTarget`, `planFill`, `planPaste`) and writes ONE commit, said once. One feature object may serve several grids.",
+      "source": "packages/dom/src/fill/index.ts"
+    },
+    {
+      "name": "columns",
+      "entry": "@dzgrid/dom/columns",
+      "signature": "columns(o?: ColumnsOptions): ColumnsFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "drag",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "A header dragged by the mouse (never a finger, Q-M3; a pen clicks); false: the keys and the API only. Default true.",
+          "default": null,
+          "source": "packages/dom/src/columns/index.ts"
+        },
+        {
+          "name": "fitOnLoad",
+          "type": "'content'",
+          "resolved": null,
+          "required": false,
+          "doc": "`'content'` (1.10.0, column-resize.md 16–21): once, when the first rows are shown, the shown columns fitted to their content as « fit all » does — flexible columns, `resizable: false` ones and widths already set left alone; not again on a data change (`fitContent()` does it again).",
+          "default": null,
+          "source": "packages/dom/src/columns/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "columns",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/columns.css",
+      "css": [],
+      "doc": "`columns(options)`: moving columns (docs/behaviors/column-move.md; step02-plan). A header pressed with the mouse and moved 4 px drags: a ghost of its text, a bar on the gap it lands in (logical, either direction; the segment it targets pins or unpins it), auto-scroll near the centre's edges; one `column.state` patch on release, said. Ctrl+Shift (Cmd+Shift on a Mac) + arrows, Home, End move the focused header within its segment, the place said after a pause. Registered drop targets take a drag instead (group-drop-zone.md). One feature object may serve several grids.",
+      "source": "packages/dom/src/columns/index.ts"
+    },
+    {
+      "name": "columnMenu",
+      "entry": "@dzgrid/dom/column-menu",
+      "signature": "columnMenu(o?: ColumnMenuOptions): ColumnMenuFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "use",
+          "type": "{ readonly columns?: { api(grid: Grid): ColumnsApiLike | null }; /** With `fill`: « Fill down » / « Fill right » on the current block (owner S12-Q12). */ readonly range?: { api(grid: Grid): { get(): unknown } | null }; readonly fill?: { api(grid: Grid): { down(o?: { readonly user?: boolean }): unknown; end(o?: { readonly user?: boolean }): unknown } | null }; /** « Choose columns… » (Phase 6 step 4), opened by the column's header. */ readonly chooser?: { api(grid: Grid): { open(anchor?: HTMLElement): boolean } | null }; /** « Group by this column » / « Stop grouping by this column » (Phase 7, `grouping()`; the way without dragging, WCAG 2.5.7). */ readonly grouping?: { api(grid: Grid): { by(): readonly string[]; setBy(by: readonly string[], o?: { readonly user?: boolean }): void } | null }; /** * The pivot (`pivot()`, Phase 10, pivot.md 20): « Total » on a created column and a row total, « Mettre en colonnes » * on a data column whose header is shown. Its texts from `locales/<lang>-pivot`. */ readonly pivot?: { api(grid: Grid): { on(): boolean; by(): readonly string[]; setBy(by: readonly string[], o?: { readonly user?: boolean }): void; accepts(id: string): boolean; values(): Readonly<Record<string, unknown>>; setValues(v: Readonly<Record<string, any>>, o?: { readonly user?: boolean }): void; valueColumn(id: string): string | undefined } | null } }",
+          "resolved": null,
+          "required": false,
+          "doc": "The features the items drive, reached through their `api(grid)` only (typed: the menu ships none of them). Absent: their items are absent.",
+          "default": null,
+          "source": "packages/dom/src/column-menu/index.ts"
+        },
+        {
+          "name": "density",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "The density line (off by default, C5; absent when `rowHeight` is a number).",
+          "default": null,
+          "source": "packages/dom/src/column-menu/index.ts"
+        },
+        {
+          "name": "onDensity",
+          "type": "(density: Density) => void",
+          "resolved": null,
+          "required": false,
+          "doc": "Told after the density line changed the grid's density (owner Q3-4).",
+          "default": null,
+          "source": "packages/dom/src/column-menu/index.ts"
+        },
+        {
+          "name": "items",
+          "type": "(column: ResolvedColumn<unknown>, defaults: readonly MenuEntry[], c: MenuContext) => readonly MenuEntry[]",
+          "resolved": null,
+          "required": false,
+          "doc": "The application's items: the defaults reordered, removed or added to. A throw: the defaults, the error reported.",
+          "default": null,
+          "source": "packages/dom/src/column-menu/index.ts"
+        },
+        {
+          "name": "classes",
+          "type": "{ readonly menu?: string; readonly item?: string }",
+          "resolved": null,
+          "required": false,
+          "doc": "Host classes (Tailwind, Bootstrap): on the list and on every item.",
+          "default": null,
+          "source": "packages/dom/src/column-menu/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "column-menu",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/columns.css",
+      "css": [],
+      "doc": "`columnMenu(options)`: the column ⋮ menu (docs/behaviors/column-menu.md; step03-plan; owner Q-M1, Q-M2, Q-K1, Q3-1–Q3-4). A ⋮ button on each column header of 96 px and more (out of the tab order; its press never moves the focus), a right-click (Shift+right-click keeps the browser's), Shift+F10 and the Menu key, Alt+ArrowDown where the column has no filter popup, a Mac's Ctrl+click: an APG menu in the popup host — sort, pin, size, move, fill, filter, hide, choose, reset, density — each item one command (source `user`), said. Opened by a pointer, the grid's focus (and its block of cells) stays; the focus comes back where it was. One feature object may serve several grids.",
+      "source": "packages/dom/src/column-menu/index.ts"
+    },
+    {
+      "name": "contextMenu",
+      "entry": "@dzgrid/dom/context-menu",
+      "signature": "contextMenu<T = unknown>(o?: ContextMenuOptions<T>): ContextMenuFeature<T>",
+      "param": "o",
+      "options": [
+        {
+          "name": "use",
+          "type": "{ /** Copy, Copy with headers; with `edit` Cut and Paste. */ readonly range?: { api(grid: Grid): RangeApiLike | null }; /** Fill down / Fill right, by its `along`. */ readonly fill?: { api(grid: Grid): FillApiLike | null }; /** Undo / Redo; Cut and Paste need it too. */ readonly edit?: { api(grid: Grid): EditApiLike | null }; /** Export to CSV (the displayed rows). */ readonly csv?: { run(scope?: 'displayed'): Promise<unknown> }; /** Export to Excel (the displayed rows): `csvExport({ xlsx })`'s `xlsx` (Phase 9); its label `cmenu.exportXlsx` is then required. */ readonly xlsx?: { run(scope?: 'displayed'): Promise<unknown> } | undefined; /** Expand / Collapse on a parent row. */ readonly tree?: { api(grid: Grid): TreeApiLike | null }; /** Pin / Unpin the row (owner Q-CM3 A). */ readonly pinned?: { api(grid: Grid): PinnedRowsApiLike<T> | null }; /** « Read the totals » on a cell of the block (`statusBar()`, owner Q-SB3; its label from the status bar's texts). */ readonly status?: { api(grid: Grid): StatusApiLike | null } }",
+          "resolved": null,
+          "required": false,
+          "doc": "The features the default items drive, through their `api(grid)` only (typed: the menu ships none of them). Absent: their items are absent.",
+          "default": null,
+          "source": "packages/dom/src/context-menu/index.ts"
+        },
+        {
+          "name": "items",
+          "type": "(c: CellMenuContext<T>, defaults: readonly MenuEntry<CellMenuContext<T>>[]) => readonly MenuEntry<CellMenuContext<T>>[]",
+          "resolved": null,
+          "required": false,
+          "doc": "The application's items: the defaults kept, reordered, removed or added to. A throw: the defaults, reported.",
+          "default": null,
+          "source": "packages/dom/src/context-menu/index.ts"
+        },
+        {
+          "name": "classes",
+          "type": "{ readonly menu?: string; readonly item?: string }",
+          "resolved": null,
+          "required": false,
+          "doc": "Host classes (Tailwind, Bootstrap): on the list and on every item.",
+          "default": null,
+          "source": "packages/dom/src/context-menu/index.ts"
+        },
+        {
+          "name": "onPin",
+          "type": "(rows: { readonly top: readonly T[]; readonly bottom: readonly T[] }) => void",
+          "resolved": null,
+          "required": false,
+          "doc": "Told after « Pin » / « Unpin » changed a band (Q-CM3 A): the application keeps its pinned rows.",
+          "default": null,
+          "source": "packages/dom/src/context-menu/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "context-menu",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/menu.css",
+      "css": [],
+      "doc": "`contextMenu(options)`: the cell menu (docs/behaviors/context-menu.md; context-menu-plan; owner Q-CM1–Q-CM4). A right-click on a body or band cell (Shift+right-click keeps the browser's), Shift+F10 and the Menu key on a focused cell, a Mac's Ctrl+click: the column menu's list (shared, one menu per grid) with copy, cut, paste, fill, undo, the tree's toggle, pin and export, each as its key, then the application's items. Inside the block it acts on the block; outside, the cell is focused first. Nothing to offer, a finger, a pen, an open editor: the browser's own menu.",
+      "source": "packages/dom/src/context-menu/index.ts"
+    },
+    {
+      "name": "statusBar",
+      "entry": "@dzgrid/dom/statusbar",
+      "signature": "statusBar(o?: StatusBarOptions): StatusBarFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "items",
+          "type": "readonly string[]",
+          "resolved": null,
+          "required": false,
+          "doc": "The items, in order: `status.rows`, `status.filtered`, `status.selected`, `status.count`, `status.sum`, `status.avg`, `status.min`, `status.max`, or a host's own `status` part. Default: the block's five figures (owner Q-SB1).",
+          "default": null,
+          "source": "packages/dom/src/statusbar/index.ts"
+        },
+        {
+          "name": "maxCells",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "Past this many cells a moving block shows « … » until it stops (150 ms after a key, a pointer released). Default 200 000.",
+          "default": null,
+          "source": "packages/dom/src/statusbar/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "status",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": null,
+      "css": [],
+      "doc": "`statusBar({ items, maxCells })`: the strip under the rows (docs/behaviors/status-bar.md; owner Q-SB1–Q-SB4) — the block's count, sum, mean, smallest and largest in the column's format and the grid's digits, the row counts on request, the host's own items; one strip with the pager. Nothing is said on its own: `api(grid).announce()` and the cell menu's « Read the totals » (`contextMenu({ use: { status } })`) say it on demand.",
+      "source": "packages/dom/src/statusbar/index.ts"
+    },
+    {
+      "name": "find",
+      "entry": "@dzgrid/dom/find",
+      "signature": "find(o?: FindOptions): FindFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "debounceMs",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "The pause before typed text is searched (a finite number of 0 or more); default 150 ms.",
+          "default": null,
+          "source": "packages/dom/src/find/index.ts"
+        },
+        {
+          "name": "highlight",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "The text tinted inside the hit cells the grid draws, the current hit's more (search-highlight.md); default true.",
+          "default": null,
+          "source": "packages/dom/src/find/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "find",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/find.css",
+      "css": [],
+      "doc": "`find(options)`: find in the grid (docs/behaviors/find.md; owner answers 2026-11-03). Ctrl+F (⌘F on a Mac) while the focus is in the grid opens a bar above the headers: the displayed text of the visible columns searched, case and accents ignored, rows never hidden; a closed tree node's rows too (opened to show a hit); every hit marked, the current one more, scrolled to and focused as the grid's cell; « 3 / 12 », ↑ ↓, Enter / Shift+Enter, Escape; said politely once the typing settles. A server's grid: the loaded page only, said in the bar. Without it, Ctrl+F is the browser's.",
+      "source": "packages/dom/src/find/index.ts"
+    },
+    {
+      "name": "rowDrag",
+      "entry": "@dzgrid/dom/row-drag",
+      "signature": "rowDrag<T = unknown>(o?: RowDragOptions<T>): RowDragFeature<T>",
+      "param": "o",
+      "options": [
+        {
+          "name": "column",
+          "type": "string",
+          "resolved": null,
+          "required": false,
+          "doc": "The column whose cells show the grip (default: the first visible column); hidden, no grip.",
+          "default": null,
+          "source": "packages/dom/src/row-drag/index.ts"
+        },
+        {
+          "name": "apply",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "The grid reorders its rows itself (flat browser rows only, Q-RD1); default false: the event only.",
+          "default": null,
+          "source": "packages/dom/src/row-drag/index.ts"
+        },
+        {
+          "name": "whenSorted",
+          "type": "'refuse' | 'allow'",
+          "resolved": null,
+          "required": false,
+          "doc": "Sorted or grouped rows: refused (default), or `allow`: the event is sent and the application decides (never applied).",
+          "default": null,
+          "source": "packages/dom/src/row-drag/index.ts"
+        },
+        {
+          "name": "canDrag",
+          "type": "(row: T) => boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "A row that may not move (a throw counts as no, reported once a gesture).",
+          "default": null,
+          "source": "packages/dom/src/row-drag/index.ts"
+        },
+        {
+          "name": "canDrop",
+          "type": "(m: RowDropInfo<T>) => boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "A place a move may not go (asked at most once a frame during a drag; a throw counts as no, reported once a gesture).",
+          "default": null,
+          "source": "packages/dom/src/row-drag/index.ts"
+        },
+        {
+          "name": "maxRows",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "The most rows one gesture moves (default 1 000): more is refused, said.",
+          "default": null,
+          "source": "packages/dom/src/row-drag/index.ts"
+        },
+        {
+          "name": "drag",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "False: no grip, no pointer drag (the keys, the menu and the API stay). Default true.",
+          "default": null,
+          "source": "packages/dom/src/row-drag/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "row-drag",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/row-drag.css",
+      "css": [],
+      "doc": "`rowDrag(options)`: moving rows (docs/behaviors/row-move.md; row-drag-plan.md; owner answers « Row drag », 2026-11-05). A grip at the start of a column's cells, pressed by a mouse, a pen or a finger and moved 4 px, drags the row (the selected rows when it is selected): a ghost, a line on the gap it lands in (a tree's middle: inside), auto-scroll near the top and bottom; one `rowMove` event on release. Alt+Shift+↑ / ↓ / Home / End (and → / ← in a tree) move the focused row; the cell menu's items through `menuItems`. The application reorders its rows (`moveRows`), or the grid does with `apply: true` (flat browser rows). Every way goes through `@dzgrid/core/row-drag`'s rules. One feature object may serve several grids.",
+      "source": "packages/dom/src/row-drag/index.ts"
+    },
+    {
+      "name": "dock",
+      "entry": "@dzgrid/dom/dock",
+      "signature": "dock(o?: DockOptions): DockFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "open",
+          "type": "Readonly<Record<string, DockArea>>",
+          "resolved": null,
+          "required": false,
+          "doc": "The panels shown at the start, and where (dock.md 3): over each panel's own default. `float` is refused for now.",
+          "default": null,
+          "source": "packages/dom/src/dock/index.ts"
+        },
+        {
+          "name": "panels",
+          "type": "readonly DockPanel[]",
+          "resolved": null,
+          "required": false,
+          "doc": "",
+          "default": null,
+          "source": "packages/dom/src/dock/index.ts"
+        },
+        {
+          "name": "sizes",
+          "type": "{ readonly min?: number; readonly max?: number }",
+          "resolved": null,
+          "required": false,
+          "doc": "An area's size in CSS px, between `min` (160) and `max` (800), and what leaves the rows 160 px (dock.md 9).",
+          "default": null,
+          "source": "packages/dom/src/dock/index.ts"
+        },
+        {
+          "name": "onChange",
+          "type": "(layout: DockState) => void",
+          "resolved": null,
+          "required": false,
+          "doc": "After each change made by the user or the API (never a restore): the layout as a state keeps it.",
+          "default": null,
+          "source": "packages/dom/src/dock/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "dock",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/dock.css",
+      "css": [],
+      "doc": "`dock(options)`: the panels beside and under the grid (docs/behaviors/dock.md; owner Q-SB5, « Dock — owner B » 2026-11-06): areas `start`, `end` and `bottom` inside the grid's box, tabs when an area holds several panels, the edge resized by the pointer and the keys (APG window splitter), collapse to a strip, « Place » to move a panel, the layout in the grid's state. The columns panel and the filters panel stand in it when both are used; an application adds its own. One feature object may serve several grids.",
+      "source": "packages/dom/src/dock/index.ts"
+    },
+    {
+      "name": "pivot",
+      "entry": "@dzgrid/dom/pivot",
+      "signature": "pivot(o?: PivotFeatureOptions): PivotFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "toggle",
+          "type": "boolean | 'inside' | HTMLElement",
+          "resolved": null,
+          "required": false,
+          "doc": "A « Tableau croisé » switch for the user (pivot.md 24, 35; Q-P6 A: none by default, the mode the application's): `true` or `'inside'` in the pivot's strip above the rows (in the bar with `pivotBar()`), an element: appended into it.",
+          "default": null,
+          "source": "packages/dom/src/pivot/index.ts"
+        },
+        {
+          "name": "valueHeaders",
+          "type": "'auto' | 'fn' | 'name'",
+          "resolved": null,
+          "required": false,
+          "doc": "The value columns' headers (pivot.md 38): `'auto'` (default) « sum(Amount) » when there are several values, the short name otherwise; `'fn'` the function form always; `'name'` the short name (`headerShort`, else `header`) only.",
+          "default": null,
+          "source": "packages/dom/src/pivot/index.ts"
+        },
+        {
+          "name": "labelWidth",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "The label column's width (default 200).",
+          "default": null,
+          "source": "packages/dom/src/pivot/index.ts"
+        },
+        {
+          "name": "columns",
+          "type": "readonly string[]",
+          "resolved": null,
+          "required": false,
+          "doc": "The pivot columns' ids, the first band first.",
+          "default": null,
+          "source": "packages/core/src/pivot/shape.ts"
+        },
+        {
+          "name": "width",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "A created column's width (default 120).",
+          "default": null,
+          "source": "packages/core/src/pivot/shape.ts"
+        },
+        {
+          "name": "on",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "Pivot mode (default true): off, the grouping as without the pivot.",
+          "default": null,
+          "source": "packages/core/src/pivot/shape.ts"
+        },
+        {
+          "name": "desc",
+          "type": "readonly string[]",
+          "resolved": null,
+          "required": false,
+          "doc": "The pivot columns whose created columns run in reverse, « (Vide) » still last (pivot.md 33).",
+          "default": null,
+          "source": "packages/core/src/pivot/shape.ts"
+        },
+        {
+          "name": "values",
+          "type": "Fns",
+          "resolved": null,
+          "required": false,
+          "doc": "The values and their functions, in order (default: the options' `aggFuncs`, then the shown columns with an `aggFunc`).",
+          "default": null,
+          "source": "packages/core/src/pivot/shape.ts"
+        },
+        {
+          "name": "subtotals",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "A sub-total after each pivot band, per value (pivot.md 8).",
+          "default": null,
+          "source": "packages/core/src/pivot/shape.ts"
+        },
+        {
+          "name": "maxColumns",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "Above this many created columns (crossings × values, sub-totals counted), none is made (default 200; pivot.md 9).",
+          "default": null,
+          "source": "packages/core/src/pivot/shape.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "pivot",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": null,
+      "css": [],
+      "doc": "`pivot(options)`: a pivot table (docs/behaviors/pivot.md; Phase 10), handed to `grouping({ by, pivot: p })`. The rows are the groups, the values of the pivot columns become created columns with a total at each crossing; a label column at the start, the data columns folded away, the value columns under « Total » at the end; `spans()` draws the bands.",
+      "source": "packages/dom/src/pivot/index.ts"
+    },
+    {
+      "name": "pivotBar",
+      "entry": "@dzgrid/dom/pivot-bar",
+      "signature": "pivotBar(o: PivotBarOptions): GridFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "use",
+          "type": "{ /** The row grouping (`grouping({ pivot })`): the « Lignes » part. */ readonly grouping: { api(grid: Grid): { by(): readonly string[]; setBy(by: readonly string[], o?: { readonly user?: boolean }): void } | null }; /** The pivot handed to that grouping: the « Colonnes » and « Valeurs » parts. */ readonly pivot: { api(grid: Grid): PivotApi | null }; /** Moving columns (`columns()`): a header dropped on a part adds its column there. */ readonly columns?: { api(grid: Grid): { readonly dropTargets: { add(el: Element, t: { accept(column: string): boolean; drop(column: string): void; readonly label?: string }): () => void } } | null } }",
+          "resolved": null,
+          "required": true,
+          "doc": "",
+          "default": null,
+          "source": "packages/dom/src/pivot-bar/index.ts"
+        },
+        {
+          "name": "panel",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "The columns panel's « Mode pivot » switch and parts (pivot.md 36; default true, with `columnsChooser()`).",
+          "default": null,
+          "source": "packages/dom/src/pivot-bar/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "pivot-bar",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/pivot.css",
+      "css": [
+        "PIVOT_BAR_CSS"
+      ],
+      "doc": "`pivotBar(options)`: the pivot's one bar (docs/behaviors/pivot.md 31–37; owner 2026-11-07) — « Lignes », « Colonnes », « Valeurs », each a named `toolbar` of chips with the bands' keys (group-drop-zone.md 9, 14–18), the values' function menu, the ↑/↓ order of a pivot column, Ctrl+Shift+ArrowUp / ArrowDown (or a chip dropped there) to move a column to another part; the pivot's strip joins it; with `columnsChooser()`, the same parts and a « Mode pivot » switch at the top of the columns panel. Use it instead of the two `groupZone()` bands beside a pivot.",
+      "source": "packages/dom/src/pivot-bar/index.ts"
+    },
+    {
+      "name": "rowNumbers",
+      "entry": "@dzgrid/dom/row-numbers",
+      "signature": "rowNumbers(): GridFeature",
+      "param": null,
+      "options": [],
+      "texts": {
+        "bundle": "row-numbers",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/row-numbers.css",
+      "css": [],
+      "doc": "`rowNumbers()`: 1, 2, 3… at the inline start of every row (docs/behaviors/row-numbers.md; owner decisions 2026-11-03), in display order (a detail panel neither numbered nor counted; a paged grid going on from the pages before), as wide as its largest number. A click on a number takes the row as the block (`range()`), Shift+click the rows between; the corner every cell; without `range()`, the row selection's click; with neither, nothing. Never a column: no sort, filter, edit, export, print, copy or state sees it.",
+      "source": "packages/dom/src/row-numbers/index.ts"
+    },
+    {
+      "name": "grouping",
+      "entry": "@dzgrid/dom/grouping",
+      "signature": "grouping(o?: GroupingFeatureOptions): GroupingFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "column",
+          "type": "string",
+          "resolved": null,
+          "required": false,
+          "doc": "The column that shows the groups' labels and chevrons: the first visible one by default (row-grouping.md 15).",
+          "default": null,
+          "source": "packages/dom/src/grouping/index.ts"
+        },
+        {
+          "name": "indent",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "Pixels per level of indent (16 by default).",
+          "default": null,
+          "source": "packages/dom/src/grouping/index.ts"
+        },
+        {
+          "name": "sticky",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "Group rows kept pinned under the header while their rows scroll, the nearest first: 0 none, 3 by default.",
+          "default": null,
+          "source": "packages/dom/src/grouping/index.ts"
+        },
+        {
+          "name": "pivot",
+          "type": "{ make(o: GroupingOptions): GroupShape<unknown>; setup(g: GridContext<unknown>, s: GroupShape<unknown>): (FeatureHandle & { column(): string | undefined; by(): readonly string[] }) | null }",
+          "resolved": null,
+          "required": false,
+          "doc": "A pivot table over the groups (`pivot()` from `@dzgrid/dom/pivot`, pivot.md 17–30); on a server only with `serverPivot()` (told).",
+          "default": null,
+          "source": "packages/dom/src/grouping/index.ts"
+        },
+        {
+          "name": "by",
+          "type": "readonly string[]",
+          "resolved": null,
+          "required": false,
+          "doc": "The grouping columns' ids, the first level first; empty (default): the rows flat.",
+          "default": null,
+          "source": "packages/core/src/grouping/shape.ts"
+        },
+        {
+          "name": "aggFuncs",
+          "type": "Readonly<Record<string, AggFuncName | AggFn>>",
+          "resolved": null,
+          "required": false,
+          "doc": "Totals by column id; they win over a column's own `aggFunc`.",
+          "default": null,
+          "source": "packages/core/src/grouping/shape.ts"
+        },
+        {
+          "name": "expanded",
+          "type": "'none' | 'all' | number",
+          "resolved": null,
+          "required": false,
+          "doc": "What is open at the first load: nothing (default, owner Q-E1 A), everything, or the levels above a depth (1: the first).",
+          "default": null,
+          "source": "packages/core/src/grouping/shape.ts"
+        },
+        {
+          "name": "footers",
+          "type": "'none' | 'group' | 'grand' | 'both'",
+          "resolved": null,
+          "required": false,
+          "doc": "Totals rows: none (default), a footer per open group, the grand total, or both (aggregation.md 9–10).",
+          "default": null,
+          "source": "packages/core/src/grouping/shape.ts"
+        },
+        {
+          "name": "grandTotal",
+          "type": "'top' | 'bottom'",
+          "resolved": null,
+          "required": false,
+          "doc": "Where the grand total sits: after the rows (default) or before them.",
+          "default": null,
+          "source": "packages/core/src/grouping/shape.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "group",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/grouping.css",
+      "css": [],
+      "doc": "`grouping(options)`: rows grouped by columns, with totals (docs/behaviors/row-grouping.md, aggregation.md; Phase 7 step 5). Hands `groupShape` from `@dzgrid/core/grouping` to the grid's rows at creation; draws the group column (indent, chevron, « value (n) »), the totals in the group and totals rows' cells, the rows' level, place and open state; opens and closes by the chevron, Enter on a group row and the keys of the group column (mirrored right to left); keeps group rows pinned under the header; says each opening. The tree's chevron styles and pinned-rows layout are shared.",
+      "source": "packages/dom/src/grouping/index.ts"
+    },
+    {
+      "name": "groupZone",
+      "entry": "@dzgrid/dom/group-zone",
+      "signature": "groupZone(o: GroupZoneOptions): GridFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "use",
+          "type": "{ /** The grouping the chips show and change. */ readonly grouping: { api(grid: Grid): GroupingApiLike | null }; /** Moving columns (`columns()`): a header dragged onto the band groups by it. Absent: no drop (the menu and the keys still work). */ readonly columns?: { api(grid: Grid): { readonly dropTargets: { add(el: Element, t: { accept(column: string): boolean; drop(column: string): void; readonly label?: string }): () => void } } | null } }",
+          "resolved": null,
+          "required": true,
+          "doc": "",
+          "default": null,
+          "source": "packages/dom/src/group-zone/index.ts"
+        },
+        {
+          "name": "texts",
+          "type": "'pivot'",
+          "resolved": null,
+          "required": false,
+          "doc": "Another band's texts: `'pivot'` reads `pivot.label`, `pivot.empty`… instead of `zone.*` (the « Colonnes » band, pivot.md 19).",
+          "default": null,
+          "source": "packages/dom/src/group-zone/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "group",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/grouping.css",
+      "css": [
+        "ZONE_CSS"
+      ],
+      "doc": "`groupZone(options)`: the « Regrouper par » band (docs/behaviors/group-drop-zone.md part 2; owner Q-Z1 B, Q-Z2 A): a `toolbar` above the rows with a chip « Nom × » per grouping column, in order. A header dragged onto it (with `columns()`) groups by its column; × or Delete removes one; Ctrl+Shift+arrows or a mouse drag moves one; each change said. One tab stop, the arrows between its items (mirrored right to left).",
+      "source": "packages/dom/src/group-zone/index.ts"
+    },
+    {
+      "name": "filtersPanel",
+      "entry": "@dzgrid/dom/filters-panel",
+      "signature": "filtersPanel(o?: FiltersPanelOptions): FiltersPanelFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "side",
+          "type": "'start' | 'end'",
+          "resolved": null,
+          "required": false,
+          "doc": "The grid's side it stands on, logical: `'end'` (the default) or `'start'`; right to left puts `end` at the left.",
+          "default": null,
+          "source": "packages/dom/src/filters-panel/index.ts"
+        },
+        {
+          "name": "open",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "Open from the start (closed by default).",
+          "default": null,
+          "source": "packages/dom/src/filters-panel/index.ts"
+        },
+        {
+          "name": "button",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "The strip with the « Filters » button (on by default); `false`: the application opens it through `api(grid)`.",
+          "default": null,
+          "source": "packages/dom/src/filters-panel/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "filters-panel",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/filters-panel.css",
+      "css": [],
+      "doc": "`filtersPanel(options)`: every column's filter in one side panel (docs/behaviors/filters-panel.md; owner answers 2026-11-03), beside `filters()` whose forms it shows: a strip with the « Filters » button at the side the application chose, the panel beside the rows (they take the room left), « Clear all filters », a column search, each filterable column unfolding to the popup's own form, a dot on active filters; apply as `filters({ apply })`; in step with every other writer. One feature object may serve several grids.",
+      "source": "packages/dom/src/filters-panel/index.ts"
+    },
+    {
+      "name": "columnsChooser",
+      "entry": "@dzgrid/dom/columns-panel",
+      "signature": "columnsChooser(o?: ColumnsChooserOptions): ColumnsChooserFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "onClose",
+          "type": "() => void",
+          "resolved": null,
+          "required": false,
+          "doc": "Told after the dialog closed (the focus is already back).",
+          "default": null,
+          "source": "packages/dom/src/columns-panel/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "columns",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/columns-panel.css",
+      "css": [],
+      "doc": "`columnsChooser(options)`: « Choisir les colonnes » (docs/behaviors/columns-chooser.md; step04-plan; owner Q-C1, Q-C2, Q-H, O1, O5, O12). A modal dialog in the popup host, anchored on the grid's root (unticking the opener's own column keeps it) and placed under the opener: a search box, every listed column in the list's order (start-pinned, centre, end-pinned, hidden ones too) inside its header groups, each a native checkbox (one tab stop, the arrows between them) with ▲ ▼ and a handle; a tick, a move, « Show all », « Reset » are each one `column.state` patch (source `user`), said; Alt+ArrowUp / ArrowDown move the focused row's column one place in the list. One feature object may serve several grids.",
+      "source": "packages/dom/src/columns-panel/index.ts"
+    },
+    {
+      "name": "gridState",
+      "entry": "@dzgrid/dom/state",
+      "signature": "gridState(o?: GridStateOptions): GridStateFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "debounce",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "The pause after a gesture before `stateChanged` (ms; 300).",
+          "default": null,
+          "source": "packages/dom/src/state/index.ts"
+        },
+        {
+          "name": "persist",
+          "type": "{ readonly key: string; readonly include?: readonly StatePart[] }",
+          "resolved": null,
+          "required": false,
+          "doc": "The browser storage at creation (G 17): read before the first request, written after each gesture (`include`: the parts kept).",
+          "default": null,
+          "source": "packages/dom/src/state/index.ts"
+        },
+        {
+          "name": "initial",
+          "type": "{ readonly v: 1 } & Partial<GridState>",
+          "resolved": null,
+          "required": false,
+          "doc": "What the grid starts with, applied before the first request (owner demo, step 16; sort.md « An initial sort »): a server is asked once, as Angular's `[state]`. Its parts only (`{ v: 1, sort: [...] }`); a stored state (`persist`) applies over it; `reset()` still goes back to the definitions.",
+          "default": null,
+          "source": "packages/dom/src/state/index.ts"
+        }
+      ],
+      "texts": null,
+      "sheet": null,
+      "css": [],
+      "doc": "`gridState(o?)` (Phase 6 step 5, docs/behaviors/grid-state.md): `state()` / `setState()` on the grid, the `stateChanged` event (once per gesture, after `debounce` ms; never for the host's changes nor a restore) and `stateRestored`; with `persist`, the state kept in the browser's storage, read before the grid's first request.",
+      "source": "packages/dom/src/state/index.ts"
+    },
+    {
+      "name": "pinnedRows",
+      "entry": "@dzgrid/dom/pinned-rows",
+      "signature": "pinnedRows<T = unknown>(o?: PinnedRowsOptions<T>): PinnedRowsFeature<T>",
+      "param": "o",
+      "options": [
+        {
+          "name": "top",
+          "type": "readonly T[]",
+          "resolved": null,
+          "required": false,
+          "doc": "",
+          "default": null,
+          "source": "packages/dom/src/pinned-rows/index.ts"
+        },
+        {
+          "name": "bottom",
+          "type": "readonly T[]",
+          "resolved": null,
+          "required": false,
+          "doc": "",
+          "default": null,
+          "source": "packages/dom/src/pinned-rows/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "pinned",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/pinned-rows.css",
+      "css": [],
+      "doc": "`pinnedRows({ top, bottom })` (docs/behaviors/pinned-rows.md): two row groups, one sticking under the header and one at the grid's foot, named by the texts; their rows drawn like the body's (formats, parts, classes, widths, pinned columns), counted and numbered, never selected; the body's view shortened by them, both together at most half the view (a taller band shows its rows in a window moved by the wheel and the focus); the keys across the bands; their cells editable through `edit()` and `editors()` (the kernel's pinned store).",
+      "source": "packages/dom/src/pinned-rows/index.ts"
+    },
+    {
+      "name": "autoHeight",
+      "entry": "@dzgrid/dom/auto-height",
+      "signature": "autoHeight(): GridFeature",
+      "param": null,
+      "options": [],
+      "texts": null,
+      "sheet": null,
+      "css": [],
+      "doc": "`autoHeight()`: rows as tall as their tallest wrapped cell (`ColumnDef.wrap`, docs/behaviors/auto-height.md; Phase 6 step 9, owner Q-R1, Q9-1..Q9-4). After each paint, before the browser shows it (`GridContext.again`), the mounted rows not measured yet at these widths are measured — every probe written, one layout read, every probe removed — and the rows laid out again in the same frame, the row at the top of the view held where it was (S3). A fixed `rowHeight` wins (nothing measured). With `@dzgrid/dom/detail`, both layouts composed (`layoutFor`).",
+      "source": "packages/dom/src/auto-height/index.ts"
+    },
+    {
+      "name": "rowGaps",
+      "entry": "@dzgrid/dom/row-gaps",
+      "signature": "rowGaps<T>(o: RowGapsOptions<T>): GridFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "before",
+          "type": "GapRule<T>",
+          "resolved": null,
+          "required": true,
+          "doc": "Asked for each shown row but the first, once per new order of the rows shown: `true` a gap of `size`, a number that many pixels.",
+          "default": null,
+          "source": "packages/dom/src/row-gaps/index.ts"
+        },
+        {
+          "name": "size",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "Pixels at the default text size, scaled with the text like the row height: 16 by default.",
+          "default": null,
+          "source": "packages/dom/src/row-gaps/index.ts"
+        }
+      ],
+      "texts": null,
+      "sheet": null,
+      "css": [],
+      "doc": "`rowGaps({ before, size })`: an empty space above some rows, outside every row (docs/behaviors/row-gaps.md). The core says where (`gapsOf`) and lays the rows out around the gaps (`gapLayout`); this feature asks the rule once per shown-rows version, scales the sizes with the text, hands the base its layout (`gapsFor`, always the outermost), tells the spans feature where a merge is cut (`gapAt`) and marks the row under a gap (`data-gap`, `--dzg-gap`) for a theme.",
+      "source": "packages/dom/src/row-gaps/index.ts"
+    },
+    {
+      "name": "print",
+      "entry": "@dzgrid/dom/print",
+      "signature": "print(grid: PrintableGrid, o?: PrintOptions | undefined): Promise<void>",
+      "param": "o",
+      "options": [
+        {
+          "name": "maxRows",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "Rows printed at most (5 000 by default, owner Q-I); beyond, the first ones, a line saying so, and `print-too-many`.",
+          "default": null,
+          "source": "packages/dom/src/print/index.ts"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "resolved": null,
+          "required": false,
+          "doc": "The table's caption; the grid's accessible name otherwise.",
+          "default": null,
+          "source": "packages/dom/src/print/index.ts"
+        },
+        {
+          "name": "header",
+          "type": "false",
+          "resolved": null,
+          "required": false,
+          "doc": "`false`: no header rows (hidden-headers.md 6); printed by default, a grid with `headers: 'hidden'` too.",
+          "default": null,
+          "source": "packages/dom/src/print/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "print",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/print.css",
+      "css": [],
+      "doc": "`print(grid, options)`: `preparePrint`, the browser's print dialog, and the cleanup on `afterprint` — or on the first `focus` or `pointerdown` after the dialog, for a browser that sends no `afterprint` (Safari's PDF path; the cleanup is idempotent, so the later ones do nothing). A build cancelled or overtaken by a newer call opens no dialog: only the newest prints, and each cleanup removes its own table only.",
+      "source": "packages/dom/src/print/index.ts"
+    },
+    {
+      "name": "printOnMenu",
+      "entry": "@dzgrid/dom/print-menu",
+      "signature": "printOnMenu(grid: PrintableGrid, o?: PrintOptions | undefined): void",
+      "param": "o",
+      "options": [
+        {
+          "name": "maxRows",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "Rows printed at most (5 000 by default, owner Q-I); beyond, the first ones, a line saying so, and `print-too-many`.",
+          "default": null,
+          "source": "packages/dom/src/print/index.ts"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "resolved": null,
+          "required": false,
+          "doc": "The table's caption; the grid's accessible name otherwise.",
+          "default": null,
+          "source": "packages/dom/src/print/index.ts"
+        },
+        {
+          "name": "header",
+          "type": "false",
+          "resolved": null,
+          "required": false,
+          "doc": "`false`: no header rows (hidden-headers.md 6); printed by default, a grid with `headers: 'hidden'` too.",
+          "default": null,
+          "source": "packages/dom/src/print/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "print",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/print.css",
+      "css": [],
+      "doc": "`printOnMenu(grid, options)`: from then on, `beforeprint` builds the print table at once (a table built in slices would be cut at its first slice), unless one is already in the page (`print()`'s, or one the application prepared: that one prints); it is removed as `print()` removes its own (`afterprint`, else the first `focus` or `pointerdown`). It lasts as long as the grid: its destruction ends it.",
+      "source": "packages/dom/src/print-menu.ts"
+    },
+    {
+      "name": "freshRows",
+      "entry": "@dzgrid/dom/fresh-rows",
+      "signature": "freshRows(o?: FreshRowsOptions): GridFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "ms",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "How long a new row stays marked, in ms: 5000 by default, from 0 to 60 000.",
+          "default": null,
+          "source": "packages/dom/src/fresh-rows/index.ts"
+        },
+        {
+          "name": "rowsArrived",
+          "type": "(keys: readonly RowKey[], source: ChangeSource) => void",
+          "resolved": null,
+          "required": false,
+          "doc": "Told once per refresh, with the keys of the rows marked (never row data) and who changed the rows; a throw is reported.",
+          "default": null,
+          "source": "packages/dom/src/fresh-rows/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "fresh",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/fresh-rows.css",
+      "css": [],
+      "doc": "`freshRows({ ms })` (docs/behaviors/fresh-rows.md, owner Q16-9 A): the rows a live change of the rows added (a delta: a transaction, or a reload or a server's answer for the same page and query compared by `sameRow`) and the query keeps get `data-dzg-fresh` for `ms` wherever they are drawn; one polite sentence counts them; `rowsArrived` is given their keys. Never on a first load, a page, a sort or a filter (new answers, not arrivals). Its look: `@dzgrid/theme/fresh-rows.css`.",
+      "source": "packages/dom/src/fresh-rows/index.ts"
+    },
+    {
+      "name": "motion",
+      "entry": "@dzgrid/dom/motion-gsap",
+      "signature": "motion(o?: MotionOptions): Motion",
+      "param": "o",
+      "options": [
+        {
+          "name": "preset",
+          "type": "'sober'",
+          "resolved": null,
+          "required": false,
+          "doc": "How it feels; `sober` (the only one yet): short, eased, no bounce.",
+          "default": null,
+          "source": "packages/dom/src/motion-gsap/index.ts"
+        },
+        {
+          "name": "effects",
+          "type": "MotionEffects",
+          "resolved": null,
+          "required": false,
+          "doc": "",
+          "default": null,
+          "source": "packages/dom/src/motion-gsap/index.ts"
+        },
+        {
+          "name": "gsap",
+          "type": "Gsap",
+          "resolved": "typeof gsap",
+          "required": false,
+          "doc": "The application's GSAP; else the chunk imports the package itself.",
+          "default": null,
+          "source": "packages/dom/src/motion-gsap/index.ts"
+        },
+        {
+          "name": "onCell",
+          "type": "(el: HTMLElement, c: CellMotion, reason: 'changed' | 'saving' | 'saved' | 'failed') => void | false",
+          "resolved": null,
+          "required": false,
+          "doc": "A cell whose value a transaction changed (`changed`), or whose save started (`saving`, once per gesture), succeeded (`saved`) or was refused (`failed`), with `@dzgrid/dom/edit` (Phase 5 step 7); after the grid's guards (at most 50 cells, and 50 calls a paint for all reasons; under reduced motion too, `c.reduced` true). Animate `el` only (transform, opacity, `--dzg-*`, classes). `false`: handled, the built-in flash (`changed`, `saved`) is skipped. Either way `el` is followed: its tweens are finished when it shows another row or its next reason.",
+          "default": null,
+          "source": "packages/dom/src/motion-gsap/index.ts"
+        },
+        {
+          "name": "onRow",
+          "type": "(el: HTMLElement, c: RowMotion, reason: 'entered' | 'moved') => void | false",
+          "resolved": null,
+          "required": false,
+          "doc": "A row that moved or entered after a sort, a filter or a tree's toggle, or that was added live (owner Q5; not under reduced motion).",
+          "default": null,
+          "source": "packages/dom/src/motion-gsap/index.ts"
+        }
+      ],
+      "texts": null,
+      "sheet": null,
+      "css": [],
+      "doc": "`motion()`: rows gliding after a sort or a filter, a value flash on live changes, a page slide, popups and the overlay fading in (docs/behaviors/motion.md, step 26). This part is small; the tweens and GSAP are a chunk loaded in idle time once the first rows are painted (owner Q1). One `motion()` may serve several grids.",
+      "source": "packages/dom/src/motion-gsap/index.ts"
+    },
+    {
+      "name": "totalsRow",
+      "entry": "@dzgrid/dom/totals-row",
+      "signature": "totalsRow(): TotalsRowFeature",
+      "param": null,
+      "options": [],
+      "texts": {
+        "bundle": "totals",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": null,
+      "css": [],
+      "doc": "`totalsRow()` (docs/behaviors/totals-row.md): the columns' `total` (`sum`, `avg`, `min`, `max`, `count`, `first`, `last` or a function; the group totals' rules, `@dzgrid/core/totals`) over the rows that pass the filters, through the edits, in one row last in the pinned bottom band — no data, read-only, never selected — its label (`totals.label`) in the first column without a total. Computed again only when the rows, the edits, the columns or the language changed. CSV, Excel and print write it; JSON does not. With a server's pages, the application gives the totals (`api.set`).",
+      "source": "packages/dom/src/totals-row/index.ts"
+    },
+    {
+      "name": "verticalHeaders",
+      "entry": "@dzgrid/dom/vertical-headers",
+      "signature": "verticalHeaders(o?: VerticalHeadersOptions): GridFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "maxHeight",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "The header row's height at most, in px (240 by default); a longer title is cut with « … ».",
+          "default": null,
+          "source": "packages/dom/src/vertical-headers/index.ts"
+        }
+      ],
+      "texts": null,
+      "sheet": "@dzgrid/theme/vertical-headers.css",
+      "css": [],
+      "doc": "`verticalHeaders()` (docs/behaviors/vertical-headers.md): the headers of the columns marked `headerVertical: true` say `data-vertical` (the theme turns their title a quarter counter-clockwise), and the column headers' row grows to the longest such title — measured on a hidden probe, once per change of the titles, the row height or the density, never at a scroll — at least a row's height, at most `maxHeight`. Names, roles and keys unchanged.",
+      "source": "packages/dom/src/vertical-headers/index.ts"
+    },
+    {
+      "name": "theming",
+      "entry": "@dzgrid/dom/theme",
+      "signature": "theming(): GridFeature",
+      "param": null,
+      "options": [],
+      "texts": null,
+      "sheet": null,
+      "css": [
+        "ICONS_CSS"
+      ],
+      "doc": "`theming()` (docs/behaviors/presentation-settings.md 16–23, 1.9.0): writes `settings.theme` as CSS variables on the grid's root and draws `settings.icons` over the grid's marks, both live; a bad key, value or icon is told (`invalid-setting`) and skipped, never thrown. Its own entry, so a grid without them carries none of it.",
+      "source": "packages/dom/src/theme/index.ts"
+    },
+    {
+      "name": "wrappedHeaders",
+      "entry": "@dzgrid/dom/wrapped-headers",
+      "signature": "wrappedHeaders(o?: WrappedHeadersOptions): GridFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "maxLines",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "The lines a title may take, 1 to 10 (3 by default); past them its last line ends with « … ».",
+          "default": null,
+          "source": "packages/dom/src/wrapped-headers/index.ts"
+        }
+      ],
+      "texts": null,
+      "sheet": null,
+      "css": [
+        "WRAPPED_HEADERS_CSS"
+      ],
+      "doc": "",
+      "source": "packages/dom/src/wrapped-headers/index.ts"
+    },
+    {
+      "name": "columnHover",
+      "entry": "@dzgrid/dom/column-hover",
+      "signature": "columnHover(): GridFeature",
+      "param": null,
+      "options": [],
+      "texts": null,
+      "sheet": null,
+      "css": [
+        "COLUMN_HOVER_CSS"
+      ],
+      "doc": "`columnHover()` (docs/behaviors/column-hover.md, 1.10.0): the column under the mouse or the pen — never the keyboard's focus, never a finger — says `data-hover-col` on the grid's root and `data-col-hover` on its mounted cells and header, written at most once per frame and only when the column changes; attributes only, no layout or style read.",
+      "source": "packages/dom/src/column-hover/index.ts"
+    },
+    {
+      "name": "responsive",
+      "entry": "@dzgrid/dom/responsive",
+      "signature": "responsive(o?: ResponsiveOptions): GridFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "priority",
+          "type": "Readonly<Record<string, number>>",
+          "resolved": null,
+          "required": false,
+          "doc": "A collapse priority by column id, over the columns' own `collapsePriority`: the highest collapse first; 0 never.",
+          "default": null,
+          "source": "packages/dom/src/responsive/index.ts"
+        }
+      ],
+      "texts": null,
+      "sheet": null,
+      "css": [],
+      "doc": "`responsive({ priority })` (docs/behaviors/responsive-columns.md): when the columns do not fit the view, centre columns collapse — the highest `collapsePriority` first, the last on screen among equals, never the first, a pinned one or a priority 0 — and each row's chevron (the detail's) opens « Title: value » lines under it. Followed at each paint; not the columns' state; the search, filters, files and print still read every column.",
+      "source": "packages/dom/src/responsive/index.ts"
+    },
+    {
+      "name": "fileImport",
+      "entry": "@dzgrid/dom/import",
+      "signature": "fileImport(o: FileImportOptions): FileImportFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "accept",
+          "type": "readonly ImportFormat[]",
+          "resolved": null,
+          "required": false,
+          "doc": "The formats taken (both by default); another is refused, `import-file` detail `type`.",
+          "default": null,
+          "source": "packages/dom/src/import/index.ts"
+        },
+        {
+          "name": "onRows",
+          "type": "(rows: Record<string, unknown>[], problems: readonly Problem[], file: ImportedFile) => void",
+          "resolved": null,
+          "required": true,
+          "doc": "The rows read, once per file: one object per line after the header, each value at its column's `field` (or id) as its codec reads it; `problems` what was refused (paths and codes, never a value). The application decides what to do.",
+          "default": null,
+          "source": "packages/dom/src/import/index.ts"
+        },
+        {
+          "name": "drop",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "`false`: no drop zone (the button only).",
+          "default": null,
+          "source": "packages/dom/src/import/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "import",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": null,
+      "css": [],
+      "doc": "`fileImport({ accept, onRows, drop })` (docs/behaviors/file-import.md): a CSV or `.xlsx` file dropped on the grid, or picked through the application's button (`api(grid).bind(button)`), read in the browser — the first non-empty line the header matched to the columns, each cell through its column's codec — and handed to `onRows`; the grid's rows untouched. Said when read.",
+      "source": "packages/dom/src/import/index.ts"
+    },
+    {
+      "name": "spans",
+      "entry": "@dzgrid/dom/spans",
+      "signature": "spans(o?: { readonly acrossLevels?: boolean; } | undefined): GridFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "acrossLevels",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "In a tree (1.2.0, opt-in, spans.md « Across levels »): outside a row's tree column, a merge continues across a node and its children shown, under one top-level row. Without it a merge stops at a level change (1.1.0).",
+          "default": null,
+          "source": "packages/dom/src/spans/index.ts"
+        }
+      ],
+      "texts": null,
+      "sheet": null,
+      "css": [],
+      "doc": "`spans()`: cells spanning rows and columns (docs/behaviors/spans.md) — identical values merged (`merge`), spans decided by the data (`rowSpan`, `colSpan`), full-width rows (`settings.fullWidth`), grouped headers (groups in `columns`, `./bands.ts`). The map comes from the core (`buildSpanMap`), on the rows as displayed and the visible columns; this feature lays it out under virtual scrolling, moves the keys over it and maps a click on a tall cell to the row under the pointer.",
+      "source": "packages/dom/src/spans/index.ts"
+    },
+    {
+      "name": "groups",
+      "entry": "@dzgrid/dom/groups",
+      "signature": "groups(): GroupsFeature",
+      "param": null,
+      "options": [],
+      "texts": null,
+      "sheet": null,
+      "css": [],
+      "doc": "`groups()`: collapsible header groups (Phase 6 step 7, docs/behaviors/header-groups.md; owner Q-GH, Q8-4), with `spans()` (the group rows). Its own entry, loaded only with collapsible groups.",
+      "source": "packages/dom/src/groups/index.ts"
+    },
+    {
+      "name": "slots",
+      "entry": "@dzgrid/dom/slots",
+      "signature": "slots(): GridFeature",
+      "param": null,
+      "options": [],
+      "texts": null,
+      "sheet": null,
+      "css": [],
+      "doc": "`slots()`: a host's parts draw the column headers' labels, the overlay, the busy mark (1.4.0) and the tooltip in place of the grid's own (docs/behaviors/parts.md, step 11). The grid keeps the rest: the header's role, sort state, mark, grip and click; the overlay's place and retry button; the tooltip's element, timing, Escape and placement.",
+      "source": "packages/dom/src/slots/index.ts"
+    }
   ]
 }

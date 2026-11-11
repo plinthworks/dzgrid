@@ -1,0 +1,85 @@
+---
+title: "print"
+description: "Imprimer les lignes telles qu’elles sont à l’écran, en vrai tableau : en-têtes sur chaque page, aucune ligne coupée."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Imprime les lignes de la grille en vrai tableau ; une fonction appelée avec la grille, pas une fonctionnalité.
+
+<FeatureFacts name="print" />
+
+## Ce qu’elle fait
+
+`print(grid, options)` ne se donne pas dans `features` : vous l’appelez avec la grille, depuis votre propre bouton, et
+rien n’est chargé avant. Elle imprime les lignes telles qu’elles sont à l’écran — mêmes colonnes, ordre, tri et
+filtres, pas seulement les lignes amenées à la vue par le défilement — en vrai tableau : en-têtes répétés sur chaque
+page, aucune ligne coupée en deux, droite à gauche en arabe, un thème sombre imprimé clair. Les lignes épinglées
+viennent en premier et en dernier ; une grille groupée imprime ses lignes de groupe et de totaux ; les panneaux de
+détail ne sont pas imprimés. Une grille aux pages venues du serveur imprime la page affichée.
+
+Elle construit le tableau à côté de la grille, ouvre la boîte d’impression du navigateur, puis retire le tableau ; la
+grille à l’écran n’est pas touchée. Appelée de nouveau avant que la boîte s’ouvre, seul l’appel le plus récent
+imprime. Au-delà de `maxRows`, les premières lignes sont imprimées, une ligne dit combien, et un problème
+`print-too-many` est signalé.
+
+La commande d’impression du navigateur (Ctrl+P) n’imprime que ce que montre la page, sauf avec
+[`printOnMenu`](../print-on-menu/). En Angular, passez `ctrl.grid()`.
+
+## Options
+
+- `maxRows` : le plus de lignes imprimées. Par défaut 5 000.
+- `title` : la légende du tableau. Par défaut : le nom accessible de la grille.
+- `header` : `false` laisse de côté les lignes d’en-tête. Elles sont imprimées par défaut, sur une grille avec
+  `headers: 'hidden'` aussi.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { print } from '@dzgrid/dom/print';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_PRINT } from '@dzgrid/dom/locales/fr-print';
+
+type Lighthouse = { id: string; light: string; metres: number };
+
+const grid = createGrid<Lighthouse>(document.getElementById('lights')!, {
+  rows: [{ id: 'l1', light: 'Roc aux mouettes', metres: 31 }, { id: 'l2', light: 'Pointe aux moules', metres: 18 }],
+  columns: [
+    { id: 'light', header: 'Phare' },
+    { id: 'metres', header: 'Hauteur (m)', type: 'number' },
+  ],
+  getRowId: (l) => l.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_PRINT.text } },
+});
+
+document.getElementById('print')!.addEventListener('click', () => {
+  void print(grid, { title: 'Phares de la baie', maxRows: 2000 });
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Phares' }}
+  features={[['print', { title: 'Phares de la baie' }]]}
+  columns={[
+    { id: 'light', header: 'Phare', flex: 1 },
+    { id: 'metres', header: 'Hauteur (m)', type: 'number', width: 130 },
+  ]}
+  rows={[
+    { id: 'l1', light: 'Roc aux mouettes', metres: 31 },
+    { id: 'l2', light: 'Pointe aux moules', metres: 18 },
+    { id: 'l3', light: 'Vieux port', metres: 24 },
+    { id: 'l4', light: 'Île aux phoques', metres: 42 },
+  ]}
+  caption="Appuyez sur « Imprimer » au-dessus de la grille : l’aperçu du navigateur montre le tableau."
+/>
+
+## Voir aussi
+
+- [`printOnMenu`](../print-on-menu/) : le Ctrl+P du navigateur imprime le même tableau.
+- [Export et impression](../../guides/export-print/#imprimer) : imprimer à côté des fichiers.
+- [`label`](../../settings/label/) : le nom de la grille, le titre par défaut.

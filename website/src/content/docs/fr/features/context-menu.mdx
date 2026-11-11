@@ -1,0 +1,101 @@
+---
+title: "contextMenu"
+description: "Le menu de cellule : copier, coller, recopier, annuler, épingler, exporter, et vos propres entrées, au clic droit ou au clavier."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Ouvre un menu sur une cellule, avec les actions des fonctions que vous lui donnez et vos propres entrées.
+
+<FeatureFacts name="contextMenu" />
+
+## Ce qu’elle fait
+
+`contextMenu()` ouvre un menu sur une cellule : un clic droit (Maj+clic droit garde celui du navigateur), Ctrl+clic
+sur Mac, Maj+F10 ou la touche Menu sur la cellule active. Dans le bloc il agit sur le bloc ; en dehors, la cellule
+prend d’abord le focus. Sans rien à proposer, ou pour un doigt, un stylet, un éditeur ouvert, c’est le menu du
+navigateur qui s’affiche.
+
+Le menu n’embarque aucune des fonctions qu’il pilote : vous les donnez dans `use`, et seules leurs entrées
+apparaissent. `range` : Copier, Copier avec les en-têtes, et avec `edit` Couper et Coller. `fill` : recopier vers le
+bas et vers la fin. `edit` : Annuler et Rétablir. `tree` : Déplier ou Replier sur une ligne parente. `pinned` :
+Épingler en haut ou en bas, Désépingler. `csv` et `xlsx` : exporter les lignes affichées. `status` : « Lire les
+totaux » sur une cellule du bloc. Tant qu’un filtre ou la recherche est actif, « Effacer tous les filtres » est
+proposé quand son texte est dans les messages.
+
+`api(grid)` donne `open(at)` (pour votre propre bouton), `close()` et `current()`. Une exception dans `items` revient
+aux entrées par défaut et est signalée.
+
+## Options
+
+- `use` : les fonctions que pilotent les entrées par défaut — `range`, `fill`, `edit`, `csv`, `xlsx` (le `xlsx` de
+  l’export), `tree`, `pinned`, `status`. Absentes : leurs entrées sont absentes.
+- `items(context, defaults)` : vos entrées — celles par défaut gardées, réordonnées, retirées ou complétées. Le
+  contexte porte la ligne, sa clé, la colonne, la valeur, le bloc et la grille.
+- `classes` : vos classes (Tailwind, Bootstrap) sur la liste (`menu`) et sur chaque entrée (`item`).
+- `onPin(rows)` : appelée après qu’Épingler ou Désépingler a changé une bande, pour que votre application garde ses
+  lignes épinglées.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { range } from '@dzgrid/dom/range';
+import { contextMenu } from '@dzgrid/dom/context-menu';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_RANGE } from '@dzgrid/dom/locales/fr-range';
+import { FR_CONTEXT_MENU } from '@dzgrid/dom/locales/fr-context-menu';
+
+type Crate = { id: string; fruit: string; kilos: number };
+
+const blocks = range();
+
+createGrid<Crate>(document.getElementById('crates')!, {
+  rows: [{ id: 'c1', fruit: 'Coing', kilos: 12 }, { id: 'c2', fruit: 'Nèfle', kilos: 7 }],
+  columns: [
+    { id: 'fruit', header: 'Fruit' },
+    { id: 'kilos', header: 'Kilos', type: 'number' },
+  ],
+  getRowId: (c) => c.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_RANGE.text, ...FR_CONTEXT_MENU.text } },
+  features: [
+    blocks,
+    contextMenu<Crate>({
+      use: { range: blocks },
+      items: (c, defaults) => [
+        ...defaults,
+        { separator: true },
+        { id: 'weigh', label: 'Peser à nouveau', action: () => console.log(c.row.fruit) },
+      ],
+    }),
+  ],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Cagettes de fruits' }}
+  features={['edit', 'range', 'fill', 'contextMenu']}
+  columns={[
+    { id: 'fruit', header: 'Fruit', flex: 1 },
+    { id: 'kilos', header: 'Kilos', type: 'number', width: 110, editable: true },
+    { id: 'crates', header: 'Cagettes', type: 'number', width: 110, editable: true },
+  ]}
+  rows={[
+    { id: 'c1', fruit: 'Coing', kilos: 12, crates: 3 },
+    { id: 'c2', fruit: 'Nèfle', kilos: 7, crates: 2 },
+    { id: 'c3', fruit: 'Reine-claude', kilos: 20, crates: 5 },
+    { id: 'c4', fruit: 'Mûre', kilos: 4, crates: 1 },
+    { id: 'c5', fruit: 'Quetsche', kilos: 15, crates: 4 },
+  ]}
+  caption="Clic droit sur une cellule, ou focus dessus puis Maj+F10 : copier, copier avec les en-têtes, recopier."
+/>
+
+## Voir aussi
+
+- [`rowDrag`](../row-drag/) : `menuItems(c)` ajoute Monter, Descendre… à ce menu.
+- [`csvExport`](../csv-export/) : le fichier qu’écrivent les entrées d’export.
+- [`range`](../range/) : le bloc sur lequel agit le menu.

@@ -11,8 +11,8 @@ Deux fonctions : `edit()` de `@dzgrid/dom/edit` tient les modifications (enregis
 `@dzgrid/dom/editors` (un calendrier de dates venu de `@tzslot/*`, chargé à la première utilisation) ou dans
 `@dzgrid/dom/editors-base` (sans calendrier : un jour se tape).
 
-F2, Entrée, un double-clic ou la frappe d’un caractère ouvre le champ ; Entrée garde la valeur et descend
-(`enterMoves`), Tab va à la cellule modifiable suivante, Échap rend l’ancienne valeur.
+F2, Entrée, un double-clic ou la frappe d’un caractère ouvre le champ ; Entrée garde la valeur (et descend
+avec `enterMoves: 'down'`), Tab va à la cellule modifiable suivante, Échap rend l’ancienne valeur.
 
 <LiveDemo
   height={320}

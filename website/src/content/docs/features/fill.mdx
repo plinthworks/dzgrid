@@ -1,0 +1,88 @@
+---
+title: "fill"
+description: "The fill handle: copy a block on, or continue a series, by the mouse or the keys."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Adds the fill handle at the corner of a block of cells, and Ctrl+D / Ctrl+R.
+
+<FeatureFacts name="fill" />
+
+## What it does
+
+`fill(blocks)` draws a small handle at the corner of the block, or of the focused cell. Drag it with the mouse to copy
+the block on, or to continue a series (1, 2, 3…; days by days); the drag starts 4 px from the handle, so a click never
+fills by accident. A pen, or anyone who does not drag, clicks the handle then clicks the last cell to fill. From the
+keyboard: Ctrl+D fills down, Ctrl+R toward the row's end, and Ctrl+Shift+Enter starts a fill steered by the arrows
+(Cmd on a Mac).
+
+A fill is one save request and one undo, said once. It writes through [`edit`](../edit/): without it every cell is
+read-only and nothing is written. It needs the [`range`](../range/) feature it is given, listed in `features` too;
+otherwise it reports a `missing-feature` error (detail `range`).
+
+`api(grid)` offers `fill(to)`, `down()`, `end()`, and `apply(input)` to write one input in every cell of the block.
+
+## Options
+
+- `handle`: the handle drawn, dragged and clicked. Default `true`; `false` leaves the keys and the API.
+- `along`: the one way a fill may go: `'row'` (along the row) or `'column'` (up or down); every gesture is brought
+  back onto it. Default: both. Another value counts as both, with an `invalid-setting` warning.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { range } from '@dzgrid/dom/range';
+import { fill } from '@dzgrid/dom/fill';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+import { EN_RANGE } from '@dzgrid/dom/locales/en-range';
+import { EN_FILL } from '@dzgrid/dom/locales/en-fill';
+
+type Tray = { id: string; seed: string; shelf: number | null };
+
+const blocks = range();
+
+createGrid<Tray>(document.getElementById('trays')!, {
+  rows: [{ id: 't1', seed: 'Basil', shelf: 1 }, { id: 't2', seed: 'Chervil', shelf: null }],
+  columns: [
+    { id: 'seed', header: 'Seed' },
+    { id: 'shelf', header: 'Shelf', type: 'number', editable: true },
+  ],
+  getRowId: (t) => t.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text, ...EN_RANGE.text, ...EN_FILL.text } },
+  features: [edit<Tray>(), editors(), blocks, fill(blocks, { along: 'column' })],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Seed trays' }}
+  features={['edit', 'range', 'fill']}
+  columns={[
+    { id: 'seed', header: 'Seed', flex: 1 },
+    { id: 'shelf', header: 'Shelf', type: 'number', width: 110, editable: true },
+    { id: 'sown', header: 'Sown', type: 'day', width: 150, editable: true },
+  ]}
+  rows={[
+    { id: 't1', seed: 'Basil', shelf: 1, sown: '2026-03-02' },
+    { id: 't2', seed: 'Chervil', shelf: 2, sown: '2026-03-03' },
+    { id: 't3', seed: 'Dill', shelf: null, sown: null },
+    { id: 't4', seed: 'Sorrel', shelf: null, sown: null },
+    { id: 't5', seed: 'Lovage', shelf: null, sown: null },
+  ]}
+  caption="Take Shelf 1 and 2, then drag the handle down to continue the series."
+/>
+
+## See also
+
+- [`range`](../range/): the block the handle sits on.
+- [`edit`](../edit/): saving, undo and redo.
+- [Selection and ranges](../../guides/selection-ranges/#blocks-of-cells-and-the-clipboard): the clipboard and the fill together.

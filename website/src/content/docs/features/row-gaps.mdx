@@ -1,0 +1,66 @@
+---
+title: "rowGaps"
+description: "An empty space above some rows, to see at a glance where a category starts."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Leaves an empty band of space above the rows your rule names.
+
+<FeatureFacts name="rowGaps" />
+
+## What it does
+
+`rowGaps({ before })` asks `before(c)` for each shown row but the first, once per new order of the rows shown (a sort,
+a filter, an opening, new rows), never at each paint. `c` holds the `row`, its `key`, its `index` among the rows shown,
+its `level` (0 for a top row) and `prev`, the row shown above it. `true` leaves a gap of `size`; a number, a gap of that
+many pixels; `false`, `0`, `null` or `undefined`, none. `roots`, exported beside it, puts a gap before each top-level
+row but the first (for a [tree](../tree/)).
+
+The gap is the grid's own background, outside every row: nothing in it is focused, selected, read or exported, and ↓
+goes straight across it. It scrolls with the rows and follows them after a sort or a filter. It is never above the
+first row shown, nor in the pinned bands. A merged cell stops at a gap. The row under a gap carries `data-gap` and
+`--dzg-gap` (the gap's size), so a theme can draw in it.
+
+`before` that is not a function tells `invalid-setting` and draws no gap. A rule that throws, or answers a negative or
+non-number size, gives no gap on that row and tells `invalid-gap` once. A wrong `size` gives 16 and `invalid-setting`.
+Beside [`detail()`](../detail/), [`responsive()`](../responsive/) or an infinite list there is no gap:
+`unsupported-combination`.
+
+## Options
+
+- `before` (required): the rule, asked for each shown row but the first.
+- `size`: a gap's pixels at the default text size, 16 by default; it grows with the text like the row height.
+
+Read when the grid is made.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { rowGaps } from '@dzgrid/dom/row-gaps';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Book = { id: string; shelf: string; title: string };
+
+createGrid<Book>(document.getElementById('library')!, {
+  rows: [
+    { id: 'b1', shelf: 'Travel', title: 'The Salt Road' },
+    { id: 'b2', shelf: 'Travel', title: 'Paper Tides' },
+    { id: 'b3', shelf: 'Nature', title: 'Winter Bees' },
+  ],
+  columns: [
+    { id: 'shelf', header: 'Shelf' },
+    { id: 'title', header: 'Title' },
+  ],
+  getRowId: (b) => b.id,
+  messages: EN,
+  // A gap where the shelf changes, as the rows are shown.
+  features: [rowGaps<Book>({ before: (c) => !!c.row && !!c.prev && c.row.shelf !== c.prev.shelf, size: 12 })],
+});
+```
+
+## See also
+
+- [`tree()`](../tree/): with `roots`, a gap before each top-level row.
+- [`spans()`](../spans/): a merged cell stops at a gap.

@@ -1,0 +1,123 @@
+---
+title: "grouping"
+description: "Des lignes réunies sous des lignes de groupe, un niveau par colonne, avec des totaux."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Regroupe les lignes selon une ou plusieurs colonnes et montre les totaux de chaque groupe.
+
+<FeatureFacts name="grouping" />
+
+## Ce qu’elle fait
+
+`grouping({ by })` réunit les lignes sous des lignes de groupe, un niveau par colonne de `by`. Une ligne de groupe
+montre « valeur (n) » dans la colonne de groupe, avec un chevron, décalée d’un cran par niveau ; ses autres cellules
+montrent les totaux du groupe. Les valeurs vides forment un seul groupe, « (Vide) », toujours le dernier. Les groupes
+commencent fermés ; → ouvre, ← ferme, et Entrée n’importe où sur une ligne de groupe l’ouvre ou la ferme. Les lignes de
+groupe ouvertes restent épinglées sous les titres pendant que leurs lignes défilent. Chaque ouverture par
+l’utilisateur est annoncée.
+
+Les totaux viennent de l’[`aggFunc`](../../column-options/agg-func/) de chaque colonne ou de l’option `aggFuncs`. Les
+filtres et la recherche testent d’abord les lignes de données : un groupe sans ligne retenue disparaît, et son compte
+et ses totaux sont ceux des lignes retenues. Une ligne de groupe n’est jamais sélectionnée ni éditée. Trier une colonne
+de regroupement range ses groupes.
+
+Changez le regroupement avec `api(grid).setBy(ids)`, avec la bande [`groupZone()`](../group-zone/), ou avec
+« Regrouper par cette colonne » dans le [menu de colonne](../column-menu/). `api(grid)` donne aussi `expandAll()`,
+`collapseAll()` et `totals()`.
+
+Une colonne que la grille ne connaît pas est écartée (`unknown-column`) ; une colonne avec `groupable: false` aussi
+(`invalid-setting`). Un total qui ne convient pas à sa colonne signale `agg-type` ; une fonction qui lève une
+exception, `agg-threw`. Le regroupement refuse à côté de lui un arbre, le maître-détail, les cellules fusionnées (les
+bandes de titres vont bien), les pages dans le navigateur et `sourceRows` (`unsupported-combination`) : l’un des deux
+s’efface. Avec `serverSideRows`, c’est le serveur qui regroupe. Ses textes sont dans le paquet `-group`.
+
+## Options
+
+- `by` : les ids des colonnes de regroupement, le premier niveau d’abord ; vide (par défaut) : les lignes à plat.
+- `aggFuncs` : les totaux par id de colonne (`sum`, `avg`, `min`, `max`, `count`, `first`, `last` ou une fonction) ;
+  ils l’emportent sur l’`aggFunc` propre d’une colonne.
+- `expanded` : ce qui est ouvert au premier chargement : `'none'` (par défaut), `'all'`, ou une profondeur (1 : le
+  premier niveau).
+- `footers` : les lignes de totaux : `'none'` (par défaut), `'group'` (une sous chaque groupe ouvert), `'grand'` (un
+  total général), ou `'both'`.
+- `grandTotal` : où se tient le total général : `'bottom'` (par défaut) ou `'top'`.
+- `column` : la colonne qui montre les libellés et les chevrons ; la première visible par défaut.
+- `indent` : les pixels par niveau, 16 par défaut.
+- `sticky` : les lignes de groupe gardées épinglées sous les titres, la plus proche d’abord : 3 par défaut, 0 pour
+  aucune.
+- `pivot` : un tableau croisé sur les groupes : [`pivot()`](../pivot/).
+
+Lues à la création de la grille ; `by` change ensuite par `api(grid).setBy()`.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { grouping } from '@dzgrid/dom/grouping';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_GROUP } from '@dzgrid/dom/locales/fr-group';
+import '@dzgrid/theme/grouping.css';
+
+type Packet = { id: string; kind: string; colour: string; name: string; packets: number };
+
+const columns: ColumnOrGroup<Packet>[] = [
+  { id: 'kind', header: 'Type' },
+  { id: 'colour', header: 'Couleur' },
+  { id: 'name', header: 'Graine', aggFunc: 'count' },
+  { id: 'packets', header: 'Sachets', type: 'number', aggFunc: 'sum' },
+];
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_GROUP.text } };
+
+const groups = grouping({ by: ['kind'], footers: 'grand' });
+const grid = createGrid<Packet>(document.getElementById('packets')!, {
+  rows: [
+    { id: 'p1', kind: 'Aromatique', colour: 'Vert', name: 'Basilic', packets: 40 },
+    { id: 'p2', kind: 'Fleur', colour: 'Orange', name: 'Souci', packets: 12 },
+  ],
+  columns,
+  getRowId: (p) => p.id,
+  messages,
+  features: [groups],
+});
+
+const api = groups.api(grid);
+api?.setBy(['kind', 'colour']);
+api?.expandAll();
+console.log(api?.totals());
+```
+
+## Démo
+
+<LiveDemo
+  height={420}
+  settings={{ label: 'Sachets de graines' }}
+  features={[['grouping', { by: ['kind', 'colour'], expanded: 1, footers: 'grand' }]]}
+  columns={[
+    { id: 'kind', header: 'Type', flex: 1, minWidth: 190 },
+    { id: 'colour', header: 'Couleur', width: 120 },
+    { id: 'name', header: 'Graine', width: 130, aggFunc: 'count' },
+    { id: 'packets', header: 'Sachets', type: 'number', width: 110, aggFunc: 'sum' },
+  ]}
+  rows={[
+    { id: 'p1', kind: 'Aromatique', colour: 'Vert', name: 'Basilic', packets: 40 },
+    { id: 'p2', kind: 'Fleur', colour: 'Orange', name: 'Souci', packets: 12 },
+    { id: 'p3', kind: 'Légume', colour: 'Orange', name: 'Carotte', packets: 55 },
+    { id: 'p4', kind: 'Aromatique', colour: 'Vert', name: 'Thym', packets: 18 },
+    { id: 'p5', kind: 'Fleur', colour: 'Jaune', name: 'Tournesol', packets: 30 },
+    { id: 'p6', kind: 'Légume', colour: 'Orange', name: 'Potiron', packets: 9 },
+    { id: 'p7', kind: 'Aromatique', colour: 'Violet', name: 'Ciboulette', packets: 22 },
+    { id: 'p8', kind: 'Fleur', colour: 'Rouge', name: 'Coquelicot', packets: 16 },
+    { id: 'p9', kind: 'Légume', colour: 'Rouge', name: 'Tomate', packets: 35 },
+  ]}
+  caption="Ouvrez un type de graine pour voir ses couleurs ; la dernière ligne est le total général."
+/>
+
+## Voir aussi
+
+- [`groupZone()`](../group-zone/) : la bande où l’on regroupe en glissant.
+- L’option de colonne [`aggFunc`](../../column-options/agg-func/).
+- Le guide [Groupes](../../guides/grouping/).

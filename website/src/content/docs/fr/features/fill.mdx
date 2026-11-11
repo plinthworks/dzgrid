@@ -1,0 +1,90 @@
+---
+title: "fill"
+description: "La poignée de recopie : recopier un bloc, ou continuer une série, à la souris ou au clavier."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Ajoute la poignée de recopie au coin d’un bloc de cellules, et Ctrl+D / Ctrl+R.
+
+<FeatureFacts name="fill" />
+
+## Ce qu’elle fait
+
+`fill(blocks)` dessine une petite poignée au coin du bloc, ou de la cellule active. Faites-la glisser à la souris pour
+recopier le bloc, ou pour continuer une série (1, 2, 3… ; les jours de jour en jour) ; le glisser commence à 4 px de
+la poignée, pour qu’un clic ne recopie jamais par accident. Un stylet, ou qui ne glisse pas, clique la poignée puis
+clique la dernière cellule à remplir. Au clavier : Ctrl+D recopie vers le bas, Ctrl+R vers la fin de la ligne, et
+Ctrl+Maj+Entrée lance une recopie guidée par les flèches (Cmd sur Mac).
+
+Une recopie fait une seule demande d’enregistrement et une seule annulation, dite une fois. Elle écrit par
+[`edit`](../edit/) : sans lui toutes les cellules sont en lecture seule et rien n’est écrit. Elle demande la fonction
+[`range`](../range/) qu’on lui donne, présente aussi dans `features` ; sinon elle signale une erreur
+`missing-feature` (détail `range`).
+
+`api(grid)` offre `fill(to)`, `down()`, `end()`, et `apply(input)` pour écrire une même saisie dans toutes les
+cellules du bloc.
+
+## Options
+
+- `handle` : la poignée dessinée, glissée et cliquée. Par défaut `true` ; `false` laisse les touches et l’API.
+- `along` : le seul sens permis : `'row'` (le long de la ligne) ou `'column'` (vers le haut ou le bas) ; chaque geste
+  y est ramené. Par défaut : les deux. Une autre valeur vaut les deux, avec un avertissement `invalid-setting`.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { range } from '@dzgrid/dom/range';
+import { fill } from '@dzgrid/dom/fill';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_EDIT } from '@dzgrid/dom/locales/fr-edit';
+import { FR_EDITORS } from '@dzgrid/dom/locales/fr-editors';
+import { FR_RANGE } from '@dzgrid/dom/locales/fr-range';
+import { FR_FILL } from '@dzgrid/dom/locales/fr-fill';
+
+type Tray = { id: string; seed: string; shelf: number | null };
+
+const blocks = range();
+
+createGrid<Tray>(document.getElementById('trays')!, {
+  rows: [{ id: 't1', seed: 'Basilic', shelf: 1 }, { id: 't2', seed: 'Cerfeuil', shelf: null }],
+  columns: [
+    { id: 'seed', header: 'Graine' },
+    { id: 'shelf', header: 'Étagère', type: 'number', editable: true },
+  ],
+  getRowId: (t) => t.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_EDIT.text, ...FR_EDITORS.text, ...FR_RANGE.text, ...FR_FILL.text } },
+  features: [edit<Tray>(), editors(), blocks, fill(blocks, { along: 'column' })],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Plateaux de semis' }}
+  features={['edit', 'range', 'fill']}
+  columns={[
+    { id: 'seed', header: 'Graine', flex: 1 },
+    { id: 'shelf', header: 'Étagère', type: 'number', width: 110, editable: true },
+    { id: 'sown', header: 'Semé', type: 'day', width: 150, editable: true },
+  ]}
+  rows={[
+    { id: 't1', seed: 'Basilic', shelf: 1, sown: '2026-03-02' },
+    { id: 't2', seed: 'Cerfeuil', shelf: 2, sown: '2026-03-03' },
+    { id: 't3', seed: 'Aneth', shelf: null, sown: null },
+    { id: 't4', seed: 'Oseille', shelf: null, sown: null },
+    { id: 't5', seed: 'Livèche', shelf: null, sown: null },
+  ]}
+  caption="Prenez Étagère 1 et 2, puis faites glisser la poignée vers le bas pour continuer la série."
+/>
+
+## Voir aussi
+
+- [`range`](../range/) : le bloc où se tient la poignée.
+- [`edit`](../edit/) : l’enregistrement, annuler et rétablir.
+- [Sélection et plages](../../guides/selection-ranges/#blocs-de-cellules-et-presse-papiers) : le presse-papiers et la recopie ensemble.

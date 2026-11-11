@@ -1,0 +1,88 @@
+---
+title: "columnsChooser"
+description: "A window to show, hide and order the columns, with a search box."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Opens « Choose columns »: every column with a box to show or hide it, and a way to change its place.
+
+<FeatureFacts name="columnsChooser" />
+
+## What it does
+
+`columnsChooser()` shows a window under the button that opened it: a search box, then every column in the grid's
+order — pinned at the start, centre, pinned at the end, hidden ones too — inside its header groups. Each column has a
+box (ticked: shown), ▲ and ▼ buttons and a handle to drag it. Every change applies at once: unticking hides the column,
+moving a row moves the column. « Show all » and « Reset » act on every column. The search ignores case and accents.
+
+The list is one tab stop: the arrows go from box to box, Alt+ArrowUp / ArrowDown move the focused column one place.
+Escape empties the search box first, then closes; so do the close button and a press outside. The focus goes back where
+it was. The last shown column can never be hidden, nor one with [`hideable: false`](../../column-options/hideable/);
+a column with [`chooser: false`](../../column-options/chooser/) is not listed.
+
+It opens from the [`columnMenu()`](../column-menu/) when the menu gets it in `use` (« Choose columns… »), or from your
+own button with `chooserFeature.api(grid).open(button)`. With [`dock()`](../dock/), it is a side panel instead of a
+window. Without the `-columns` texts, the grid is not made: an error names the missing keys.
+
+## Options
+
+- `onClose`: called after the window closed (the focus is already back).
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { columnsChooser } from '@dzgrid/dom/columns-panel';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import '@dzgrid/theme/columns-panel.css';
+
+type Fruit = { id: string; name: string; colour: string; weight: number; code: string };
+
+const chooser = columnsChooser({ onClose: () => console.log('chooser closed') });
+
+const grid = createGrid<Fruit>(document.getElementById('fruit')!, {
+  rows: [{ id: 'f1', name: 'Quince', colour: 'Yellow', weight: 320, code: 'Q-01' }],
+  columns: [
+    { id: 'name', header: 'Fruit', hideable: false },
+    { id: 'colour', header: 'Colour' },
+    { id: 'weight', header: 'Weight (g)', type: 'number', hidden: true },
+    { id: 'code', header: 'Code', chooser: false },
+  ],
+  getRowId: (f) => f.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_COLUMNS.text } },
+  features: [chooser],
+});
+
+const button = document.getElementById('choose')!;
+button.addEventListener('click', () => chooser.api(grid)?.open(button));
+```
+
+## Live demo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Fruit' }}
+  features={['chooser', 'columnMenu']}
+  columns={[
+    { id: 'name', header: 'Fruit', flex: 1, minWidth: 140 },
+    { id: 'colour', header: 'Colour', width: 130 },
+    { id: 'weight', header: 'Weight (g)', type: 'number', width: 130, hidden: true },
+    { id: 'season', header: 'Season', width: 130 },
+  ]}
+  rows={[
+    { id: 'f1', name: 'Quince', colour: 'Yellow', weight: 320, season: 'Autumn' },
+    { id: 'f2', name: 'Plum', colour: 'Purple', weight: 60, season: 'Summer' },
+    { id: 'f3', name: 'Pear', colour: 'Green', weight: 180, season: 'Autumn' },
+    { id: 'f4', name: 'Cherry', colour: 'Red', weight: 8, season: 'Summer' },
+  ]}
+  caption="Open a column’s ⋮ menu and pick « Choose columns… »: tick and untick, or move a column by its ▲ ▼ buttons."
+/>
+
+## See also
+
+- The [`chooser`](../../column-options/chooser/) and [`hideable`](../../column-options/hideable/) column options.
+- The [`dock`](../dock/) feature: the chooser as a side panel.
+- [Dock and panels](../../guides/dock-panels/): the guide.

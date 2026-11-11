@@ -1,0 +1,106 @@
+---
+title: "columnMenu"
+description: "Le menu ⋮ de chaque titre de colonne : trier, figer, dimensionner, déplacer, masquer, choisir, rétablir."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Met un menu sur chaque titre de colonne, avec un élément par action possible sur cette colonne.
+
+<FeatureFacts name="columnMenu" />
+
+## Ce qu’elle fait
+
+`columnMenu()` ajoute un bouton ⋮ à chaque titre de colonne large d’au moins 96 px. Le menu s’ouvre aussi par un clic
+droit sur le titre (Maj+clic droit garde celui du navigateur), par Maj+F10 ou la touche Menu, par Alt+Flèche bas
+quand la colonne n’a pas de fenêtre de filtre, et par Ctrl+clic sur Mac. Ses éléments : trier, figer au début ou à la
+fin, dimensionner, déplacer, filtrer, masquer, choisir les colonnes, rétablir les colonnes, et la densité si on la
+demande. Chaque élément est dit quand il agit. Ouvert par un pointeur, le menu laisse le focus de la grille où il était.
+
+Certains éléments viennent d’autres fonctions, données dans `use` : « Ajuster cette colonne », « Ajuster toutes les
+colonnes », « Redimensionner au clavier » et les déplacements demandent [`columns()`](../columns/) ; « Choisir les
+colonnes… » demande [`columnsChooser()`](../columns-chooser/) ; le regroupement, le pivot et la recopie ont leurs
+éléments quand [`grouping()`](../grouping/), [`pivot()`](../pivot/) ou [`range()`](../range/) avec
+[`fill()`](../fill/) sont donnés. Sans elles, ces éléments n’apparaissent pas. « Filtrer… » apparaît avec
+[`filters()`](../filters/). « Élargir » et « Rétrécir » changent la largeur de 10 px et laissent le menu ouvert : une
+façon de redimensionner sans faire glisser.
+
+[`menu: false`](../../column-options/menu/) sur une colonne lui retire le menu. Une colonne verrouillée
+(`movable: false`) a ses éléments de déplacement et de figeage grisés ; « Masquer la colonne » est grisé pour une colonne en
+`hideable: false` et pour la dernière affichée. Sans les textes `-column-menu`, la grille n’est pas créée : une erreur
+nomme les clés qui manquent.
+
+## Options
+
+- `use` : les fonctions que les éléments pilotent (`columns`, `chooser`, `grouping`, `pivot`, `range`, `fill`),
+  jointes par leur API. Une fonction non donnée : ses éléments n’apparaissent pas.
+- `density` : une ligne « Compacte / Normale / Aérée ». Absente par défaut ; absente aussi quand `rowHeight` est un
+  nombre.
+- `onDensity` : appelée après que cette ligne a changé la densité de la grille.
+- `items` : vos éléments, à partir de la colonne et des entrées par défaut : réordonner, retirer ou ajouter. Si elle
+  lève une erreur, les entrées par défaut sont montrées et l’erreur est signalée.
+- `classes` : vos classes sur le menu (`menu`) et sur chaque élément (`item`), pour Tailwind ou Bootstrap.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { columns } from '@dzgrid/dom/columns';
+import { columnMenu } from '@dzgrid/dom/column-menu';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+import { FR_COLUMN_MENU } from '@dzgrid/dom/locales/fr-column-menu';
+import '@dzgrid/theme/columns.css';
+import '@dzgrid/theme/menu.css';
+
+type River = { id: string; name: string; sea: string; length: number };
+
+const moves = columns();
+
+createGrid<River>(document.getElementById('rivers')!, {
+  rows: [{ id: 'r1', name: 'Argentine', sea: 'mer du Nord', length: 212 }],
+  columns: [
+    { id: 'name', header: 'Rivière' },
+    { id: 'sea', header: 'Se jette dans', menu: false },
+    { id: 'length', header: 'Longueur (km)', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_COLUMNS.text, ...FR_COLUMN_MENU.text } },
+  features: [
+    moves,
+    columnMenu({
+      use: { columns: moves },
+      density: true,
+      // Pas de « Masquer la colonne » sur le nom de la rivière.
+      items: (column, defaults) => (column.id === 'name' ? defaults.filter((e) => 'separator' in e || e.id !== 'hide') : defaults),
+    }),
+  ],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Rivières' }}
+  features={['columns', 'chooser', ['columnMenu', { density: true }]]}
+  columns={[
+    { id: 'name', header: 'Rivière', flex: 1, minWidth: 140 },
+    { id: 'sea', header: 'Se jette dans', width: 150 },
+    { id: 'length', header: 'Longueur (km)', type: 'number', width: 140 },
+  ]}
+  rows={[
+    { id: 'r1', name: 'Argentine', sea: 'mer du Nord', length: 212 },
+    { id: 'r2', name: 'Aulnaie', sea: 'lac Merrow', length: 87 },
+    { id: 'r3', name: 'Chute-Pierre', sea: 'mer du Nord', length: 341 },
+    { id: 'r4', name: 'Roselière', sea: 'baie Grise', length: 56 },
+  ]}
+  caption="Ouvrez le menu d’une colonne par son bouton ⋮ ou par un clic droit sur son titre."
+/>
+
+## Voir aussi
+
+- L’option de colonne [`menu`](../../column-options/menu/) : pas de menu pour une colonne.
+- Les fonctions [`columns`](../columns/) et [`columnsChooser`](../columns-chooser/), que le menu pilote.
+- Le réglage [`density`](../../settings/density/).

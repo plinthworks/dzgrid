@@ -1,0 +1,72 @@
+---
+title: "pinnedRows"
+description: "Des lignes qui restent visibles : certaines sous les titres, d’autres au pied de la grille."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Épingle des lignes à vous sous les titres et au pied de la grille.
+
+<FeatureFacts name="pinnedRows" />
+
+## Ce qu’elle fait
+
+`pinnedRows({ top, bottom })` dessine deux bandes : les lignes `top` juste sous les titres, les lignes `bottom` au pied
+de la grille, toutes visibles pendant que le corps défile. Leurs colonnes restent alignées sur le corps, colonnes
+épinglées et défilement horizontal compris. Le tri, les filtres, la recherche et les pages ne les déplacent, ne les
+cachent ni ne les comptent jamais ; dans une grille paginée, elles s’affichent sur chaque page.
+
+Elles sont dessinées comme les lignes du corps (formats, parties de cellule, classes) et atteintes avec les flèches :
+↓ depuis la dernière ligne de titres entre dans la bande du haut, ↓ depuis la dernière ligne du corps dans celle du
+bas. Elles ne sont jamais sélectionnées. Avec [`edit()`](../edit/) et [`editors()`](../editors/), leurs cellules
+s’éditent comme les autres, par le même enregistrement ; la fonction `editable` d’une colonne reçoit
+`{ pinned: 'top' }` ou `{ pinned: 'bottom' }` en troisième argument. Ensemble, les bandes prennent au plus la moitié
+de la vue ; au-delà, une bande montre ses lignes dans une fenêtre que la molette et le focus déplacent.
+
+Chaque ligne a pour clé le `getRowId` de la grille, à part des lignes du corps. Un id en double d’un même côté est
+écarté (`duplicate-row-id`), un id inutilisable aussi (`invalid-row-id`) ; plus de 5 lignes d’un côté signale
+`too-many-pinned-rows`, et elles sont quand même dessinées. [`totalsRow()`](../totals-row/) ajoute sa ligne à la fin
+de la bande du bas.
+
+## Options
+
+- `top` : les lignes sous les titres, dans l’ordre.
+- `bottom` : les lignes au pied de la grille, dans l’ordre.
+
+Lues à la création de la grille ; `api(grid).set({ top, bottom })` les remplace ensuite (un côté omis est gardé).
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { pinnedRows } from '@dzgrid/dom/pinned-rows';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_PINNED } from '@dzgrid/dom/locales/fr-pinned';
+import '@dzgrid/theme/pinned-rows.css';
+
+type Reading = { id: string; station: string; rain: number };
+
+const pins = pinnedRows<Reading>({
+  top: [{ id: 'goal', station: 'Objectif annuel', rain: 800 }],
+  bottom: [{ id: 'last', station: 'L’an dernier', rain: 742 }],
+});
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_PINNED.text } };
+
+const grid = createGrid<Reading>(document.getElementById('rain')!, {
+  rows: [{ id: 's1', station: 'Cap Lumière', rain: 61 }, { id: 's2', station: 'Colline creuse', rain: 48 }],
+  columns: [
+    { id: 'station', header: 'Station' },
+    { id: 'rain', header: 'Pluie (mm)', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [pins],
+});
+
+pins.api(grid)?.set({ bottom: [] });   // vide la bande du bas, garde celle du haut
+```
+
+## Voir aussi
+
+- [`totalsRow()`](../totals-row/) : une ligne Total dans la bande du bas.
+- [`edit()`](../edit/) : l’édition, lignes épinglées comprises.

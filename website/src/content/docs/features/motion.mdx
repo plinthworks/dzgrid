@@ -1,0 +1,69 @@
+---
+title: "motion"
+description: "Rows that glide after a sort, a flash on a changed value, popups that fade in — with GSAP, which you install."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Animates the grid with GSAP: rows gliding, values flashing, pages sliding, popups fading in.
+
+<FeatureFacts name="motion" />
+
+## What it does
+
+`motion()` adds movement that is never needed to read the grid. After a sort or a filter, the rows that stay glide to
+their new place and the rows that come into view fade in. A page change slides the rows a little, from the side the
+reading goes to. A value changed live (a transaction, or a reload with [`sameRow`](../../settings/same-row/)) is
+tinted for a moment. A popup and the overlay fade in. A tree's rows glide when a parent opens or closes. The order,
+the focus and what a screen reader reads are the new ones from the first frame.
+
+GSAP is not part of DzGrid: your application installs the `gsap` package (3.13 or later, under GSAP's own licence).
+Give it with `motion({ gsap })`, the same instance your own hooks use; otherwise the motion code imports the package
+itself. That code and GSAP are fetched in idle time after the first rows are painted, or at `load()`. Without GSAP the
+grid works, without motion, and tells one `missing-feature` error (detail `gsap`).
+
+Reduced motion is followed live: nothing moves, a changed value keeps a still mark. The
+[`motion`](../../settings/motion/) setting at `false` stops every effect. One `motion()` may serve several grids.
+
+## Options
+
+- `preset`: how it feels; `'sober'` (the only one yet): short, eased, no bounce.
+- `effects`: each effect on by default, `false` turns one off — `flip` (rows glide), `enter` (rows fade in), `flash`
+  (a changed value; `{ hold, fade }` in ms, each 0 to 10 000, by default `{ hold: 0, fade: 600 }`; a bad field takes
+  its default with an `invalid-setting` warning), `page`, `popup`, `expand` (a tree's rows).
+- `gsap`: your application's GSAP; otherwise the motion code imports the package itself.
+- `onCell(el, cell, reason)`: a cell whose value changed (`changed`), or whose save started, succeeded or was refused
+  (`saving`, `saved`, `failed`, with [`edit`](../edit/)), for your own tween. At most 50 calls a paint. Animate `el`
+  only; return `false` to skip the built-in flash.
+- `onRow(el, row, reason)`: a row that moved or entered after a sort, a filter or a tree's toggle, or was added live
+  (not under reduced motion).
+
+## Example
+
+```ts
+import { gsap } from 'gsap';
+import { createGrid } from '@dzgrid/dom';
+import { motion } from '@dzgrid/dom/motion-gsap';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Ferry = { id: string; ferry: string; knots: number };
+
+const moves = motion({ gsap, effects: { page: false, flash: { hold: 400, fade: 800 } } });
+
+createGrid<Ferry>(document.getElementById('ferries')!, {
+  rows: [{ id: 'f1', ferry: 'Morning gull', knots: 12 }, { id: 'f2', ferry: 'Tidewalker', knots: 9 }],
+  columns: [
+    { id: 'ferry', header: 'Ferry' },
+    { id: 'knots', header: 'Knots', type: 'number' },
+  ],
+  getRowId: (f) => f.id,
+  messages: EN,
+  features: [moves],
+});
+```
+
+## See also
+
+- [`motion`](../../settings/motion/): the setting that switches every movement off.
+- [`freshRows`](../fresh-rows/): a still mark on the rows a refresh added.
+- [`edit`](../edit/): the saves `onCell` hears.

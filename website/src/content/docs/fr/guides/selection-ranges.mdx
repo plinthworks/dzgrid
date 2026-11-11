@@ -132,7 +132,7 @@ grid.addEventListener('dzg-selection-changed', (e) => {
 - `mode: 'exclude'` veut dire « toutes les lignes que la requête trouve, sauf ces clés » : après « tout sélectionner »
   sur des lignes paginées ou venues d’un serveur, la grille ne peut pas les lister, votre serveur le peut en rejouant
   la requête.
-- `canSelect(row, selection, context)` rend `false`, ou un code de raison, pour refuser une ligne ; il demande la
+- `canSelect(row, selection, context)` rend `false`, ou la phrase à dire, pour refuser une ligne ; il demande la
   fonction `rules()` de `@dzgrid/dom/rules` (textes `-rules`), qui dit pourquoi à l’utilisateur.
 
 Chaque clé du réglage `selection` est sur sa page : [`selection`](../../settings/selection/).

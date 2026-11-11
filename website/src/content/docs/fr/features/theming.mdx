@@ -1,0 +1,73 @@
+---
+title: "theming"
+description: "Écrit le réglage theme en variables CSS et dessine vos propres icônes, les deux en direct."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Donne à la grille les réglages theme et icons : couleurs, tailles et marques pour une grille, depuis le code.
+
+<FeatureFacts name="theming" />
+
+## Ce qu’elle fait
+
+`theming()` lit le réglage [`theme`](../../settings/theme/) et écrit chaque clé en variable CSS sur la racine de la
+grille ; elle l’emporte donc sur vos feuilles de style pour cette grille seulement. Elle dessine aussi le réglage
+[`icons`](../../settings/icons/) à la place des marques de la grille (tri, filtre, menu, chevron…). Les deux suivent
+en direct : `grid.update({ theme })` retire les clés qui ne sont pas redonnées.
+
+Une clé qui n’est pas dans le thème, une valeur qui pourrait sortir du CSS (`;`, `{`, `}`, `<`, `\`, `!`, `url(`), ou
+une icône refusée est signalée par un avertissement `invalid-setting` et laissée de côté ; rien n’est levé. Le
+contraste reste à votre charge.
+
+Donner `theme` ou `icons` à une grille sans cette fonction signale un avertissement `missing-feature`. Elle a son
+entrée à elle : une grille qui n’utilise pas ces réglages n’en porte rien.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { theming } from '@dzgrid/dom/theme';
+import { FR } from '@dzgrid/dom/locales/fr';
+import '@dzgrid/theme/variables.css';
+
+type Hive = { id: string; name: string; frames: number };
+
+const grid = createGrid<Hive>(document.getElementById('hives')!, {
+  rows: [{ id: 'h1', name: 'Ruche du verger', frames: 10 }],
+  columns: [{ id: 'name', header: 'Ruche' }, { id: 'frames', header: 'Cadres', type: 'number' }],
+  getRowId: (h) => h.id,
+  messages: FR,
+  theme: { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 6%, var(--tz-bg))', headerWeight: 500, columnLine: 'var(--dzg-line) solid var(--tz-border)' },
+  icons: { sortAsc: '<svg viewBox="0 0 16 16"><path d="M8 3l5 8H3z"/></svg>' },
+  features: [theming()],
+});
+
+grid.update({ theme: { headerWeight: 700 } });
+```
+
+## Démo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Ruches', theme: { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 8%, var(--tz-bg))', headerWeight: 500, columnLine: 'var(--dzg-line) solid var(--tz-border)', headerCase: 'uppercase' } }}
+  features={['theming']}
+  columns={[
+    { id: 'name', header: 'Ruche', flex: 1 },
+    { id: 'apiary', header: 'Rucher', width: 140 },
+    { id: 'frames', header: 'Cadres', type: 'number', width: 110 },
+  ]}
+  rows={[
+    { id: 'h1', name: 'Ruche du verger', apiary: 'Colline', frames: 10 },
+    { id: 'h2', name: 'Trèfle', apiary: 'Prairie', frames: 8 },
+    { id: 'h3', name: 'Vieux chêne', apiary: 'Colline', frames: 12 },
+    { id: 'h4', name: 'Allée de lavande', apiary: 'Jardin', frames: 9 },
+  ]}
+  caption="Lignes alternées, traits entre les colonnes et titres en capitales, réglés depuis le code pour cette grille seulement."
+/>
+
+## Voir aussi
+
+- Les réglages [`theme`](../../settings/theme/) et [`icons`](../../settings/icons/).
+- [Thème et droite à gauche](../../guides/theming-rtl/) : toutes les clés dans le guide.

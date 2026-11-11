@@ -4,10 +4,11 @@
  * the text written; as DzCalendar's gen-options) — the type as written, the comment, the default (the JSDoc
  * `@default`: a code literal, or a `{token}` the site translates), whether `update()` changes it (`UPDATE_POLICY`
  * in packages/dom/src/update.ts), whether it is required, the Angular input of the same name, the `<dz-grid>`
- * attribute or property that sets it, where it is declared. `--check` fails when the file differs.
+ * attribute or property that sets it, where it is declared; and each feature's import, signature, options, texts
+ * bundle, theme sheet and own CSS. `--check` fails when the file differs.
  */
 import ts from 'typescript';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -19,6 +20,34 @@ const POLICY = join(root, 'packages/dom/src/update.ts');
 const ANGULAR = join(root, 'packages/angular/src/grid.ts');
 const ELEMENT = join(root, 'packages/element/src/index.ts');
 const KNOWN_TAGS = new Set(['default']);
+const DOM = join(root, 'packages/dom/src');
+/**
+ * The features, one page each (`features/<slug>`): the entry they are imported from and the function. An entry that
+ * exports two (`parts`: `badge` and `cellBoolean`) gives two pages; `filters-base` and `editors-base` are the same
+ * functions without the calendar, told on the `filters` and `editors` pages.
+ */
+export const FEATURES = [
+  ['pagination', 'pagination'], ['search', 'quickSearch'], ['export', 'csvExport'], ['parts', 'badge'], ['parts', 'cellBoolean'],
+  ['rules', 'rules'], ['tree', 'tree'], ['tree-lazy', 'lazyChildren'], ['detail', 'detail'], ['detail', 'nestedGrid'],
+  ['edit', 'edit'], ['editors', 'editors'], ['editors-list', 'listEditor'], ['filters', 'filters'], ['range', 'range'],
+  ['fill', 'fill'], ['columns', 'columns'], ['column-menu', 'columnMenu'], ['context-menu', 'contextMenu'],
+  ['statusbar', 'statusBar'], ['find', 'find'], ['row-drag', 'rowDrag'], ['dock', 'dock'], ['pivot', 'pivot'],
+  ['pivot-bar', 'pivotBar'], ['row-numbers', 'rowNumbers'], ['grouping', 'grouping'], ['group-zone', 'groupZone'],
+  ['filters-panel', 'filtersPanel'], ['columns-panel', 'columnsChooser'], ['state', 'gridState'], ['pinned-rows', 'pinnedRows'],
+  ['auto-height', 'autoHeight'], ['row-gaps', 'rowGaps'], ['print', 'print'], ['print-menu', 'printOnMenu'],
+  ['fresh-rows', 'freshRows'], ['motion-gsap', 'motion'], ['totals-row', 'totalsRow'], ['vertical-headers', 'verticalHeaders'],
+  ['theme', 'theming'], ['wrapped-headers', 'wrappedHeaders'], ['column-hover', 'columnHover'], ['responsive', 'responsive'],
+  ['import', 'fileImport'], ['spans', 'spans'], ['groups', 'groups'], ['slots', 'slots'],
+];
+/** A feature whose entry exports no `*_KEYS` but uses another's texts (`printOnMenu`: `print()`'s table). */
+const TEXTS_OF = { printOnMenu: 'print' };
+/** The `@dzgrid/theme` sheet a feature needs after `dzgrid.css`, read from each sheet's opening comment. */
+const SHEETS = {
+  edit: 'edit', editors: 'edit', range: 'range', fill: 'fill', columns: 'columns', columnMenu: 'columns', contextMenu: 'menu',
+  columnsChooser: 'columns-panel', pinnedRows: 'pinned-rows', print: 'print', printOnMenu: 'print', freshRows: 'fresh-rows',
+  find: 'find', rowDrag: 'row-drag', dock: 'dock', pivotBar: 'pivot', verticalHeaders: 'vertical-headers',
+  filtersPanel: 'filters-panel', rowNumbers: 'row-numbers', quickSearch: 'search', grouping: 'grouping', groupZone: 'grouping',
+};
 
 const parse = (file) => ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.ES2022, true);
 /** The first node of a file that `test` accepts, depth first. */
@@ -52,7 +81,8 @@ function elementKeys() {
 
 export function generate() {
   const config = ts.getParsedCommandLineOfConfigFile(join(root, 'packages/dom/tsconfig.json'), {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => {} });
-  const program = ts.createProgram([SETTINGS, COLUMNS], { ...config.options, noEmit: true });
+  const entries = [...new Set(FEATURES.map(([e]) => join(DOM, `${e}.ts`)))];
+  const program = ts.createProgram([SETTINGS, COLUMNS, ...entries], { ...config.options, noEmit: true });
   const checker = program.getTypeChecker();
   const interfaceOf = (file, name) => {
     const node = find(program.getSourceFile(file), (n) => ts.isInterfaceDeclaration(n) && n.name.text === name);
@@ -94,7 +124,74 @@ export function generate() {
     return { ...record(sym), live: live[sym.name] === 'live', angular: inputs.has(sym.name), element: element[sym.name] ?? null };
   });
   const columns = checker.getPropertiesOfType(interfaceOf(COLUMNS, 'ColumnDef')).map(record);
-  return { settings, columns };
+  return { settings, columns, features: features(program, checker, record) };
+}
+
+/** The keys of a `text: { … }` bundle (`locales/en-*.ts`, `locales/en.ts`): bundle name → its keys. */
+function bundles() {
+  const out = {};
+  for (const file of readdirSync(join(DOM, 'locales')).filter((f) => /^en(-.+)?\.ts$/.test(f))) {
+    const text = find(parse(join(DOM, 'locales', file)), (n) => ts.isPropertyAssignment(n) && nameOf(n) === 'text' && ts.isObjectLiteralExpression(n.initializer));
+    if (text) out[file === 'en.ts' ? '' : file.slice(3, -3)] = new Set(text.initializer.properties.map(nameOf));
+  }
+  return out;
+}
+
+/**
+ * A `*_KEYS` constant's keys, read from its type (a list of string literals, or `readonly SomeMessageKey[]`), or
+ * null when it holds no text keys (`THEME_KEYS`: the theme's own keys).
+ */
+function keysOf(checker, sym) {
+  const type = checker.getTypeOfSymbol(sym);
+  const elems = checker.isTupleType(type) ? checker.getTypeArguments(type) : checker.isArrayType(type) ? [checker.getTypeArguments(type)[0]] : [];
+  const out = elems.flatMap((t) => (t.isUnion() ? t.types : [t])).filter((t) => t.isStringLiteral()).map((t) => t.value);
+  return out.length && out.every((k) => k.includes('.')) ? out : null;
+}
+
+/**
+ * Each feature's facts: its import, its signature, its options (the first parameter's keys, recorded as settings
+ * are), its texts bundle (the `locales/<lang>-<name>` holding every key of the entry's `*_KEYS`), its own CSS export.
+ */
+function features(program, checker, record) {
+  const texts = bundles();
+  const langs = (b) => ['en', 'fr', 'ar'].filter((l) => existsSync(join(DOM, 'locales', `${l}-${b}.ts`)));
+  for (const s of Object.values(SHEETS)) if (!existsSync(join(root, 'packages/theme', `${s}.scss`))) throw new Error(`no @dzgrid/theme/${s}.css`);
+  return FEATURES.map(([entry, name]) => {
+    const file = program.getSourceFile(join(DOM, `${entry}.ts`));
+    const exports = checker.getExportsOfModule(checker.getSymbolAtLocation(file));
+    const real = (s) => (s.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(s) : s);
+    const fn = exports.find((s) => s.name === name);
+    if (!fn) throw new Error(`@dzgrid/dom/${entry} exports no ${name}`);
+    const sym = real(fn);
+    const sig = checker.getSignaturesOfType(checker.getTypeOfSymbol(sym), ts.SignatureKind.Call)[0];
+    // A ready value (`cellBoolean`, a part) has no call: its type is shown instead.
+    // The options are the parameter named `o` (`fill(blocks, o)`, `print(grid, o)`); a function without one has none.
+    const param = sig?.parameters.find((p) => p.name === 'o');
+    let options = [];
+    if (param) {
+      const t = checker.getNonNullableType(checker.getTypeOfSymbol(param));
+      if (!checker.getSignaturesOfType(t, ts.SignatureKind.Call).length && !(t.flags & ts.TypeFlags.StringLike)) options = checker.getPropertiesOfType(t).map((p) => record(p));
+    }
+    const keys = exports.filter((s) => /_KEYS$/.test(s.name)).map((s) => keysOf(checker, real(s))).find(Boolean) ?? null;
+    let bundle = TEXTS_OF[name] ?? null;
+    if (keys && !bundle) {
+      bundle = Object.keys(texts).find((b) => b && keys.every((k) => texts[b].has(k))) ?? (keys.every((k) => texts[''].has(k)) ? '' : undefined);
+      if (bundle === undefined) throw new Error(`${name}: no texts bundle holds all of its keys`);
+    }
+    const decl = sym.declarations[0];
+    return {
+      name,
+      entry: `@dzgrid/dom/${entry}`,
+      signature: (sig ? `${name}${checker.signatureToString(sig, undefined, ts.TypeFormatFlags.NoTruncation)}` : `${name}: ${checker.typeToString(checker.getTypeOfSymbol(sym))}`).replace(/\s+/g, ' '),
+      param: param ? param.name : null,
+      options,
+      texts: bundle ? { bundle, langs: langs(bundle) } : bundle === '' ? { bundle: '', langs: ['en', 'fr', 'ar'] } : null,
+      sheet: SHEETS[name] ? `@dzgrid/theme/${SHEETS[name]}.css` : null,
+      css: exports.filter((s) => /_CSS$/.test(s.name)).map((s) => s.name),
+      doc: ts.displayPartsToString(sym.getDocumentationComment(checker)).split(/\n\s*\n/)[0].replace(/\s+/g, ' ').trim(),
+      source: relative(root, decl.getSourceFile().fileName),
+    };
+  });
 }
 
 const text = (data) => JSON.stringify(data, null, 2) + '\n';

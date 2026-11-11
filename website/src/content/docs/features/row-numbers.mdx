@@ -1,0 +1,53 @@
+---
+title: "rowNumbers"
+description: "Numbers 1, 2, 3 at the start of every row, in the order shown; a click takes the row."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Numbers the rows shown, in a narrow strip at the start of every row.
+
+<FeatureFacts name="rowNumbers" />
+
+## What it does
+
+`rowNumbers()` adds a narrow strip at the start of every row (on the right in Arabic), pinned: it never scrolls
+sideways. It counts 1, 2, 3… in the order shown, after the sort, the filters and the search; on a paged grid it goes
+on from the pages before (page 2 of 50 rows starts at 51). A detail panel and a [pinned row](../pinned-rows/) get no
+number. The strip is as wide as its largest number.
+
+A click on a number takes the whole row as the block when [`range`](../range/) is there, Shift+click the rows
+between, and a click on the corner every cell. Without `range`, a click selects the row as the row's box would (with
+the [`selection`](../../settings/selection/) setting); with neither, a click does nothing.
+
+It is never a column: not sorted, filtered, edited, moved or resized, never searched, never in an export, the print,
+the clipboard or the grid's state. A screen reader hears « Row number, 12 ». The function takes no options.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { range } from '@dzgrid/dom/range';
+import { rowNumbers } from '@dzgrid/dom/row-numbers';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_RANGE } from '@dzgrid/dom/locales/en-range';
+import { EN_ROW_NUMBERS } from '@dzgrid/dom/locales/en-row-numbers';
+
+type Shell = { id: string; shell: string; beach: string };
+
+createGrid<Shell>(document.getElementById('shells')!, {
+  rows: [{ id: 's1', shell: 'Cowrie', beach: 'North cove' }, { id: 's2', shell: 'Whelk', beach: 'Long strand' }],
+  columns: [
+    { id: 'shell', header: 'Shell' },
+    { id: 'beach', header: 'Beach' },
+  ],
+  getRowId: (s) => s.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_RANGE.text, ...EN_ROW_NUMBERS.text } },
+  features: [range(), rowNumbers()],
+});
+```
+
+## See also
+
+- [`range`](../range/): a click on a number takes the row.
+- [`selection`](../../settings/selection/): the row selection a click uses without `range`.

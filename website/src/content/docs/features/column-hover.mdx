@@ -1,0 +1,53 @@
+---
+title: "columnHover"
+description: "Marks the column under the mouse, so your style sheet can tint it."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Marks the column under the mouse or the pen, from its header to its last cell.
+
+<FeatureFacts name="columnHover" />
+
+## What it does
+
+`columnHover()` follows the pointer over the grid: the column under it gets `data-col-hover` on its header and its
+cells, and the grid's root gets `data-hover-col` with the column's id. Leaving the grid, or a place with no column (the
+gap after the last column, a group row, a full-width row), clears both.
+
+The tint is yours: set the variable `--dzg-column-hover-bg`. It is drawn over the row's own colour, so an alternate,
+hovered or selected row keeps its colour under a light tint. Unset, nothing is drawn, but the attributes are still
+written for your own CSS. The focused cell keeps its own look.
+
+Only the mouse and the pen count: the keyboard's focus never moves it, and a finger does not either. The work is
+attributes only, at most once per frame and only when the column changes. Right to left changes nothing; print does not
+show it.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { columnHover } from '@dzgrid/dom/column-hover';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Harvest = { id: string; field: string; june: number; july: number; august: number };
+
+// In your CSS: .dzg { --dzg-column-hover-bg: color-mix(in srgb, var(--tz-accent) 8%, transparent); }
+createGrid<Harvest>(document.getElementById('harvest')!, {
+  rows: [{ id: 'h1', field: 'North field', june: 120, july: 340, august: 410 }],
+  columns: [
+    { id: 'field', header: 'Field' },
+    { id: 'june', header: 'June (kg)', type: 'number' },
+    { id: 'july', header: 'July (kg)', type: 'number' },
+    { id: 'august', header: 'August (kg)', type: 'number' },
+  ],
+  getRowId: (h) => h.id,
+  messages: EN,
+  features: [columnHover()],
+});
+```
+
+## See also
+
+- [Theming and right to left](../../guides/theming-rtl/): the theme variables.
+- The [`theme`](../../settings/theme/) setting.

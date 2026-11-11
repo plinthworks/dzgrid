@@ -1,0 +1,72 @@
+---
+title: "pagination"
+description: "A footer under the rows: what is selected, where you are, and the pager."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Draws the pager under the rows when the grid shows its rows page by page.
+
+<FeatureFacts name="pagination" />
+
+## What it does
+
+`pagination()` adds a strip under the rows. At the start: what is selected and where you are (« 51 to 100 of
+1 234 »). At the end: first, previous, « Page 3 of 25 », next, last, and a « Rows per page » list. In Arabic the strip
+is mirrored.
+
+The pages themselves come from the [`pagination`](../../settings/pagination/) setting, or from a server that sends
+pages. Without paging, the feature draws nothing and reports an `invalid-page` warning. Paging without the feature
+still works through the API, with a `missing-feature` warning.
+
+A button that cannot act stays in place, dimmed, and keeps the focus. When every row of a page is ticked and more rows
+match, the footer offers « Select all 1 234 rows ».
+
+## Options
+
+- `footer`: the footer's parts, in order. By default `['footer.selected', 'footer.count', 'footer.pager']`. A host
+  part of the same name replaces the grid's; a name that is not a footer part is skipped, with an `unknown-part`
+  error. Read once, when the grid is made.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { pagination } from '@dzgrid/dom/pagination';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_PAGINATION } from '@dzgrid/dom/locales/en-pagination';
+
+type Seed = { id: string; name: string; packets: number };
+
+createGrid<Seed>(document.getElementById('seeds')!, {
+  rows: [{ id: 's1', name: 'Basil', packets: 40 }],
+  columns: [
+    { id: 'name', header: 'Seed' },
+    { id: 'packets', header: 'Packets', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  pagination: { pageSize: 50 },
+  messages: { ...EN, text: { ...EN.text, ...EN_PAGINATION.text } },
+  features: [pagination()],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={500}
+  settings={{ label: 'Seeds', pagination: { pageSize: 12, pageSizes: [12, 24] } }}
+  features={['pagination']}
+  columns={[
+    { id: 'name', header: 'Seed', flex: 1 },
+    { id: 'packets', header: 'Packets', type: 'number', width: 120 },
+  ]}
+  rows={Array.from({ length: 40 }, (_, i) => ({ id: `s${i + 1}`, name: `Seed ${i + 1}`, packets: (i * 7) % 50 }))}
+  caption="Twelve rows per page: use the pager under the grid."
+/>
+
+## See also
+
+- The [`pagination`](../../settings/pagination/) setting: page size and the sizes offered.
+- [Server data](../../guides/server-data/): pages asked from a server.

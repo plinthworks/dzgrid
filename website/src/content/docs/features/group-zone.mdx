@@ -1,0 +1,100 @@
+---
+title: "groupZone"
+description: "The Group by band above the rows: one chip per grouping column, to drag, move or remove."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Shows the grouping as a band of chips above the rows, which the user can change.
+
+<FeatureFacts name="groupZone" />
+
+## What it does
+
+`groupZone({ use })` adds a band above the rows. Empty, it reads « Drag a column here to group ». Each grouping column
+shows as a chip with its name and a × button, in grouping order. A header dragged onto the band groups by its column;
+× or Delete removes one; Ctrl+Shift+← → or a mouse drag moves one; each change is said. The band is one tab stop: the
+arrows move between its items, mirrored in Arabic.
+
+It drives the [`grouping()`](../grouping/) given in `use.grouping`, through its API; that feature must be in the grid
+too. The header drop needs [`columns()`](../columns/) in `use.columns`: without it, there is no drop, but « Group by
+this column » in the [column menu](../column-menu/) and the keys still work. A column with `groupable: false` cannot be
+dropped and shows no chip. A dropped column stays visible.
+
+Its texts (the `-group` bundle) are required: an error names any missing key. Beside a pivot, use
+[`pivotBar()`](../pivot-bar/) instead.
+
+## Options
+
+- `use` (required): `grouping`, the feature whose columns the band shows and changes; `columns`, optional, the column
+  moves that let a header be dropped on it.
+- `texts`: `'pivot'` reads the pivot's texts (`pivot.label`, `pivot.empty`…) instead of `zone.*`, for a second band
+  that holds the pivot columns.
+
+Read when the grid is made.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { grouping } from '@dzgrid/dom/grouping';
+import { groupZone } from '@dzgrid/dom/group-zone';
+import { columns } from '@dzgrid/dom/columns';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_GROUP } from '@dzgrid/dom/locales/en-group';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import '@dzgrid/theme/grouping.css';
+import '@dzgrid/theme/columns.css';
+
+type Packet = { id: string; kind: string; colour: string; name: string; packets: number };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_GROUP.text, ...EN_COLUMNS.text } };
+const groups = grouping({ by: ['kind'] });
+const moves = columns();
+
+createGrid<Packet>(document.getElementById('packets')!, {
+  rows: [{ id: 'p1', kind: 'Herb', colour: 'Green', name: 'Basil', packets: 40 }],
+  columns: [
+    { id: 'kind', header: 'Kind' },
+    { id: 'colour', header: 'Colour' },
+    { id: 'name', header: 'Seed', groupable: false },
+    { id: 'packets', header: 'Packets', type: 'number', aggFunc: 'sum' },
+  ],
+  getRowId: (p) => p.id,
+  messages,
+  features: [moves, groups, groupZone({ use: { grouping: groups, columns: moves } })],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={420}
+  settings={{ label: 'Seed packets' }}
+  features={['columns', ['grouping', { by: ['kind'] }], 'groupZone']}
+  columns={[
+    { id: 'kind', header: 'Kind', flex: 1, minWidth: 190 },
+    { id: 'colour', header: 'Colour', width: 120 },
+    { id: 'name', header: 'Seed', width: 130, aggFunc: 'count' },
+    { id: 'packets', header: 'Packets', type: 'number', width: 110, aggFunc: 'sum' },
+  ]}
+  rows={[
+    { id: 'p1', kind: 'Herb', colour: 'Green', name: 'Basil', packets: 40 },
+    { id: 'p2', kind: 'Flower', colour: 'Orange', name: 'Marigold', packets: 12 },
+    { id: 'p3', kind: 'Vegetable', colour: 'Orange', name: 'Carrot', packets: 55 },
+    { id: 'p4', kind: 'Herb', colour: 'Green', name: 'Thyme', packets: 18 },
+    { id: 'p5', kind: 'Flower', colour: 'Yellow', name: 'Sunflower', packets: 30 },
+    { id: 'p6', kind: 'Vegetable', colour: 'Orange', name: 'Pumpkin', packets: 9 },
+    { id: 'p7', kind: 'Herb', colour: 'Purple', name: 'Chive', packets: 22 },
+    { id: 'p8', kind: 'Flower', colour: 'Red', name: 'Poppy', packets: 16 },
+    { id: 'p9', kind: 'Vegetable', colour: 'Red', name: 'Tomato', packets: 35 },
+  ]}
+  caption="Drag the Colour title into the band above the titles; × on a chip removes it."
+/>
+
+## See also
+
+- [`grouping()`](../grouping/): the grouping it shows.
+- The [`groupable`](../../column-options/groupable/) column option.
+- The [Grouping](../../guides/grouping/) guide.

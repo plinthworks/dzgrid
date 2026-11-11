@@ -1,0 +1,95 @@
+---
+title: "range"
+description: "Blocks of cells: take a rectangle with the keys or the mouse, copy it, paste into it."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Lets the user take a block of cells, and copy, cut, paste or empty it.
+
+<FeatureFacts name="range" />
+
+## What it does
+
+`range()` adds blocks of cells. Shift+arrows grow a block from the focused cell, a drag of the mouse or a pen draws
+one, Shift+click stretches it, Ctrl+A takes every cell shown and Shift+Space the focused row. The block is tinted, and
+its size is said to a screen reader after a pause. It is dropped, and that is said once, when the sort or the rows
+shown change.
+
+Ctrl+C copies the block as tab-separated text that spreadsheets read (numbers in the locale's form, formula starts
+guarded), with an HTML table beside it. Ctrl+X cuts, Ctrl+V pastes into editable cells, Delete empties them: these
+three need [`edit`](../edit/), and a paste or a cut is one save request and one undo. The `rangeCopied` event tells
+how many cells were copied.
+
+`api(grid)` gives the block to your code: `get()`, `set(range)`, `clear()`, `box()`, `copy()`, `cut()`,
+`paste(text)`, `erase()`. A block over rows not loaded yet (a server's) is refused with a `rows-not-loaded` warning; a
+`maxPaste` that is not a whole number is replaced by the default, with an `invalid-setting` warning.
+
+## Options
+
+- `drag`: a press and a drag of the mouse or a pen makes a block. Default `true`; `false` leaves the keys,
+  Shift+click and the API.
+- `canCopy(ask)`: may refuse a copy or a cut. It sees the block's column ids and its counts, never the values;
+  `false` or a throw refuses.
+- `guard`: the formula guard on copy, so a spreadsheet does not run a copied text. Default `true`.
+- `raw`: numbers copied with a point whatever the locale. Default `false`.
+- `maxPaste`: above this many cells a paste writes nothing. Default 100 000.
+- `clearOnOutside`: a press outside the grid clears the block, and says so — not inside an element marked
+  `data-dzg-keep-range`, nor on the page's scrollbar. Default `true`; with `false` the block stays (Escape clears it).
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { range } from '@dzgrid/dom/range';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_RANGE } from '@dzgrid/dom/locales/en-range';
+
+type Book = { id: string; title: string; pages: number };
+
+const blocks = range({ maxPaste: 5000, canCopy: (ask) => ask.cells <= 1000 });
+
+const grid = createGrid<Book>(document.getElementById('books')!, {
+  rows: [{ id: 'b1', title: 'The salt road', pages: 212 }, { id: 'b2', title: 'Owls at noon', pages: 96 }],
+  columns: [
+    { id: 'title', header: 'Title' },
+    { id: 'pages', header: 'Pages', type: 'number' },
+  ],
+  getRowId: (b) => b.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_RANGE.text } },
+  features: [blocks],
+  onEvent: (e) => {
+    if (e.type === 'rangeCopied') console.log(e.cells);
+  },
+});
+
+console.log(blocks.api(grid)?.copy({ headers: true })?.text);
+```
+
+## Live demo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Books' }}
+  features={['range']}
+  columns={[
+    { id: 'title', header: 'Title', flex: 1 },
+    { id: 'pages', header: 'Pages', type: 'number', width: 110 },
+    { id: 'copies', header: 'Copies', type: 'number', width: 110 },
+  ]}
+  rows={[
+    { id: 'b1', title: 'The salt road', pages: 212, copies: 4 },
+    { id: 'b2', title: 'Owls at noon', pages: 96, copies: 11 },
+    { id: 'b3', title: 'A map of small rivers', pages: 340, copies: 2 },
+    { id: 'b4', title: 'The lantern keeper', pages: 158, copies: 7 },
+    { id: 'b5', title: 'Seven kinds of rain', pages: 64, copies: 9 },
+  ]}
+  caption="Shift+arrows or a drag take a block; Ctrl+C copies it; a press outside the grid clears it."
+/>
+
+## See also
+
+- [`fill`](../fill/): the handle at the block's corner, and Ctrl+D / Ctrl+R.
+- [`statusBar`](../status-bar/): the block's count, sum and mean under the rows.
+- [Selection and ranges](../../guides/selection-ranges/#blocks-of-cells-and-the-clipboard): rows and blocks, side by side.

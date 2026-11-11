@@ -1,0 +1,115 @@
+---
+title: "csvExport"
+description: "Write the grid's rows to a CSV, Excel or JSON file from your own button."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Writes the rows as the grid shows them to a file — CSV, Excel or JSON — from your own button.
+
+<FeatureFacts name="csvExport" />
+
+## What it does
+
+`csvExport({ canExport })` has no button of its own: `bind(button, { scope, format })` makes yours export, and
+`run(scope)` exports from code. The file holds the visible columns in their order, the sort and the filters. Scopes:
+`'displayed'` (the rows shown now: the current page when paged), `'selected'`, `'all'` (every row the query matches).
+`format: 'xlsx'` writes an Excel file when the `xlsx` option is on; `format: 'json'` a JSON file, no option needed.
+
+Values are written as values: ISO days, instants in the display zone, numbers a spreadsheet can add up, enum labels.
+A text starting like a formula gets a leading `'` so a spreadsheet does not run it. The file is built in chunks so
+the page never freezes; `cancel()` stops it. `run` resolves with `'done'`, `'refused'`, `'failed'`, `'cancelled'` or
+`'busy'`.
+
+An Excel file asked without the `xlsx` option, or `'all'` on server rows without `exportAll`, fails with a
+`missing-feature` warning. The [`contextMenu`](../context-menu/) offers the same through
+`use: { csv: exporter, xlsx: exporter.xlsx }`.
+
+## Options
+
+- `canExport` (required): `true`, or a function that may refuse (`{ ok: false, reason }`), asked when the export
+  runs with the request and the grid's `context`.
+- `exportAll(request, context)`: for server rows, your server builds the whole file and returns `{ url }` or
+  `{ blob }`.
+- `fileName(c)`: the file's name (`.csv` added). Default: the texts' file name, then the date and time.
+- `onProgress(p)`: for a progress bar of your own; the grid says no progress sentences.
+- `maxCells`: above this many cells (rows × columns) a browser export is refused. Default 10 000 000.
+- `deliver(file)`: takes the file instead of the grid's download (tests, your own saving).
+- `loadRun`: where the export's code comes from (by default fetched at the first export).
+- `xlsx`: `true` (or its options) for Excel files too. Absent: CSV and JSON only.
+- `text`: `'value'` (default), or `'display'` for each cell as the grid shows it.
+- `separator`: `','`, `';'` or a tab. Default: the locale's.
+- `bom`: a BOM first, so Excel reads UTF-8 (Arabic). Default `true`.
+- `header`: a line of column titles first. Default `true`.
+- `numbers`: `'excel'` (default: the locale's decimal mark unless the separator is `,`) or `'raw'`.
+- `instants`: `'wall'` (default: the display zone's clock) or `'iso'` (UTC with `Z`).
+- `enums`: `'label'` (the translated label) or `'code'`.
+- `sanitizeFormulas`: the formula guard. Default `true`.
+- `spans`: a spanned cell's value in every slot it covers (`'repeat'`, default) or in its first only (`'first'`).
+- `columns`: column ids, in order. Default: the visible columns; a hidden one named is written.
+- `tree`: a tree's depth — `'level'` (default: a first column, 1 for the roots), `'indent'` (two spaces per level),
+  `'none'` (flat).
+- `levelHeader`: the level column's title. Default `Level`.
+- `treeColumn`: the column that carries the indent. Default: the first written.
+- `groupRows`: a grouped grid's group, footer and grand total lines written (default), or `false` for the data rows
+  only.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { csvExport } from '@dzgrid/dom/export';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EXPORT } from '@dzgrid/dom/locales/en-export';
+
+type Kite = { id: string; kite: string; metres: number; flown: string };
+
+const exporter = csvExport({
+  canExport: true,
+  xlsx: true,
+  separator: ';',
+  fileName: ({ scope }) => `kites-${scope}`,
+});
+
+createGrid<Kite>(document.getElementById('kites')!, {
+  rows: [{ id: 'k1', kite: 'Red falcon', metres: 1.8, flown: '2026-04-19' }],
+  columns: [
+    { id: 'kite', header: 'Kite' },
+    { id: 'metres', header: 'Span (m)', type: 'number' },
+    { id: 'flown', header: 'Last flown', type: 'day' },
+  ],
+  getRowId: (k) => k.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_EXPORT.text } },
+  features: [exporter],
+});
+
+exporter.bind(document.getElementById('csv')!, { scope: 'displayed' });
+exporter.bind(document.getElementById('xlsx')!, { scope: 'all', format: 'xlsx' });
+```
+
+## Live demo
+
+<LiveDemo
+  height={320}
+  settings={{ label: 'Kites' }}
+  features={['filters', 'export']}
+  columns={[
+    { id: 'kite', header: 'Kite', flex: 1 },
+    { id: 'metres', header: 'Span (m)', type: 'number', width: 120 },
+    { id: 'flown', header: 'Last flown', type: 'day', width: 150 },
+  ]}
+  rows={[
+    { id: 'k1', kite: 'Red falcon', metres: 1.8, flown: '2026-04-19' },
+    { id: 'k2', kite: 'Paper carp', metres: 0.9, flown: '2025-09-07' },
+    { id: 'k3', kite: 'Box of winds', metres: 1.2, flown: '2026-02-28' },
+    { id: 'k4', kite: 'Night heron', metres: 2.4, flown: '2026-05-30' },
+  ]}
+  caption="Sort or filter first: the CSV, Excel and JSON buttons above the grid write what it shows."
+/>
+
+## See also
+
+- [Export and print](../../guides/export-print/#csv-and-excel): the scopes, server rows, the JSON file.
+- [`fileImport`](../file-import/): the other way, a file read into rows.
+- [`print`](../print/): the same rows on paper.

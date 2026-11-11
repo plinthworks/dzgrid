@@ -1,0 +1,119 @@
+---
+title: "csvExport"
+description: "Écrire les lignes de la grille dans un fichier CSV, Excel ou JSON depuis votre propre bouton."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Écrit les lignes telles que la grille les montre dans un fichier — CSV, Excel ou JSON — depuis votre propre bouton.
+
+<FeatureFacts name="csvExport" />
+
+## Ce qu’elle fait
+
+`csvExport({ canExport })` n’a pas de bouton à lui : `bind(button, { scope, format })` fait exporter le vôtre, et
+`run(scope)` exporte depuis le code. Le fichier contient les colonnes visibles dans leur ordre, le tri et les filtres.
+Portées : `'displayed'` (les lignes affichées : la page courante si la grille est paginée), `'selected'`, `'all'`
+(toutes les lignes qui répondent à la requête). `format: 'xlsx'` écrit un fichier Excel quand l’option `xlsx` est
+active ; `format: 'json'` un fichier JSON, sans option.
+
+Les valeurs sont écrites comme valeurs : jours ISO, instants dans le fuseau d’affichage, nombres qu’un tableur peut
+additionner, libellés des listes. Un texte qui commence comme une formule reçoit un `'` devant pour qu’un tableur ne
+l’exécute pas. Le fichier est construit par morceaux pour que la page ne se fige jamais ; `cancel()` l’arrête. `run`
+se termine par `'done'`, `'refused'`, `'failed'`, `'cancelled'` ou `'busy'`.
+
+Un fichier Excel demandé sans l’option `xlsx`, ou `'all'` sur des lignes serveur sans `exportAll`, échoue avec un
+avertissement `missing-feature`. Le [`contextMenu`](../context-menu/) propose la même chose par
+`use: { csv: exporter, xlsx: exporter.xlsx }`.
+
+## Options
+
+- `canExport` (obligatoire) : `true`, ou une fonction qui peut refuser (`{ ok: false, reason }`), appelée au moment de
+  l’export avec la demande et le `context` de la grille.
+- `exportAll(request, context)` : pour des lignes serveur, votre serveur construit le fichier entier et rend
+  `{ url }` ou `{ blob }`.
+- `fileName(c)` : le nom du fichier (`.csv` ajouté). Par défaut : le nom des textes, puis la date et l’heure.
+- `onProgress(p)` : pour votre propre barre de progression ; la grille ne dit aucune phrase de progression.
+- `maxCells` : au-delà de ce nombre de cellules (lignes × colonnes) un export dans le navigateur est refusé. Par
+  défaut 10 000 000.
+- `deliver(file)` : reçoit le fichier à la place du téléchargement de la grille (tests, votre propre enregistrement).
+- `loadRun` : d’où vient le code de l’export (par défaut chargé au premier export).
+- `xlsx` : `true` (ou ses options) pour les fichiers Excel aussi. Absente : CSV et JSON seulement.
+- `text` : `'value'` (par défaut), ou `'display'` pour chaque cellule telle que la grille la montre.
+- `separator` : `','`, `';'` ou une tabulation. Par défaut : celui de la locale.
+- `bom` : un BOM au début, pour qu’Excel lise l’UTF-8 (l’arabe). Par défaut `true`.
+- `header` : une ligne de titres de colonnes au début. Par défaut `true`.
+- `numbers` : `'excel'` (par défaut : la virgule décimale de la locale sauf si le séparateur est `,`) ou `'raw'`.
+- `instants` : `'wall'` (par défaut : l’heure du fuseau d’affichage) ou `'iso'` (UTC avec `Z`).
+- `enums` : `'label'` (le libellé traduit) ou `'code'`.
+- `sanitizeFormulas` : la protection des formules. Par défaut `true`.
+- `spans` : la valeur d’une cellule fusionnée dans chaque case qu’elle couvre (`'repeat'`, par défaut) ou dans la
+  première seulement (`'first'`).
+- `columns` : des identifiants de colonnes, dans l’ordre. Par défaut : les colonnes visibles ; une colonne masquée
+  nommée est écrite.
+- `tree` : la profondeur d’un arbre — `'level'` (par défaut : une première colonne, 1 pour les racines), `'indent'`
+  (deux espaces par niveau), `'none'` (à plat).
+- `levelHeader` : le titre de la colonne de niveau. Par défaut `Level`.
+- `treeColumn` : la colonne qui porte le retrait. Par défaut : la première écrite.
+- `groupRows` : les lignes de groupe, de pied et de total général d’une grille groupée écrites (par défaut), ou
+  `false` pour les lignes de données seules.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { csvExport } from '@dzgrid/dom/export';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_EXPORT } from '@dzgrid/dom/locales/fr-export';
+
+type Kite = { id: string; kite: string; metres: number; flown: string };
+
+const exporter = csvExport({
+  canExport: true,
+  xlsx: true,
+  separator: ';',
+  fileName: ({ scope }) => `cerfs-volants-${scope}`,
+});
+
+createGrid<Kite>(document.getElementById('kites')!, {
+  rows: [{ id: 'k1', kite: 'Faucon rouge', metres: 1.8, flown: '2026-04-19' }],
+  columns: [
+    { id: 'kite', header: 'Cerf-volant' },
+    { id: 'metres', header: 'Envergure (m)', type: 'number' },
+    { id: 'flown', header: 'Dernier vol', type: 'day' },
+  ],
+  getRowId: (k) => k.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_EXPORT.text } },
+  features: [exporter],
+});
+
+exporter.bind(document.getElementById('csv')!, { scope: 'displayed' });
+exporter.bind(document.getElementById('xlsx')!, { scope: 'all', format: 'xlsx' });
+```
+
+## Démo
+
+<LiveDemo
+  height={320}
+  settings={{ label: 'Cerfs-volants' }}
+  features={['filters', 'export']}
+  columns={[
+    { id: 'kite', header: 'Cerf-volant', flex: 1 },
+    { id: 'metres', header: 'Envergure (m)', type: 'number', width: 120 },
+    { id: 'flown', header: 'Dernier vol', type: 'day', width: 150 },
+  ]}
+  rows={[
+    { id: 'k1', kite: 'Faucon rouge', metres: 1.8, flown: '2026-04-19' },
+    { id: 'k2', kite: 'Carpe de papier', metres: 0.9, flown: '2025-09-07' },
+    { id: 'k3', kite: 'Boîte à vents', metres: 1.2, flown: '2026-02-28' },
+    { id: 'k4', kite: 'Héron de nuit', metres: 2.4, flown: '2026-05-30' },
+  ]}
+  caption="Triez ou filtrez d’abord : les boutons CSV, Excel et JSON au-dessus de la grille écrivent ce qu’elle montre."
+/>
+
+## Voir aussi
+
+- [Export et impression](../../guides/export-print/#csv-et-excel) : les portées, les lignes serveur, le fichier JSON.
+- [`fileImport`](../file-import/) : l’autre sens, un fichier lu en lignes.
+- [`print`](../print/) : les mêmes lignes sur papier.

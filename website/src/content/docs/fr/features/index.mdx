@@ -1,0 +1,33 @@
+---
+title: "Fonctions"
+description: "Chaque fonction, depuis son entrée, une page par fonction."
+sidebar:
+  order: 0
+---
+
+import FeatureList from '../../../../components/FeatureList.astro';
+
+La grille seule affiche, fait défiler, trie et sélectionne les lignes. Tout le reste est une fonction : importée
+depuis son entrée et donnée dans `features`, pour qu’une application ne charge que ce qu’elle utilise. La plupart des
+fonctions ont besoin de leurs textes, ajoutés aux `messages` de la grille, et certaines d’une feuille de style de
+`@dzgrid/theme`, chargée après `dzgrid.css`.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { pagination } from '@dzgrid/dom/pagination';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_PAGINATION } from '@dzgrid/dom/locales/fr-pagination';
+
+type Row = { id: string; name: string };
+
+createGrid<Row>(document.getElementById('grid')!, {
+  rows: [{ id: 'r1', name: 'Premier' }],
+  columns: [{ id: 'name', header: 'Nom' }],
+  getRowId: (r) => r.id,
+  pagination: { pageSize: 50 },
+  messages: { ...FR, text: { ...FR.text, ...FR_PAGINATION.text } },
+  features: [pagination()],
+});
+```
+
+<FeatureList />

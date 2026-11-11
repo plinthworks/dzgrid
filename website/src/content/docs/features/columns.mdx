@@ -1,0 +1,92 @@
+---
+title: "columns"
+description: "Move columns by dragging their headers or with the keyboard, and size them from the keyboard."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Lets the user move columns and fit or size them, with the mouse or the keyboard.
+
+<FeatureFacts name="columns" />
+
+## What it does
+
+`columns()` lets the user move a column. With the mouse, a header pressed and moved 4 px drags: a light copy follows
+the pointer and a bar shows where the column will land. Dropped among the columns pinned to the start or the end, the
+column is pinned there; dragged out, it is unpinned. Near the grid's edges the columns scroll. Escape puts everything
+back. A finger on a header scrolls the grid and never drags. In Arabic everything is mirrored.
+
+From the keyboard, on a focused header: Ctrl+Shift+arrows (Cmd+Shift on a Mac) move the column one place,
+Ctrl+Shift+Home / End to the edge of its part (never across a pinned edge); the new place is said. Alt+R enters a
+resize mode: the arrows change the width by 10 px (Shift: 1 px), Home fits the content, Enter keeps, Escape puts the
+old width back.
+
+Dragging a header's edge resizes a column even without this feature; with it, a double click on the edge fits the
+column to its content. A column with [`movable: false`](../../column-options/movable/) keeps its place, one with
+[`resizable: false`](../../column-options/resizable/) its width. Each move or fit is one change of the columns' state,
+which [`gridState()`](../grid-state/) can save. From code, `columnsFeature.api(grid)` gives `move`, `autoSize`,
+`autoSizeAll`, `resizeMode` and `fitContent`. Without the `-columns` texts, the grid is not made: an error names the
+missing keys.
+
+## Options
+
+- `drag`: whether a header can be dragged by the mouse. `false` leaves the keys and the API only. By default `true`.
+- `fitOnLoad`: `'content'` fits the shown columns to their content once, when the first rows are shown. Flexible
+  columns, `resizable: false` ones and widths already set (a saved state, the user) are left alone. A data change never
+  fits again; `fitContent()` on the api does.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { columns } from '@dzgrid/dom/columns';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import '@dzgrid/theme/columns.css';
+
+type Book = { id: string; title: string; shelf: string; pages: number };
+
+const moves = columns({ fitOnLoad: 'content' });
+
+const grid = createGrid<Book>(document.getElementById('books')!, {
+  rows: [{ id: 'b1', title: 'The Salt Road', shelf: 'A3', pages: 312 }],
+  columns: [
+    { id: 'title', header: 'Title', movable: false },
+    { id: 'shelf', header: 'Shelf' },
+    { id: 'pages', header: 'Pages', type: 'number' },
+  ],
+  getRowId: (b) => b.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_COLUMNS.text } },
+  features: [moves],
+});
+
+moves.api(grid)?.move('pages', 'start');
+```
+
+## Live demo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Books' }}
+  features={['columns']}
+  columns={[
+    { id: 'title', header: 'Title', flex: 1, minWidth: 160 },
+    { id: 'shelf', header: 'Shelf', width: 110 },
+    { id: 'pages', header: 'Pages', type: 'number', width: 110 },
+    { id: 'year', header: 'Year', type: 'number', width: 100 },
+  ]}
+  rows={[
+    { id: 'b1', title: 'The Salt Road', shelf: 'A3', pages: 312, year: 1998 },
+    { id: 'b2', title: 'Rivers of Glass', shelf: 'B1', pages: 205, year: 2004 },
+    { id: 'b3', title: 'A Field of Seeds', shelf: 'A1', pages: 178, year: 2011 },
+    { id: 'b4', title: 'The Lantern Keeper', shelf: 'C2', pages: 420, year: 1987 },
+  ]}
+  caption="Drag a title to move its column; on a focused title, Ctrl+Shift+arrows move it and Alt+R resizes it."
+/>
+
+## See also
+
+- The [`columnMenu`](../column-menu/) feature: move, pin and size from a menu.
+- The [`movable`](../../column-options/movable/) and [`resizable`](../../column-options/resizable/) column options.
+- [Columns](../../guides/columns/#moving-resizing-hiding): the columns guide.

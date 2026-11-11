@@ -1,0 +1,85 @@
+---
+title: "responsive"
+description: "Columns that do not fit move into lines under each row instead of scrolling sideways."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+On a narrow screen, takes the columns that do not fit out of the rows and shows them under each row.
+
+<FeatureFacts name="responsive" />
+
+## What it does
+
+When the columns do not fit the view, `responsive()` takes centre columns out of the rows instead of making the grid
+scroll sideways. A chevron on each row's first cell then opens « Title: value » lines under the row, one per column
+taken out. The column with the highest [`collapsePriority`](../../column-options/collapse-priority/) goes first (a
+column without one counts 1); among equals, the last on screen. The first column, pinned columns and a priority of 0
+never go. A flexible column counts its `minWidth`. It follows every resize.
+
+On a row's first cell, Enter or Space opens and closes its lines. The quick search, the filters, the files and print
+still see every column, and nothing is saved in the grid state.
+
+The lines are a detail rows panel, so the `-detail` texts are needed. It cannot be combined with a tree, row grouping or
+your own [`detail()`](../detail/): the grid tells `unsupported-combination`. A column with
+`collapsePriority` on a grid without this feature tells a `missing-feature` warning.
+
+## Options
+
+- `priority`: a collapse priority by column id, over the columns' own `collapsePriority`. The highest collapses first;
+  0 never.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { responsive } from '@dzgrid/dom/responsive';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_DETAIL } from '@dzgrid/dom/locales/en-detail';
+
+type Hive = { id: string; name: string; apiary: string; frames: number; queen: string; checked: string };
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_DETAIL.text } };
+
+createGrid<Hive>(document.getElementById('hives')!, {
+  rows: [{ id: 'h1', name: 'Clover', apiary: 'Hill', frames: 9, queen: 'Marked blue', checked: '2026-05-02' }],
+  columns: [
+    { id: 'name', header: 'Hive', width: 160 },
+    { id: 'apiary', header: 'Apiary', width: 140, collapsePriority: 2 },
+    { id: 'frames', header: 'Frames', type: 'number', width: 100, collapsePriority: 0 },
+    { id: 'queen', header: 'Queen', width: 180 },
+    { id: 'checked', header: 'Checked', type: 'day', width: 140 },
+  ],
+  getRowId: (h) => h.id,
+  messages,
+  features: [responsive({ priority: { queen: 3 } })],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Hives' }}
+  features={['responsive']}
+  columns={[
+    { id: 'name', header: 'Hive', width: 160 },
+    { id: 'apiary', header: 'Apiary', width: 160, collapsePriority: 2 },
+    { id: 'frames', header: 'Frames', type: 'number', width: 120, collapsePriority: 0 },
+    { id: 'queen', header: 'Queen', width: 200 },
+    { id: 'checked', header: 'Checked', type: 'day', width: 160 },
+    { id: 'honey', header: 'Honey (kg)', type: 'number', width: 140 },
+  ]}
+  rows={[
+    { id: 'h1', name: 'Clover', apiary: 'Hill', frames: 9, queen: 'Marked blue', checked: '2026-05-02', honey: 12 },
+    { id: 'h2', name: 'Heather', apiary: 'Moor', frames: 10, queen: 'Marked white', checked: '2026-05-09', honey: 8 },
+    { id: 'h3', name: 'Linden', apiary: 'Hill', frames: 8, queen: 'Not seen', checked: '2026-04-28', honey: 15 },
+  ]}
+  caption="Make the window narrow: Apiary leaves the rows first, then the last columns; the chevron shows them under each row."
+/>
+
+## See also
+
+- The [`collapsePriority`](../../column-options/collapse-priority/) column option.
+- The [`detail`](../detail/) feature: the panels under the rows.
+- [Columns](../../guides/columns/#columns-that-collapse-on-narrow-screens): the guide.

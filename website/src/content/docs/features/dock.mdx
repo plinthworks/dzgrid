@@ -1,0 +1,105 @@
+---
+title: "dock"
+description: "Areas beside and under the rows for the columns chooser, the filters panel and your own panels."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Gives side panels a place beside or under the rows, with tabs, resizing and collapsing.
+
+<FeatureFacts name="dock" />
+
+## What it does
+
+`dock()` adds three areas inside the grid's box: `start` and `end` beside the rows (logical sides: mirrored in
+Arabic) and `bottom` under them. The [`columnsChooser`](../columns-chooser/) (panel `columns`), the
+[`filtersPanel`](../filters-panel/) (panel `filters`) and your own panels stand there. Two panels in one area become
+tabs. Each area is resized by its edge, by the pointer or the arrow keys, collapsed to a strip, closed, or moved to
+another area with its « Place » button.
+
+`api(grid)` gives `show(id, area)`, `hide(id)`, `move(id, area)`, `collapse(area)`, `resize(area, px)`, `layout()`
+and `setLayout(layout)`. With [`gridState`](../grid-state/), where each panel stands is saved with the rest of the
+state.
+
+A floating window (area `float`) is not there yet: in `open` it is refused with an `invalid-setting` warning, and in a
+restored layout skipped with a `state-field` warning.
+
+## Options
+
+- `open`: the panels shown at the start, and where (`{ columns: 'end' }`), over each panel's own default.
+- `panels`: your own panels — `id`, `title` (text, or a function asked again at each paint), `area` (`end` by
+  default; hidden there until shown, unless `open` names it) and `mount(host)`, which draws the content once and may
+  return a cleanup.
+- `sizes`: the limits of an area's size in CSS px, `{ min, max }` (160 and 800 by default); the rows always keep 160 px.
+- `onChange(layout)`: after each change made by the user or the API, never after a restore: the layout as the state
+  keeps it.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { dock } from '@dzgrid/dom/dock';
+import { columnsChooser } from '@dzgrid/dom/columns-panel';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_DOCK } from '@dzgrid/dom/locales/en-dock';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+
+type Tea = { id: string; tea: string; minutes: number };
+
+const panels = dock({
+  open: { columns: 'end' },
+  sizes: { min: 200, max: 480 },
+  panels: [{
+    id: 'notes',
+    title: 'Notes',
+    area: 'bottom',
+    mount(host) {
+      const p = host.ownerDocument.createElement('p');
+      p.textContent = 'Warm the pot first.';
+      host.append(p);
+      return () => p.remove();
+    },
+  }],
+  onChange: (layout) => console.log(layout),
+});
+
+const grid = createGrid<Tea>(document.getElementById('teas')!, {
+  rows: [{ id: 'e1', tea: 'Smoked pine', minutes: 4 }],
+  columns: [
+    { id: 'tea', header: 'Tea' },
+    { id: 'minutes', header: 'Minutes', type: 'number' },
+  ],
+  getRowId: (t) => t.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_DOCK.text, ...EN_COLUMNS.text } },
+  features: [columnsChooser(), panels],
+});
+
+panels.api(grid)?.show('notes');
+```
+
+## Live demo
+
+<LiveDemo
+  height={420}
+  settings={{ label: 'Teas' }}
+  features={['filters', 'chooser', 'filtersPanel', ['dock', { open: { columns: 'end', filters: 'end' } }]]}
+  columns={[
+    { id: 'tea', header: 'Tea', flex: 1, minWidth: 140 },
+    { id: 'minutes', header: 'Minutes', type: 'number', width: 110 },
+    { id: 'picked', header: 'Picked', type: 'day', width: 140, hidden: true },
+  ]}
+  rows={[
+    { id: 'e1', tea: 'Smoked pine', minutes: 4, picked: '2026-04-12' },
+    { id: 'e2', tea: 'Mountain mint', minutes: 3, picked: '2026-05-02' },
+    { id: 'e3', tea: 'Roasted barley', minutes: 6, picked: '2025-10-20' },
+    { id: 'e4', tea: 'Lime blossom', minutes: 5, picked: '2026-06-18' },
+  ]}
+  caption="The chooser and the filters share the end area as tabs: drag the area's edge to resize it."
+/>
+
+## See also
+
+- [Dock and panels](../../guides/dock-panels/): the two panels and your own, step by step.
+- [`columnsChooser`](../columns-chooser/) and [`filtersPanel`](../filters-panel/): the panels that come with DzGrid.
+- [`gridState`](../grid-state/): the layout saved with the state.

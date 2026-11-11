@@ -1,0 +1,56 @@
+---
+/**
+ * A feature's facts, generated from the sources (scripts/gen-options.mjs → src/generated/options.json): how it is
+ * imported, its signature, the texts bundle it needs and in which languages, its own CSS (for `injectStyles: false`),
+ * where it is declared, then its options, name and type. An unknown name fails the build.
+ *
+ *   <FeatureFacts name="pagination" />
+ */
+import data from '../generated/options.json';
+
+interface Props {
+  name: string;
+}
+const { name } = Astro.props;
+const fact = data.features.find((f) => f.name === name);
+if (!fact) throw new Error(`<FeatureFacts name="${name}">: not in src/generated/options.json (node scripts/gen-options.mjs)`);
+const fr = Astro.currentLocale === 'fr';
+const W = fr
+  ? { import: 'Import', signature: 'Signature', texts: 'Textes', css: 'CSS à part', sheet: 'Feuille de style', source: 'Déclarée dans', options: 'Options', name: 'Nom', type: 'Type', noTexts: 'pas de paquet à elle', base: 'ceux du paquet de base (`@dzgrid/dom/locales/fr`)', langs: 'langues :', noOptions: 'Aucune option.', cssNote: 'à ajouter soi-même avec `injectStyles: false`' }
+  : { import: 'Import', signature: 'Signature', texts: 'Texts', css: 'Own CSS', sheet: 'Style sheet', source: 'Declared in', options: 'Options', name: 'Name', type: 'Type', noTexts: 'no bundle of its own', base: 'the base bundle’s (`@dzgrid/dom/locales/en`)', langs: 'languages:', noOptions: 'No options.', cssNote: 'to add yourself with `injectStyles: false`' };
+const escape = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const code = (text: string) => `<code>${escape(text)}</code>`;
+const inline = (md: string) => escape(md).replace(/`([^`]+)`/g, '<code>$1</code>');
+const constant = (lang: string, bundle: string) => `${lang.toUpperCase()}_${bundle.toUpperCase().replace(/-/g, '_')}`;
+const lang = fr ? 'fr' : 'en';
+const texts = !fact.texts
+  ? inline(W.noTexts)
+  : fact.texts.bundle === ''
+    ? inline(W.base)
+    : `${code(`import { ${constant(lang, fact.texts.bundle)} } from '@dzgrid/dom/locales/${lang}-${fact.texts.bundle}';`)}<br>${W.langs} ${fact.texts.langs.map(code).join(', ')}`;
+const href = `https://github.com/plinthworks/dzgrid/blob/main/${fact.source}`;
+---
+
+<table class="dzg-facts">
+  <tbody>
+    <tr><th scope="row">{W.import}</th><td set:html={code(`import { ${fact.name} } from '${fact.entry}';`)} /></tr>
+    <tr><th scope="row">{W.signature}</th><td set:html={code(fact.signature)} /></tr>
+    <tr><th scope="row">{W.texts}</th><td set:html={texts} /></tr>
+    {fact.sheet && <tr><th scope="row">{W.sheet}</th><td set:html={code(`import '${fact.sheet}';`)} /></tr>}
+    {fact.css.length > 0 && <tr><th scope="row">{W.css}</th><td set:html={`${fact.css.map(code).join(', ')} — ${inline(W.cssNote)}`} /></tr>}
+    <tr><th scope="row">{W.source}</th><td><a href={href}><code>{fact.source}</code></a></td></tr>
+  </tbody>
+</table>
+
+{fact.options.length > 0 && (
+  <div class="dzg-option-list">
+    <table>
+      <thead><tr><th scope="col">{W.options}</th><th scope="col">{W.type}</th></tr></thead>
+      <tbody>
+        {fact.options.map((o) => (
+          <tr><th scope="row"><code>{o.name}</code>{o.required && <small> ({fr ? 'obligatoire' : 'required'})</small>}</th><td><code>{o.type}</code></td></tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}

@@ -1,0 +1,72 @@
+---
+title: "theming"
+description: "Writes the theme setting as CSS variables and draws your own icons, both live."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Gives the theme and icons settings to the grid: colours, sizes and marks for one grid, from code.
+
+<FeatureFacts name="theming" />
+
+## What it does
+
+`theming()` reads the [`theme`](../../settings/theme/) setting and writes each key as a CSS variable on the grid's root,
+so it wins over your style sheets for that grid only. It also draws the [`icons`](../../settings/icons/) setting over
+the grid's own marks (sort, filter, menu, chevron…). Both are live: `grid.update({ theme })` takes away the keys not
+given again.
+
+A key that is not in the theme, a value that could break out of CSS (`;`, `{`, `}`, `<`, `\`, `!`, `url(`), or an icon
+that is refused is told as an `invalid-setting` warning and left out; nothing is thrown. Contrast is yours to keep.
+
+Giving `theme` or `icons` to a grid without this feature tells a `missing-feature` warning. It is its own entry, so a
+grid that does not use these settings carries none of it.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { theming } from '@dzgrid/dom/theme';
+import { EN } from '@dzgrid/dom/locales/en';
+import '@dzgrid/theme/variables.css';
+
+type Hive = { id: string; name: string; frames: number };
+
+const grid = createGrid<Hive>(document.getElementById('hives')!, {
+  rows: [{ id: 'h1', name: 'Orchard hive', frames: 10 }],
+  columns: [{ id: 'name', header: 'Hive' }, { id: 'frames', header: 'Frames', type: 'number' }],
+  getRowId: (h) => h.id,
+  messages: EN,
+  theme: { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 6%, var(--tz-bg))', headerWeight: 500, columnLine: 'var(--dzg-line) solid var(--tz-border)' },
+  icons: { sortAsc: '<svg viewBox="0 0 16 16"><path d="M8 3l5 8H3z"/></svg>' },
+  features: [theming()],
+});
+
+grid.update({ theme: { headerWeight: 700 } });
+```
+
+## Live demo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Beehives', theme: { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 8%, var(--tz-bg))', headerWeight: 500, columnLine: 'var(--dzg-line) solid var(--tz-border)', headerCase: 'uppercase' } }}
+  features={['theming']}
+  columns={[
+    { id: 'name', header: 'Hive', flex: 1 },
+    { id: 'apiary', header: 'Apiary', width: 140 },
+    { id: 'frames', header: 'Frames', type: 'number', width: 110 },
+  ]}
+  rows={[
+    { id: 'h1', name: 'Orchard hive', apiary: 'Hill', frames: 10 },
+    { id: 'h2', name: 'Clover', apiary: 'Meadow', frames: 8 },
+    { id: 'h3', name: 'Old oak', apiary: 'Hill', frames: 12 },
+    { id: 'h4', name: 'Lavender row', apiary: 'Garden', frames: 9 },
+  ]}
+  caption="Alternate rows, lines between columns and capital titles, set from code on this grid only."
+/>
+
+## See also
+
+- The [`theme`](../../settings/theme/) and [`icons`](../../settings/icons/) settings.
+- [Theming and right to left](../../guides/theming-rtl/#the-theme-setting): every key in the guide.

@@ -130,7 +130,7 @@ grid.addEventListener('dzg-selection-changed', (e) => {
   `selectedIds(controller)` gives the ids of the whole selection with the query.
 - `mode: 'exclude'` means « every row the query matches, but these keys »: after « select all » on paged or server
   rows, the grid cannot list them, your server can by replaying the query.
-- `canSelect(row, selection, context)` returns `false`, or a reason code, to refuse a row; it needs the `rules()`
+- `canSelect(row, selection, context)` returns `false`, or the sentence to say, to refuse a row; it needs the `rules()`
   feature from `@dzgrid/dom/rules` (texts `-rules`), which says why to the user.
 
 Every key of the `selection` setting is on its page: [`selection`](../../settings/selection/).

@@ -1,0 +1,68 @@
+---
+title: "lazyChildren"
+description: "Les enfants d’un arbre chargés par votre code ou un serveur la première fois que leur parent s’ouvre."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Charge les enfants d’un parent la première fois qu’il s’ouvre, pour un arbre donné par des ids de parent ou des chemins.
+
+<FeatureFacts name="lazyChildren" />
+
+## Ce qu’elle fait
+
+`lazyChildren({ has, load })` se donne à [`tree()`](../tree/) comme option `lazy`. Une ligne pour laquelle `has(row)`
+est vrai montre un chevron fermé. L’ouvrir montre une ligne « Chargement… » sous elle pendant que `load(row, { signal })`
+tourne ; puis les enfants prennent sa place, triés et filtrés comme les autres lignes. Un échec montre l’erreur et un
+bouton Réessayer (Entrée sur cette ligne réessaie aussi). Un chargement qui ne rend aucune ligne fait du parent une
+feuille.
+
+Fermer le parent pendant le chargement l’interrompt, par le `signal`. Les enfants chargés restent : rouvrir le parent
+ne demande rien, jusqu’à de nouvelles lignes ou un rafraîchissement. « Tout ouvrir » et `*` n’ouvrent que les lignes
+déjà chargées : ils ne lancent jamais une rafale de requêtes. Un filtre s’applique aux lignes chargées. La ligne de
+chargement n’est jamais sélectionnée, copiée, éditée ni exportée ; ses textes sont ceux du paquet de base.
+
+Avec une source serveur, `sourceRows({ fetch, children })` de `@dzgrid/core/server` répond à la place de `load` ; seul
+`has` est alors utile. Les lignes imbriquées (`tree({ children })`) ne peuvent pas se charger à la demande, car une
+ligne chargée ne saurait pas nommer son parent : `unsupported-combination`, et l’arbre marche sans chargement à la
+demande. Ni `load` ni enfants du serveur : `missing-feature`, et ouvrir une ligne déclarée échoue tout de suite.
+
+## Options
+
+- `has` (obligatoire) : si une ligne a des enfants pas encore chargés ; lu pour les lignes affichées et pour une ligne
+  qu’on ouvre.
+- `load` : votre chargeur. Il reçoit la ligne et un `signal`, et rend les enfants de la ligne : une liste, ou une
+  Promise d’une liste. Les `children` d’un serveur prennent sa place.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { tree } from '@dzgrid/dom/tree';
+import { lazyChildren } from '@dzgrid/dom/tree-lazy';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_TREE } from '@dzgrid/dom/locales/fr-tree';
+
+type Drawer = { id: string; parent: string | null; name: string; drawers: number };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_TREE.text } };
+
+createGrid<Drawer>(document.getElementById('seed-bank')!, {
+  rows: [{ id: 'root', parent: null, name: 'Banque de graines', drawers: 4 }],
+  columns: [{ id: 'name', header: 'Tiroir' }],
+  getRowId: (d) => d.id,
+  messages,
+  features: [tree<Drawer>({
+    parentId: (d) => d.parent,
+    lazy: lazyChildren<Drawer>({
+      has: (d) => d.drawers > 0,
+      load: async (d, { signal }) => (await fetch(`/api/drawers/${d.id}`, { signal: signal as AbortSignal })).json(),
+    }),
+  })],
+});
+```
+
+## Voir aussi
+
+- [`tree()`](../tree/) : l’arbre où il charge.
+- [Enfants chargés à la demande](../../guides/tree/#enfants-chargés-à-la-demande) dans le guide.

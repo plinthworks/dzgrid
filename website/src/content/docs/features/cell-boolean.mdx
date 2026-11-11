@@ -1,0 +1,50 @@
+---
+title: "cellBoolean"
+description: "A ready cell part for yes / no columns: a mark and the word, in the grid’s language."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+A cell part that shows ✓ Yes or ✗ No in every boolean column.
+
+<FeatureFacts name="cellBoolean" />
+
+## What it does
+
+`cellBoolean` from `@dzgrid/dom/parts` is a ready cell part, not a function to call. Register it in the
+[`parts`](../../settings/parts/) setting under the name `'cell.boolean'`: every column of type `boolean` then takes it,
+with nothing to write in the columns. True shows ✓ and « Yes », false ✗ and « No », in the grid's language (Oui / Non in
+French); a blank value shows nothing. There is no tone colour: a « no » is not an error. A screen reader reads « Yes »
+or « No ».
+
+Without the part, a boolean column already shows the word (Yes / No) from the base bundle; the part adds the marks. Its
+words come from the `-parts` texts (`cell.yes`, `cell.no`). Without them, the yes / no cells are left empty and the
+error is reported. Sorting, filters and files are unchanged: a CSV file still writes `true` / `false`.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { cellBoolean } from '@dzgrid/dom/parts';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_PARTS } from '@dzgrid/dom/locales/en-parts';
+
+type Plant = { id: string; name: string; perennial: boolean; edible: boolean };
+
+createGrid<Plant>(document.getElementById('plants')!, {
+  rows: [{ id: 'p1', name: 'Rosemary', perennial: true, edible: true }],
+  columns: [
+    { id: 'name', header: 'Plant' },
+    { id: 'perennial', header: 'Perennial', type: 'boolean' },
+    { id: 'edible', header: 'Edible', type: 'boolean' },
+  ],
+  getRowId: (p) => p.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_PARTS.text } },
+  parts: { 'cell.boolean': cellBoolean },
+});
+```
+
+## See also
+
+- The [`badge`](../badge/) part, from the same entry.
+- The [`parts`](../../settings/parts/) setting and the [`type`](../../column-options/type/) column option.

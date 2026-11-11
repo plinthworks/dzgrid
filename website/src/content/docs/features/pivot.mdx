@@ -1,0 +1,123 @@
+---
+title: "pivot"
+description: "A pivot table on top of grouping: the values of a column become columns, with a total at each crossing."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Turns the values of some columns into columns, with a total where each group and each column meet.
+
+<FeatureFacts name="pivot" />
+
+## What it does
+
+`pivot()` is not listed in `features`: it is given to [`grouping({ by, pivot })`](../grouping/), which draws it. The
+rows are the groups, and no data row is shown. Each value of the pivot columns becomes a column, and each cell totals
+the value columns where a group and a column meet; a crossing with no row shows nothing, never « 0 ». A label column
+stands at the start, the data columns are folded away, and the value columns stay at the end under « Total », as the
+rows' totals. The grand total row closes the table.
+
+The created columns' header bands need [`spans()`](../spans/); with [`groups()`](../groups/) they fold too. A click on a
+created column sorts the groups by its totals. Pivot mode is the application's: `toggle` shows a « Pivot table » switch
+to the user, otherwise `api(grid).setOn(on)`. `api(grid)` also changes the pivot columns (`setBy`), the values
+(`setValues`) and the reversed orders (`setDesc`), and `series()` gives the numbers of one value, ready for a chart
+library of your own. For a bar where the user builds the table, add [`pivotBar()`](../pivot-bar/).
+
+Past `maxColumns` created columns, none is made: the rows stay grouped with their totals, and the grid tells
+`pivot-too-many` with the count. A pivot column the grid does not know is dropped (`unknown-column`); one with
+`groupable: false`, given twice, or also a grouping column, `invalid-setting`. Beside `sourceRows` or an infinite list
+the pivot is not made (`unsupported-combination`); `serverSideRows` with `serverPivot()` lets a server compute it. Its
+texts are in the `-pivot` bundle, and required: an error names any missing key.
+
+## Options
+
+- `columns`: the pivot columns' ids, the first band first.
+- `values`: the value columns and their function (`sum`, `avg`, `min`, `max`, `count`, `first`, `last` or yours), in
+  order. By default the grouping's `aggFuncs`, then the shown columns with an `aggFunc`.
+- `on`: pivot mode, `true` by default; off, the grouping as without the pivot.
+- `subtotals`: a sub-total column after each band, per value.
+- `desc`: the pivot columns whose created columns run in reverse, « (Blank) » still last.
+- `maxColumns`: above this many created columns (crossings × values, sub-totals counted), none is made: 200 by
+  default.
+- `valueHeaders`: the value columns' headers: `'auto'` (the default: « sum(Takings) » with several values, the short
+  name with one), `'fn'` the function form always, `'name'` the short name only (`headerShort`, else `header`).
+- `width`: a created column's width; without it, as wide as its header needs, from 120 to 240 px.
+- `labelWidth`: the label column's width, 200 by default.
+- `toggle`: a « Pivot table » switch for the user: `true` or `'inside'` in the pivot's strip above the rows (in the bar
+  with `pivotBar()`), or an element of yours it is added to. None by default.
+
+Read when the grid is made; `api(grid)` changes the mode, the columns and the values after.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { grouping } from '@dzgrid/dom/grouping';
+import { pivot } from '@dzgrid/dom/pivot';
+import { spans } from '@dzgrid/dom/spans';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_GROUP } from '@dzgrid/dom/locales/en-group';
+import { EN_PIVOT } from '@dzgrid/dom/locales/en-pivot';
+import '@dzgrid/theme/grouping.css';
+import '@dzgrid/theme/pivot.css';
+
+type Sale = { id: string; shop: string; month: string; bread: string; loaves: number; takings: number };
+
+const columns: ColumnOrGroup<Sale>[] = [
+  { id: 'shop', header: 'Bakery' },
+  { id: 'month', header: 'Month' },
+  { id: 'bread', header: 'Bread' },
+  { id: 'loaves', header: 'Loaves', type: 'number' },
+  { id: 'takings', header: 'Takings', type: 'number', numberFormat: { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 } },
+];
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_GROUP.text, ...EN_PIVOT.text } };
+
+const cross = pivot({ columns: ['month'], values: { loaves: 'sum', takings: 'sum' }, toggle: true });
+const grid = createGrid<Sale>(document.getElementById('bakeries')!, {
+  rows: [
+    { id: 'b1', shop: 'Mill Street', month: '2026-01', bread: 'Rye', loaves: 120, takings: 360 },
+    { id: 'b2', shop: 'Harbour', month: '2026-02', bread: 'Baguette', loaves: 210, takings: 252 },
+  ],
+  columns,
+  getRowId: (s) => s.id,
+  messages,
+  features: [spans(), grouping({ by: ['shop'], pivot: cross })],
+});
+
+const api = cross.api(grid);
+api?.setValues({ loaves: 'avg', takings: 'sum' });
+console.log(api?.series({ value: 'takings' }));
+```
+
+## Live demo
+
+<LiveDemo
+  height={340}
+  settings={{ label: 'Bakeries' }}
+  features={['spans', 'groups', ['pivot', { columns: ['month'], values: { loaves: 'sum', takings: 'sum' }, toggle: true }], ['grouping', { by: ['shop'] }]]}
+  columns={[
+    { id: 'shop', header: 'Bakery' },
+    { id: 'month', header: 'Month' },
+    { id: 'bread', header: 'Bread' },
+    { id: 'loaves', header: 'Loaves', type: 'number' },
+    { id: 'takings', header: 'Takings', type: 'number', numberFormat: { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 } },
+  ]}
+  rows={[
+    { id: 'b1', shop: 'Mill Street', month: '2026-01', bread: 'Rye', loaves: 120, takings: 360 },
+    { id: 'b2', shop: 'Mill Street', month: '2026-02', bread: 'Sourdough', loaves: 95, takings: 380 },
+    { id: 'b3', shop: 'Mill Street', month: '2026-02', bread: 'Rye', loaves: 64, takings: 192 },
+    { id: 'b4', shop: 'Harbour', month: '2026-01', bread: 'Baguette', loaves: 210, takings: 252 },
+    { id: 'b5', shop: 'Harbour', month: '2026-03', bread: 'Sourdough', loaves: 80, takings: 320 },
+    { id: 'b6', shop: 'Old Town', month: '2026-02', bread: 'Baguette', loaves: 150, takings: 180 },
+    { id: 'b7', shop: 'Old Town', month: '2026-03', bread: 'Rye', loaves: 70, takings: 210 },
+  ]}
+  caption="Each month is a column; the switch above the rows turns the pivot off and on."
+/>
+
+## See also
+
+- [`pivotBar()`](../pivot-bar/): the bar where the user builds the table.
+- [`grouping()`](../grouping/): the rows of the table.
+- The [Pivot](../../guides/pivot/) guide.

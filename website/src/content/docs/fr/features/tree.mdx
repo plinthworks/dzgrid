@@ -1,0 +1,113 @@
+---
+title: "tree"
+description: "Les lignes en arbre, d’après un id de parent, des enfants imbriqués ou un chemin : retrait, chevrons, touches."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Montre les lignes en arbre ; la hiérarchie vient de vos lignes, de l’une de trois façons.
+
+<FeatureFacts name="tree" />
+
+## Ce qu’elle fait
+
+`tree()` décale la colonne de l’arbre d’un cran par niveau et donne un chevron à chaque parent. → ouvre une ligne, ←
+la ferme ou va à son parent (en miroir en arabe), `*` ouvre ses sœurs ; un clic sur le chevron ouvre ou ferme aussi.
+Chaque ouverture ou fermeture par l’utilisateur est annoncée. Un tri range les enfants de chaque parent entre eux ; ce
+qui est ouvert le reste après un tri, un filtre ou de nouvelles lignes. Les lignes de l’arbre sont des lignes de
+données ordinaires : la sélection, l’édition et l’export fonctionnent sur elles.
+
+Donnez exactement un seul de `parentId`, `children` ou `path` ; aucun ou plusieurs donne une erreur `tree-shape`. Un
+id de parent qui ne nomme aucune ligne place la ligne en haut (`tree-orphan`) ; un cycle est rompu (`tree-cycle`) ;
+avec `children`, les ids doivent être uniques dans tout l’arbre (`duplicate-row-id`). Avec `path`, un niveau
+qu’aucune ligne n’a devient une ligne de remplissage : un libellé, jamais une donnée.
+
+Une colonne d’arbre qui n’est pas la première colonne visible marche, avec un avertissement `tree-column-not-first`
+(les lecteurs d’écran attendent la hiérarchie en premier). Un arbre refuse à côté de lui le maître-détail et les pages
+dans le navigateur (`unsupported-combination`) ; les cellules fusionnées marchent, entre sœurs
+([`spans()`](../spans/)). Ses textes sont dans le paquet `-tree`.
+
+## Options
+
+- `parentId` : l’id du parent d’une ligne ; `null`, `undefined` ou `''` pour une ligne du haut.
+- `children` : les enfants d’une ligne (données imbriquées) ; chaque niveau devient des lignes de la grille.
+- `path` : le chemin de libellés d’une ligne, le haut d’abord, comme `['Jardin', 'Outils', 'Râteau']`.
+- `initial` : ce qui est ouvert au premier chargement : `'none'` (par défaut), `'all'`, ou une profondeur (1 : les
+  lignes du haut).
+- `filter` : ce que garde un filtre : les correspondances et leurs ancêtres (`'ancestors'`, par défaut), ou aussi
+  leurs sous-arbres entiers (`'subtree'`).
+- `column` : la colonne qui montre la hiérarchie, la première visible par défaut. Une fonction la nomme ligne par
+  ligne ; une réponse qui n’est pas une colonne visible revient à la colonne par défaut, avec un avertissement
+  `invalid-setting`.
+- `indent` : les pixels par niveau, 16 par défaut ; ou une fonction `(row, level)` qui donne le retrait d’une ligne,
+  de 0 à 1 000 (sinon `level × 16`, signalé une fois).
+- `sticky` : combien de parents ouverts restent épinglés sous les titres pendant que leurs enfants défilent, le plus
+  proche d’abord : 3 par défaut, 0 pour aucun.
+- `fixedOpen` : les lignes toujours ouvertes, dessinées sans chevron ; aucune touche, commande ou « tout fermer » ne
+  les ferme. Une exception compte comme faux ; une valeur qui n’est pas une fonction est ignorée (`invalid-setting`).
+- `lazy` : des enfants chargés quand leur parent s’ouvre : [`lazyChildren()`](../lazy-children/).
+- `structure` : les colonnes qui forment l’arbre ; elles ne s’éditent pas (une colonne marquée éditable signale
+  `edit-structure` une fois). Par défaut la colonne de l’arbre d’un arbre en `path`, aucune sinon ; `[]` la libère.
+
+Lues à la création de la grille.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { tree } from '@dzgrid/dom/tree';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_TREE } from '@dzgrid/dom/locales/fr-tree';
+
+type Place = { id: string; parent: string | null; name: string; items: number };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_TREE.text } };
+
+const grid = createGrid<Place>(document.getElementById('shed')!, {
+  rows: [
+    { id: 'g', parent: null, name: 'Abri de jardin', items: 40 },
+    { id: 'g1', parent: 'g', name: 'Étagère du haut', items: 12 },
+    { id: 'g11', parent: 'g1', name: 'Boîtes de graines', items: 8 },
+    { id: 'g2', parent: 'g', name: 'Mur à outils', items: 15 },
+  ],
+  columns: [
+    { id: 'name', header: 'Endroit', flex: 1 },
+    { id: 'items', header: 'Objets', type: 'number' },
+  ],
+  getRowId: (p) => p.id,
+  messages,
+  features: [tree<Place>({ parentId: (p) => p.parent, initial: 1, sticky: 2, filter: 'subtree' })],
+});
+
+grid.kernel.dispatch({ type: 'rows.expandAll', expanded: true }, 'api');
+```
+
+## Démo
+
+<LiveDemo
+  height={340}
+  settings={{ label: 'Abri de jardin' }}
+  features={[['tree', { parentField: 'parent', initial: 1 }]]}
+  columns={[
+    { id: 'name', header: 'Endroit', flex: 1, minWidth: 220 },
+    { id: 'items', header: 'Objets', type: 'number', width: 120 },
+  ]}
+  rows={[
+    { id: 'g', parent: null, name: 'Abri de jardin', items: 40 },
+    { id: 'g1', parent: 'g', name: 'Étagère du haut', items: 12 },
+    { id: 'g11', parent: 'g1', name: 'Boîtes de graines', items: 8 },
+    { id: 'g12', parent: 'g1', name: 'Boîte à ficelle', items: 3 },
+    { id: 'g2', parent: 'g', name: 'Mur à outils', items: 15 },
+    { id: 'g21', parent: 'g2', name: 'Crochets', items: 9 },
+    { id: 'g3', parent: 'g', name: 'Table de rempotage', items: 10 },
+    { id: 'g31', parent: 'g3', name: 'Tiroir', items: 6 },
+  ]}
+  caption="→ ouvre un endroit, ← le ferme ; les boutons au-dessus ouvrent ou ferment tout."
+/>
+
+## Voir aussi
+
+- [`lazyChildren()`](../lazy-children/) : des enfants chargés à la demande.
+- [`rowGaps()`](../row-gaps/) : un espace avant chaque ligne du haut.
+- Le guide [Arbre](../../guides/tree/).

@@ -1,0 +1,68 @@
+---
+title: "rowGaps"
+description: "Un espace vide au-dessus de certaines lignes, pour voir d’un coup d’œil où commence une catégorie."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Laisse une bande d’espace vide au-dessus des lignes que votre règle désigne.
+
+<FeatureFacts name="rowGaps" />
+
+## Ce qu’elle fait
+
+`rowGaps({ before })` demande `before(c)` pour chaque ligne affichée sauf la première, une fois par nouvel ordre des
+lignes affichées (un tri, un filtre, une ouverture, de nouvelles lignes), jamais à chaque dessin. `c` contient la
+`row`, sa `key`, son `index` parmi les lignes affichées, son `level` (0 pour une ligne du haut) et `prev`, la ligne
+affichée au-dessus. `true` laisse un espace de `size` ; un nombre, un espace de ce nombre de pixels ; `false`, `0`,
+`null` ou `undefined`, aucun. `roots`, exporté à côté, met un espace avant chaque ligne du haut sauf la première (pour
+un [arbre](../tree/)).
+
+L’espace a le fond même de la grille, hors de toute ligne : rien n’y prend le focus, n’y est sélectionné, lu ni
+exporté, et ↓ le traverse d’un coup. Il défile avec les lignes et les suit après un tri ou un filtre. Il n’est jamais
+au-dessus de la première ligne affichée, ni dans les bandes épinglées. Une cellule fusionnée s’arrête à un espace. La
+ligne sous un espace porte `data-gap` et `--dzg-gap` (la taille de l’espace), pour qu’un thème puisse y dessiner.
+
+Un `before` qui n’est pas une fonction signale `invalid-setting` et ne dessine aucun espace. Une règle qui lève une
+exception, ou qui répond une taille négative ou qui n’est pas un nombre, ne donne pas d’espace sur cette ligne et
+signale `invalid-gap` une fois. Un `size` faux donne 16 et `invalid-setting`. À côté de [`detail()`](../detail/), de
+[`responsive()`](../responsive/) ou d’une liste infinie, pas d’espace : `unsupported-combination`.
+
+## Options
+
+- `before` (obligatoire) : la règle, demandée pour chaque ligne affichée sauf la première.
+- `size` : les pixels d’un espace pour la taille de texte par défaut, 16 par défaut ; il grandit avec le texte comme la
+  hauteur des lignes.
+
+Lues à la création de la grille.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { rowGaps } from '@dzgrid/dom/row-gaps';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Book = { id: string; shelf: string; title: string };
+
+createGrid<Book>(document.getElementById('library')!, {
+  rows: [
+    { id: 'b1', shelf: 'Voyage', title: 'La Route du sel' },
+    { id: 'b2', shelf: 'Voyage', title: 'Marées de papier' },
+    { id: 'b3', shelf: 'Nature', title: 'Abeilles d’hiver' },
+  ],
+  columns: [
+    { id: 'shelf', header: 'Rayon' },
+    { id: 'title', header: 'Titre' },
+  ],
+  getRowId: (b) => b.id,
+  messages: FR,
+  // Un espace là où le rayon change, dans l’ordre affiché.
+  features: [rowGaps<Book>({ before: (c) => !!c.row && !!c.prev && c.row.shelf !== c.prev.shelf, size: 12 })],
+});
+```
+
+## Voir aussi
+
+- [`tree()`](../tree/) : avec `roots`, un espace avant chaque ligne du haut.
+- [`spans()`](../spans/) : une cellule fusionnée s’arrête à un espace.

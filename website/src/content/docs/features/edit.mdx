@@ -1,0 +1,95 @@
+---
+title: "edit"
+description: "Holds the edits: save, refusals, undo and redo, and rows out of order after an edit."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Holds every edit of the grid: it checks it, saves it through your code, and can undo it.
+
+<FeatureFacts name="edit" />
+
+## What it does
+
+`edit()` holds the edits: from the fields of [`editors()`](../editors/), a paste, a fill, or your code
+(`editFeature.api(grid).commit(…)`). It checks each value against the column's
+[`editable`](../../column-options/editable/), [`edit`](../../column-options/edit/) and
+[`validate`](../../column-options/validate/), then hands it to `save`. Resolved: kept. Rejected: the cells go back,
+and an error with a string `reason` shows that reason. While a save runs, a line runs round the cell and a screen
+reader hears « Saving ». The grid never writes into your rows: a kept value is shown over the row until your rows
+carry it.
+
+Ctrl+Z undoes and Ctrl+Y or Ctrl+Shift+Z redoes (Cmd on a Mac), over the last 100 gestures, each going through `save`
+again; the api has `undo()` and `redo()` too. An edited row never moves or hides by itself: in a sorted or filtered
+list it stays in place, greyed if it no longer passes the filter, and a mark on the header puts the list back in order.
+
+It draws no field itself: give [`editors()`](../editors/) too, or only paste, fill and code edit. An edit option on a
+column of a grid with no feature that edits tells a `missing-feature` warning. Without the `-edit` texts, the grid is not made: an
+error names the missing keys.
+
+## Options
+
+- `save`: your save, `(request, signal)`. One request per gesture, with its `changes` and `origin`. Without it, a kept
+  value is saved locally at once.
+- `savingBorder`: the line running round a cell while it saves. By default `true`; `false` gives a still border.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+import '@dzgrid/theme/edit.css';
+
+type Tool = { id: string; name: string; stock: number };
+
+const editing = edit<Tool>({
+  save: async (req, signal) => {
+    const body = req.changes.map((c) => ({ id: c.row.id, column: c.column, value: c.value }));
+    const answer = await fetch('/api/tools', { method: 'PATCH', body: JSON.stringify(body), signal: signal as AbortSignal });
+    if (!answer.ok) throw Object.assign(new Error('refused'), { reason: await answer.text() });
+  },
+});
+
+const grid = createGrid<Tool>(document.getElementById('tools')!, {
+  rows: [{ id: 't1', name: 'Spade', stock: 12 }],
+  columns: [
+    { id: 'name', header: 'Tool', editable: true, edit: { required: true } },
+    { id: 'stock', header: 'In stock', type: 'number', editable: true, edit: { min: 0 } },
+  ],
+  getRowId: (t) => t.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text } },
+  features: [editing, editors()],
+});
+
+document.getElementById('undo')!.addEventListener('click', () => editing.api(grid)?.undo());
+```
+
+## Live demo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Garden gnomes' }}
+  features={['edit']}
+  columns={[
+    { id: 'name', header: 'Name', flex: 1, minWidth: 140, editable: true, edit: { required: true, maxLength: 40 } },
+    { id: 'height', header: 'Height (cm)', type: 'number', width: 130, editable: true, edit: { min: 5, max: 120 } },
+    { id: 'painted', header: 'Painted on', type: 'day', width: 140, editable: true },
+  ]}
+  rows={[
+    { id: 'g1', name: 'Barnaby', height: 31, painted: '2025-04-02' },
+    { id: 'g2', name: 'Pip', height: 18, painted: '2024-09-14' },
+    { id: 'g3', name: 'Old Thistle', height: 46, painted: '2023-06-30' },
+  ]}
+  caption="Type over a name, or try a height of 300 (refused: at most 120). Undo and Redo above, or Ctrl+Z and Ctrl+Y."
+/>
+
+## See also
+
+- The [`editors`](../editors/) feature: the fields.
+- The [`editable`](../../column-options/editable/), [`edit`](../../column-options/edit/) and [`validate`](../../column-options/validate/) column options.
+- [Editing](../../guides/editing/#saving): saving in the guide.

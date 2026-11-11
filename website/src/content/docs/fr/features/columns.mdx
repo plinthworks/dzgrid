@@ -1,0 +1,93 @@
+---
+title: "columns"
+description: "Déplacer les colonnes en faisant glisser leur titre ou au clavier, et les dimensionner au clavier."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Permet de déplacer les colonnes et de les ajuster ou dimensionner, à la souris ou au clavier.
+
+<FeatureFacts name="columns" />
+
+## Ce qu’elle fait
+
+`columns()` permet de déplacer une colonne. À la souris, un titre pressé puis déplacé de 4 px glisse : une copie
+légère suit le pointeur et une barre montre où la colonne va se poser. Posée parmi les colonnes figées au début ou à
+la fin, la colonne y est figée ; sortie de là, elle ne l’est plus. Près des bords de la grille, les colonnes défilent.
+Échap remet tout en place. Un doigt sur un titre fait défiler la grille et ne le déplace jamais. En arabe, tout est en
+miroir.
+
+Au clavier, sur un titre qui a le focus : Ctrl+Maj+flèches (Cmd+Maj sur Mac) déplacent la colonne d’une place,
+Ctrl+Maj+Début / Fin jusqu’au bord de sa partie (jamais au-delà d’un bord figé) ; la nouvelle place est dite. Alt+R
+ouvre un mode de redimensionnement : les flèches changent la largeur de 10 px (Maj : 1 px), Début ajuste au contenu,
+Entrée garde, Échap rend l’ancienne largeur.
+
+Faire glisser le bord d’un titre redimensionne une colonne même sans cette fonction ; avec elle, un double-clic sur
+le bord ajuste la colonne à son contenu. Une colonne avec [`movable: false`](../../column-options/movable/) garde sa
+place, une avec [`resizable: false`](../../column-options/resizable/) sa largeur. Chaque déplacement ou ajustement est
+un seul changement de l’état des colonnes, que [`gridState()`](../grid-state/) peut garder. Par le code,
+`columnsFeature.api(grid)` donne `move`, `autoSize`, `autoSizeAll`, `resizeMode` et `fitContent`. Sans les textes
+`-columns`, la grille n’est pas créée : une erreur nomme les clés qui manquent.
+
+## Options
+
+- `drag` : si un titre peut être glissé à la souris. `false` ne laisse que les touches et l’API. Par défaut `true`.
+- `fitOnLoad` : `'content'` ajuste une fois les colonnes affichées à leur contenu, quand les premières lignes
+  s’affichent. Les colonnes flexibles, celles en `resizable: false` et les largeurs déjà fixées (un état gardé,
+  l’utilisateur) ne bougent pas. Un changement de données n’ajuste plus jamais ; `fitContent()` de l’API le refait.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { columns } from '@dzgrid/dom/columns';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+import '@dzgrid/theme/columns.css';
+
+type Book = { id: string; title: string; shelf: string; pages: number };
+
+const moves = columns({ fitOnLoad: 'content' });
+
+const grid = createGrid<Book>(document.getElementById('books')!, {
+  rows: [{ id: 'b1', title: 'La Route du sel', shelf: 'A3', pages: 312 }],
+  columns: [
+    { id: 'title', header: 'Titre', movable: false },
+    { id: 'shelf', header: 'Étagère' },
+    { id: 'pages', header: 'Pages', type: 'number' },
+  ],
+  getRowId: (b) => b.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_COLUMNS.text } },
+  features: [moves],
+});
+
+moves.api(grid)?.move('pages', 'start');
+```
+
+## Démo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Livres' }}
+  features={['columns']}
+  columns={[
+    { id: 'title', header: 'Titre', flex: 1, minWidth: 160 },
+    { id: 'shelf', header: 'Étagère', width: 110 },
+    { id: 'pages', header: 'Pages', type: 'number', width: 110 },
+    { id: 'year', header: 'Année', type: 'number', width: 100 },
+  ]}
+  rows={[
+    { id: 'b1', title: 'La Route du sel', shelf: 'A3', pages: 312, year: 1998 },
+    { id: 'b2', title: 'Rivières de verre', shelf: 'B1', pages: 205, year: 2004 },
+    { id: 'b3', title: 'Un champ de graines', shelf: 'A1', pages: 178, year: 2011 },
+    { id: 'b4', title: 'Le Gardien de lanterne', shelf: 'C2', pages: 420, year: 1987 },
+  ]}
+  caption="Faites glisser un titre pour déplacer sa colonne ; sur un titre qui a le focus, Ctrl+Maj+flèches le déplacent et Alt+R le redimensionne."
+/>
+
+## Voir aussi
+
+- La fonction [`columnMenu`](../column-menu/) : déplacer, figer et dimensionner depuis un menu.
+- Les options de colonne [`movable`](../../column-options/movable/) et [`resizable`](../../column-options/resizable/).
+- [Colonnes](../../guides/columns/) : le guide des colonnes.

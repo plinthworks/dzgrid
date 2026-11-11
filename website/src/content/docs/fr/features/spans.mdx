@@ -1,0 +1,99 @@
+---
+title: "spans"
+description: "Des cellules qui couvrent plusieurs lignes ou colonnes : valeurs fusionnées, étendues venues des données, lignes pleine largeur, titres groupés."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Dessine les cellules fusionnées, les cellules sur plusieurs lignes ou colonnes, les lignes pleine largeur et les titres groupés.
+
+<FeatureFacts name="spans" />
+
+## Ce qu’elle fait
+
+`spans()` dessine ce que demandent les colonnes et les réglages : des voisines égales fusionnées en une haute cellule
+([`merge`](../../column-options/merge/)), des étendues décidées par les données
+([`rowSpan`](../../column-options/row-span/), [`colSpan`](../../column-options/col-span/)), des lignes d’une seule
+cellule ([`fullWidth`](../../settings/full-width/)), et les rangées de titres des groupes de colonnes (une colonne
+avec `children`). Des règles d’étendue données sans elle sont ignorées, et la grille signale un
+avertissement `missing-feature` par sorte de règle.
+
+Les étendues se calculent sur les lignes telles qu’affichées : après un tri ou un filtre, les lignes désormais
+voisines fusionnent à nouveau. Une fusion ne traverse jamais une page, un bord épinglé, un groupe de lignes ni un
+espace. Le libellé d’une longue cellule fusionnée suit le défilement, pour rester en vue. Les touches traitent une
+cellule étendue comme un seul arrêt, et revenir en arrière ramène à la ligne d’où l’on venait ; un clic sur une haute
+cellule agit sur la ligne sous le pointeur. Un fichier CSV écrit la valeur sur chaque ligne que la cellule couvre.
+
+Dans un [arbre](../tree/), une fusion ne joint que des sœurs, sauf si `acrossLevels` est activé ; les lignes pleine
+largeur restent refusées à côté d’un arbre (`unsupported-combination`). Le maître-détail refuse `spans()`. Une étendue
+posée sur une autre est écartée (`span-overlap`) ; une étendue coupée par un bord épinglé ou par la fin des lignes
+signale `span-clipped` ; une étendue fausse (`merge` avec `rowSpan` ou `colSpan` sur une même colonne, une règle qui
+lève une exception) `invalid-span` ; un groupe de colonnes faux `invalid-column-group`.
+
+## Options
+
+- `acrossLevels` : dans un arbre, hors de la colonne de l’arbre d’une ligne, une fusion continue à travers un nœud et
+  ses enfants affichés, sous une même ligne du haut. Désactivé par défaut : une fusion s’arrête là où le niveau change.
+
+Lue à la création de la grille.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { spans } from '@dzgrid/dom/spans';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Hike = { id: string; valley: string; trail: string; km: number };
+
+const columns: ColumnOrGroup<Hike>[] = [
+  { id: 'valley', header: 'Vallée', merge: true },
+  { id: 'walk', header: 'Balade', children: [
+    { id: 'trail', header: 'Sentier' },
+    { id: 'km', header: 'Distance (km)', type: 'number' },
+  ] },
+];
+
+createGrid<Hike>(document.getElementById('walks')!, {
+  rows: [
+    { id: 'w1', valley: 'Vallée verte', trail: 'Sentier des fougères', km: 4.5 },
+    { id: 'w2', valley: 'Vallée verte', trail: 'Boucle de la cascade', km: 7 },
+    { id: 'w3', valley: 'Vallée de pierre', trail: 'Chemin de crête', km: 11 },
+  ],
+  columns,
+  getRowId: (w) => w.id,
+  messages: FR,
+  features: [spans()],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Balades' }}
+  features={['spans']}
+  columns={[
+    { id: 'valley', header: 'Vallée', width: 170, merge: true },
+    { id: 'walk', header: 'Balade', children: [
+      { id: 'trail', header: 'Sentier', flex: 1, minWidth: 180 },
+      { id: 'km', header: 'Distance (km)', type: 'number', width: 150 },
+    ] },
+  ]}
+  rows={[
+    { id: 'w1', valley: 'Vallée verte', trail: 'Sentier des fougères', km: 4.5 },
+    { id: 'w2', valley: 'Vallée verte', trail: 'Boucle de la cascade', km: 7 },
+    { id: 'w3', valley: 'Vallée verte', trail: 'Marches moussues', km: 2.5 },
+    { id: 'w4', valley: 'Vallée de pierre', trail: 'Chemin de crête', km: 11 },
+    { id: 'w5', valley: 'Vallée de pierre', trail: 'Vieux pont', km: 3 },
+  ]}
+  caption="Triez par Distance : les vallées se séparent, puis fusionnent à nouveau triées par Vallée."
+/>
+
+## Voir aussi
+
+- L’option de colonne [`merge`](../../column-options/merge/).
+- Le réglage [`fullWidth`](../../settings/full-width/).
+- [Groupes de colonnes](../../guides/columns/#groupes-de-colonnes) dans le guide.

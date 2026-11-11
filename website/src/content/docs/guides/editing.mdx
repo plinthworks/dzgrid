@@ -10,7 +10,7 @@ Two features: `edit()` from `@dzgrid/dom/edit` holds the edits (save, undo, refu
 `editors()` draws the fields (texts `-editors`). Take `editors` from `@dzgrid/dom/editors` (a date calendar from
 `@tzslot/*`, loaded on first use) or from `@dzgrid/dom/editors-base` (no calendar: a day is typed).
 
-F2, Enter, a double click or typing a character opens the field; Enter keeps the value and moves down (`enterMoves`),
+F2, Enter, a double click or typing a character opens the field; Enter keeps the value (and moves down with `enterMoves: 'down'`),
 Tab moves to the next editable cell, Escape gives the old value back.
 
 <LiveDemo

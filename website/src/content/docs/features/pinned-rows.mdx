@@ -1,0 +1,71 @@
+---
+title: "pinnedRows"
+description: "Rows that stay in view: some under the headers, some at the foot of the grid."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Pins rows of your own under the headers and at the foot of the grid.
+
+<FeatureFacts name="pinnedRows" />
+
+## What it does
+
+`pinnedRows({ top, bottom })` draws two bands: the `top` rows right under the headers, the `bottom` rows at the foot of
+the grid, both in view while the body scrolls. Their columns stay aligned with the body, pinned columns and sideways
+scroll included. Sorting, filtering, searching and paging never move, hide or count them; on a paged grid they show on
+every page.
+
+They are drawn like the body's rows (formats, cell parts, classes) and reached with the arrows: ↓ from the last header
+row goes into the top band, ↓ from the last body row into the bottom one. They are never selected. With
+[`edit()`](../edit/) and [`editors()`](../editors/), their cells edit like any other, through the same save; a column's
+`editable` function gets `{ pinned: 'top' }` or `{ pinned: 'bottom' }` as its third argument. Together the bands take
+at most half the view; beyond that, a band shows its rows in a window moved by the wheel and the focus.
+
+Each row is keyed by the grid's `getRowId`, apart from the body's rows. A duplicate id on one side is dropped
+(`duplicate-row-id`), an unusable one too (`invalid-row-id`); more than 5 rows on one side tells
+`too-many-pinned-rows`, and they are still drawn. [`totalsRow()`](../totals-row/) adds its row at the end of the
+bottom band.
+
+## Options
+
+- `top`: the rows under the headers, in order.
+- `bottom`: the rows at the foot of the grid, in order.
+
+Read when the grid is made; `api(grid).set({ top, bottom })` replaces them after (a side left out is kept).
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { pinnedRows } from '@dzgrid/dom/pinned-rows';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_PINNED } from '@dzgrid/dom/locales/en-pinned';
+import '@dzgrid/theme/pinned-rows.css';
+
+type Reading = { id: string; station: string; rain: number };
+
+const pins = pinnedRows<Reading>({
+  top: [{ id: 'goal', station: 'Yearly goal', rain: 800 }],
+  bottom: [{ id: 'last', station: 'Last year', rain: 742 }],
+});
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_PINNED.text } };
+
+const grid = createGrid<Reading>(document.getElementById('rain')!, {
+  rows: [{ id: 's1', station: 'Cape Lumen', rain: 61 }, { id: 's2', station: 'Hollow Hill', rain: 48 }],
+  columns: [
+    { id: 'station', header: 'Station' },
+    { id: 'rain', header: 'Rain (mm)', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [pins],
+});
+
+pins.api(grid)?.set({ bottom: [] });   // empties the bottom band, keeps the top one
+```
+
+## See also
+
+- [`totalsRow()`](../totals-row/): a Total row in the bottom band.
+- [`edit()`](../edit/): editing, pinned rows included.

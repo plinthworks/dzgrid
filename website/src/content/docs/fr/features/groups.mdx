@@ -1,0 +1,91 @@
+---
+title: "groups"
+description: "Des groupes de titres qui s’ouvrent et se ferment, et montrent moins de colonnes une fois fermés."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Ajoute le bouton qui ouvre et ferme un groupe de colonnes repliable.
+
+<FeatureFacts name="groups" />
+
+## Ce qu’elle fait
+
+Un groupe de colonnes avec `collapsible: true` reçoit un petit bouton dans son titre. Fermé, le groupe montre ses
+colonnes marquées [`groupShow: 'closed'`](../../column-options/group-show/) ou sans marque ; ouvert, il montre ses
+colonnes marquées `'open'` ou sans marque. Entrée ou Espace sur le titre du groupe qui a le focus fait comme
+le bouton, et le nouvel état est dit. `open: false` sur le groupe le fait commencer fermé. Une colonne que
+l’utilisateur a masquée le reste quand son groupe s’ouvre, et le choix des colonnes garde cochée une colonne repliée
+par son groupe.
+
+Les lignes de groupes elles-mêmes sont dessinées par [`spans()`](../spans/), qu’il faut aussi. Un groupe fermé qui
+ne montrerait aucune colonne montre sa première, avec un avertissement `invalid-column-group`. Un repli qui ne
+laisserait aucune colonne à l’écran est refusé. L’état ouvert ou fermé de chaque groupe est gardé par
+[`gridState()`](../grid-state/), et « Réinitialiser les colonnes » du menu de colonne rend celui des définitions. Par le code :
+`groupsFeature.api(grid)` donne `toggle`, `isOpen`, `reset`, `get` et `set`.
+
+Ses textes sont dans le paquet `-columns`. Avec un groupe repliable et sans eux, la grille n’est pas créée : une erreur
+nomme la clé qui manque.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { spans } from '@dzgrid/dom/spans';
+import { groups } from '@dzgrid/dom/groups';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+
+type Station = { id: string; name: string; tempMin: number; tempMax: number; rain: number };
+
+const columns: ColumnOrGroup<Station>[] = [
+  { id: 'name', header: 'Station' },
+  { id: 'weather', header: 'Météo', collapsible: true, open: false, children: [
+    { id: 'tempMin', header: 'Min °C', type: 'number', groupShow: 'open' },
+    { id: 'tempMax', header: 'Max °C', type: 'number', groupShow: 'closed' },
+    { id: 'rain', header: 'Pluie (mm)', type: 'number', groupShow: 'open' },
+  ] },
+];
+
+const folds = groups();
+
+const grid = createGrid<Station>(document.getElementById('stations')!, {
+  rows: [{ id: 's1', name: 'Cap Lumière', tempMin: 4, tempMax: 17, rain: 2.5 }],
+  columns,
+  getRowId: (s) => s.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_COLUMNS.text } },
+  features: [spans(), folds],
+});
+
+folds.api(grid)?.toggle('weather');
+```
+
+## Démo
+
+<LiveDemo
+  height={250}
+  settings={{ label: 'Stations météo' }}
+  features={['spans', 'groups']}
+  columns={[
+    { id: 'name', header: 'Station', flex: 1 },
+    { id: 'weather', header: 'Météo', collapsible: true, children: [
+      { id: 'tempMin', header: 'Min °C', type: 'number', groupShow: 'open' },
+      { id: 'tempMax', header: 'Max °C', type: 'number', groupShow: 'closed' },
+      { id: 'rain', header: 'Pluie (mm)', type: 'number', groupShow: 'open' },
+    ] },
+  ]}
+  rows={[
+    { id: 's1', name: 'Cap Lumière', tempMin: 4, tempMax: 17, rain: 2.5 },
+    { id: 's2', name: 'Roc aux Mouettes', tempMin: 7, tempMax: 15, rain: 11 },
+    { id: 's3', name: 'Champ-de-Lande', tempMin: -1, tempMax: 12, rain: 0.4 },
+  ]}
+  caption="Le bouton du groupe replie Météo sur sa colonne Max °C."
+/>
+
+## Voir aussi
+
+- L’option de colonne [`groupShow`](../../column-options/group-show/).
+- La fonction [`spans`](../spans/) : les lignes de titres de groupes.
+- [Colonnes](../../guides/columns/) : les groupes de colonnes dans le guide.

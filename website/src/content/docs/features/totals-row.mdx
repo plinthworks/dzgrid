@@ -1,0 +1,84 @@
+---
+title: "totalsRow"
+description: "A Total row always in view at the bottom of the grid, from each column’s total."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Adds a totals row at the foot of the grid, from the columns’ `total` option.
+
+<FeatureFacts name="totalsRow" />
+
+## What it does
+
+`totalsRow()` adds one row at the very bottom of the pinned bottom band, always in view while the rows scroll. Each
+column with a [`total`](../../column-options/total/) shows it there: `'sum'`, `'avg'`, `'min'`, `'max'`, `'count'`,
+`'first'`, `'last'`, or your function of the values. The first shown column without a total says « Total ». No column
+with a total: no row.
+
+The totals count the rows that pass the filters and the search (every page of a paged grid, every level of a tree),
+with edits counted as soon as they are typed. They follow the group totals' rules: sums without drift, means over the
+numbers present, `count` counting every row. The row is not data: it is never selected or edited. CSV, Excel and print
+end with it (not an export of the selected rows); a JSON file does not.
+
+It is a row of the pinned bottom band, so [`pinnedRows()`](../pinned-rows/) must be among the features, with its
+texts; without it, a `missing-feature` warning and no row. A total that does not fit its column tells `agg-type`; an
+unknown name, `invalid-setting`; a function that throws, `agg-threw`. With server pages the grid holds one page, so it
+computes nothing: give the totals your server sends with `api(grid).set({ … })`; `set(null)` goes back to computing.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { pinnedRows } from '@dzgrid/dom/pinned-rows';
+import { totalsRow } from '@dzgrid/dom/totals-row';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_PINNED } from '@dzgrid/dom/locales/en-pinned';
+import { EN_TOTALS } from '@dzgrid/dom/locales/en-totals';
+import '@dzgrid/theme/pinned-rows.css';
+
+type Hive = { id: string; name: string; honey: number; frames: number };
+
+const totals = totalsRow();
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_PINNED.text, ...EN_TOTALS.text } };
+
+const grid = createGrid<Hive>(document.getElementById('hives')!, {
+  rows: [{ id: 'h1', name: 'Clover', honey: 18.5, frames: 9 }, { id: 'h2', name: 'Heather', honey: 12, frames: 7 }],
+  columns: [
+    { id: 'name', header: 'Hive' },
+    { id: 'honey', header: 'Honey (kg)', type: 'number', total: 'sum' },
+    { id: 'frames', header: 'Frames', type: 'number', total: 'avg' },
+  ],
+  getRowId: (h) => h.id,
+  messages,
+  features: [pinnedRows<Hive>(), totals],
+});
+
+console.log(totals.api(grid)?.values());
+```
+
+## Live demo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Hives' }}
+  features={['totals']}
+  columns={[
+    { id: 'name', header: 'Hive', flex: 1 },
+    { id: 'honey', header: 'Honey (kg)', type: 'number', width: 140, total: 'sum' },
+    { id: 'frames', header: 'Frames', type: 'number', width: 120, total: 'avg', numberFormat: { maximumFractionDigits: 1 } },
+  ]}
+  rows={[
+    { id: 'h1', name: 'Clover', honey: 18.5, frames: 9 },
+    { id: 'h2', name: 'Heather', honey: 12, frames: 7 },
+    { id: 'h3', name: 'Lime tree', honey: 21.4, frames: 10 },
+    { id: 'h4', name: 'Orchard', honey: 9.8, frames: 6 },
+  ]}
+/>
+
+## See also
+
+- The [`total`](../../column-options/total/) column option.
+- [`pinnedRows()`](../pinned-rows/): the band it stands in.
+- [Totals row](../../guides/columns/#totals-row) in the guide.

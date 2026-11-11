@@ -1,0 +1,120 @@
+---
+title: "filters"
+description: "Column filters: a filter button and a popup in each header, and an optional row of filter fields."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Adds the filter controls: a button and a popup on each filterable header, and an optional floating row.
+
+<FeatureFacts name="filters" />
+
+## What it does
+
+`filters()` puts a filter button in each filterable header; Alt+↓ on the header opens it too. The popup holds the
+column's filter: an operator and a value for text and numbers, All / Yes / No for a yes/no column, one or two dates for
+a day or an instant column, a list of values to tick for a column with `filter: { kind: 'set' }`. A filtered column
+shows a mark in its header, and the grid says the new row count. Each column says what it allows with its
+[`filter`](../../column-options/filter/) option (`filter: false` for none).
+
+`floating: true` adds a row of small filter fields under the headers: text and number columns get a box that filters
+as you type; the others a summary that opens the popup.
+
+**Two entries, one function.** `@dzgrid/dom/filters` has every kind: its day and instant forms use a calendar loaded
+on demand, which needs `@tzslot/core` and `@tzslot/dom` installed. `@dzgrid/dom/filters-base` is the same `filters()`
+without the calendar: text, number, yes/no and the value list only. There, a day or instant column gets **no filter** and
+no button, and one `missing-feature` warning names `@dzgrid/dom/filters` — unless `loadDates` brings the date forms
+back.
+
+Its texts are required: without them the grid is not made, and an error names each missing key. A `maxConditions`,
+`rowHeight` or `dateCalendar` it cannot take is dropped with an `invalid-setting` warning.
+
+## Options
+
+- `floating`: the row of filter fields under the headers, for every filterable column (a column's `filter.floating`
+  wins). Off by default.
+- `debounceMs`: the pause before a typed filter applies: 150 ms in the browser, 300 ms on a server by default. A
+  column's `filter.debounceMs` wins.
+- `popup`: the header's filter button and the popup; `false` for neither. On by default.
+- `apply`: `'live'` (the default) applies the popup's fields as they change; `'button'` only at Apply or Enter, and
+  closing without Apply drops the draft. The floating row stays live.
+- `maxConditions`: how many conditions a popup offers, 1 to 5 (1 by default); from 2, « Add condition » and an AND / OR
+  join. A column's `filter.maxConditions` wins.
+- `matchCase`: a « Match case » box on each text condition (off by default). A column's `filter.matchCase` wins.
+- `rowHeight`: the floating row's height in px at 16 px text, 24 to 1 000, grown with the text size. Absent or wrong:
+  the row height.
+- `busyFlash`: a short busy state after each filter change, in milliseconds (off by default): `aria-busy` on the grid
+  and the theme's spinner over the rows. Nothing waits for it.
+- `dateCalendar`: the period calendar: `{ months: 2 }` for two months (1 by default), `{ presets: [] }` for no
+  shortcuts, `{ presets: ['today', 'last7Days'] }` for these, in this order.
+- `dateZone`: the instant form says its time zone; `false` for an application with one zone. On by default.
+- `dateMessages`: the calendar's words for a language beyond English, French and Arabic, or over them:
+  `{ es: { … } }`.
+- `loadDates`: advanced. Where the date forms come from, instead of the grid's own loading. With
+  `@dzgrid/dom/filters-base` it brings them back. A failed load shows the error and Retry.
+- `loadSet`: advanced. Where the value list's code comes from, as `loadDates`.
+
+All are read when the grid is made; only the floating row can change later, with `floating.set(on)` on the feature.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { filters } from '@dzgrid/dom/filters';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+
+type Seed = { id: string; name: string; kind: string; packets: number; sown: string };
+
+const columns: ColumnOrGroup<Seed>[] = [
+  { id: 'name', header: 'Seed' },
+  { id: 'kind', header: 'Kind', filter: { kind: 'set' } },
+  { id: 'packets', header: 'Packets', type: 'number', filter: { maxConditions: 2 } },
+  { id: 'sown', header: 'Sown', type: 'day' },
+];
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+
+const seedFilters = filters({ floating: true, apply: 'button', debounceMs: 200 });
+createGrid<Seed>(document.getElementById('seeds')!, {
+  rows: [{ id: 's1', name: 'Basil', kind: 'Herb', packets: 40, sown: '2026-03-14' }],
+  columns,
+  getRowId: (s) => s.id,
+  messages,
+  features: [seedFilters],
+});
+
+seedFilters.floating.set(false);   // hides the floating row
+```
+
+## Live demo
+
+<LiveDemo
+  height={380}
+  settings={{ label: 'Seeds' }}
+  features={[['filters', { floating: true }]]}
+  columns={[
+    { id: 'name', header: 'Seed', flex: 1, minWidth: 160 },
+    { id: 'kind', header: 'Kind', width: 150, filter: { kind: 'set' } },
+    { id: 'packets', header: 'Packets', type: 'number', width: 120 },
+    { id: 'sown', header: 'Sown', type: 'day', width: 150 },
+  ]}
+  rows={[
+    { id: 's1', name: 'Basil', kind: 'Herb', packets: 40, sown: '2026-03-14' },
+    { id: 's2', name: 'Marigold', kind: 'Flower', packets: 12, sown: '2026-04-02' },
+    { id: 's3', name: 'Carrot', kind: 'Vegetable', packets: 55, sown: '2026-03-28' },
+    { id: 's4', name: 'Thyme', kind: 'Herb', packets: 18, sown: '2026-02-20' },
+    { id: 's5', name: 'Sunflower', kind: 'Flower', packets: 30, sown: '2026-04-15' },
+    { id: 's6', name: 'Pumpkin', kind: 'Vegetable', packets: 9, sown: '2026-05-01' },
+    { id: 's7', name: 'Chive', kind: 'Herb', packets: 22, sown: '2026-03-05' },
+    { id: 's8', name: 'Poppy', kind: 'Flower', packets: 16, sown: '2026-04-21' },
+  ]}
+  caption="Type in the small fields under the titles, or open a title’s funnel."
+/>
+
+## See also
+
+- The [`filter`](../../column-options/filter/) column option: kind, operators, floating field.
+- [`filtersPanel()`](../filters-panel/): every filter in a side panel.
+- [Column filters](../../guides/sort-filter-search/#column-filters) in the guide.

@@ -1,0 +1,118 @@
+---
+title: "grouping"
+description: "Rows gathered under group rows, one level per column, with totals."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Groups the rows by one or more columns and shows each group’s totals.
+
+<FeatureFacts name="grouping" />
+
+## What it does
+
+`grouping({ by })` gathers the rows under group rows, one level per column in `by`. A group row shows « value (n) » in
+the group column, with a chevron, indented one step per level; its other cells show the group's totals. Empty values
+form one group, « (Blank) », always last. Groups start closed; → opens, ← closes, and Enter anywhere on a group row
+opens or closes it. Open group rows stay pinned under the header while their rows scroll. Each opening by the user is
+said.
+
+Totals come from each column's [`aggFunc`](../../column-options/agg-func/) or from the `aggFuncs` option. Filters and
+the search test the data rows first: a group with no matching row disappears, and its count and totals are those of
+the matching rows. A group row is never selected or edited. Sorting a grouped column orders its groups.
+
+Change the grouping with `api(grid).setBy(ids)`, with the band [`groupZone()`](../group-zone/), or with « Group by this
+column » in the [column menu](../column-menu/). `api(grid)` also gives `expandAll()`, `collapseAll()` and `totals()`.
+
+A column the grid does not know is dropped (`unknown-column`); one with `groupable: false` too (`invalid-setting`). A
+total that does not fit its column tells `agg-type`; a function that throws, `agg-threw`. Grouping refuses a tree,
+master/detail, merged cells (header bands are fine), browser pages and `sourceRows` beside it
+(`unsupported-combination`): one of the two steps aside. With `serverSideRows` the server groups. Its texts are in the
+`-group` bundle.
+
+## Options
+
+- `by`: the grouping columns' ids, the first level first; empty (the default): the rows flat.
+- `aggFuncs`: totals by column id (`sum`, `avg`, `min`, `max`, `count`, `first`, `last` or a function); they win over
+  a column's own `aggFunc`.
+- `expanded`: what is open at the first load: `'none'` (the default), `'all'`, or a depth (1: the first level).
+- `footers`: totals rows: `'none'` (the default), `'group'` (one under each open group), `'grand'` (a grand total), or
+  `'both'`.
+- `grandTotal`: where the grand total sits: `'bottom'` (the default) or `'top'`.
+- `column`: the column that shows the labels and chevrons; the first visible one by default.
+- `indent`: pixels per level, 16 by default.
+- `sticky`: group rows kept pinned under the header, the nearest first: 3 by default, 0 for none.
+- `pivot`: a pivot table over the groups: [`pivot()`](../pivot/).
+
+Read when the grid is made; `by` then changes through `api(grid).setBy()`.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { grouping } from '@dzgrid/dom/grouping';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_GROUP } from '@dzgrid/dom/locales/en-group';
+import '@dzgrid/theme/grouping.css';
+
+type Packet = { id: string; kind: string; colour: string; name: string; packets: number };
+
+const columns: ColumnOrGroup<Packet>[] = [
+  { id: 'kind', header: 'Kind' },
+  { id: 'colour', header: 'Colour' },
+  { id: 'name', header: 'Seed', aggFunc: 'count' },
+  { id: 'packets', header: 'Packets', type: 'number', aggFunc: 'sum' },
+];
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_GROUP.text } };
+
+const groups = grouping({ by: ['kind'], footers: 'grand' });
+const grid = createGrid<Packet>(document.getElementById('packets')!, {
+  rows: [
+    { id: 'p1', kind: 'Herb', colour: 'Green', name: 'Basil', packets: 40 },
+    { id: 'p2', kind: 'Flower', colour: 'Orange', name: 'Marigold', packets: 12 },
+  ],
+  columns,
+  getRowId: (p) => p.id,
+  messages,
+  features: [groups],
+});
+
+const api = groups.api(grid);
+api?.setBy(['kind', 'colour']);
+api?.expandAll();
+console.log(api?.totals());
+```
+
+## Live demo
+
+<LiveDemo
+  height={420}
+  settings={{ label: 'Seed packets' }}
+  features={[['grouping', { by: ['kind', 'colour'], expanded: 1, footers: 'grand' }]]}
+  columns={[
+    { id: 'kind', header: 'Kind', flex: 1, minWidth: 190 },
+    { id: 'colour', header: 'Colour', width: 120 },
+    { id: 'name', header: 'Seed', width: 130, aggFunc: 'count' },
+    { id: 'packets', header: 'Packets', type: 'number', width: 110, aggFunc: 'sum' },
+  ]}
+  rows={[
+    { id: 'p1', kind: 'Herb', colour: 'Green', name: 'Basil', packets: 40 },
+    { id: 'p2', kind: 'Flower', colour: 'Orange', name: 'Marigold', packets: 12 },
+    { id: 'p3', kind: 'Vegetable', colour: 'Orange', name: 'Carrot', packets: 55 },
+    { id: 'p4', kind: 'Herb', colour: 'Green', name: 'Thyme', packets: 18 },
+    { id: 'p5', kind: 'Flower', colour: 'Yellow', name: 'Sunflower', packets: 30 },
+    { id: 'p6', kind: 'Vegetable', colour: 'Orange', name: 'Pumpkin', packets: 9 },
+    { id: 'p7', kind: 'Herb', colour: 'Purple', name: 'Chive', packets: 22 },
+    { id: 'p8', kind: 'Flower', colour: 'Red', name: 'Poppy', packets: 16 },
+    { id: 'p9', kind: 'Vegetable', colour: 'Red', name: 'Tomato', packets: 35 },
+  ]}
+  caption="Open a kind of seed to see its colours; the last row is the grand total."
+/>
+
+## See also
+
+- [`groupZone()`](../group-zone/): the band where the user groups by dragging.
+- The [`aggFunc`](../../column-options/agg-func/) column option.
+- The [Grouping](../../guides/grouping/) guide.

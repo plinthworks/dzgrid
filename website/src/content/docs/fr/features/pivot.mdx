@@ -1,0 +1,128 @@
+---
+title: "pivot"
+description: "Un tableau croisé sur le regroupement : les valeurs d’une colonne deviennent des colonnes, avec un total à chaque croisement."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Transforme les valeurs de certaines colonnes en colonnes, avec un total là où chaque groupe et chaque colonne se croisent.
+
+<FeatureFacts name="pivot" />
+
+## Ce qu’elle fait
+
+`pivot()` ne se met pas dans `features` : elle se donne à [`grouping({ by, pivot })`](../grouping/), qui la dessine.
+Les lignes sont les groupes, et aucune ligne de données n’est montrée. Chaque valeur des colonnes croisées devient une
+colonne, et chaque cellule totalise les colonnes de valeurs là où un groupe et une colonne se croisent ; un croisement
+sans ligne ne montre rien, jamais « 0 ». Une colonne de libellés se tient au début, les colonnes de données sont
+repliées, et les colonnes de valeurs restent à la fin sous « Total », comme totaux des lignes. La ligne du total
+général ferme le tableau.
+
+Les bandes de titres des colonnes créées demandent [`spans()`](../spans/) ; avec [`groups()`](../groups/), elles se
+replient aussi. Un clic sur une colonne créée trie les groupes selon ses totaux. Le mode tableau croisé appartient à
+l’application : `toggle` montre à l’utilisateur un interrupteur « Tableau croisé », sinon `api(grid).setOn(on)`.
+`api(grid)` change aussi les colonnes croisées (`setBy`), les valeurs (`setValues`) et les ordres inversés
+(`setDesc`), et `series()` donne les nombres d’une valeur, prêts pour une bibliothèque de graphiques à vous. Pour une
+barre où l’utilisateur construit le tableau, ajoutez [`pivotBar()`](../pivot-bar/).
+
+Au-delà de `maxColumns` colonnes créées, aucune n’est faite : les lignes restent regroupées avec leurs totaux, et la
+grille signale `pivot-too-many` avec le compte. Une colonne croisée que la grille ne connaît pas est écartée
+(`unknown-column`) ; une colonne avec `groupable: false`, donnée deux fois, ou aussi colonne de regroupement,
+`invalid-setting`. À côté de `sourceRows` ou d’une liste infinie, le tableau croisé n’est pas fait
+(`unsupported-combination`) ; `serverSideRows` avec `serverPivot()` le fait calculer par un serveur. Ses textes sont
+dans le paquet `-pivot`, et obligatoires : une erreur nomme chaque clé manquante.
+
+## Options
+
+- `columns` : les ids des colonnes croisées, la première bande d’abord.
+- `values` : les colonnes de valeurs et leur fonction (`sum`, `avg`, `min`, `max`, `count`, `first`, `last` ou la
+  vôtre), dans l’ordre. Par défaut les `aggFuncs` du regroupement, puis les colonnes affichées qui ont un `aggFunc`.
+- `on` : le mode tableau croisé, `true` par défaut ; désactivé, le regroupement comme sans tableau croisé.
+- `subtotals` : une colonne de sous-total après chaque bande, par valeur.
+- `desc` : les colonnes croisées dont les colonnes créées vont à l’envers, « (Vide) » toujours en dernier.
+- `maxColumns` : au-delà de ce nombre de colonnes créées (croisements × valeurs, sous-totaux compris), aucune n’est
+  faite : 200 par défaut.
+- `valueHeaders` : les titres des colonnes de valeurs : `'auto'` (par défaut : « somme(Recette) » avec plusieurs
+  valeurs, le nom court avec une seule), `'fn'` la forme avec la fonction toujours, `'name'` le nom court seulement
+  (`headerShort`, sinon `header`).
+- `width` : la largeur d’une colonne créée ; sans elle, aussi large que son titre le demande, de 120 à 240 px.
+- `labelWidth` : la largeur de la colonne de libellés, 200 par défaut.
+- `toggle` : un interrupteur « Tableau croisé » pour l’utilisateur : `true` ou `'inside'` dans la bande du tableau
+  croisé au-dessus des lignes (dans la barre avec `pivotBar()`), ou un élément à vous où il est ajouté. Aucun par
+  défaut.
+
+Lues à la création de la grille ; `api(grid)` change ensuite le mode, les colonnes et les valeurs.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { grouping } from '@dzgrid/dom/grouping';
+import { pivot } from '@dzgrid/dom/pivot';
+import { spans } from '@dzgrid/dom/spans';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_GROUP } from '@dzgrid/dom/locales/fr-group';
+import { FR_PIVOT } from '@dzgrid/dom/locales/fr-pivot';
+import '@dzgrid/theme/grouping.css';
+import '@dzgrid/theme/pivot.css';
+
+type Sale = { id: string; shop: string; month: string; bread: string; loaves: number; takings: number };
+
+const columns: ColumnOrGroup<Sale>[] = [
+  { id: 'shop', header: 'Boulangerie' },
+  { id: 'month', header: 'Mois' },
+  { id: 'bread', header: 'Pain' },
+  { id: 'loaves', header: 'Pains', type: 'number' },
+  { id: 'takings', header: 'Recette', type: 'number', numberFormat: { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 } },
+];
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_GROUP.text, ...FR_PIVOT.text } };
+
+const cross = pivot({ columns: ['month'], values: { loaves: 'sum', takings: 'sum' }, toggle: true });
+const grid = createGrid<Sale>(document.getElementById('bakeries')!, {
+  rows: [
+    { id: 'b1', shop: 'Rue du Moulin', month: '2026-01', bread: 'Seigle', loaves: 120, takings: 360 },
+    { id: 'b2', shop: 'Le Port', month: '2026-02', bread: 'Baguette', loaves: 210, takings: 252 },
+  ],
+  columns,
+  getRowId: (s) => s.id,
+  messages,
+  features: [spans(), grouping({ by: ['shop'], pivot: cross })],
+});
+
+const api = cross.api(grid);
+api?.setValues({ loaves: 'avg', takings: 'sum' });
+console.log(api?.series({ value: 'takings' }));
+```
+
+## Démo
+
+<LiveDemo
+  height={340}
+  settings={{ label: 'Boulangeries' }}
+  features={['spans', 'groups', ['pivot', { columns: ['month'], values: { loaves: 'sum', takings: 'sum' }, toggle: true }], ['grouping', { by: ['shop'] }]]}
+  columns={[
+    { id: 'shop', header: 'Boulangerie' },
+    { id: 'month', header: 'Mois' },
+    { id: 'bread', header: 'Pain' },
+    { id: 'loaves', header: 'Pains', type: 'number' },
+    { id: 'takings', header: 'Recette', type: 'number', numberFormat: { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 } },
+  ]}
+  rows={[
+    { id: 'b1', shop: 'Rue du Moulin', month: '2026-01', bread: 'Seigle', loaves: 120, takings: 360 },
+    { id: 'b2', shop: 'Rue du Moulin', month: '2026-02', bread: 'Levain', loaves: 95, takings: 380 },
+    { id: 'b3', shop: 'Rue du Moulin', month: '2026-02', bread: 'Seigle', loaves: 64, takings: 192 },
+    { id: 'b4', shop: 'Le Port', month: '2026-01', bread: 'Baguette', loaves: 210, takings: 252 },
+    { id: 'b5', shop: 'Le Port', month: '2026-03', bread: 'Levain', loaves: 80, takings: 320 },
+    { id: 'b6', shop: 'Vieille ville', month: '2026-02', bread: 'Baguette', loaves: 150, takings: 180 },
+    { id: 'b7', shop: 'Vieille ville', month: '2026-03', bread: 'Seigle', loaves: 70, takings: 210 },
+  ]}
+  caption="Chaque mois est une colonne ; l’interrupteur au-dessus des lignes éteint et rallume le tableau croisé."
+/>
+
+## Voir aussi
+
+- [`pivotBar()`](../pivot-bar/) : la barre où l’utilisateur construit le tableau.
+- [`grouping()`](../grouping/) : les lignes du tableau.
+- Le guide [Tableau croisé](../../guides/pivot/).

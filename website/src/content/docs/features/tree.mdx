@@ -1,0 +1,108 @@
+---
+title: "tree"
+description: "Rows shown as a tree, from a parent id, nested children or a path: indent, chevrons and keys."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Shows the rows as a tree; the hierarchy comes from your rows, in one of three ways.
+
+<FeatureFacts name="tree" />
+
+## What it does
+
+`tree()` indents the tree column one step per level and gives each parent a chevron. → opens a row, ← closes it or
+goes to its parent (mirrored in Arabic), `*` opens its siblings; a click on the chevron opens or closes too. Each
+opening or closing by the user is said. A sort orders each parent's children among themselves; what is open stays open
+after a sort, a filter or new rows. Tree rows are ordinary data rows: selection, editing and export work on them.
+
+Give exactly one of `parentId`, `children` or `path`; none or several is a `tree-shape` error. A parent id that names
+no row puts the row at the top (`tree-orphan`); a cycle is broken (`tree-cycle`); with `children`, ids must be unique
+across the whole tree (`duplicate-row-id`). With `path`, a level no row has becomes a filler row: a label, never data.
+
+A tree column that is not the first visible column works, with a `tree-column-not-first` warning (screen readers expect
+the hierarchy first). A tree refuses master/detail and browser pages beside it (`unsupported-combination`); merged
+cells work, between siblings ([`spans()`](../spans/)). Its texts are in the `-tree` bundle.
+
+## Options
+
+- `parentId`: the id of a row's parent; `null`, `undefined` or `''` for a top row.
+- `children`: a row's children (nested data); every level becomes rows of the grid.
+- `path`: a row's path of labels, top first, such as `['Garden', 'Tools', 'Rake']`.
+- `initial`: what is open at the first load: `'none'` (the default), `'all'`, or a depth (1: the top rows).
+- `filter`: what a filter keeps: the matches and their ancestors (`'ancestors'`, the default), or their whole
+  subtrees too (`'subtree'`).
+- `column`: the column that shows the hierarchy, the first visible one by default. A function names it row by row; an
+  answer that is not a visible column falls back to the default, with one `invalid-setting` warning.
+- `indent`: pixels per level, 16 by default; or a function `(row, level)` giving a row's indent, 0 to 1 000 (anything
+  else gives `level × 16`, told once).
+- `sticky`: how many open parents stay pinned under the header while their children scroll, the nearest first: 3 by
+  default, 0 for none.
+- `fixedOpen`: the rows always open, drawn with no chevron; no key, command or « close all » closes them. A throw
+  counts as false; a value that is not a function is ignored (`invalid-setting`).
+- `lazy`: children loaded when their parent opens: [`lazyChildren()`](../lazy-children/).
+- `structure`: the columns that feed the tree; they cannot be edited (one marked editable tells `edit-structure`
+  once). By default the tree column of a `path` tree, none otherwise; `[]` frees it.
+
+Read when the grid is made.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { tree } from '@dzgrid/dom/tree';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_TREE } from '@dzgrid/dom/locales/en-tree';
+
+type Place = { id: string; parent: string | null; name: string; items: number };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_TREE.text } };
+
+const grid = createGrid<Place>(document.getElementById('shed')!, {
+  rows: [
+    { id: 'g', parent: null, name: 'Garden shed', items: 40 },
+    { id: 'g1', parent: 'g', name: 'Top shelf', items: 12 },
+    { id: 'g11', parent: 'g1', name: 'Seed tins', items: 8 },
+    { id: 'g2', parent: 'g', name: 'Tool wall', items: 15 },
+  ],
+  columns: [
+    { id: 'name', header: 'Place', flex: 1 },
+    { id: 'items', header: 'Items', type: 'number' },
+  ],
+  getRowId: (p) => p.id,
+  messages,
+  features: [tree<Place>({ parentId: (p) => p.parent, initial: 1, sticky: 2, filter: 'subtree' })],
+});
+
+grid.kernel.dispatch({ type: 'rows.expandAll', expanded: true }, 'api');
+```
+
+## Live demo
+
+<LiveDemo
+  height={340}
+  settings={{ label: 'Garden shed' }}
+  features={[['tree', { parentField: 'parent', initial: 1 }]]}
+  columns={[
+    { id: 'name', header: 'Place', flex: 1, minWidth: 220 },
+    { id: 'items', header: 'Items', type: 'number', width: 120 },
+  ]}
+  rows={[
+    { id: 'g', parent: null, name: 'Garden shed', items: 40 },
+    { id: 'g1', parent: 'g', name: 'Top shelf', items: 12 },
+    { id: 'g11', parent: 'g1', name: 'Seed tins', items: 8 },
+    { id: 'g12', parent: 'g1', name: 'Twine box', items: 3 },
+    { id: 'g2', parent: 'g', name: 'Tool wall', items: 15 },
+    { id: 'g21', parent: 'g2', name: 'Hooks', items: 9 },
+    { id: 'g3', parent: 'g', name: 'Potting bench', items: 10 },
+    { id: 'g31', parent: 'g3', name: 'Drawer', items: 6 },
+  ]}
+  caption="→ opens a place, ← closes it; the buttons above open or close everything."
+/>
+
+## See also
+
+- [`lazyChildren()`](../lazy-children/): children loaded on demand.
+- [`rowGaps()`](../row-gaps/): a space before each top-level row.
+- The [Tree](../../guides/tree/) guide.

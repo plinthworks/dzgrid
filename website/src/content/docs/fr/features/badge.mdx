@@ -1,0 +1,66 @@
+---
+title: "badge"
+description: "Une partie de cellule toute prête : un statut montré comme une petite étiquette encadrée, avec un ton."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Une partie de cellule qui dessine un statut en petite étiquette encadrée, colorée selon son ton.
+
+<FeatureFacts name="badge" />
+
+## Ce qu’elle fait
+
+`badge()` de `@dzgrid/dom/parts` n’est pas une fonction de la grille : elle renvoie une partie de cellule.
+Enregistrez-la sous un nom à vous dans le réglage [`parts`](../../settings/parts/), et nommez-la dans le
+[`ui.cell`](../../column-options/ui/) d’une colonne. L’étiquette est le texte de la cellule (le libellé d’une colonne
+`enum` ; une valeur inconnue montre la valeur). Le ton vient de `tones`, par la valeur en chaîne, sinon de `fallback`.
+Une valeur vide ne montre rien.
+
+Cinq tons : `neutral`, `info`, `success`, `warning`, `danger`. En plus de la couleur, chaque ton sauf neutre a une
+petite forme avant l’étiquette (✓, i, !, ✕) : la couleur n’est jamais le seul signe. Un lecteur d’écran ne lit que
+l’étiquette. Le tri, les filtres, la recherche rapide et les fichiers traitent la colonne comme du texte. Un `badge()`
+par correspondance ; plusieurs colonnes peuvent partager un nom.
+
+`badge` lui-même n’a besoin d’aucun texte. Le paquet `-parts` montré plus haut sert à
+[`cellBoolean`](../cell-boolean/), de la même entrée.
+
+## Options
+
+- `tones` : le ton de chaque valeur, par la valeur en chaîne : `{ done: 'success', late: 'danger' }`.
+- `fallback` : le ton d’une valeur que `tones` ne nomme pas. Par défaut `neutral`.
+- `classes` : vos classes par ton, posées à côté de celles de l’étiquette : `{ danger: 'bg-red-100 text-red-800' }`. La
+  forme du ton reste.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { badge } from '@dzgrid/dom/parts';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Batch = { id: string; fruit: string; state: string };
+
+createGrid<Batch>(document.getElementById('batches')!, {
+  rows: [
+    { id: 'b1', fruit: 'Abricots', state: 'ripe' },
+    { id: 'b2', fruit: 'Figues', state: 'spoilt' },
+  ],
+  columns: [
+    { id: 'fruit', header: 'Fruit' },
+    {
+      id: 'state', header: 'État', type: 'enum', ui: { cell: 'stateBadge' },
+      enumOptions: [{ value: 'ripe', label: 'Mûr' }, { value: 'green', label: 'Pas encore mûr' }, { value: 'spoilt', label: 'Gâté' }],
+    },
+  ],
+  getRowId: (b) => b.id,
+  messages: FR,
+  parts: { stateBadge: badge({ tones: { ripe: 'success', green: 'info', spoilt: 'danger' } }) },
+});
+```
+
+## Voir aussi
+
+- Le réglage [`parts`](../../settings/parts/) et l’option de colonne [`ui`](../../column-options/ui/).
+- La partie [`cellBoolean`](../cell-boolean/) : des cellules oui / non.
+- [Colonnes](../../guides/columns/) : les cellules sur mesure dans le guide.

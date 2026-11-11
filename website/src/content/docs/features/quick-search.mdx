@@ -1,0 +1,87 @@
+---
+title: "quickSearch"
+description: "A search field of your page filters the rows on every visible column."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Binds a search field of your page to the grid: every word typed must be found in the row.
+
+<FeatureFacts name="quickSearch" />
+
+## What it does
+
+`quickSearch()` draws no field. You write your own `<input>` (its label, its place, its style) and hand it to
+`bind(input)`. Every word typed must appear somewhere in the row, in any visible column, in any order. Case, accents and
+Arabic short vowels are ignored. Number and date columns are searched only for a word that holds a digit; hidden
+columns are never searched; a yes/no column is searched by its word (« Yes », « No ») in the grid's language.
+
+The rows narrow after a short pause: 150 ms in the browser, 300 ms when a server searches, or the `debounceMs` given to
+`bind(input, { debounceMs })` (a value that is not a number of 0 or more gives the default). Enter applies at once,
+Escape empties the field, ↓ goes into the grid. Once the rows settle, the grid says how many it found. The words found
+are tinted inside the cells the grid draws (`@dzgrid/theme/search.css`); a cell drawn by your own part is left alone.
+
+`bind` can be called for several fields; it returns a function that unbinds. The search and the column filters both
+apply: a row must pass both. The grid draws no text of its own for the search, so the feature needs no texts bundle.
+
+## Options
+
+- `highlight`: tints the words found inside the cells. On by default; `false` leaves the cells alone. Read when the
+  grid is made.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { quickSearch } from '@dzgrid/dom/search';
+import { EN } from '@dzgrid/dom/locales/en';
+import '@dzgrid/theme/search.css';
+
+type Book = { id: string; title: string; pages: number };
+
+const search = quickSearch({ highlight: true });
+createGrid<Book>(document.getElementById('books')!, {
+  rows: [{ id: 'b1', title: 'The Salt Road', pages: 312 }],
+  columns: [
+    { id: 'title', header: 'Title' },
+    { id: 'pages', header: 'Pages', type: 'number' },
+  ],
+  getRowId: (b) => b.id,
+  messages: EN,
+  features: [search],
+});
+
+const unbind = search.bind(document.querySelector<HTMLInputElement>('#book-search')!, { debounceMs: 200 });
+// Later: unbind();
+```
+
+## Live demo
+
+<LiveDemo
+  height={340}
+  settings={{ label: 'Books' }}
+  features={['search']}
+  columns={[
+    { id: 'title', header: 'Title', flex: 2, minWidth: 200 },
+    { id: 'shelf', header: 'Shelf', width: 130 },
+    { id: 'pages', header: 'Pages', type: 'number', width: 110 },
+  ]}
+  rows={[
+    { id: 'b1', title: 'The Salt Road', shelf: 'Travel', pages: 312 },
+    { id: 'b2', title: 'Nine Lanterns', shelf: 'Tales', pages: 188 },
+    { id: 'b3', title: 'Paper Tides', shelf: 'Travel', pages: 254 },
+    { id: 'b4', title: 'The Quiet Orchard', shelf: 'Nature', pages: 140 },
+    { id: 'b5', title: 'River of Glass', shelf: 'Travel', pages: 296 },
+    { id: 'b6', title: 'A Map of Moths', shelf: 'Nature', pages: 122 },
+    { id: 'b7', title: 'Winter Bees', shelf: 'Nature', pages: 98 },
+    { id: 'b8', title: 'The Lantern Keeper', shelf: 'Tales', pages: 210 },
+  ]}
+  caption="Type « salt » or « bees » in the field above the grid."
+/>
+
+## See also
+
+- [`filters()`](../filters/): a filter per column.
+- [`find()`](../find/): marks the matches without hiding a row.
+- [Quick search](../../guides/sort-filter-search/#quick-search) in the guide.

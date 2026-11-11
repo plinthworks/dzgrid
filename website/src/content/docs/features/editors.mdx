@@ -1,0 +1,94 @@
+---
+title: "editors"
+description: "The fields that edit a cell: text, number, day, date and time, yes / no, a list, or your own."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Draws the field that edits a cell, chosen by the column’s type, and its keys.
+
+<FeatureFacts name="editors" />
+
+## What it does
+
+`editors()` opens a field in an editable cell: on F2, Enter, a typed character or a double click. Text and number
+columns get a text field; `day` and `instant` columns a date field with a calendar button (Alt+ArrowDown opens it too);
+a list (an `enum` column or `edit.options`) the list of [`listEditor`](../list-editor/); a yes / no cell opens no field —
+Space, Enter or a double click toggles it. Your own editor is a part named in the column's `edit.editor`. Enter keeps the
+value, Tab keeps it and opens the next editable cell, Escape gives the old value back, Delete clears. A refused value
+stays in the open field, under a small bubble that says why.
+
+It comes from two entries with the same function. `@dzgrid/dom/editors` has the calendar, from `@tzslot/*`, loaded on
+first use. `@dzgrid/dom/editors-base` has none: for an app without `@tzslot/*` installed, a day is typed (unless
+`loadCalendar` brings a calendar).
+
+It needs [`edit()`](../edit/), which holds the values: without it, nothing opens and the grid tells a `missing-feature`
+warning. A list column without `list` opens a text field, with a `missing-feature` warning per column; a list of more
+than 500 options opens a text field too, with an `invalid-column` warning. An `edit.editor` name no one registered tells
+`unknown-part`. Without the `-editors` texts, the grid is not made: an error names the missing keys.
+
+## Options
+
+- `enterMoves`: after Enter (Shift+Enter), stay in the same cell (`'stay'`, by default) or move to the cell below
+  (above) with `'down'`.
+- `tab`: Tab opens the next editable cell (`'cell'`, by default) or leaves the grid (`'grid'`).
+- `calendar`: the calendar button and Alt+ArrowDown on day and date-time fields. By default `true`; `false` types only
+  and loads nothing.
+- `loadCalendar`: where the calendar's code comes from, for an app that serves its own files.
+- `dateMessages`: the calendar's words by language, over its own English, French and Arabic.
+- `list`: the list editor, `listEditor` from `@dzgrid/dom/editors-list`.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors';
+import { listEditor } from '@dzgrid/dom/editors-list';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+import '@dzgrid/theme/edit.css';
+
+type Gnome = { id: string; name: string; hat: string; painted: string; fishing: boolean };
+
+createGrid<Gnome>(document.getElementById('gnomes')!, {
+  rows: [{ id: 'g1', name: 'Barnaby', hat: 'red', painted: '2025-04-02', fishing: true }],
+  columns: [
+    { id: 'name', header: 'Name', editable: true },
+    { id: 'hat', header: 'Hat', type: 'enum', editable: true, enumOptions: [{ value: 'red', label: 'Red' }, { value: 'green', label: 'Green' }] },
+    { id: 'painted', header: 'Painted on', type: 'day', editable: true },
+    { id: 'fishing', header: 'Fishing', type: 'boolean', editable: true },
+  ],
+  getRowId: (g) => g.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text } },
+  features: [edit<Gnome>(), editors({ enterMoves: 'down', tab: 'cell', list: listEditor })],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Garden gnomes' }}
+  features={['edit']}
+  columns={[
+    { id: 'name', header: 'Name', flex: 1, minWidth: 140, editable: true },
+    { id: 'hat', header: 'Hat', type: 'enum', width: 110, editable: true, enumOptions: [{ value: 'red', label: 'Red' }, { value: 'green', label: 'Green' }, { value: 'blue', label: 'Blue' }] },
+    { id: 'painted', header: 'Painted on', type: 'day', width: 140, editable: true },
+    { id: 'fishing', header: 'Fishing', type: 'boolean', width: 100, editable: true },
+  ]}
+  rows={[
+    { id: 'g1', name: 'Barnaby', hat: 'red', painted: '2025-04-02', fishing: true },
+    { id: 'g2', name: 'Pip', hat: 'green', painted: '2024-09-14', fishing: false },
+    { id: 'g3', name: 'Old Thistle', hat: 'blue', painted: '2023-06-30', fishing: true },
+  ]}
+  caption="Pick a hat in the list, a day in the calendar, toggle Fishing with Space."
+/>
+
+## See also
+
+- The [`edit`](../edit/) feature: saving, undo and redo.
+- The [`listEditor`](../list-editor/): the list field.
+- [Editing](../../guides/editing/#your-own-editor): your own editor in the guide.

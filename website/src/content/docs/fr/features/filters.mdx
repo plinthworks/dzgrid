@@ -1,0 +1,125 @@
+---
+title: "filters"
+description: "Les filtres de colonne : un bouton et une fenêtre dans chaque titre, et une rangée de champs facultative."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Ajoute les commandes de filtre : un bouton et une fenêtre sur chaque titre filtrable, et une rangée flottante facultative.
+
+<FeatureFacts name="filters" />
+
+## Ce qu’elle fait
+
+`filters()` met un bouton de filtre dans chaque titre filtrable ; Alt+↓ sur le titre l’ouvre aussi. La fenêtre
+contient le filtre de la colonne : un opérateur et une valeur pour le texte et les nombres, Tous / Oui / Non pour une
+colonne oui/non, une ou deux dates pour une colonne de jours ou d’instants, une liste de valeurs à cocher pour une
+colonne avec `filter: { kind: 'set' }`. Une colonne filtrée porte une marque dans son titre, et la grille dit le
+nouveau nombre de lignes. Chaque colonne dit ce qu’elle permet avec son option
+[`filter`](../../column-options/filter/) (`filter: false` pour aucun filtre).
+
+`floating: true` ajoute une rangée de petits champs de filtre sous les titres : les colonnes de texte et de nombres ont
+une case qui filtre pendant la frappe ; les autres un résumé qui ouvre la fenêtre.
+
+**Deux entrées, une même fonction.** `@dzgrid/dom/filters` a toutes les sortes : ses formulaires de jours et
+d’instants utilisent un calendrier chargé à la demande, qui demande `@tzslot/core` et `@tzslot/dom` installés.
+`@dzgrid/dom/filters-base` est le même `filters()` sans le calendrier : texte, nombre, oui/non et liste de valeurs
+seulement. Là, une colonne de jours ou d’instants n’a **aucun filtre** ni bouton, et un avertissement `missing-feature` nomme
+`@dzgrid/dom/filters` — sauf si `loadDates` ramène les formulaires de dates.
+
+Ses textes sont obligatoires : sans eux la grille n’est pas créée, et une erreur nomme chaque clé manquante. Un
+`maxConditions`, un `rowHeight` ou un `dateCalendar` qu’elle ne peut pas prendre est écarté avec un avertissement
+`invalid-setting`.
+
+## Options
+
+- `floating` : la rangée de champs de filtre sous les titres, pour chaque colonne filtrable (le `filter.floating`
+  d’une colonne l’emporte). Désactivée par défaut.
+- `debounceMs` : la pause avant qu’un filtre tapé s’applique : 150 ms dans le navigateur, 300 ms sur un serveur par
+  défaut. Le `filter.debounceMs` d’une colonne l’emporte.
+- `popup` : le bouton de filtre du titre et la fenêtre ; `false` pour aucun des deux. Activé par défaut.
+- `apply` : `'live'` (par défaut) applique les champs de la fenêtre dès qu’ils changent ; `'button'` seulement à
+  Appliquer ou Entrée, et fermer sans Appliquer abandonne le brouillon. La rangée flottante reste immédiate.
+- `maxConditions` : le nombre de conditions qu’offre une fenêtre, de 1 à 5 (1 par défaut) ; à partir de 2,
+  « Ajouter une condition » et un lien ET / OU. Le `filter.maxConditions` d’une colonne l’emporte.
+- `matchCase` : une case « Respecter la casse » sur chaque condition de texte (désactivée par défaut). Le
+  `filter.matchCase` d’une colonne l’emporte.
+- `rowHeight` : la hauteur de la rangée flottante en px pour un texte de 16 px, de 24 à 1 000, agrandie avec le
+  texte. Absente ou fausse : la hauteur des lignes.
+- `busyFlash` : un court état « occupé » après chaque changement de filtre, en millisecondes (désactivé par défaut) :
+  `aria-busy` sur la grille et la roue du thème sur les lignes. Rien ne l’attend.
+- `dateCalendar` : le calendrier des périodes : `{ months: 2 }` pour deux mois (1 par défaut), `{ presets: [] }` pour
+  aucun raccourci, `{ presets: ['today', 'last7Days'] }` pour ceux-là, dans cet ordre.
+- `dateZone` : le formulaire d’instant dit son fuseau horaire ; `false` pour une application à un seul fuseau. Activé
+  par défaut.
+- `dateMessages` : les mots du calendrier pour une langue autre que l’anglais, le français et l’arabe, ou par-dessus :
+  `{ es: { … } }`.
+- `loadDates` : avancé. D’où viennent les formulaires de dates, à la place du chargement propre à la grille. Avec
+  `@dzgrid/dom/filters-base`, il les ramène. Un chargement raté montre l’erreur et Réessayer.
+- `loadSet` : avancé. D’où vient le code de la liste de valeurs, comme `loadDates`.
+
+Toutes sont lues à la création de la grille ; seule la rangée flottante peut changer ensuite, avec `floating.set(on)`
+sur la fonction.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { filters } from '@dzgrid/dom/filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+
+type Seed = { id: string; name: string; kind: string; packets: number; sown: string };
+
+const columns: ColumnOrGroup<Seed>[] = [
+  { id: 'name', header: 'Graine' },
+  { id: 'kind', header: 'Type', filter: { kind: 'set' } },
+  { id: 'packets', header: 'Sachets', type: 'number', filter: { maxConditions: 2 } },
+  { id: 'sown', header: 'Semé le', type: 'day' },
+];
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text } };
+
+const seedFilters = filters({ floating: true, apply: 'button', debounceMs: 200 });
+createGrid<Seed>(document.getElementById('seeds')!, {
+  rows: [{ id: 's1', name: 'Basilic', kind: 'Aromatique', packets: 40, sown: '2026-03-14' }],
+  columns,
+  getRowId: (s) => s.id,
+  messages,
+  features: [seedFilters],
+});
+
+seedFilters.floating.set(false);   // cache la rangée flottante
+```
+
+## Démo
+
+<LiveDemo
+  height={380}
+  settings={{ label: 'Graines' }}
+  features={[['filters', { floating: true }]]}
+  columns={[
+    { id: 'name', header: 'Graine', flex: 1, minWidth: 160 },
+    { id: 'kind', header: 'Type', width: 150, filter: { kind: 'set' } },
+    { id: 'packets', header: 'Sachets', type: 'number', width: 120 },
+    { id: 'sown', header: 'Semé le', type: 'day', width: 150 },
+  ]}
+  rows={[
+    { id: 's1', name: 'Basilic', kind: 'Aromatique', packets: 40, sown: '2026-03-14' },
+    { id: 's2', name: 'Souci', kind: 'Fleur', packets: 12, sown: '2026-04-02' },
+    { id: 's3', name: 'Carotte', kind: 'Légume', packets: 55, sown: '2026-03-28' },
+    { id: 's4', name: 'Thym', kind: 'Aromatique', packets: 18, sown: '2026-02-20' },
+    { id: 's5', name: 'Tournesol', kind: 'Fleur', packets: 30, sown: '2026-04-15' },
+    { id: 's6', name: 'Potiron', kind: 'Légume', packets: 9, sown: '2026-05-01' },
+    { id: 's7', name: 'Ciboulette', kind: 'Aromatique', packets: 22, sown: '2026-03-05' },
+    { id: 's8', name: 'Coquelicot', kind: 'Fleur', packets: 16, sown: '2026-04-21' },
+  ]}
+  caption="Tapez dans les petits champs sous les titres, ou ouvrez l’entonnoir d’un titre."
+/>
+
+## Voir aussi
+
+- L’option de colonne [`filter`](../../column-options/filter/) : sorte, opérateurs, champ flottant.
+- [`filtersPanel()`](../filters-panel/) : tous les filtres dans un volet.
+- [Filtres de colonne](../../guides/sort-filter-search/#filtres-de-colonne) dans le guide.

@@ -1,0 +1,98 @@
+---
+title: "range"
+description: "Des blocs de cellules : prendre un rectangle au clavier ou à la souris, le copier, y coller."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Laisse l’utilisateur prendre un bloc de cellules, et le copier, le couper, y coller ou le vider.
+
+<FeatureFacts name="range" />
+
+## Ce qu’elle fait
+
+`range()` ajoute les blocs de cellules. Maj+flèches agrandissent un bloc depuis la cellule active, un glisser de la
+souris ou du stylet en trace un, Maj+clic l’étire, Ctrl+A prend toutes les cellules affichées et Maj+Espace la ligne
+active. Le bloc est teinté, et sa taille est dite au lecteur d’écran après une pause. Il est abandonné, et c’est dit
+une fois, quand le tri ou les lignes affichées changent.
+
+Ctrl+C copie le bloc en texte séparé par des tabulations, que lisent les tableurs (nombres dans la forme de la locale,
+débuts de formule protégés), avec un tableau HTML à côté. Ctrl+X coupe, Ctrl+V colle dans les cellules modifiables,
+Suppr les vide : ces trois-là demandent [`edit`](../edit/), et un collage ou une coupe fait une seule demande
+d’enregistrement et une seule annulation. L’événement `rangeCopied` dit combien de cellules ont été copiées.
+
+`api(grid)` donne le bloc à votre code : `get()`, `set(range)`, `clear()`, `box()`, `copy()`, `cut()`,
+`paste(text)`, `erase()`. Un bloc sur des lignes pas encore chargées (celles d’un serveur) est refusé avec un
+avertissement `rows-not-loaded` ; un `maxPaste` qui n’est pas un nombre entier est remplacé par la valeur par défaut,
+avec un avertissement `invalid-setting`.
+
+## Options
+
+- `drag` : appuyer et glisser avec la souris ou un stylet fait un bloc. Par défaut `true` ; `false` laisse les
+  touches, Maj+clic et l’API.
+- `canCopy(ask)` : peut refuser une copie ou une coupe. Elle voit les identifiants des colonnes du bloc et ses
+  comptes, jamais les valeurs ; `false` ou une exception refuse.
+- `guard` : la protection des formules à la copie, pour qu’un tableur n’exécute pas un texte copié. Par défaut
+  `true`.
+- `raw` : les nombres copiés avec un point, quelle que soit la locale. Par défaut `false`.
+- `maxPaste` : au-delà de ce nombre de cellules, un collage n’écrit rien. Par défaut 100 000.
+- `clearOnOutside` : appuyer hors de la grille efface le bloc, et le dit — pas dans un élément marqué
+  `data-dzg-keep-range`, ni sur la barre de défilement de la page. Par défaut `true` ; avec `false` le bloc reste
+  (Échap l’efface).
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { range } from '@dzgrid/dom/range';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_RANGE } from '@dzgrid/dom/locales/fr-range';
+
+type Book = { id: string; title: string; pages: number };
+
+const blocks = range({ maxPaste: 5000, canCopy: (ask) => ask.cells <= 1000 });
+
+const grid = createGrid<Book>(document.getElementById('books')!, {
+  rows: [{ id: 'b1', title: 'La route du sel', pages: 212 }, { id: 'b2', title: 'Des hiboux à midi', pages: 96 }],
+  columns: [
+    { id: 'title', header: 'Titre' },
+    { id: 'pages', header: 'Pages', type: 'number' },
+  ],
+  getRowId: (b) => b.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_RANGE.text } },
+  features: [blocks],
+  onEvent: (e) => {
+    if (e.type === 'rangeCopied') console.log(e.cells);
+  },
+});
+
+console.log(blocks.api(grid)?.copy({ headers: true })?.text);
+```
+
+## Démo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Livres' }}
+  features={['range']}
+  columns={[
+    { id: 'title', header: 'Titre', flex: 1 },
+    { id: 'pages', header: 'Pages', type: 'number', width: 110 },
+    { id: 'copies', header: 'Exemplaires', type: 'number', width: 110 },
+  ]}
+  rows={[
+    { id: 'b1', title: 'La route du sel', pages: 212, copies: 4 },
+    { id: 'b2', title: 'Des hiboux à midi', pages: 96, copies: 11 },
+    { id: 'b3', title: 'Carte des petites rivières', pages: 340, copies: 2 },
+    { id: 'b4', title: 'Le gardien des lanternes', pages: 158, copies: 7 },
+    { id: 'b5', title: 'Sept sortes de pluie', pages: 64, copies: 9 },
+  ]}
+  caption="Maj+flèches ou un glisser prennent un bloc ; Ctrl+C le copie ; appuyer hors de la grille l’efface."
+/>
+
+## Voir aussi
+
+- [`fill`](../fill/) : la poignée au coin du bloc, et Ctrl+D / Ctrl+R.
+- [`statusBar`](../status-bar/) : le nombre, la somme et la moyenne du bloc sous les lignes.
+- [Sélection et plages](../../guides/selection-ranges/#blocs-de-cellules-et-presse-papiers) : les lignes et les blocs, côte à côte.

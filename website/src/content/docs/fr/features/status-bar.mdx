@@ -1,0 +1,69 @@
+---
+title: "statusBar"
+description: "Une bande sous les lignes avec le nombre, la somme, la moyenne, le min et le max du bloc, et les comptes de lignes si vous le demandez."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Montre les chiffres du bloc de cellules, et les comptes de lignes, dans une bande sous les lignes.
+
+<FeatureFacts name="statusBar" />
+
+## Ce qu’elle fait
+
+`statusBar()` ajoute une bande sous les lignes. Tant qu’un bloc de deux cellules ou plus est pris, elle montre à la
+fin : le nombre de cellules non vides, puis la somme, la moyenne, le min et le max des nombres de ses colonnes
+`type: 'number'` (à partir de deux nombres ; une colonne de texte qui contient « 12 » est comptée, jamais additionnée).
+Chaque chiffre est écrit dans le format de sa colonne, avec les chiffres de la grille. Sur une grille paginée, elle
+partage la bande du pied de [`pagination`](../pagination/).
+
+Les chiffres du bloc demandent [`range`](../range/) : sans lui ils restent vides, avec un avertissement
+`missing-feature` (détail `range`). Au-delà de `maxCells`, un bloc qui bouge montre « … » jusqu’à ce qu’il s’arrête.
+
+Un lecteur d’écran n’entend rien de lui-même : la bande est du texte simple, nommée « Barre d’état ».
+`api(grid).announce()` la dit en une phrase, tout comme « Lire les totaux » dans le
+[`contextMenu`](../context-menu/) quand vous lui donnez `use: { status }`. `api(grid).stats()` rend les chiffres du
+moment.
+
+## Options
+
+- `items` : les éléments, dans l’ordre — `status.rows`, `status.filtered`, `status.selected`, `status.count`,
+  `status.sum`, `status.avg`, `status.min`, `status.max`, ou une partie `status` à vous. Par défaut les cinq chiffres
+  du bloc. Un nom qui n’est pas un élément est ignoré, avec un problème `unknown-part`.
+- `maxCells` : au-delà de ce nombre de cellules, un bloc qui bouge montre « … » jusqu’à ce qu’il s’arrête (150 ms
+  après une touche, ou le pointeur relâché). Par défaut 200 000 ; une valeur qui n’est pas un entier à partir de 1
+  y revient, avec un avertissement `invalid-setting`.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { range } from '@dzgrid/dom/range';
+import { statusBar } from '@dzgrid/dom/statusbar';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_RANGE } from '@dzgrid/dom/locales/fr-range';
+import { FR_STATUS } from '@dzgrid/dom/locales/fr-status';
+
+type River = { id: string; river: string; km: number };
+
+const bar = statusBar({ items: ['status.rows', 'status.count', 'status.sum', 'status.avg'] });
+
+const grid = createGrid<River>(document.getElementById('rivers')!, {
+  rows: [{ id: 'r1', river: 'Saulemare', km: 84 }, { id: 'r2', river: 'Rupierre', km: 31.5 }],
+  columns: [
+    { id: 'river', header: 'Rivière' },
+    { id: 'km', header: 'Longueur (km)', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_RANGE.text, ...FR_STATUS.text } },
+  features: [range(), bar],
+});
+
+console.log(bar.api(grid)?.stats());
+```
+
+## Voir aussi
+
+- [`range`](../range/) : le bloc d’où viennent les chiffres.
+- [`pagination`](../pagination/) : le pagineur dans la même bande.
+- [`contextMenu`](../context-menu/) : « Lire les totaux » pour un lecteur d’écran.

@@ -1,0 +1,56 @@
+---
+title: "printOnMenu"
+description: "The browser's own print command (Ctrl+P, the File menu) prints the whole grid as a table."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Makes the browser's own print command print the grid as print() does; called with the grid, not a feature.
+
+<FeatureFacts name="printOnMenu" />
+
+## What it does
+
+`printOnMenu(grid, options)` is not given in `features`: you call it once with the grid. From then on, when the user
+prints with the browser's own command (Ctrl+P, the File menu), the grid builds the same table as
+[`print`](../print/) at once: every row on screen, not only those scrolled into view, headers on each page. Without
+it, that command prints only what the page shows.
+
+If a print table is already in the page (one `print` is building), that one prints. The table is removed after the
+print. It lasts as long as the grid: destroying the grid ends it. It uses the texts of `print` and its look in
+`print.css`.
+
+## Options
+
+- `maxRows`: the most rows printed. Default 5 000; beyond, the first ones, a line saying so, and `print-too-many`.
+- `title`: the table's caption. Default: the grid's accessible name.
+- `header`: `false` leaves the header rows out. They are printed by default.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { printOnMenu } from '@dzgrid/dom/print-menu';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_PRINT } from '@dzgrid/dom/locales/en-print';
+import '@dzgrid/theme/print.css';
+
+type OldMap = { id: string; map: string; year: number };
+
+const grid = createGrid<OldMap>(document.getElementById('maps')!, {
+  rows: [{ id: 'm1', map: 'The marsh roads', year: 1820 }, { id: 'm2', map: 'Coast of the nine coves', year: 1874 }],
+  columns: [
+    { id: 'map', header: 'Map' },
+    { id: 'year', header: 'Year', type: 'number' },
+  ],
+  getRowId: (m) => m.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_PRINT.text } },
+});
+
+printOnMenu(grid, { title: 'Old maps' });
+```
+
+## See also
+
+- [`print`](../print/): printing from your own button.
+- [Export and print](../../guides/export-print/#print): the two together.

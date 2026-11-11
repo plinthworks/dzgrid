@@ -1,0 +1,57 @@
+---
+title: "printOnMenu"
+description: "La commande d’impression du navigateur (Ctrl+P, le menu Fichier) imprime toute la grille en tableau."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Fait imprimer à la commande du navigateur la grille comme le fait print() ; appelée avec la grille, pas une fonctionnalité.
+
+<FeatureFacts name="printOnMenu" />
+
+## Ce qu’elle fait
+
+`printOnMenu(grid, options)` ne se donne pas dans `features` : vous l’appelez une fois avec la grille. Dès lors, quand
+l’utilisateur imprime avec la commande du navigateur (Ctrl+P, le menu Fichier), la grille construit aussitôt le même
+tableau que [`print`](../print/) : toutes les lignes de l’écran, pas seulement celles amenées à la vue, en-têtes sur
+chaque page. Sans elle, cette commande n’imprime que ce que montre la page.
+
+Si un tableau d’impression est déjà dans la page (celui que `print` construit), c’est lui qui s’imprime. Le tableau
+est retiré après l’impression. Elle dure autant que la grille : détruire la grille y met fin. Elle utilise les textes
+de `print` et son apparence dans `print.css`.
+
+## Options
+
+- `maxRows` : le plus de lignes imprimées. Par défaut 5 000 ; au-delà, les premières, une ligne qui le dit, et
+  `print-too-many`.
+- `title` : la légende du tableau. Par défaut : le nom accessible de la grille.
+- `header` : `false` laisse de côté les lignes d’en-tête. Elles sont imprimées par défaut.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { printOnMenu } from '@dzgrid/dom/print-menu';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_PRINT } from '@dzgrid/dom/locales/fr-print';
+import '@dzgrid/theme/print.css';
+
+type OldMap = { id: string; map: string; year: number };
+
+const grid = createGrid<OldMap>(document.getElementById('maps')!, {
+  rows: [{ id: 'm1', map: 'Les chemins du marais', year: 1820 }, { id: 'm2', map: 'Côte des neuf anses', year: 1874 }],
+  columns: [
+    { id: 'map', header: 'Carte' },
+    { id: 'year', header: 'Année', type: 'number' },
+  ],
+  getRowId: (m) => m.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_PRINT.text } },
+});
+
+printOnMenu(grid, { title: 'Cartes anciennes' });
+```
+
+## Voir aussi
+
+- [`print`](../print/) : imprimer depuis votre propre bouton.
+- [Export et impression](../../guides/export-print/#imprimer) : les deux ensemble.

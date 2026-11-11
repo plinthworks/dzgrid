@@ -1,0 +1,97 @@
+---
+title: "rowDrag"
+description: "Déplacer des lignes par une poignée, au clavier ou par le menu ; la grille dit où, vos données décident."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Laisse l’utilisateur déplacer des lignes : une poignée à faire glisser, des touches, des entrées de menu.
+
+<FeatureFacts name="rowDrag" />
+
+## Ce qu’elle fait
+
+`rowDrag()` met une poignée au début d’une cellule de chaque ligne. Faites-la glisser à la souris, au stylet ou au
+doigt ; ou appuyez sur Alt+Maj+↑ / ↓ (Option+Maj sur Mac), Alt+Maj+Début / Fin, et dans un arbre Alt+Maj+→ / ← pour
+descendre ou remonter d’un niveau. `menuItems(c)` donne Monter, Descendre, Tout en haut, Tout en bas (et les niveaux
+dans un arbre) au [`contextMenu`](../context-menu/). La poignée d’une ligne sélectionnée entraîne toutes les lignes
+sélectionnées affichées.
+
+La grille envoie un événement `rowMove` qui dit où vont les lignes ; vos données décident. `moveRows` de
+`@dzgrid/core/row-drag` l’applique à votre tableau. Tant que les lignes sont triées ou groupées, un déplacement est
+refusé et la grille dit pourquoi. Avec une source serveur la grille envoie seulement l’événement : `apply: true` y
+est ignoré, avec un avertissement `invalid-setting`.
+
+`api(grid)` donne `move(keys, target)`, `step(key, by)` et `dropTargets.add(element, target)`, qui fait de n’importe
+quel élément à vous un endroit où déposer des lignes.
+
+## Options
+
+- `column` : la colonne dont les cellules montrent la poignée. Par défaut : la première colonne visible ; masquée, pas
+  de poignée.
+- `apply` : la grille réordonne elle-même ses lignes (lignes à plat tenues dans le navigateur seulement). Par défaut
+  `false` : l’événement seul.
+- `whenSorted` : lignes triées ou groupées — `'refuse'` (par défaut), ou `'allow'` : l’événement est envoyé et votre
+  application décide ; la grille ne l’applique jamais.
+- `canDrag(row)` : une ligne qui ne peut pas bouger. Une exception vaut non, signalée une fois par geste.
+- `canDrop(info)` : un endroit où un déplacement ne peut pas aller. Demandée au plus une fois par image pendant un
+  glisser ; une exception vaut non.
+- `maxRows` : le plus de lignes qu’un geste déplace. Par défaut 1 000 ; au-delà c’est refusé, et dit.
+- `drag` : `false` retire la poignée et le glisser au pointeur ; les touches, le menu et l’API restent. Par défaut
+  `true`.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { rowDrag } from '@dzgrid/dom/row-drag';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_ROW_DRAG } from '@dzgrid/dom/locales/fr-row-drag';
+
+type Tool = { id: string; name: string; hung: boolean };
+
+createGrid<Tool>(document.getElementById('tools')!, {
+  rows: [
+    { id: 't1', name: 'Égoïne', hung: false },
+    { id: 't2', name: 'Niveau à bulle', hung: true },
+    { id: 't3', name: 'Maillet', hung: false },
+  ],
+  columns: [
+    { id: 'name', header: 'Outil' },
+    { id: 'hung', header: 'Au mur', type: 'boolean' },
+  ],
+  getRowId: (t) => t.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_ROW_DRAG.text } },
+  features: [rowDrag<Tool>({ column: 'name', apply: true, canDrag: (t) => !t.hung })],
+  onEvent: (e) => {
+    if (e.type === 'rowMove') console.log(e.applied);
+  },
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Outils' }}
+  features={[['rowDrag', { column: 'name', apply: true }]]}
+  columns={[
+    { id: 'name', header: 'Outil', flex: 1 },
+    { id: 'drawer', header: 'Tiroir', type: 'number', width: 120 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Égoïne', drawer: 1 },
+    { id: 't2', name: 'Niveau à bulle', drawer: 2 },
+    { id: 't3', name: 'Maillet', drawer: 2 },
+    { id: 't4', name: 'Pointe à tracer', drawer: 3 },
+    { id: 't5', name: 'Wastringue', drawer: 4 },
+  ]}
+  caption="Faites glisser un outil par sa poignée, ou donnez-lui le focus et appuyez sur Alt+Maj+↓."
+/>
+
+## Voir aussi
+
+- [Déplacer des lignes](../../guides/row-moves/) : appliquer un déplacement à vos données, aussi dans un arbre.
+- [`contextMenu`](../context-menu/) : là où va `menuItems(c)`.
+- [`tree`](../tree/) : changer de niveau.

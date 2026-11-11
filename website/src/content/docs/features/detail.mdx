@@ -1,0 +1,93 @@
+---
+title: "detail"
+description: "A panel under a row, opened by a chevron: any content of yours, or a whole grid."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Opens a panel under each master row, as wide as the grid.
+
+<FeatureFacts name="detail" />
+
+## What it does
+
+`detail({ part })` puts a chevron in the first column of each master row. A click on it, or → on that column (← to
+close, mirrored in Arabic), opens a panel under the row; the rows below move down. The panel shows the `part`: a
+`'detail'` part of your own (`definePart('detail', …)`), or a whole grid made by [`nestedGrid()`](../nested-grid/). It
+is mounted when first shown and removed when its row closes or scrolls away. Each opening by the user is said.
+
+The panel is one stop for the keys: ↓ from the master reaches it, Enter or F2 goes inside, Escape comes back. Its name
+is « Details of » its master. It is never selected, edited, copied or exported. A height change inside it never moves
+the rows above it.
+
+Master/detail refuses a tree and the `spans()` feature beside it (`unsupported-combination`): the grid shows the
+details without the other. Its texts are required: an error names any missing key. A height that is not a number of 0
+or more, or a function that throws, gives 240 px, without a warning.
+
+## Options
+
+- `part` (required): what a panel shows: a `'detail'` part (`nestedGrid(…)`, `definePart('detail', …)`), or its name
+  in the [`parts`](../../settings/parts/) setting.
+- `height`: a panel's height: a number (240 by default), a function of the master row, or `'auto'` (measured; 240
+  until then). A nested grid needs a number or a function.
+- `isMaster`: which rows have a detail, asked once per row and version of the rows; a throw is no. Every row by
+  default. A row without one keeps an empty chevron place, so the texts line up.
+- `initial`: what is open at the first load: `'none'` (the default) or `'all'`.
+- `column`: the column whose cells carry the chevron; the first visible one by default.
+- `nested`: this grid's depth, 1 on the page; by default one more than the grids around it.
+
+Read when the grid is made.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { detail, nestedGrid } from '@dzgrid/dom/detail';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_DETAIL } from '@dzgrid/dom/locales/en-detail';
+
+type Pick = { id: string; day: string; crates: number };
+type Orchard = { id: string; name: string; picks: Pick[] };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_DETAIL.text } };
+const picks = nestedGrid<Pick>({
+  settings: (c) => ({
+    rows: (c.row as Orchard).picks,
+    columns: [{ id: 'day', header: 'Day', type: 'day' }, { id: 'crates', header: 'Crates', type: 'number' }],
+    getRowId: (p) => p.id,
+    messages,
+  }),
+});
+
+createGrid<Orchard>(document.getElementById('orchards')!, {
+  rows: [{ id: 'o1', name: 'North slope', picks: [{ id: 'p1', day: '2026-09-02', crates: 41 }] }],
+  columns: [{ id: 'name', header: 'Orchard' }],
+  getRowId: (o) => o.id,
+  messages,
+  features: [detail<Orchard>({ part: picks, height: 200, isMaster: (o) => o.picks.length > 0 })],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={360}
+  settings={{ label: 'Orchards' }}
+  features={[['detail', { field: 'picks', height: 170, columns: [{ id: 'day', header: 'Day', type: 'day', flex: 1 }, { id: 'crates', header: 'Crates', type: 'number', width: 110 }] }]]}
+  columns={[
+    { id: 'name', header: 'Orchard', flex: 1 },
+    { id: 'trees', header: 'Rows of trees', type: 'number', width: 150 },
+  ]}
+  rows={[
+    { id: 'o1', name: 'North slope', trees: 12, picks: [{ id: 'p1', day: '2026-09-02', crates: 41 }, { id: 'p2', day: '2026-09-09', crates: 36 }] },
+    { id: 'o2', name: 'Old mill', trees: 7, picks: [{ id: 'p3', day: '2026-09-05', crates: 17 }] },
+    { id: 'o3', name: 'River bend', trees: 9, picks: [] },
+  ]}
+  caption="The chevron on an orchard opens its picking days: a grid of its own inside the row."
+/>
+
+## See also
+
+- [`nestedGrid()`](../nested-grid/): a whole grid in each panel.
+- [Master and detail](../../guides/tree/#master-and-detail) in the guide.

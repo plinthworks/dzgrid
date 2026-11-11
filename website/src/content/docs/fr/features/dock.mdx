@@ -1,0 +1,104 @@
+---
+title: "dock"
+description: "Des zones à côté et sous les lignes pour le choix des colonnes, le volet des filtres et vos propres volets."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Donne aux volets une place à côté ou sous les lignes, avec onglets, redimensionnement et repli.
+
+<FeatureFacts name="dock" />
+
+## Ce qu’elle fait
+
+`dock()` ajoute trois zones dans la boîte de la grille : `start` et `end` à côté des lignes (côtés logiques : en
+miroir en arabe) et `bottom` sous elles. Le [`columnsChooser`](../columns-chooser/) (volet `columns`), le
+[`filtersPanel`](../filters-panel/) (volet `filters`) et vos propres volets s’y tiennent. Deux volets dans une même
+zone deviennent des onglets. Chaque zone se redimensionne par son bord, au pointeur ou avec les flèches, se replie en
+bandeau, se ferme, ou passe dans une autre zone par son bouton « Placer ».
+
+`api(grid)` donne `show(id, area)`, `hide(id)`, `move(id, area)`, `collapse(area)`, `resize(area, px)`, `layout()` et
+`setLayout(layout)`. Avec [`gridState`](../grid-state/), la place de chaque volet est gardée avec le reste de l’état.
+
+Une fenêtre flottante (zone `float`) n’est pas encore là : dans `open` elle est refusée avec un avertissement
+`invalid-setting`, et dans une disposition restaurée ignorée avec un avertissement `state-field`.
+
+## Options
+
+- `open` : les volets montrés au départ, et où (`{ columns: 'end' }`), par-dessus la place par défaut de chacun.
+- `panels` : vos propres volets — `id`, `title` (un texte, ou une fonction redemandée à chaque dessin), `area` (`end`
+  par défaut ; caché là jusqu’à ce qu’on le montre, sauf si `open` le nomme) et `mount(host)`, qui dessine le contenu
+  une fois et peut rendre une fonction de nettoyage.
+- `sizes` : les limites de la taille d’une zone en px CSS, `{ min, max }` (160 et 800 par défaut) ; les lignes gardent toujours 160 px.
+- `onChange(layout)` : après chaque changement fait par l’utilisateur ou l’API, jamais après une restauration : la
+  disposition telle que l’état la garde.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { dock } from '@dzgrid/dom/dock';
+import { columnsChooser } from '@dzgrid/dom/columns-panel';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_DOCK } from '@dzgrid/dom/locales/fr-dock';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+
+type Tea = { id: string; tea: string; minutes: number };
+
+const panels = dock({
+  open: { columns: 'end' },
+  sizes: { min: 200, max: 480 },
+  panels: [{
+    id: 'notes',
+    title: 'Notes',
+    area: 'bottom',
+    mount(host) {
+      const p = host.ownerDocument.createElement('p');
+      p.textContent = 'Chauffez d’abord la théière.';
+      host.append(p);
+      return () => p.remove();
+    },
+  }],
+  onChange: (layout) => console.log(layout),
+});
+
+const grid = createGrid<Tea>(document.getElementById('teas')!, {
+  rows: [{ id: 'e1', tea: 'Pin fumé', minutes: 4 }],
+  columns: [
+    { id: 'tea', header: 'Thé' },
+    { id: 'minutes', header: 'Minutes', type: 'number' },
+  ],
+  getRowId: (t) => t.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_DOCK.text, ...FR_COLUMNS.text } },
+  features: [columnsChooser(), panels],
+});
+
+panels.api(grid)?.show('notes');
+```
+
+## Démo
+
+<LiveDemo
+  height={420}
+  settings={{ label: 'Thés' }}
+  features={['filters', 'chooser', 'filtersPanel', ['dock', { open: { columns: 'end', filters: 'end' } }]]}
+  columns={[
+    { id: 'tea', header: 'Thé', flex: 1, minWidth: 140 },
+    { id: 'minutes', header: 'Minutes', type: 'number', width: 110 },
+    { id: 'picked', header: 'Cueilli', type: 'day', width: 140, hidden: true },
+  ]}
+  rows={[
+    { id: 'e1', tea: 'Pin fumé', minutes: 4, picked: '2026-04-12' },
+    { id: 'e2', tea: 'Menthe des montagnes', minutes: 3, picked: '2026-05-02' },
+    { id: 'e3', tea: 'Orge grillée', minutes: 6, picked: '2025-10-20' },
+    { id: 'e4', tea: 'Fleur de tilleul', minutes: 5, picked: '2026-06-18' },
+  ]}
+  caption="Le choix des colonnes et les filtres partagent la zone de fin en onglets : faites glisser le bord de la zone pour la redimensionner."
+/>
+
+## Voir aussi
+
+- [Volets latéraux](../../guides/dock-panels/) : les deux volets et les vôtres, pas à pas.
+- [`columnsChooser`](../columns-chooser/) et [`filtersPanel`](../filters-panel/) : les volets fournis avec DzGrid.
+- [`gridState`](../grid-state/) : la disposition gardée avec l’état.

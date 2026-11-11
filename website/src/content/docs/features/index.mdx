@@ -1,0 +1,32 @@
+---
+title: "Features"
+description: "Every feature, from its own entry, one page each."
+sidebar:
+  order: 0
+---
+
+import FeatureList from '../../../components/FeatureList.astro';
+
+The grid alone shows, scrolls, sorts and selects rows. Everything else is a feature: imported from its own entry and
+given in `features`, so an application loads only what it uses. Most features need their texts, spread into
+the grid's `messages`, and some need a style sheet from `@dzgrid/theme`, loaded after `dzgrid.css`.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { pagination } from '@dzgrid/dom/pagination';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_PAGINATION } from '@dzgrid/dom/locales/en-pagination';
+
+type Row = { id: string; name: string };
+
+createGrid<Row>(document.getElementById('grid')!, {
+  rows: [{ id: 'r1', name: 'First' }],
+  columns: [{ id: 'name', header: 'Name' }],
+  getRowId: (r) => r.id,
+  pagination: { pageSize: 50 },
+  messages: { ...EN, text: { ...EN.text, ...EN_PAGINATION.text } },
+  features: [pagination()],
+});
+```
+
+<FeatureList />

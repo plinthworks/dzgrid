@@ -1,0 +1,69 @@
+---
+title: "slots"
+description: "Lets your parts draw the column titles, the overlay, the busy mark and the tooltip."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Lets your own parts draw the column header labels, the overlay, the busy mark and the tooltip.
+
+<FeatureFacts name="slots" />
+
+## What it does
+
+Cell parts work without any feature. `slots()` adds four more places a part may draw, in place of the grid's own:
+
+- a column header's label: the column's `ui.header`, else a part named `header.<type>` (`header.number`), else one
+  named `header` for every column;
+- the overlay (loading, empty, no match, error): a part named `overlay`;
+- the busy mark: a part named `busy`;
+- the tooltip: the column's `ui.tooltip`, else `tooltip.<type>`, else `tooltip`.
+
+The grid keeps the rest: the header's role, sort state and mark, the resize grip and the click that sorts; the
+overlay's place and its retry button; the tooltip's element, timing, Escape and placement. A header part gets the
+column, its `label` and its sort.
+
+A header, overlay, busy or tooltip part registered on a grid without this feature, or a column's `ui.header` or
+`ui.tooltip`, tells a `missing-feature` warning. A name no one registered for that slot tells `unknown-part`, and the
+grid's own drawing is used.
+
+## Example
+
+```ts
+import { createGrid, definePart } from '@dzgrid/dom';
+import { slots } from '@dzgrid/dom/slots';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Crate = { id: string; fruit: string; weight: number };
+
+// A header label with its unit in a lighter span.
+const withUnit = definePart('header', {
+  mount(host, c) {
+    const name = host.ownerDocument.createElement('span');
+    const unit = host.ownerDocument.createElement('small');
+    unit.textContent = ' kg';
+    host.append(name, unit);
+    const draw = (n: typeof c) => { name.textContent = n.label; };
+    draw(c);
+    return { update: draw, destroy: () => { name.remove(); unit.remove(); } };
+  },
+});
+
+createGrid<Crate>(document.getElementById('crates')!, {
+  rows: [{ id: 'c1', fruit: 'Pears', weight: 18.5 }],
+  columns: [
+    { id: 'fruit', header: 'Fruit' },
+    { id: 'weight', header: 'Weight', type: 'number', ui: { header: 'withUnit' } },
+  ],
+  getRowId: (c) => c.id,
+  messages: EN,
+  parts: { withUnit },
+  features: [slots()],
+});
+```
+
+## See also
+
+- The [`parts`](../../settings/parts/) setting and the [`ui`](../../column-options/ui/) column option.
+- The [`overlay`](../../settings/overlay/) and [`tooltips`](../../settings/tooltips/) settings.
+- [Columns](../../guides/columns/#classes-tooltips-custom-cells): custom cells in the guide.

@@ -1,0 +1,89 @@
+---
+title: "nestedGrid"
+description: "A ready detail part: a whole grid of its own inside each master’s panel."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Makes a grid inside each detail panel, from settings built for its master row.
+
+<FeatureFacts name="nestedGrid" />
+
+## What it does
+
+`nestedGrid({ settings })` is a part for [`detail()`](../detail/). For each panel shown it calls `settings(c)` with the
+panel's context (`c.row` is the master row) and makes a grid from the answer: its rows, columns, messages, label, its
+own features. That grid has its own keys, scroll, sort, filters and focus. Enter or F2 on the panel goes into it (its
+focused cell, else the first row in view); Escape on one of its cells comes back to the panel, one level only.
+
+When a panel goes (closed or scrolled away), its grid's sort, filters, quick search, open rows, focused cell and scroll
+are remembered, and given back when it comes again, for the last `keep` masters. A new master row or a new language
+updates the grid in place; only a changed fixed setting (such as `getRowId` or `features`) makes it again.
+
+A nested grid has no height of its own: give `detail()` a number or a function as `height`. Grids can nest inside
+nested grids; past three levels, the grid made tells `unsupported-combination` and still works.
+
+## Options
+
+- `settings` (required): the grid for a master, from the panel's context: its rows, columns, messages, label, its own
+  features.
+- `keep`: how many masters' grids are remembered, the least recently used forgotten first: 20 by default.
+- `onGrid`: called with each grid made, once it is mounted, to wire your own toolbar or events.
+- `env`: the grid's test seams, for tests only.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { detail, nestedGrid } from '@dzgrid/dom/detail';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_DETAIL } from '@dzgrid/dom/locales/en-detail';
+
+type Visit = { id: string; day: string; frogs: number };
+type Pond = { id: string; name: string; visits: Visit[] };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_DETAIL.text } };
+const visits = nestedGrid<Visit>({
+  settings: (c) => ({
+    rows: (c.row as Pond).visits,
+    columns: [{ id: 'day', header: 'Day', type: 'day' }, { id: 'frogs', header: 'Frogs', type: 'number' }],
+    getRowId: (v) => v.id,
+    label: `Visits of ${(c.row as Pond).name}`,
+    messages,
+  }),
+  keep: 50,
+  onGrid: (grid) => console.log(grid.kernel.query.sort),
+});
+
+createGrid<Pond>(document.getElementById('ponds')!, {
+  rows: [{ id: 'n1', name: 'Lily pond', visits: [{ id: 'v1', day: '2026-05-04', frogs: 12 }] }],
+  columns: [{ id: 'name', header: 'Pond' }],
+  getRowId: (p) => p.id,
+  messages,
+  features: [detail<Pond>({ part: visits, height: 180 })],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={360}
+  settings={{ label: 'Ponds' }}
+  features={[['detail', { field: 'visits', height: 170, columns: [{ id: 'day', header: 'Day', type: 'day', flex: 1 }, { id: 'frogs', header: 'Frogs', type: 'number', width: 130 }] }]]}
+  columns={[
+    { id: 'name', header: 'Pond', flex: 1 },
+    { id: 'depth', header: 'Depth (m)', type: 'number', width: 130 },
+  ]}
+  rows={[
+    { id: 'n1', name: 'Lily pond', depth: 1.2, visits: [{ id: 'v1', day: '2026-05-04', frogs: 12 }, { id: 'v2', day: '2026-05-18', frogs: 21 }, { id: 'v3', day: '2026-06-01', frogs: 9 }] },
+    { id: 'n2', name: 'Reed pool', depth: 0.6, visits: [{ id: 'v4', day: '2026-05-11', frogs: 4 }, { id: 'v5', day: '2026-05-25', frogs: 7 }] },
+    { id: 'n3', name: 'Stone basin', depth: 0.4, visits: [{ id: 'v6', day: '2026-06-08', frogs: 2 }] },
+  ]}
+  caption="Open a pond, sort its visits, close it and open it again: the sort is kept."
+/>
+
+## See also
+
+- [`detail()`](../detail/): the panels it fills.
+- [Master and detail](../../guides/tree/#master-and-detail) in the guide.

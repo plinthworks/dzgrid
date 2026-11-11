@@ -1,0 +1,78 @@
+---
+title: "listEditor"
+description: "The list field of the editors: pick a value among the column’s options, with the keyboard or a click."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+The field that picks a value from a list, given to the editors as `editors({ list: listEditor })`.
+
+<FeatureFacts name="listEditor" />
+
+## What it does
+
+`listEditor` is not a feature of its own: give it to [`editors()`](../editors/) as `editors({ list: listEditor })`. It
+has its own entry, `@dzgrid/dom/editors-list`, so a grid without list columns does not load it. It edits an `enum`
+column, or any column with `edit.options` (a list, or a function of the row), up to 500 options; the labels come from
+the column when the options give none.
+
+The cell shows a field and a list opens under it (above when there is no room), the current value active. Up / Down,
+Home / End and PageUp / PageDown (by 10) move in the list. Letters typed within half a second jump to the first option
+starting with them, case and accents ignored; the same letter again goes to the next one. Enter or Space picks and keeps
+the value, Tab picks and moves on, Escape gives up, a click on an option picks it. A value not among the options shows
+first in the list, marked, and can be kept only if it was the cell's own.
+
+Without it, a list column opens a plain text field read by the column's format, and the grid tells one
+`missing-feature` warning per column.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { listEditor } from '@dzgrid/dom/editors-list';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+import '@dzgrid/theme/edit.css';
+
+type Gnome = { id: string; name: string; hat: string; garden: string };
+
+createGrid<Gnome>(document.getElementById('gnomes')!, {
+  rows: [{ id: 'g1', name: 'Barnaby', hat: 'red', garden: 'Rose bed' }],
+  columns: [
+    { id: 'name', header: 'Name' },
+    { id: 'hat', header: 'Hat', type: 'enum', editable: true, enumOptions: [{ value: 'red', label: 'Red' }, { value: 'green', label: 'Green' }] },
+    { id: 'garden', header: 'Garden', editable: true, edit: { options: [{ value: 'Rose bed' }, { value: 'Pond' }, { value: 'Vegetable patch' }] } },
+  ],
+  getRowId: (g) => g.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text } },
+  features: [edit<Gnome>(), editors({ list: listEditor })],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Garden gnomes' }}
+  features={['edit']}
+  columns={[
+    { id: 'name', header: 'Name', flex: 1, minWidth: 140 },
+    { id: 'hat', header: 'Hat', type: 'enum', width: 130, editable: true, enumOptions: [{ value: 'red', label: 'Red' }, { value: 'green', label: 'Green' }, { value: 'blue', label: 'Blue' }, { value: 'gold', label: 'Gold' }] },
+  ]}
+  rows={[
+    { id: 'g1', name: 'Barnaby', hat: 'red' },
+    { id: 'g2', name: 'Pip', hat: 'green' },
+    { id: 'g3', name: 'Old Thistle', hat: 'blue' },
+  ]}
+  caption="Open a Hat cell with Enter, then type « g » or use the arrows."
+/>
+
+## See also
+
+- The [`editors`](../editors/) feature, which takes it.
+- The [`edit`](../../column-options/edit/) and [`enumOptions`](../../column-options/enum-options/) column options.
+- [Editing](../../guides/editing/#checks): lists in the guide.

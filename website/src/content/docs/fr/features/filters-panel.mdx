@@ -1,0 +1,97 @@
+---
+title: "filtersPanel"
+description: "Le filtre de chaque colonne dans un volet latéral, avec une recherche de colonne et Effacer tous les filtres."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Ajoute un volet latéral qui liste chaque colonne filtrable avec son filtre.
+
+<FeatureFacts name="filtersPanel" />
+
+## Ce qu’elle fait
+
+`filtersPanel()` met une bande étroite sur un côté de la grille avec un bouton « Filtres », qui montre combien de
+filtres sont actifs. Le bouton ouvre un volet à côté des lignes : les lignes prennent la place restante, rien n’est
+recouvert (sur un écran étroit, 30 rem ou moins, le volet ouvert couvre les lignes). De haut en bas : son titre et ×,
+« Effacer tous les filtres », une recherche sur les noms de colonnes, puis chaque colonne qui a un filtre, masquées
+comprises.
+
+Déplier une colonne montre le formulaire même de la fenêtre de filtre ; plusieurs peuvent être ouvertes à la fois. Un
+point marque chaque colonne filtrée. Les changements s’appliquent comme dans les fenêtres (`filters({ apply })`), et
+un filtre posé ailleurs s’affiche aussitôt. « Effacer tous les filtres » vide chaque filtre de colonne et la recherche
+rapide, et garde le tri. Sur le bouton d’une colonne, ↑ ↓ vont à la colonne précédente et suivante, Entrée ou Espace la
+déplie ; Échap dans la recherche la vide.
+
+Il lui faut [`filters()`](../filters/), de l’une ou l’autre entrée : sans elle rien n’est dessiné et un avertissement
+`missing-feature` est signalé. Ses textes sont obligatoires : une erreur nomme chaque clé manquante. Dans un
+[dock](../dock/), il devient le volet `filters` du dock, avec les mêmes options.
+
+## Options
+
+- `side` : le côté où il se tient, `'end'` (par défaut) ou `'start'` ; de droite à gauche, `end` est à gauche.
+- `open` : ouvert au démarrage de la grille ; fermé par défaut.
+- `button` : la bande avec le bouton « Filtres », activée par défaut. `false` : votre application ouvre le volet avec
+  `api(grid).open()`, `close()` ou `toggle()`.
+
+Lues à la création de la grille.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters-base';
+import { filtersPanel } from '@dzgrid/dom/filters-panel';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { FR_FILTERS_PANEL } from '@dzgrid/dom/locales/fr-filters-panel';
+import '@dzgrid/theme/filters-panel.css';
+
+type Tool = { id: string; name: string; shed: string; weight: number };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text, ...FR_FILTERS_PANEL.text } };
+const panel = filtersPanel({ side: 'end', button: true });
+
+const grid = createGrid<Tool>(document.getElementById('tools')!, {
+  rows: [{ id: 't1', name: 'Râteau', shed: 'Abri nord', weight: 1.4 }],
+  columns: [
+    { id: 'name', header: 'Outil' },
+    { id: 'shed', header: 'Abri', filter: { kind: 'set' } },
+    { id: 'weight', header: 'Poids (kg)', type: 'number' },
+  ],
+  getRowId: (t) => t.id,
+  messages,
+  features: [filters(), panel],
+});
+
+panel.api(grid)?.open('shed');   // le volet ouvert, le filtre Abri déplié
+```
+
+## Démo
+
+<LiveDemo
+  height={380}
+  settings={{ label: 'Outils' }}
+  features={['filters', 'filtersPanel']}
+  columns={[
+    { id: 'name', header: 'Outil', flex: 1, minWidth: 140 },
+    { id: 'shed', header: 'Abri', width: 140, filter: { kind: 'set' } },
+    { id: 'weight', header: 'Poids (kg)', type: 'number', width: 130 },
+  ]}
+  rows={[
+    { id: 't1', name: 'Râteau', shed: 'Abri nord', weight: 1.4 },
+    { id: 't2', name: 'Bêche', shed: 'Abri nord', weight: 2.1 },
+    { id: 't3', name: 'Binette', shed: 'Abri sud', weight: 1.2 },
+    { id: 't4', name: 'Cisailles', shed: 'Abri sud', weight: 0.9 },
+    { id: 't5', name: 'Transplantoir', shed: 'Abri nord', weight: 0.3 },
+    { id: 't6', name: 'Brouette', shed: 'Abri sud', weight: 14 },
+  ]}
+  caption="Le bouton « Filtres » à la fin de la grille ouvre le volet."
+/>
+
+## Voir aussi
+
+- [`filters()`](../filters/) : les filtres que le volet montre.
+- [`dock()`](../dock/) : le volet parmi d’autres volets latéraux.
+- [Le volet des filtres](../../guides/sort-filter-search/#le-volet-des-filtres) dans le guide.

@@ -3,6 +3,7 @@
  * One page per option (docs/website-plan.md, batch 3): the facts in `src/generated/options.json` are what
  * scripts/gen-options.mjs reads in the sources today; a page under `settings/` or `column-options/` is the option its
  * slug names (`row-height` → `rowHeight`) and shows that option's facts, in both languages, and every option has one;
+ * the same for `features/` and each feature function (`quick-search` → `quickSearch`);
  * every default the sources write as a `{token}` has its words in both languages.
  */
 import { describe, expect, it } from 'vitest';
@@ -14,7 +15,11 @@ import { generate, OUT } from '../../scripts/gen-options.mjs';
 import { FACTS } from '../src/i18n/facts';
 
 const DOCS = fileURLToPath(new URL('../src/content/docs', import.meta.url));
-const data = generate() as { settings: { name: string; default: { token?: string } | null }[]; columns: { name: string; default: { token?: string } | null }[] };
+const data = generate() as {
+  settings: { name: string; default: { token?: string } | null }[];
+  columns: { name: string; default: { token?: string } | null }[];
+  features: { name: string }[];
+};
 const kebab = (name: string) => name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 const pagesIn = (dir: string) => (existsSync(dir) ? readdirSync(dir).filter((f) => /\.mdx?$/.test(f) && !/^index\./.test(f)) : []);
 
@@ -49,4 +54,19 @@ describe('one page per option', () => {
       expect(missing).toEqual([]);
     });
   }
+
+  it('a feature page is the function its slug names, with its facts; every feature has its page, in both languages', () => {
+    const slugs = new Map(data.features.map((f) => [kebab(f.name), f.name]));
+    const wrong: string[] = [];
+    for (const d of ['features', 'fr/features']) {
+      for (const file of pagesIn(join(DOCS, d))) {
+        const name = slugs.get(file.replace(/\.mdx?$/, ''));
+        const text = readFileSync(join(DOCS, d, file), 'utf8');
+        if (!name) wrong.push(`${d}/${file}: no feature of that name`);
+        else if (!text.includes(`title: "${name}"`) || !text.includes(`<FeatureFacts name="${name}" />`)) wrong.push(`${d}/${file}: not titled ${name}, or no <FeatureFacts name="${name}" />`);
+      }
+      for (const [slug] of slugs) if (!existsSync(join(DOCS, d, `${slug}.mdx`))) wrong.push(`${d}/${slug}: missing`);
+    }
+    expect(wrong).toEqual([]);
+  });
 });

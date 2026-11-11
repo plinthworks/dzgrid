@@ -1,0 +1,96 @@
+---
+title: "edit"
+description: "Tient les modifications : enregistrement, refus, annuler et rétablir, et lignes hors d’ordre après une modification."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Tient chaque modification de la grille : la vérifie, l’enregistre par votre code, et peut l’annuler.
+
+<FeatureFacts name="edit" />
+
+## Ce qu’elle fait
+
+`edit()` tient les modifications : venues des champs d’[`editors()`](../editors/), d’un collage, d’une recopie, ou de
+votre code (`editFeature.api(grid).commit(…)`). Elle vérifie chaque valeur selon
+[`editable`](../../column-options/editable/), [`edit`](../../column-options/edit/) et
+[`validate`](../../column-options/validate/) de la colonne, puis la passe à `save`. Résolu : gardée. Rejeté : les
+cellules reviennent, et une erreur avec une `reason` en chaîne montre cette raison. Pendant un enregistrement, un trait
+court autour de la cellule et un lecteur d’écran entend « Enregistrement en cours ». La grille n’écrit jamais dans vos lignes :
+une valeur gardée s’affiche par-dessus la ligne jusqu’à ce que vos lignes la portent.
+
+Ctrl+Z annule et Ctrl+Y ou Ctrl+Maj+Z rétablit (Cmd sur Mac), sur les 100 derniers gestes, chacun repassant par `save` ;
+l’API a aussi `undo()` et `redo()`. Une ligne modifiée ne bouge ni ne disparaît d’elle-même : dans une liste triée ou
+filtrée, elle reste en place, grisée si elle ne passe plus le filtre, et une marque sur le titre remet la liste en ordre.
+
+Elle ne dessine aucun champ elle-même : donnez aussi [`editors()`](../editors/), ou seuls le collage, la recopie et le
+code modifient. Une option d’édition sur une colonne d’une grille sans aucune fonction qui modifie signale un
+avertissement `missing-feature`. Sans les textes `-edit`, la grille n’est pas créée : une erreur nomme les clés qui manquent.
+
+## Options
+
+- `save` : votre enregistrement, `(request, signal)`. Une demande par geste, avec ses `changes` et son `origin`. Sans
+  lui, une valeur gardée est enregistrée sur place tout de suite.
+- `savingBorder` : le trait qui court autour d’une cellule pendant l’enregistrement. Par défaut `true` ; `false` donne
+  une bordure fixe.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_EDIT } from '@dzgrid/dom/locales/fr-edit';
+import { FR_EDITORS } from '@dzgrid/dom/locales/fr-editors';
+import '@dzgrid/theme/edit.css';
+
+type Tool = { id: string; name: string; stock: number };
+
+const editing = edit<Tool>({
+  save: async (req, signal) => {
+    const body = req.changes.map((c) => ({ id: c.row.id, column: c.column, value: c.value }));
+    const answer = await fetch('/api/tools', { method: 'PATCH', body: JSON.stringify(body), signal: signal as AbortSignal });
+    if (!answer.ok) throw Object.assign(new Error('refused'), { reason: await answer.text() });
+  },
+});
+
+const grid = createGrid<Tool>(document.getElementById('tools')!, {
+  rows: [{ id: 't1', name: 'Bêche', stock: 12 }],
+  columns: [
+    { id: 'name', header: 'Outil', editable: true, edit: { required: true } },
+    { id: 'stock', header: 'En stock', type: 'number', editable: true, edit: { min: 0 } },
+  ],
+  getRowId: (t) => t.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_EDIT.text, ...FR_EDITORS.text } },
+  features: [editing, editors()],
+});
+
+document.getElementById('undo')!.addEventListener('click', () => editing.api(grid)?.undo());
+```
+
+## Démo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Nains de jardin' }}
+  features={['edit']}
+  columns={[
+    { id: 'name', header: 'Nom', flex: 1, minWidth: 140, editable: true, edit: { required: true, maxLength: 40 } },
+    { id: 'height', header: 'Taille (cm)', type: 'number', width: 130, editable: true, edit: { min: 5, max: 120 } },
+    { id: 'painted', header: 'Peint le', type: 'day', width: 140, editable: true },
+  ]}
+  rows={[
+    { id: 'g1', name: 'Barnabé', height: 31, painted: '2025-04-02' },
+    { id: 'g2', name: 'Pépin', height: 18, painted: '2024-09-14' },
+    { id: 'g3', name: 'Vieux Chardon', height: 46, painted: '2023-06-30' },
+  ]}
+  caption="Tapez sur un nom, ou essayez une taille de 300 (refusée : 120 au plus). Annuler et Rétablir au-dessus, ou Ctrl+Z et Ctrl+Y."
+/>
+
+## Voir aussi
+
+- La fonction [`editors`](../editors/) : les champs.
+- Les options de colonne [`editable`](../../column-options/editable/), [`edit`](../../column-options/edit/) et [`validate`](../../column-options/validate/).
+- [Édition](../../guides/editing/) : l’enregistrement dans le guide.

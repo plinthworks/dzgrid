@@ -10,6 +10,8 @@ import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+// @ts-expect-error a plain .mjs script
+import { FEATURES } from '../../scripts/gen-options.mjs';
 
 const SITE = fileURLToPath(new URL('..', import.meta.url));
 const DOCS = join(SITE, 'src/content/docs');
@@ -41,6 +43,7 @@ const WRITTEN = [
   'column-options/row-span', 'column-options/sortable', 'column-options/tooltip', 'column-options/total',
   'column-options/type', 'column-options/ui', 'column-options/validate', 'column-options/value',
   'column-options/width', 'column-options/wrap',
+  'features/index', ...FEATURES.map(([, name]: [string, string]) => `features/${name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`),
 ];
 /** The sidebar's sections: a page lives in one of them (or is the home page). */
 const SECTIONS = ['getting-started', 'guides', 'settings', 'column-options', 'features', 'api'];

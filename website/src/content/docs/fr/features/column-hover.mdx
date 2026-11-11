@@ -1,0 +1,55 @@
+---
+title: "columnHover"
+description: "Marque la colonne sous la souris, pour que votre feuille de style la teinte."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Marque la colonne sous la souris ou le stylet, de son titre à sa dernière cellule.
+
+<FeatureFacts name="columnHover" />
+
+## Ce qu’elle fait
+
+`columnHover()` suit le pointeur sur la grille : la colonne qui est dessous reçoit `data-col-hover` sur son titre et
+ses cellules, et la racine de la grille reçoit `data-hover-col` avec l’identifiant de la colonne. Quitter la grille, ou
+un endroit sans colonne (l’espace après la dernière colonne, une ligne de groupe, une ligne pleine largeur), efface les
+deux.
+
+La teinte est à vous : donnez une valeur à la variable `--dzg-column-hover-bg`. Elle se dessine par-dessus la couleur
+de la ligne, si bien qu’une ligne alternée, survolée ou sélectionnée garde sa couleur sous une teinte légère. Sans
+valeur, rien ne se dessine, mais les attributs sont quand même écrits pour votre propre CSS. La cellule qui a le focus
+garde son propre aspect.
+
+Seuls la souris et le stylet comptent : le focus du clavier ne la déplace jamais, un doigt non plus. Le travail ne
+touche que des attributs, au plus une fois par image et seulement quand la colonne change. La droite à gauche ne
+change rien ; l’impression ne la montre pas.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { columnHover } from '@dzgrid/dom/column-hover';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Harvest = { id: string; field: string; june: number; july: number; august: number };
+
+// Dans votre CSS : .dzg { --dzg-column-hover-bg: color-mix(in srgb, var(--tz-accent) 8%, transparent); }
+createGrid<Harvest>(document.getElementById('harvest')!, {
+  rows: [{ id: 'h1', field: 'Champ du nord', june: 120, july: 340, august: 410 }],
+  columns: [
+    { id: 'field', header: 'Champ' },
+    { id: 'june', header: 'Juin (kg)', type: 'number' },
+    { id: 'july', header: 'Juillet (kg)', type: 'number' },
+    { id: 'august', header: 'Août (kg)', type: 'number' },
+  ],
+  getRowId: (h) => h.id,
+  messages: FR,
+  features: [columnHover()],
+});
+```
+
+## Voir aussi
+
+- [Thème et droite à gauche](../../guides/theming-rtl/) : les variables du thème.
+- Le réglage [`theme`](../../settings/theme/).

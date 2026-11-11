@@ -35,7 +35,7 @@ export interface FiltersOptions {
   /** tzslot's words for a language beyond English, French and Arabic, or over them: `{ es: {...} }` (its `TzslotMessages`, in part). */
   readonly dateMessages?: Readonly<Record<string, object>>;
   /**
-   * The period widget's calendar: `{ months: 1 }` for one month (2 by default), `{ presets: [] }` for no
+   * The period widget's calendar: `{ months: 2 }` for two months (1 by default), `{ presets: [] }` for no
    * shortcuts, `{ presets: ['today', 'last7Days'] }` for these, in this order (the six by default). A value
    * it cannot take is dropped with an `invalid-setting` warning. Between two moments: no shortcuts, still.
    */

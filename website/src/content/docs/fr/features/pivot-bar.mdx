@@ -1,0 +1,115 @@
+---
+title: "pivotBar"
+description: "La barre du tableau croisé : Lignes, Colonnes et Valeurs, chacune une rangée de puces que l’utilisateur réarrange."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Dessine une barre au-dessus des lignes où l’utilisateur construit le tableau croisé.
+
+<FeatureFacts name="pivotBar" />
+
+## Ce qu’elle fait
+
+`pivotBar({ use })` dessine une bande au-dessus des lignes avec trois parties nommées : « Lignes » (les colonnes de
+regroupement), « Colonnes » (les colonnes croisées) et « Valeurs ». Chaque partie est une barre d’outils de puces avec
+les touches et les déplacements de [`groupZone()`](../group-zone/) : × ou Suppr retire, Ctrl+Maj+← → déplace dans la
+partie, « + » liste les colonnes que la partie accepte (le chemin sans glisser). Ctrl+Maj+↑ ↓, ou une puce déposée sur
+une autre partie, déplace une colonne vers la partie précédente ou suivante ; une partie qui la refuse le dit.
+
+La puce d’une valeur, comme « somme(Recette) », ouvre un menu des fonctions qui conviennent à sa colonne. La puce d’une
+colonne croisée a un bouton d’ordre (↑ ou ↓) qui inverse ses colonnes créées. Avec [`columns()`](../columns/) dans
+`use.columns`, un titre déposé sur une partie y ajoute sa colonne. Quand la barre fait 30 rem de large ou moins, les
+parties s’empilent. Avec [`columnsChooser()`](../columns-chooser/), le volet des colonnes commence par un interrupteur
+« Mode pivot » et les mêmes trois parties.
+
+Il lui faut le [`grouping()`](../grouping/) et le [`pivot()`](../pivot/) donnés dans `use`. Ses textes viennent de
+trois paquets, `-pivot-bar`, `-pivot` et `-group` ; une erreur nomme chaque clé manquante. Prenez-la à la place de
+`groupZone()` à côté d’un tableau croisé.
+
+## Options
+
+- `use` (obligatoire) : `grouping`, le regroupement des lignes (« Lignes ») ; `pivot`, le tableau croisé donné à ce
+  regroupement (« Colonnes » et « Valeurs ») ; `columns`, facultatif, pour qu’un titre puisse être déposé sur une
+  partie.
+- `panel` : l’interrupteur « Mode pivot » et les trois parties en haut du volet des colonnes, avec
+  `columnsChooser()`. Activé par défaut.
+
+Lues à la création de la grille.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { grouping } from '@dzgrid/dom/grouping';
+import { pivot } from '@dzgrid/dom/pivot';
+import { pivotBar } from '@dzgrid/dom/pivot-bar';
+import { spans } from '@dzgrid/dom/spans';
+import { columns } from '@dzgrid/dom/columns';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_GROUP } from '@dzgrid/dom/locales/fr-group';
+import { FR_PIVOT } from '@dzgrid/dom/locales/fr-pivot';
+import { FR_PIVOT_BAR } from '@dzgrid/dom/locales/fr-pivot-bar';
+import { FR_COLUMNS } from '@dzgrid/dom/locales/fr-columns';
+import '@dzgrid/theme/grouping.css';
+import '@dzgrid/theme/pivot.css';
+import '@dzgrid/theme/columns.css';
+
+type Sale = { id: string; shop: string; month: string; bread: string; loaves: number; takings: number };
+
+const cols: ColumnOrGroup<Sale>[] = [
+  { id: 'shop', header: 'Boulangerie' },
+  { id: 'month', header: 'Mois' },
+  { id: 'bread', header: 'Pain' },
+  { id: 'loaves', header: 'Pains', type: 'number' },
+  { id: 'takings', header: 'Recette', type: 'number', numberFormat: { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 } },
+];
+const messages: GridMessages = {
+  ...FR,
+  text: { ...FR.text, ...FR_GROUP.text, ...FR_PIVOT.text, ...FR_PIVOT_BAR.text, ...FR_COLUMNS.text },
+};
+
+const cross = pivot({ columns: ['month'], values: { takings: 'sum' } });
+const rowsBy = grouping({ by: ['shop'], pivot: cross });
+const moves = columns();
+createGrid<Sale>(document.getElementById('bakeries')!, {
+  rows: [{ id: 'b1', shop: 'Rue du Moulin', month: '2026-01', bread: 'Seigle', loaves: 120, takings: 360 }],
+  columns: cols,
+  getRowId: (s) => s.id,
+  messages,
+  features: [spans(), moves, rowsBy, pivotBar({ use: { grouping: rowsBy, pivot: cross, columns: moves }, panel: false })],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={380}
+  settings={{ label: 'Boulangeries' }}
+  features={['spans', 'groups', 'columns', ['pivot', { columns: ['month'], values: { loaves: 'sum', takings: 'sum' } }], ['grouping', { by: ['shop'] }], 'pivotBar']}
+  columns={[
+    { id: 'shop', header: 'Boulangerie' },
+    { id: 'month', header: 'Mois' },
+    { id: 'bread', header: 'Pain' },
+    { id: 'loaves', header: 'Pains', type: 'number' },
+    { id: 'takings', header: 'Recette', type: 'number', numberFormat: { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 } },
+  ]}
+  rows={[
+    { id: 'b1', shop: 'Rue du Moulin', month: '2026-01', bread: 'Seigle', loaves: 120, takings: 360 },
+    { id: 'b2', shop: 'Rue du Moulin', month: '2026-02', bread: 'Levain', loaves: 95, takings: 380 },
+    { id: 'b3', shop: 'Rue du Moulin', month: '2026-02', bread: 'Seigle', loaves: 64, takings: 192 },
+    { id: 'b4', shop: 'Le Port', month: '2026-01', bread: 'Baguette', loaves: 210, takings: 252 },
+    { id: 'b5', shop: 'Le Port', month: '2026-03', bread: 'Levain', loaves: 80, takings: 320 },
+    { id: 'b6', shop: 'Vieille ville', month: '2026-02', bread: 'Baguette', loaves: 150, takings: 180 },
+    { id: 'b7', shop: 'Vieille ville', month: '2026-03', bread: 'Seigle', loaves: 70, takings: 210 },
+  ]}
+  caption="Dans la barre au-dessus de la grille, + sous Colonnes ajoute Pain comme seconde bande ; la puce d’une valeur change sa fonction."
+/>
+
+## Voir aussi
+
+- [`pivot()`](../pivot/) : le tableau que la barre construit.
+- [`groupZone()`](../group-zone/) : la bande pour un regroupement seul.
+- Le guide [Tableau croisé](../../guides/pivot/).

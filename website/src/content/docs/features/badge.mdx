@@ -1,0 +1,65 @@
+---
+title: "badge"
+description: "A ready cell part: a status shown as a small framed label with a tone."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+A cell part that draws a status as a small label in a frame, coloured by its tone.
+
+<FeatureFacts name="badge" />
+
+## What it does
+
+`badge()` from `@dzgrid/dom/parts` is not a feature: it returns a cell part. Register it under a name of your own in
+the [`parts`](../../settings/parts/) setting, and name it in a column's [`ui.cell`](../../column-options/ui/). The label
+is the cell's text (an `enum` column's label; an unknown value shows the value). The tone comes from `tones`, by the
+value as a string, else `fallback`. A blank value shows nothing.
+
+Five tones: `neutral`, `info`, `success`, `warning`, `danger`. Besides the colour, each tone but neutral has a small
+shape before the label (✓, i, !, ✕), so colour is never the only sign. A screen reader reads the label only. Sorting,
+filters, quick search and files treat the column as plain text. One `badge()` per mapping; several columns may share
+one name.
+
+`badge` itself needs no texts. The `-parts` bundle shown above is for [`cellBoolean`](../cell-boolean/), from the same
+entry.
+
+## Options
+
+- `tones`: the tone of each value, by the value as a string: `{ done: 'success', late: 'danger' }`.
+- `fallback`: the tone of a value `tones` does not name. By default `neutral`.
+- `classes`: your classes per tone, put beside the badge's own: `{ danger: 'bg-red-100 text-red-800' }`. The tone's shape
+  stays.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { badge } from '@dzgrid/dom/parts';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Batch = { id: string; fruit: string; state: string };
+
+createGrid<Batch>(document.getElementById('batches')!, {
+  rows: [
+    { id: 'b1', fruit: 'Apricots', state: 'ripe' },
+    { id: 'b2', fruit: 'Figs', state: 'spoilt' },
+  ],
+  columns: [
+    { id: 'fruit', header: 'Fruit' },
+    {
+      id: 'state', header: 'State', type: 'enum', ui: { cell: 'stateBadge' },
+      enumOptions: [{ value: 'ripe', label: 'Ripe' }, { value: 'green', label: 'Not ripe yet' }, { value: 'spoilt', label: 'Spoilt' }],
+    },
+  ],
+  getRowId: (b) => b.id,
+  messages: EN,
+  parts: { stateBadge: badge({ tones: { ripe: 'success', green: 'info', spoilt: 'danger' } }) },
+});
+```
+
+## See also
+
+- The [`parts`](../../settings/parts/) setting and the [`ui`](../../column-options/ui/) column option.
+- The [`cellBoolean`](../cell-boolean/) part: yes / no cells.
+- [Columns](../../guides/columns/#classes-tooltips-custom-cells): custom cells in the guide.

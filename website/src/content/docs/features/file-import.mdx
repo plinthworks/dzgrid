@@ -1,0 +1,76 @@
+---
+title: "fileImport"
+description: "Read a CSV or Excel file dropped on the grid, or picked with your button, into rows you decide about."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Reads a CSV or Excel file into rows and hands them to you; the grid never changes its rows itself.
+
+<FeatureFacts name="fileImport" />
+
+## What it does
+
+`fileImport({ onRows })` reads a CSV or Excel (`.xlsx`) file dropped on the grid, or picked with your own button
+(`api(grid).bind(button)`, the keyboard path), in the browser. The first non-empty line is the header, matched to your
+columns by title or id (case and accents aside); each cell goes through its column's type as if typed in the grid's
+language. A screen reader hears how many rows were read.
+
+**The grid never changes its rows**: `onRows(rows, problems, file)` gets one object per line, at each column's
+`field` (or id), and you decide — add them, replace, or show a preview. A refused cell is left out and told as an
+`import-cell` problem (path `rows[3].qty`), never with its value; a header that matches no column, or twice, is an
+`import-header` problem. A file in a format not accepted, or several files dropped at once (the first is read), give
+an `import-file` problem.
+
+`api(grid)` also gives `open()` (the file picker) and `read(file)` for a file you got yourself. The reading code is
+fetched at the first file.
+
+## Options
+
+- `accept`: the formats taken, `'csv'` and `'xlsx'`. Both by default; another file is refused (`import-file`, detail
+  `type`).
+- `onRows(rows, problems, file)` (required): the rows read, once per file, with what was refused (paths and codes,
+  never a value) and the file's name and format. A throw is reported.
+- `drop`: `false` removes the drop zone; your button only.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { fileImport } from '@dzgrid/dom/import';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_IMPORT } from '@dzgrid/dom/locales/en-import';
+
+type Jar = { id: string; flavour: string; grams: number };
+
+let jars: Jar[] = [{ id: 'j1', flavour: 'Fig', grams: 250 }];
+let next = 1;
+
+const importer = fileImport({
+  accept: ['csv', 'xlsx'],
+  onRows: (rows, problems) => {
+    if (problems.length) console.warn(problems);
+    jars = [...jars, ...rows.map((r) => ({ ...(r as Omit<Jar, 'id'>), id: `new-${next++}` }))];
+    grid.update({ rows: jars });
+  },
+});
+
+const grid = createGrid<Jar>(document.getElementById('jars')!, {
+  rows: jars,
+  columns: [
+    { id: 'flavour', header: 'Flavour' },
+    { id: 'grams', header: 'Grams', type: 'number' },
+  ],
+  getRowId: (j) => j.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_IMPORT.text } },
+  features: [importer],
+});
+
+importer.api(grid)?.bind(document.getElementById('import')!);
+```
+
+## See also
+
+- [Export and print](../../guides/export-print/#import-a-file): importing beside exporting.
+- [`csvExport`](../csv-export/): the other way, rows written to a file.
+- [`field`](../../column-options/field/): where each imported value goes.

@@ -1,0 +1,114 @@
+---
+title: "pivotBar"
+description: "The pivot’s bar: Rows, Columns and Values, each a row of chips the user rearranges."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Draws one bar above the rows where the user builds the pivot table.
+
+<FeatureFacts name="pivotBar" />
+
+## What it does
+
+`pivotBar({ use })` draws one strip above the rows with three named parts: « Rows » (the grouping columns),
+« Columns » (the pivot columns) and « Values ». Each part is a toolbar of chips with the keys and moves of
+[`groupZone()`](../group-zone/): × or Delete removes, Ctrl+Shift+← → moves within the part, « + » lists the columns the
+part accepts (the way without dragging). Ctrl+Shift+↑ ↓, or a chip dropped on another part, moves a column to the
+previous or next part; a part that refuses it says so.
+
+A value's chip, such as « sum(Takings) », opens a menu of the functions that fit its column. A pivot column's chip has
+an order button (↑ or ↓) that reverses its created columns. With [`columns()`](../columns/) in `use.columns`, a header
+dropped on a part adds its column there. When the bar is 30 rem wide or less, the parts stack. With
+[`columnsChooser()`](../columns-chooser/), the columns panel starts with a « Pivot mode » switch and the same three
+parts.
+
+It needs the [`grouping()`](../grouping/) and the [`pivot()`](../pivot/) given in `use`. Its texts come from three
+bundles, `-pivot-bar`, `-pivot` and `-group`; an error names any missing key. Use it instead of `groupZone()` beside a
+pivot.
+
+## Options
+
+- `use` (required): `grouping`, the row grouping (« Rows »); `pivot`, the pivot given to that grouping (« Columns » and
+  « Values »); `columns`, optional, so a header can be dropped on a part.
+- `panel`: the « Pivot mode » switch and the three parts at the top of the columns panel, with `columnsChooser()`. On
+  by default.
+
+Read when the grid is made.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { grouping } from '@dzgrid/dom/grouping';
+import { pivot } from '@dzgrid/dom/pivot';
+import { pivotBar } from '@dzgrid/dom/pivot-bar';
+import { spans } from '@dzgrid/dom/spans';
+import { columns } from '@dzgrid/dom/columns';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_GROUP } from '@dzgrid/dom/locales/en-group';
+import { EN_PIVOT } from '@dzgrid/dom/locales/en-pivot';
+import { EN_PIVOT_BAR } from '@dzgrid/dom/locales/en-pivot-bar';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+import '@dzgrid/theme/grouping.css';
+import '@dzgrid/theme/pivot.css';
+import '@dzgrid/theme/columns.css';
+
+type Sale = { id: string; shop: string; month: string; bread: string; loaves: number; takings: number };
+
+const cols: ColumnOrGroup<Sale>[] = [
+  { id: 'shop', header: 'Bakery' },
+  { id: 'month', header: 'Month' },
+  { id: 'bread', header: 'Bread' },
+  { id: 'loaves', header: 'Loaves', type: 'number' },
+  { id: 'takings', header: 'Takings', type: 'number', numberFormat: { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 } },
+];
+const messages: GridMessages = {
+  ...EN,
+  text: { ...EN.text, ...EN_GROUP.text, ...EN_PIVOT.text, ...EN_PIVOT_BAR.text, ...EN_COLUMNS.text },
+};
+
+const cross = pivot({ columns: ['month'], values: { takings: 'sum' } });
+const rowsBy = grouping({ by: ['shop'], pivot: cross });
+const moves = columns();
+createGrid<Sale>(document.getElementById('bakeries')!, {
+  rows: [{ id: 'b1', shop: 'Mill Street', month: '2026-01', bread: 'Rye', loaves: 120, takings: 360 }],
+  columns: cols,
+  getRowId: (s) => s.id,
+  messages,
+  features: [spans(), moves, rowsBy, pivotBar({ use: { grouping: rowsBy, pivot: cross, columns: moves }, panel: false })],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={380}
+  settings={{ label: 'Bakeries' }}
+  features={['spans', 'groups', 'columns', ['pivot', { columns: ['month'], values: { loaves: 'sum', takings: 'sum' } }], ['grouping', { by: ['shop'] }], 'pivotBar']}
+  columns={[
+    { id: 'shop', header: 'Bakery' },
+    { id: 'month', header: 'Month' },
+    { id: 'bread', header: 'Bread' },
+    { id: 'loaves', header: 'Loaves', type: 'number' },
+    { id: 'takings', header: 'Takings', type: 'number', numberFormat: { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 } },
+  ]}
+  rows={[
+    { id: 'b1', shop: 'Mill Street', month: '2026-01', bread: 'Rye', loaves: 120, takings: 360 },
+    { id: 'b2', shop: 'Mill Street', month: '2026-02', bread: 'Sourdough', loaves: 95, takings: 380 },
+    { id: 'b3', shop: 'Mill Street', month: '2026-02', bread: 'Rye', loaves: 64, takings: 192 },
+    { id: 'b4', shop: 'Harbour', month: '2026-01', bread: 'Baguette', loaves: 210, takings: 252 },
+    { id: 'b5', shop: 'Harbour', month: '2026-03', bread: 'Sourdough', loaves: 80, takings: 320 },
+    { id: 'b6', shop: 'Old Town', month: '2026-02', bread: 'Baguette', loaves: 150, takings: 180 },
+    { id: 'b7', shop: 'Old Town', month: '2026-03', bread: 'Rye', loaves: 70, takings: 210 },
+  ]}
+  caption="In the bar above the grid, + under Columns adds Bread as a second band; a value’s chip changes its function."
+/>
+
+## See also
+
+- [`pivot()`](../pivot/): the table the bar builds.
+- [`groupZone()`](../group-zone/): the band for grouping alone.
+- The [Pivot](../../guides/pivot/) guide.

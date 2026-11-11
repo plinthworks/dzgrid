@@ -1,0 +1,66 @@
+---
+title: "lazyChildren"
+description: "Tree children loaded by your code or a server the first time their parent opens."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Loads a parent’s children the first time it opens, for a tree given by parent ids or paths.
+
+<FeatureFacts name="lazyChildren" />
+
+## What it does
+
+`lazyChildren({ has, load })` is given to [`tree()`](../tree/) as its `lazy` option. A row for which `has(row)` is true
+shows a closed chevron. Opening it shows one « Loading… » row under it while `load(row, { signal })` runs; then the
+children take its place, sorted and filtered like the other rows. A failure shows the error and a Retry button (Enter on
+that row retries too). A load that answers no rows makes the parent a leaf.
+
+Closing the parent while it loads aborts the load, through the `signal`. Loaded children stay: opening the parent again
+asks nothing, until the grid gets new rows or a refresh. « Open all » and `*` open only rows already loaded: they never
+start a burst of requests. A filter applies to the rows loaded. The loading row is never selected, copied, edited or
+exported; its texts are the base bundle's.
+
+With a server source, `sourceRows({ fetch, children })` from `@dzgrid/core/server` answers in place of `load`; only
+`has` is needed then. Nested rows (`tree({ children })`) cannot load lazily, since a loaded row could not name its
+parent: `unsupported-combination`, and the tree works without lazy loading. No `load` and no server children:
+`missing-feature`, and opening a declared row fails at once.
+
+## Options
+
+- `has` (required): whether a row has children not loaded yet; read for the rows shown and for a row being opened.
+- `load`: your loader. It gets the row and a `signal`, and returns the row's children: a list, or a Promise of one. A
+  server's `children` takes its place.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { tree } from '@dzgrid/dom/tree';
+import { lazyChildren } from '@dzgrid/dom/tree-lazy';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_TREE } from '@dzgrid/dom/locales/en-tree';
+
+type Drawer = { id: string; parent: string | null; name: string; drawers: number };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_TREE.text } };
+
+createGrid<Drawer>(document.getElementById('seed-bank')!, {
+  rows: [{ id: 'root', parent: null, name: 'Seed bank', drawers: 4 }],
+  columns: [{ id: 'name', header: 'Drawer' }],
+  getRowId: (d) => d.id,
+  messages,
+  features: [tree<Drawer>({
+    parentId: (d) => d.parent,
+    lazy: lazyChildren<Drawer>({
+      has: (d) => d.drawers > 0,
+      load: async (d, { signal }) => (await fetch(`/api/drawers/${d.id}`, { signal: signal as AbortSignal })).json(),
+    }),
+  })],
+});
+```
+
+## See also
+
+- [`tree()`](../tree/): the tree it loads into.
+- [Children loaded on demand](../../guides/tree/#children-loaded-on-demand) in the guide.

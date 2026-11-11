@@ -1,0 +1,97 @@
+---
+title: "find"
+description: "Ctrl+F dans la grille : une barre de recherche qui marque chaque résultat et passe de l’un à l’autre."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Remplace le Ctrl+F du navigateur quand le focus est dans la grille.
+
+<FeatureFacts name="find" />
+
+## Ce qu’elle fait
+
+Le focus dans la grille, Ctrl+F (⌘F sur Mac) ouvre une barre au-dessus des titres : un champ, le compte
+(« 3 / 12 »), ↑, ↓ et ×. Elle cherche le texte que montre chaque cellule, dans les colonnes visibles, sans tenir
+compte de la casse ni des accents. Partout ailleurs dans la page, Ctrl+F reste celui du navigateur.
+
+La recherche ne cache jamais de ligne : elle marque chaque cellule trouvée, la courante plus fortement, la fait
+défiler en vue et en fait la cellule active de la grille. Entrée ou ↓ va au résultat suivant, Maj+Entrée ou ↑ au
+précédent, en bouclant aux extrémités ; Échap ferme la barre et laisse le focus sur le dernier résultat. Elle cherche
+dans les lignes que gardent les filtres et la recherche rapide, y compris dans les nœuds fermés d’un arbre (leurs
+parents s’ouvrent pour montrer un résultat). Avec un serveur, seules les lignes chargées sont cherchées, et la barre
+le dit.
+
+Votre application peut la piloter avec `api(grid)` : `open(text)`, `next()`, `previous()`, `close()` et `state()`.
+Un `debounceMs` qui n’est pas un nombre de 0 ou plus donne 150 ms et un avertissement `invalid-setting`. Ses textes
+sont dans le paquet `-find`.
+
+## Options
+
+- `debounceMs` : la pause avant que le texte tapé soit cherché, un nombre de 0 ou plus ; 150 ms par défaut.
+- `highlight` : les lettres trouvées teintées dans les cellules, celles du résultat courant plus fortement. Activé par
+  défaut.
+
+Lues à la création de la grille.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { find } from '@dzgrid/dom/find';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FIND } from '@dzgrid/dom/locales/fr-find';
+import '@dzgrid/theme/find.css';
+
+type River = { id: string; name: string; region: string; length: number };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_FIND.text } };
+const finder = find({ debounceMs: 100 });
+
+const grid = createGrid<River>(document.getElementById('rivers')!, {
+  rows: [
+    { id: 'r1', name: 'Ruisseau du Héron', region: 'Nord', length: 42 },
+    { id: 'r2', name: 'Méandre', region: 'Est', length: 96 },
+  ],
+  columns: [
+    { id: 'name', header: 'Rivière' },
+    { id: 'region', header: 'Région' },
+    { id: 'length', header: 'Longueur (km)', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [finder],
+});
+
+const bar = finder.api(grid);
+bar?.open('héron');
+console.log(bar?.state().count);
+```
+
+## Démo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Rivières' }}
+  features={['find']}
+  columns={[
+    { id: 'name', header: 'Rivière', flex: 1 },
+    { id: 'region', header: 'Région', width: 130 },
+    { id: 'length', header: 'Longueur (km)', type: 'number', width: 140 },
+  ]}
+  rows={[
+    { id: 'r1', name: 'Argentine', region: 'Nord', length: 412 },
+    { id: 'r2', name: 'Ruisseau du Héron', region: 'Nord', length: 42 },
+    { id: 'r3', name: 'Méandre', region: 'Est', length: 96 },
+    { id: 'r4', name: 'Petit Héron', region: 'Sud', length: 18 },
+    { id: 'r5', name: 'Bief du moulin', region: 'Ouest', length: 7 },
+    { id: 'r6', name: 'Vieux ru du Héron', region: 'Ouest', length: 33 },
+  ]}
+  caption="Cliquez une cellule, appuyez sur Ctrl+F (Cmd+F sur Mac) et tapez « héron » : Entrée va au suivant."
+/>
+
+## Voir aussi
+
+- [`quickSearch()`](../quick-search/) : une recherche qui cache les lignes sans correspondance.
+- [Rechercher dans la grille (Ctrl+F)](../../guides/sort-filter-search/#rechercher-dans-la-grille-ctrlf) dans le guide.

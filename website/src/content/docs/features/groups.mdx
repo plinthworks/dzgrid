@@ -1,0 +1,90 @@
+---
+title: "groups"
+description: "Header groups that open and close, showing fewer columns when closed."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Adds the button that opens and closes a collapsible group of columns.
+
+<FeatureFacts name="groups" />
+
+## What it does
+
+A column group with `collapsible: true` gets a small button in its header. Closed, the group shows its columns
+marked [`groupShow: 'closed'`](../../column-options/group-show/) or not marked; open, it shows its columns marked
+`'open'` or not marked. Enter or Space on the focused group header does the same as the button, and the new state is
+said. `open: false` on the group starts it closed. A column the user hid stays hidden when its group opens, and the
+columns chooser keeps a column folded by its group ticked.
+
+The group rows themselves are drawn by [`spans()`](../spans/), which is needed too. A closed group that would show no
+column shows its first one, with an `invalid-column-group` warning. A fold that would leave no column on screen is
+refused. The open or closed state of each group is saved by [`gridState()`](../grid-state/), and the column menu's
+« Reset columns » brings back the definitions'. From code: `groupsFeature.api(grid)` gives `toggle`, `isOpen`, `reset`, `get`
+and `set`.
+
+Its texts are in the `-columns` bundle. With a collapsible group and without them, the grid is not made: an error
+names the missing key.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { spans } from '@dzgrid/dom/spans';
+import { groups } from '@dzgrid/dom/groups';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_COLUMNS } from '@dzgrid/dom/locales/en-columns';
+
+type Station = { id: string; name: string; tempMin: number; tempMax: number; rain: number };
+
+const columns: ColumnOrGroup<Station>[] = [
+  { id: 'name', header: 'Station' },
+  { id: 'weather', header: 'Weather', collapsible: true, open: false, children: [
+    { id: 'tempMin', header: 'Min °C', type: 'number', groupShow: 'open' },
+    { id: 'tempMax', header: 'Max °C', type: 'number', groupShow: 'closed' },
+    { id: 'rain', header: 'Rain (mm)', type: 'number', groupShow: 'open' },
+  ] },
+];
+
+const folds = groups();
+
+const grid = createGrid<Station>(document.getElementById('stations')!, {
+  rows: [{ id: 's1', name: 'Cape Lumen', tempMin: 4, tempMax: 17, rain: 2.5 }],
+  columns,
+  getRowId: (s) => s.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_COLUMNS.text } },
+  features: [spans(), folds],
+});
+
+folds.api(grid)?.toggle('weather');
+```
+
+## Live demo
+
+<LiveDemo
+  height={250}
+  settings={{ label: 'Weather stations' }}
+  features={['spans', 'groups']}
+  columns={[
+    { id: 'name', header: 'Station', flex: 1 },
+    { id: 'weather', header: 'Weather', collapsible: true, children: [
+      { id: 'tempMin', header: 'Min °C', type: 'number', groupShow: 'open' },
+      { id: 'tempMax', header: 'Max °C', type: 'number', groupShow: 'closed' },
+      { id: 'rain', header: 'Rain (mm)', type: 'number', groupShow: 'open' },
+    ] },
+  ]}
+  rows={[
+    { id: 's1', name: 'Cape Lumen', tempMin: 4, tempMax: 17, rain: 2.5 },
+    { id: 's2', name: 'Gull Rock', tempMin: 7, tempMax: 15, rain: 11 },
+    { id: 's3', name: 'Moorfield', tempMin: -1, tempMax: 12, rain: 0.4 },
+  ]}
+  caption="The group’s button folds Weather to its Max °C column."
+/>
+
+## See also
+
+- The [`groupShow`](../../column-options/group-show/) column option.
+- The [`spans`](../spans/) feature: group header rows.
+- [Columns](../../guides/columns/#column-groups): column groups in the guide.

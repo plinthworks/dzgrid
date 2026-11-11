@@ -1,0 +1,96 @@
+---
+title: "spans"
+description: "Cells spanning rows and columns: merged values, spans from the data, full-width rows, grouped headers."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Draws merged cells, cells spanning rows or columns, full-width rows and grouped headers.
+
+<FeatureFacts name="spans" />
+
+## What it does
+
+`spans()` draws what the columns and settings ask for: equal neighbours merged into one tall cell
+([`merge`](../../column-options/merge/)), spans decided by the data ([`rowSpan`](../../column-options/row-span/),
+[`colSpan`](../../column-options/col-span/)), rows one cell wide ([`fullWidth`](../../settings/full-width/)), and the
+header rows of column groups (a column with `children`). Span rules given without it are ignored, and the grid tells one
+`missing-feature` warning per kind of rule.
+
+Spans are computed on the rows as shown: after a sort or a filter, the rows now side by side merge again. A merge never
+crosses a page, a pinned edge, a group of rows or a gap. The label of a long merged cell moves with the scroll, so it
+stays in view. The keys treat a spanned cell as one stop, and moving back returns to the row you came from; a click on
+a tall cell acts on the row under the pointer. A CSV file writes the value on every row the cell covers.
+
+In a [tree](../tree/), a merge joins siblings only, unless `acrossLevels` is on; full-width rows stay refused beside a
+tree (`unsupported-combination`). Master/detail refuses `spans()`. A span over another is dropped (`span-overlap`); one
+cut by a pinned edge or by the end of the rows tells `span-clipped`; a bad span (`merge` with `rowSpan` or `colSpan` on
+one column, a rule that throws) `invalid-span`; a bad column group `invalid-column-group`.
+
+## Options
+
+- `acrossLevels`: in a tree, outside a row's tree column, a merge goes on across a node and its children shown, under
+  one top-level row. Off by default: a merge stops where the level changes.
+
+Read when the grid is made.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import type { ColumnOrGroup } from '@dzgrid/core';
+import { spans } from '@dzgrid/dom/spans';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Hike = { id: string; valley: string; trail: string; km: number };
+
+const columns: ColumnOrGroup<Hike>[] = [
+  { id: 'valley', header: 'Valley', merge: true },
+  { id: 'walk', header: 'Walk', children: [
+    { id: 'trail', header: 'Trail' },
+    { id: 'km', header: 'Distance (km)', type: 'number' },
+  ] },
+];
+
+createGrid<Hike>(document.getElementById('walks')!, {
+  rows: [
+    { id: 'w1', valley: 'Green valley', trail: 'Fern path', km: 4.5 },
+    { id: 'w2', valley: 'Green valley', trail: 'Waterfall loop', km: 7 },
+    { id: 'w3', valley: 'Stone valley', trail: 'Ridge walk', km: 11 },
+  ],
+  columns,
+  getRowId: (w) => w.id,
+  messages: EN,
+  features: [spans()],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={300}
+  settings={{ label: 'Walks' }}
+  features={['spans']}
+  columns={[
+    { id: 'valley', header: 'Valley', width: 170, merge: true },
+    { id: 'walk', header: 'Walk', children: [
+      { id: 'trail', header: 'Trail', flex: 1, minWidth: 180 },
+      { id: 'km', header: 'Distance (km)', type: 'number', width: 150 },
+    ] },
+  ]}
+  rows={[
+    { id: 'w1', valley: 'Green valley', trail: 'Fern path', km: 4.5 },
+    { id: 'w2', valley: 'Green valley', trail: 'Waterfall loop', km: 7 },
+    { id: 'w3', valley: 'Green valley', trail: 'Mossy steps', km: 2.5 },
+    { id: 'w4', valley: 'Stone valley', trail: 'Ridge walk', km: 11 },
+    { id: 'w5', valley: 'Stone valley', trail: 'Old bridge', km: 3 },
+  ]}
+  caption="Sort by Distance: the valleys split, then merge again when sorted back by Valley."
+/>
+
+## See also
+
+- The [`merge`](../../column-options/merge/) column option.
+- The [`fullWidth`](../../settings/full-width/) setting.
+- [Column groups](../../guides/columns/#column-groups) in the guide.

@@ -1,0 +1,90 @@
+---
+title: "quickSearch"
+description: "Un champ de recherche de votre page filtre les lignes sur toutes les colonnes visibles."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Relie un champ de recherche de votre page à la grille : chaque mot tapé doit se trouver dans la ligne.
+
+<FeatureFacts name="quickSearch" />
+
+## Ce qu’elle fait
+
+`quickSearch()` ne dessine aucun champ. Vous écrivez votre propre `<input>` (son libellé, sa place, son style) et le
+donnez à `bind(input)`. Chaque mot tapé doit figurer quelque part dans la ligne, dans n’importe quelle colonne
+visible, dans n’importe quel ordre. La casse, les accents et les voyelles brèves de l’arabe sont ignorés. Les colonnes
+de nombres et de dates ne sont cherchées que pour un mot qui contient un chiffre ; les colonnes masquées ne le
+sont jamais ; une colonne oui/non est cherchée par son mot (« Oui », « Non ») dans la langue de la grille.
+
+Les lignes se réduisent après une courte pause : 150 ms dans le navigateur, 300 ms quand un serveur cherche, ou le
+`debounceMs` donné à `bind(input, { debounceMs })` (une valeur qui n’est pas un nombre de 0 ou plus donne la valeur
+par défaut). Entrée applique tout de suite, Échap vide le champ, ↓ descend dans la grille. Une fois les lignes en
+place, la grille dit combien elle en a trouvé. Les mots trouvés sont teintés dans les cellules que la grille dessine
+(`@dzgrid/theme/search.css`) ; une cellule dessinée par votre propre partie n’est pas touchée.
+
+`bind` peut servir pour plusieurs champs ; il rend une fonction qui les détache. La recherche et les filtres de
+colonne s’appliquent tous les deux : une ligne doit passer les deux. La grille n’écrit aucun texte à elle pour la
+recherche : la fonction n’a pas besoin de paquet de textes.
+
+## Options
+
+- `highlight` : teinte les mots trouvés dans les cellules. Activé par défaut ; `false` laisse les cellules telles
+  quelles. Lu à la création de la grille.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { quickSearch } from '@dzgrid/dom/search';
+import { FR } from '@dzgrid/dom/locales/fr';
+import '@dzgrid/theme/search.css';
+
+type Book = { id: string; title: string; pages: number };
+
+const search = quickSearch({ highlight: true });
+createGrid<Book>(document.getElementById('books')!, {
+  rows: [{ id: 'b1', title: 'La Route du sel', pages: 312 }],
+  columns: [
+    { id: 'title', header: 'Titre' },
+    { id: 'pages', header: 'Pages', type: 'number' },
+  ],
+  getRowId: (b) => b.id,
+  messages: FR,
+  features: [search],
+});
+
+const unbind = search.bind(document.querySelector<HTMLInputElement>('#book-search')!, { debounceMs: 200 });
+// Plus tard : unbind();
+```
+
+## Démo
+
+<LiveDemo
+  height={340}
+  settings={{ label: 'Livres' }}
+  features={['search']}
+  columns={[
+    { id: 'title', header: 'Titre', flex: 2, minWidth: 200 },
+    { id: 'shelf', header: 'Rayon', width: 130 },
+    { id: 'pages', header: 'Pages', type: 'number', width: 110 },
+  ]}
+  rows={[
+    { id: 'b1', title: 'La Route du sel', shelf: 'Voyage', pages: 312 },
+    { id: 'b2', title: 'Neuf Lanternes', shelf: 'Contes', pages: 188 },
+    { id: 'b3', title: 'Marées de papier', shelf: 'Voyage', pages: 254 },
+    { id: 'b4', title: 'Le Verger tranquille', shelf: 'Nature', pages: 140 },
+    { id: 'b5', title: 'Rivière de verre', shelf: 'Voyage', pages: 296 },
+    { id: 'b6', title: 'Une carte des phalènes', shelf: 'Nature', pages: 122 },
+    { id: 'b7', title: 'Abeilles d’hiver', shelf: 'Nature', pages: 98 },
+    { id: 'b8', title: 'Le Gardien de la lanterne', shelf: 'Contes', pages: 210 },
+  ]}
+  caption="Tapez « sel » ou « abeilles » dans le champ au-dessus de la grille."
+/>
+
+## Voir aussi
+
+- [`filters()`](../filters/) : un filtre par colonne.
+- [`find()`](../find/) : marque les correspondances sans cacher de ligne.
+- [Recherche rapide](../../guides/sort-filter-search/#recherche-rapide) dans le guide.

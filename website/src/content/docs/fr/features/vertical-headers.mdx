@@ -1,0 +1,73 @@
+---
+title: "verticalHeaders"
+description: "Des titres de colonnes écrits vers le haut, pour que des colonnes étroites le restent."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Fait tourner d’un quart de tour, vers le haut, le titre des colonnes marquées headerVertical.
+
+<FeatureFacts name="verticalHeaders" />
+
+## Ce qu’elle fait
+
+Une colonne avec [`headerVertical: true`](../../column-options/header-vertical/) a son titre écrit vers le haut. La
+ligne des titres de colonnes grandit jusqu’au plus long de ces titres, au moins la hauteur d’une ligne et au plus
+`maxHeight` ; un titre plus long est coupé par « … ». La mesure est refaite quand les titres, la hauteur des lignes ou
+la densité changent, jamais pendant le défilement.
+
+Les noms, les rôles et les touches ne changent pas : un lecteur d’écran lit le titre comme les autres. La rotation
+vient de la feuille de style `vertical-headers.css`. Une colonne en `headerVertical` dans une grille sans cette
+fonction garde un titre à plat, et la grille signale un avertissement `missing-feature`.
+
+## Options
+
+- `maxHeight` : la hauteur au plus de la ligne des titres, en px. Par défaut 240. Lue une fois, à la création de la
+  fonction.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { verticalHeaders } from '@dzgrid/dom/vertical-headers';
+import { FR } from '@dzgrid/dom/locales/fr';
+import '@dzgrid/theme/vertical-headers.css';
+
+type Bed = { id: string; name: string; mon: boolean; tue: boolean; wed: boolean };
+const day = (id: 'mon' | 'tue' | 'wed', header: string) => ({ id, header, type: 'boolean' as const, width: 44, headerVertical: true });
+
+createGrid<Bed>(document.getElementById('watering')!, {
+  rows: [{ id: 'p1', name: 'Spirale d’aromatiques', mon: true, tue: false, wed: true }],
+  columns: [{ id: 'name', header: 'Planche', flex: 1, minWidth: 140 }, day('mon', 'Lundi'), day('tue', 'Mardi'), day('wed', 'Mercredi')],
+  getRowId: (b) => b.id,
+  messages: FR,
+  features: [verticalHeaders({ maxHeight: 120 })],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={240}
+  settings={{ label: 'Arrosage' }}
+  features={[['verticalHeaders', { maxHeight: 120 }]]}
+  columns={[
+    { id: 'name', header: 'Planche', flex: 1, minWidth: 140 },
+    { id: 'mon', header: 'Lundi', type: 'boolean', width: 44, headerVertical: true },
+    { id: 'tue', header: 'Mardi', type: 'boolean', width: 44, headerVertical: true },
+    { id: 'wed', header: 'Mercredi', type: 'boolean', width: 44, headerVertical: true },
+    { id: 'thu', header: 'Jeudi', type: 'boolean', width: 44, headerVertical: true },
+  ]}
+  rows={[
+    { id: 'p1', name: 'Spirale d’aromatiques', mon: true, tue: false, wed: true, thu: false },
+    { id: 'p2', name: 'Tunnel à haricots', mon: false, tue: true, wed: false, thu: true },
+    { id: 'p3', name: 'Tour à fraises', mon: true, tue: true, wed: true, thu: false },
+  ]}
+/>
+
+## Voir aussi
+
+- L’option de colonne [`headerVertical`](../../column-options/header-vertical/).
+- La fonction [`wrappedHeaders`](../wrapped-headers/) : les longs titres sur plusieurs lignes à la place.
+- [Colonnes](../../guides/columns/) : les titres verticaux dans le guide.

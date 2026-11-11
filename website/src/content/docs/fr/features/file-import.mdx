@@ -1,0 +1,77 @@
+---
+title: "fileImport"
+description: "Lire un fichier CSV ou Excel déposé sur la grille, ou choisi avec votre bouton, en lignes dont vous décidez."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Lit un fichier CSV ou Excel en lignes et vous les donne ; la grille ne change jamais ses lignes d’elle-même.
+
+<FeatureFacts name="fileImport" />
+
+## Ce qu’elle fait
+
+`fileImport({ onRows })` lit un fichier CSV ou Excel (`.xlsx`) déposé sur la grille, ou choisi avec votre propre bouton
+(`api(grid).bind(button)`, le chemin clavier), dans le navigateur. La première ligne non vide est l’en-tête, rapproché
+de vos colonnes par titre ou par identifiant (casse et accents mis à part) ; chaque cellule passe par le type de sa
+colonne comme si elle était tapée dans la langue de la grille. Un lecteur d’écran entend combien de lignes ont été
+lues.
+
+**La grille ne change jamais ses lignes** : `onRows(rows, problems, file)` reçoit un objet par ligne, au `field` de
+chaque colonne (ou à son identifiant), et c’est vous qui décidez — les ajouter, remplacer, ou montrer un aperçu. Une
+cellule refusée est laissée de côté et signalée par un problème `import-cell` (chemin `rows[3].qty`), jamais avec sa
+valeur ; un en-tête qui ne correspond à aucune colonne, ou deux fois, est un problème `import-header`. Un fichier dans
+un format non accepté, ou plusieurs fichiers déposés à la fois (le premier est lu), donnent un problème `import-file`.
+
+`api(grid)` donne aussi `open()` (le sélecteur de fichier) et `read(file)` pour un fichier que vous avez obtenu
+vous-même. Le code de lecture est chargé au premier fichier.
+
+## Options
+
+- `accept` : les formats acceptés, `'csv'` et `'xlsx'`. Les deux par défaut ; un autre fichier est refusé
+  (`import-file`, détail `type`).
+- `onRows(rows, problems, file)` (obligatoire) : les lignes lues, une fois par fichier, avec ce qui a été refusé
+  (chemins et codes, jamais une valeur) et le nom et le format du fichier. Une exception est signalée.
+- `drop` : `false` retire la zone de dépôt ; votre bouton seulement.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { fileImport } from '@dzgrid/dom/import';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_IMPORT } from '@dzgrid/dom/locales/fr-import';
+
+type Jar = { id: string; flavour: string; grams: number };
+
+let jars: Jar[] = [{ id: 'j1', flavour: 'Figue', grams: 250 }];
+let next = 1;
+
+const importer = fileImport({
+  accept: ['csv', 'xlsx'],
+  onRows: (rows, problems) => {
+    if (problems.length) console.warn(problems);
+    jars = [...jars, ...rows.map((r) => ({ ...(r as Omit<Jar, 'id'>), id: `new-${next++}` }))];
+    grid.update({ rows: jars });
+  },
+});
+
+const grid = createGrid<Jar>(document.getElementById('jars')!, {
+  rows: jars,
+  columns: [
+    { id: 'flavour', header: 'Parfum' },
+    { id: 'grams', header: 'Grammes', type: 'number' },
+  ],
+  getRowId: (j) => j.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_IMPORT.text } },
+  features: [importer],
+});
+
+importer.api(grid)?.bind(document.getElementById('import')!);
+```
+
+## Voir aussi
+
+- [Export et impression](../../guides/export-print/#importer-un-fichier) : importer à côté d’exporter.
+- [`csvExport`](../csv-export/) : l’autre sens, des lignes écrites dans un fichier.
+- [`field`](../../column-options/field/) : où va chaque valeur importée.

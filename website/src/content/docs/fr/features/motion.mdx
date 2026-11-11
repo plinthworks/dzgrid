@@ -1,0 +1,71 @@
+---
+title: "motion"
+description: "Des lignes qui glissent après un tri, un éclat sur une valeur changée, des fenêtres qui apparaissent en fondu — avec GSAP, que vous installez."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Anime la grille avec GSAP : lignes qui glissent, valeurs qui s’éclairent, pages qui coulissent, fenêtres en fondu.
+
+<FeatureFacts name="motion" />
+
+## Ce qu’elle fait
+
+`motion()` ajoute du mouvement dont on n’a jamais besoin pour lire la grille. Après un tri ou un filtre, les lignes qui
+restent glissent vers leur nouvelle place et celles qui arrivent à la vue apparaissent en fondu. Un changement de page
+fait coulisser un peu les lignes, depuis le côté où va la lecture. Une valeur changée en direct (une transaction, ou
+un rechargement avec [`sameRow`](../../settings/same-row/)) est teintée un instant. Une fenêtre surgissante et le
+calque apparaissent en fondu. Les lignes d’un arbre glissent quand un parent s’ouvre ou se ferme. L’ordre, le focus et
+ce que lit un lecteur d’écran sont les nouveaux dès la première image.
+
+GSAP ne fait pas partie de DzGrid : votre application installe le paquet `gsap` (3.13 ou plus, sous la licence propre
+de GSAP). Donnez-le avec `motion({ gsap })`, la même instance que vos propres fonctions d’animation ; sinon le code
+d’animation importe le paquet lui-même. Ce code et GSAP sont chargés au repos après le dessin des premières lignes, ou
+à `load()`. Sans GSAP la grille marche, sans mouvement, et signale une erreur `missing-feature` (détail `gsap`).
+
+Le mouvement réduit est suivi en direct : rien ne bouge, une valeur changée garde une marque immobile. Le réglage
+[`motion`](../../settings/motion/) à `false` arrête tous les effets. Un même `motion()` peut servir plusieurs grilles.
+
+## Options
+
+- `preset` : l’allure ; `'sober'` (la seule pour l’instant) : court, adouci, sans rebond.
+- `effects` : chaque effet actif par défaut, `false` en coupe un — `flip` (les lignes glissent), `enter` (les lignes
+  apparaissent en fondu), `flash` (une valeur changée ; `{ hold, fade }` en ms, chacun de 0 à 10 000, par défaut
+  `{ hold: 0, fade: 600 }` ; un champ invalide prend sa valeur par défaut avec un avertissement `invalid-setting`),
+  `page`, `popup`, `expand` (les lignes d’un arbre).
+- `gsap` : le GSAP de votre application ; sinon le code d’animation importe le paquet lui-même.
+- `onCell(el, cell, reason)` : une cellule dont la valeur a changé (`changed`), ou dont l’enregistrement a commencé,
+  réussi ou été refusé (`saving`, `saved`, `failed`, avec [`edit`](../edit/)), pour votre propre animation. Au plus
+  50 appels par dessin. N’animez que `el` ; rendez `false` pour sauter l’éclat intégré.
+- `onRow(el, row, reason)` : une ligne qui a bougé ou est entrée après un tri, un filtre ou l’ouverture d’un arbre, ou
+  qui a été ajoutée en direct (pas en mouvement réduit).
+
+## Exemple
+
+```ts
+import { gsap } from 'gsap';
+import { createGrid } from '@dzgrid/dom';
+import { motion } from '@dzgrid/dom/motion-gsap';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Ferry = { id: string; ferry: string; knots: number };
+
+const moves = motion({ gsap, effects: { page: false, flash: { hold: 400, fade: 800 } } });
+
+createGrid<Ferry>(document.getElementById('ferries')!, {
+  rows: [{ id: 'f1', ferry: 'Mouette du matin', knots: 12 }, { id: 'f2', ferry: 'Passe-marée', knots: 9 }],
+  columns: [
+    { id: 'ferry', header: 'Bac' },
+    { id: 'knots', header: 'Nœuds', type: 'number' },
+  ],
+  getRowId: (f) => f.id,
+  messages: FR,
+  features: [moves],
+});
+```
+
+## Voir aussi
+
+- [`motion`](../../settings/motion/) : le réglage qui coupe tout mouvement.
+- [`freshRows`](../fresh-rows/) : une marque immobile sur les lignes qu’un rafraîchissement a ajoutées.
+- [`edit`](../edit/) : les enregistrements qu’entend `onCell`.

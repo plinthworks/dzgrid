@@ -1,0 +1,72 @@
+---
+title: "pagination"
+description: "Un pied sous les lignes : la sélection, la position, et le pagineur."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Dessine le pagineur sous les lignes quand la grille montre ses lignes page par page.
+
+<FeatureFacts name="pagination" />
+
+## Ce qu’elle fait
+
+`pagination()` ajoute une bande sous les lignes. Au début : ce qui est sélectionné et où l’on est (« 51 à 100 sur
+1 234 »). À la fin : première, précédente, « Page 3 sur 25 », suivante, dernière, et une liste « Lignes par page ». En
+arabe la bande est en miroir.
+
+Les pages viennent du réglage [`pagination`](../../settings/pagination/), ou d’un serveur qui envoie des pages. Sans
+pages, la fonction ne dessine rien et signale un avertissement `invalid-page`. Des pages sans la fonction marchent
+quand même par l’API, avec un avertissement `missing-feature`.
+
+Un bouton qui ne peut pas agir reste à sa place, grisé, et garde le focus. Quand toutes les lignes d’une page sont
+cochées et que d’autres lignes correspondent, le pied propose « Sélectionner les 1 234 lignes ».
+
+## Options
+
+- `footer` : les parties du pied, dans l’ordre. Par défaut `['footer.selected', 'footer.count', 'footer.pager']`.
+  Une partie de l’hôte du même nom remplace celle de la grille ; un nom qui n’est pas une partie du pied est ignoré,
+  avec une erreur `unknown-part`. Lu une fois, à la création de la grille.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { pagination } from '@dzgrid/dom/pagination';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_PAGINATION } from '@dzgrid/dom/locales/fr-pagination';
+
+type Seed = { id: string; name: string; packets: number };
+
+createGrid<Seed>(document.getElementById('seeds')!, {
+  rows: [{ id: 's1', name: 'Basilic', packets: 40 }],
+  columns: [
+    { id: 'name', header: 'Graine' },
+    { id: 'packets', header: 'Sachets', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  pagination: { pageSize: 50 },
+  messages: { ...FR, text: { ...FR.text, ...FR_PAGINATION.text } },
+  features: [pagination()],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={500}
+  settings={{ label: 'Graines', pagination: { pageSize: 12, pageSizes: [12, 24] } }}
+  features={['pagination']}
+  columns={[
+    { id: 'name', header: 'Graine', flex: 1 },
+    { id: 'packets', header: 'Sachets', type: 'number', width: 120 },
+  ]}
+  rows={Array.from({ length: 40 }, (_, i) => ({ id: `s${i + 1}`, name: `Graine ${i + 1}`, packets: (i * 7) % 50 }))}
+  caption="Douze lignes par page : utilisez le pagineur sous la grille."
+/>
+
+## Voir aussi
+
+- Le réglage [`pagination`](../../settings/pagination/) : taille des pages et tailles proposées.
+- [Données serveur](../../guides/server-data/) : des pages demandées à un serveur.

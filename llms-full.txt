@@ -672,8 +672,8 @@ createGrid<Hive>(document.getElementById('hives')!, {
 ```
 
 On a row's first cell, Enter or Space opens and closes its lines (arrows too, as for detail rows). It is a detail rows
-feature: it cannot be combined with a tree, row grouping, header groups or your own `detail()` (told
-`unsupported-combination`).
+feature: it cannot be combined with a tree, row grouping or your own `detail()` (told `unsupported-combination`), nor
+with header groups (not told).
 
 ## Column groups
 
@@ -856,7 +856,7 @@ grid.kernel.dispatch({ type: 'filter.set', filter: {} }, 'api');   // clears eve
 - The filter shapes (`ColumnFilter`): `text`, `number`, `day`, `instant`, `boolean`, `set`, `combined` (`and` / `or`
   of conditions), `custom` (your own kind, registered with the `filterKinds` setting).
 
-Every option of `filters()` will have its place under [Features](https://plinthworks.github.io/dzgrid/features/).
+Every option of `filters()` is on [its page](https://plinthworks.github.io/dzgrid/features/filters/).
 
 ## The filters panel
 
@@ -935,7 +935,7 @@ grid.kernel.dispatch({ type: 'selection.all' }, 'api');
   `selectedIds(controller)` gives the ids of the whole selection with the query.
 - `mode: 'exclude'` means « every row the query matches, but these keys »: after « select all » on paged or server
   rows, the grid cannot list them, your server can by replaying the query.
-- `canSelect(row, selection, context)` returns `false`, or a reason code, to refuse a row; it needs the `rules()`
+- `canSelect(row, selection, context)` returns `false`, or the sentence to say, to refuse a row; it needs the `rules()`
   feature from `@dzgrid/dom/rules` (texts `-rules`), which says why to the user.
 
 Every key of the `selection` setting is on its page: [`selection`](https://plinthworks.github.io/dzgrid/settings/selection/).
@@ -992,7 +992,7 @@ Two features: `edit()` from `@dzgrid/dom/edit` holds the edits (save, undo, refu
 `editors()` draws the fields (texts `-editors`). Take `editors` from `@dzgrid/dom/editors` (a date calendar from
 `@tzslot/*`, loaded on first use) or from `@dzgrid/dom/editors-base` (no calendar: a day is typed).
 
-F2, Enter, a double click or typing a character opens the field; Enter keeps the value and moves down (`enterMoves`),
+F2, Enter, a double click or typing a character opens the field; Enter keeps the value (and moves down with `enterMoves: 'down'`),
 Tab moves to the next editable cell, Escape gives the old value back.
 
 ```ts
@@ -1145,7 +1145,7 @@ grid.kernel.dispatch({ type: 'rows.expandAll', expanded: true }, 'api');
 - `rows.expand` and `rows.expandAll` commands open and close from code; `rowExpanded` events tell you. In Angular,
   `[(expanded)]` holds the open keys.
 
-Every option of `tree()` will have its place under [Features](https://plinthworks.github.io/dzgrid/features/).
+Every option of `tree()` is on [its page](https://plinthworks.github.io/dzgrid/features/tree/).
 
 ## Children loaded on demand
 
@@ -1259,7 +1259,7 @@ console.log(api?.totals());
 - Sorting a grouped column sorts the groups; other sorts sort the rows inside each group.
 - In Angular, `[(groupBy)]` holds the grouped columns and `ctrl.grouping()` gives the api.
 
-Every option of `grouping()` will have its place under [Features](https://plinthworks.github.io/dzgrid/features/).
+Every option of `grouping()` is on [its page](https://plinthworks.github.io/dzgrid/features/grouping/).
 
 ## Groups on a server
 
@@ -1326,7 +1326,7 @@ console.log(chart?.categories, chart?.series.length);
   otherwise `api.setOn(on)`.
 - `api.series()` gives the numbers of one value column, ready for a chart library of your own: DzGrid draws no chart.
 
-Every option of `pivot()` will have its place under [Features](https://plinthworks.github.io/dzgrid/features/).
+Every option of `pivot()` is on [its page](https://plinthworks.github.io/dzgrid/features/pivot/).
 
 ## Pivot on a server
 
@@ -1732,7 +1732,7 @@ const grid = createGrid<Chore>(document.getElementById('chores')!, {
   parentId, setParent })` rewrites the parent ids for you.
 - In Angular, the `(rowMove)` output carries the same event, and `ctrl.rowDrag()` the api (`move`, `step`).
 
-Every option of `rowDrag()` will have its place under [Features](https://plinthworks.github.io/dzgrid/features/).
+Every option of `rowDrag()` is on [its page](https://plinthworks.github.io/dzgrid/features/row-drag/).
 
 ## Between grids, or onto your own element
 
@@ -1804,7 +1804,7 @@ panels.api(grid)?.move('filters', 'start');
   feature, where each panel stands is saved with the rest of the grid's state.
 - A floating window (area `float`) is planned, not there yet: it is refused with a warning.
 
-Every option of `dock()` will have its place under [Features](https://plinthworks.github.io/dzgrid/features/).
+Every option of `dock()` is on [its page](https://plinthworks.github.io/dzgrid/features/dock/).
 
 ---
 
@@ -1867,7 +1867,7 @@ document.getElementById('selected')!.addEventListener('click', async () => {
 - The right-click menu offers the same: `contextMenu({ use: { csv: exporter, xlsx: exporter.xlsx } })`.
 - In Angular: `<button [dzgExport]="exporter" dzgExportScope="displayed">` (directive `DzgExport`).
 
-Every option of `csvExport()` will have its place under [Features](https://plinthworks.github.io/dzgrid/features/).
+Every option of `csvExport()` is on [its page](https://plinthworks.github.io/dzgrid/features/csv-export/).
 
 ## JSON
 
@@ -1999,7 +1999,7 @@ api?.reset();                      // back to the columns and options the grid w
   a newer version (`v` higher) is refused whole (`state-version`).
 - Not saved: open rows, the selection, the focus, the scroll position, edits in progress.
 
-Every option of `gridState()` will have its place under [Features](https://plinthworks.github.io/dzgrid/features/).
+Every option of `gridState()` is on [its page](https://plinthworks.github.io/dzgrid/features/grid-state/).
 
 ## In the address
 

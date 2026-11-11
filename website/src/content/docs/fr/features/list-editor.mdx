@@ -1,0 +1,79 @@
+---
+title: "listEditor"
+description: "Le champ liste des éditeurs : choisir une valeur parmi les choix de la colonne, au clavier ou d’un clic."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Le champ qui choisit une valeur dans une liste, donné aux éditeurs par `editors({ list: listEditor })`.
+
+<FeatureFacts name="listEditor" />
+
+## Ce qu’elle fait
+
+`listEditor` n’est pas une fonction de la grille à elle seule : donnez-la à [`editors()`](../editors/) par
+`editors({ list: listEditor })`. Elle a son entrée à elle, `@dzgrid/dom/editors-list`, pour qu’une grille sans
+colonne liste ne la charge pas. Elle modifie une colonne `enum`, ou toute colonne avec `edit.options` (une liste, ou une
+fonction de la ligne), jusqu’à 500 choix ; les libellés viennent de la colonne quand les choix n’en donnent pas.
+
+La cellule montre un champ et une liste s’ouvre dessous (au-dessus s’il n’y a pas la place), la valeur actuelle
+active. Haut / Bas, Début / Fin et Page préc. / Page suiv. (de 10) se déplacent dans la liste. Des lettres tapées en
+moins d’une demi-seconde vont au premier choix qui commence par elles, sans tenir compte de la casse ni des accents ; la
+même lettre encore va au suivant. Entrée ou Espace choisit et garde la valeur, Tab choisit et passe à la suite, Échap
+abandonne, un clic sur un choix le prend. Une valeur absente des choix s’affiche en tête de liste, marquée, et ne peut
+être gardée que si c’était celle de la cellule.
+
+Sans elle, une colonne liste ouvre un simple champ de texte lu selon le format de la colonne, et la grille signale un
+avertissement `missing-feature` par colonne.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { listEditor } from '@dzgrid/dom/editors-list';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_EDIT } from '@dzgrid/dom/locales/fr-edit';
+import { FR_EDITORS } from '@dzgrid/dom/locales/fr-editors';
+import '@dzgrid/theme/edit.css';
+
+type Gnome = { id: string; name: string; hat: string; garden: string };
+
+createGrid<Gnome>(document.getElementById('gnomes')!, {
+  rows: [{ id: 'g1', name: 'Barnabé', hat: 'red', garden: 'Massif de roses' }],
+  columns: [
+    { id: 'name', header: 'Nom' },
+    { id: 'hat', header: 'Bonnet', type: 'enum', editable: true, enumOptions: [{ value: 'red', label: 'Rouge' }, { value: 'green', label: 'Vert' }] },
+    { id: 'garden', header: 'Jardin', editable: true, edit: { options: [{ value: 'Massif de roses' }, { value: 'Mare' }, { value: 'Potager' }] } },
+  ],
+  getRowId: (g) => g.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_EDIT.text, ...FR_EDITORS.text } },
+  features: [edit<Gnome>(), editors({ list: listEditor })],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={260}
+  settings={{ label: 'Nains de jardin' }}
+  features={['edit']}
+  columns={[
+    { id: 'name', header: 'Nom', flex: 1, minWidth: 140 },
+    { id: 'hat', header: 'Bonnet', type: 'enum', width: 130, editable: true, enumOptions: [{ value: 'red', label: 'Rouge' }, { value: 'green', label: 'Vert' }, { value: 'blue', label: 'Bleu' }, { value: 'gold', label: 'Or' }] },
+  ]}
+  rows={[
+    { id: 'g1', name: 'Barnabé', hat: 'red' },
+    { id: 'g2', name: 'Pépin', hat: 'green' },
+    { id: 'g3', name: 'Vieux Chardon', hat: 'blue' },
+  ]}
+  caption="Ouvrez une cellule Bonnet avec Entrée, puis tapez « v » ou utilisez les flèches."
+/>
+
+## Voir aussi
+
+- La fonction [`editors`](../editors/), qui la reçoit.
+- Les options de colonne [`edit`](../../column-options/edit/) et [`enumOptions`](../../column-options/enum-options/).
+- [Édition](../../guides/editing/) : les listes dans le guide.

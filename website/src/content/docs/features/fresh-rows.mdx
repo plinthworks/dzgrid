@@ -1,0 +1,69 @@
+---
+title: "freshRows"
+description: "Rows a refresh brought are marked for a few seconds and counted once to a screen reader."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Marks the rows a live change just added, for a few seconds, and says how many came.
+
+<FeatureFacts name="freshRows" />
+
+## What it does
+
+`freshRows()` marks the rows that were not there before a live change: a tint and a bar at the row's start (on the
+right in Arabic), so not colour alone. The mark stays 5 seconds by default, then goes; it is still, no fade, no blink.
+A row keeps its mark for the rest of its time wherever it shows: after a sort, when scrolled into view, on another
+page. A screen reader hears one sentence for the refresh, « 3 new rows ».
+
+New means added by a transaction or an update of the rows, or by a server's answer for the same page and query. Nothing
+is marked on the first load, when the user turns a page, sorts or filters, or when more than half the rows changed (a
+new list). A full reload or a server's answer counts only with the [`sameRow`](../../settings/same-row/) setting; a
+server source without it tells one `missing-feature` warning (detail `sameRow`), and the feature stays on.
+
+The mark is for the screen only: never exported, printed or copied, never in the state. Its colour is
+`--dzg-fresh-color` (green by default) in `fresh-rows.css`.
+
+## Options
+
+- `ms`: how long a new row stays marked, in ms, from 0 to 60 000. Default 5 000; another value takes it back, with an
+  `invalid-setting` warning.
+- `rowsArrived(keys, source)`: told once per refresh with the keys of the rows marked (never row data) and who
+  changed the rows. A throw is reported.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import type { ClientModel } from '@dzgrid/core';
+import { sameValues } from '@dzgrid/core/compare';
+import { freshRows } from '@dzgrid/dom/fresh-rows';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FRESH } from '@dzgrid/dom/locales/en-fresh';
+
+type Buoy = { id: string; sea: string; wave: number };
+
+const grid = createGrid<Buoy, ClientModel<Buoy>>(document.getElementById('buoys')!, {
+  rows: [
+    { id: 'y1', sea: 'Glass sea', wave: 1.2 },
+    { id: 'y2', sea: 'Salt bay', wave: 0.4 },
+    { id: 'y3', sea: 'Grey sound', wave: 2.1 },
+  ],
+  columns: [
+    { id: 'sea', header: 'Sea' },
+    { id: 'wave', header: 'Wave (m)', type: 'number' },
+  ],
+  getRowId: (b) => b.id,
+  sameRow: sameValues,
+  messages: { ...EN, text: { ...EN.text, ...EN_FRESH.text } },
+  features: [freshRows({ ms: 8000, rowsArrived: (keys) => console.log(keys.length) })],
+});
+
+grid.kernel.rows.applyTransaction({ add: [{ id: 'y4', sea: 'Amber reach', wave: 0.9 }] });
+```
+
+## See also
+
+- [`sameRow`](../../settings/same-row/): a full reload compared row by row.
+- [Server data](../../guides/server-data/#rows-that-change): transactions and reloads.
+- [`motion`](../motion/): a changed value's flash.
