@@ -144,6 +144,8 @@ export function checkSource(source: string, file: string): Finding[] {
         if (a0.text === 'style' && literalTexts(a1).some((t) => COLOUR_DECL.test(t))) add('colour', n, "setAttribute('style') with a colour");
       }
       if (callee === 'setProperty' && a0 && ts.isStringLiteral(a0) && COLOUR_CSS.test(a0.text)) add('colour', n, `style.setProperty('${a0.text}')`);
+      // `text-align` / `float` through setProperty: only logical values (1.11.0, a clamped title set at the start).
+      if (callee === 'setProperty' && a0 && ts.isStringLiteral(a0) && /^(text-align|float)$/.test(a0.text) && a1 && literalTexts(a1).some((t) => /^(left|right)$/.test(t.trim()))) add('physical', n, `style.setProperty('${a0.text}', physical)`);
       if (callee && TEXT_CALLS.has(callee)) {
         const args = callee === 'insertAdjacentText' ? n.arguments.slice(1) : n.arguments;
         if (args.some((a) => literalTexts(a).some(hasLetters))) add('literal-text', n, `${callee}(literal text)`);

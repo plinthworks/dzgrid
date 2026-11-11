@@ -287,7 +287,8 @@ createGrid<Plot>(document.getElementById('watering')!, {
 `headerWrap: true` on a column, with the `wrappedHeaders()` feature from `@dzgrid/dom/wrapped-headers` (no stylesheet),
 puts a long title on several lines (at most `maxLines`, 3 by default, then « … ») and grows the column headers' row to
 the tallest — measured again when a column is resized or the text size changes, never while scrolling. With
-`headerHeight` the taller wins. Fitting such a column to its content takes its cells and the title's longest word.
+`headerHeight` the taller wins. Fitting such a column to its content takes its cells and the title's longest word. A
+title cut at the cap sits at the start of its cell, even in a number column, so its « … » shows in every browser.
 
 ```ts
 import { createGrid } from '@dzgrid/dom';

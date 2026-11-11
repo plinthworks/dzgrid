@@ -413,7 +413,7 @@ made with `definePart` from `@dzgrid/dom`.
 - No `messages`: the page stays empty and the console says `dz-grid: messages are required`.
 - A feature whose texts are not merged into `messages` throws when the grid is made, naming the missing keys.
 - An output that does not exist (`(selectionChange)`) never fires and says nothing: only the outputs the component
-  lists exist; `(gridEvent)` carries every event.
+  lists exist — one per grid event, of its name (`(sortChanged)`, `(pageChanged)`…); `(gridEvent)` carries them all.
 - `features` written in the template (`[features]="[filters()]"`) makes a new array on every check: keep it a field.
 </Aside>
 

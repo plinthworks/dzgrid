@@ -1,6 +1,6 @@
 // 1.10.0 in real browsers (scripts/browser-1-10.mjs): group rows apart from the column headers (`headerHeight: { columns,
 // groups }`), the filter row's own height, columns fitted at load, titles on several lines, the column under the pointer.
-// `?lang=ar` right to left, `?dark=1`, `?narrow=1` a 420 px grid. Made-up rows: a tea house's tastings.
+// `?lang=ar` right to left, `?dark=1`, `?narrow=1` a 420 px grid, `?clamp=2` titles capped at 2 lines (1.11.0). Made-up rows: a tea house's tastings.
 import type { ColumnOrGroup, GridEvent, Problem } from '@dzgrid/core';
 import { createGrid, type GridMessages } from '../../src/index.js';
 import { spans } from '../../src/spans.js';
@@ -53,7 +53,7 @@ const cols = columnsFeature({ fitOnLoad: 'content' });
 const grid = createGrid<T>(document.getElementById('host')!, {
   rows, getRowId: (r) => r.id, columns, messages, locale: ar ? 'ar' : 'fr-FR', timeZone: 'UTC', direction: ar ? 'rtl' : 'ltr',
   rowHeight: 36, headerHeight: { columns: 48, groups: 28 }, label: ar ? 'التذوق' : 'Dégustations',
-  features: [spans(), filters({ floating: true, rowHeight: 44 }), cols, pinnedRows<T>({ top: [{ id: 'ref', name: ar ? 'المرجع' : 'Référence', origin: '—', grams: 3, temp: 80, minutes: 3, note: '—', organic: false }] }), wrappedHeaders(), columnHover()],
+  features: [spans(), filters({ floating: true, rowHeight: 44 }), cols, pinnedRows<T>({ top: [{ id: 'ref', name: ar ? 'المرجع' : 'Référence', origin: '—', grams: 3, temp: 80, minutes: 3, note: '—', organic: false }] }), wrappedHeaders(q.get('clamp') ? { maxLines: Number(q.get('clamp')) } : {}), columnHover()],
   onEvent: (e: GridEvent<T>) => { if (e.type === 'problems') told.push(...e.problems); },
 });
 Object.assign(window, { grid, cols, told, ready: true });

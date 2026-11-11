@@ -3,10 +3,12 @@
 # history: 1.0.0 as published on npm (first baseline of the guard, 2026-10-29)
 # history: Phase 11 L6 (2026-11-09): the names the guide (docs/guide/) documents, guarded from now on; additions only, nothing removed or narrowed — @dzgrid/angular#DzgColumnOrGroup, @dzgrid/angular#selectedIds, @dzgrid/angular#DzGrid, @dzgrid/angular#DzgController
 # history: 1.8.0 fix (owner found on 1.7.0): DzGrid's selectionChanged reason typed through @dzgrid/core's exported SelectionReason instead of the unpublished @dzgrid/core/kernel — same type, nothing narrowed — @dzgrid/angular#DzGrid
+# history: owner 2026-11-10: baseline extended to every published entry
+# history: owner 2026-11-10 « ok comme ça, 1.11.0 juste après »: [motion] and an output for every grid event — @dzgrid/angular#DzGrid
 
 @ @dzgrid/angular
 ## DZGRID_ANGULAR_VERSION
-  declare const DZGRID_ANGULAR_VERSION = "1.0.0";
+  declare const DZGRID_ANGULAR_VERSION = "1.11.0";
 ## DZG_DEFAULTS
   declare const DZG_DEFAULTS: InjectionToken<DzGridDefaults>;
 ## DZG_ENV
@@ -24,10 +26,14 @@
       readonly messages: _angular_core.InputSignal<GridMessages | undefined>;
       readonly locale: _angular_core.InputSignal<string | undefined>;
       readonly timeZone: _angular_core.InputSignal<string | undefined>;
-      readonly numerals: _angular_core.InputSignal<"latn" | "locale" | undefined>;
-      readonly direction: _angular_core.InputSignal<"auto" | "ltr" | "rtl" | undefined>;
+      readonly numerals: _angular_core.InputSignal<"locale" | "latn" | undefined>;
+      readonly direction: _angular_core.InputSignal<"ltr" | "rtl" | "auto" | undefined>;
       readonly density: _angular_core.InputSignal<"compact" | "comfortable" | "spacious" | undefined>;
+      readonly headers: _angular_core.InputSignal<"hidden" | "shown" | undefined>;
       readonly rowHeight: _angular_core.InputSignal<number | undefined>;
+      readonly headerHeight: _angular_core.InputSignal<number | _dzgrid_dom.HeaderHeights | undefined>;
+      readonly theme: _angular_core.InputSignal<_dzgrid_dom.GridTheme | undefined>;
+      readonly icons: _angular_core.InputSignal<_dzgrid_dom.GridIcons | undefined>;
       readonly overlay: _angular_core.InputSignal<"loading" | "error" | null | undefined>;
       readonly busy: _angular_core.InputSignal<boolean | undefined>;
       readonly label: _angular_core.InputSignal<string | undefined>;
@@ -69,6 +75,7 @@
       readonly features: _angular_core.InputSignal<readonly GridFeature[] | undefined>;
       readonly multiSort: _angular_core.InputSignal<boolean | undefined>;
       readonly sameRow: _angular_core.InputSignal<((a: T, b: T) => boolean) | undefined>;
+      readonly motion: _angular_core.InputSignal<boolean | undefined>;
       readonly floatingFilters: _angular_core.InputSignal<boolean | undefined>;
       readonly save: _angular_core.InputSignal<SaveHandler<T> | undefined>;
       readonly state: _angular_core.InputSignal<GridState | null | undefined>;
@@ -197,6 +204,134 @@
           readonly parent: RowKey | null;
           readonly applied: boolean;
       }>;
+      readonly modelUpdated: OutputEmitterRef<{
+          readonly type: "modelUpdated";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly displayed: _dzgrid_core.DisplayedRows<T>;
+          readonly kind: _dzgrid_core.ModelChange<T_1>["kind"];
+      }>;
+      readonly sortChanged: OutputEmitterRef<{
+          readonly type: "sortChanged";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly sort: readonly _dzgrid_core.SortItem[];
+      }>;
+      readonly filterChanged: OutputEmitterRef<{
+          readonly type: "filterChanged";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly filter: FilterModel;
+      }>;
+      readonly quickChanged: OutputEmitterRef<{
+          readonly type: "quickChanged";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly text: string;
+      }>;
+      readonly pageChanged: OutputEmitterRef<{
+          readonly type: "pageChanged";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly page: _dzgrid_core.PageState;
+      }>;
+      readonly columnsChanged: OutputEmitterRef<{
+          readonly type: "columnsChanged";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly changed: readonly string[];
+          readonly layoutChanged: boolean;
+      }>;
+      readonly columnResized: OutputEmitterRef<{
+          readonly type: "columnResized";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly column: string;
+          readonly width: number;
+          readonly finished: boolean;
+      }>;
+      readonly pinnedChanged: OutputEmitterRef<{
+          readonly type: "pinnedChanged";
+          readonly source: _dzgrid_core.ChangeSource;
+      }>;
+      readonly focusChanged: OutputEmitterRef<{
+          readonly type: "focusChanged";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly focus: _dzgrid_core.FocusPos | null;
+      }>;
+      readonly firstDataRendered: OutputEmitterRef<{
+          readonly type: "firstDataRendered";
+          readonly source: "data";
+      }>;
+      readonly selectionRefused: OutputEmitterRef<{
+          readonly type: "selectionRefused";
+          readonly source: _dzgrid_core.ChangeSource;
+      } & _dzgrid_core.SelectionRefusal>;
+      readonly editingStarted: OutputEmitterRef<{
+          readonly type: "editingStarted";
+          readonly source: "user";
+          readonly key: RowKey;
+          readonly column: string;
+          readonly start: "f2" | "enter" | "key" | "dblclick" | "tap" | "tab";
+      }>;
+      readonly editingStopped: OutputEmitterRef<{
+          readonly type: "editingStopped";
+          readonly source: "user";
+          readonly key: RowKey;
+          readonly column: string;
+          readonly kept: boolean;
+          readonly via: "enter" | "tab" | "escape" | "blur" | "lost";
+      }>;
+      readonly editStates: OutputEmitterRef<{
+          readonly type: "editStates";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly cells: readonly {
+              readonly key: RowKey;
+              readonly column: string;
+          }[];
+      }>;
+      readonly stateRestored: OutputEmitterRef<{
+          readonly type: "stateRestored";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly problems: readonly Problem[];
+      }>;
+      readonly groupByChanged: OutputEmitterRef<{
+          readonly type: "groupByChanged";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly by: readonly string[];
+      }>;
+      readonly exportRequested: OutputEmitterRef<{
+          readonly type: "exportRequested";
+      } & _dzgrid_core.ExportTrace & {
+          readonly columns: readonly string[];
+          readonly query: Query;
+          readonly queryKey: string;
+          readonly server?: _dzgrid_core.ExportServerPart;
+          readonly count: number | null;
+          readonly selection?: {
+              readonly mode: "include" | "exclude";
+              readonly count: number | null;
+          };
+          readonly zone: string;
+          readonly locale: string;
+      }>;
+      readonly exportFinished: OutputEmitterRef<{
+          readonly type: "exportFinished";
+      } & _dzgrid_core.ExportTrace & {
+          readonly outcome: "done" | "failed" | "cancelled";
+          readonly via: "browser" | "server";
+          readonly rows: number | null;
+          readonly columns: number;
+          readonly bytes: number | null;
+          readonly fileName: string | null;
+          readonly hidden?: number;
+          readonly durationMs: number;
+          readonly blank?: number;
+          readonly invalid?: number;
+          readonly failure?: {
+              readonly stage: "load" | "rows" | "canExport" | "exportAll" | "build" | "download";
+              readonly name: string;
+          };
+      }>;
+      readonly exportRefused: OutputEmitterRef<{
+          readonly type: "exportRefused";
+      } & _dzgrid_core.ExportTrace & {
+          readonly refusal: "host" | "too-large" | "error";
+          readonly reason?: string;
+      }>;
       readonly problems: OutputEmitterRef<readonly Problem[]>;
       readonly gridReady: OutputEmitterRef<DzgController<T>>;
       readonly controller: DzgController<T>;
@@ -293,8 +428,28 @@
               "required": false;
               "isSignal": true;
           };
+          "headers": {
+              "alias": "headers";
+              "required": false;
+              "isSignal": true;
+          };
           "rowHeight": {
               "alias": "rowHeight";
+              "required": false;
+              "isSignal": true;
+          };
+          "headerHeight": {
+              "alias": "headerHeight";
+              "required": false;
+              "isSignal": true;
+          };
+          "theme": {
+              "alias": "theme";
+              "required": false;
+              "isSignal": true;
+          };
+          "icons": {
+              "alias": "icons";
               "required": false;
               "isSignal": true;
           };
@@ -403,6 +558,11 @@
               "required": false;
               "isSignal": true;
           };
+          "motion": {
+              "alias": "motion";
+              "required": false;
+              "isSignal": true;
+          };
           "floatingFilters": {
               "alias": "floatingFilters";
               "required": false;
@@ -471,6 +631,25 @@
           "densityChanged": "densityChanged";
           "selectionChanged": "selectionChanged";
           "rowMove": "rowMove";
+          "modelUpdated": "modelUpdated";
+          "sortChanged": "sortChanged";
+          "filterChanged": "filterChanged";
+          "quickChanged": "quickChanged";
+          "pageChanged": "pageChanged";
+          "columnsChanged": "columnsChanged";
+          "columnResized": "columnResized";
+          "pinnedChanged": "pinnedChanged";
+          "focusChanged": "focusChanged";
+          "firstDataRendered": "firstDataRendered";
+          "selectionRefused": "selectionRefused";
+          "editingStarted": "editingStarted";
+          "editingStopped": "editingStopped";
+          "editStates": "editStates";
+          "stateRestored": "stateRestored";
+          "groupByChanged": "groupByChanged";
+          "exportRequested": "exportRequested";
+          "exportFinished": "exportFinished";
+          "exportRefused": "exportRefused";
           "problems": "problems";
           "gridReady": "gridReady";
       }, [
@@ -487,6 +666,24 @@
   type DzGridDefaults = Pick<GridSettings<unknown>, 'locale' | 'timeZone' | 'direction' | 'density' | 'rowHeight' | 'numerals' | 'features'>;
 ## DzgCell
   type DzgCell = DzgPartComponent<'cell'>;
+## DzgColumnDef
+  type DzgColumnDef<T, V = unknown> = Omit<ColumnDef<T, V>, 'ui'> & {
+      readonly ui?: DzgColumnUi<T, V>;
+  };
+## DzgColumnGroup
+  type DzgColumnGroup<T> = Omit<ColumnGroupDef<T>, 'children'> & {
+      readonly children: readonly DzgColumnOrGroup<T>[];
+  };
+## DzgColumnOrGroup
+  type DzgColumnOrGroup<T> = DzgColumnDef<T, any> | DzgColumnGroup<T>;
+## DzgColumnUi
+  type DzgColumnUi<T, V = unknown> = Omit<NonNullable<ColumnDef<T, V>['ui']>, 'cell' | 'header' | 'tooltip'> & {
+      readonly cell?: string | Type<DzgPartComponent<'cell'>>;
+      readonly header?: string | Type<DzgPartComponent<'header'>>;
+      readonly tooltip?: string | Type<DzgPartComponent<'tooltip'>>;
+  };
+## DzgColumns
+  type DzgColumns<T> = readonly DzgColumnOrGroup<T>[];
 ## DzgController
   declare class DzgController<T = unknown> {
       #private;
@@ -613,15 +810,19 @@
   type WiredSlot = keyof SlotContext;
 ## componentPart
   declare function componentPart<S extends WiredSlot>(slot: S, cmp: Type<DzgPartComponent<S>>): SlotPart<S>;
+## expandedIds
+  declare function expandedIds<T>(controller: DzgController<T>): string[] | null;
 ## fromObservable
   declare function fromObservable<T>(fetch: (req: DataRequest) => ObservableLike<DataResponse<T>>, values?: (req: ValuesRequest) => ObservableLike<ValuesResponse>): DataSource<T>;
 ## provideDzGrid
   declare function provideDzGrid(c: DzGridConfig): Provider[];
-## DzgColumnOrGroup
-  type DzgColumnOrGroup<T> = DzgColumnDef<T, any> | DzgColumnGroup<T>;
 ## selectedIds
   declare function selectedIds<T>(controller: DzgController<T>): {
       readonly mode: 'include' | 'exclude';
       readonly ids: string[];
       readonly query: Query;
   } | null;
+## uiData
+  declare function uiData<D = Readonly<Record<string, unknown>>>(c: {
+      readonly column: ResolvedColumn<any>;
+  }): D | undefined;

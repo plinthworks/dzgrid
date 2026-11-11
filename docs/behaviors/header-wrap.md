@@ -30,12 +30,17 @@ cut with « … », the title goes on two or three lines and the header row is a
 10. Fitting the column to its content (the menu, a double-click, `fitOnLoad`, `column-resize.md` 11, 16) measures its
     cells and only the title's longest word (with the header's marks and buttons): the title goes on lines instead of
     widening the column.
+11. (1.11.0, owner 2026-11-10 « C ») A title cut at the cap says `data-hclamp` on its header cell and its label is set
+    (inline) at the start of the cell, whatever the column's alignment, so its « … » shows in Chrome, Firefox and WebKit,
+    left to right and right to left. Known from the same copies the row's height is measured on (one read more of each
+    copy, in the same pass: no layout added); a title that fits again loses it.
 
 ## Where DzGrid differs on purpose
 - A cap in lines, not in pixels: it follows the text size and the density by itself.
 - The row grows; the column never widens for its title, not even when fitted to its content (10).
-- Known browser limit (Chrome 157, seen 2026-11-10): a clamped title aligned at the end (a number column's) is cut at
-  the cap without its « … »; start and centred titles show it. The whole title stays in the cell's name.
+- A title cut at the cap is set at the start of its cell, even in a number or centred column (11): Chrome (157, seen
+  2026-11-10) draws a clamped line aligned at the end, or centred in right-to-left text, past the label's edge, so its
+  « … » was cut off; Firefox and WebKit draw it. Its lines are nearly full anyway, so the move is slight.
 
 ## Tests
 `packages/dom/test/wrapped-headers.test.ts` (attribute, height from measured copies, the cap, the cache, missing

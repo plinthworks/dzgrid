@@ -10,6 +10,7 @@
 # history: Owner « ★ partout » (2026-11-09, 1.9.0 lot A): the names the guide documents for the new entries; additions only, nothing removed or narrowed — @dzgrid/core/auto-columns#autoColumns
 # history: Owner « ★ partout » (2026-11-09, 1.9.0 lot A): autoColumns returns plain ColumnDef[] (unreleased, accepted earlier in this lot) — @dzgrid/core/auto-columns#autoColumns
 # history: owner 2026-11-10 (yes / no fix, A): booleanCodecWith's labels become optional — wider for callers — @dzgrid/core#booleanCodecWith
+# history: owner 2026-11-10: baseline extended to every published entry
 
 @ @dzgrid/core
 ## AbortHandle
@@ -22,8 +23,27 @@
       readonly aborted: boolean;
       readonly reason?: unknown;
   }
+## AggCtx
+  export interface AggCtx {
+      readonly column: string;
+      readonly level: number | null;
+  }
+## AggFn
+  export type AggFn<V = unknown> = {
+      agg(values: readonly (V | null)[], ctx: AggCtx): unknown;
+  }['agg'];
+## AggFuncName
+  export type AggFuncName = 'sum' | 'avg' | 'min' | 'max' | 'count' | 'first' | 'last';
 ## AnyFilterKind
   export type AnyFilterKind = FilterKind<any, any>;
+## BlockLoadingNode
+  export interface BlockLoadingNode {
+      readonly key: RowKey;
+      readonly kind: 'loading';
+      readonly level: number;
+      readonly parent: null;
+      readonly failed: boolean;
+  }
 ## CellAddr
   export interface CellAddr {
       readonly row: RowKey;
@@ -104,6 +124,7 @@
       readonly now?: () => number;
       readonly shape?: RowShape<T>;
       readonly app?: unknown;
+      readonly sameRow?: ((a: T, b: T) => boolean) | undefined;
   }
 ## CollatorSpec
   export interface CollatorSpec {
@@ -122,6 +143,7 @@
       readonly field?: string;
       readonly value?: (row: Readonly<T>) => V;
       readonly header?: string;
+      readonly headerShort?: string;
       readonly type?: ColumnType;
       readonly codec?: ValueCodec<V>;
       readonly enumOptions?: readonly EnumOption[];
@@ -138,16 +160,29 @@
       readonly menu?: false;
       readonly chooser?: false;
       readonly sortable?: boolean;
+      readonly groupable?: boolean;
+      readonly aggFunc?: AggFuncName | AggFn<V>;
+      readonly total?: AggFuncName | AggFn<V>;
+      readonly headerVertical?: boolean;
+      readonly headerWrap?: boolean;
+      readonly collapsePriority?: number;
       readonly filter?: false | {
           readonly kind?: string;
           readonly floating?: boolean;
           readonly debounceMs?: number;
           readonly ops?: readonly string[];
           readonly optionPart?: string;
+          readonly exclude?: false;
+          readonly start?: 'all' | 'empty';
+          readonly selectAll?: boolean;
+          readonly maxConditions?: number;
+          readonly matchCase?: boolean;
+          readonly condition?: boolean;
       };
       readonly pinned?: Side | null;
       readonly hidden?: boolean;
       readonly align?: 'start' | 'center' | 'end';
+      readonly headerAlign?: 'start' | 'center' | 'end';
       readonly wrap?: boolean;
       readonly ui?: {
           readonly cell?: string;
@@ -234,6 +269,7 @@
       visible(): readonly ResolvedColumn<T>[];
       readonly version: number;
       readonly dataVersion: number;
+      withCollapsed?(): readonly ResolvedColumn<T>[];
   }
 ## ColumnModel
   export interface ColumnModel<T> extends ColumnLookup<T> {
@@ -245,6 +281,8 @@
       setAvailableInline(px: number): ColumnChange;
       readonly folded: ReadonlySet<string>;
       fold(ids: ReadonlySet<string>): ColumnChange;
+      readonly collapsed?: ReadonlySet<string>;
+      collapse?(rank: ((c: ResolvedColumn<T>) => number) | null): ColumnChange;
   }
 ## ColumnOrGroup
   export type ColumnOrGroup<T> = ColumnDef<T, any> | ColumnGroupDef<T>;
@@ -308,6 +346,7 @@
       matchedAt?(i: DisplayIndex): boolean;
       parentOf?(key: RowKey): RowKey | null;
       levelAt?(i: DisplayIndex): number;
+      held?(): Iterable<DisplayIndex>;
   }
 ## EMPTY_QUERY
   export declare const EMPTY_QUERY: Query;
@@ -350,7 +389,7 @@
       readonly id: string;
       readonly at: string;
       readonly scope: ExportScope;
-      readonly format?: 'csv' | 'xlsx';
+      readonly format?: 'csv' | 'xlsx' | 'json';
   }
 ## FilterKind
   export interface FilterKind<S extends Json = Json, V = unknown> {
@@ -375,6 +414,16 @@
       readonly column: string;
       readonly level?: number;
   };
+## FooterNode
+  export interface FooterNode {
+      readonly key: RowKey;
+      readonly kind: 'footer';
+      readonly level: number;
+      readonly group: RowKey | null;
+      readonly label: string;
+      readonly count: number;
+      readonly aggs: Readonly<Record<string, unknown>>;
+  }
 ## Formatters
   export interface Formatters {
       number(spec?: NumberFormatSpec): (n: number) => string;
@@ -720,7 +769,13 @@
       readonly level: number;
       readonly label: string;
       readonly path: readonly string[];
+      readonly column?: string;
+      readonly value?: unknown;
+      readonly count?: number;
+      readonly aggs?: Readonly<Record<string, unknown>>;
   }
+## GroupProblemCode
+  export type GroupProblemCode = 'agg-type' | 'agg-threw' | 'pivot-too-many';
 ## HeaderSelection
   export type HeaderSelection = 'none' | 'some' | 'all';
 ## INTENT_OWNERS
@@ -826,6 +881,10 @@
       readonly numerals: 'latn' | 'locale';
       readonly timeZone: string;
       readonly calendar: 'gregory';
+      readonly yesNo?: readonly [
+          yes: string,
+          no: string
+      ];
   }
 ## MAX_INSTANT
   export declare const MAX_INSTANT = 8640000000000000;
@@ -859,6 +918,9 @@
       readonly shape?: RowShape<T>;
       readonly app?: unknown;
       readonly held?: boolean | undefined;
+      readonly sameRow?: ((a: T, b: T) => boolean) | undefined;
+      readonly timer?: ((fn: () => void, ms: number) => () => void) | undefined;
+      readonly frame?: ((fn: () => void) => void) | undefined;
   }
 ## ModelStatus
   export type ModelStatus = {
@@ -1000,7 +1062,7 @@
       readonly detail?: string;
   }
 ## ProblemCode
-  export type ProblemCode = (typeof PROBLEM_CODES)[number] | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | GapProblemCode | XlsxProblemCode | 'print-too-many' | 'unknown-ui-key';
+  export type ProblemCode = (typeof PROBLEM_CODES)[number] | GroupProblemCode | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | GapProblemCode | XlsxProblemCode | ImportProblemCode | 'print-too-many' | 'unknown-ui-key' | 'rows-not-loaded' | 'unbounded-viewport';
 ## Query
   export interface Query {
       readonly sort: readonly SortItem[];
@@ -1020,7 +1082,7 @@
       readonly state: SelectionState;
   } | {
       readonly ok: false;
-      readonly reason: 'anchor-not-displayed' | 'target-not-displayed';
+      readonly reason: 'anchor-not-displayed' | 'target-not-displayed' | 'rows-not-loaded';
   };
 ## Rejected
   export type Rejected = typeof REJECTED;
@@ -1099,12 +1161,13 @@
       reapply?(source?: ChangeSource): void;
       readonly orderStale?: boolean;
       setApp?(context: unknown, source?: ChangeSource): void;
+      want?(first: number, last: number, keep?: readonly number[]): void;
       hold?(fn: () => void): void;
       subscribe(fn: (c: ModelChange<T>) => void): () => void;
       destroy(): void;
   }
 ## RowNode
-  export type RowNode<T> = DataNode<T> | GroupNode | DetailNode<T> | LoadingNode;
+  export type RowNode<T> = DataNode<T> | GroupNode | DetailNode<T> | LoadingNode | FooterNode | BlockLoadingNode;
 ## RowScope
   export interface RowScope {
       readonly params: Readonly<Record<string, Json>>;
@@ -1112,18 +1175,20 @@
   }
 ## RowShape
   export interface RowShape<T> {
-      readonly kind: 'tree' | 'detail';
+      readonly kind: 'tree' | 'detail' | 'group';
       readonly initial?: 'none' | 'all' | number;
       build(input: ShapeInput<T>): DisplayedRows<T>;
       all?(): DisplayedRows<T>;
-      parents?(snap: RowSnapshot<T>, depth: number, shown?: boolean): readonly RowKey[];
+      parents?(snap: RowSnapshot<T>, depth: number, shown?: boolean, env?: ColumnEnv<T>): readonly RowKey[];
       isOpen?(key: RowKey): boolean;
       opens?(key: RowKey): boolean;
       readonly problems: readonly Problem[];
       load?(rows: Iterable<T>, id: (row: T) => RowIdInput): Iterable<T>;
       tx?(tx: RowTransaction<T>, id: (row: T) => RowIdInput, snap: RowSnapshot<T>): RowTransaction<T>;
       rekey?(snap: RowSnapshot<T>): ((key: RowKey) => RowKey) | null;
-      attach?(model: ClientModel<T>, redraw: () => void): void;
+      attach?(model: ClientModel<T>, redraw: (kind?: 'rows' | 'expand', source?: ChangeSource) => void): void;
+      reads?(): readonly string[];
+      values?(changed?: readonly string[]): void;
       refresh?(): void;
   }
 ## RowTransaction
@@ -1168,6 +1233,8 @@
       readonly skip: (key: RowKey) => boolean;
       rowsChanged?(): void;
   }
+## SelectionReason
+  export type SelectionReason = 'scope-changed' | 'rows-dropped';
 ## SelectionRefusal
   export interface SelectionRefusal {
       readonly rows: readonly RowKey[];
@@ -1212,6 +1279,7 @@
       readonly layer: ReadonlyMap<RowKey, boolean> | null;
       readonly changed?: readonly RowKey[];
       readonly version: number;
+      readonly env?: ColumnEnv<T>;
   }
 ## Side
   export type Side = 'start' | 'end';
@@ -1364,6 +1432,7 @@
       readonly columns: ColumnModel<T>;
       readonly query?: Query;
       readonly keepSelectionOnFilter?: boolean;
+      readonly multiSort?: boolean | undefined;
   }): GridKernel<T, M>;
 ## dataKey
   export declare function dataKey(id: unknown): RowKey | null;
@@ -1599,6 +1668,8 @@
       readonly quick?: string;
       readonly sort?: readonly SortItem[];
       readonly page?: PageWindow;
+      readonly blocks?: true;
+      readonly group?: GroupPart;
       readonly params: Readonly<Record<string, Json>>;
       readonly zone: string;
       readonly key: string;
@@ -1645,6 +1716,7 @@
       accepts(t: Ticket): DropReason | null;
       settle(t: Ticket): DropReason | null;
       cancel(channel: string): void;
+      forget?(channel: string): void;
       newEpoch(): void;
       destroy(): void;
       readonly epoch: number;
@@ -1871,6 +1943,7 @@
       readonly text?: ((col: ResolvedColumn<T>, row: Readonly<T>, index: number) => string | null) | undefined;
       readonly apart?: ((row: number) => boolean) | undefined;
       readonly treeColumn?: string | ((row: T) => string | undefined) | undefined;
+      readonly acrossLevels?: boolean | undefined;
   }
 ## SpanLookup
   export interface SpanLookup {
@@ -1916,6 +1989,8 @@
       readonly reader?: ValueReader<T>;
       readonly spans?: SpanMap | null;
       readonly spanColumns?: readonly string[];
+      readonly groupLabel?: ((node: GroupNode | FooterNode) => string) | undefined;
+      readonly aggFuncs?: Readonly<Record<string, AggFuncName | AggFn>> | undefined;
   }
 ## CsvOptions
   export interface CsvOptions {
@@ -1933,6 +2008,7 @@
       readonly tree?: 'none' | 'level' | 'indent';
       readonly levelHeader?: string;
       readonly treeColumn?: string;
+      readonly groupRows?: boolean;
   }
 ## CsvScope
   export type CsvScope = ExportScope;
@@ -1951,7 +2027,7 @@
       readonly count: number | null;
       readonly selection?: SelectionState;
       readonly server?: Omit<DataRequest, 'page' | 'signal'>;
-      readonly format?: 'csv' | 'xlsx';
+      readonly format?: 'csv' | 'xlsx' | 'json';
   }
 ## csvChunks
   export declare function csvChunks<T>(i: CsvInput<T>, o?: CsvOptions): Generator<string, CsvSummary>;
@@ -1970,6 +2046,92 @@
   export declare const csvSeparatorFor: (ctx: LocaleCtx) => "," | ";";
 ## toCsv
   export declare function toCsv<T>(i: CsvInput<T>, o?: CsvOptions): string;
+
+@ @dzgrid/core/xlsx
+## XLSX_COLUMNS
+  export declare const XLSX_COLUMNS = 16384;
+## XLSX_MIME
+  export declare const XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+## XLSX_ROWS
+  export declare const XLSX_ROWS = 1048576;
+## XlsxInput
+  export interface XlsxInput<T> extends CsvInput<T> {
+      readonly widths?: Readonly<Record<string, number>>;
+      readonly pinned?: readonly string[];
+      readonly groups?: readonly ColumnOrGroup<T>[];
+  }
+## XlsxOptions
+  export interface XlsxOptions<T = any> {
+      readonly text?: 'value' | 'display' | undefined;
+      readonly enums?: 'label' | 'code' | undefined;
+      readonly header?: boolean | undefined;
+      readonly columns?: readonly string[];
+      readonly levelHeader?: string | undefined;
+      readonly treeColumn?: string | undefined;
+      readonly sheetName?: string;
+      readonly groups?: boolean;
+      readonly freeze?: boolean;
+      readonly spans?: 'repeat' | 'merge';
+      readonly tree?: 'outline' | 'level' | 'none';
+      readonly instants?: 'wall' | 'utc';
+      readonly rtl?: boolean;
+      readonly xlsxStyle?: (c: XlsxStyleContext<T>) => XlsxStyle | null | undefined;
+      readonly chunkRows?: number;
+      readonly groupRows?: boolean | undefined;
+  }
+## XlsxPiece
+  export interface XlsxPiece {
+      readonly entry: string;
+      readonly text: string;
+  }
+## XlsxStyle
+  export interface XlsxStyle {
+      readonly fill?: string;
+      readonly color?: string;
+      readonly bold?: boolean;
+      readonly italic?: boolean;
+  }
+## XlsxStyleContext
+  export interface XlsxStyleContext<T> {
+      readonly column: string;
+      readonly value: unknown;
+      readonly row: Readonly<T> | null;
+      readonly header: boolean;
+  }
+## XlsxSummary
+  export interface XlsxSummary extends CsvSummary {
+      readonly problems: readonly Problem[];
+  }
+## ZipEntry
+  export interface ZipEntry {
+      readonly name: string;
+      readonly crc: number;
+      readonly size: number;
+      readonly method: 0 | 8;
+      readonly data: readonly Uint8Array[];
+  }
+## crc32
+  export declare function crc32(b: Uint8Array, crc?: number): number;
+## numFmtFor
+  export declare function numFmtFor(spec: NumberFormatSpec | undefined, ctx: LocaleCtx): string | 0;
+## serialOfDay
+  export declare const serialOfDay: (d: Day) => number | null;
+## sheetNameOf
+  export declare function sheetNameOf(name: unknown): string;
+## toXlsx
+  export declare function toXlsx<T>(i: XlsxInput<T>, o?: XlsxOptions<T>, deflate?: (b: Uint8Array) => Uint8Array): {
+      readonly parts: Uint8Array[];
+      readonly summary: XlsxSummary;
+  };
+## utf8
+  export declare function utf8(s: string): Uint8Array;
+## xlsxParts
+  export declare function xlsxParts<T>(i: XlsxInput<T>, o?: XlsxOptions<T>): Generator<XlsxPiece, XlsxSummary>;
+## zipFile
+  export declare function zipFile(entries: readonly ZipEntry[]): {
+      readonly parts: Uint8Array[];
+      readonly problems: Problem[];
+  };
 
 @ @dzgrid/core/rules
 ## SelectionRule
@@ -1994,6 +2156,7 @@
       readonly path?: (row: T) => readonly string[];
       readonly filter?: 'ancestors' | 'subtree';
       readonly initial?: 'none' | 'all' | number;
+      readonly fixedOpen?: (row: T) => boolean;
   }
 ## TreeRows
   export interface TreeRows<T> extends DisplayedRows<T> {
@@ -2066,6 +2229,7 @@
       readonly height?: number | ((master: Readonly<T>) => number) | 'auto';
       readonly initial?: 'none' | 'all';
       readonly sizes?: ReadonlyMap<RowKey, number>;
+      readonly isMaster?: (master: Readonly<T>) => boolean;
   }
 ## DetailRows
   export interface DetailRows<T> extends DisplayedRows<T> {
@@ -2073,6 +2237,7 @@
       readonly details: Uint32Array;
       readonly heights: readonly number[];
       parentOf(key: RowKey): RowKey | null;
+      isMaster?(key: RowKey): boolean;
   }
 ## DetailShape
   export interface DetailShape<T> extends RowShape<T> {
@@ -2100,6 +2265,387 @@
   export declare function detailShape<T>(o?: DetailOptions<T>): DetailShape<T>;
 ## sparseRowLayout
   export declare function sparseRowLayout(rows: Pick<DisplayedRows<unknown>, 'count' | 'index'>, h: number, x: SparseExtras): SparseLayout;
+
+@ @dzgrid/core/grouping
+## AggCtx
+  export interface AggCtx {
+      readonly column: string;
+      readonly level: number | null;
+  }
+## AggFn
+  export type AggFn<V = unknown> = {
+      agg(values: readonly (V | null)[], ctx: AggCtx): unknown;
+  }['agg'];
+## AggFuncName
+  export type AggFuncName = 'sum' | 'avg' | 'min' | 'max' | 'count' | 'first' | 'last';
+## FooterNode
+  export interface FooterNode {
+      readonly key: RowKey;
+      readonly kind: 'footer';
+      readonly level: number;
+      readonly group: RowKey | null;
+      readonly label: string;
+      readonly count: number;
+      readonly aggs: Readonly<Record<string, unknown>>;
+  }
+## GroupShape
+  export interface GroupShape<T> extends RowShape<T> {
+      readonly kind: 'group';
+      readonly options?: GroupingOptions;
+      readonly by: readonly string[];
+      setBy(by: readonly string[], source?: ChangeSource): void;
+      totals(): Readonly<Record<string, unknown>>;
+      off(): void;
+      readonly diagnostics: {
+          readonly builds: number;
+          readonly aggs: number;
+          readonly flattens: number;
+      };
+  }
+## GroupedRows
+  export type GroupedRows<T> = TreeRows<T>;
+## GroupingOptions
+  export interface GroupingOptions {
+      readonly by?: readonly string[];
+      readonly aggFuncs?: Readonly<Record<string, AggFuncName | AggFn>>;
+      readonly expanded?: 'none' | 'all' | number;
+      readonly footers?: 'none' | 'group' | 'grand' | 'both';
+      readonly grandTotal?: 'top' | 'bottom';
+  }
+## checkRowGroups
+  export declare function checkRowGroups<T>(raw: unknown, columns: Pick<ColumnLookup<T>, 'get'>): {
+      readonly by: readonly string[] | null;
+      readonly problems: readonly Problem[];
+  };
+## groupConflicts
+  export declare function groupConflicts(o: {
+      readonly tree?: boolean;
+      readonly detail?: boolean;
+      readonly spans?: boolean;
+      readonly page?: boolean;
+      readonly server?: boolean;
+  }): Problem[];
+## groupShape
+  export declare function groupShape<T>(o?: GroupingOptions): GroupShape<T>;
+
+@ @dzgrid/core/infinite
+## InfiniteDiagnostics
+  export interface InfiniteDiagnostics {
+      readonly fetches: number;
+      readonly valueFetches: number;
+      readonly gate: GateDiagnostics;
+      readonly blocks: {
+          readonly held: number;
+          readonly asked: number;
+          readonly evicted: number;
+          readonly max: number;
+          readonly failed: number;
+      };
+  }
+## InfiniteModel
+  export interface InfiniteModel<T> extends SourceHandle<T> {
+      readonly diagnostics: InfiniteDiagnostics;
+      want(first: number, last: number, keep?: readonly number[]): void;
+      applyTransaction(tx: RowTransaction<T>, source?: ChangeSource): TransactionResult;
+      applyTransactionAsync(tx: RowTransaction<T>, done?: (r: TransactionResult) => void): void;
+  }
+## InfiniteOptions
+  export interface InfiniteOptions {
+      readonly blockSize?: number;
+      readonly maxBlocks?: number;
+      readonly ahead?: number;
+      readonly concurrency?: number;
+      readonly restMs?: number;
+      readonly batchMs?: number;
+      readonly params?: Readonly<Record<string, Json>>;
+      readonly abort?: () => AbortHandle;
+  }
+## InfiniteRows
+  export interface InfiniteRows<T> extends SourceBinding<T> {
+      create(env: ModelEnv<T>): InfiniteModel<T>;
+  }
+## infiniteRows
+  export declare function infiniteRows<T>(data: DataSource<T>, o?: InfiniteOptions): InfiniteRows<T>;
+
+@ @dzgrid/core/server-side
+## GroupPart
+  export interface GroupPart {
+      readonly by: readonly string[];
+      readonly path: readonly GroupValue[];
+      readonly aggs: readonly {
+          readonly column: string;
+          readonly fn: AggFuncName;
+      }[];
+      readonly pivot?: PivotPart;
+  }
+## GroupResponse
+  export interface GroupResponse {
+      readonly groups: readonly {
+          readonly value: GroupValue;
+          readonly count?: number;
+          readonly aggs?: Readonly<Record<string, Json>>;
+      }[];
+      readonly total?: number;
+      readonly hasNext?: boolean;
+      readonly totals?: Readonly<Record<string, Json>>;
+  }
+## GroupValue
+  export type GroupValue = string | number | boolean | null;
+## PivotCells
+  export type PivotCells = Readonly<Record<string, Readonly<Record<string, Json>>>>;
+## PivotPart
+  export interface PivotPart {
+      readonly columns: readonly string[];
+      readonly desc?: readonly string[];
+      readonly subtotals?: true;
+      readonly limit: number;
+      readonly sort?: {
+          readonly crossing: readonly GroupValue[];
+          readonly column: string;
+          readonly dir: 'asc' | 'desc';
+      };
+      readonly crossings?: readonly (readonly GroupValue[])[];
+  }
+## PivotResponse
+  export interface PivotResponse extends Omit<GroupResponse, 'groups'> {
+      readonly groups: readonly (GroupResponse['groups'][number] & {
+          readonly cells?: PivotCells;
+      })[];
+      readonly pivot?: {
+          readonly crossings?: readonly (readonly GroupValue[])[];
+          readonly count?: number;
+          readonly totals?: PivotCells;
+      };
+  }
+## ServerPivotPlug
+  export interface ServerPivotPlug {
+      link(env: ModelEnv<any>, model: ServerPivotHooks): ServerPivotLink | null;
+  }
+## ServerSideDiagnostics
+  export interface ServerSideDiagnostics {
+      readonly fetches: number;
+      readonly valueFetches: number;
+      readonly gate: GateDiagnostics;
+      readonly blocks: {
+          readonly held: number;
+          readonly asked: number;
+          readonly evicted: number;
+          readonly max: number;
+          readonly failed: number;
+      };
+      readonly levels: number;
+      readonly flattens: number;
+  }
+## ServerSideModel
+  export interface ServerSideModel<T> extends SourceHandle<T> {
+      readonly diagnostics: ServerSideDiagnostics;
+      want(first: number, last: number, keep?: readonly number[]): void;
+      readonly by: readonly string[];
+      readonly pivot?: boolean;
+      readonly wireSort?: readonly SortItem[] | undefined;
+      setBy(by: readonly string[], source?: ChangeSource): void;
+      totals(): Readonly<Record<string, unknown>>;
+      readonly group: GroupPart | null;
+      readonly expansion: ReadonlySet<RowKey>;
+      isExpanded(key: RowKey): boolean;
+      setExpansion(set: ReadonlySet<RowKey>, source?: ChangeSource): void;
+      expand(rows: readonly RowKey[], expanded: boolean, source?: ChangeSource): readonly RowKey[];
+      expandable(depth?: number): readonly RowKey[];
+      expandAll(expanded: boolean, depth?: number, source?: ChangeSource): readonly RowKey[];
+      applyTransaction(tx: RowTransaction<T>, source?: ChangeSource): TransactionResult;
+      applyTransactionAsync(tx: RowTransaction<T>, done?: (r: TransactionResult) => void): void;
+  }
+## ServerSideOptions
+  export interface ServerSideOptions {
+      readonly blockSize?: number;
+      readonly maxBlocks?: number;
+      readonly ahead?: number;
+      readonly concurrency?: number;
+      readonly restMs?: number;
+      readonly batchMs?: number;
+      readonly by?: readonly string[];
+      readonly aggFuncs?: Readonly<Record<string, AggFuncName>>;
+      readonly footers?: 'none' | 'group' | 'grand' | 'both';
+      readonly grandTotal?: 'top' | 'bottom';
+      readonly params?: Readonly<Record<string, Json>>;
+      readonly abort?: () => AbortHandle;
+      readonly pivot?: ServerPivotPlug;
+  }
+## ServerSideRows
+  export interface ServerSideRows<T> extends SourceBinding<T> {
+      create(env: ModelEnv<T>): ServerSideModel<T>;
+  }
+## serverSideRows
+  export declare function serverSideRows<T>(data: DataSource<T>, o?: ServerSideOptions): ServerSideRows<T>;
+
+@ @dzgrid/core/row-drag
+## DropWhere
+  export type DropWhere = 'before' | 'after' | 'inside';
+## MoveRowsOptions
+  export interface MoveRowsOptions<T> {
+      readonly parentId?: (row: T) => RowIdInput | null | undefined;
+      readonly setParent?: (row: T, parent: RowIdInput | null) => T;
+  }
+## MoveStep
+  export type MoveStep = -1 | 1 | 'start' | 'end' | 'in' | 'out';
+## RowDrop
+  export interface RowDrop {
+      readonly key: RowKey | null;
+      readonly where: DropWhere;
+  }
+## RowMove
+  export interface RowMove {
+      readonly keys: readonly RowKey[];
+      readonly target: RowDrop;
+  }
+## dropPlace
+  export declare function dropPlace(d: Rows, i: number, frac: number, moving: readonly RowKey[], tree: boolean): RowDrop | null;
+## movableAt
+  export declare const movableAt: (d: Rows, i: number) => RowKey | null;
+## moveRows
+  export declare function moveRows<T>(rows: readonly T[], move: RowMove, getRowId: (row: T) => RowIdInput, o?: MoveRowsOptions<T>): T[];
+## movingRows
+  export declare function movingRows(d: Rows, keys: readonly RowKey[]): RowKey[];
+## nextPlace
+  export declare function nextPlace(d: Rows, keys: readonly RowKey[], focus: RowKey, by: MoveStep, tree: boolean): RowDrop | null;
+## parentAfter
+  export declare const parentAfter: (d: Rows, t: RowDrop) => RowKey | null;
+## placeOf
+  export declare function placeOf(d: Rows, key: RowKey, tree: boolean): {
+      readonly n: number;
+      readonly total: number;
+      readonly level: number;
+  } | null;
+## siblings
+  export declare function siblings(d: Rows, parent: RowKey | null, tree: boolean): RowKey[];
+## unchanged
+  export declare function unchanged(d: Rows, keys: readonly RowKey[], t: RowDrop, tree: boolean): boolean;
+## within
+  export declare function within(d: Rows, key: RowKey, set: ReadonlySet<RowKey>): boolean;
+
+@ @dzgrid/core/dock
+## DOCK_AREAS
+  export declare const DOCK_AREAS: readonly DockArea[];
+## DockArea
+  export type DockArea = 'start' | 'end' | 'bottom' | 'float';
+## DockAreaState
+  export interface DockAreaState {
+      readonly active?: string;
+      readonly size?: number;
+      readonly collapsed?: boolean;
+  }
+## DockPanelState
+  export interface DockPanelState {
+      readonly area: DockArea;
+      readonly open: boolean;
+      readonly at?: {
+          readonly inline: number;
+          readonly block: number;
+      };
+  }
+## DockState
+  export interface DockState {
+      readonly panels: Readonly<Record<string, DockPanelState>>;
+      readonly areas: {
+          readonly start?: DockAreaState;
+          readonly end?: DockAreaState;
+          readonly bottom?: DockAreaState;
+      };
+  }
+## checkDock
+  export declare function checkDock(raw: unknown, lim: {
+      readonly min: number;
+      readonly max: number;
+  }): {
+      dock: DockState | null;
+      problems: Problem[];
+  };
+
+@ @dzgrid/core/pivot
+## PivotColumns
+  export interface PivotColumns<T> {
+      readonly columns: readonly ColumnOrGroup<T>[];
+      readonly key: string;
+      readonly count: number;
+  }
+## PivotOptions
+  export interface PivotOptions extends GroupingOptions {
+      readonly on?: boolean;
+      readonly columns?: readonly string[];
+      readonly desc?: readonly string[];
+      readonly values?: Fns;
+      readonly subtotals?: boolean;
+      readonly maxColumns?: number;
+      readonly width?: number;
+      readonly labels?: {
+          readonly blank?: string;
+          readonly total?: string;
+      };
+  }
+## PivotSeries
+  export interface PivotSeries {
+      readonly categories: readonly string[];
+      readonly series: readonly {
+          readonly id: string;
+          readonly name: string;
+          readonly values: readonly (number | null)[];
+      }[];
+  }
+## PivotShape
+  export interface PivotShape<T> extends GroupShape<T> {
+      readonly on: boolean;
+      setOn(on: boolean, source?: ChangeSource): void;
+      readonly pivotBy: readonly string[];
+      setPivotBy(columns: readonly string[], source?: ChangeSource): void;
+      readonly pivotDesc: readonly string[];
+      valueFns(): Fns;
+      setValueFns(values: Fns, source?: ChangeSource): void;
+      set(p: {
+          readonly on?: boolean;
+          readonly columns?: readonly string[];
+          readonly desc?: readonly string[];
+          readonly values?: Fns;
+      }, source?: ChangeSource): void;
+      generated(): PivotColumns<T>;
+      made(id: string): boolean;
+      valueColumn(id: string): string | undefined;
+      rows(key: RowKey): readonly T[];
+      series(o?: {
+          readonly value?: string;
+          readonly level?: number;
+      }): PivotSeries;
+      readonly passes: number;
+      serve?(link: PivotServe): (C: PivotCrossings | null, values: readonly {
+          readonly col: ResolvedColumn<T>;
+          readonly fn: AggFuncName;
+      }[], depth: number, told: Problem[], count?: number) => {
+          readonly n: number;
+          readonly slot: ArrayLike<number>;
+          readonly ids: readonly string[];
+      };
+  }
+## checkPivot
+  export declare function checkPivot<T>(raw: unknown, columns: Pick<ColumnLookup<T>, 'get'>): {
+      readonly pivot: {
+          readonly on?: boolean;
+          readonly columns?: readonly string[];
+          readonly desc?: readonly string[];
+          readonly values?: Readonly<Record<string, AggFuncName>>;
+      } | null;
+      readonly problems: readonly Problem[];
+  };
+## pivotShape
+  export declare function pivotShape<T>(o?: PivotOptions): PivotShape<T>;
+## pivotState
+  export declare function pivotState<T>(shape: PivotShape<T>, columns: Pick<ColumnLookup<T>, 'get'>): {
+      get(): PivotState;
+      set(raw: unknown): readonly Problem[];
+      made(id: string): boolean;
+  };
+
+@ @dzgrid/core/server-pivot
+## serverPivot
+  export declare function serverPivot(): ServerPivotPlug;
 
 @ @dzgrid/core/edit
 ## CellInput
@@ -2239,6 +2785,19 @@
       readonly start: number;
       readonly end: number;
   }
+## RangeStats
+  export interface RangeStats {
+      readonly cells: number;
+      readonly filled: number;
+      readonly numbers: number;
+      readonly sum: number;
+      readonly min: number | null;
+      readonly max: number | null;
+      readonly partial: boolean;
+      readonly formats: readonly NumberFormatSpec[];
+  }
+## boxHeld
+  export declare function boxHeld(b: RangeBox, d: DisplayedRows<unknown>): boolean;
 ## boxRows
   export declare function boxRows<T>(b: RangeBox, displayed: DisplayedRows<T>): DataNode<T>[];
 ## boxSize
@@ -2255,6 +2814,7 @@
 ## decodeTsv
   export declare function decodeTsv(text: string, o?: {
       readonly pad?: boolean;
+      readonly sep?: string;
   }): string[][];
 ## encodeTsv
   export declare function encodeTsv(m: readonly (readonly string[])[]): string;
@@ -2262,7 +2822,7 @@
   export declare function fillTarget(src: RangeBox, to: {
       readonly row: number;
       readonly col: number;
-  }): {
+  }, along?: 'row' | 'column'): {
       readonly box: RangeBox;
       readonly way: FillWay;
   } | null;
@@ -2276,6 +2836,11 @@
   }): PastePlan;
 ## rangeBox
   export declare function rangeBox(r: CellRange, displayed: DisplayedRows<unknown>, columns: readonly string[]): RangeBox | null;
+## rangeStats
+  export declare function rangeStats<T>(b: RangeBox, displayed: DisplayedRows<T>, columns: readonly ResolvedColumn<T>[], o: {
+      readonly ctx: LocaleCtx;
+      readonly reader: ValueReader<T>;
+  }): RangeStats;
 
 @ @dzgrid/core/state
 ## Density
@@ -2291,6 +2856,9 @@
       readonly page?: number;
       readonly pageSize?: number;
       readonly density?: Density;
+      readonly rowGroups?: readonly string[];
+      readonly dock?: DockState;
+      readonly pivot?: PivotState;
   }
 ## GridStateColumn
   export interface GridStateColumn {
@@ -2306,6 +2874,18 @@
       get(): Readonly<Record<string, boolean>>;
       set(open: Readonly<Record<string, boolean>>): void;
   }
+## PivotState
+  export interface PivotState {
+      readonly on?: boolean;
+      readonly columns?: readonly string[];
+      readonly desc?: readonly string[];
+      readonly values?: Readonly<Record<string, AggFuncName>>;
+  }
+## RowGroupsAdapter
+  export interface RowGroupsAdapter {
+      get(): readonly string[];
+      set(raw: unknown): readonly Problem[];
+  }
 ## STATE_UPGRADES
   export declare const STATE_UPGRADES: readonly ((s: any) => any)[];
 ## STATE_VERSION
@@ -2315,6 +2895,16 @@
       density?(): Density | undefined;
       setDensity?(d: unknown): boolean | void;
       readonly groups?: GroupsAdapter | undefined;
+      readonly rowGroups?: RowGroupsAdapter | undefined;
+      readonly dock?: {
+          get(): DockState | undefined;
+          set(raw: unknown): readonly Problem[];
+      } | undefined;
+      readonly pivot?: {
+          get(): PivotState | undefined;
+          set(raw: unknown): readonly Problem[];
+          made(id: string): boolean;
+      } | undefined;
   }
 ## StateOptions
   export interface StateOptions {
@@ -2322,7 +2912,7 @@
       readonly exclude?: readonly StatePart[];
   }
 ## StatePart
-  export type StatePart = 'columns' | 'groups' | 'sort' | 'filter' | 'quick' | 'page' | 'density';
+  export type StatePart = 'columns' | 'groups' | 'sort' | 'filter' | 'quick' | 'page' | 'density' | 'rowGroups' | 'dock' | 'pivot';
 ## StateProblemCode
   export type StateProblemCode = 'state-version' | 'state-column' | 'state-group' | 'state-field' | 'state-storage';
 ## captureState
@@ -2337,147 +2927,91 @@
 ## stateText
   export declare const stateText: (s: GridState) => string;
 
-@ @dzgrid/core/xlsx
-## XLSX_COLUMNS
-  export declare const XLSX_COLUMNS = 16384;
-## XLSX_MIME
-  export declare const XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-## XLSX_ROWS
-  export declare const XLSX_ROWS = 1048576;
-## XlsxInput
-  export interface XlsxInput<T> extends CsvInput<T> {
-      readonly widths?: Readonly<Record<string, number>>;
-      readonly pinned?: readonly string[];
-      readonly groups?: readonly ColumnOrGroup<T>[];
-  }
-## XlsxOptions
-  export interface XlsxOptions<T = any> {
-      readonly text?: 'value' | 'display' | undefined;
-      readonly enums?: 'label' | 'code' | undefined;
-      readonly header?: boolean | undefined;
-      readonly columns?: readonly string[];
-      readonly levelHeader?: string | undefined;
-      readonly treeColumn?: string | undefined;
-      readonly sheetName?: string;
-      readonly groups?: boolean;
-      readonly freeze?: boolean;
-      readonly spans?: 'repeat' | 'merge';
-      readonly tree?: 'outline' | 'level' | 'none';
-      readonly instants?: 'wall' | 'utc';
-      readonly rtl?: boolean;
-      readonly xlsxStyle?: (c: XlsxStyleContext<T>) => XlsxStyle | null | undefined;
-      readonly chunkRows?: number;
-  }
-## XlsxPiece
-  export interface XlsxPiece {
-      readonly entry: string;
-      readonly text: string;
-  }
-## XlsxStyle
-  export interface XlsxStyle {
-      readonly fill?: string;
-      readonly color?: string;
-      readonly bold?: boolean;
-      readonly italic?: boolean;
-  }
-## XlsxStyleContext
-  export interface XlsxStyleContext<T> {
-      readonly column: string;
-      readonly value: unknown;
+@ @dzgrid/core/row-gaps
+## GapCtx
+  export interface GapCtx<T> {
       readonly row: Readonly<T> | null;
-      readonly header: boolean;
+      readonly key: RowKey;
+      readonly index: number;
+      readonly level: number;
+      readonly prev: Readonly<T> | null;
   }
-## XlsxSummary
-  export interface XlsxSummary extends CsvSummary {
-      readonly problems: readonly Problem[];
-  }
-## ZipEntry
-  export interface ZipEntry {
-      readonly name: string;
-      readonly crc: number;
-      readonly size: number;
-      readonly method: 0 | 8;
-      readonly data: readonly Uint8Array[];
-  }
-## crc32
-  export declare function crc32(b: Uint8Array, crc?: number): number;
-## numFmtFor
-  export declare function numFmtFor(spec: NumberFormatSpec | undefined, ctx: LocaleCtx): string | 0;
-## serialOfDay
-  export declare const serialOfDay: (d: Day) => number | null;
-## sheetNameOf
-  export declare function sheetNameOf(name: unknown): string;
-## toXlsx
-  export declare function toXlsx<T>(i: XlsxInput<T>, o?: XlsxOptions<T>, deflate?: (b: Uint8Array) => Uint8Array): {
-      readonly parts: Uint8Array[];
-      readonly summary: XlsxSummary;
+## GapRule
+  export type GapRule<T> = (c: GapCtx<T>) => boolean | number | null | undefined;
+## gapLayout
+  export declare function gapLayout(inner: RowLayout, at: readonly number[], sizes: readonly number[]): RowLayout;
+## gapsOf
+  export declare function gapsOf<T>(rows: DisplayedRows<T>, rule: GapRule<T>, size: number): {
+      at: number[];
+      sizes: number[];
+      problems: Problem[];
   };
-## utf8
-  export declare function utf8(s: string): Uint8Array;
-## xlsxParts
-  export declare function xlsxParts<T>(i: XlsxInput<T>, o?: XlsxOptions<T>): Generator<XlsxPiece, XlsxSummary>;
-## zipFile
-  export declare function zipFile(entries: readonly ZipEntry[]): {
-      readonly parts: Uint8Array[];
-      readonly problems: Problem[];
-  };
+## roots
+  export declare const roots: (c: GapCtx<unknown>) => boolean;
 
-@ @dzgrid/core/server-side
-## serverSideRows
-  export declare function serverSideRows<T>(data: DataSource<T>, o?: ServerSideOptions): ServerSideRows<T>;
-## ServerSideOptions
-  export interface ServerSideOptions {
-      readonly blockSize?: number;
-      readonly maxBlocks?: number;
-      readonly ahead?: number;
-      readonly concurrency?: number;
-      readonly restMs?: number;
-      readonly batchMs?: number;
-      readonly by?: readonly string[];
-      readonly aggFuncs?: Readonly<Record<string, AggFuncName>>;
-      readonly footers?: 'none' | 'group' | 'grand' | 'both';
-      readonly grandTotal?: 'top' | 'bottom';
-      readonly params?: Readonly<Record<string, Json>>;
-      readonly abort?: () => AbortHandle;
-      readonly pivot?: ServerPivotPlug;
-  }
-
-@ @dzgrid/core/server-pivot
-## serverPivot
-  export declare function serverPivot(): ServerPivotPlug;
-
-@ @dzgrid/core/row-drag
-## moveRows
-  export declare function moveRows<T>(rows: readonly T[], move: RowMove, getRowId: (row: T) => RowIdInput, o?: MoveRowsOptions<T>): T[];
-## MoveRowsOptions
-  export interface MoveRowsOptions<T> {
-      readonly parentId?: (row: T) => RowIdInput | null | undefined;
-      readonly setParent?: (row: T, parent: RowIdInput | null) => T;
-  }
-## RowMove
-  export interface RowMove {
-      readonly keys: readonly RowKey[];
-      readonly target: RowDrop;
-  }
-
-@ @dzgrid/core/infinite
-## infiniteRows
-  export declare function infiniteRows<T>(data: DataSource<T>, o?: InfiniteOptions): InfiniteRows<T>;
-## InfiniteOptions
-  export interface InfiniteOptions {
-      readonly blockSize?: number;
-      readonly maxBlocks?: number;
-      readonly ahead?: number;
-      readonly concurrency?: number;
-      readonly restMs?: number;
-      readonly batchMs?: number;
-      readonly params?: Readonly<Record<string, Json>>;
-      readonly abort?: () => AbortHandle;
-  }
+@ @dzgrid/core/compare
+## sameValues
+  export declare function sameValues(a: unknown, b: unknown): boolean;
 
 @ @dzgrid/core/auto-columns
+## AutoColumnsOptions
+  export interface AutoColumnsOptions<T> {
+      readonly sample?: number;
+      readonly header?: (field: string) => string;
+      readonly override?: Readonly<Record<string, Partial<ColumnDef<T>>>>;
+      readonly merge?: Readonly<Record<string, MergedColumn<T>>>;
+      readonly hide?: readonly string[];
+      readonly add?: readonly ColumnDef<T>[];
+      readonly order?: readonly string[];
+  }
+## MergedColumn
+  export type MergedColumn<T> = Partial<Omit<ColumnDef<T>, 'id'>> & {
+      readonly from: readonly string[];
+  };
 ## autoColumns
   export declare function autoColumns<T>(rows: readonly T[], o?: AutoColumnsOptions<T>): {
       columns: ColumnDef<T>[];
       problems: Problem[];
   };
+
+@ @dzgrid/core/totals
+## ColumnTotals
+  export interface ColumnTotals {
+      readonly values: Readonly<Record<string, unknown>>;
+      readonly columns: readonly string[];
+      readonly problems: readonly Problem[];
+  }
+## columnTotals
+  export declare function columnTotals<T>(rows: DisplayedRows<T>, columns: readonly ResolvedColumn<T>[], o: {
+      readonly ctx: LocaleCtx;
+      readonly reader: ValueReader<T>;
+  }): ColumnTotals;
+
+@ @dzgrid/core/import
+## ImportCell
+  export type ImportCell = string | number | boolean | null | {
+      readonly error: true;
+  };
+## ImportResult
+  export interface ImportResult {
+      readonly rows: Record<string, unknown>[];
+      readonly problems: Problem[];
+  }
+## ZipEntry
+  export interface ZipEntry {
+      readonly method: number;
+      readonly data: Uint8Array;
+      readonly size: number;
+  }
+## importRows
+  export declare function importRows<T>(table: readonly (readonly ImportCell[])[], columns: readonly ResolvedColumn<T>[], ctx: LocaleCtx): ImportResult;
+## readCsv
+  export declare function readCsv(text: string): string[][];
+## readSheet
+  export declare function readSheet(xml: string, shared: readonly string[]): ImportCell[][];
+## sharedStrings
+  export declare const sharedStrings: (xml: string) => string[];
+## sheetPath
+  export declare function sheetPath(workbook: string, rels: string): string | null;
+## zipEntries
+  export declare function zipEntries(b: Uint8Array): Map<string, ZipEntry> | null;

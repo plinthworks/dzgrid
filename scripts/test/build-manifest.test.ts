@@ -84,7 +84,7 @@ describe('the dzgrid peers of a published manifest', () => {
   });
 });
 
-// 1.10.1: `import '@dzgrid/element/define'` kept by a bundler both from the repo's sources (the site, an app on the
+// 1.11.0: `import '@dzgrid/element/define'` kept by a bundler both from the repo's sources (the site, an app on the
 // workspace: the exports map points at src/define.ts) and once published (dist/define.js).
 describe('sideEffects, from the source to the published manifest', () => {
   it('the repo\'s element manifest names the file its ./define export points at', async () => {

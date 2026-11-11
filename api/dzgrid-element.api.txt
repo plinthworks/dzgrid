@@ -1,6 +1,7 @@
 # The accepted public type surface — written by scripts/api.mjs, checked by `npm run check:api`.
 # Changed only by an owner decision: `node scripts/api.mjs --accept "<decision>"` (see scripts/api.mjs).
 # history: 1.8.0 new package @dzgrid/element (Phase 11 L7, owner Q3 A: a Web Component; created alone, the other baselines untouched)
+# history: owner 2026-11-10: baseline extended to every published entry
 
 @ @dzgrid/element
 ## DzGridElement
@@ -25,6 +26,10 @@
       set features(v: GridSettings<T>['features']);
       get parts(): GridSettings<T>['parts'];
       set parts(v: GridSettings<T>['parts']);
+      get theme(): GridSettings<T>['theme'];
+      set theme(v: GridSettings<T>['theme']);
+      get icons(): GridSettings<T>['icons'];
+      set icons(v: GridSettings<T>['icons']);
       get settings(): Partial<GridSettings<T>>;
       set settings(v: Partial<GridSettings<T>>);
       get env(): GridEnv;
@@ -60,6 +65,10 @@
       set features(v: GridSettings<T>['features']);
       get parts(): GridSettings<T>['parts'];
       set parts(v: GridSettings<T>['parts']);
+      get theme(): GridSettings<T>['theme'];
+      set theme(v: GridSettings<T>['theme']);
+      get icons(): GridSettings<T>['icons'];
+      set icons(v: GridSettings<T>['icons']);
       get settings(): Partial<GridSettings<T>>;
       set settings(v: Partial<GridSettings<T>>);
       get env(): GridEnv;

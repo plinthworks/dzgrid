@@ -414,7 +414,8 @@ simple faite avec `definePart` de `@dzgrid/dom`.
 - Une fonction dont les textes ne sont pas fusionnés dans `messages` lève une erreur à la création, en nommant les
   clés manquantes.
 - Une sortie qui n’existe pas (`(selectionChange)`) ne se déclenche jamais et ne dit rien : seules les sorties que
-  le composant liste existent ; `(gridEvent)` porte chaque événement.
+  le composant liste existent — une par événement de la grille, de son nom (`(sortChanged)`, `(pageChanged)`…) ;
+  `(gridEvent)` les porte toutes.
 - `features` écrit dans le gabarit (`[features]="[filters()]"`) crée un nouveau tableau à chaque vérification :
   gardez-le en champ.
 </Aside>

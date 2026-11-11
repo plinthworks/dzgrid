@@ -89,7 +89,7 @@ describe('llms.txt and the site’s text', () => {
     expect([...missing]).toEqual([]);
   });
 
-  // 1.10.1: `filters-base` gives a day or instant column no filter; a page that offers it says so.
+  // 1.11.0: `filters-base` gives a day or instant column no filter; a page that offers it says so.
   it('every page that offers `@dzgrid/dom/filters-base` in its text says a day column gets no filter there', () => {
     const offering = files.filter((f) => prose(f.text).includes('`@dzgrid/dom/filters-base`'));
     expect(offering.length).toBeGreaterThan(0);

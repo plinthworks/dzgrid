@@ -1,4 +1,4 @@
-import { clientRows, createColumnModel, createKernel, problem, resolveOperations, type ClientModel, type GridKernel, type RowKey, type RowModel } from '@dzgrid/core';
+import { clientRows, createColumnModel, createKernel, problem, resolveOperations, type ClientModel, type Problem, type GridKernel, type RowKey, type RowModel } from '@dzgrid/core';
 import { emit, filterKindLookup, missingFeatureProblems } from '@dzgrid/core/internal';
 import { sortAnnouncer, selectionAnnouncer } from './a11y/announce.js';
 import { LiveRegion } from './a11y/live-region.js';
@@ -25,7 +25,7 @@ import { headerPx, ROW_HEIGHT, rowPx, type GridSettings } from './settings.js';
 import { injectStyles } from './styles.js';
 import { installWarmup } from './warmup.js';
 import { applyUpdate, closed, ctxOf, rowHeightProblems } from './update.js';
-import { shapeOf } from './features.js';
+import { onlyFeatures, shapeOf } from './features.js';
 
 export interface GridApi {
   focusCell(row: RowKey, column: string): void;
@@ -57,9 +57,10 @@ function element(doc: Document, className: string, role?: string): HTMLElement {
  */
 /** `M`: the model the grid's kernel holds — the browser's rows, or `SourceHandle<T>` with a `source`. */
 export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTMLElement, initial: GridSettings<T>, env: GridEnv = {}): GridInstance<T, M> {
-  const doc = host.ownerDocument;
-  const win = doc.defaultView;
+  const doc = host.ownerDocument, win = doc.defaultView;
   checkMessages(initial.messages);
+  const odd: Problem[] = []; // something not a feature in the list: told, skipped (features.ts)
+  initial = onlyFeatures(initial, odd);
   const scope = new Scope();
   const styleRoot = host.getRootNode();
   if (initial.injectStyles !== false) injectStyles(styleRoot.nodeType === 11 ? (styleRoot as ShadowRoot) : doc, initial.nonce);
@@ -76,9 +77,8 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   body.append(layer);
   viewport.append(header, body);
   const overlay = element(doc, 'dzg-overlay');
-  overlay.hidden = true;
   const tooltip = element(doc, 'dzg-tooltip', 'tooltip');
-  tooltip.hidden = true;
+  tooltip.hidden = overlay.hidden = true;
   const live = new LiveRegion(doc, scope);
   root.append(viewport, overlay, tooltip, live.el);
   host.append(root);
@@ -97,7 +97,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   const kernel = createKernel<T, RowModel<T>>({ rows, columns, keepSelectionOnFilter: initial.selection?.keepOnFilter !== false, multiSort: initial.multiSort });
   if (initial.context !== undefined) kernel.dispatch({ type: 'context.app', value: initial.context }, 'host'); // editable rules, custom kinds (Q12)
   // Operations without a source run in the browser, and are told (a source's model tells its own); the filter kinds refused too.
-  const told = [...kinds.problems, ...(initial.source ? [] : resolveOperations(initial.operations, false).problems), ...rowHeightProblems(initial.rowHeight), ...rowHeightProblems(initial.headerHeight, 'headerHeight')];
+  const told = [...odd, ...kinds.problems, ...(initial.source ? [] : resolveOperations(initial.operations, false).problems), ...rowHeightProblems(initial.rowHeight), ...rowHeightProblems(initial.headerHeight, 'headerHeight')];
 
   let dir: Dir = 'ltr';
   const geometry = env.geometry ?? domGeometry(viewport, header, () => dir, live.el);

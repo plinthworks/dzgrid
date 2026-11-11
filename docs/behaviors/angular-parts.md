@@ -108,8 +108,13 @@ are exactly these; anything else goes through `(gridEvent)` and its `type`:
 | `(stateChanged)` | `{ state, source }` | 1.1.0 |
 | `(densityChanged)` | `{ density, source }` | 1.1.0 |
 | `(selectionChanged)` | `{ selection: { mode, keys }, count, source }` — **keys, not ids** (below) | 1.1.0 |
-| `(groupByChange)` | the model's half of `[(groupBy)]` (below); `groupByChanged` `{ by, source }` comes through `(gridEvent)` | 1.5.0 |
+| `(groupByChange)` | the model's half of `[(groupBy)]` (below) | 1.5.0 |
 | `(rowMove)` | `{ via, keys, rows, target, parent, applied, source }` (`rowDrag()` in `[features]`, row-move.md 24); `ctl.rowDrag()` its api, null without the grid | 1.8.0 |
+| `(sortChanged)`, `(filterChanged)`, `(quickChanged)`, `(pageChanged)`, `(columnsChanged)`, `(columnResized)`, `(pinnedChanged)`, `(focusChanged)`, `(modelUpdated)`, `(firstDataRendered)`, `(selectionRefused)`, `(editingStarted)`, `(editingStopped)`, `(editStates)`, `(stateRestored)`, `(groupByChanged)`, `(exportRequested)`, `(exportFinished)`, `(exportRefused)` | the event of that name (`GridEvent`) | 1.11.0 |
+
+Since 1.11.0 every grid event has an output of its own name (`problems` aside: `(problems)` carries its list), and every
+setting of `createGrid` an input (`onEvent` aside), `[motion]` the last one added; `test/parity.test.ts` fails when a
+setting or an event reaches the grid without its input or output.
 
 Before 1.1.0, `(selectionChanged)` was such a silent DOM binding (the allergen app's « selected rows stay empty »); it is
 now a real output. Strict templates check `$event` on these: `$event.rows` on `(selectionChanged)` does not compile

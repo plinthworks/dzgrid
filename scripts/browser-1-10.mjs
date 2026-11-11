@@ -5,7 +5,8 @@
  * in finally. Checks: the group rows and the column headers' row at their own heights (density.md « Group rows'
  * height »), the filter row at its own (filter-ui.md), the pinned band under the header; titles on several lines, the row
  * as tall as the tallest, nothing cut but by the line cap (header-wrap.md); columns fitted at load, no cell clipped, the
- * flexible one left alone (column-resize.md 16–21); the column under the pointer tinted, not the keyboard's (column-hover.md).
+ * flexible one left alone (column-resize.md 16–21); the column under the pointer tinted, not the keyboard's (column-hover.md);
+ * 1.11.0: titles cut at a 2-line cap (`?clamp=2`) marked and set at the start (header-wrap.md 11).
  */
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -110,7 +111,34 @@ async function run(name, lang, dark, narrow, full) {
   }
 }
 
+/**
+ * 1.11.0 (header-wrap.md 11): titles cut at a 2-line cap say `data-hclamp` and sit at the start, even in the number
+ * columns (Chrome drew an end-aligned clamped line's « … » past the edge); the others keep their alignment.
+ */
+async function clampRun(name, lang) {
+  const b = await browser(name);
+  try {
+    const page = await b.newPage();
+    await page.setViewportSize({ width: 900, height: 640 });
+    await page.goto(site.url(`v1-10.html?lang=${lang}&clamp=2`));
+    await page.waitForFunction(() => window.ready === true, null, { timeout: 30000 });
+    await frames(page);
+    await frames(page);
+    const tag = `${name} ${lang} clamp 2`;
+    const x = await page.evaluate(() => [...document.querySelectorAll('.dzg-hcell[data-hwrap] > .dzg-hlabel')].map((l) => ({
+      col: l.parentElement.dataset.col, cut: l.scrollHeight > l.clientHeight + 1, mark: l.parentElement.hasAttribute('data-hclamp'), align: getComputedStyle(l).textAlign,
+    })));
+    check(`${tag}: a cut title marked and at the start, the others not`, x.some((l) => l.cut) && x.every((l) => l.cut === l.mark && (!l.cut || l.align === 'start')), x);
+    if (SHOTS) await page.locator('.dzg-header').screenshot({ path: `${SHOTS}/v1-10-${tag.replace(/ /g, '-')}.png` });
+    await page.close();
+  } finally {
+    await b.close().catch(() => {});
+  }
+}
+
 try {
+  if (!process.argv.includes('--others-only')) for (const lang of ['fr', 'ar']) await clampRun('chrome', lang);
+  if (!process.argv.includes('--no-others')) for (const name of ['firefox', 'webkit']) await clampRun(name, 'fr');
   if (!process.argv.includes('--others-only'))
     for (const [lang, dark, narrow] of [['fr', false, false], ['ar', false, false], ['fr', false, true], ['ar', false, true], ['fr', true, false], ['ar', true, false]]) await run('chrome', lang, dark, narrow, true);
   if (!process.argv.includes('--no-others')) for (const name of ['firefox', 'webkit']) await run(name, 'fr', false, false, false);

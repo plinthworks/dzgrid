@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 // @ts-expect-error a plain .mjs script
 import { baselineFile, breaks, compatible, format, parse, PACKAGES } from '../api.mjs';
 
@@ -71,9 +72,39 @@ describe('api.mjs, what counts as a compatible change', () => {
   it('has a baseline for each package, with its history', () => {
     for (const name of PACKAGES) {
       const { surface, history } = parse(readFileSync(baselineFile(name), 'utf8'));
-      // `@dzgrid/element` arrived after 1.0.0 (Phase 11 L7): its baseline starts with the new package.
-      expect(history[0]).toMatch(name === 'element' ? /^1\.8\.0 new package/ : /^1\.0\.0 as published on npm/);
+      // `@dzgrid/element` arrived after 1.0.0 (Phase 11 L7): its baseline starts with the new package; `@dzgrid/theme`'s
+      // (stylesheets, entries only) with the 1.11.0 extension to every published entry.
+      const first = { element: /^1\.8\.0 new package/, theme: /^owner 2026-11-10: baseline extended to every published entry$/ }[name as string];
+      expect(history[0]).toMatch(first ?? /^1\.0\.0 as published on npm/);
       expect(Object.keys(surface).length).toBeGreaterThan(0);
     }
+  });
+
+  // 1.11.0 (owner 2026-11-10, « C »): the baselines had no section for entries published after they were written
+  // (the French and Arabic locale bundles, some DOM entries) and missed inputs of the Angular component, so
+  // `check:api` did not guard them. Every entry of every package's exports map has a section; a new one fails
+  // here until the owner accepts it.
+  it('has a section for every published entry of every package', () => {
+    const root = new URL('../..', import.meta.url).pathname;
+    const missing: string[] = [];
+    for (const name of ['core', 'dom', 'theme', 'angular', 'element']) {
+      expect(PACKAGES).toContain(name);
+      const manifest = JSON.parse(readFileSync(join(root, 'packages', name, 'package.json'), 'utf8')) as { name: string; exports: Record<string, unknown> };
+      const { surface } = parse(readFileSync(baselineFile(name), 'utf8'));
+      for (const key of Object.keys(manifest.exports)) {
+        if (key === './package.json' || key === './internal') continue;
+        const entry = key === '.' ? manifest.name : manifest.name + key.slice(1);
+        if (!(entry in surface)) missing.push(entry);
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+
+  it('records every input, model and output of the Angular component', () => {
+    const source = readFileSync(new URL('../../packages/angular/src/grid.ts', import.meta.url), 'utf8');
+    const members = [...source.matchAll(/^\s*readonly (\w+) = (?:input|model|output)\b/gm)].map((m) => m[1]);
+    expect(members.length).toBeGreaterThan(40);
+    const text: string = parse(readFileSync(baselineFile('angular'), 'utf8')).surface['@dzgrid/angular'].DzGrid;
+    expect(members.filter((m) => !text.includes(`readonly ${m}: `))).toEqual([]);
   });
 });

@@ -375,6 +375,9 @@ export function unslotted(s: GridSettings<unknown>, paged: unknown): Problem[] {
     ...(s.icons ? missing('settings.icons', 'theme') : []),
     // A selection rule without its feature (step 21): an error, the grid selects nothing (fail closed).
     ...(s.selection?.canSelect ? missing('settings.selection.canSelect', 'rules', 'error') : []),
+    // An edit option with no feature that edits (1.11.0): the column stayed read-only unsaid. Once, its first column;
+    // `editors()` without `edit()` says it already (`features.editors`).
+    ...(['edit', 'fill', 'range', 'editors'].some((f) => has.has(f)) ? [] : leaves(s.columns).flatMap((d, i) => (['editable', 'validate', 'edit'] as const).filter((k) => d?.[k]).map((k): Problem => ({ code: 'missing-feature', severity: 'warning', path: `columns[${i}].${k}`, detail: 'edit' }))).slice(0, 1)),
     ...leaves(s.columns).flatMap((d, i) => [
       ...(d?.filter && (d.filter.floating || d.filter.kind) ? missing(`columns[${i}].filter`, 'filters') : []),
       // A column's total, vertical title or collapse priority without its feature (1.9.0, totals-row.md 5, vertical-headers.md 2, responsive-columns.md 14).

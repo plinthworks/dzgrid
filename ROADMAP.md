@@ -1372,7 +1372,7 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   `release:check` « the 5 packages at 1.10.0 » (its bytes step re-run after the real-build line moved).
 - For the owner: commit and publish (`docs/release-1.10.0.md`).
 
-## 1.10.1 — patch (2026-11-10, not committed; prepared, not published)
+## 1.11.0 — minor (2026-11-11; prepared, not published; owner « il n'y a plus de 1.10.1, il y a que 1.11 »)
 
 - [x] Four defects found by the site's batch 1 (owner « A »), each test first: the grid's root grows to fill its
   container whatever its rows (`flex: 1 1 auto`, `block-size: 100%`, `border-box` in the layout sheet; it had no
@@ -1386,8 +1386,20 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
 - `check:api`: `LAYOUT_CSS` changed — accepted by the owner (« A »). Sizes: K.8 90 105 / 91 000, DOM base 24 749 /
   24 750, real Angular build 101 197 / 101 500.
 - Checks: one `gate:step` green (9 257 tests); `test:real-app` 58 / 58 (0.2 % pixels differ, the 2 px border, references
-  kept); `release:check` « the 5 packages at 1.10.1 ».
-- For the owner: commit and publish (`docs/release-1.10.1.md`).
+  kept); `release:check` « the 5 packages at 1.11.0 ».
+- [x] Three more found by the site's batch 2 (owner « C »): something not a feature in `features` told and skipped
+  (`onlyFeatures`, features.ts), a wrapped title cut at its cap shows its « … » in Chrome (header-wrap.md 11),
+  `check:api` guards every published entry.
+- [x] A check of the component against the grid (owner 2026-11-10, « soit le travail n'est pas bien fait soit il y a
+  des gros manquements »): Angular `[motion]` and an output for every grid event (19), each test first;
+  `test/parity.test.ts` fails, by the compiler, when a setting or an event reaches the grid without its input or
+  output. An edit option (`editable`, `validate`, `edit`) with none of `edit()`, `fill()`, `range()`, `editors()`
+  told (`missing-feature`, detail `edit`): the column stayed read-only unsaid (`needs-feature.test.ts`). Found sound:
+  the three languages' texts (87 bundles, same keys), `<dz-grid>`'s events and settings, the controller's methods.
+  `aggFunc` without `grouping()` left silent on purpose: a server's groups and the exports read it.
+- Sizes: DOM base 24 921 / 24 950 (+2 % rule); Angular 8 590 / 8 650 (owner « Monter à 8 650 », over the rule); K.8
+  90 566 / 91 000. `check:api`: the Angular additions accepted (owner « ok comme ça »).
+- For the owner: publish (`docs/release-1.11.0.md`).
 
 ## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)
 

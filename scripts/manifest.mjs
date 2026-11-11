@@ -25,7 +25,7 @@ export function manifestProblems(name, manifest) {
 }
 
 /**
- * The published `sideEffects` from the source's (1.10.1): the source names its own files (`./src/define.ts`, so a build
+ * The published `sideEffects` from the source's (1.11.0): the source names its own files (`./src/define.ts`, so a build
  * from the repo's sources keeps them), the published manifest the built ones (`./define.js`); a pattern (`*.css`) stays.
  */
 export function publishedSideEffects(source) {

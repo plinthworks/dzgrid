@@ -332,7 +332,7 @@ made with `definePart` from `@dzgrid/dom`.
 > - No `messages`: the page stays empty and the console says `dz-grid: messages are required`.
 > - A feature whose texts are not merged into `messages` throws when the grid is made, naming the missing keys.
 > - An output that does not exist (`(selectionChange)`) never fires and says nothing: only the outputs the component
->   lists exist; `(gridEvent)` carries every event.
+>   lists exist — one per grid event, of its name (`(sortChanged)`, `(pageChanged)`…); `(gridEvent)` carries them all.
 > - `features` written in the template (`[features]="[filters()]"`) makes a new array on every check: keep it a field.
 
 ## Next
@@ -618,7 +618,8 @@ createGrid<Plot>(document.getElementById('watering')!, {
 `headerWrap: true` on a column, with the `wrappedHeaders()` feature from `@dzgrid/dom/wrapped-headers` (no stylesheet),
 puts a long title on several lines (at most `maxLines`, 3 by default, then « … ») and grows the column headers' row to
 the tallest — measured again when a column is resized or the text size changes, never while scrolling. With
-`headerHeight` the taller wins. Fitting such a column to its content takes its cells and the title's longest word.
+`headerHeight` the taller wins. Fitting such a column to its content takes its cells and the title's longest word. A
+title cut at the cap sits at the start of its cell, even in a number column, so its « … » shows in every browser.
 
 ```ts
 
@@ -2217,7 +2218,7 @@ row height; `groups` absent: the columns'). The filter row has its own too: `fil
 Titles on several lines (`headerWrap`, [columns](https://plinthworks.github.io/dzgrid/guides/columns/)) grow the column headers' row; the taller wins.
 
 **The grid's height comes from its container**, never from its rows: give the host a height (fixed, a flex or grid
-share, `100dvh` minus a bar) and the grid fills it whatever its row count (since 1.10.1); the rows scroll inside. There is no « as tall as its rows » mode — the page would
+share, `100dvh` minus a bar) and the grid fills it whatever its row count (since 1.11.0); the rows scroll inside. There is no « as tall as its rows » mode — the page would
 jump each time a filter changes the count.
 
 **Column under the pointer** (1.10.0): `columnHover()` from `@dzgrid/dom/column-hover` writes `data-hover-col` on the

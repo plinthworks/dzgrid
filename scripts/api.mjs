@@ -18,6 +18,11 @@
  * release is published, accept its whole surface (no `--only`, « 1.1.0 published ») so its
  * additions are guarded too.
  *
+ * Every entry of every package's exports map has a section (1.11.0, owner 2026-11-10 « C »: the French and
+ * Arabic locale bundles and some DOM entries had none, so nothing guarded them): a new entry fails
+ * scripts/test/api-surface.test.ts until it is accepted; a stylesheet entry of `@dzgrid/theme` is a
+ * section with no exports, guarded against removal.
+ *
  * Not covered: `./internal` entries (no semver promise); types declared in dist/ but not exported
  * (they are guarded only through the text of the exports that name them); re-exports from another
  * package (recorded as `= @dzgrid/core#Name`, guarded where they are declared).
@@ -28,18 +33,25 @@ import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-export const PACKAGES = ['core', 'dom', 'angular', 'element'];
+export const PACKAGES = ['core', 'dom', 'theme', 'angular', 'element'];
+/** What npm receives: a package's dist/, or the package folder itself for `@dzgrid/theme` (published as written). */
+export const publishedDir = (name, from = null) => (from ? join(from, name) : name === 'theme' ? join(root, 'packages', name) : join(root, 'packages', name, 'dist'));
 export const baselineFile = (name) => join(root, 'api', `dzgrid-${name}.api.txt`);
 
 const printer = ts.createPrinter({ removeComments: true, newLine: ts.NewLineKind.LineFeed });
 
-/** Public entries of a built package: subpath → declaration file. `./internal` is not public. */
+/**
+ * Public entries of a built package, every key of its exports map: subpath → declaration file, or null
+ * for an entry without types (a stylesheet of `@dzgrid/theme`) — recorded with no exports, so its
+ * removal fails too. `./internal` is not public.
+ */
 function entries(dist) {
   const manifest = JSON.parse(readFileSync(join(dist, 'package.json'), 'utf8'));
   const out = {};
   for (const [subpath, target] of Object.entries(manifest.exports ?? {})) {
-    if (subpath === './package.json' || subpath === './internal' || typeof target !== 'object' || !target.types) continue;
-    out[subpath === '.' ? manifest.name : manifest.name + subpath.slice(1)] = join(dist, target.types);
+    if (subpath === './package.json' || subpath === './internal') continue;
+    const types = typeof target === 'object' && target !== null ? target.types : undefined;
+    out[subpath === '.' ? manifest.name : manifest.name + subpath.slice(1)] = types ? join(dist, types) : null;
   }
   return out;
 }
@@ -53,12 +65,12 @@ export function surfaceOf(dist) {
   const host = ts.createCompilerHost(options);
   host.resolveModuleNameLiterals = (literals, containing, redirected, opts) =>
     literals.map((l) => (l.text.startsWith('.') ? ts.resolveModuleName(l.text, containing, opts, host) : { resolvedModule: undefined }));
-  const program = ts.createProgram(Object.values(files), options, host);
+  const program = ts.createProgram(Object.values(files).filter(Boolean), options, host);
   const checker = program.getTypeChecker();
   const inside = (file) => !relative(dist, file).startsWith('..');
   const surface = {};
   for (const [entry, file] of Object.entries(files)) {
-    const source = program.getSourceFile(file);
+    const source = file && program.getSourceFile(file);
     const moduleSymbol = source && checker.getSymbolAtLocation(source);
     const out = {};
     if (moduleSymbol) {
@@ -369,7 +381,7 @@ function main() {
   let failed = false;
   for (const name of PACKAGES) {
     // `--from <dir>`: read <dir>/<name>/ instead of packages/<name>/dist (a published tarball, unpacked).
-    const dist = from ? join(from, name) : join(root, 'packages', name, 'dist');
+    const dist = publishedDir(name, from);
     if (!existsSync(join(dist, 'package.json'))) {
       console.error(`${relative(root, dist)} is missing: run npm run build first`);
       process.exit(1);
@@ -408,7 +420,7 @@ function main() {
     }
     const found = breaks(old.surface, current);
     const count = Object.values(current).reduce((n, e) => n + Object.keys(e).length, 0);
-    if (found.length === 0) console.log(`@dzgrid/${name}: ${count} exports, nothing removed or narrowed`);
+    if (found.length === 0) console.log(`@dzgrid/${name}: ${Object.keys(current).length} entries, ${count} exports, nothing removed or narrowed`);
     else {
       failed = true;
       console.error(`@dzgrid/${name}: ${found.length} public type(s) removed or changed incompatibly:\n${report(found)}`);

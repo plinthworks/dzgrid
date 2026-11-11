@@ -5,7 +5,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ColumnDef, Problem } from '@dzgrid/core';
 import { cleanup, emake, type R } from './support-edit.js';
-import { wrappedHeaders } from '../src/wrapped-headers.js';
+import { wrappedHeaders, WRAPPED_HEADERS_CSS } from '../src/wrapped-headers.js';
 import { verticalHeaders } from '../src/vertical-headers.js';
 import { spans } from '../src/spans.js';
 import { SPANS_CSS } from '../src/spans/styles.js';
@@ -119,6 +119,29 @@ describe('wrappedHeaders()', () => {
     const m = emake({ columns: cols() });
     expect(hcell(m.host, 'n').hasAttribute('data-hwrap')).toBe(false);
     expect(told(m.events).map((p) => [p.code, p.path, p.detail])).toEqual([['missing-feature', 'columns[1].headerWrap', 'wrapped-headers'], ['missing-feature', 'columns[2].headerWrap', 'wrapped-headers']]);
+  });
+
+  it('a title cut at the cap says data-hclamp and is set at the start, read from the same copies (11)', () => {
+    // A copy's label: as tall as its lines, shown at most the cap's (the clamp); jsdom has no layout, both faked.
+    const full = (l: HTMLElement) => Math.max(1, Math.ceil(((l.textContent ?? '').length * 7) / (parseFloat(l.parentElement!.style.getPropertyValue('inline-size')) - 16))) * 20;
+    const cap = (l: HTMLElement) => Number(l.closest<HTMLElement>('.dzg')!.style.getPropertyValue('--dzg-header-lines') || 3) * 20;
+    vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockImplementation(function (this: HTMLElement) { return this.closest('.dzg-wprobe') ? full(this) : 0; });
+    vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(function (this: HTMLElement) { return this.closest('.dzg-wprobe') ? Math.min(full(this), cap(this)) : 0; });
+    const m = emake({ columns: cols(), settings: { features: [wrappedHeaders({ maxLines: 2 })] } });
+    expect(hcell(m.host, 'n').hasAttribute('data-hclamp')).toBe(true); // 3 lines over a cap of 2
+    expect(hcell(m.host, 'q').hasAttribute('data-hclamp')).toBe(false);
+    expect(hcell(m.host, 'name').hasAttribute('data-hclamp')).toBe(false);
+    const label = (id: string) => hcell(m.host, id).querySelector<HTMLElement>('.dzg-hlabel')!;
+    expect([label('n').style.textAlign, label('q').style.textAlign]).toEqual(['start', '']); // inline: a host loading the CSS itself gets it too
+    expect(WRAPPED_HEADERS_CSS).not.toContain('hclamp'); // the published literal unchanged
+    // Wide enough again: it fits, the mark goes.
+    m.g.update({ columns: cols(undefined, 260) });
+    expect([hcell(m.host, 'n').hasAttribute('data-hclamp'), label('n').style.textAlign]).toEqual([false, '']);
+    m.g.update({ columns: cols() });
+    expect(hcell(m.host, 'n').hasAttribute('data-hclamp')).toBe(true);
+    const kept = label('n');
+    m.g.destroy();
+    expect([m.host.querySelector('[data-hclamp]'), kept.style.textAlign]).toEqual([null, '']);
   });
 
   it('destroyed: attributes and the row’s height taken away', () => {

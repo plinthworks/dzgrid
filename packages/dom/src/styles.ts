@@ -15,7 +15,7 @@
  * (3), equal-width digits in number cells (5), the alternate rows' and the density's variables the theme reads (2,
  * 15), the pinned edge's shadow while content is under it, mirrored for the end side and in right to left (7).
  *
- * The root fills its container whatever its rows (1.10.1, virtual-scroll.md « The grid's height comes from its
+ * The root fills its container whatever its rows (1.11.0, virtual-scroll.md « The grid's height comes from its
  * container »): a flex item that grows, 100 % of a host with a height, its border inside. A Web Component host
  * (`[data-dzg-host]`) is no box of its own unless the page styles it (web-component.md 13).
  */

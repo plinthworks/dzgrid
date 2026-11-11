@@ -1,5 +1,5 @@
 import type { GridContext } from './context.js';
-import type { FocusPos, Intent, KeyOwner, ResolvedColumn, RowKey, RowShape } from '@dzgrid/core';
+import { problem, type FocusPos, type Intent, type KeyOwner, type Problem, type ResolvedColumn, type RowKey, type RowShape } from '@dzgrid/core';
 import type { OverlayState } from './render/overlay.js';
 import type { TipFor } from './render/tooltip.js';
 import type { Goal, Move, MoveShape, SpanLookup } from './keys/move.js';
@@ -34,6 +34,15 @@ export interface GridFeature {
 }
 
 /** The model's options a feature's shape adds (none without one). */
+/**
+ * The settings with only real features (a JS caller; owner « C », 2026-11-10): anything else in the list is told at
+ * its index (`invalid-setting`, detail its `typeof`, never its content) and skipped — never a TypeError; one feature
+ * alone, not in a list, is taken as a list. `pivot()` has a `setup` too but is grouping's companion
+ * (`grouping({ pivot })`): its `make` tells it apart.
+ */
+export const onlyFeatures = <S extends { readonly features?: readonly GridFeature[] }>(s: S, odd: Problem[]): S =>
+  s.features ? { ...s, features: ([] as GridFeature[]).concat(s.features).filter((f, i) => (typeof f?.setup == 'function' && !(f as { make?: unknown }).make) || void odd.push(problem('invalid-setting', 'warning', `features[${i}]`, typeof f))) } : s;
+
 export const shapeOf = (features: readonly GridFeature[] | undefined): { shape?: RowShape<any> } => {
   const f = features?.find((x) => x.shape && !x.shapeAfter?.some((id) => features.some((y) => y.id === id)));
   return f ? { shape: f.shape!() } : {};

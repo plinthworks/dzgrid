@@ -296,7 +296,8 @@ createGrid<Plot>(document.getElementById('watering')!, {
 de style), met un long titre sur plusieurs lignes (au plus `maxLines`, 3 par défaut, puis « … ») et fait grandir la
 ligne des titres de colonnes jusqu’au plus haut — mesuré de nouveau quand une colonne est redimensionnée ou que la
 taille du texte change, jamais pendant le défilement. Avec `headerHeight`, le plus haut l’emporte. Ajuster une telle
-colonne à son contenu prend ses cellules et le mot le plus long du titre.
+colonne à son contenu prend ses cellules et le mot le plus long du titre. Un titre coupé à la limite se place au début
+de sa cellule, même dans une colonne de nombres, pour que son « … » se voie dans tous les navigateurs.
 
 ```ts
 import { createGrid } from '@dzgrid/dom';

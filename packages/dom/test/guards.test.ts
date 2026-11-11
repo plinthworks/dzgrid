@@ -32,6 +32,9 @@ describe('the DOM layer guards', () => {
     expect(checkSource("if (k === 'ArrowLeft') {}", 'src/keys/router.ts')).toEqual([]);
     expect(checkSource("if (k === 'ArrowLeft') {}", 'src/dir.ts')).toEqual([]);
     expect(checkSource('const x = vp.scrollLeft;', 'src/keys/router.ts').map((f) => f.rule)).toEqual(['physical']);
+    // 1.11.0: text-align through setProperty, logical values only.
+    expect(checkSource("el.style.setProperty('text-align', on ? 'right' : '');", 'src/a.ts').map((f) => f.why)).toContain("style.setProperty('text-align', physical)");
+    expect(checkSource("el.style.setProperty('text-align', on ? 'start' : '');", 'src/a.ts')).toEqual([]);
   });
 
   // Phase 5 step 11b (step11b-plan « The security rules for pasted HTML » 2; owner S11b-Q5): the pasted-HTML reader

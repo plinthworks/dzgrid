@@ -75,7 +75,7 @@ properties. It listens to `dzg-*` events.
     parent and fills it whatever its rows (virtual-scroll.md « The grid's height comes from its container »), or is
     sized itself (`dz-grid > .dzg { block-size: … }`). Connected, the element marks itself `data-dzg-host`; the layout
     sheet's `:where([data-dzg-host]) { display: contents }` (zero specificity, layer `dzgrid.layout`) reads the mark,
-    also under a flex or grid parent, which makes an unknown element a block (1.10.1: before, the element stayed a
+    also under a flex or grid parent, which makes an unknown element a block (1.11.0: before, the element stayed a
     block there and its grid did not fill the host). An element still displayed `inline` before that sheet is in the
     page is given `display: contents` inline. A page that styles the element's `display` itself keeps its own (any
     page rule wins over the layer's). Angular's host takes `display: contents` inline, always.

@@ -43,10 +43,15 @@ type Ev<T, K extends GridEvent<T>['type']> = Extract<GridEvent<T>, { type: K }>;
 /** The settings read from the inputs, in this order; the defaults' keys fall back to `provideDzGrid`. */
 const KEYS = [
   'rows', 'source', 'columns', 'getRowId', 'locale', 'timeZone', 'numerals', 'direction', 'density', 'headers', 'rowHeight', 'headerHeight', 'theme', 'icons', 'overlay', 'busy', 'label', 'tooltips', 'overscan',
-  'searchWarmup', 'selection', 'context', 'rowClass', 'fullWidth', 'operations', 'pagination', 'filterKinds', 'clock', 'injectStyles', 'nonce', 'features', 'multiSort', 'sameRow',
+  'searchWarmup', 'selection', 'context', 'rowClass', 'fullWidth', 'operations', 'pagination', 'filterKinds', 'clock', 'injectStyles', 'nonce', 'features', 'multiSort', 'sameRow', 'motion',
 ] as const;
 /** Events with an output of their own name. */
-const OUTS = ['cellClicked', 'rowClicked', 'cellAction', 'partAction', 'fetchFailed', 'rowExpanded', 'cellEdited', 'saveFailed', 'orderStale', 'undoChanged', 'rangeChanged', 'rangeCopied', 'stateChanged', 'densityChanged', 'selectionChanged', 'rowMove'];
+const OUTS = [
+  'cellClicked', 'rowClicked', 'cellAction', 'partAction', 'fetchFailed', 'rowExpanded', 'cellEdited', 'saveFailed', 'orderStale', 'undoChanged', 'rangeChanged', 'rangeCopied', 'stateChanged', 'densityChanged', 'selectionChanged', 'rowMove',
+  // 1.11.0: every other event too (test/parity.test.ts).
+  'modelUpdated', 'sortChanged', 'filterChanged', 'quickChanged', 'pageChanged', 'columnsChanged', 'columnResized', 'pinnedChanged', 'focusChanged', 'firstDataRendered', 'selectionRefused',
+  'editingStarted', 'editingStopped', 'editStates', 'stateRestored', 'groupByChanged', 'exportRequested', 'exportFinished', 'exportRefused',
+];
 
 /** What `membershipOf` reads of a query with no filter and no search. */
 const NONE = { filter: {}, quick: '' } as Query;
@@ -148,6 +153,8 @@ export class DzGrid<T> implements AfterContentInit {
   readonly multiSort = input<boolean>();
   /** A full reload compares rows by value: only real changes flash (`sameValues` from `@dzgrid/core/compare`). Fixed. */
   readonly sameRow = input<S<T>['sameRow']>();
+  /** False: no motion (`data-motion="off"` on the root, `@dzgrid/dom/motion-gsap` stops); live. 1.11.0. */
+  readonly motion = input<boolean>();
   /**
    * The floating filter row shown or hidden live (`filters().floating`, Phase 4 step 12): unset, the feature's
    * own state; each new value set, never written back over a user's toggle made since (no echo). One-way: the
@@ -203,6 +210,26 @@ export class DzGrid<T> implements AfterContentInit {
   readonly selectionChanged = output<Ev<T, 'selectionChanged'>>();
   /** Rows moved (`rowDrag()`, Phase 9): give `[rows]` back in the new order (`moveRows`), unless the feature applied it. */
   readonly rowMove = output<Ev<T, 'rowMove'>>();
+  /** 1.11.0: an output for every other grid event too, each its own events only (`(gridEvent)` still has them all). */
+  readonly modelUpdated = output<Ev<T, 'modelUpdated'>>();
+  readonly sortChanged = output<Ev<T, 'sortChanged'>>();
+  readonly filterChanged = output<Ev<T, 'filterChanged'>>();
+  readonly quickChanged = output<Ev<T, 'quickChanged'>>();
+  readonly pageChanged = output<Ev<T, 'pageChanged'>>();
+  readonly columnsChanged = output<Ev<T, 'columnsChanged'>>();
+  readonly columnResized = output<Ev<T, 'columnResized'>>();
+  readonly pinnedChanged = output<Ev<T, 'pinnedChanged'>>();
+  readonly focusChanged = output<Ev<T, 'focusChanged'>>();
+  readonly firstDataRendered = output<Ev<T, 'firstDataRendered'>>();
+  readonly selectionRefused = output<Ev<T, 'selectionRefused'>>();
+  readonly editingStarted = output<Ev<T, 'editingStarted'>>();
+  readonly editingStopped = output<Ev<T, 'editingStopped'>>();
+  readonly editStates = output<Ev<T, 'editStates'>>();
+  readonly stateRestored = output<Ev<T, 'stateRestored'>>();
+  readonly groupByChanged = output<Ev<T, 'groupByChanged'>>();
+  readonly exportRequested = output<Ev<T, 'exportRequested'>>();
+  readonly exportFinished = output<Ev<T, 'exportFinished'>>();
+  readonly exportRefused = output<Ev<T, 'exportRefused'>>();
   readonly problems = output<readonly Problem[]>();
   readonly gridReady = output<DzgController<T>>();
 

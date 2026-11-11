@@ -73,7 +73,7 @@ describe('<dz-grid> properties (3, 4)', () => {
     await expect(el.ready).resolves.toBeUndefined();
   });
 
-  it('marked as a host for the layout sheet\'s `display: contents` (13, 1.10.1: also once blockified by a flex parent); a page rule wins', () => {
+  it('marked as a host for the layout sheet\'s `display: contents` (13, 1.11.0: also once blockified by a flex parent); a page rule wins', () => {
     document.body.insertAdjacentHTML('beforeend', '<div style="display: flex; flex-direction: column"></div>');
     const el = make('<dz-grid-test></dz-grid-test>');
     document.body.firstElementChild!.append(el);

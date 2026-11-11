@@ -190,10 +190,10 @@ describe('the icons setting (16–19)', () => {
   });
 });
 
-describe('the guide lists every key (docs/guide/theming-rtl.md « Every variable »)', () => {
+describe('the guide lists every key (the site\'s guides/theming-rtl.mdx « Every variable »; docs/guide/ moved into the site, batch 2)', () => {
   it('each key of THEME_KEYS in the table’s key column, beside its variable', async () => {
     const { readFileSync } = await import('node:fs');
-    const guide = readFileSync(`${process.cwd()}/docs/guide/theming-rtl.md`, 'utf8'); // the suite runs from the repository's root
+    const guide = readFileSync(`${process.cwd()}/website/src/content/docs/guides/theming-rtl.mdx`, 'utf8'); // the suite runs from the repository's root
     const rows = guide.split('\n').filter((l) => l.startsWith('| `--'));
     const kebab = (k: string) => k.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
     const PALETTE = ['bg', 'bgRaised', 'fg', 'fgMuted', 'border', 'accent', 'accentFg', 'danger', 'warning', 'success'];

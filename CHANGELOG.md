@@ -5,10 +5,13 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.10.1] - 2026-11-10
+## [1.11.0] - 2026-11-10
 
-A patch: four defects found while writing the documentation site (owner 2026-11-10, « A »). Nothing of 1.10.0 is
-removed (`npm run check:api`; `LAYOUT_CSS`'s longer literal accepted by the owner).
+A minor (owner 2026-11-10: « il n'y a plus de 1.10.1, il y a que 1.11 »): seven defects found while writing the
+documentation site (« A » for the first four, « C » for the last three), and what a check of the component against
+the grid found missing — Angular's `[motion]` input, an output for every grid event, a warning for an edit option no
+feature reads. Nothing of 1.10.0 is removed (`npm run check:api`, now over every published entry, and the
+1.10.0 tarballs compared: only `LAYOUT_CSS`'s longer literal, accepted by the owner).
 
 ### Upgrading from 1.10.0
 - **The grid's root now fills its container whatever its row count**: a grid with few rows in a host with a height (a
@@ -21,6 +24,20 @@ removed (`npm run check:api`; `LAYOUT_CSS`'s longer literal accepted by the owne
   own styles its `display` (any page rule wins). Angular's host is unchanged (`display: contents` inline).
 - **`LAYOUT_CSS` (`@dzgrid/dom`) is a longer literal**: its type is the string itself; code that typed a variable as
   `typeof LAYOUT_CSS` and assigned the 1.10.0 text to it must widen it to `string`.
+- **A wrapped title cut at its `maxLines` cap sits at the start of its cell**, even in a number column (the titles that
+  fit keep their alignment): see Fixed.
+
+### Added
+- **Angular: `[motion]`** (`false`: no motion, as `createGrid`'s `motion`; live). The only setting of `createGrid`
+  without an input of its own (`onEvent` aside: the outputs are its place).
+- **Angular: an output for every grid event**, of the event's name: `(sortChanged)`, `(filterChanged)`,
+  `(quickChanged)`, `(pageChanged)`, `(columnsChanged)`, `(columnResized)`, `(pinnedChanged)`, `(focusChanged)`,
+  `(modelUpdated)`, `(firstDataRendered)`, `(selectionRefused)`, `(editingStarted)`, `(editingStopped)`,
+  `(editStates)`, `(stateRestored)`, `(groupByChanged)`, `(exportRequested)`, `(exportFinished)`, `(exportRefused)`
+  (19; before, only `(gridEvent)` carried them). A test fails if a setting or an event is added to the grid without its
+  input or output.
+- **A column's `editable`, `validate` or `edit` with none of `edit()`, `fill()`, `range()`** is told: one
+  `missing-feature` warning (detail `edit`) at the first such column. The column stayed read-only without a word.
 
 ### Fixed
 - **A grid with few rows did not fill its flex-column host** (the guide said it did): the root had no `flex-grow`. The
@@ -38,6 +55,27 @@ removed (`npm run check:api`; `LAYOUT_CSS`'s longer literal accepted by the owne
 - **The guide said `@dzgrid/dom/filters-base` gives « the same functions »**: it gives a day or instant column no
   filter (no button) and one `missing-feature` warning. The guide and the site's getting-started page say so, and that
   day filters come from `@dzgrid/dom/filters` (or `filters-base` with `loadDates`).
+- **Something not a feature in `features` made `createGrid` throw a TypeError** (JavaScript callers; typed code cannot
+  write it): `pivot()` from `@dzgrid/dom/pivot` (grouping's companion, `grouping({ pivot })`), a factory not called,
+  `null`, another export's result. Each is now one `invalid-setting` warning at `features[i]` (detail: the value's
+  `typeof`, never its content) and is skipped; the real features beside it work. One feature given alone, not in a
+  list, is taken as a list.
+- **A wrapped title cut at its `maxLines` cap showed no « … » in Chrome** when the column's title sits at the end (a
+  number column) or centred in right-to-left text: Chrome draws that line's « … » past the label's edge. A title cut at
+  the cap now says `data-hclamp` on its header cell and its label is set at the start (inline, so a host loading
+  `WRAPPED_HEADERS_CSS` itself gets it too); the « … » shows in Chrome, Firefox and WebKit, left to right and right to
+  left. Known from the copies the row's height is already measured on: no layout added (header-wrap.md 11). The
+  known limit `header-wrap.md` noted in 1.10.0 is gone.
+
+### Tooling
+- **`npm run check:api` guards every published entry.** The baselines (`api/*.api.txt`) had no section for entries
+  published after they were written — 7 of `@dzgrid/core` (`grouping`, `pivot`, `dock`, `compare`, `totals`,
+  `import`, `row-gaps`) and 36 of `@dzgrid/dom` (28 French and Arabic locale bundles, `statusbar`, `row-numbers`,
+  `row-gaps`, `fresh-rows` and four English bundles) — and missed four inputs of the Angular component (`headers`,
+  `headerHeight`, `theme`, `icons`), so nothing guarded them. The baselines now hold the whole published surface, and
+  `@dzgrid/theme`'s stylesheet entries as sections without exports (`api/dzgrid-theme.api.txt`, new); a test fails when
+  an entry of a package's exports map has no section, or an input, model or output of the component is not recorded
+  (owner 2026-11-10: « baseline extended to every published entry »).
 
 ## [1.10.0] - 2026-11-10
 

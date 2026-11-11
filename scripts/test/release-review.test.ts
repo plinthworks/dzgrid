@@ -15,13 +15,13 @@ const pkg = (name: string) => JSON.parse(readFileSync(`${ROOT}packages/${name}/p
 const NAMES = ['core', 'dom', 'angular', 'theme', 'element'];
 const VERSIONS = Object.fromEntries(NAMES.map((n) => [pkg(n).name, pkg(n).version]));
 
-describe('1.10.1 as npm would receive it', () => {
-  it('each manifest, once pinned as build.mjs does, has its @dzgrid peers on ^1.10.1', () => {
+describe('1.11.0 as npm would receive it', () => {
+  it('each manifest, once pinned as build.mjs does, has its @dzgrid peers on ^1.11.0', () => {
     for (const n of NAMES) {
       const pinned = pinPeers(pkg(n), VERSIONS);
       expect(peerProblems(n, pinned, VERSIONS), n).toEqual([]);
       for (const [dep, range] of Object.entries((pinned.peerDependencies ?? {}) as Record<string, string>)) {
-        if (dep.startsWith('@dzgrid/')) expect(range, `${n} → ${dep}`).toBe('^1.10.1');
+        if (dep.startsWith('@dzgrid/')) expect(range, `${n} → ${dep}`).toBe('^1.11.0');
       }
     }
   });
@@ -41,10 +41,10 @@ describe('1.10.1 as npm would receive it', () => {
   // After `npm run pack:local`: the tarballs carry no test source, sandbox, capture or measure result, and each
   // non-theme package declares no side effects.
   const packed = `${ROOT}packed`;
-  /** The packs' version: 1.10.1 (`npm run pack:release`), or a local one (`npm run pack:local`, app-feedback 15: `1.10.2-local.<stamp>`). */
-  const V = existsSync(packed) ? (readdirSync(packed).find((f) => f.startsWith('dzgrid-core-'))?.slice(12, -4) ?? '1.10.1') : '1.10.1';
-  const local = V !== '1.10.1';
-  it.skipIf(!existsSync(packed))('the packed tarballs: no test sources, sideEffects as declared, version 1.10.1, every exported file present', () => {
+  /** The packs' version: 1.11.0 (`npm run pack:release`), or a local one (`npm run pack:local`, app-feedback 15: `1.11.1-local.<stamp>`). */
+  const V = existsSync(packed) ? (readdirSync(packed).find((f) => f.startsWith('dzgrid-core-'))?.slice(12, -4) ?? '1.11.0') : '1.11.0';
+  const local = V !== '1.11.0';
+  it.skipIf(!existsSync(packed))('the packed tarballs: no test sources, sideEffects as declared, version 1.11.0, every exported file present', () => {
     const tgz = readdirSync(packed).filter((f) => f.endsWith('.tgz'));
     expect(V).toMatch(/^(1\.10\.1|1\.10\.2-local\.\d{14})$/);
     // `@dzgrid/element` (Phase 11 L7) is packed from the first pack made after it: an older pack has the four.
@@ -134,7 +134,7 @@ describe('1.10.1 as npm would receive it', () => {
     }
     const dom = manifestOf('dom');
     expect(Object.keys(dom.peerDependencies)).toEqual(expect.arrayContaining(['@dzgrid/core', 'gsap', '@tzslot/core', '@tzslot/dom']));
-    expect(dom.peerDependencies['@dzgrid/core']).toBe(local ? V : '^1.10.1');
+    expect(dom.peerDependencies['@dzgrid/core']).toBe(local ? V : '^1.11.0');
     // Not bundled: no shipped module carries gsap's or tzslot's code, only imports of them.
     for (const f of listOf('dom').filter((x) => x.endsWith('.js'))) {
       const text = readFileSync(join(unpack('dom'), f), 'utf8');

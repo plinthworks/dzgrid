@@ -34,6 +34,16 @@ export const WRAPPED_HEADERS_CSS =
  * createGrid(host, { …, columns: [{ id: 'days', header: 'Average delivery time in days', width: 90, headerWrap: true }], features: [wrappedHeaders()] });
  * ```
  */
+/**
+ * A title cut at the cap (header-wrap.md 11, 1.11.0): `data-hclamp` on its cell, its label set at the start — Chrome draws
+ * the « … » of a clamped line aligned at the end past the label's edge. Inline, so a host loading `WRAPPED_HEADERS_CSS`
+ * itself gets it too.
+ */
+function markCut(cell: HTMLElement | null | undefined, on: boolean): void {
+  const label = cell?.querySelector<HTMLElement>('.dzg-hlabel');
+  if (label) setAttr(cell!, 'data-hclamp', on ? '' : null), label.style.setProperty('text-align', on ? 'start' : '');
+}
+
 export function wrappedHeaders(o: WrappedHeadersOptions = {}): GridFeature {
   const ok = Number.isInteger(o.maxLines) && o.maxLines! >= 1 && o.maxLines! <= 10;
   const lines = ok ? o.maxLines! : 3;
@@ -60,9 +70,12 @@ export function wrappedHeaders(o: WrappedHeadersOptions = {}): GridFeature {
       el.header.append(probe);
       let key = '';
       let need = 0;
+      /** The columns whose title is cut at the cap, read on the copies. */
+      let cut = new Set<string>();
       return {
         decorateHeader(col, c) {
           setAttr(c, 'data-hwrap', col.def.headerWrap ? '' : null);
+          markCut(c, cut.has(col.id));
         },
         afterRows() {
           const cols = g.columns.visible().filter((c) => c.def.headerWrap);
@@ -84,10 +97,12 @@ export function wrappedHeaders(o: WrappedHeadersOptions = {}): GridFeature {
               cell.style.setProperty('inline-size', `${widthOf(g, c.id)}px`);
               return probe.appendChild(cell);
             });
-            // All written, then all read (one layout), then all removed.
+            // All written, then all read (one layout), then all removed. A label taller than it shows: cut at the cap.
             const tall = Math.max(0, ...copies.map((c) => c.offsetHeight));
+            cut = new Set(cols.filter((_, i) => { const l = copies[i]!.querySelector('.dzg-hlabel')!; return l.scrollHeight > l.clientHeight + 1; }).map((c) => c.id));
             for (const c of copies) c.remove();
             need = tall > h ? tall : 0;
+            for (const c of cols) markCut(g.headerRenderer.cell(c.id), cut.has(c.id));
           }
           needHeader(g, 'wrapped', need);
         },
@@ -95,7 +110,7 @@ export function wrappedHeaders(o: WrappedHeadersOptions = {}): GridFeature {
           probe.remove();
           needHeader(g, 'wrapped', 0, true);
           el.root.style.removeProperty('--dzg-header-lines');
-          for (const c of el.header.querySelectorAll('[data-hwrap]')) c.removeAttribute('data-hwrap');
+          for (const c of el.header.querySelectorAll<HTMLElement>('[data-hwrap]')) c.removeAttribute('data-hwrap'), markCut(c, false);
         },
       };
     },
