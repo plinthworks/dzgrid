@@ -270,6 +270,7 @@ export interface GridTheme {
     readonly rowSelectedBg?: ThemeValue;
     readonly rowActiveBg?: ThemeValue;
     readonly cellActiveBg?: ThemeValue;
+    readonly columnHoverBg?: ThemeValue;
     readonly focusRing?: ThemeValue;
     readonly focusWidth?: ThemeValue;
     readonly selectBar?: ThemeValue;
@@ -765,6 +766,12 @@ export declare function spans(o?: {
 }): GridFeature;
 ```
 
+### SPANS_CSS
+
+```ts
+export declare const SPANS_CSS: string;
+```
+
 ## `@dzgrid/dom/groups`
 
 ### GroupsApi
@@ -799,6 +806,12 @@ export interface GroupsFeature extends GridFeature {
 
 ```ts
 export declare function groups(): GroupsFeature;
+```
+
+### GROUPS_CSS
+
+```ts
+export declare const GROUPS_CSS: string;
 ```
 
 ## `@dzgrid/dom/slots`
@@ -861,6 +874,12 @@ export interface PaginationOptions {
 
 ```ts
 export declare function pagination(o?: PaginationOptions): GridFeature;
+```
+
+### PAGINATION_CSS
+
+```ts
+export declare const PAGINATION_CSS: string;
 ```
 
 ## `@dzgrid/dom/export`
@@ -1121,6 +1140,12 @@ export interface TreeMessages {
 export declare function tree<T>(o: TreeFeatureOptions<T>): TreeFeature;
 ```
 
+### TREE_CSS
+
+```ts
+export declare const TREE_CSS: string;
+```
+
 ## `@dzgrid/dom/tree-lazy`
 
 ### LazyChildren
@@ -1220,6 +1245,12 @@ export declare function detail<T>(o: DetailFeatureOptions<T>): GridFeature;
 
 ```ts
 export declare function nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<'detail'>;
+```
+
+### DETAIL_CSS
+
+```ts
+export declare const DETAIL_CSS: string;
 ```
 
 ## `@dzgrid/dom/edit`
@@ -1432,6 +1463,12 @@ export interface EditorsOptions {
 
 ```ts
 export declare function editors(o?: EditorsOptions): GridFeature;
+```
+
+### EDITORS_CSS
+
+```ts
+export declare const EDITORS_CSS: string;
 ```
 
 ## `@dzgrid/dom/filters-base`
@@ -2477,6 +2514,12 @@ export interface StatusStats {
 export declare function statusBar(o?: StatusBarOptions): StatusBarFeature;
 ```
 
+### STATUS_CSS
+
+```ts
+export declare const STATUS_CSS: string;
+```
+
 ## `@dzgrid/dom/find`
 
 ### FIND_KEYS
@@ -2566,6 +2609,12 @@ export interface FindState {
 
 ```ts
 export declare function find(o?: FindOptions): FindFeature;
+```
+
+### FIND_CSS
+
+```ts
+export declare const FIND_CSS: string;
 ```
 
 ## `@dzgrid/dom/row-drag`
@@ -2695,6 +2744,12 @@ export type RowMoveResult = 'moved' | 'edge' | 'locked' | 'sorted' | 'grouped' |
 export declare function rowDrag<T = unknown>(o?: RowDragOptions<T>): RowDragFeature<T>;
 ```
 
+### ROW_DRAG_CSS
+
+```ts
+export declare const ROW_DRAG_CSS: string;
+```
+
 ## `@dzgrid/dom/dock`
 
 ### DOCK_KEYS
@@ -2799,6 +2854,12 @@ export interface DockPanel {
 export declare function dock(o?: DockOptions): DockFeature;
 ```
 
+### DOCK_CSS
+
+```ts
+export declare const DOCK_CSS: string;
+```
+
 ## `@dzgrid/dom/pivot`
 
 ### PIVOT_KEYS
@@ -2865,6 +2926,7 @@ export interface PivotFeature {
 export interface PivotFeatureOptions extends Omit<PivotOptions, keyof GroupingOptions | 'labels'> {
     readonly toggle?: boolean | 'inside' | HTMLElement;
     readonly valueHeaders?: 'auto' | 'fn' | 'name';
+    readonly width?: number;
     readonly labelWidth?: number;
 }
 ```
@@ -3000,6 +3062,12 @@ export interface RowNumbersMessages {
 export declare function rowNumbers(): GridFeature;
 ```
 
+### ROW_NUMBERS_CSS
+
+```ts
+export declare const ROW_NUMBERS_CSS: string;
+```
+
 ## `@dzgrid/dom/grouping`
 
 ### GROUP_KEYS
@@ -3080,6 +3148,12 @@ export interface GroupingFeatureOptions extends GroupingOptions {
 
 ```ts
 export declare function grouping(o?: GroupingFeatureOptions): GroupingFeature;
+```
+
+### TREE_CSS
+
+```ts
+export declare const TREE_CSS: string;
 ```
 
 ## `@dzgrid/dom/group-zone`
@@ -3205,6 +3279,12 @@ export interface FiltersPanelOptions {
 
 ```ts
 export declare function filtersPanel(o?: FiltersPanelOptions): FiltersPanelFeature;
+```
+
+### FILTERS_PANEL_CSS
+
+```ts
+export declare const FILTERS_PANEL_CSS: string;
 ```
 
 ## `@dzgrid/dom/columns-panel`
@@ -3443,6 +3523,12 @@ export declare function pinnedRows<T = unknown>(o?: PinnedRowsOptions<T>): Pinne
 
 ```ts
 export declare function autoHeight(): GridFeature;
+```
+
+### WRAP_CSS
+
+```ts
+export declare const WRAP_CSS = ":is(.dzg-body,.dzg-sticky) .dzg-cell[data-wrap]{line-height:var(--dzg-wrap-line,1.25rem);padding-block:calc((var(--dzg-row-height,2rem) - var(--dzg-line,1px) - var(--dzg-wrap-line,1.25rem))/2)}";
 ```
 
 ## `@dzgrid/dom/row-gaps`
@@ -3797,6 +3883,12 @@ export interface SetKit {
 export declare function filters(o?: FiltersOptions): FiltersFeature;
 ```
 
+### FILTERS_CSS
+
+```ts
+export declare const FILTERS_CSS: string;
+```
+
 ## `@dzgrid/dom/totals-row`
 
 ### TOTALS_KEYS
@@ -3943,6 +4035,12 @@ export interface ResponsiveOptions {
 export declare function responsive(o?: ResponsiveOptions): GridFeature;
 ```
 
+### RESPONSIVE_CSS
+
+```ts
+export declare const RESPONSIVE_CSS: string;
+```
+
 ## `@dzgrid/dom/import`
 
 ### FileImportApi
@@ -4023,6 +4121,12 @@ export interface ImportedFile {
 
 ```ts
 export declare function fileImport(o: FileImportOptions): FileImportFeature;
+```
+
+### IMPORT_CSS
+
+```ts
+export declare const IMPORT_CSS: string;
 ```
 
 ## Texts bundles

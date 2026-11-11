@@ -64,7 +64,7 @@ function setup(g: GridContext<unknown>, o: GroupZoneOptions): FeatureHandle {
   if (missing.length) throw new TypeError(`groupZone: missing ${missing.join(', ')}`);
   const { el, doc, columns: m, scope } = g;
   const root = el.root.getRootNode() as Document | ShadowRoot;
-  if (!root.querySelector('style[data-dzgrid-zone]')) {
+  if (!root.querySelector('style[data-dzgrid-zone]') && g.settings.injectStyles !== false) {
     const st = doc.createElement('style');
     st.setAttribute('data-dzgrid-zone', '');
     if (g.settings.nonce) st.setAttribute('nonce', g.settings.nonce);
@@ -141,7 +141,7 @@ function setup(g: GridContext<unknown>, o: GroupZoneOptions): FeatureHandle {
     const had = zone.contains(root.activeElement ?? null);
     const was = had ? (root.activeElement as HTMLElement) : null;
     const wasCol = was?.closest<HTMLElement>('.dzg-gchip')?.dataset['col'];
-    const wasX = !!was?.classList.contains('dzg-chip-x');
+    const wasX = was?.classList.contains('dzg-chip-x');
     zone.setAttribute('aria-label', g.msg(K('zone.label')));
     zone.replaceChildren();
     if (!by.length) {
@@ -187,10 +187,11 @@ function setup(g: GridContext<unknown>, o: GroupZoneOptions): FeatureHandle {
     // The grid's own reading of an arrow, mirrored right to left (forward: +1).
     const step = intentFor({ key: k, shiftKey: false, ctrlKey: false, altKey: false, metaKey: false }, { dir: g.dir, owner: 'cell', mac: g.mac });
     const by = step?.kind === 'move' && step.axis === 'col' ? step.delta : 0;
-    const mods = e.ctrlKey || e.shiftKey || e.altKey || e.metaKey;
+    const am = e.altKey || e.metaKey;
+    const mods = e.ctrlKey || e.shiftKey || am;
     let done = true;
-    if (by && e.ctrlKey && e.shiftKey && !e.altKey && !e.metaKey) place(id, shown().indexOf(id) + by);
-    else if (by && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey) rove(i + by, true);
+    if (by && e.ctrlKey && e.shiftKey && !am) place(id, shown().indexOf(id) + by);
+    else if (by && !mods) rove(i + by, true);
     else if (mods) done = false;
     else if (k === 'Home' || k === 'End') rove(k === 'Home' ? 0 : all.length - 1, true);
     else if (k === 'Delete' || k === 'Backspace') remove(id);

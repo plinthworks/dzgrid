@@ -7,7 +7,9 @@ import type { FeatureHandle, GridFeature } from '../features.js';
 import type { GroupMessageKey } from '../part-texts.js';
 import type { CellView, Frame, RowView } from '../render/rows.js';
 import { isolationFor } from '../render/bidi.js';
-import { injectTreeStyles } from '../tree/styles.js';
+import { injectTreeStyles, TREE_CSS } from '../tree/styles.js';
+/** Its layout CSS, for a page that sets `injectStyles: false` and loads it itself. */
+export { TREE_CSS };
 import { stickyStack } from '../tree/sticky.js';
 
 /** The texts `grouping()` needs, from `@dzgrid/dom/locales/<lang>-group`. */
@@ -105,7 +107,7 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
   if (told.length) emit(kernel, { type: 'problems', source: 'host', problems: told });
   if (!s || tree || server) return s?.off(), { destroy() {} };
   const shape: Pick<GroupShape<unknown>, 'by' | 'setBy' | 'reads' | 'totals'> = side ? { get by() { return side.by; }, setBy: (by, x) => side.setBy(by, x), reads: () => side.by, totals: () => side.totals() } : s;
-  injectTreeStyles(el.root.getRootNode() as Document | ShadowRoot, g.settings.nonce);
+  if (g.settings.injectStyles !== false) injectTreeStyles(el.root.getRootNode() as Document | ShadowRoot, g.settings.nonce);
 
   const rows = (): Rows | null => {
     const d = g.rows.displayed as Partial<Rows>;

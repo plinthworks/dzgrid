@@ -23,6 +23,11 @@ export interface PivotFeatureOptions extends Omit<PivotOptions, keyof GroupingOp
    * name otherwise; `'fn'` the function form always; `'name'` the short name (`headerShort`, else `header`) only.
    */
   readonly valueHeaders?: 'auto' | 'fn' | 'name';
+  /**
+   * A created column's width. Not given: each is sized from its header, 120 to 240 px (a long « sum(Amount) » header
+   * gets room); given: every created column takes it.
+   */
+  readonly width?: number;
   /** The label column's width (default 200). */
   readonly labelWidth?: number;
 }

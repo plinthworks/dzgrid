@@ -16,7 +16,8 @@ export interface ResponsiveOptions {
  * detail's empty slot gone while nothing is collapsed; one line per collapsed column, its title then its value, the
  * colon drawn here (a narrow space before it in French); a value read in its own direction (`B-1` in Arabic).
  */
-const CSS =
+/** Its layout, written once per document or shadow root; with `injectStyles: false` the page loads it itself. */
+export const RESPONSIVE_CSS =
   '@layer dzgrid.layout{' +
   ':where([data-dzg-responsive] .dzg-toggle[data-none]){display:none}' +
   ':where(.dzg-rlines){margin:0;padding:.375rem var(--dzg-cell-padding-inline,.75rem)}' +
@@ -70,9 +71,13 @@ export function responsive(o: ResponsiveOptions = {}): GridFeature {
       const s = st;
       st = null;
       const fs = g.settings.features ?? [];
-      // One row shape a grid (14): another's, or the application's own details beside these, told; the first listed wins.
-      if (!s || fs.some((f) => f.id === 'detail')) emit(g.kernel, { type: 'problems', source: 'host', problems: [problem('unsupported-combination', 'warning', 'responsive', s ? 'detail' : fs.find((f) => f !== me && f.shape)?.id ?? 'shape')] });
-      return s ? setup(g, s, o) : { destroy() {} };
+      // One row shape a grid (14): another's, header groups, spans, or the application's own details beside these, told;
+      // the first listed wins. Header groups and spans keep every column (a collapse would cut a group or a span).
+      const groups = (g.settings.columns ?? []).some((c) => c && 'children' in c);
+      const spanned = fs.some((f) => f.id === 'spans');
+      const why = !s ? fs.find((f) => f !== me && f.shape)?.id ?? 'shape' : groups ? 'groups' : spanned ? 'spans' : fs.some((f) => f.id === 'detail') ? 'detail' : null;
+      if (why) emit(g.kernel, { type: 'problems', source: 'host', problems: [problem('unsupported-combination', 'warning', 'responsive', why)] });
+      return s && !groups && !spanned ? setup(g, s, o) : { destroy() {} };
     },
   };
   return me;
@@ -87,7 +92,7 @@ function setup(g: GridContext<unknown>, s: State, o: ResponsiveOptions): Feature
     const st = doc.createElement('style');
     st.setAttribute('data-dzgrid-responsive', '');
     if (g.settings.nonce) st.setAttribute('nonce', g.settings.nonce);
-    st.textContent = CSS;
+    st.textContent = RESPONSIVE_CSS;
     ('head' in root ? root.head : root).append(st);
   }
   el.root.setAttribute('data-dzg-responsive', '');

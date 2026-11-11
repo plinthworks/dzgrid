@@ -15,7 +15,8 @@ export const ROW_NUMBERS_KEYS = ['rownum.header'] as const satisfies readonly Ro
  * The strip's layout, injected once per document or shadow root (row-numbers.md 2, 3): no colour (the theme's
  * `row-numbers.css`), logical sides only, zero specificity, in the cascade layer dzgrid.layout.
  */
-const CSS =
+/** Its layout, written once per document or shadow root; with `injectStyles: false` the page loads it itself. */
+export const ROW_NUMBERS_CSS =
   '@layer dzgrid.layout{' +
   ':where(.dzg-lead){display:flex;flex:none;align-items:center;justify-content:flex-end;box-sizing:border-box;padding-inline:.375rem;overflow:hidden;white-space:nowrap;font-variant-numeric:tabular-nums;user-select:none;cursor:pointer}' +
   ':where(.dzg-pins .dzg-lead){cursor:auto}' +
@@ -47,7 +48,7 @@ function setup(g: GridContext<unknown>): FeatureHandle {
     const s = doc.createElement('style');
     s.setAttribute('data-dzgrid-rownum', '');
     if (g.settings.nonce) s.setAttribute('nonce', g.settings.nonce);
-    s.textContent = CSS;
+    s.textContent = ROW_NUMBERS_CSS;
     ('head' in target ? target.head : target).append(s);
   }
   // Detail panels, an application's or the collapsed columns' lines (`responsive`): not numbered.

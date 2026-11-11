@@ -48,8 +48,10 @@ next starts. Scrolls, sorts, filters, opens and closes, moves with the keys, sel
   the same map: the row under a gap writes its value again.
 - **With**: a tree and its pinned parents, rows always open (`fixedOpen`), merged cells, automatic row height (a row
   both taller and gapped; the gaps feature is the outermost layout whatever the order of the features), pinned rows,
-  client pages, right to left (the same offsets: a gap is a block-direction space). **Not with** master/detail in
-  1.1.0: `unsupported-combination` (path `rowGaps`, detail `detail`), no gap drawn.
+  client pages, right to left (the same offsets: a gap is a block-direction space). **Not with** master/detail or
+  columns that collapse (`responsive()`, whose lines are detail panels): `unsupported-combination` (path `rowGaps`,
+  detail `detail`), no gap drawn; nor with a list loaded in blocks (infinite scrolling): `unsupported-combination`
+  (detail `blocks`), no gap drawn.
 - **Problems** (never the row's data): `before` not a function — `invalid-setting` (path `rowGaps.before`), no gap. A
   rule that throws, or answers a negative, non-finite or non-number value: no gap on that row, told once per grid and
   per kind (`invalid-gap`, path `rowGaps.before`, detail `threw` or `not a size`). `size` not a non-negative finite

@@ -3,6 +3,7 @@ title: "columnHover"
 description: "Marque la colonne sous la souris, pour que votre feuille de style la teinte."
 ---
 
+import LiveDemo from '../../../../components/LiveDemo.astro';
 import FeatureFacts from '../../../../components/FeatureFacts.astro';
 
 Marque la colonne sous la souris ou le stylet, de son titre à sa dernière cellule.
@@ -16,7 +17,8 @@ ses cellules, et la racine de la grille reçoit `data-hover-col` avec l’identi
 un endroit sans colonne (l’espace après la dernière colonne, une ligne de groupe, une ligne pleine largeur), efface les
 deux.
 
-La teinte est à vous : donnez une valeur à la variable `--dzg-column-hover-bg`. Elle se dessine par-dessus la couleur
+La teinte est à vous : donnez une valeur à la variable `--dzg-column-hover-bg`, dans votre CSS ou par la clé de thème
+`columnHoverBg` avec [`theming()`](../theming/). Elle se dessine par-dessus la couleur
 de la ligne, si bien qu’une ligne alternée, survolée ou sélectionnée garde sa couleur sous une teinte légère. Sans
 valeur, rien ne se dessine, mais les attributs sont quand même écrits pour votre propre CSS. La cellule qui a le focus
 garde son propre aspect.
@@ -48,6 +50,25 @@ createGrid<Harvest>(document.getElementById('harvest')!, {
   features: [columnHover()],
 });
 ```
+
+Passez la souris sur les colonnes :
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Récolte', theme: { columnHoverBg: 'color-mix(in srgb, var(--tz-accent) 12%, transparent)' } }}
+  features={['columnHover', 'theming']}
+  columns={[
+    { id: 'field', header: 'Parcelle', flex: 1 },
+    { id: 'june', header: 'Juin (kg)', type: 'number', width: 120 },
+    { id: 'july', header: 'Juillet (kg)', type: 'number', width: 120 },
+    { id: 'august', header: 'Août (kg)', type: 'number', width: 130 },
+  ]}
+  rows={[
+    { id: 'h1', field: 'Champ du nord', june: 120, july: 340, august: 410 },
+    { id: 'h2', field: 'Verger', june: 80, july: 150, august: 290 },
+    { id: 'h3', field: 'Parcelle de la rivière', june: 200, july: 260, august: 180 },
+  ]}
+/>
 
 ## Voir aussi
 

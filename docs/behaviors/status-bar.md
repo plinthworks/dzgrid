@@ -53,7 +53,7 @@ opens the cell menu (Shift+F10) and picks « Lire les totaux ».
   context: `stats` (the core's `RangeStats` plus `avg`, null without a block), `busy` (« … »), `counts`, `selection`
   (`count`, null when unknown), `figure(name)` (the text the strip writes for `count`, `sum`, `avg`, `min`, `max`, or
   null when it shows none), `format(n, column?)` (the grid's number writing, a column's format when named), and
-  what every part gets. An unknown name: skipped, `unknown-part` at `statusBar.items[i]`. Block items without
+  what every part gets. An unknown name: skipped, `unknown-part` (an error) at `statusBar.items[i]`. Block items without
   `range()`: empty, one `missing-feature` warning at `features.statusBar`, detail `range`.
 - **One strip** (`@dzgrid/dom/internal`'s bottom strip, `div.dzg-footer`, the last child of the grid's root): made by
   the first of `pagination()` and `statusBar()` set up, dropped with the last; it sets `--dzg-footer-size` so the

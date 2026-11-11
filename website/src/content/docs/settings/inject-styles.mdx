@@ -19,8 +19,8 @@ with layout of its own (filters, pages, the status bar…). A policy that allows
 
 `false`: neither the grid nor its features write any `<style>`, your page loads the rules instead — except the date
 panels, whose own sheets are written unless the page already holds them under the same `data-tzslot` ids. The base's are
-`LAYOUT_CSS` from `@dzgrid/dom`, in the `dzgrid.layout` layer; a few features export theirs too (`ICONS_CSS`,
-`WRAPPED_HEADERS_CSS`, `COLUMN_HOVER_CSS`, `PIVOT_BAR_CSS`, `ZONE_CSS`). The look itself, `@dzgrid/theme`, is always
+`LAYOUT_CSS` from `@dzgrid/dom`, in the `dzgrid.layout` layer; every feature with layout of its own exports it from
+its entry, named on its [page](../../features/) (`FILTERS_CSS`, `PAGINATION_CSS`, `STATUS_CSS`, `TREE_CSS`…). The look itself, `@dzgrid/theme`, is always
 yours to load. The setting is read once: `update()` refuses a change.
 
 ## Example

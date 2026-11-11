@@ -77,7 +77,7 @@ function setup(g: GridContext<unknown>, o: PivotBarOptions): FeatureHandle {
   const { el, doc, columns: m, scope } = g;
   const root = el.root.getRootNode() as Document | ShadowRoot;
   for (const [k, css] of [['zone', ZONE_CSS], ['pbar', PIVOT_BAR_CSS]] as const) {
-    if (root.querySelector(`style[data-dzgrid-${k}]`)) continue;
+    if (g.settings.injectStyles === false || root.querySelector(`style[data-dzgrid-${k}]`)) continue;
     const st = doc.createElement('style');
     st.setAttribute(`data-dzgrid-${k}`, '');
     if (g.settings.nonce) st.setAttribute('nonce', g.settings.nonce);

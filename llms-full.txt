@@ -672,8 +672,8 @@ createGrid<Hive>(document.getElementById('hives')!, {
 ```
 
 On a row's first cell, Enter or Space opens and closes its lines (arrows too, as for detail rows). It is a detail rows
-feature: it cannot be combined with a tree, row grouping or your own `detail()` (told `unsupported-combination`), nor
-with header groups (not told).
+feature: it cannot be combined with a tree, row grouping, header groups, merged cells (`spans()`) or your own
+`detail()`: the grid tells `unsupported-combination` and nothing collapses.
 
 ## Column groups
 
@@ -2107,6 +2107,7 @@ changes nothing by itself; a feature's sheet is named. *Key* is the `theme` sett
 | `--dzg-row-odd-bg` | `rowOddBg` | Alternate rows (the 2nd, 4th… shown) | none | base |
 | `--dzg-row-hover-bg`, `--dzg-row-selected-bg`, `--dzg-row-active-bg` | `rowHoverBg`, `rowSelectedBg`, `rowActiveBg` | Row under the pointer, selected, holding the focus | tints of the palette | base |
 | `--dzg-cell-active-bg`, `--dzg-focus-ring` | `cellActiveBg`, `focusRing` | The focused cell's tint and ring | accent tints | base |
+| `--dzg-column-hover-bg` | `columnHoverBg` | The column under the pointer, with `columnHover()` | none (nothing drawn) | `columnHover()` |
 | `--dzg-focus-width` | `focusWidth` | The ring's width (never under 2 px) | `2px` | variables |
 | `--dzg-select-bar` | `selectBar` | A selected row's bar at its start | `0` | base |
 | `--dzg-stale-fg`, `--dzg-context-fg`, `--dzg-toggle-fg` | `staleFg`, `contextFg`, `toggleFg` | Rows kept while loading, a tree's context rows, chevrons | `--tz-fg-muted` | base |
@@ -2115,6 +2116,7 @@ changes nothing by itself; a feature's sheet is named. *Key* is the `theme` sett
 | `--dzg-pinned-bg`, `--dzg-pinned-line` | `pinnedBg`, `pinnedLine` | Pinned rows' surface and edge | `--tz-bg-raised`, `--tz-fg-muted` | `pinned-rows.css` |
 | `--dzg-busy-bar` | `busyBar` | The busy bar | `--tz-accent` | base |
 | `--dzg-flash-color` | `flashColor` | A changed value's flash | `--tz-warning` | base |
+| `--dzg-flash` | — | The flash's strength, 1 → 0, written on the cell by `motion()`: not a colour to set | `1` | base |
 | `--dzg-fresh-color`, `--dzg-fresh-bg`, `--dzg-fresh-bar` | `freshColor`, `freshBg`, `freshBar` | Rows a refresh brought | `--tz-success`, 14 %, `3px` | `fresh-rows.css` |
 | `--dzg-saving-color`, `--dzg-saved-color`, `--dzg-refused-color`, `--dzg-refused-bg` | `savingColor`, `savedColor`, `refusedColor`, `refusedBg` | Save marks, a refused value | tones | `edit.css`, base |
 | `--dzg-editor-border` | `editorBorder` | An open editor's frame | `--dzg-focus-ring` | `edit.css` |

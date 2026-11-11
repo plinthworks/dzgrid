@@ -69,7 +69,8 @@ export interface RowDragFeature<T = unknown> extends GridFeature {
 }
 
 /** The grip's and the layer's layout (no colour: `@dzgrid/theme/row-drag.css`), injected once per document or shadow root. */
-const CSS =
+/** Its layout, written once per document or shadow root; with `injectStyles: false` the page loads it itself. */
+export const ROW_DRAG_CSS =
   '@layer dzgrid.layout{' +
   ':where(.dzg-grip){display:inline-flex;flex:none;align-items:center;justify-content:center;vertical-align:middle;inline-size:var(--dzg-target-min,24px);block-size:var(--dzg-target-min,24px);margin-inline-end:.125rem;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}' +
   ':where(.dzg-grip)::before{content:"\\283f";font-size:var(--dzg-icon-size);line-height:1}:where(.dzg-grip[data-dzg-off]){cursor:not-allowed}' +
@@ -121,7 +122,7 @@ function setup(g: GridContext<unknown>, o: RowDragOptions<unknown>, apis: WeakMa
     const s = doc.createElement('style');
     s.setAttribute('data-dzgrid-rmove', '');
     if (g.settings.nonce) s.setAttribute('nonce', g.settings.nonce);
-    s.textContent = CSS;
+    s.textContent = ROW_DRAG_CSS;
     ('head' in target ? target.head : target).append(s);
   }
   const server = g.rows.kind === 'source';

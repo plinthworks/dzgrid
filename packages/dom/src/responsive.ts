@@ -4,4 +4,6 @@
  * `@dzgrid/dom/detail`'s rows (its texts, `locales/<lang>-detail`); the decision in the core's column model.
  */
 export { responsive } from './responsive/index.js';
+/** Its layout CSS, for a page that sets `injectStyles: false` and loads it itself. */
+export { RESPONSIVE_CSS } from './responsive/index.js';
 export type { ResponsiveOptions } from './responsive/index.js';

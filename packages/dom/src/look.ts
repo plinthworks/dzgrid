@@ -28,6 +28,8 @@ export interface GridTheme {
   readonly pinnedShadow?: ThemeValue; readonly detailLine?: ThemeValue;
   // Rows and cells.
   readonly rowOddBg?: ThemeValue; readonly rowHoverBg?: ThemeValue; readonly rowSelectedBg?: ThemeValue; readonly rowActiveBg?: ThemeValue; readonly cellActiveBg?: ThemeValue;
+  /** The hovered column's tint, drawn by `columnHover()`; unset, nothing is drawn. */
+  readonly columnHoverBg?: ThemeValue;
   readonly focusRing?: ThemeValue; readonly focusWidth?: ThemeValue; readonly selectBar?: ThemeValue; readonly staleFg?: ThemeValue; readonly contextFg?: ThemeValue;
   readonly toggleFg?: ThemeValue; readonly detailBg?: ThemeValue; readonly groupRowBg?: ThemeValue; readonly pinnedBg?: ThemeValue; readonly pinnedLine?: ThemeValue;
   // States and marks.

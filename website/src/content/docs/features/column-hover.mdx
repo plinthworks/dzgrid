@@ -3,6 +3,7 @@ title: "columnHover"
 description: "Marks the column under the mouse, so your style sheet can tint it."
 ---
 
+import LiveDemo from '../../../components/LiveDemo.astro';
 import FeatureFacts from '../../../components/FeatureFacts.astro';
 
 Marks the column under the mouse or the pen, from its header to its last cell.
@@ -15,7 +16,8 @@ Marks the column under the mouse or the pen, from its header to its last cell.
 cells, and the grid's root gets `data-hover-col` with the column's id. Leaving the grid, or a place with no column (the
 gap after the last column, a group row, a full-width row), clears both.
 
-The tint is yours: set the variable `--dzg-column-hover-bg`. It is drawn over the row's own colour, so an alternate,
+The tint is yours: set the variable `--dzg-column-hover-bg`, in your CSS or as the theme key `columnHoverBg` with
+[`theming()`](../theming/). It is drawn over the row's own colour, so an alternate,
 hovered or selected row keeps its colour under a light tint. Unset, nothing is drawn, but the attributes are still
 written for your own CSS. The focused cell keeps its own look.
 
@@ -46,6 +48,25 @@ createGrid<Harvest>(document.getElementById('harvest')!, {
   features: [columnHover()],
 });
 ```
+
+Move the mouse over the columns:
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Harvest', theme: { columnHoverBg: 'color-mix(in srgb, var(--tz-accent) 12%, transparent)' } }}
+  features={['columnHover', 'theming']}
+  columns={[
+    { id: 'field', header: 'Field', flex: 1 },
+    { id: 'june', header: 'June (kg)', type: 'number', width: 120 },
+    { id: 'july', header: 'July (kg)', type: 'number', width: 120 },
+    { id: 'august', header: 'August (kg)', type: 'number', width: 130 },
+  ]}
+  rows={[
+    { id: 'h1', field: 'North field', june: 120, july: 340, august: 410 },
+    { id: 'h2', field: 'Orchard', june: 80, july: 150, august: 290 },
+    { id: 'h3', field: 'River plot', june: 200, july: 260, august: 180 },
+  ]}
+/>
 
 ## See also
 

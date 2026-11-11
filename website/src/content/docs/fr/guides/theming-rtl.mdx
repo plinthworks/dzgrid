@@ -90,6 +90,7 @@ du réglage `theme`.
 | `--dzg-row-odd-bg` | `rowOddBg` | Lignes alternées (la 2e, la 4e… affichées) | aucun | base |
 | `--dzg-row-hover-bg`, `--dzg-row-selected-bg`, `--dzg-row-active-bg` | `rowHoverBg`, `rowSelectedBg`, `rowActiveBg` | Ligne sous le pointeur, sélectionnée, qui a le focus | teintes de la palette | base |
 | `--dzg-cell-active-bg`, `--dzg-focus-ring` | `cellActiveBg`, `focusRing` | La teinte et l’anneau de la cellule qui a le focus | teintes de l’accent | base |
+| `--dzg-column-hover-bg` | `columnHoverBg` | La colonne sous le pointeur, avec `columnHover()` | aucune (rien n’est dessiné) | `columnHover()` |
 | `--dzg-focus-width` | `focusWidth` | L’épaisseur de l’anneau (jamais sous 2 px) | `2px` | variables |
 | `--dzg-select-bar` | `selectBar` | La barre d’une ligne sélectionnée, à son début | `0` | base |
 | `--dzg-stale-fg`, `--dzg-context-fg`, `--dzg-toggle-fg` | `staleFg`, `contextFg`, `toggleFg` | Lignes gardées pendant un chargement, lignes de contexte d’un arbre, chevrons | `--tz-fg-muted` | base |
@@ -98,6 +99,7 @@ du réglage `theme`.
 | `--dzg-pinned-bg`, `--dzg-pinned-line` | `pinnedBg`, `pinnedLine` | La surface et le bord des lignes figées | `--tz-bg-raised`, `--tz-fg-muted` | `pinned-rows.css` |
 | `--dzg-busy-bar` | `busyBar` | La barre d’activité | `--tz-accent` | base |
 | `--dzg-flash-color` | `flashColor` | Le flash d’une valeur changée | `--tz-warning` | base |
+| `--dzg-flash` | — | La force du flash, de 1 à 0, écrite sur la cellule par `motion()` : pas une couleur à régler | `1` | base |
 | `--dzg-fresh-color`, `--dzg-fresh-bg`, `--dzg-fresh-bar` | `freshColor`, `freshBg`, `freshBar` | Les lignes apportées par un rafraîchissement | `--tz-success`, 14 %, `3px` | `fresh-rows.css` |
 | `--dzg-saving-color`, `--dzg-saved-color`, `--dzg-refused-color`, `--dzg-refused-bg` | `savingColor`, `savedColor`, `refusedColor`, `refusedBg` | Marques d’enregistrement, une valeur refusée | tons | `edit.css`, base |
 | `--dzg-editor-border` | `editorBorder` | Le cadre d’un éditeur ouvert | `--dzg-focus-ring` | `edit.css` |

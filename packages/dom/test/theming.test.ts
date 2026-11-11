@@ -73,6 +73,12 @@ describe('the theme object (20–23)', () => {
     expect(s.getPropertyValue('--dzg-row-height')).toBe('32px');
   });
 
+  it('columnHoverBg: the hovered column\'s tint (column-hover), --dzg-column-hover-bg', () => {
+    const m = make({ theme: { columnHoverBg: 'rgb(0 0 255 / 8%)' } });
+    expect(root(m.host).style.getPropertyValue('--dzg-column-hover-bg')).toBe('rgb(0 0 255 / 8%)');
+    expect(told(m.events)).toEqual([]);
+  });
+
   it('every key is a variable the guide lists (the list, not a guess)', () => {
     expect(THEME_KEYS).toContain('rowOddBg');
     expect(THEME_KEYS).toContain('accentFg');

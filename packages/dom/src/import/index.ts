@@ -46,7 +46,8 @@ const TYPES: Readonly<Record<ImportFormat, string>> = { csv: '.csv,text/csv', xl
  * The drop zone's layout, injected (no colour of its own: the theme's header background and focus ring — the header's text on it, a pair the theme checks — logical sides,
  * zero specificity, in the base's layer): over the grid while a file is dragged on it.
  */
-const CSS =
+/** Its layout, written once per document or shadow root; with `injectStyles: false` the page loads it itself. */
+export const IMPORT_CSS =
   '@layer dzgrid.layout{' +
   ':where(.dzg-drop){position:absolute;inset:0;z-index:6;display:none;align-items:center;justify-content:center;padding:1rem;text-align:center;font-weight:600;pointer-events:none;' +
   'border:2px dashed var(--dzg-focus-ring,var(--tz-accent,currentColor));background:var(--dzg-header-bg,var(--tz-bg-raised,Canvas))}:where([data-dzg-drop]){position:relative}:where([data-dzg-drop]>.dzg-drop){display:flex}' +
@@ -107,7 +108,7 @@ export function fileImport(o: FileImportOptions): FileImportFeature {
           const s = doc.createElement('style');
           s.setAttribute('data-dzgrid-import', '');
           if (g.settings.nonce) s.setAttribute('nonce', g.settings.nonce);
-          s.textContent = CSS;
+          s.textContent = IMPORT_CSS;
           ('head' in root ? root.head : root).append(s);
         }
         const zone = doc.createElement('div');

@@ -5,7 +5,9 @@ import type { GridContext } from '../context.js';
 import type { FeatureHandle, GridFeature } from '../features.js';
 import type { Frame, RowView } from '../render/rows.js';
 import type { TreeMessageKey } from '../part-texts.js';
-import { injectTreeStyles } from './styles.js';
+import { injectTreeStyles, TREE_CSS } from './styles.js';
+/** Its layout CSS, for a page that sets `injectStyles: false` and loads it itself. */
+export { TREE_CSS };
 import type { LazyChildren } from './lazy.js';
 import { stickyStack } from './sticky.js';
 
@@ -78,7 +80,7 @@ function setup<T>(g: GridContext<unknown>, column: Col, indent: Indent, lazy: La
   const missing = TREE_KEYS.filter((key) => g.settings.messages.text[key] === undefined);
   if (missing.length) throw new TypeError(`tree: missing ${missing.join(', ')}`);
   const { kernel, el, rowRenderer, doc } = g;
-  injectTreeStyles(el.root.getRootNode() as Document | ShadowRoot, g.settings.nonce);
+  if (g.settings.injectStyles !== false) injectTreeStyles(el.root.getRootNode() as Document | ShadowRoot, g.settings.nonce);
   el.viewport.setAttribute('role', 'treegrid');
   // Cell spans beside a tree (1.1.0, spans.md « In a tree »): siblings only; the spans feature merges leaves only here.
 

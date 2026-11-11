@@ -4,5 +4,7 @@
  * Its texts in `locales/<lang>-find`; its colours in `@dzgrid/theme/find.css`.
  */
 export { find, FIND_KEYS } from './find/index.js';
+/** Its layout CSS, for a page that sets `injectStyles: false` and loads it itself. */
+export { FIND_CSS } from './find/styles.js';
 export type { FindApi, FindFeature, FindHit, FindOptions, FindState } from './find/index.js';
 export type { FindHeldKey, FindMessageKey, FindMessages } from './part-texts.js';

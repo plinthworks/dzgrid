@@ -5,5 +5,7 @@
  * `locales/<lang>-import`.
  */
 export { fileImport, IMPORT_KEYS } from './import/index.js';
+/** Its layout CSS, for a page that sets `injectStyles: false` and loads it itself. */
+export { IMPORT_CSS } from './import/index.js';
 export type { FileImportApi, FileImportFeature, FileImportOptions, ImportedFile, ImportFormat } from './import/index.js';
 export type { ImportMessageKey, ImportMessages } from './part-texts.js';

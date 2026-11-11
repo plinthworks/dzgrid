@@ -6,6 +6,8 @@
  * colours in `@dzgrid/theme/dock.css`.
  */
 export { dock, DOCK_KEYS } from './dock/index.js';
+/** Its layout CSS, for a page that sets `injectStyles: false` and loads it itself. */
+export { DOCK_CSS } from './dock/styles.js';
 export type { DockApi, DockFeature, DockOptions, DockPanel } from './dock/index.js';
 export type { DockArea, DockAreaState, DockPanelState, DockState } from '@dzgrid/core/dock';
 export type { DockMessageKey, DockMessages } from './part-texts.js';

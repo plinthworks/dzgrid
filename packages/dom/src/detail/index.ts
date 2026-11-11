@@ -7,7 +7,9 @@ import type { PartHandle, SlotContext, SlotPart } from '../part.js';
 import type { DetailMessageKey } from '../part-texts.js';
 import type { Frame } from '../render/rows.js';
 import { sideways } from '../dir.js';
-import { injectDetailStyles } from './styles.js';
+import { injectDetailStyles, DETAIL_CSS } from './styles.js';
+/** Its layout CSS, for a page that sets `injectStyles: false` and loads it itself. */
+export { DETAIL_CSS };
 
 /** The texts `detail()` needs, from `@dzgrid/dom/locales/<lang>-detail`. */
 export const DETAIL_KEYS = ['detail.label', 'detail.expanded', 'detail.collapsed'] as const satisfies readonly DetailMessageKey[];
@@ -74,7 +76,7 @@ function setup<T>(g: GridContext<unknown>, o: DetailFeatureOptions<T>, sizes: Ma
   if (told.length) emit(kernel, { type: 'problems', source: 'host', problems: told });
   // Another feature's shape is the grid's (a tree listed first): nothing to draw.
   if (!sizes) return { destroy() {} };
-  injectDetailStyles(el.root.getRootNode() as Document | ShadowRoot, g.settings.nonce);
+  if (g.settings.injectStyles !== false) injectDetailStyles(el.root.getRootNode() as Document | ShadowRoot, g.settings.nonce);
 
   const auto = o.height === 'auto';
   let depth = o.nested ?? 1;

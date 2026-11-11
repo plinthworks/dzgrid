@@ -5,7 +5,7 @@
  * take what is left; the side (strip and panel) stands in that room, the whole height. 30 rem or less: the open panel
  * covers the rows.
  */
-export const PANEL_CSS =
+export const FILTERS_PANEL_CSS =
   '@layer dzgrid.layout{' +
   ':where(.dzg[data-dzg-fside]){box-sizing:border-box;--dzg-fp-room:var(--dzg-fstrip-size,2rem)}' +
   ':where(.dzg[data-dzg-fopen]){--dzg-fp-room:calc(var(--dzg-fstrip-size,2rem) + var(--dzg-fpanel-size,18rem))}' +
@@ -44,6 +44,6 @@ export function injectPanelStyles(target: Document | ShadowRoot, nonce?: string)
   const style = doc.createElement('style');
   style.setAttribute('data-dzgrid-fpanel', '');
   if (nonce) style.setAttribute('nonce', nonce);
-  style.textContent = PANEL_CSS;
+  style.textContent = FILTERS_PANEL_CSS;
   ('head' in target ? target.head : target).append(style);
 }

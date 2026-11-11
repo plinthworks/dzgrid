@@ -366,8 +366,8 @@ createGrid<Hive>(document.getElementById('hives')!, {
 ```
 
 On a row's first cell, Enter or Space opens and closes its lines (arrows too, as for detail rows). It is a detail rows
-feature: it cannot be combined with a tree, row grouping or your own `detail()` (told `unsupported-combination`), nor
-with header groups (not told).
+feature: it cannot be combined with a tree, row grouping, header groups, merged cells (`spans()`) or your own
+`detail()`: the grid tells `unsupported-combination` and nothing collapses.
 
 ## Column groups
 

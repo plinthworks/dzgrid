@@ -8,6 +8,8 @@ import { filtersWith, type FiltersFeature, type FiltersOptions } from './filters
 import type { DateKit, DateKitName } from './filters/dates.js';
 
 export { FILTER_KEYS } from './filters/index.js';
+/** Its layout CSS, for a page that sets `injectStyles: false` and loads it itself. */
+export { FILTERS_CSS } from './filters/styles.js';
 export type { FiltersFeature, FiltersOptions } from './filters/index.js';
 export type { SetKit } from './filters/set.js';
 export type { DateAdapter, DateCalendarOptions, DateField, DateKit, DateKitName, DatePart, DateSettings } from './filters/dates.js';

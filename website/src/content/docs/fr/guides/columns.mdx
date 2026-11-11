@@ -378,7 +378,8 @@ createGrid<Hive>(document.getElementById('hives')!, {
 
 Sur la première cellule d’une ligne, Entrée ou Espace ouvre et ferme ses lignes (les flèches aussi, comme pour les
 lignes de détail). C’est une fonction des lignes de détail : elle ne se combine pas avec un arbre, un regroupement de
-lignes ou votre propre `detail()` (signalé par `unsupported-combination`), ni avec des groupes de titres (non signalé).
+lignes, des groupes de titres, des cellules fusionnées (`spans()`) ou votre propre `detail()` : la grille signale
+`unsupported-combination` et rien ne se replie.
 
 ## Groupes de colonnes
 

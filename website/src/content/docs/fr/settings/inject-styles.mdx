@@ -20,8 +20,9 @@ qui les permet avec un nonce : donnez-le par [`nonce`](../nonce/) et gardez le d
 `false` : ni la grille ni ses fonctions n’écrivent de `<style>`, votre page charge les règles à la place — sauf les
 panneaux de date, dont les feuilles sont écrites si la page ne les a pas déjà sous les mêmes identifiants
 `data-tzslot`. Celles de la
-base sont `LAYOUT_CSS` de `@dzgrid/dom`, dans la couche `dzgrid.layout` ; quelques fonctions exportent aussi les
-leurs (`ICONS_CSS`, `WRAPPED_HEADERS_CSS`, `COLUMN_HOVER_CSS`, `PIVOT_BAR_CSS`, `ZONE_CSS`). L’apparence elle-même,
+base sont `LAYOUT_CSS` de `@dzgrid/dom`, dans la couche `dzgrid.layout` ; chaque fonction qui a sa propre mise en
+page l’exporte depuis son entrée, nommée sur sa [page](../../features/) (`FILTERS_CSS`, `PAGINATION_CSS`, `STATUS_CSS`,
+`TREE_CSS`…). L’apparence elle-même,
 `@dzgrid/theme`, est toujours à charger par vous. Le réglage est lu une fois : `update()` refuse un changement.
 
 ## Exemple

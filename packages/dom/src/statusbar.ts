@@ -4,6 +4,8 @@
  * the application's own items; one strip with the pager. Its texts in `locales/<lang>-status`; its colours the footer's.
  */
 export { statusBar, STATUS_KEYS } from './statusbar/index.js';
+/** Its layout CSS, for a page that sets `injectStyles: false` and loads it itself. */
+export { STATUS_CSS } from './statusbar/styles.js';
 export type { StatusBarApi, StatusBarFeature, StatusBarOptions } from './statusbar/index.js';
 export type { StatusStats } from './part.js';
 export type { StatusMessageKey, StatusMessages } from './part-texts.js';

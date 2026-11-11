@@ -997,7 +997,9 @@
         ]
       },
       "sheet": null,
-      "css": [],
+      "css": [
+        "PAGINATION_CSS"
+      ],
       "doc": "`pagination()`: a footer under the rows (docs/behaviors/pagination-footer.md, step 17) — what is selected, where the user is, and the pager in a named `<nav>`. Its parts `footer.selected`, `footer.count` and `footer.pager` are replaced by a host's of the same name.",
       "source": "packages/dom/src/pagination/index.ts"
     },
@@ -1441,7 +1443,9 @@
         ]
       },
       "sheet": null,
-      "css": [],
+      "css": [
+        "TREE_CSS"
+      ],
       "doc": "`tree(options)`: the rows as a tree (docs/behaviors/tree-view.md, tree-keys.md, tree-filter.md; WAI-ARIA 1.2 treegrid). Hands `treeShape` from `@dzgrid/core/tree` to the grid's rows at creation; draws the tree column (indent, a decorative toggle), the rows' level, place and open state; opens and closes by the pointer on the toggle and by the keys of the tree column; says each opening.",
       "source": "packages/dom/src/tree/index.ts"
     },
@@ -1546,7 +1550,9 @@
         ]
       },
       "sheet": null,
-      "css": [],
+      "css": [
+        "DETAIL_CSS"
+      ],
       "doc": "`detail(options)`: a panel under each open master (docs/behaviors/master-detail.md, D8, owner Q4–Q5). Hands `detailShape` from `@dzgrid/core/detail` to the grid's rows at creation and places them with its sparse layout; draws a chevron in the masters' first column (forward opens, back closes); mounts the `part` in a panel at the first paint showing it (the base destroys it when its row goes); measures `'auto'` heights; names each panel « Details of » its master; says each opening by the user.",
       "source": "packages/dom/src/detail/index.ts"
     },
@@ -1602,7 +1608,9 @@
         ]
       },
       "sheet": null,
-      "css": [],
+      "css": [
+        "DETAIL_CSS"
+      ],
       "doc": "`nestedGrid(options)`: a ready `'detail'` part that makes a grid in each panel (master-detail.md): its own keys, scroll and focus; Enter or F2 on the panel focuses it (its focus, else the first row in view); Escape it leaves goes back to the panel's cell, one level only. Each master's sort, filters, open rows, focused cell and scroll (its top row and the offset into it) are remembered when its panel goes (closed, scrolled away) and given back when it comes again, for the last `keep` masters. A new master row or language updates the grid in place (`grid.update`); only a change of a fixed setting makes it again. Past 3 levels, the grid made tells `unsupported-combination` (`detail.depth`, owner Q5). A nested grid needs a fixed or function height (it has no natural height of its own).",
       "source": "packages/dom/src/detail/nested.ts"
     },
@@ -1714,7 +1722,9 @@
         ]
       },
       "sheet": "@dzgrid/theme/edit.css",
-      "css": [],
+      "css": [
+        "EDITORS_CSS"
+      ],
       "doc": "`editors(options)`: the editors of a cell (editing.md, editors.md, edit-validation.md 3–9): text and number fields; day and instant fields with tzslot's calendar loaded on demand (`loadCalendar` replaces that import); a yes/no cell toggled in place; a list; the application's own editor (a part of slot `editor`).",
       "source": "packages/dom/src/editors.ts"
     },
@@ -1863,7 +1873,9 @@
         ]
       },
       "sheet": null,
-      "css": [],
+      "css": [
+        "FILTERS_CSS"
+      ],
       "doc": "`filters()`: the filter UI (docs/behaviors/filter-ui.md): the floating row, the popup (text, number, yes/no, the value list, tzslot's date forms loaded on demand; `loadDates` replaces that import).",
       "source": "packages/dom/src/filters.ts"
     },
@@ -2172,7 +2184,9 @@
         ]
       },
       "sheet": null,
-      "css": [],
+      "css": [
+        "STATUS_CSS"
+      ],
       "doc": "`statusBar({ items, maxCells })`: the strip under the rows (docs/behaviors/status-bar.md; owner Q-SB1–Q-SB4) — the block's count, sum, mean, smallest and largest in the column's format and the grid's digits, the row counts on request, the host's own items; one strip with the pager. Nothing is said on its own: `api(grid).announce()` and the cell menu's « Read the totals » (`contextMenu({ use: { status } })`) say it on demand.",
       "source": "packages/dom/src/statusbar/index.ts"
     },
@@ -2210,7 +2224,9 @@
         ]
       },
       "sheet": "@dzgrid/theme/find.css",
-      "css": [],
+      "css": [
+        "FIND_CSS"
+      ],
       "doc": "`find(options)`: find in the grid (docs/behaviors/find.md; owner answers 2026-11-03). Ctrl+F (⌘F on a Mac) while the focus is in the grid opens a bar above the headers: the displayed text of the visible columns searched, case and accents ignored, rows never hidden; a closed tree node's rows too (opened to show a hit); every hit marked, the current one more, scrolled to and focused as the grid's cell; « 3 / 12 », ↑ ↓, Enter / Shift+Enter, Escape; said politely once the typing settles. A server's grid: the loaded page only, said in the bar. Without it, Ctrl+F is the browser's.",
       "source": "packages/dom/src/find/index.ts"
     },
@@ -2293,7 +2309,9 @@
         ]
       },
       "sheet": "@dzgrid/theme/row-drag.css",
-      "css": [],
+      "css": [
+        "ROW_DRAG_CSS"
+      ],
       "doc": "`rowDrag(options)`: moving rows (docs/behaviors/row-move.md; row-drag-plan.md; owner answers « Row drag », 2026-11-05). A grip at the start of a column's cells, pressed by a mouse, a pen or a finger and moved 4 px, drags the row (the selected rows when it is selected): a ghost, a line on the gap it lands in (a tree's middle: inside), auto-scroll near the top and bottom; one `rowMove` event on release. Alt+Shift+↑ / ↓ / Home / End (and → / ← in a tree) move the focused row; the cell menu's items through `menuItems`. The application reorders its rows (`moveRows`), or the grid does with `apply: true` (flat browser rows). Every way goes through `@dzgrid/core/row-drag`'s rules. One feature object may serve several grids.",
       "source": "packages/dom/src/row-drag/index.ts"
     },
@@ -2349,7 +2367,9 @@
         ]
       },
       "sheet": "@dzgrid/theme/dock.css",
-      "css": [],
+      "css": [
+        "DOCK_CSS"
+      ],
       "doc": "`dock(options)`: the panels beside and under the grid (docs/behaviors/dock.md; owner Q-SB5, « Dock — owner B » 2026-11-06): areas `start`, `end` and `bottom` inside the grid's box, tabs when an area holds several panels, the edge resized by the pointer and the keys (APG window splitter), collapse to a strip, « Place » to move a panel, the layout in the grid's state. The columns panel and the filters panel stand in it when both are used; an application adds its own. One feature object may serve several grids.",
       "source": "packages/dom/src/dock/index.ts"
     },
@@ -2378,6 +2398,15 @@
           "source": "packages/dom/src/pivot/index.ts"
         },
         {
+          "name": "width",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "A created column's width. Not given: each is sized from its header, 120 to 240 px (a long « sum(Amount) » header gets room); given: every created column takes it.",
+          "default": null,
+          "source": "packages/dom/src/pivot/index.ts"
+        },
+        {
           "name": "labelWidth",
           "type": "number",
           "resolved": null,
@@ -2392,15 +2421,6 @@
           "resolved": null,
           "required": false,
           "doc": "The pivot columns' ids, the first band first.",
-          "default": null,
-          "source": "packages/core/src/pivot/shape.ts"
-        },
-        {
-          "name": "width",
-          "type": "number",
-          "resolved": null,
-          "required": false,
-          "doc": "A created column's width (default 120).",
           "default": null,
           "source": "packages/core/src/pivot/shape.ts"
         },
@@ -2518,7 +2538,9 @@
         ]
       },
       "sheet": "@dzgrid/theme/row-numbers.css",
-      "css": [],
+      "css": [
+        "ROW_NUMBERS_CSS"
+      ],
       "doc": "`rowNumbers()`: 1, 2, 3… at the inline start of every row (docs/behaviors/row-numbers.md; owner decisions 2026-11-03), in display order (a detail panel neither numbered nor counted; a paged grid going on from the pages before), as wide as its largest number. A click on a number takes the row as the block (`range()`), Shift+click the rows between; the corner every cell; without `range()`, the row selection's click; with neither, nothing. Never a column: no sort, filter, edit, export, print, copy or state sees it.",
       "source": "packages/dom/src/row-numbers/index.ts"
     },
@@ -2619,7 +2641,9 @@
         ]
       },
       "sheet": "@dzgrid/theme/grouping.css",
-      "css": [],
+      "css": [
+        "TREE_CSS"
+      ],
       "doc": "`grouping(options)`: rows grouped by columns, with totals (docs/behaviors/row-grouping.md, aggregation.md; Phase 7 step 5). Hands `groupShape` from `@dzgrid/core/grouping` to the grid's rows at creation; draws the group column (indent, chevron, « value (n) »), the totals in the group and totals rows' cells, the rows' level, place and open state; opens and closes by the chevron, Enter on a group row and the keys of the group column (mirrored right to left); keeps group rows pinned under the header; says each opening. The tree's chevron styles and pinned-rows layout are shared.",
       "source": "packages/dom/src/grouping/index.ts"
     },
@@ -2706,7 +2730,9 @@
         ]
       },
       "sheet": "@dzgrid/theme/filters-panel.css",
-      "css": [],
+      "css": [
+        "FILTERS_PANEL_CSS"
+      ],
       "doc": "`filtersPanel(options)`: every column's filter in one side panel (docs/behaviors/filters-panel.md; owner answers 2026-11-03), beside `filters()` whose forms it shows: a strip with the « Filters » button at the side the application chose, the panel beside the rows (they take the room left), « Clear all filters », a column search, each filterable column unfolding to the popup's own form, a dot on active filters; apply as `filters({ apply })`; in step with every other writer. One feature object may serve several grids.",
       "source": "packages/dom/src/filters-panel/index.ts"
     },
@@ -2825,7 +2851,9 @@
       "options": [],
       "texts": null,
       "sheet": null,
-      "css": [],
+      "css": [
+        "WRAP_CSS"
+      ],
       "doc": "`autoHeight()`: rows as tall as their tallest wrapped cell (`ColumnDef.wrap`, docs/behaviors/auto-height.md; Phase 6 step 9, owner Q-R1, Q9-1..Q9-4). After each paint, before the browser shows it (`GridContext.again`), the mounted rows not measured yet at these widths are measured — every probe written, one layout read, every probe removed — and the rows laid out again in the same frame, the row at the top of the view held where it was (S3). A fixed `rowHeight` wins (nothing measured). With `@dzgrid/dom/detail`, both layouts composed (`layoutFor`).",
       "source": "packages/dom/src/auto-height/index.ts"
     },
@@ -3161,7 +3189,9 @@
       ],
       "texts": null,
       "sheet": null,
-      "css": [],
+      "css": [
+        "RESPONSIVE_CSS"
+      ],
       "doc": "`responsive({ priority })` (docs/behaviors/responsive-columns.md): when the columns do not fit the view, centre columns collapse — the highest `collapsePriority` first, the last on screen among equals, never the first, a pinned one or a priority 0 — and each row's chevron (the detail's) opens « Title: value » lines under it. Followed at each paint; not the columns' state; the search, filters, files and print still read every column.",
       "source": "packages/dom/src/responsive/index.ts"
     },
@@ -3208,7 +3238,9 @@
         ]
       },
       "sheet": null,
-      "css": [],
+      "css": [
+        "IMPORT_CSS"
+      ],
       "doc": "`fileImport({ accept, onRows, drop })` (docs/behaviors/file-import.md): a CSV or `.xlsx` file dropped on the grid, or picked through the application's button (`api(grid).bind(button)`), read in the browser — the first non-empty line the header matched to the columns, each cell through its column's codec — and handed to `onRows`; the grid's rows untouched. Said when read.",
       "source": "packages/dom/src/import/index.ts"
     },
@@ -3230,7 +3262,9 @@
       ],
       "texts": null,
       "sheet": null,
-      "css": [],
+      "css": [
+        "SPANS_CSS"
+      ],
       "doc": "`spans()`: cells spanning rows and columns (docs/behaviors/spans.md) — identical values merged (`merge`), spans decided by the data (`rowSpan`, `colSpan`), full-width rows (`settings.fullWidth`), grouped headers (groups in `columns`, `./bands.ts`). The map comes from the core (`buildSpanMap`), on the rows as displayed and the visible columns; this feature lays it out under virtual scrolling, moves the keys over it and maps a click on a tall cell to the row under the pointer.",
       "source": "packages/dom/src/spans/index.ts"
     },
@@ -3242,7 +3276,9 @@
       "options": [],
       "texts": null,
       "sheet": null,
-      "css": [],
+      "css": [
+        "GROUPS_CSS"
+      ],
       "doc": "`groups()`: collapsible header groups (Phase 6 step 7, docs/behaviors/header-groups.md; owner Q-GH, Q8-4), with `spans()` (the group rows). Its own entry, loaded only with collapsible groups.",
       "source": "packages/dom/src/groups/index.ts"
     },

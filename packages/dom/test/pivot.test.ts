@@ -194,3 +194,18 @@ describe('refusals (pivot.md 26)', () => {
     expect(t.visible()).not.toContain(LABEL);
   });
 });
+
+describe('pivot() set in features instead of grouping({ pivot }) (untyped code)', () => {
+  it('the grid is made, nothing pivots, the feature refused (invalid-setting)', async () => {
+    const { createGrid } = await import('../src/grid.js');
+    const { pivot } = await import('../src/pivot.js');
+    const { EN } = await import('../src/locales/en.js');
+    const host = document.body.appendChild(document.createElement('div'));
+    const told: Problem[] = [];
+    // `pivot()` is not a GridFeature for `features`: the untyped mistake this test is about.
+    const g = createGrid<{ id: string }>(host, { rows: [{ id: 'a' }], getRowId: (r) => r.id, columns: [{ id: 'id' }], messages: EN, features: [pivot() as never], onEvent: (e) => void (e.type === 'problems' && told.push(...e.problems)) }, { sync: true });
+    expect(told).toEqual([{ code: 'invalid-setting', severity: 'warning', path: 'features[0]', detail: 'object' }]);
+    expect(host.querySelectorAll('.dzg-layer > .dzg-row').length).toBe(1);
+    g.destroy();
+  });
+});

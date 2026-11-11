@@ -8,6 +8,7 @@ import type { GridSettings } from '../src/settings.js';
 import type { GridFeature } from '../src/features.js';
 import { responsive } from '../src/responsive.js';
 import { detail } from '../src/detail.js';
+import { spans } from '../src/spans.js';
 import { definePart } from '../src/part.js';
 import { csvExport, type CsvExportOptions } from '../src/export.js';
 import { preparePrint } from '../src/print.js';
@@ -209,6 +210,18 @@ describe('responsive() — collapse and lines', () => {
     const t = make({ inline: 300, features: [detail<T>({ part }), responsive()] });
     expect(t.heads()).toEqual(['name', 'city', 'qty', 'note']);
     expect(t.problems()).toContainEqual({ code: 'unsupported-combination', severity: 'warning', path: 'responsive', detail: 'detail' });
+  });
+
+  it('with header groups: told, nothing collapses (14)', () => {
+    const t = make({ inline: 300, settings: { columns: [{ id: 'who', header: 'Who', children: COLUMNS.slice(0, 2) }, ...COLUMNS.slice(2)] } });
+    expect(t.heads()).toEqual(['name', 'city', 'qty', 'note']);
+    expect(t.problems()).toContainEqual({ code: 'unsupported-combination', severity: 'warning', path: 'responsive', detail: 'groups' });
+  });
+
+  it('with spans(): told, nothing collapses (14)', () => {
+    const t = make({ inline: 300, features: [responsive(), spans()] });
+    expect(t.heads()).toEqual(['name', 'city', 'qty', 'note']);
+    expect(t.problems()).toContainEqual({ code: 'unsupported-combination', severity: 'warning', path: 'responsive', detail: 'spans' });
   });
 
   it('collapsePriority without the feature: missing-feature (14)', () => {

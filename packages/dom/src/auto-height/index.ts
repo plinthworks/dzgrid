@@ -35,7 +35,7 @@ function setup(g: GridContext<unknown>): FeatureHandle {
   const { columns, rowRenderer } = g;
   // Once per document or shadow root; a host with a strict CSP passes its nonce.
   const root = g.el.root.getRootNode() as Document | ShadowRoot;
-  if (!root.querySelector('style[data-dzgrid-wrap]')) {
+  if (g.settings.injectStyles !== false && !root.querySelector('style[data-dzgrid-wrap]')) {
     const style = g.doc.createElement('style');
     style.setAttribute('data-dzgrid-wrap', '');
     if (g.settings.nonce) style.setAttribute('nonce', g.settings.nonce);

@@ -4,3 +4,5 @@
  * rules carries none of it. Builds on `@dzgrid/core/spans`.
  */
 export { spans } from './spans/index.js';
+/** Its layout CSS, for a page that sets `injectStyles: false` and loads it itself. */
+export { SPANS_CSS } from './spans/styles.js';

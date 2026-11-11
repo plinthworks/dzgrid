@@ -12,7 +12,7 @@ const K: Record<keyof GridTheme, 0> = {
   font: 0, radius: 0, line: 0, pillRadius: 0, cellPaddingInline: 0, cellPaddingBlock: 0, space: 0, targetMin: 0, cellFontSize: 0, numFigures: 0, cellAlignBlock: 0,
   headerBg: 0, headerFg: 0, headerSize: 0, headerWeight: 0, headerFontFamily: 0, headerTracking: 0, headerCase: 0, headerAlignBlock: 0, headerHoverBg: 0,
   frame: 0, frameRadius: 0, rowLine: 0, columnLine: 0, headerLine: 0, headerSeparator: 0, headerSeparatorSize: 0, headerSeparatorHeight: 0, pinnedColumnLine: 0, pinnedShadow: 0, detailLine: 0,
-  rowOddBg: 0, rowHoverBg: 0, rowSelectedBg: 0, rowActiveBg: 0, cellActiveBg: 0, focusRing: 0, focusWidth: 0, selectBar: 0, staleFg: 0, contextFg: 0,
+  rowOddBg: 0, rowHoverBg: 0, rowSelectedBg: 0, rowActiveBg: 0, cellActiveBg: 0, columnHoverBg: 0, focusRing: 0, focusWidth: 0, selectBar: 0, staleFg: 0, contextFg: 0,
   toggleFg: 0, detailBg: 0, groupRowBg: 0, pinnedBg: 0, pinnedLine: 0,
   busyBar: 0, flashColor: 0, freshColor: 0, freshBg: 0, freshBar: 0, savingColor: 0, savedColor: 0, refusedColor: 0, refusedBg: 0, editorBorder: 0,
   rangeBg: 0, rangeEdge: 0, fillHandle: 0, moveBar: 0, resizeMode: 0, searchMark: 0, findColor: 0, findBg: 0, findCurrentBg: 0, findMark: 0, findMarkCurrent: 0,

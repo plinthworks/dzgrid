@@ -5,6 +5,8 @@
  * its look in `@dzgrid/theme/row-drag.css`.
  */
 export { rowDrag, ROW_DRAG_KEYS } from './row-drag/index.js';
+/** Its layout CSS, for a page that sets `injectStyles: false` and loads it itself. */
+export { ROW_DRAG_CSS } from './row-drag/index.js';
 export type { RowDragApi, RowDragFeature, RowDragOptions, RowDropInfo, RowDropTarget, RowMoveResult } from './row-drag/index.js';
 export type { RowDragMessageKey, RowDragMessages } from './part-texts.js';
 export type { DropWhere, MoveStep, RowDrop, RowMove } from '@dzgrid/core/row-drag';

@@ -112,7 +112,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
     return { destroy() {} };
   }
   const root = el.root.getRootNode() as Document | ShadowRoot;
-  if (!root.querySelector('style[data-dzgrid-editors]')) {
+  if (g.settings.injectStyles !== false && !root.querySelector('style[data-dzgrid-editors]')) {
     const s = doc.createElement('style');
     s.setAttribute('data-dzgrid-editors', '');
     if (g.settings.nonce) s.setAttribute('nonce', g.settings.nonce);

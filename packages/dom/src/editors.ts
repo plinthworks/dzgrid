@@ -9,6 +9,8 @@ import type { GridFeature } from './features.js';
 import { editorsWith, type EditorsOptions } from './editors/index.js';
 
 export { EDITORS_KEYS } from './editors/index.js';
+/** Its layout CSS, for a page that sets `injectStyles: false` and loads it itself. */
+export { EDITORS_CSS } from './editors/index.js';
 export type { EditorsOptions } from './editors/index.js';
 export type { CalendarAdapter, CalendarKit, CalendarView } from './editors/dates.js';
 export type { CellInput, EditorHandle } from './part.js';

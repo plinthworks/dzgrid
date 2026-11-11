@@ -21,8 +21,9 @@ never go. A flexible column counts its `minWidth`. It follows every resize.
 On a row's first cell, Enter or Space opens and closes its lines. The quick search, the filters, the files and print
 still see every column, and nothing is saved in the grid state.
 
-The lines are a detail rows panel, so the `-detail` texts are needed. It cannot be combined with a tree, row grouping or
-your own [`detail()`](../detail/): the grid tells `unsupported-combination`. A column with
+The lines are a detail rows panel, so the `-detail` texts are needed. It cannot be combined with a tree, row grouping,
+header groups, merged cells ([`spans()`](../spans/)) or your own [`detail()`](../detail/): the grid tells
+`unsupported-combination`. A column with
 `collapsePriority` on a grid without this feature tells a `missing-feature` warning.
 
 ## Options
