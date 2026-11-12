@@ -1,0 +1,331 @@
+---
+title: "Changer l’apparence"
+description: "La hauteur des lignes et des titres, celle de la grille, la police, les couleurs, les traits, une colonne ou une ligne : chacun, pas à pas."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+
+Chaque partie ci-dessous répond à une question — « comment avoir des lignes plus hautes ? », « comment changer la
+police ? » — avec le code à copier. Chaque nom employé ici est dans [le tableau des variables](../theming-rtl/#toutes-les-variables),
+avec sa valeur par défaut.
+
+## Deux façons de changer l’apparence
+
+- **Dans votre feuille de style**, avec des variables CSS. Cela touche toutes les grilles de la page, ou une seule si
+  vous mettez ses règles sous la classe ou l’id de son hôte (`#orders .dzg { … }`). C’est la voie pour l’apparence de
+  toute votre application.
+- **Depuis le code**, avec le réglage [`theme`](../../settings/theme/) et la fonction
+  [`theming()`](../../features/theming/). Cela ne touche qu’une grille, l’emporte sur votre feuille de style, et change
+  à chaud avec `grid.update({ theme })`. C’est la voie quand l’apparence dépend des données ou de l’utilisateur.
+
+Les hauteurs ne sont pas du CSS : ce sont des réglages (`density`, `rowHeight`, `headerHeight`), car la grille en a
+besoin pour placer des lignes qu’elle n’a pas encore dessinées.
+
+### Les feuilles à charger
+
+```ts
+import '@dzgrid/theme/dzgrid.css';      // obligatoire : couleurs, traits, en-tête, survol, focus
+import '@dzgrid/theme/variables.css';   // les réglages marqués « variables » dans le tableau
+```
+
+En Angular, mettez-les dans `angular.json` (`"styles": ["node_modules/@dzgrid/theme/dzgrid.css",
+"node_modules/@dzgrid/theme/variables.css", "src/styles.css"]`) et écrivez vos règles dans une feuille **globale** : les
+styles propres d’un composant (encapsulation émulée) n’atteignent jamais les cellules de la grille.
+
+Les règles du thème sont dans la couche de cascade `dzgrid` : les vôtres gagnent **sans `!important`**. Avec une remise
+à zéro hors couche (le preflight de Tailwind 3, le Reboot de Bootstrap), chargez plutôt les copies `*.unlayered.css`
+([plus](../theming-rtl/#le-thème)).
+
+## Hauteur des lignes
+
+| Vous voulez | Écrivez |
+|---|---|
+| Des lignes plus serrées ou plus aérées, dans une liste | `density: 'compact'` (28 px), `'comfortable'` (32 px, le défaut), `'spacious'` (40 px) |
+| Une hauteur exacte | `rowHeight: 44` (pixels, de 24 à 1 000) — l’emporte sur la densité |
+| Revenir à la hauteur de la densité | `grid.update({ rowHeight: undefined })` |
+| Des lignes aussi hautes que leur texte | `wrap: true` sur la colonne et la fonction [`autoHeight()`](../../features/auto-height/), sans `rowHeight` |
+| Laisser l’utilisateur choisir | `columnMenu({ density: true })` : le menu de colonne propose les trois densités |
+
+Les hauteurs valent pour la taille de texte par défaut du navigateur (16 px). Un lecteur qui grossit le texte a
+d’elles-mêmes des lignes plus hautes. La police que vous donnez à la grille ne change **pas** la hauteur : avec un texte
+plus grand, réglez aussi `rowHeight`.
+
+La densité règle aussi la marge intérieure des cellules sur les côtés (× 0,75, 1, 1,25). Pour la garder fixe quelle que
+soit la densité : `.dzg { --dzg-density: 1 }` ; pour la changer : `--dzg-cell-padding-inline`.
+
+## Hauteur des titres
+
+| Vous voulez | Écrivez |
+|---|---|
+| Des titres de colonne plus hauts | `headerHeight: 56` (pixels, 24 au moins) |
+| Les titres de colonne et les rangées de groupes au-dessus, chacun sa hauteur | `headerHeight: { columns: 56, groups: 32 }` |
+| Une rangée de filtres plus haute | `filters({ floating: true, rowHeight: 44 })` |
+| Des titres longs sur plusieurs lignes | `headerWrap: true` sur la colonne (la rangée prend la hauteur du titre le plus haut) |
+
+Sans `headerHeight`, les rangées de titres prennent la hauteur des lignes.
+
+La démo ci-dessous règle `rowHeight: 44` et `headerHeight: 56`, avec une police à empattements donnée par le réglage
+`theme`.
+
+<LiveDemo
+  height={300}
+  features={['theming']}
+  settings={{ label: 'Phares', rowHeight: 44, headerHeight: 56, theme: { font: '400 0.9375rem/1.4 Georgia, "Times New Roman", serif', headerWeight: 700 } }}
+  columns={[
+    { id: 'name', header: 'Phare', flex: 1 },
+    { id: 'coast', header: 'Côte', width: 140 },
+    { id: 'range', header: 'Portée (milles)', type: 'number', width: 150 },
+  ]}
+  rows={[
+    { id: 'l1', name: 'Pointe aux Mouettes', coast: 'Nord', range: 18 },
+    { id: 'l2', name: 'Vieux Port', coast: 'Ouest', range: 12 },
+    { id: 'l3', name: 'Roche aux Phoques', coast: 'Nord', range: 22 },
+    { id: 'l4', name: 'Cap des Sables', coast: 'Sud', range: 9 },
+  ]}
+/>
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { theming } from '@dzgrid/dom/theme';
+import { FR } from '@dzgrid/dom/locales/fr';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/variables.css';
+
+type Light = { id: string; name: string; range: number };
+
+const grid = createGrid<Light>(document.getElementById('lights')!, {
+  rows: [{ id: 'l1', name: 'Pointe aux Mouettes', range: 18 }],
+  columns: [{ id: 'name', header: 'Phare' }, { id: 'range', header: 'Portée (milles)', type: 'number' }],
+  getRowId: (l) => l.id,
+  messages: FR,
+  rowHeight: 44,
+  headerHeight: 56,
+  theme: { font: '400 0.9375rem/1.4 Georgia, "Times New Roman", serif', headerWeight: 700 },
+  features: [theming()],
+});
+
+grid.update({ rowHeight: 36 });   // à chaud
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { theming } from '@dzgrid/dom/theme';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Light = { id: string; name: string; range: number };
+
+@Component({
+  selector: 'app-lights',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+    [rowHeight]="44" [headerHeight]="56" [theme]="theme" [features]="features" />`,
+})
+export class Lights {
+  readonly rows: Light[] = [{ id: 'l1', name: 'Pointe aux Mouettes', range: 18 }];
+  readonly columns: DzgColumnOrGroup<Light>[] = [{ id: 'name', header: 'Phare' }, { id: 'range', header: 'Portée (milles)', type: 'number' }];
+  readonly rowId = (l: Light) => l.id;
+  readonly messages = FR;
+  readonly theme = { font: '400 0.9375rem/1.4 Georgia, "Times New Roman", serif', headerWeight: 700 };
+  readonly features = [theming()];
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid row-height="44" header-height="56"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { theming } from '@dzgrid/dom/theme';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Light = { id: string; name: string; range: number };
+
+const grid = document.querySelector<DzGridElement<Light>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Phare' }, { id: 'range', header: 'Portée (milles)', type: 'number' }];
+grid.getRowId = (l) => l.id;
+grid.messages = FR;
+grid.features = [theming()];
+grid.settings = { theme: { font: '400 0.9375rem/1.4 Georgia, "Times New Roman", serif', headerWeight: 700 } };
+grid.rows = [{ id: 'l1', name: 'Pointe aux Mouettes', range: 18 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## Hauteur de la grille
+
+La grille prend la hauteur de l’élément que vous lui donnez — jamais celle de ses lignes. Donnez une hauteur à cet
+élément et les lignes défilent à l’intérieur :
+
+```css
+#lights { block-size: 480px; }                       /* fixe */
+#lights { block-size: calc(100dvh - 4rem); }         /* l’écran, moins une barre */
+.page { display: flex; flex-direction: column; block-size: 100dvh; }
+.page > #lights { flex: 1; min-block-size: 0; }      /* ce qui reste dans une mise en page en colonne */
+```
+
+Un élément sans hauteur donne une grille sans place : donnez la hauteur à l’élément lui-même ou à son parent flex ou
+grid. Il n’y a pas de mode « aussi haute que ses lignes » : la page sauterait à chaque filtre qui change le nombre de
+lignes.
+
+## Police
+
+**Toute la grille.** Dans votre feuille de style, donnez la police à la racine de la grille ; l’en-tête, les cellules,
+les menus et les fenêtres suivent :
+
+```css
+.dzg { font-family: "Atkinson Hyperlegible", system-ui, sans-serif; font-size: 0.875rem; }
+```
+
+Ou avec la variable `--dzg-font`, qui est le raccourci CSS `font` : elle veut **au moins une taille et une police**, dans
+cet ordre. Une police seule n’est pas un `font` valide et la grille garde la police de la page :
+
+```css
+.dzg { --dzg-font: 400 0.875rem/1.45 "Atkinson Hyperlegible", system-ui, sans-serif; }   /* marche */
+.dzg { --dzg-font: "Atkinson Hyperlegible", sans-serif; }                                 /* ignorée : pas de taille */
+```
+
+Depuis le code, pour une grille : `theme: { font: '400 0.875rem/1.45 Inter, sans-serif' }`, avec `theming()` (la démo
+ci-dessus).
+
+**Seulement les cellules, seulement les titres.** Il faut `variables.css`, sauf pour `--dzg-header-size` :
+
+```css
+.dzg {
+  --dzg-cell-font-size: 0.8125rem;            /* le texte des cellules */
+  --dzg-header-size: 0.8125rem;               /* le texte des titres */
+  --dzg-header-weight: 500;                   /* la graisse des titres (600 par défaut) */
+  --dzg-header-font-family: "Inter", sans-serif;
+  --dzg-header-case: uppercase;               /* titres en capitales (sans effet en arabe) */
+  --dzg-header-tracking: 0.04em;              /* l’espacement des lettres */
+}
+```
+
+La même chose depuis le code : `theme: { cellFontSize: '0.8125rem', headerSize: '0.8125rem', headerWeight: 500,
+headerCase: 'uppercase' }`. Les nombres gardent des chiffres de même largeur pour que les colonnes s’alignent
+(`--dzg-num-figures: normal` l’enlève).
+
+## Couleurs
+
+La palette, ce sont dix variables que toute la grille partage. Changez-les et tout suit : en-tête, survol, sélection,
+focus, filtres, menus.
+
+```css
+:root {
+  --tz-accent: light-dark(#0f766e, #5eead4);     /* focus, sélection, filtres actifs, boutons */
+  --tz-bg: light-dark(#ffffff, #111827);         /* le fond de la grille */
+  --tz-fg: light-dark(#1f2937, #f3f4f6);         /* le texte */
+}
+.dzg {
+  --dzg-header-bg: light-dark(#f1f5f9, #1e293b);
+  --dzg-row-hover-bg: color-mix(in srgb, var(--tz-accent) 6%, var(--tz-bg));
+  --dzg-row-selected-bg: color-mix(in srgb, var(--tz-accent) 14%, var(--tz-bg));
+}
+```
+
+- `light-dark(clair, sombre)` donne chaque couleur pour les deux modes. La grille suit le mode du système ;
+  `data-theme="light"` ou `data-theme="dark"` sur n’importe quel ancêtre en impose un.
+- Les autres surfaces (`--tz-bg-raised`, `--tz-fg-muted`, `--tz-border`) et les tons (`--tz-danger`, `--tz-warning`,
+  `--tz-success`) sont dans [le tableau](../theming-rtl/#toutes-les-variables).
+- Le contraste est à votre charge : 4,5:1 pour le texte. `npm run check:contrast -- --palette palettes.json`, dans le
+  dépôt de DzGrid, vérifie le vôtre.
+- Avec Tailwind ou Bootstrap, chargez `@dzgrid/theme/tailwind.css` (Tailwind 4), `tailwind3.css` ou `bootstrap.css` :
+  la grille prend alors les couleurs, la police et les coins de votre framework.
+
+## Traits, lignes alternées et coins
+
+```css
+.dzg {
+  --dzg-row-odd-bg: color-mix(in srgb, var(--tz-accent) 5%, var(--tz-bg));   /* lignes alternées */
+  --dzg-column-line: var(--dzg-line, 1px) solid var(--tz-border);                  /* traits entre colonnes */
+  --dzg-row-line: none;                                                        /* pas de trait entre lignes */
+  --dzg-frame: none;                                                           /* pas de cadre */
+  --dzg-radius: 0;                                                             /* coins carrés */
+  --dzg-line: 1px;                                                             /* l’épaisseur de chaque trait */
+}
+```
+
+`--dzg-row-odd-bg` et `--dzg-radius` sont dans `dzgrid.css` ; les autres demandent `variables.css`. Pour reprendre
+une variable de la grille dans une valeur, donnez sa valeur de repli — `var(--dzg-line, 1px)` : le thème n’en déclare
+aucune, donc sans le `, 1px` la valeur est vide et toute la ligne est ignorée. La démo ci-dessous
+règle la même chose depuis le code, sur cette grille seulement :
+
+<LiveDemo
+  height={260}
+  features={['theming']}
+  settings={{ label: 'Vergers', theme: { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 7%, var(--tz-bg))', columnLine: 'var(--dzg-line, 1px) solid var(--tz-border)', rowLine: 'none', headerCase: 'uppercase', headerTracking: '0.04em', headerSize: '0.8125rem' } }}
+  columns={[
+    { id: 'name', header: 'Verger', flex: 1 },
+    { id: 'fruit', header: 'Fruit', width: 130 },
+    { id: 'trees', header: 'Arbres', type: 'number', width: 110 },
+  ]}
+  rows={[
+    { id: 'o1', name: 'Ferme de la colline', fruit: 'Pomme', trees: 240 },
+    { id: 'o2', name: 'Bord de rivière', fruit: 'Poire', trees: 85 },
+    { id: 'o3', name: 'Mur de pierre', fruit: 'Prune', trees: 130 },
+    { id: 'o4', name: 'Coteau sud', fruit: 'Cerise', trees: 64 },
+    { id: 'o5', name: 'Chemin du moulin', fruit: 'Pomme', trees: 190 },
+  ]}
+/>
+
+## Largeur des colonnes
+
+Les largeurs sont des options de colonne, pas du CSS : `width` (pixels), `flex` (une part de la place restante),
+`minWidth`, `maxWidth`, `resizable`. Le [guide des colonnes](../columns/) les montre, avec l’ajustement au contenu.
+
+## Une colonne, une ligne, une cellule
+
+**Les cellules et le titre d’une colonne** : l’option de colonne `ui` prend des classes.
+
+```ts
+import type { ColumnDef } from '@dzgrid/core';
+
+type Order = { id: string; client: string; total: number };
+
+export const columns: ColumnDef<Order>[] = [
+  { id: 'client', header: 'Client', ui: { headerClass: 'col-client', cellClass: () => 'col-client' } },
+  { id: 'total', header: 'Total', type: 'number', ui: { cellClass: (c) => (c.row.total > 1000 ? 'big' : null) } },
+];
+```
+
+```css
+.dzg .col-client { font-weight: 600; }
+.dzg .big { color: var(--tz-success); }
+```
+
+**Une ligne** : le réglage [`rowClass`](../../settings/row-class/), d’après les données de la ligne :
+`rowClass: ({ row }) => (row.daysLate > 0 ? 'late' : null)`, puis `.dzg .late { color: var(--tz-danger); }`.
+
+**Un contenu dessiné à votre façon** (une pastille, une barre, un lien) : une partie de cellule, voir
+[`ui`](../../column-options/ui/) et [`parts`](../../settings/parts/). Une classe nomme une apparence ; gardez les
+couleurs en variables pour que le mode sombre et les couleurs forcées s’appliquent encore.
+
+## Icônes
+
+Les flèches de tri, l’entonnoir, les points du menu et les chevrons peuvent être vos propres SVG, avec le réglage
+[`icons`](../../settings/icons/) et `theming()`. Leur taille : `--dzg-icon-size` (`variables.css`).
+
+## Apparences toutes prêtes
+
+`@dzgrid/theme/midnight.css` et `clinic.css`, chacun en clair et en sombre, sont des thèmes complets d’où partir ;
+`data-dzg-skin="midnight"` sur un conteneur en habille cette zone seulement. Lire leur source est le plus court moyen
+de voir beaucoup de variables à l’œuvre.
+
+## Voir aussi
+
+- [Thèmes et droite à gauche](../theming-rtl/) — chaque variable, la couche de cascade, les icônes, la droite à gauche.
+- [`density`](../../settings/density/), [`rowHeight`](../../settings/row-height/),
+  [`headerHeight`](../../settings/header-height/), [`theme`](../../settings/theme/).

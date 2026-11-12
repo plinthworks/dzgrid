@@ -96,6 +96,9 @@ describe('columns.css', () => {
     expect(gap).toMatch(/content: ""/);
     expect(gap).toMatch(/order: 9/);
     expect(gap).toMatch(/inline-size: calc\(var\(--dzg-target-min, 24px\) - var\(--dzg-cell-padding-inline, 0\.5rem\) \* var\(--dzg-density, 1\)\)/); // the density's padding (1.9.0)
+    // Narrower than its content (a column at its 40 px minimum), the cell cuts at its start: the button keeps its gap.
+    expect(decl(/^\.dzg-hcell:has\(> \.dzg-mbtn\)$/)).toMatch(/justify-content: flex-end/);
+    expect(decl(/^\.dzg-hcell:has\(> \.dzg-reapply\)$/)).toMatch(/justify-content: flex-end/);
     expect(decl(/^\.dzg-reapply$/)).toMatch(/order: 3/);
     // Its dots: a shape over currentColor, no glyph font.
     expect(decl(/^\.dzg-mbtn::before$/)).toMatch(/background: (currentColor|radial-gradient)/);

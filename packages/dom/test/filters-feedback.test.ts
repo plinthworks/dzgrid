@@ -122,4 +122,10 @@ describe('J: the Clear button keeps the column in its name, not in its text; the
     expect(btn).toMatch(/position:relative;z-index:1/);
     expect(FILTERS_CSS).toContain(':where(.dzg-hcell:has(>.dzg-fbtn))::after{content:"";order:9;flex:none;inline-size:calc(var(--dzg-target-min,24px) - var(--dzg-cell-padding-inline,.5rem)*var(--dzg-density,1))}');
   });
+
+  it('a column narrower than its header\'s content cuts at its start, so the button stays clear of the grip (2026-11-12)', () => {
+    // A column at its 40 px minimum: the content overflowed at the end, the button slid under the grip, which was left
+    // 4 px to be caught. Packed at the end, what does not fit is the label's side.
+    expect(FILTERS_CSS).toContain(':where(.dzg-hcell:has(>.dzg-fbtn)){justify-content:end}');
+  });
 });

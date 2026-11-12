@@ -1,0 +1,323 @@
+---
+title: "Changing the look"
+description: "Row and header heights, the grid's height, the font, colours, lines, one column or one row: each, step by step."
+---
+
+import CodeTabs from '../../../components/CodeTabs.astro';
+import LiveDemo from '../../../components/LiveDemo.astro';
+
+Each section below answers one question — « how do I make the rows taller? », « how do I change the font? » — with
+the code to copy. Every name used here is in [the table of variables](../theming-rtl/#every-variable), with its
+default.
+
+## Two ways to change the look
+
+- **In your stylesheet**, with CSS variables. This styles every grid of the page, or one grid when you put its rules
+  under the host's class or id (`#orders .dzg { … }`). Use it for the look of your whole application.
+- **From code**, with the [`theme`](../../settings/theme/) setting and the [`theming()`](../../features/theming/)
+  feature. This styles one grid only, wins over your stylesheet, and changes live with `grid.update({ theme })`. Use it
+  when the look depends on data or on the user.
+
+Heights are not CSS: they are settings (`density`, `rowHeight`, `headerHeight`), because the grid needs them to place
+rows it has not drawn yet.
+
+### The stylesheets to load
+
+```ts
+import '@dzgrid/theme/dzgrid.css';      // required: colours, lines, header, hover, focus
+import '@dzgrid/theme/variables.css';   // the presentation knobs marked « variables » in the table
+```
+
+In Angular, put them in `angular.json` (`"styles": ["node_modules/@dzgrid/theme/dzgrid.css",
+"node_modules/@dzgrid/theme/variables.css", "src/styles.css"]`) and write your rules in a **global** stylesheet: a
+component's own styles (emulated encapsulation) never reach the grid's cells.
+
+The theme's rules sit in the cascade layer `dzgrid`, so yours win **without `!important`**. With an unlayered reset
+(Tailwind 3's preflight, Bootstrap's Reboot), load the `*.unlayered.css` copies instead
+([more](../theming-rtl/#the-theme)).
+
+## Row height
+
+| You want | Write |
+|---|---|
+| Tighter or looser rows, from a list | `density: 'compact'` (28 px), `'comfortable'` (32 px, the default), `'spacious'` (40 px) |
+| An exact height | `rowHeight: 44` (pixels, 24 to 1 000) — wins over the density |
+| Back to the density's height | `grid.update({ rowHeight: undefined })` |
+| Rows as tall as their text | the column's `wrap: true` and the [`autoHeight()`](../../features/auto-height/) feature, without `rowHeight` |
+| The user chooses | `columnMenu({ density: true })`: the column menu offers the three densities |
+
+The heights are for the browser's default text size (16 px). A reader who makes the text bigger gets taller rows by
+themselves. The font you set on the grid does **not** change the height: with bigger text, set `rowHeight` too.
+
+The density also sets the cells' side padding (× 0.75, 1, 1.25). To keep the padding fixed whatever the density:
+`.dzg { --dzg-density: 1 }`; to change it: `--dzg-cell-padding-inline`.
+
+## Header height
+
+| You want | Write |
+|---|---|
+| Taller column titles | `headerHeight: 56` (pixels, 24 at least) |
+| Column titles and the group rows above them apart | `headerHeight: { columns: 56, groups: 32 }` |
+| A taller filter row | `filters({ floating: true, rowHeight: 44 })` |
+| Long titles on several lines | the column's `headerWrap: true` (the row grows to the tallest title) |
+
+Without `headerHeight`, the header rows take the row height.
+
+The demo below sets `rowHeight: 44` and `headerHeight: 56`, with a serif font from the `theme` setting.
+
+<LiveDemo
+  height={300}
+  features={['theming']}
+  settings={{ label: 'Lighthouses', rowHeight: 44, headerHeight: 56, theme: { font: '400 0.9375rem/1.4 Georgia, "Times New Roman", serif', headerWeight: 700 } }}
+  columns={[
+    { id: 'name', header: 'Lighthouse', flex: 1 },
+    { id: 'coast', header: 'Coast', width: 140 },
+    { id: 'range', header: 'Range (nm)', type: 'number', width: 130 },
+  ]}
+  rows={[
+    { id: 'l1', name: 'Gull Point', coast: 'North', range: 18 },
+    { id: 'l2', name: 'Old Harbour', coast: 'West', range: 12 },
+    { id: 'l3', name: 'Seal Rock', coast: 'North', range: 22 },
+    { id: 'l4', name: 'Sandy Head', coast: 'South', range: 9 },
+  ]}
+/>
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { theming } from '@dzgrid/dom/theme';
+import { EN } from '@dzgrid/dom/locales/en';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/variables.css';
+
+type Light = { id: string; name: string; range: number };
+
+const grid = createGrid<Light>(document.getElementById('lights')!, {
+  rows: [{ id: 'l1', name: 'Gull Point', range: 18 }],
+  columns: [{ id: 'name', header: 'Lighthouse' }, { id: 'range', header: 'Range (nm)', type: 'number' }],
+  getRowId: (l) => l.id,
+  messages: EN,
+  rowHeight: 44,
+  headerHeight: 56,
+  theme: { font: '400 0.9375rem/1.4 Georgia, "Times New Roman", serif', headerWeight: 700 },
+  features: [theming()],
+});
+
+grid.update({ rowHeight: 36 });   // live
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { theming } from '@dzgrid/dom/theme';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Light = { id: string; name: string; range: number };
+
+@Component({
+  selector: 'app-lights',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages"
+    [rowHeight]="44" [headerHeight]="56" [theme]="theme" [features]="features" />`,
+})
+export class Lights {
+  readonly rows: Light[] = [{ id: 'l1', name: 'Gull Point', range: 18 }];
+  readonly columns: DzgColumnOrGroup<Light>[] = [{ id: 'name', header: 'Lighthouse' }, { id: 'range', header: 'Range (nm)', type: 'number' }];
+  readonly rowId = (l: Light) => l.id;
+  readonly messages = EN;
+  readonly theme = { font: '400 0.9375rem/1.4 Georgia, "Times New Roman", serif', headerWeight: 700 };
+  readonly features = [theming()];
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```html
+<dz-grid row-height="44" header-height="56"></dz-grid>
+```
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { theming } from '@dzgrid/dom/theme';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Light = { id: string; name: string; range: number };
+
+const grid = document.querySelector<DzGridElement<Light>>('dz-grid')!;
+grid.columns = [{ id: 'name', header: 'Lighthouse' }, { id: 'range', header: 'Range (nm)', type: 'number' }];
+grid.getRowId = (l) => l.id;
+grid.messages = EN;
+grid.features = [theming()];
+grid.settings = { theme: { font: '400 0.9375rem/1.4 Georgia, "Times New Roman", serif', headerWeight: 700 } };
+grid.rows = [{ id: 'l1', name: 'Gull Point', range: 18 }];
+```
+
+</Fragment>
+</CodeTabs>
+
+## The grid's height
+
+The grid takes the height of the element you give it — never the height of its rows. Give that element a height and
+the rows scroll inside:
+
+```css
+#lights { block-size: 480px; }                       /* fixed */
+#lights { block-size: calc(100dvh - 4rem); }         /* the screen, minus a bar */
+.page { display: flex; flex-direction: column; block-size: 100dvh; }
+.page > #lights { flex: 1; min-block-size: 0; }      /* what is left in a column layout */
+```
+
+An element with no height gives a grid with no room: give the height to the element itself or to its flex or grid
+parent. There is no « as tall as its rows » mode: the page would jump each time a filter changes the count.
+
+## Font
+
+**The whole grid.** In your stylesheet, set the font on the grid's root; the header, cells, menus and popups follow:
+
+```css
+.dzg { font-family: "Atkinson Hyperlegible", system-ui, sans-serif; font-size: 0.875rem; }
+```
+
+Or with the variable `--dzg-font`, which is the CSS `font` shorthand: it needs **at least a size and a family**, in
+that order. A family alone is not a valid `font` and the grid keeps the page's font:
+
+```css
+.dzg { --dzg-font: 400 0.875rem/1.45 "Atkinson Hyperlegible", system-ui, sans-serif; }   /* works */
+.dzg { --dzg-font: "Atkinson Hyperlegible", sans-serif; }                                 /* ignored: no size */
+```
+
+From code, for one grid: `theme: { font: '400 0.875rem/1.45 Inter, sans-serif' }`, with `theming()` (the demo above).
+
+**Only the cells, only the header.** These need `variables.css`, except `--dzg-header-size`:
+
+```css
+.dzg {
+  --dzg-cell-font-size: 0.8125rem;            /* the cells' text */
+  --dzg-header-size: 0.8125rem;               /* the titles' text */
+  --dzg-header-weight: 500;                   /* the titles' weight (600 by default) */
+  --dzg-header-font-family: "Inter", sans-serif;
+  --dzg-header-case: uppercase;               /* titles in capitals (none in Arabic) */
+  --dzg-header-tracking: 0.04em;              /* letter spacing */
+}
+```
+
+The same from code: `theme: { cellFontSize: '0.8125rem', headerSize: '0.8125rem', headerWeight: 500, headerCase:
+'uppercase' }`. Numbers keep digits of equal width so columns line up (`--dzg-num-figures: normal` turns it off).
+
+## Colours
+
+The palette is ten variables shared by every part of the grid. Change them and everything follows: header, hover,
+selection, focus, filters, menus.
+
+```css
+:root {
+  --tz-accent: light-dark(#0f766e, #5eead4);     /* focus, selection, active filters, buttons */
+  --tz-bg: light-dark(#ffffff, #111827);         /* the grid's surface */
+  --tz-fg: light-dark(#1f2937, #f3f4f6);         /* text */
+}
+.dzg {
+  --dzg-header-bg: light-dark(#f1f5f9, #1e293b);
+  --dzg-row-hover-bg: color-mix(in srgb, var(--tz-accent) 6%, var(--tz-bg));
+  --dzg-row-selected-bg: color-mix(in srgb, var(--tz-accent) 14%, var(--tz-bg));
+}
+```
+
+- `light-dark(light, dark)` gives each colour for both modes. The grid follows the system's mode;
+  `data-theme="light"` or `data-theme="dark"` on any ancestor forces one.
+- The other surfaces (`--tz-bg-raised`, `--tz-fg-muted`, `--tz-border`) and the tones (`--tz-danger`, `--tz-warning`,
+  `--tz-success`) are in [the table](../theming-rtl/#every-variable).
+- Contrast is yours to keep: 4.5:1 for text. `npm run check:contrast -- --palette palettes.json`, in DzGrid's repository, checks yours.
+- With Tailwind or Bootstrap, load `@dzgrid/theme/tailwind.css` (Tailwind 4), `tailwind3.css` or `bootstrap.css`: the
+  grid then takes your framework's colours, font and corners.
+
+## Lines, stripes and corners
+
+```css
+.dzg {
+  --dzg-row-odd-bg: color-mix(in srgb, var(--tz-accent) 5%, var(--tz-bg));   /* striped rows */
+  --dzg-column-line: var(--dzg-line, 1px) solid var(--tz-border);                  /* lines between columns */
+  --dzg-row-line: none;                                                        /* no line between rows */
+  --dzg-frame: none;                                                           /* no outer border */
+  --dzg-radius: 0;                                                             /* square corners */
+  --dzg-line: 1px;                                                             /* every line's width */
+}
+```
+
+`--dzg-row-odd-bg` and `--dzg-radius` are in `dzgrid.css`; the others need `variables.css`. To reuse a grid
+variable in a value, give its fallback — `var(--dzg-line, 1px)`: the theme declares none, so without the `, 1px` the
+value is empty and the whole line is dropped. The demo below sets the
+same from code, on this grid only:
+
+<LiveDemo
+  height={260}
+  features={['theming']}
+  settings={{ label: 'Orchards', theme: { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 7%, var(--tz-bg))', columnLine: 'var(--dzg-line, 1px) solid var(--tz-border)', rowLine: 'none', headerCase: 'uppercase', headerTracking: '0.04em', headerSize: '0.8125rem' } }}
+  columns={[
+    { id: 'name', header: 'Orchard', flex: 1 },
+    { id: 'fruit', header: 'Fruit', width: 130 },
+    { id: 'trees', header: 'Trees', type: 'number', width: 110 },
+  ]}
+  rows={[
+    { id: 'o1', name: 'Hill farm', fruit: 'Apple', trees: 240 },
+    { id: 'o2', name: 'River bend', fruit: 'Pear', trees: 85 },
+    { id: 'o3', name: 'Stone wall', fruit: 'Plum', trees: 130 },
+    { id: 'o4', name: 'South slope', fruit: 'Cherry', trees: 64 },
+    { id: 'o5', name: 'Mill lane', fruit: 'Apple', trees: 190 },
+  ]}
+/>
+
+## Column widths
+
+Widths are column options, not CSS: `width` (pixels), `flex` (a share of the room left), `minWidth`, `maxWidth`,
+`resizable`. The [columns guide](../columns/) shows them, with sizing to the content.
+
+## One column, one row, one cell
+
+**A column's cells and title**: the column option `ui` takes classes.
+
+```ts
+import type { ColumnDef } from '@dzgrid/core';
+
+type Order = { id: string; client: string; total: number };
+
+export const columns: ColumnDef<Order>[] = [
+  { id: 'client', header: 'Client', ui: { headerClass: 'col-client', cellClass: () => 'col-client' } },
+  { id: 'total', header: 'Total', type: 'number', ui: { cellClass: (c) => (c.row.total > 1000 ? 'big' : null) } },
+];
+```
+
+```css
+.dzg .col-client { font-weight: 600; }
+.dzg .big { color: var(--tz-success); }
+```
+
+**A row**: the [`rowClass`](../../settings/row-class/) setting, from the row's data:
+`rowClass: ({ row }) => (row.daysLate > 0 ? 'late' : null)`, then `.dzg .late { color: var(--tz-danger); }`.
+
+**Content drawn your way** (a badge, a bar, a link): a cell part, see [`ui`](../../column-options/ui/) and
+[`parts`](../../settings/parts/). Classes name a look; keep the colours as variables so the dark mode and forced
+colours still apply.
+
+## Icons
+
+The sort arrows, the funnel, the menu dots and the chevrons can be your own SVG, with the
+[`icons`](../../settings/icons/) setting and `theming()`. Their size: `--dzg-icon-size` (`variables.css`).
+
+## Ready-made looks
+
+`@dzgrid/theme/midnight.css` and `clinic.css`, each light and dark, are complete themes to start from;
+`data-dzg-skin="midnight"` on a container applies one to that area only. Reading their source is the quickest way to
+see many variables at work.
+
+## See also
+
+- [Theming and right to left](../theming-rtl/) — every variable, the cascade layer, the icons, right to left.
+- [`density`](../../settings/density/), [`rowHeight`](../../settings/row-height/),
+  [`headerHeight`](../../settings/header-height/), [`theme`](../../settings/theme/).

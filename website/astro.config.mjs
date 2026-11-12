@@ -35,6 +35,7 @@ function aliases() {
 /** The guides, by task (moved here from docs/guide/ in batch 2; the order is the old guide index's). */
 const GUIDES = [
   'columns',
+  'appearance',
   'sort-filter-search',
   'selection-ranges',
   'editing',

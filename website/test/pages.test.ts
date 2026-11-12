@@ -22,6 +22,8 @@ const WRITTEN = [
   'guides/columns', 'guides/sort-filter-search', 'guides/selection-ranges', 'guides/editing', 'guides/tree',
   'guides/grouping', 'guides/pivot', 'guides/server-data', 'guides/row-moves', 'guides/dock-panels',
   'guides/export-print', 'guides/state', 'guides/theming-rtl', 'guides/accessibility',
+  // 2026-11-12, the owner: « how to change the height, the font » — the look, step by step.
+  'guides/appearance',
   // Batch 3 (2026-11-11): one page per option.
   'settings/index', 'settings/density', 'settings/row-height', 'settings/header-height', 'settings/headers', 'settings/label',
   'settings/messages', 'settings/locale', 'settings/time-zone', 'settings/numerals', 'settings/direction', 'settings/clock',
@@ -207,6 +209,18 @@ describe('the site’s pages', () => {
       const en = new Set(headings(read('en', slug)).filter((h) => !/^`?[@\w./-]+`?$/.test(h) && !['TypeScript', 'Angular', 'Guides'].includes(h)));
       expect(headings(read('fr', slug)).filter((h) => en.has(h)), slug).toEqual([]);
     }
+  });
+
+  it('an example reads a grid variable with its fallback, unless the grid writes it (2026-11-12)', () => {
+    // The theme reads its knobs as `var(--dzg-line, 1px)` and declares none: `columnLine: 'var(--dzg-line) solid …'`
+    // was invalid, and the line never drawn. The API pages are the library's own CSS, left out.
+    const WRITTEN_BY_THE_GRID = new Set(['--dzg-row-height', '--dzg-header-height', '--dzg-density', '--dzg-flash']);
+    const bare: string[] = [];
+    for (const lang of ['en', 'fr'] as const)
+      for (const [slug, file] of pages[lang])
+        if (!slug.startsWith('api/'))
+          for (const m of readFileSync(file, 'utf8').matchAll(/var\((--dzg-[a-z-]+)\)/g)) if (!WRITTEN_BY_THE_GRID.has(m[1]!)) bare.push(`${lang} ${slug}: ${m[0]}`);
+    expect(bare).toEqual([]);
   });
 
   it('every relative link lands on a page of the same language, and on its heading when it names one', () => {

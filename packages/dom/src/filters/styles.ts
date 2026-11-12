@@ -19,27 +19,27 @@ export const FILTERS_CSS =
   // grip's width keeps it apart — a size, not a margin, so a page's `* { margin: 0 }` cannot undo it — and the button sits
   // over the grip (after it in the DOM, same layer) should a page's reset take the cell's padding too.
   ':where(.dzg-fbtn){order:1;flex:none;inline-size:24px;block-size:24px;margin-inline-start:auto;position:relative;z-index:1}' +
+  // Narrower than that (a column at its minimum), the cell packs at its end, so what is cut is the label's side.
+  ':where(.dzg-hcell:has(>.dzg-fbtn)){justify-content:end}' +
   ':where(.dzg-hcell:has(>.dzg-fbtn))::after{content:"";order:9;flex:none;inline-size:calc(var(--dzg-target-min,24px) - var(--dzg-cell-padding-inline,.5rem)*var(--dzg-density,1))}' +
   // Beside a button the label gives way, cut with an ellipsis.
   ':where(.dzg-hcell>.dzg-hlabel){min-inline-size:0;overflow:hidden;text-overflow:ellipsis}' +
   // Step 21, `header.filterBox`: the name, then the box taking what is left.
   ':where(.dzg-hlabel:has(>.dzg-hfbox)){display:flex;flex:1;align-items:center;gap:.25rem}' +
   ':where(.dzg-hfbox){position:relative;display:flex;flex:1;align-items:center;min-inline-size:0}' +
-  // The popup: the fields one under the other, each label above its control; the footer's buttons at the end.
-  ':where(.dzg-fpop){display:grid;gap:.75rem;min-inline-size:12rem}' +
-  ':where(.dzg-fpop label){display:grid;gap:2px}' +
+  // The popup: the fields one under the other, each label above its control (a date field, step 14, as a label: tzslot's
+  // under its label); the footer's buttons at the end.
+  ':where(.dzg-fpop,.dzg-fconds,.dzg-fcond){display:grid;gap:.75rem}:where(.dzg-fpop){min-inline-size:12rem}' +
+  ':where(.dzg-fpop label,.dzg-fdate){display:grid;gap:2px}' +
   ':where(.dzg-fpop [role=radiogroup] label){display:flex;align-items:center;gap:.5rem;min-block-size:24px}' +
   ':where(.dzg-fpop :is(select,button,.dzg-finput)){min-block-size:2rem}' +
   ':where(.dzg-ffoot){display:flex;justify-content:end;gap:.5rem;white-space:nowrap}' +
-  // Phase 9: the condition rows, the join on one line, match case beside its box, a list's separator.
-  ':where(.dzg-fconds,.dzg-fcond){display:grid;gap:.75rem}' +
+  // Phase 9 (the condition rows: a grid, with the popup's rule), the join on one line, match case beside its box, a list's separator.
   ':where(.dzg-fjoin){display:flex;flex-wrap:wrap;column-gap:1rem}' +
   ':where(.dzg-fpop .dzg-fcasel){display:flex;align-items:center;gap:.5rem}' +
   ':where(.dzg-fadd,.dzg-frm){justify-self:start}' +
   ':where(.dzg-fsep){inline-size:100%;margin:0}' +
   ':where(.dzg-fpop [hidden]){display:none}' +
-  // Step 14: a date field (tzslot's) under its label, as wide as the form.
-  ':where(.dzg-fdate){display:grid;gap:2px}' +
   '}' +
   // Outside the layer, on purpose: tzslot's sheets are unlayered (its trigger's min-width), so a layered
   // rule would lose to them and the field would overflow the popup (review of the showcase themes).

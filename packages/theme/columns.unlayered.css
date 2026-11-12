@@ -90,6 +90,11 @@
   z-index: 1;
 }
 
+.dzg-hcell:has(> .dzg-mbtn),
+.dzg-hcell:has(> .dzg-reapply) {
+  justify-content: flex-end;
+}
+
 .dzg-hcell:has(> .dzg-mbtn)::after,
 .dzg-hcell:has(> .dzg-reapply)::after {
   content: "";

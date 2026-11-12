@@ -39,7 +39,7 @@ const grid = createGrid<Hive>(document.getElementById('hives')!, {
   columns: [{ id: 'name', header: 'Ruche' }, { id: 'frames', header: 'Cadres', type: 'number' }],
   getRowId: (h) => h.id,
   messages: FR,
-  theme: { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 6%, var(--tz-bg))', headerWeight: 500, columnLine: 'var(--dzg-line) solid var(--tz-border)' },
+  theme: { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 6%, var(--tz-bg))', headerWeight: 500, columnLine: 'var(--dzg-line, 1px) solid var(--tz-border)' },
   icons: { sortAsc: '<svg viewBox="0 0 16 16"><path d="M8 3l5 8H3z"/></svg>' },
   features: [theming()],
 });
@@ -51,7 +51,7 @@ grid.update({ theme: { headerWeight: 700 } });
 
 <LiveDemo
   height={260}
-  settings={{ label: 'Ruches', theme: { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 8%, var(--tz-bg))', headerWeight: 500, columnLine: 'var(--dzg-line) solid var(--tz-border)', headerCase: 'uppercase' } }}
+  settings={{ label: 'Ruches', theme: { rowOddBg: 'color-mix(in srgb, var(--tz-accent) 8%, var(--tz-bg))', headerWeight: 500, columnLine: 'var(--dzg-line, 1px) solid var(--tz-border)', headerCase: 'uppercase' } }}
   features={['theming']}
   columns={[
     { id: 'name', header: 'Ruche', flex: 1 },

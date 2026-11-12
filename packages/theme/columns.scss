@@ -133,6 +133,13 @@ $layered: true !default;
 
   // The gap for the resize grip after the last button: an empty last item of the grip's width (a size, not a margin, so
   // a page's `* { margin: 0 }` cannot undo it; the filters' layout draws the same with a filter button alone).
+  // Narrower than its content (a column at its minimum), the cell packs at its end: what is cut is the label's side, never
+  // the gap, so the grip stays clear (the buttons' auto margin takes any room left, so a wide cell is unchanged).
+  .dzg-hcell:has(> .dzg-mbtn),
+  .dzg-hcell:has(> .dzg-reapply) {
+    justify-content: flex-end;
+  }
+
   .dzg-hcell:has(> .dzg-mbtn)::after,
   .dzg-hcell:has(> .dzg-reapply)::after {
     content: '';
