@@ -87,7 +87,15 @@ describe('columns.css', () => {
     expect(b).toMatch(/flex: none/);
     expect(b).toMatch(/inline-size: var\(--dzg-target-min, 24px\)/);
     expect(b).toMatch(/block-size: var\(--dzg-target-min, 24px\)/);
-    expect(b).toMatch(/margin-inline-end: calc\(var\(--dzg-target-min, 24px\) - var\(--dzg-cell-padding-inline, 0\.5rem\) \* var\(--dzg-density, 1\)\)/); // the density's padding (1.9.0)
+    // Clear of the grip by an empty last item of the grip's width, not a margin a page's `* { margin: 0 }` would undo
+    // (the docs site, 2026-11-12); over the grip, after it in the DOM, should a reset take the padding too.
+    expect(b).not.toMatch(/margin-inline-end/);
+    expect(b).toMatch(/z-index: 1/);
+    const gap = decl(/^\.dzg-hcell:has\(> \.dzg-mbtn\)::after$/);
+    expect(decl(/^\.dzg-hcell:has\(> \.dzg-reapply\)::after$/)).toBe(gap);
+    expect(gap).toMatch(/content: ""/);
+    expect(gap).toMatch(/order: 9/);
+    expect(gap).toMatch(/inline-size: calc\(var\(--dzg-target-min, 24px\) - var\(--dzg-cell-padding-inline, 0\.5rem\) \* var\(--dzg-density, 1\)\)/); // the density's padding (1.9.0)
     expect(decl(/^\.dzg-reapply$/)).toMatch(/order: 3/);
     // Its dots: a shape over currentColor, no glyph font.
     expect(decl(/^\.dzg-mbtn::before$/)).toMatch(/background: (currentColor|radial-gradient)/);

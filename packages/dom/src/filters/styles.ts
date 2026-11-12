@@ -15,8 +15,11 @@ export const FILTERS_CSS =
   ':where(.dzg-fsum){flex:1;overflow:hidden;text-overflow:ellipsis}' +
   ':where(.dzg-fclear){inline-size:24px;block-size:24px}' +
   // The header's filter button: a 24 px target after the label and the sort mark (the mark may come
-  // later in the DOM: `order`, so a focused button is never moved), clear of the resize grip.
-  ':where(.dzg-fbtn){order:1;flex:none;inline-size:24px;block-size:24px;margin-inline:auto calc(var(--dzg-target-min,24px) - var(--dzg-cell-padding-inline,.5rem)*var(--dzg-density,1))}' +
+  // later in the DOM: `order`, so a focused button is never moved), clear of the resize grip: an empty last item of the
+  // grip's width keeps it apart — a size, not a margin, so a page's `* { margin: 0 }` cannot undo it — and the button sits
+  // over the grip (after it in the DOM, same layer) should a page's reset take the cell's padding too.
+  ':where(.dzg-fbtn){order:1;flex:none;inline-size:24px;block-size:24px;margin-inline-start:auto;position:relative;z-index:1}' +
+  ':where(.dzg-hcell:has(>.dzg-fbtn))::after{content:"";order:9;flex:none;inline-size:calc(var(--dzg-target-min,24px) - var(--dzg-cell-padding-inline,.5rem)*var(--dzg-density,1))}' +
   // Beside a button the label gives way, cut with an ellipsis.
   ':where(.dzg-hcell>.dzg-hlabel){min-inline-size:0;overflow:hidden;text-overflow:ellipsis}' +
   // Step 21, `header.filterBox`: the name, then the box taking what is left.

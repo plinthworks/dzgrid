@@ -54,8 +54,8 @@
   inline-size: var(--dzg-target-min, 24px);
   block-size: var(--dzg-target-min, 24px);
   margin-inline-start: auto;
-  margin-inline-end: calc(var(--dzg-target-min, 24px) - var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1));
   padding: 0;
+  z-index: 1;
   border: 0;
   border-radius: var(--dzg-radius, 0.375rem);
   color: var(--tz-fg-muted);
@@ -85,14 +85,17 @@
   margin-inline-start: 0;
 }
 
-.dzg-hcell:has(> .dzg-mbtn) > .dzg-fbtn,
-.dzg-hcell:has(> .dzg-reapply) > :is(.dzg-fbtn, .dzg-mbtn) {
-  margin-inline-end: 0;
-}
-
 .dzg-reapply {
   order: 3;
-  margin-inline-end: calc(var(--dzg-target-min, 24px) - var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1));
+  z-index: 1;
+}
+
+.dzg-hcell:has(> .dzg-mbtn)::after,
+.dzg-hcell:has(> .dzg-reapply)::after {
+  content: "";
+  order: 9;
+  flex: none;
+  inline-size: calc(var(--dzg-target-min, 24px) - var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1));
 }
 
 @media (hover: none), (any-pointer: coarse) {

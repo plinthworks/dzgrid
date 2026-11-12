@@ -115,4 +115,11 @@ describe('J: the Clear button keeps the column in its name, not in its text; the
   it('the footer\'s buttons do not wrap their text', () => {
     expect(FILTERS_CSS).toMatch(/:where\(\.dzg-ffoot\)\{[^}]*white-space:nowrap/);
   });
+
+  it('the filter button clear of the resize grip by a size, not a margin a page\'s `* { margin: 0 }` undoes (docs site, 2026-11-12)', () => {
+    const btn = FILTERS_CSS.match(/:where\(\.dzg-fbtn\)\{([^}]*)\}/)![1]!;
+    expect(btn).not.toMatch(/margin-inline-end|margin-inline:/);
+    expect(btn).toMatch(/position:relative;z-index:1/);
+    expect(FILTERS_CSS).toContain(':where(.dzg-hcell:has(>.dzg-fbtn))::after{content:"";order:9;flex:none;inline-size:calc(var(--dzg-target-min,24px) - var(--dzg-cell-padding-inline,.5rem)*var(--dzg-density,1))}');
+  });
 });

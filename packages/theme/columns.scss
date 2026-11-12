@@ -94,8 +94,8 @@ $layered: true !default;
     inline-size: var(--dzg-target-min, 24px);
     block-size: var(--dzg-target-min, 24px);
     margin-inline-start: auto;
-    margin-inline-end: calc(var(--dzg-target-min, 24px) - var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1));
     padding: 0;
+    z-index: 1;
     border: 0;
     border-radius: var(--dzg-radius, 0.375rem);
     color: var(--tz-fg-muted);
@@ -121,19 +121,24 @@ $layered: true !default;
     opacity: 1;
   }
 
-  // Beside the filter button: one push toward the end, one gap for the resize grip (the last button's).
+  // Beside the filter button: one push toward the end.
   .dzg-hcell:has(> .dzg-fbtn) > .dzg-mbtn {
     margin-inline-start: 0;
   }
 
-  .dzg-hcell:has(> .dzg-mbtn) > .dzg-fbtn,
-  .dzg-hcell:has(> .dzg-reapply) > :is(.dzg-fbtn, .dzg-mbtn) {
-    margin-inline-end: 0;
-  }
-
   .dzg-reapply {
     order: 3;
-    margin-inline-end: calc(var(--dzg-target-min, 24px) - var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1));
+    z-index: 1;
+  }
+
+  // The gap for the resize grip after the last button: an empty last item of the grip's width (a size, not a margin, so
+  // a page's `* { margin: 0 }` cannot undo it; the filters' layout draws the same with a filter button alone).
+  .dzg-hcell:has(> .dzg-mbtn)::after,
+  .dzg-hcell:has(> .dzg-reapply)::after {
+    content: '';
+    order: 9;
+    flex: none;
+    inline-size: calc(var(--dzg-target-min, 24px) - var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1));
   }
 
   @media (hover: none), (any-pointer: coarse) {

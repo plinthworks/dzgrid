@@ -178,7 +178,7 @@ describe('@dzgrid/theme/variables.css (8–16)', () => {
   });
 
   it('the header buttons keep their gap for the grip whatever the density (15)', () => {
-    expect(file('../columns.css')).toContain('margin-inline-end: calc(var(--dzg-target-min, 24px) - var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1));');
+    expect(file('../columns.css')).toContain('inline-size: calc(var(--dzg-target-min, 24px) - var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1));');
     expect(file('../columns.css')).not.toContain('- var(--dzg-cell-padding-inline, 0.5rem));');
   });
 });
