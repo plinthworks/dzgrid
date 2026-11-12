@@ -3,7 +3,7 @@
   "entries": {
     "@dzgrid/core": {
       "file": "packages/core/src/index.ts",
-      "maxGzip": 29550
+      "maxGzip": 29590
     },
     "@dzgrid/core/server": {
       "file": "packages/core/src/server.ts",
@@ -1190,7 +1190,7 @@
     },
     "@dzgrid/dom/filters": {
       "file": "packages/dom/src/filters.ts",
-      "maxGzip": 12150,
+      "maxGzip": 12180,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
@@ -1203,7 +1203,7 @@
     },
     "@dzgrid/dom/filters-base": {
       "file": "packages/dom/src/filters-base.ts",
-      "maxGzip": 12100,
+      "maxGzip": 12125,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",

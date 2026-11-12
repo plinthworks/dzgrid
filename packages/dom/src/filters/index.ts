@@ -170,6 +170,9 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
   onCommand(g.kernel, commit.heard);
   const popup = menu(g, resolve, commit, o.popup !== false, o.apply);
   keep(popup);
+  // The filter button beside the grip and a title stub, 24 × 3 + 8 px at least; a column's own minWidth wins
+  // (column-resize.md 21–24).
+  g.columns.floor?.((c) => (popup.can(c) && c.def.ui?.header !== 'header.filterBox' ? 80 : 0));
   const row = floatingRow(g, resolve, commit, popup, px);
   // Shown or hidden live (floating-toggle.md): the row's spec in the header rows or not; a hide moves the grid's
   // focus off the row first. The paint reads the view's height before the header changes: one more reads it after.

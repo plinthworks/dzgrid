@@ -13,7 +13,7 @@ Un plancher sous la largeur de la colonne.
 
 Aucune largeur ne passe en dessous : ni celle de la définition, ni le glisser de l’utilisateur, ni le
 « Rétrécir » du menu, ni une part de [`flex`](../flex/) quand la grille est étroite (la grille défile alors de côté).
-Elle vaut 40 px si elle n’est pas donnée. Donnez une `minWidth` à une colonne flexible, pour qu’elle ne devienne jamais
+Elle vaut 40 px si elle n’est pas donnée, ou 80 px quand le titre de la colonne a un bouton de filtre : le bouton, la poignée d’élargissement et le début du titre tiennent côte à côte, sur une ligne. Une `minWidth` que vous donnez l’emporte, même plus petite. Donnez une `minWidth` à une colonne flexible, pour qu’elle ne devienne jamais
 trop étroite pour être lue.
 
 Avec [`collapsePriority`](../collapse-priority/), une colonne flexible compte sa `minWidth` pour savoir si elle tient.

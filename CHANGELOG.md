@@ -5,6 +5,22 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **The filter button and the resize grip no longer overlap.** A page's reset (`* { margin: 0 }`: Starlight,
+  Tailwind's preflight) took away the gap between them, so a click on the funnel started a resize; the gap is now a
+  size, which no reset touches, and the header's buttons sit over the grip. A column narrower than its header's
+  content cuts at its title's side, never the gap.
+- **A column with a filter button is never narrower than 80 px** (owner 2026-11-12) when it has no `minWidth` of its
+  own: the button, the grip and the start of the title fit side by side. A `minWidth` you give wins, smaller too.
+
+### Added
+- `ColumnModel.floor()` and `ColumnModel.minOf()` in `@dzgrid/core` (optional in the type): the smallest width a
+  column's header needs, and the minimum in force.
+- Each feature's layout CSS is exported from its entry (`FILTERS_CSS`, `TREE_CSS`…), for `injectStyles: false`; the
+  theme key `columnHoverBg`.
+
 ## [1.11.0] - 2026-11-10
 
 A minor (owner 2026-11-10: « il n'y a plus de 1.10.1, il y a que 1.11 »): seven defects found while writing the

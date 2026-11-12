@@ -11,6 +11,7 @@
 # history: Owner « ★ partout » (2026-11-09, 1.9.0 lot A): autoColumns returns plain ColumnDef[] (unreleased, accepted earlier in this lot) — @dzgrid/core/auto-columns#autoColumns
 # history: owner 2026-11-10 (yes / no fix, A): booleanCodecWith's labels become optional — wider for callers — @dzgrid/core#booleanCodecWith
 # history: owner 2026-11-10: baseline extended to every published entry
+# history: owner 2026-11-12 « 1 ok … on agrandit »: the header floor (column-resize.md 21–24); additions only — @dzgrid/core#ColumnModel
 
 @ @dzgrid/core
 ## AbortHandle
@@ -283,6 +284,8 @@
       fold(ids: ReadonlySet<string>): ColumnChange;
       readonly collapsed?: ReadonlySet<string>;
       collapse?(rank: ((c: ResolvedColumn<T>) => number) | null): ColumnChange;
+      floor?(f: ((c: ResolvedColumn<T>) => number) | null): ColumnChange;
+      minOf?(id: string): number;
   }
 ## ColumnOrGroup
   export type ColumnOrGroup<T> = ColumnDef<T, any> | ColumnGroupDef<T>;

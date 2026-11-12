@@ -365,6 +365,8 @@ export interface ColumnModel<T> extends ColumnLookup<T> {
     fold(ids: ReadonlySet<string>): ColumnChange;
     readonly collapsed?: ReadonlySet<string>;
     collapse?(rank: ((c: ResolvedColumn<T>) => number) | null): ColumnChange;
+    floor?(f: ((c: ResolvedColumn<T>) => number) | null): ColumnChange;
+    minOf?(id: string): number;
 }
 ```
 

@@ -68,6 +68,14 @@ export interface ColumnModel<T> extends ColumnLookup<T> {
    * null: off. `state()`, `hidden`, `folded` and `dataVersion` untouched (responsive-columns.md 1, 5, 9).
    */
   collapse?(rank: ((c: ResolvedColumn<T>) => number) | null): ColumnChange;
+  /**
+   * The smallest width each column's header needs (its buttons beside the resize grip, from the DOM layer): the default
+   * minimum over 40 px, for a column with no `minWidth` of its own; null: off (column-resize.md 21–24, 1.11.1). Optional
+   * in the type only, an addition: the grid's model has it.
+   */
+  floor?(f: ((c: ResolvedColumn<T>) => number) | null): ColumnChange;
+  /** The minimum width in force for a column: its `minWidth`, else the default and the floor (40 for an unknown id). */
+  minOf?(id: string): number;
 }
 
 const DEFAULT_WIDTH = 150;
@@ -85,6 +93,7 @@ export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { 
   let visibleList: readonly ResolvedColumn<T>[] = [];
   let folded: ReadonlySet<string> = new Set();
   let rank: ((c: ResolvedColumn<T>) => number) | null = null;
+  let floorOf: ((c: ResolvedColumn<T>) => number) | null = null;
   let collapsed: ReadonlySet<string> = new Set();
   let seen: readonly ResolvedColumn<T>[] = [];
 
@@ -94,6 +103,8 @@ export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { 
     defProblems = r.problems;
     byId = new Map(columns.map((c) => [c.id, c]));
   };
+
+  const minFor = (c: ResolvedColumn<T>): number => c.def.minWidth ?? Math.max(DEFAULT_MIN, floorOf?.(c) ?? 0);
 
   const recompute = (): void => {
     const pos = new Map(columns.map((c, i) => [c.id, i]));
@@ -112,7 +123,7 @@ export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { 
     const end = seg('end');
 
     const bounds = (c: ResolvedColumn<T>) => {
-      const min = c.def.minWidth ?? DEFAULT_MIN;
+      const min = minFor(c);
       return { min, max: Math.max(min, c.def.maxWidth ?? Infinity) };
     };
     const clamp = (c: ResolvedColumn<T>, w: number) => {
@@ -237,6 +248,8 @@ export function createColumnModel<T>(initial: readonly ColumnOrGroup<T>[], o: { 
         return [];
       });
     },
+    floor: (f) => change(() => ((floorOf = f), [])),
+    minOf: (id) => (byId.has(id) ? minFor(byId.get(id)!) : DEFAULT_MIN),
     setAvailableInline(px) {
       if (!(Number.isFinite(px) && px >= 0)) {
         return { changed: [], layoutChanged: false, problems: [problem('invalid-column', 'error', 'availableInline')] };

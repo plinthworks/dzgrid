@@ -12,7 +12,7 @@ A floor under the column’s width.
 ## What it does
 
 No width goes under it: not the definition's, not the user's drag, not the menu's « Narrow », not a
-[`flex`](../flex/) share when the grid is narrow (the grid scrolls sideways instead). It is 40 px when not given. Give
+[`flex`](../flex/) share when the grid is narrow (the grid scrolls sideways instead). It is 40 px when not given, or 80 px when the column's header has a filter button: the button, the resize grip and the start of the title fit side by side, on one line. A `minWidth` you give wins, smaller too. Give
 a flexible column a `minWidth`, so it never gets too narrow to read.
 
 With [`collapsePriority`](../collapse-priority/), a flexible column counts its `minWidth` to decide whether it fits.

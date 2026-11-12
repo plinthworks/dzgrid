@@ -129,7 +129,7 @@ export function columnMenu(o: ColumnMenuOptions = {}): ColumnMenuFeature {
         const side = sideOf(id);
         const cols = o.use?.columns?.api(g);
         const w = widthOf(g, id);
-        const min = def.minWidth ?? 40;
+        const min = m.minOf?.(id) ?? def.minWidth ?? 40;
         const size = (by: number) => () => {
           kernel.dispatch({ type: 'column.resize', column: id, width: widthOf(g, id) + by, finished: true }, 'user');
           hush();

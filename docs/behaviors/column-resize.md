@@ -102,6 +102,24 @@ Written before the code. An application whose columns should open as wide as the
 21. Right to left, text size: as auto-size (measured as drawn). The view's own width is not a goal: columns wider than
     the view scroll, narrower leave room (« fit to the view » stays the `flex` columns' job).
 
+### A floor for a header with a button (owner 2026-11-12)
+Written before the code. Owner: « fait en sorte que le design soit bien, pas de retour à la ligne, du coup on agrandit ».
+A column narrowed to the default 40 px could not hold its filter button (24 px) beside the resize grip (24 px): the two
+overlapped, a click on the funnel caught the grip.
+
+21. A column whose header carries a feature's button at every width (the filter button; not the ⋮, which is not
+    drawn under 96 px, nor `header.filterBox`, which has none) is never narrower than its buttons, the grip, the
+    cell's start padding and one button's width for its title (cut with an ellipsis, on one line): 24 × (buttons + 2)
+    + 8 = **80 px** for one button at the default sizes (a larger `--dzg-target-min` cuts the title, never the gap).
+    The title never goes to a second line.
+22. It is the column's **default** minimum: a `minWidth` the application gives wins, smaller too (the header then cuts
+    at its title's side, the button kept clear of the grip). `maxWidth` under it raises to it, as `maxWidth` under
+    `minWidth` does.
+23. Everything that bounds a width follows it: a drag, the keys, the column menu's widths, a flexible column sharing
+    little room, « Ajuster », a restored `GridState` width (raised, never stored lower), the collapse into rows.
+24. Computed by the grid from its features (each says how many header buttons a column gets), again at each
+    column change; no setting, no event of its own.
+
 ### Keyboard
 
 | Where | Key | LTR | RTL |
