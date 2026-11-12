@@ -51,13 +51,14 @@ jobs:
       - name: Install the workspace
         run: npm ci
 
-      # Every example compiles (ngc, strict templates), every page has its twin, every link lands, no banned word.
-      - name: Check the pages and their examples
-        run: npx vitest run --project tools website/test scripts/test/banned-words.test.ts
-
       - name: Install the site
         working-directory: website
         run: npm ci
+
+      # Every example compiles (ngc, strict templates), every page has its twin, every link lands, no banned word. After the
+      # site's install: the option pages' test reads website/src, whose tsconfig extends astro/tsconfigs/strict.
+      - name: Check the pages and their examples
+        run: npx vitest run --project tools website/test scripts/test/banned-words.test.ts
 
       - name: Build the site
         working-directory: website
