@@ -6,24 +6,16 @@ import type { GridIcons, GridTheme } from '../look.js';
 import { setAttr } from '../render/write.js';
 import { cleanIcon, ICONS, injectIconStyles } from './icons.js';
 
-/** Every key of `GridTheme`, one variable each (the type holds the list complete both ways). */
-const K: Record<keyof GridTheme, 0> = {
-  bg: 0, bgRaised: 0, fg: 0, fgMuted: 0, border: 0, accent: 0, accentFg: 0, danger: 0, warning: 0, success: 0,
-  font: 0, radius: 0, line: 0, pillRadius: 0, cellPaddingInline: 0, cellPaddingBlock: 0, space: 0, targetMin: 0, cellFontSize: 0, numFigures: 0, cellAlignBlock: 0,
-  headerBg: 0, headerFg: 0, headerSize: 0, headerWeight: 0, headerFontFamily: 0, headerTracking: 0, headerCase: 0, headerAlignBlock: 0, headerHoverBg: 0,
-  frame: 0, frameRadius: 0, rowLine: 0, columnLine: 0, headerLine: 0, headerSeparator: 0, headerSeparatorSize: 0, headerSeparatorHeight: 0, pinnedColumnLine: 0, pinnedShadow: 0, detailLine: 0,
-  rowOddBg: 0, rowHoverBg: 0, rowSelectedBg: 0, rowActiveBg: 0, cellActiveBg: 0, columnHoverBg: 0, focusRing: 0, focusWidth: 0, selectBar: 0, staleFg: 0, contextFg: 0,
-  toggleFg: 0, detailBg: 0, groupRowBg: 0, pinnedBg: 0, pinnedLine: 0,
-  busyBar: 0, flashColor: 0, freshColor: 0, freshBg: 0, freshBar: 0, savingColor: 0, savedColor: 0, refusedColor: 0, refusedBg: 0, editorBorder: 0,
-  rangeBg: 0, rangeEdge: 0, fillHandle: 0, moveBar: 0, resizeMode: 0, searchMark: 0, findColor: 0, findBg: 0, findCurrentBg: 0, findMark: 0, findMarkCurrent: 0,
-  boxSize: 0, boxRadius: 0, boxOnBg: 0, boxEdge: 0, iconSize: 0, popupBg: 0, popupShadow: 0, tooltipBg: 0, tooltipFg: 0, inputBg: 0,
-  inputBorder: 0, buttonBg: 0, buttonBorder: 0, menuItemHeight: 0, menuDisabled: 0, panelBg: 0, chipBg: 0, chipHoverBg: 0, controlActiveBg: 0, scrollbar: 0,
-  scrollbarThumb: 0, scrollbarThumbActive: 0,
-  rowHoverFg: 0, rowSelectedFg: 0, rowActiveFg: 0, columnSeparator: 0, columnSeparatorSize: 0, columnSeparatorHeight: 0, lastRowLine: 0, lastColumnLine: 0, headerSeparatorEnd: 0, headerPaddingInline: 0, headerButtonFg: 0, headerButtonActiveFg: 0, headerGroupLine: 0, sortFg: 0, inputFg: 0, inputRadius: 0, buttonFg: 0, buttonRadius: 0, popupRadius: 0, popupBorder: 0,
-  popupPadding: 0, optionSelectedBg: 0, tooltipFontSize: 0, tooltipFontFamily: 0, tooltipFontWeight: 0, tooltipLineHeight: 0, tooltipMaxWidth: 0, tooltipPaddingBlock: 0, tooltipPaddingInline: 0, tooltipRadius: 0, tooltipWhiteSpace: 0, tooltipArrowSize: 0, tooltipArrowColor: 0, overlayFg: 0, overlayBg: 0, footerBg: 0, footerFg: 0,
-};
+/** Every key of `GridTheme`, one variable each, in one string (the smallest to ship); the type below holds the list complete both ways. */
+const WORDS = 'bg bgRaised fg fgMuted border accent accentFg danger warning success font radius line pillRadius cellPaddingInline cellPaddingBlock space targetMin cellFontSize numFigures cellAlignBlock headerBg headerFg headerSize headerWeight headerFontFamily headerTracking headerCase headerAlignBlock headerHoverBg frame frameRadius rowLine columnLine headerLine headerSeparator headerSeparatorSize headerSeparatorHeight pinnedColumnLine pinnedShadow detailLine rowOddBg rowHoverBg rowSelectedBg rowActiveBg cellActiveBg columnHoverBg focusRing focusWidth selectBar staleFg contextFg toggleFg detailBg groupRowBg pinnedBg pinnedLine busyBar flashColor freshColor freshBg freshBar savingColor savedColor refusedColor refusedBg editorBorder rangeBg rangeEdge fillHandle moveBar resizeMode searchMark findColor findBg findCurrentBg findMark findMarkCurrent boxSize boxRadius boxOnBg boxEdge iconSize popupBg popupShadow tooltipBg tooltipFg inputBg inputBorder buttonBg buttonBorder menuItemHeight menuDisabled panelBg chipBg chipHoverBg controlActiveBg scrollbar scrollbarThumb scrollbarThumbActive rowHoverFg rowSelectedFg rowActiveFg columnSeparator columnSeparatorSize columnSeparatorHeight lastRowLine lastColumnLine headerSeparatorEnd headerPaddingInline headerButtonFg headerButtonActiveFg headerGroupLine sortFg inputFg inputRadius buttonFg buttonRadius popupRadius popupBorder popupPadding optionSelectedBg tooltipFontSize tooltipFontFamily tooltipFontWeight tooltipLineHeight tooltipMaxWidth tooltipPaddingBlock tooltipPaddingInline tooltipRadius tooltipWhiteSpace tooltipArrowSize tooltipArrowColor overlayFg overlayBg footerBg footerFg sortNoneFg buttonFontWeight buttonPaddingInline buttonHeight buttonHoverBg buttonHoverFg buttonActiveBg buttonPrimaryBg buttonPrimaryFg buttonPrimaryBorder buttonPrimaryHoverBg buttonPrimaryHoverFg buttonPrimaryActiveBg setListMinWidth setListMaxWidth';
 /** The `theme` setting's keys (the guide's table lists the same). */
-export const THEME_KEYS = Object.keys(K) as readonly (keyof GridTheme)[];
+export const THEME_KEYS = WORDS.split(' ') as readonly (keyof GridTheme)[];
+const K = new Set<string>(THEME_KEYS);
+// Each key of the type in the string and nothing else: a key missing either way is a type error.
+type Words<S extends string, A = never> = S extends `${infer W} ${infer R}` ? Words<R, A | W> : A | S;
+type Same<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const complete: Same<Words<typeof WORDS>, keyof GridTheme> = true;
+void complete;
 /** The palette's keys: `--tz-*`, shared with tzslot. */
 const TZ = new Set(THEME_KEYS.slice(0, 10));
 const kebab = (k: string) => k.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
@@ -72,7 +64,7 @@ export function theming(): GridFeature {
           theme = s.theme;
           const next: [string, string][] = [];
           for (const [k, v] of Object.entries(theme ?? {})) {
-            if (own(K, k) && (typeof v == 'number' ? Number.isFinite(v) : typeof v == 'string' && !BAD.test(v))) next.push([(TZ.has(k as never) ? '--tz-' : '--dzg-') + kebab(k), String(v)]);
+            if (K.has(k) && (typeof v == 'number' ? Number.isFinite(v) : typeof v == 'string' && !BAD.test(v))) next.push([(TZ.has(k as never) ? '--tz-' : '--dzg-') + kebab(k), String(v)]);
             else bad(`settings.theme.${k}`, String(v).slice(0, 80));
           }
           vars = write(vars, next);

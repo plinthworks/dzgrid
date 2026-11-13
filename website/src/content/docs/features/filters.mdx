@@ -21,6 +21,11 @@ shows a mark in its header, and the grid says the new row count. Each column say
 `floating: true` adds a row of small filter fields under the headers: text and number columns get a box that filters
 as you type; the others a summary that opens the popup.
 
+**The value list is as wide as its longest value** (1.12.0), measured on the whole list when the popup opens and when
+the values arrive, never while a search narrows it: between `--dzg-set-list-min-width` (`14rem`) and
+`--dzg-set-list-max-width` (`min(32rem, 90vw)`). A longer value keeps its ellipsis; its full text shows on hover and
+is read by screen readers. Right to left and Arabic alike; the popup stays inside the window.
+
 **Two entries, one function.** `@dzgrid/dom/filters` has every kind: its day and instant forms use a calendar loaded
 on demand, which needs `@tzslot/core` and `@tzslot/dom` installed. `@dzgrid/dom/filters-base` is the same `filters()`
 without the calendar: text, number, yes/no and the value list only. There, a day or instant column gets **no filter** and

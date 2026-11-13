@@ -1,5 +1,22 @@
 # État du travail — à lire en premier si la session est perdue
 
+Mis à jour : 2026-11-13 (nuit). **1.12.0, les cinq corrections faites** (propriétaire « oui lance les 5 corrections »),
+non commitées, non publiées. Chacune : ligne de fiche d'abord (`presentation-settings.md` 34–38, `filter-set.md` « The
+list's width »), test à la main rouge d'abord, `browser-1-12.mjs` étendu ((9) titres, (10) liste, table des variables).
+(1) **Titre envoyé au bout de la colonne** sous le preflight de Tailwind 3 : le `button { margin: 0 }` enlevait la
+marge auto des boutons, le rangement « à la fin » (1.11.0) faisait le reste ; corrigé par un élément vide qui grandit
+(`::before`, ordre 1) dans la mise en page des filtres (injectée : copies en couche et sans couche) et `columns.css` ;
+**K.8 91 000 → 92 000 (propriétaire 2026-11-13 « tu peux augmenter », mesuré 91 037)** ; la matrice échouait avant
+(Chrome, preflight, les deux copies). (2)
+`--dzg-sort-none-fg` (feuille des icônes de `theming()`). (3) **nouvelle feuille `@dzgrid/theme/buttons.css`** (12
+variables des boutons, principal et états ; `variables.css` n'avait plus la place sous +2 %). (4)
+`data-dzg-row-fg="force"` et `--dzg-row-state-fg` (`variables.css`). (5) liste du filtre par valeurs à la largeur de sa
+plus longue valeur (toutes les valeurs écrites une par ligne dans une copie cachée d'une étiquette, une seule mise en page, dans le morceau paresseux ; un canevas mesurait mal l'arabe dans Firefox ; `--dzg-set-list-min-width` / `-max-width`). Clés
+de `theme` en une chaîne (vérifiée par le type) pour tenir `@dzgrid/dom/theme` sous +2 %. Tailles : K.8 91 036 / 92 000 ; +2 % : `/filters` 12 250,
+`/filters-base` 12 200, `columns.css` 1 224, `variables.css` 1 938, `dom/theme` 2 499 ; `buttons.css`
+500 (nouvelle). Appli Angular réelle 102 100 → 102 150 (+2 %, mesuré 102 115). Corrigé en passant : deux tests figeaient encore la ligne de l'appli Angular réelle à 101 700 (le commit
+préparé l'avait mise à 102 100). Gate vert (9 398 tests), real-app 58/58, matrice 1.12 6 080/6 080 (Chrome, Firefox, WebKit), `release:check` « the 5 packages at 1.12.0 », tests du site 33/33. Reste au propriétaire : relire, commiter, publier.
+
 Mis à jour : 2026-11-13 (soir). **1.12.0 préparée, non commitée, non publiée** (le propriétaire commite et publie :
 `docs/release-1.12.0.md`). Relecture finie, chaque correction test d'abord : (1) l'infobulle près du bord bas compte sa
 flèche (la marge de `variables.css` vaut la flèche des deux côtés, une translation la monte au-dessus ; la grille lit

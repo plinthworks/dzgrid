@@ -220,12 +220,56 @@ everything an application needs is a `--dzg-*` variable (or a `theme` key, or a 
     three public declarations (`check:api`); the change is ready, not applied. The guide's table lists every variable the
     sheets read (a test fails on one missing, either way).
 
+### Five corrections before publishing (owner 2026-11-13, « oui lance les 5 corrections »)
+34. **A header's title stays at its start under a page's reset** (a defect, seen in a real app with Tailwind 3's
+    preflight and the `*.unlayered.css` copies). Cause: the filter button (and the column menu's ⋮) were pushed to the
+    header's end by an auto margin (`margin-inline-start: auto`, in the layered layout), and since 1.11.0 a cell with
+    buttons packs at its end (`justify-content: end`, so a too-narrow cell cuts the title's side, never the grip's
+    gap). Tailwind 3's preflight (`button { margin: 0 }`, unlayered) takes that margin; with nothing taking the free
+    room, the end packing sent the title, its sort mark and the buttons to the column's end. Now the push is an empty
+    item that grows (`::before`, ordered after the title and the sort mark, before the buttons; a size, which no common
+    reset touches), its gap given back so nothing moves by a pixel. A title that grows itself (an aligned column's, the
+    header filter box) needs none. Where: the filters' layout (`FILTERS_CSS`, injected: the layered and the unlayered
+    sheets alike) for a header with a filter button, `columns.css` (both copies) for one with a ⋮. The audit screen's
+    size (K.8) line goes 91 000 → 92 000 for it (owner 2026-11-13, « tu peux augmenter »; measured 91 037). Start- and
+    end-aligned, with and without the column menu, left to right and Arabic, both copies, with and without the reset:
+    `browser-1-12.mjs` (9).
+35. `--dzg-sort-none-fg`: the colour of the unsorted mark (`icons.sortNone`, 25), apart from the active one
+    (`--dzg-sort-fg`); default the latter (today's look), so an app greys the unsorted mark and keeps the accent on the
+    sorted one. `variables.css`.
+36. **Buttons**: the popups' buttons (a filter's Clear and Apply, the condition rows' add / remove, the period
+    shortcuts, the pager, the overlay's Retry) read, beside 1.9.0's `--dzg-button-bg`, `-fg`, `-border` (a colour) and
+    `-radius`: `--dzg-button-font-weight` (inherited), `--dzg-button-padding-inline` (.75rem; on the footer's, the
+    overlay's, add / remove and Retry: the pager's squares and the shortcuts keep their own) and `--dzg-button-height`
+    (2rem, the same buttons but a row's Retry, a 24 px target; a height, not a block padding: the browsers' own button
+    padding differs, so no default could be today's in all three), `--dzg-button-hover-bg` / `--dzg-button-hover-fg` / `--dzg-button-active-bg` (under the pointer, pressed:
+    unset, no change — today); the primary one (Apply) `--dzg-button-primary-bg` (accent), `-fg` (accent's text),
+    `-border` (accent), `-hover-bg`, `-hover-fg`, `-active-bg` (unset: no change). A pager button that cannot act takes
+    no hover. Defaults today's look. In their own opt-in sheet `@dzgrid/theme/buttons.css` (and `buttons.unlayered.css`),
+    loaded after `variables.css`: that one had no room under its size line (+2 % rule). With it, no rule on the grid's
+    classes is needed. The columns panel and the dock draw their own quiet buttons (another look, `_controls.scss`): not
+    these.
+37. **Every text of a hovered or selected row in the row's colour, opt-in**: `data-dzg-row-fg="force"` on the grid's
+    host or any ancestor (a CSS switch read by `variables.css`; no setting, no code). Then a hovered row's and a selected
+    row's cells and everything in them (an app's coloured status mark included) take the row's text colour
+    (`--dzg-row-hover-fg` / `--dzg-row-selected-fg`, else the row's own), over the content's own colour (`!important`
+    in the grid's layer: an app's unlayered rule cannot keep it); light and dark alike (the variables follow the
+    palette). Without the switch, 27 as before: content with its own colour keeps it. A focused row is not forced.
+    For content that should follow without the switch, or for what is not a text colour (a badge's background, an
+    icon's fill), the theme sets `--dzg-row-state-fg` on the cells of a hovered, focused or selected row: the colour the
+    application gave that row's text (unset when it gave none, and on the other rows), so a part writes
+    `color: var(--dzg-row-state-fg, <its own colour>)`. Written by the theme, not a `theme` key.
+38. **The set filter's list as wide as its longest value**: filter-set.md « The list's width ». Variables
+    `--dzg-set-list-min-width` (14rem, today's) and `--dzg-set-list-max-width` (`min(32rem, 90vw)`), read by the set
+    chunk's layout.
+
 ## Right to left
 The separator, the last column's line, the arrow's place and the header padding are logical; the separator's
 background position is mirrored by `:dir(rtl)`.
 
 ## Tests
 `packages/dom/test/presentation-1-12.test.ts` (25, 29, 32), `packages/theme/test/presentation-1-12.test.ts` (24, 26–33,
-both copies, contrast pairs, the guide's table), browsers `node scripts/browser-1-12.mjs` (Chrome, Firefox, WebKit ×
+both copies, contrast pairs, the guide's table), `packages/theme/test/presentation-1-12-fixes.test.ts` (34–37),
+`packages/dom/test/filters-set-width.test.ts` (38), browsers `node scripts/browser-1-12.mjs` (Chrome, Firefox, WebKit ×
 layered / unlayered × light / dark × ltr / ar × a page with Tailwind 3's preflight; axe; every variable's default and
-effect, table-driven).
+effect, table-driven; 34 the header's places, 37 the forced row text, 38 the list's width).

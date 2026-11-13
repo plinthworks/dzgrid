@@ -146,6 +146,35 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
     else if (any) tx(status, text);
     typed = false;
     boxes();
+    widen();
+  }
+  /**
+   * The list as wide as its longest value (filter-set.md « The list's width »): on the whole list only (not while a
+   * search narrows it, so the popup never jumps), once a row is drawn and laid out (the popup shown). Every label, then
+   * every count, written one per line into a hidden copy of that row's label (same font, same language: a canvas has
+   * none, and Firefox picked another font for Arabic there) and read once: one layout for the whole list, no row per
+   * value (the list stays windowed). The rest of a row and the list's frame are read from the drawn row. Not with a
+   * part's rows.
+   */
+  let sized: unknown;
+  let sizedIn = '';
+  function widen(): void {
+    const x = list.el.querySelector<HTMLElement>('.dzg-fopt');
+    const w = !part && !sent && x && x.getBoundingClientRect().width;
+    // Once per list and locale (a draw after a tick or a status change measures nothing again).
+    const src = h.available ? h.result : get().column.def.enumOptions;
+    if (!w || (src === sized && shown === sizedIn)) return;
+    sized = src;
+    sizedIn = shown;
+    const [, , name, count] = x.children as unknown as HTMLElement[];
+    const copy = name!.cloneNode() as HTMLElement;
+    copy.style.cssText = 'position:absolute;visibility:hidden;inline-size:auto;max-inline-size:none;white-space:pre';
+    x.append(copy);
+    const widest = (t: string[]): number => ((copy.textContent = t.join('\n')), copy.getBoundingClientRect().width);
+    const a = widest(rows.map((r) => r.label)) + widest(rows.map((r) => r.count));
+    copy.remove();
+    const rest = w - name!.getBoundingClientRect().width - count!.getBoundingClientRect().width;
+    wrap.style.setProperty('--dzg-set-fit', `${Math.ceil(a + rest + list.el.offsetWidth - list.el.clientWidth + 1)}px`);
   }
   /** Select all: over the rows shown (blanks included when shown), checked, unchecked or mixed. */
   function boxes(): void {
@@ -223,6 +252,7 @@ export function body(get: () => C, doc: Document, changed: Changed, note: typeof
     // Called once the popup shows: the rows are measured there (a chunk drawn before it was shown).
     focus() {
       list.measure();
+      widen();
       search.focus();
     },
     destroy() {

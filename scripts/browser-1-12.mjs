@@ -3,14 +3,18 @@
  * choix »): `node scripts/browser-1-12.mjs`. Page `packages/dom/test/browser/v1-12.html`. The matrix: Chrome, Firefox,
  * WebKit × the layered sheets and the `*.unlayered.css` copies × light and dark × French and Arabic (right to left) ×
  * without and with Tailwind 3's preflight (an unlayered reset, as a real app has). One browser at a time, closed in
- * finally. `SHOTS=dir` keeps a screenshot per run; `--only=chrome` (or firefox, webkit) runs one browser.
+ * finally. `SHOTS=dir` keeps a screenshot per run; `--only=chrome` (or firefox, webkit) runs one browser;
+ * `--match=preflight` (any part of a run's name) only the runs that hold it.
  *
  * Each run: (1) every variable's default is today's look — the computed styles with variables.css equal those without
  * it — and setting it changes the computed style (table-driven, VARS); (2) the app's icons are never clipped nor
  * overdrawn by a default mark, sortNone on sortable unsorted columns only, the default marks back without icons;
  * (3) a hovered / selected / focused row's text colour, an app's own coloured content kept; (4) the column separator's
  * size and height; (5) the input edge on, recoloured, `none`; (6) the tooltip's arrow on each side, over its cell's
- * middle, mirrored in Arabic; (7) the last row and last column lines through scroll and sort; (8) axe finds nothing.
+ * middle, mirrored in Arabic; (7) the last row and last column lines through scroll and sort; (8) axe finds nothing;
+ * (9) a header's title, sort mark and filter button in place, start- and end-aligned, whatever the reset; (10) the set
+ * filter's list as wide as its longest value; and the 1.12.0 corrections' variables (buttons.css, the unsorted mark,
+ * a row's text forced under `data-dzg-row-fg="force"`, `--dzg-row-state-fg`).
  */
 import { mkdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -27,6 +31,8 @@ const SHOTS = process.env.SHOTS;
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 const frames = (page) => page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(r)))));
 const RED = 'rgb(255, 0, 0)';
+/** A filter popup's footer, as the grid draws it (made in the grid's root: the popup itself is not open here). */
+const FOOT = '<div class="dzg-ffoot"><button type="button" class="dzg-fclr">Effacer</button><button type="button" class="dzg-fapply">Appliquer</button></div>';
 
 /**
  * Every variable an app sets (presentation-settings.md 26–33), where it shows: `at` an element the page has (or `make`,
@@ -72,6 +78,21 @@ const VARS = [
   { v: '--dzg-tooltip-fg', tip: true, at: '.dzg-tooltip', p: 'color', value: RED },
   { v: '--dzg-tooltip-arrow-size', tip: true, at: '.dzg-tooltip', pseudo: '::before', p: 'block-size', value: '10px', was: '6px' },
   { v: '--dzg-tooltip-arrow-color', tip: true, at: '.dzg-tooltip', pseudo: '::before', p: 'background-color', value: RED, was: 'tooltip' },
+  // buttons.css (presentation-settings.md 36): a filter popup's footer, Clear and Apply; under the pointer (`hover`), pressed (`press`).
+  { v: '--dzg-button-font-weight', reset: true, make: FOOT, at: '[data-made] .dzg-fclr', p: 'font-weight', value: '700' },
+  { v: '--dzg-button-padding-inline', reset: true, make: FOOT, at: '[data-made] .dzg-fclr', p: 'padding-inline-start', value: '13px' },
+  { v: '--dzg-button-height', make: FOOT, at: '[data-made] .dzg-fclr', p: 'min-block-size', value: '41px' },
+  { v: '--dzg-button-hover-bg', reset: true, hover: true, make: FOOT, at: '[data-made] .dzg-fclr', p: 'background-color', value: RED },
+  { v: '--dzg-button-hover-fg', reset: true, hover: true, make: FOOT, at: '[data-made] .dzg-fclr', p: 'color', value: RED },
+  { v: '--dzg-button-active-bg', reset: true, press: true, make: FOOT, at: '[data-made] .dzg-fclr', p: 'background-color', value: RED },
+  { v: '--dzg-button-primary-bg', reset: true, make: FOOT, at: '[data-made] .dzg-fapply', p: 'background-color', value: RED },
+  { v: '--dzg-button-primary-fg', reset: true, make: FOOT, at: '[data-made] .dzg-fapply', p: 'color', value: RED },
+  { v: '--dzg-button-primary-border', reset: true, make: FOOT, at: '[data-made] .dzg-fapply', p: 'border-inline-start-color', value: RED },
+  { v: '--dzg-button-primary-hover-bg', reset: true, hover: true, make: FOOT, at: '[data-made] .dzg-fapply', p: 'background-color', value: RED },
+  { v: '--dzg-button-primary-hover-fg', reset: true, hover: true, make: FOOT, at: '[data-made] .dzg-fapply', p: 'color', value: RED },
+  { v: '--dzg-button-primary-active-bg', reset: true, press: true, make: FOOT, at: '[data-made] .dzg-fapply', p: 'background-color', value: RED },
+  // The secondary's hover leaves Apply as it is (its own variables).
+  { v: '--dzg-button-hover-bg', reset: true, hover: true, make: FOOT, at: '[data-made] .dzg-fapply', p: 'background-color', value: RED, want: (x, d) => x === d },
 ];
 
 // `reset`: a border, or a button's or an input's colour, which an unlayered reset (Tailwind 3's preflight) takes from the
@@ -83,6 +104,13 @@ async function stage(page, e) {
   if (e.make) await page.evaluate((html) => { const d = document.createElement('div'); d.dataset.made = ''; d.innerHTML = html; document.querySelector('.dzg').append(d); }, e.make);
   await page.evaluate((bottom) => { const v = document.querySelector('.dzg-viewport'); v.scrollTop = bottom ? v.scrollHeight : 0; }, !!e.bottom);
   await frames(page);
+  // Under the pointer, or pressed (released after the read: `release`).
+  if (e.hover || e.press) {
+    await page.mouse.move(0, 0);
+    await page.hover(e.at);
+    if (e.press) await page.mouse.down();
+    await frames(page);
+  }
   // The pointer moved off and back (twice at most): a hover the browser coalesced shows nothing.
   for (let i = 0; e.tip && i < 2; i++) {
     await page.mouse.move(0, 0);
@@ -124,6 +152,7 @@ async function run(name, cfg) {
     for (const e of VARS) {
       await stage(page, e);
       before.push(await read(page, dflt(e)));
+      await page.mouse.up();
     }
     const baseInput = await page.evaluate(() => { const s = getComputedStyle(document.querySelector('.dzg-finput')); return { style: s.outlineStyle, width: s.outlineWidth, offset: s.outlineOffset }; });
     check(`${tag}: the filter box edged by default (a line a reset cannot erase)`, baseInput.style === 'solid' && baseInput.width === '1px' && baseInput.offset === '-1px', baseInput);
@@ -131,6 +160,7 @@ async function run(name, cfg) {
     for (const [i, e] of VARS.entries()) {
       await stage(page, e);
       const now = await read(page, dflt(e));
+      await page.mouse.up();
       // The arrow is new (owner 5, decided): its default is checked, not compared with 1.11 (which had none).
       if (e.was === 'tooltip') check(`${tag}: ${e.v} unset: the tooltip's background`, now === (await page.evaluate(() => getComputedStyle(document.querySelector('.dzg-tooltip')).backgroundColor)), now);
       else if (e.was) check(`${tag}: ${e.v} unset: ${e.was}`, now === e.was, now);
@@ -139,8 +169,9 @@ async function run(name, cfg) {
       await frames(page);
       await stage(page, e);
       const set = await read(page, e);
+      await page.mouse.up();
       const want = e.want ?? e.value;
-      if (!(e.reset && css === 'layered' && preflight)) check(`${tag}: ${e.v} set changes the look`, typeof want == 'function' ? want(set) : set === want, { set, want: String(want) });
+      if (!(e.reset && css === 'layered' && preflight)) check(`${tag}: ${e.v} set changes the look${e.want?.length === 2 ? ' (not this one)' : ''}`, typeof want == 'function' ? want(set, now) : set === want, { set, want: String(want), at: e.at });
       await page.evaluate(({ v, more }) => { const r = document.querySelector('.dzg'); for (const k of [v, ...Object.keys(more ?? {})]) r.style.removeProperty(k); }, { v: e.v, more: e.with });
       await page.mouse.move(0, 0);
     }
@@ -173,6 +204,44 @@ async function run(name, cfg) {
     await page.evaluate(() => { document.querySelector('.dzg-layer .dzg-row[aria-rowindex="6"]').setAttribute('aria-selected', 'true'); });
     const sel = await page.evaluate(() => getComputedStyle(document.querySelector('.dzg-layer .dzg-row[aria-rowindex="6"] .dzg-cell[data-col=note]')).color);
     check(`${tag}: a selected row's text takes --dzg-row-selected-fg`, sel === RED, sel);
+    // (3b) An app's part that follows `--dzg-row-state-fg` (37) takes the row's colour without the switch; with
+    // `data-dzg-row-fg="force"` on the host, everything in a hovered or selected row does, the coloured mark included.
+    const parts = async (attr) => {
+      await page.evaluate((attr) => {
+        const host = document.querySelector('#host');
+        if (attr) host.setAttribute('data-dzg-row-fg', 'force');
+        else host.removeAttribute('data-dzg-row-fg');
+        const c = document.querySelector('.dzg-layer .dzg-row[aria-rowindex="6"] .dzg-cell[data-col=note]');
+        if (!c.querySelector('.app-led')) {
+          const led = document.createElement('span');
+          led.className = 'app-led';
+          led.textContent = '●';
+          const follow = document.createElement('span');
+          follow.className = 'app-follow';
+          follow.textContent = '◆';
+          c.append(led, follow);
+        }
+      }, attr);
+      await frames(page);
+      return page.evaluate(() => {
+        const c = document.querySelector('.dzg-layer .dzg-row[aria-rowindex="6"] .dzg-cell[data-col=note]');
+        return { led: getComputedStyle(c.querySelector('.app-led')).color, follow: getComputedStyle(c.querySelector('.app-follow')).color };
+      });
+    };
+    const selNoForce = await parts(false);
+    check(`${tag}: selected, no switch: the app's mark keeps its colour, a part reading --dzg-row-state-fg follows`, selNoForce.led === 'rgb(0, 128, 0)' && selNoForce.follow === RED, selNoForce);
+    const selForce = await parts(true);
+    check(`${tag}: selected, data-dzg-row-fg=force: the app's coloured mark takes the row's colour`, selForce.led === RED && selForce.follow === RED, selForce);
+    await page.evaluate(() => document.querySelector('.dzg-layer .dzg-row[aria-rowindex="6"]').removeAttribute('aria-selected'));
+    const restForce = await parts(true);
+    check(`${tag}: at rest, even with the switch, the app's colours stay`, restForce.led === 'rgb(0, 128, 0)' && restForce.follow === 'rgb(0, 128, 0)', restForce);
+    await page.hover('.dzg-layer .dzg-row[aria-rowindex="6"] .dzg-cell[data-col=note]');
+    await frames(page);
+    const hovForce = await parts(true);
+    check(`${tag}: hovered, data-dzg-row-fg=force: the app's coloured mark takes the hover colour`, hovForce.led === RED && hovForce.follow === RED, hovForce);
+    await page.mouse.move(0, 0);
+    await page.evaluate(() => { document.querySelector('#host').removeAttribute('data-dzg-row-fg'); document.querySelectorAll('.dzg-layer .dzg-row[aria-rowindex="6"] :is(.app-led, .app-follow)').forEach((x) => x.remove()); });
+    await page.evaluate(() => { document.querySelector('.dzg-layer .dzg-row[aria-rowindex="6"]').setAttribute('aria-selected', 'true'); });
     await page.evaluate(() => { document.querySelector('.dzg-layer .dzg-row[aria-rowindex="6"]').removeAttribute('aria-selected'); const r = document.querySelector('.dzg'); for (const v of ['--dzg-row-hover-fg', '--dzg-row-selected-fg', '--dzg-row-active-fg']) r.style.removeProperty(v); });
 
     // (4) The separator: a 2 px mark, 60 % of the row's height, at the inline end; none after the last column nor
@@ -260,8 +329,46 @@ async function run(name, cfg) {
     await page.evaluate(() => { document.querySelector('.dzg').style.removeProperty('--dzg-last-row-line'); document.querySelector('.dzg-viewport').scrollTop = 0; window.grid.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'jan', dir: 'asc' }] }, 'host'); });
     await frames(page);
 
+    // (9) A header with its title, its sort mark and the filter button (owner 2026-11-13: under Tailwind 3's preflight the
+    // three went to the column's end — the reset's `button { margin: 0 }` took the buttons' auto margin). A start-aligned
+    // column: the title at the cell's start, the sort mark right after it; an end-aligned one: the title at its label's
+    // end, the mark after it; in both the buttons at the end, before the grip's gap. Mirrored in Arabic.
+    await page.evaluate(() => window.grid.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'seed', dir: 'asc' }, { column: 'grams', dir: 'desc' }, { column: 'note', dir: 'asc' }] }, 'host'));
+    await frames(page);
+    const hdr = await page.evaluate((rtl) => {
+      const out = {};
+      for (const col of ['seed', 'grams', 'note']) {
+        const c = document.querySelector(`.dzg-hrow .dzg-hcell[data-col=${col}]`);
+        const r = c.getBoundingClientRect();
+        const s = (x) => (rtl ? r.right - x.right : x.left - r.left);
+        const e = (x) => (rtl ? r.right - x.left : x.right - r.left);
+        const label = c.querySelector(':scope > .dzg-hlabel');
+        const range = document.createRange();
+        range.selectNodeContents(label);
+        const text = range.getBoundingClientRect();
+        const cs = getComputedStyle(c);
+        const btns = [...c.querySelectorAll(':scope > button')].map((b) => b.getBoundingClientRect());
+        const pad = (x) => Math.round(parseFloat(x) * 10) / 10;
+        out[col] = { width: r.width, padStart: pad(cs.paddingInlineStart), padEnd: pad(cs.paddingInlineEnd), after: parseFloat(getComputedStyle(c, '::after').width) || 0, gap: parseFloat(cs.columnGap) || 0, textStart: s(text), textEnd: e(text), labelEnd: e(label.getBoundingClientRect()), sortStart: s(c.querySelector(':scope > .dzg-sort').getBoundingClientRect()), fbtnStart: s(c.querySelector(':scope > .dzg-fbtn').getBoundingClientRect()), lastEnd: Math.max(...btns.map(e)), align: c.dataset.align ?? null };
+      }
+      return out;
+    }, rtl);
+    const near = (a, b) => Math.abs(a - b) < 1.5;
+    // The last button, then the gap, then the grip's room (the cell's `::after`), then the padding.
+    const atEnd = (h) => near(h.lastEnd, h.width - h.padEnd - h.after - h.gap);
+    const sd = hdr.seed;
+    check(`${tag}: a start-aligned header with a filter button: the title at the start, the sort mark after it, the buttons at the end`, sd.align === null && near(sd.textStart, sd.padStart) && sd.sortStart >= sd.textEnd - 0.5 && sd.sortStart - sd.textEnd < 10 && sd.fbtnStart > sd.sortStart + 8 && atEnd(sd), sd);
+    // Without the column menu: the filters' layout alone places the filter button, with either copy of the sheets.
+    const nt = hdr.note;
+    check(`${tag}: a start-aligned header with a filter button and no menu: the title at the start, the buttons at the end`, nt.align === null && near(nt.textStart, nt.padStart) && nt.sortStart >= nt.textEnd - 0.5 && nt.sortStart - nt.textEnd < 10 && nt.fbtnStart > nt.sortStart + 8 && atEnd(nt), nt);
+    const gr = hdr.grams;
+    check(`${tag}: an end-aligned header with a filter button: the title at its label's end, the sort mark after it, the buttons at the end`, gr.align === 'end' && near(gr.textEnd, gr.labelEnd) && gr.textStart > gr.padStart + 8 && gr.sortStart >= gr.labelEnd - 0.5 && gr.sortStart - gr.labelEnd < 10 && atEnd(gr), gr);
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/1-12-${name}-${css}-${lang}${dark ? '-dark' : ''}${preflight ? '-pf' : ''}-header.png`, clip: { x: 0, y: 0, width: 900, height: 160 } });
+    await page.evaluate(() => window.grid.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'jan', dir: 'asc' }] }, 'host'));
+    await frames(page);
+
     // (2) Without icons: the default marks.
-    const marks = () => page.evaluate(() => {
+    const marks =() => page.evaluate(() => {
       const d = document.createElement('span');
       d.className = 'dzg-msub';
       d.dataset.made = '';
@@ -285,6 +392,40 @@ async function run(name, cfg) {
     const dm = await marks();
     check(`${tag}: no app icon: the default funnel, its hollow, the triangles, the ⋮ and the submenu arrow`, dm.funnel.clip.startsWith('polygon') && dm.hollow === '""' && dm.sort === null && dm.asc.includes('▲') && dm.menu.clip.startsWith('path') && dm.sub.clip.startsWith('path'), dm);
 
+    // (10) The set filter's list as wide as its longest value (filter-set.md « The list's width »): no label cut, wider than
+    // the 14rem minimum, the popup inside the window; a search does not move it; past --dzg-set-list-max-width the long
+    // value is cut and keeps its full text as its title.
+    const openSet = async () => {
+      await page.click('.dzg-hcell[data-col=note] > .dzg-fbtn');
+      await page.waitForFunction(() => document.querySelectorAll('.dzg-popup .dzg-fopt').length >= 4, null, { timeout: 10000 });
+      await frames(page);
+    };
+    const setLook = () => page.evaluate(() => {
+      const w = document.querySelector('.dzg-popup .dzg-flistw').getBoundingClientRect();
+      const p = document.querySelector('.dzg-popup').getBoundingClientRect();
+      const names = [...document.querySelectorAll('.dzg-popup .dzg-fname')].map((n) => ({ text: n.textContent, cut: n.scrollWidth > n.clientWidth + 1, title: n.title }));
+      return { w: w.width, rem: parseFloat(getComputedStyle(document.documentElement).fontSize), box: [p.left, p.right], win: document.documentElement.clientWidth, names };
+    });
+    await openSet();
+    const sw = await setLook();
+    const long = await page.evaluate(() => window.notes[3]);
+    check(`${tag}: the set list as wide as its longest value: none cut, wider than 14rem, inside the window`, sw.names.length >= 4 && sw.names.every((n) => !n.cut) && sw.w > 14 * sw.rem + 8 && sw.w < 32 * sw.rem && sw.box[0] >= 0 && sw.box[1] <= sw.win + 0.5, sw);
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/1-12-${name}-${css}-${lang}${dark ? '-dark' : ''}${preflight ? '-pf' : ''}-set-list.png` });
+    await page.fill('.dzg-popup .dzg-fsearch', (await page.evaluate(() => window.notes[1])).slice(0, 2));
+    await page.waitForFunction(() => document.querySelectorAll('.dzg-popup .dzg-fopt').length < 4, null, { timeout: 5000 });
+    await frames(page);
+    const narrowed = await setLook();
+    check(`${tag}: a search narrowing the set list does not move its width`, Math.abs(narrowed.w - sw.w) < 0.5 && narrowed.names.length < 4, { narrowed, w: sw.w });
+    await page.keyboard.press('Escape');
+    await page.evaluate(() => document.querySelector('.dzg').style.setProperty('--dzg-set-list-max-width', '15rem'));
+    await openSet();
+    const capped = await setLook();
+    const cut = capped.names.find((n) => n.text === long);
+    check(`${tag}: past --dzg-set-list-max-width the long value is cut, its full text its title`, Math.abs(capped.w - 15 * capped.rem) < 0.5 && cut?.cut === true && cut.title === long && capped.names.filter((n) => n.text !== long).every((n) => !n.cut), capped);
+    await page.keyboard.press('Escape');
+    await page.evaluate(() => document.querySelector('.dzg').style.removeProperty('--dzg-set-list-max-width'));
+    await frames(page);
+
     if (process.argv.includes('--axe') || name === 'chrome') {
       await page.addScriptTag({ content: AXE });
       const v = await page.evaluate(async () => (await window.axe.run(document.querySelector('#host'), { runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] })).violations.map((x) => `${x.id}: ${x.nodes.length}`));
@@ -301,6 +442,17 @@ async function run(name, cfg) {
     check(`${tag}: the app's funnel full size, unclipped, no hollow drawn over it`, isIcon(im.funnel) && full(im.funnel) && im.funnel.inset.every((x) => x === '0px') && im.hollow === 'none', im.funnel);
     check(`${tag}: the app's ⋮ and submenu arrow unclipped, in the mark's colour`, isIcon(im.menu) && full(im.menu) && isIcon(im.sub) && im.sub.bg !== 'rgba(0, 0, 0, 0)', { menu: im.menu, sub: im.sub });
     check(`${tag}: sortNone on a sortable unsorted column, none on an unsortable one; the sorted one its own`, im.sortDir === 'none' && /data:image\/svg\+xml/.test(im.sort?.mask ?? '') && im.sort.content === '""' && !im.unsortable && im.asc === '""', im);
+    // (2b) The unsorted mark's own colour (35): the mark's colour by default; `--dzg-sort-none-fg` changes it, not the sorted one's.
+    const noneFg = () => page.evaluate(() => {
+      const n = document.querySelector('.dzg-hcell[data-col=seed] > .dzg-sort[data-dir=none]');
+      const a = document.querySelector('.dzg-hcell[data-col=jan] > .dzg-sort[data-dir=asc]');
+      return { none: getComputedStyle(n, '::before').backgroundColor, noneColor: getComputedStyle(n).color, asc: getComputedStyle(a, '::before').backgroundColor };
+    });
+    const nf0 = await noneFg();
+    await page.evaluate((RED) => document.querySelector('.dzg').style.setProperty('--dzg-sort-none-fg', RED), RED);
+    const nf1 = await noneFg();
+    await page.evaluate(() => document.querySelector('.dzg').style.removeProperty('--dzg-sort-none-fg'));
+    check(`${tag}: the unsorted mark in the mark's colour by default, --dzg-sort-none-fg recolours it alone`, nf0.none === nf0.noneColor && nf1.none === RED && nf1.asc === nf0.asc && nf0.asc !== RED, { nf0, nf1 });
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/1-12-${name}-${css}-${lang}${dark ? '-dark' : ''}${preflight ? '-pf' : ''}-icons.png`, clip: { x: 0, y: 0, width: 900, height: 200 } });
     if (name === 'chrome') {
       await page.addScriptTag({ content: AXE });
@@ -322,6 +474,9 @@ try {
     for (const css of ['layered', 'unlayered']) for (const dark of [false, true]) for (const lang of ['fr', 'ar']) for (const preflight of [false, true]) {
       // `--first`: one run per browser (layered, light, French), while working.
       if (process.argv.includes('--first') && (css !== 'layered' || dark || lang !== 'fr' || preflight)) continue;
+      // `--match=preflight`: only the runs whose tag holds it (while working).
+      const match = process.argv.find((a) => a.startsWith('--match='))?.slice(8);
+      if (match && !`${css}${dark ? ' dark' : ''} ${lang}${preflight ? ' preflight' : ''}`.includes(match)) continue;
       await run(name, { css, dark, lang, preflight });
     }
   }

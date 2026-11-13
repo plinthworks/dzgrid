@@ -322,11 +322,12 @@ describe('the size lines (owner, 2026-10-20, step 21; reset at the Phase 3 close
     expect(b['@dzgrid/core/rules']).toEqual({ file: 'packages/core/src/rules.ts', maxGzip: 600, over: '@dzgrid/core' }); // Phase 4 close: 492 + 10 % = 550; Phase 5 close (Q-C3): 512 + 10 % = 600
     expect(b['@dzgrid/dom/rules']).toEqual({ file: 'packages/dom/src/rules.ts', maxGzip: 750, external: ['@dzgrid/core', '@dzgrid/core/internal', '@dzgrid/dom/internal'] });
     expect([b['@dzgrid/dom/locales/en-rules']!.maxGzip, b['@dzgrid/dom/locales/fr-rules']!.maxGzip, b['@dzgrid/dom/locales/ar-rules']!.maxGzip]).toEqual([200, 200, 250]);
-    expect(b['@dzgrid/dom/filters']!.maxGzip).toBe(12200); // owner 2026-11-13 (« A partout »): 12 200 (measured 12 181); owner 2026-11-12: 12 180 (the header floor); 1.10.0 (+2 % rule, the filter row's height): filters 12 150, filters-base 12 100; Phase 9 (owner B after F1–F2, 2026-11-02): 12 000; Q-F6: 10 210 → 11 400; the owner's grant (Q17b), §5.2's /filters 10 kB; 10 100 since the owner's look (2026-10-27)
+    expect(b['@dzgrid/dom/filters']!.maxGzip).toBe(12250); // 1.12.0 five corrections (+2 % rule, measured 12 217); owner 2026-11-13 (« A partout »): 12 200 (measured 12 181); owner 2026-11-12: 12 180 (the header floor); 1.10.0 (+2 % rule, the filter row's height): filters 12 150, filters-base 12 100; Phase 9 (owner B after F1–F2, 2026-11-02): 12 000; Q-F6: 10 210 → 11 400; the owner's grant (Q17b), §5.2's /filters 10 kB; 10 100 since the owner's look (2026-10-27)
     expect(b['@dzgrid/theme']!.maxGzip).toBe(3050); // owner 2026-11-13 (« A partout »): 3 050 (measured 3 043); Phase 8 step 4: 2 960 (+2 % rule, loading rows); 1.4.0 busy bar (+2 % rule); // the owner's third look (decisions.md « Comfort stylesheet »); Phase 5 close (Q-C2): 2 750, the measure 2 494 + 10 %
     // owner 2026-11-13 (« A partout »): filters-base 12 150 (measured 12 129); menu.css 800 (measured 775) and variables.css
     // 1 900 (measured 1 853: the tooltip's arrow, 38 variables) beyond the +2 % rule, accepted by the owner.
-    expect([b['@dzgrid/dom/filters-base']!.maxGzip, b['@dzgrid/theme/menu.css']!.maxGzip, b['@dzgrid/theme/variables.css']!.maxGzip]).toEqual([12150, 800, 1900]);
+    // 1.12.0's five corrections (owner « oui lance les 5 corrections », +2 % rule): variables.css 1 900 → 1 938 (measured 1 921).
+    expect([b['@dzgrid/dom/filters-base']!.maxGzip, b['@dzgrid/theme/menu.css']!.maxGzip, b['@dzgrid/theme/variables.css']!.maxGzip]).toEqual([12200, 800, 1938]); // filters-base 12 200 (+2 %, measured 12 164)
     expect(b['@dzgrid/dom/pagination']!.maxGzip).toBe(3450); // Phase 4 close: 3 211 + 10 % → 3 550; Phase 6 close: 3 132 + 10 % → 3 450
     expect(b['@dzgrid/dom/export']!.maxGzip).toBe(1350); // a raise: it was at its cap
   });

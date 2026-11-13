@@ -309,7 +309,13 @@ describe('1.12.0, the five packages', () => {
     expect(readFileSync(`${ROOT}scripts/build.mjs`, 'utf8')).toMatch(/'\.\/locales\/ar-import', '\.\/theme'[,\]]/); // 1.10.0: './wrapped-headers', './column-hover' after it
     const theme = pkg('theme');
     for (const f of ['variables.css', 'variables.unlayered.css', 'variables.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
-    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'vertical-headers', 'variables'\]/);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'vertical-headers', 'variables'[,\]]/); // 1.12.0: 'buttons' after it
+  });
+
+  it('export buttons.css (1.12.0, presentation-settings.md 36), built like the others', () => {
+    const theme = pkg('theme');
+    for (const f of ['buttons.css', 'buttons.unlayered.css', 'buttons.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'variables', 'buttons'\]/);
   });
 
   it('export the Phase 9 filters panel (@dzgrid/dom/filters-panel), its -filters-panel texts and filters-panel.css, built like the others', () => {

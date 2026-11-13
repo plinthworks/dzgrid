@@ -27,8 +27,26 @@ complete, English and French).
   by default are today's — not a promised hook: style them through `--dzg-last-row-line`, `--dzg-last-column-line`).
 - Size lines raised to the measures (owner 2026-11-13): `@dzgrid/dom` 25 200, `@dzgrid/theme` 3 050, `/filters`
   12 200, `/filters-base` 12 150, `menu.css` 800, `variables.css` 1 900 (the last two beyond the +2 % rule).
+- **The five corrections** (owner 2026-11-13, before publishing):
+  - A header's title sent to the column's end under a reset: fixed in the grid's own layout and `columns.css`, for the
+    layered and the unlayered sheets alike. Nothing to change: a header looks as before.
+  - **New opt-in sheet `@dzgrid/theme/buttons.css`** (`buttons.unlayered.css` with the unlayered copies), after
+    `variables.css`: the popups' buttons' looks as variables. Without it nothing changes.
+  - **The set filter's popup grows with its longest value** (up to `min(32rem, 90vw)`; `--dzg-set-list-max-width`
+    sets it, `--dzg-set-list-max-width: 14rem` gives the old width back).
+  - Wanted the old « everything white on hover » look? `data-dzg-row-fg="force"` on the grid's host (with
+    `--dzg-row-hover-fg` / `--dzg-row-selected-fg`). Without it, content with its own colour keeps it, as in 1.12.0.
+  - Size lines: the audit screen (K.8) 91 000 → 92 000 (owner 2026-11-13, « tu peux augmenter »; measured 91 037: the
+    header fix in the base); +2 % rule: `/filters` 12 250, `/filters-base` 12 200, `columns.css` 1 224, `variables.css`
+    1 938, `@dzgrid/dom/theme` 2 499, the real Angular example 102 150; `buttons.css` new at 500.
 
 ### Fixed
+- **A header's title stays at its start under a page's reset** (seen with Tailwind 3's preflight and the unlayered
+  copies): a column with a filter button (or the column menu's ⋮) showed its title, its sort mark and its funnel at the
+  column's end. The preflight's `button { margin: 0 }` took the margin that pushed the buttons to the end, and the cell's
+  end packing (1.11.0's fix for narrow columns) then moved everything there. The buttons are now pushed by an empty item
+  that grows, a size no common reset touches, in the filters' layout and `columns.css` (both copies); checked in
+  Chrome, Firefox and WebKit, start- and end-aligned columns, left to right and Arabic, with and without the reset.
 - **An app's icon is never clipped nor overdrawn** by the grid's own mark, with the `*.unlayered.css` copies too (under
   an unlayered reset such as Tailwind 3's preflight the funnel was clipped and shrunk, the ⋮ and the submenu arrow cut
   to the default shapes): each default mark is drawn only where no icon replaces it.
@@ -62,6 +80,24 @@ complete, English and French).
   line height, max width, paddings, radius, white space (`pre-line` keeps line breaks); `--dzg-overlay-fg`,
   `--dzg-overlay-bg`, `--dzg-footer-fg`, `--dzg-footer-bg`.
 
+- **The set filter's popup as wide as its longest value** (owner 2026-11-13): measured on the whole list at the opening
+  and when values arrive (every value written into one hidden copy of a label and read once, no row per value: the list stays windowed), never while a search
+  narrows it (the popup does not jump), between `--dzg-set-list-min-width` (14rem) and `--dzg-set-list-max-width`
+  (`min(32rem, 90vw)`); a longer value keeps its ellipsis and its full text as its title; inside the window, right to
+  left and Arabic alike. Option rows painted by an app's part keep today's width.
+- **`--dzg-sort-none-fg`**: the unsorted mark's own colour (`icons.sortNone`), the sorted one's by default — grey the
+  unsorted mark, keep the accent on the sort.
+- **`@dzgrid/theme/buttons.css`**: every look of the popups' buttons (a filter's Clear and Apply, add / remove a
+  condition, the period shortcuts, the pager, Retry) a variable: `--dzg-button-font-weight`,
+  `--dzg-button-padding-inline`, `--dzg-button-height`, `--dzg-button-hover-bg`, `--dzg-button-hover-fg`,
+  `--dzg-button-active-bg`, and for the primary one (Apply) `--dzg-button-primary-bg`, `-fg`, `-border`, `-hover-bg`,
+  `-hover-fg`, `-active-bg`; defaults today's look (no hover or press look until you set one).
+- **A hovered or selected row's text forced, opt-in**: `data-dzg-row-fg="force"` on the grid's host or an ancestor
+  makes everything in such a row take the row's text colour, an app's coloured mark included (light and dark).
+  `--dzg-row-state-fg` (written on a hovered, focused or selected row: the colour you gave its text) lets a cell part
+  follow without the switch: `color: var(--dzg-row-state-fg, <its own>)`.
+- The `theme` keys of these variables (`sortNoneFg`, `buttonFontWeight` … `buttonPrimaryActiveBg`, `setListMinWidth`,
+  `setListMaxWidth`).
 - `ColumnModel.floor()` and `ColumnModel.minOf()` in `@dzgrid/core` (optional in the type): the smallest width a
   column's header needs, and the minimum in force.
 - Each feature's layout CSS is exported from its entry (`FILTERS_CSS`, `TREE_CSS`…), for `injectStyles: false`; the

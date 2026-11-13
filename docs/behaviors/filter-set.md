@@ -173,6 +173,25 @@ box, ticks and unticks values (or "select all"), presses Apply or Escape.
   loads (once per document or shadow root, `data-dzgrid-set`, with the grid's nonce; not with
   `injectStyles: false`) and hands the chunk its loading / failure helper.
 
+## The list's width (1.12.0, owner 2026-11-13)
+- The popup is as wide as the list's longest value needs, between `--dzg-set-list-min-width` (14rem: today's width)
+  and `--dzg-set-list-max-width` (`min(32rem, 90vw)`); beyond the maximum a label keeps its ellipsis and its full text
+  stays its `title` (shown on hover) and in the option's name (read by a screen reader).
+- Decided on the **whole** list: at the opening (once the popup shows), and when the values arrive or change (a
+  server's answer, a refresh), never while a search narrows it — the popup does not jump as one types; a search
+  cleared keeps the same width. A locale change measures again.
+- Measured without laying out a row per value (the list is windowed: rows out of view are not in the page): every
+  label, then every count shown, written one per line into a hidden copy of a drawn row's label (its font and its
+  language) and read once — one layout for the whole list. Not a canvas's `measureText`: a canvas has no language, and
+  Firefox drew Arabic there in another font (the longest value came out cut by a few pixels; seen in the browser
+  matrix). The rest of a row (padding, box, gaps) and the list's frame and scrollbar are read once from the drawn row.
+  Nothing is measured while no row is laid out (the popup not shown yet).
+- Written as `--dzg-set-fit` on the list's frame (the grid's, not a knob); the layout takes
+  `max(min-width, min(fit, max-width))`, so a popup wider for another reason (its footer, a condition form) still
+  stretches the list. The popup is placed again as it grows (it never leaves the window: its placement, 8 px from the
+  window's end edge). Widths are the same in right to left; Arabic text is measured shaped.
+- An option row painted by an application's part (`optionPart`): today's width (the part's size is its own).
+
 ## With a condition (Phase 9, F2)
 `filter: { kind: 'set', condition: true }` puts a condition form above the list, one popup (owner Q-F3 A); both
 parts are stored as a `combined` AND, the condition first, one part alone stored plain: `filter-multi.md`. The list's
@@ -199,6 +218,9 @@ values and counts leave the whole column filter out (both parts), so a value the
   `packages/core/test/set-no-exclude.test.ts` (compile, kernel, `columns.set`, a restored state),
   `packages/core/test/wire.test.ts` « include-only column », conformance `filter-combined/set-include-only-*`,
   `wire/set-include-only-*`.
+- The list's width: `packages/dom/test/filters-set-width.test.ts` (the measure injected: longest label and count, the
+  bounds, a search keeps the width, values arriving later, the part's rows, a row not laid out); Chrome, Firefox, WebKit:
+  `scripts/browser-1-12.mjs` (10) (French and Arabic, a long value cut at the maximum with its `title`, inside the window).
 - `packages/dom/test/filters-set-walk.test.ts` (a seeded random walk, in the browser and on a server); `structure.test.ts` (`filters/set/` reached only
   through `import()`).
 - Browser: `scripts/browser.mjs` (`filters=1&popup=1&sets=1`, fr light, ar right to left dark);

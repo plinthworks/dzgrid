@@ -49,6 +49,33 @@ Puis `npm run publish:verify`, et dans les applications `npm update @dzgrid/core
 - **Le plancher de 80 px** relève aussi un `width` plus petit donné par l'application (comme le minimum de 40 px
   avant) ; un `minWidth` le garde plus étroit. Écrit dans la fiche et le CHANGELOG.
 
+## Les cinq corrections (ta réponse « oui lance les 5 corrections », 2026-11-13)
+
+Chacune : une ligne de fiche d'abord (`presentation-settings.md` 34–38, `filter-set.md` « The list's width »), un test
+écrit à la main et rouge d'abord, la matrice navigateurs étendue (elle échouait avant la correction).
+
+1. **Le titre d'une colonne envoyé au bout de la colonne** (Tailwind 3, copies sans couche). Cause : le bouton de
+   filtre (et le ⋮) étaient poussés au bout par une marge automatique ; le `button { margin: 0 }` du preflight
+   (sans couche) l'enlève, et la cellule rangée « à la fin » depuis la 1.11.0 (colonnes étroites) envoyait alors tout
+   au bout. Corrigé par un élément vide qui grandit avant les boutons (une taille : aucune remise à zéro courante n'y
+   touche), dans la mise en page des filtres (injectée : copies en couche et sans couche pareil) et `columns.css`.
+   **K.8 91 000 → 92 000** (ta réponse « tu peux augmenter » ; mesuré 91 037).
+2. **`--dzg-sort-none-fg`** : la couleur de la marque « non triée » à part (par défaut celle du tri).
+3. **Les boutons des fenêtres** (Effacer, Appliquer, ajouter / retirer, raccourcis, pagination, Réessayer) : 12
+   variables (graisse, marge latérale, hauteur, survol, appui ; le bouton principal et ses états), défauts = l'aspect
+   d'aujourd'hui. **Nouvelle feuille `@dzgrid/theme/buttons.css`** (après `variables.css`) : `variables.css` n'avait
+   plus la place sous sa ligne (+2 %).
+4. **Tout le texte d'une ligne survolée ou sélectionnée dans la couleur de la ligne, au choix** :
+   `data-dzg-row-fg="force"` sur l'hôte de la grille. Et `--dzg-row-state-fg` pour qu'un composant de cellule suive
+   sans l'interrupteur.
+5. **La liste d'un filtre par valeurs aussi large que sa plus longue valeur** (une seule mesure, toutes les valeurs dans une
+   copie cachée d'une étiquette, sans poser de ligne ; jamais pendant une recherche ; entre `--dzg-set-list-min-width` 14rem et `--dzg-set-list-max-width`
+   `min(32rem, 90vw)` ; au-delà, points de suspension et texte entier en infobulle).
+
+Tailles : **K.8 91 037 / 92 000** (ligne relevée, « tu peux augmenter ») ; +2 % par ligne : `/filters` 12 250,
+`/filters-base` 12 200, `columns.css` 1 224, `variables.css` 1 938, `@dzgrid/dom/theme` 2 499 (les clés de `theme` en
+une chaîne), l'appli Angular réelle 102 150 (mesuré 102 115) ; `buttons.css` nouvelle, 500.
+
 ## À regarder après (CHANGELOG « Upgrading from 1.11.0 »)
 
 - Le bord discret des champs de filtre en mode clair (`--dzg-input-border: none` l'enlève).
@@ -56,7 +83,9 @@ Puis `npm run publish:verify`, et dans les applications `npm update @dzgrid/core
 - L'infobulle à la taille des cellules ; avec `variables.css`, sa flèche et 6 px de plus entre elle et sa cellule.
 - `data-last-row` / `data-last-col` sur la dernière ligne et la dernière colonne (les traits par défaut sont ceux
   d'avant).
+- La fenêtre d'un filtre par valeurs plus large quand une valeur est longue (`--dzg-set-list-max-width: 14rem` rend
+  l'ancienne largeur).
 
-Tailles : K.8 (profil esbuild) 90 997 / 91 000 ; base DOM 25 169 / 25 200 ; Angular 8 599 / 8 650. **Appli Angular réelle
+Tailles (avant les cinq corrections) : K.8 (profil esbuild) 90 997 / 91 000 ; base DOM 25 169 / 25 200 ; Angular 8 599 / 8 650. **Appli Angular réelle
 102 079 / 101 700 : au-dessus — `release:check` s'arrête là, à toi de décider** (la ligne relevée par la règle des
 +2 % serait 102 100 ; la 1.12.0 telle que commitée mesurait déjà ≈ 17 o de moins au profil esbuild, donc déjà au-dessus).

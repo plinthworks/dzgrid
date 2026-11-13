@@ -235,6 +235,7 @@ $arrow: var(--dzg-tooltip-arrow-size, 0.375rem);
     font-size: var(--dzg-icon-size, 0.75em);
   }
 
+
   .dzg-fbtn#{$no-funnel}::before,
   .dzg-fbtn#{$no-filter}::after {
     inset-block: calc(50% - #{$icon} / 2) calc(50% - #{$icon} / 2 + #{$icon} / 12);
@@ -251,16 +252,27 @@ $arrow: var(--dzg-tooltip-arrow-size, 0.375rem);
 @include layer {
   // A row's text when hovered, holding the focus, selected (27): no weight, so content with its own colour keeps it;
   // unset, the cells inherit the row's colour (today). In the backgrounds' order: selected last.
-  :where(.dzg-row:hover:not([data-spans]), .dzg-row[data-hover]) :where(.dzg-cell) {
-    color: var(--dzg-row-hover-fg);
+  // Through `--dzg-row-state-fg`, written on the row (37): content can follow it (`var(--dzg-row-state-fg, own)`).
+  :where(.dzg-row:hover:not([data-spans]), .dzg-row[data-hover]) {
+    --dzg-row-state-fg: var(--dzg-row-hover-fg);
   }
 
-  :where(.dzg-row:focus-within:not([data-dzg-quiet] *)) :where(.dzg-cell) {
-    color: var(--dzg-row-active-fg);
+  :where(.dzg-row:focus-within:not([data-dzg-quiet] *)) {
+    --dzg-row-state-fg: var(--dzg-row-active-fg);
   }
 
-  :where(.dzg-row[aria-selected=true]) :where(.dzg-cell) {
-    color: var(--dzg-row-selected-fg);
+  :where(.dzg-row[aria-selected=true]) {
+    --dzg-row-state-fg: var(--dzg-row-selected-fg);
+  }
+
+  :where(.dzg-cell) {
+    color: var(--dzg-row-state-fg);
+  }
+
+  // Forced (37, opt-in: `data-dzg-row-fg="force"` on the host or an ancestor): a hovered or selected row's cells and all
+  // in them in the cell's colour, over content's own (`!important`); an edited cell keeps its editor's.
+  :where([data-dzg-row-fg=force]) :where(.dzg-row:hover:not([data-spans]), .dzg-row[data-hover], .dzg-row[aria-selected=true]) :where(.dzg-cell:not([data-dzg-editing]), .dzg-cell:not([data-dzg-editing]) *) {
+    color: var(--dzg-row-state-fg, inherit) !important;
   }
 
   // A mark between columns (28): the cell's background image at its inline end, of a size and a height; no colour, no

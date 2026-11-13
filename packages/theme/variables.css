@@ -160,14 +160,20 @@
   }
 }
 @layer dzgrid.theme {
-  :where(.dzg-row:hover:not([data-spans]), .dzg-row[data-hover]) :where(.dzg-cell) {
-    color: var(--dzg-row-hover-fg);
+  :where(.dzg-row:hover:not([data-spans]), .dzg-row[data-hover]) {
+    --dzg-row-state-fg: var(--dzg-row-hover-fg);
   }
-  :where(.dzg-row:focus-within:not([data-dzg-quiet] *)) :where(.dzg-cell) {
-    color: var(--dzg-row-active-fg);
+  :where(.dzg-row:focus-within:not([data-dzg-quiet] *)) {
+    --dzg-row-state-fg: var(--dzg-row-active-fg);
   }
-  :where(.dzg-row[aria-selected=true]) :where(.dzg-cell) {
-    color: var(--dzg-row-selected-fg);
+  :where(.dzg-row[aria-selected=true]) {
+    --dzg-row-state-fg: var(--dzg-row-selected-fg);
+  }
+  :where(.dzg-cell) {
+    color: var(--dzg-row-state-fg);
+  }
+  :where([data-dzg-row-fg=force]) :where(.dzg-row:hover:not([data-spans]), .dzg-row[data-hover], .dzg-row[aria-selected=true]) :where(.dzg-cell:not([data-dzg-editing]), .dzg-cell:not([data-dzg-editing]) *) {
+    color: var(--dzg-row-state-fg, inherit) !important;
   }
   .dzg-cell {
     background-image: linear-gradient(var(--dzg-column-separator) 0 0);

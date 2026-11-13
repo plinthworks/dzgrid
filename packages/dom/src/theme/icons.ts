@@ -66,6 +66,9 @@ export const ICONS_CSS =
   '@layer dzgrid.layout,dzgrid.theme,dzgrid.skin,dzgrid.bridge,dzgrid.contrast,dzgrid.icons;@layer dzgrid.icons{' +
   [...INLINE, ...BOX, SUB].map((s, i) => `${s}{--dzg-i:var(--dzg-icon-${VAR[i]})}`).join('') +
   `${INLINE.join(',')}{content:"";display:inline-block;inline-size:1em;block-size:1em;vertical-align:-.125em;background:currentColor;${mask('contain')}}` +
+  // The unsorted mark's own colour (presentation-settings.md 35): the sorted one's (the mark's colour) by default. On the
+  // drawing, which no theme sheet colours, so the unlayered copies cannot hide it.
+  `${INLINE[2]}{background:var(--dzg-sort-none-fg,currentColor)}` +
   `${BOX.join(',')}{content:"";position:absolute;inset:0;clip-path:none;background:currentColor;${mask('var(--dzg-icon-size,1rem)')}}` +
   `${on('filter', '.dzg-fbtn::after')}{content:none}` +
   `${SUB}{clip-path:none;background:currentColor;${mask('contain')}}` +

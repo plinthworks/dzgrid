@@ -60,6 +60,15 @@ export interface GridTheme {
   readonly tooltipArrowColor?: ThemeValue;
   // Overlay and pager footer.
   readonly overlayFg?: ThemeValue; readonly overlayBg?: ThemeValue; readonly footerBg?: ThemeValue; readonly footerFg?: ThemeValue;
+  /** The unsorted mark's colour (`icons.sortNone`); the sorted one's by default. */
+  readonly sortNoneFg?: ThemeValue;
+  // The popups' buttons (`@dzgrid/theme/buttons.css`): weight, side padding, height; under the pointer and pressed (unset: no
+  // change); the primary one (Apply) and its states.
+  readonly buttonFontWeight?: ThemeValue; readonly buttonPaddingInline?: ThemeValue; readonly buttonHeight?: ThemeValue; readonly buttonHoverBg?: ThemeValue;
+  readonly buttonHoverFg?: ThemeValue; readonly buttonActiveBg?: ThemeValue; readonly buttonPrimaryBg?: ThemeValue; readonly buttonPrimaryFg?: ThemeValue;
+  readonly buttonPrimaryBorder?: ThemeValue; readonly buttonPrimaryHoverBg?: ThemeValue; readonly buttonPrimaryHoverFg?: ThemeValue; readonly buttonPrimaryActiveBg?: ThemeValue;
+  /** The set filter's list: at least (14rem) and at most (`min(32rem, 90vw)`) as wide as its longest value needs. */
+  readonly setListMinWidth?: ThemeValue; readonly setListMaxWidth?: ThemeValue;
 }
 
 /** An icon: an SVG's text, or an `SVGElement` (copied). Drawn in the mark's colour and size; cleaned, else refused (the default kept). */

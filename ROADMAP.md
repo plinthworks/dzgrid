@@ -1417,6 +1417,16 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   `width` too (documented, tested); `merge` typed with C (ngc test). Not confirmed: `data-dzg-icons` left after
   `theming()`'s destroy (the root goes with the grid in the same destroy; features are fixed).
 - [x] Release prep: the five packages at 1.12.0, CHANGELOG dated, `docs/release-1.12.0.md`.
+- [x] Five corrections (owner 2026-11-13 « oui lance les 5 corrections »; presentation-settings.md 34–38,
+  filter-set.md « The list's width »; each sheet line first, a test failing first, `browser-1-12.mjs` (9), (10) and
+  its table extended): (1) a header's title sent to the column's end under Tailwind 3's preflight — the reset's
+  `button { margin: 0 }` took the auto margin pushing the buttons, the end packing did the rest; now a growing item in
+  the filters' layout and `columns.css` (both copies; K.8 91 000 → 92 000, owner 2026-11-13 « tu peux augmenter »,
+  measured 91 037); (2) `--dzg-sort-none-fg`
+  (theming()'s icon sheet); (3) `@dzgrid/theme/buttons.css` (new, opt-in: 12 button variables, primary and states);
+  (4) `data-dzg-row-fg="force"` and `--dzg-row-state-fg`; (5) the set list as wide as its longest value (one hidden
+  copy of a label measures every value, in the lazy chunk, `--dzg-set-list-min-width` / `-max-width`). Theme keys one string (dom/theme under its
+  +2 % line).
 - For the owner: commit, publish; whether `refresh({})` also routes through `api.reload()` (+17 B of K.8).
 
 ## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)

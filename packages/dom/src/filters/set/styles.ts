@@ -16,7 +16,9 @@ export const SET_CSS =
   // margins left the count squeezed between them).
   ':where(.dzg-fset){display:grid;gap:.5rem}' +
   ':where(.dzg-fstatus){margin:0;min-block-size:1.2em;min-block-size:1lh}' +
-  ':where(.dzg-flistw){position:relative;min-inline-size:14rem}' +
+  // As wide as its longest value (1.12.0, filter-set.md « The list's width »: `--dzg-set-fit`, measured by the chunk),
+  // between the two knobs; a minimum, so a popup wider for another reason still stretches it.
+  ':where(.dzg-flistw){position:relative;min-inline-size:max(var(--dzg-set-list-min-width,14rem),min(var(--dzg-set-fit,0px),var(--dzg-set-list-max-width,min(32rem,90vw))))}' +
   ':where(.dzg-flist){position:relative;min-block-size:4.5rem;max-block-size:18rem;overflow-y:auto}' +
   ':where(.dzg-fopt){position:absolute;inset-inline:0;box-sizing:border-box;display:flex;align-items:center;gap:.5rem;block-size:2.25rem;padding-inline:.5rem}' +
   ':where(.dzg-fname){flex:1;min-inline-size:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;unicode-bidi:plaintext;text-align:start}' +

@@ -53,7 +53,6 @@
   flex: none;
   inline-size: var(--dzg-target-min, 24px);
   block-size: var(--dzg-target-min, 24px);
-  margin-inline-start: auto;
   padding: 0;
   z-index: 1;
   border: 0;
@@ -81,10 +80,6 @@
   opacity: 1;
 }
 
-.dzg-hcell:has(> .dzg-fbtn) > .dzg-mbtn {
-  margin-inline-start: 0;
-}
-
 .dzg-reapply {
   order: 3;
   z-index: 1;
@@ -93,6 +88,13 @@
 .dzg-hcell:has(> .dzg-mbtn),
 .dzg-hcell:has(> .dzg-reapply) {
   justify-content: flex-end;
+}
+
+.dzg-hcell:has(> .dzg-mbtn, > .dzg-reapply):where(:not([data-align], :has(.dzg-hfbox)))::before {
+  content: "";
+  order: 1;
+  flex: auto;
+  margin-inline-start: calc(-1 * var(--dzg-space, 0.25rem));
 }
 
 .dzg-hcell:has(> .dzg-mbtn)::after,

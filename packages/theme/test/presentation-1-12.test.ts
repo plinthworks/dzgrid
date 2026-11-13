@@ -95,9 +95,10 @@ describe('variables.css: every new knob, today\'s look by default (26–33), bot
   for (const c of COPIES) {
     it(`variables${c}.css`, () => {
       const css = vars(c);
-      // 27: zero weight, unset = inherited.
-      expect(body(css, ':where(.dzg-row:hover:not([data-spans]), .dzg-row[data-hover]) :where(.dzg-cell)')).toBe('color: var(--dzg-row-hover-fg);');
-      expect(body(css, ':where(.dzg-row[aria-selected=true]) :where(.dzg-cell)')).toBe('color: var(--dzg-row-selected-fg);');
+      // 27: zero weight, unset = inherited (through `--dzg-row-state-fg` on the row since the 1.12.0 corrections, 37).
+      expect(body(css, ':where(.dzg-row:hover:not([data-spans]), .dzg-row[data-hover])')).toBe('--dzg-row-state-fg: var(--dzg-row-hover-fg);');
+      expect(body(css, ':where(.dzg-row[aria-selected=true])')).toBe('--dzg-row-state-fg: var(--dzg-row-selected-fg);');
+      expect(body(css, ':where(.dzg-cell)')).toBe('color: var(--dzg-row-state-fg);');
       expect(css.indexOf('var(--dzg-row-hover-fg)')).toBeLessThan(css.indexOf('var(--dzg-row-selected-fg)'));
       // 28: no colour, no image.
       expect(body(css, '.dzg-cell')).toContain('background-image: linear-gradient(var(--dzg-column-separator) 0 0);');
@@ -123,7 +124,9 @@ describe('the guide lists every variable the sheets read, and nothing else (owne
   const WRITTEN = new Set(['--dzg-odd', '--dzg-rb', '--dzg-re', '--dzg-rs', '--dzg-rt', '--dzg-tree-at', '--dzg-tree-pad', '--dzg-turn', '--dzg-check-w', '--dzg-chevron',
     '--dzg-dock-bottom', '--dzg-dock-end', '--dzg-dock-start', '--dzg-dock-strip', '--dzg-footer-size', '--dzg-fp-room', '--dzg-fpanel-size', '--dzg-fstrip-size', '--dzg-gch',
     '--dzg-header-h', '--dzg-header-lines', '--dzg-header-row-h', '--dzg-i', '--dzg-inset', '--dzg-span-at', '--dzg-up', '--dzg-view-w', '--dzg-wrap-line', '--dzg-tip-at',
-    '--dzg-row-height', '--dzg-header-height', '--dzg-density', '--dzg-flash', '--dzg-icon']);
+    '--dzg-row-height', '--dzg-header-height', '--dzg-density', '--dzg-flash', '--dzg-icon',
+    // 1.12.0 corrections: a button's state colours (buttons.css), a hovered / selected row's text colour (37), the set list's measured width (38).
+    '--dzg-bb', '--dzg-bf', '--dzg-row-state-fg', '--dzg-set-fit']);
   const read = (dir: string, test: (f: string) => boolean) => readdirSync(here(dir), { recursive: true, encoding: 'utf8' }).filter(test).map((f) => readFileSync(here(`${dir}/${f}`), 'utf8')).join('\n');
   const used = [...new Set([...(read('..', (f) => /^[^/]*\.scss$/.test(f)) + read('../../dom/src', (f) => f.endsWith('.ts'))).matchAll(/var\((--dzg-[a-z0-9-]*[a-z0-9])/g)].map((m) => m[1]!))]
     .filter((v) => !WRITTEN.has(v) && !(v.startsWith('--dzg-icon-') && v !== '--dzg-icon-size') && !v.startsWith('--dzg-badge-'));

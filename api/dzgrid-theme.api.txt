@@ -1,6 +1,7 @@
 # The accepted public type surface — written by scripts/api.mjs, checked by `npm run check:api`.
 # Changed only by an owner decision: `node scripts/api.mjs --accept "<decision>"` (see scripts/api.mjs).
 # history: owner 2026-11-10: baseline extended to every published entry
+# history: owner 2026-11-13 « oui lance les 5 corrections »: the new opt-in sheet buttons.css (an addition) — @dzgrid/theme/buttons.css, @dzgrid/theme/buttons.unlayered.css, @dzgrid/theme/buttons.scss
 
 @ @dzgrid/theme
 
@@ -149,3 +150,9 @@
 @ @dzgrid/theme/dzgrid.comfort.unlayered.css
 
 @ @dzgrid/theme/comfort.scss
+
+@ @dzgrid/theme/buttons.css
+
+@ @dzgrid/theme/buttons.unlayered.css
+
+@ @dzgrid/theme/buttons.scss

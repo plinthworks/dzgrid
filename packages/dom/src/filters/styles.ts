@@ -18,7 +18,12 @@ export const FILTERS_CSS =
   // later in the DOM: `order`, so a focused button is never moved), clear of the resize grip: an empty last item of the
   // grip's width keeps it apart — a size, not a margin, so a page's `* { margin: 0 }` cannot undo it — and the button sits
   // over the grip (after it in the DOM, same layer) should a page's reset take the cell's padding too.
-  ':where(.dzg-fbtn){order:1;flex:none;inline-size:24px;block-size:24px;margin-inline-start:auto;position:relative;z-index:1}' +
+  ':where(.dzg-fbtn){order:1;flex:none;inline-size:24px;block-size:24px;position:relative;z-index:1}' +
+  // Pushed to the end by an empty item that grows before it (`::before`, order 1: after the title and the sort mark), not
+  // by a margin: Tailwind 3's preflight (`button { margin: 0 }`, unlayered) took the auto margin and, with the end packing
+  // below, sent the title to the column's end (owner 2026-11-13). Its gap given back; a title that grows itself (an aligned
+  // column's, the filter box) needs none.
+  ':where(.dzg-hcell:has(>.dzg-fbtn):not([data-align],:has(.dzg-hfbox)))::before{content:"";order:1;flex:auto;margin-inline-start:calc(-1*var(--dzg-space,.25rem))}' +
   // Narrower than that (a column at its minimum), the cell packs at its end, so what is cut is the label's side.
   ':where(.dzg-hcell:has(>.dzg-fbtn)){justify-content:end}' +
   ':where(.dzg-hcell:has(>.dzg-fbtn))::after{content:"";order:9;flex:none;inline-size:calc(var(--dzg-target-min,24px) - var(--dzg-header-padding-inline,var(--dzg-cell-padding-inline,.5rem))*var(--dzg-density,1))}' +

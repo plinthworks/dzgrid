@@ -2397,9 +2397,21 @@ changes nothing by itself; a feature's sheet is named. *Key* is the `theme` sett
 | `--dzg-option-selected-bg` | `optionSelectedBg` | A ticked value in a set filter's list (1.12.0) | none | variables |
 | `--dzg-overlay-fg`, `--dzg-overlay-bg` | `overlayFg`, `overlayBg` | The loading, no-rows and error message (1.12.0) | `--tz-fg-muted`, `--tz-bg` | variables |
 | `--dzg-footer-fg`, `--dzg-footer-bg` | `footerFg`, `footerBg` | The pager's strip (1.12.0) | `--tz-fg-muted`, `--dzg-header-bg` | variables |
+| `--dzg-sort-none-fg` | `sortNoneFg` | The unsorted mark (`icons.sortNone`), apart from the sorted one (1.12.0) | the sort marks' | `theming()` |
+| `--dzg-button-font-weight`, `--dzg-button-padding-inline`, `--dzg-button-height` | `buttonFontWeight`, `buttonPaddingInline`, `buttonHeight` | The popups' buttons: weight, side padding, height (the pager's squares and the shortcuts keep their own; 1.12.0) | inherited, `.75rem`, `2rem` | `buttons.css` |
+| `--dzg-button-hover-bg`, `--dzg-button-hover-fg`, `--dzg-button-active-bg` | `buttonHoverBg`, `buttonHoverFg`, `buttonActiveBg` | A button under the pointer, pressed (a pager button that cannot act: none; 1.12.0) | no change | `buttons.css` |
+| `--dzg-button-primary-bg`, `--dzg-button-primary-fg`, `--dzg-button-primary-border` | `buttonPrimaryBg`, `buttonPrimaryFg`, `buttonPrimaryBorder` | The primary button (a filter's Apply; 1.12.0) | `--tz-accent`, `--tz-accent-fg`, `--tz-accent` | `buttons.css` |
+| `--dzg-button-primary-hover-bg`, `--dzg-button-primary-hover-fg`, `--dzg-button-primary-active-bg` | `buttonPrimaryHoverBg`, `buttonPrimaryHoverFg`, `buttonPrimaryActiveBg` | The primary button under the pointer, pressed (1.12.0) | no change | `buttons.css` |
+| `--dzg-set-list-min-width`, `--dzg-set-list-max-width` | `setListMinWidth`, `setListMaxWidth` | A set filter's list: as wide as its longest value, between these (1.12.0) | `14rem`, `min(32rem, 90vw)` | the set filter |
 
 Read-only (written by the grid; no key): `--dzg-row-height`, `--dzg-header-height`, `--dzg-density` (`.75` compact,
 `1`, `1.25` spacious: the side padding follows the density; `.dzg { --dzg-density: 1 }` in your own CSS keeps it fixed).
+`--dzg-row-state-fg` is written too, by `variables.css`, on a hovered, focused or selected row: the text colour you gave
+that row (unset otherwise). A cell part follows it with `color: var(--dzg-row-state-fg, <its own colour>)` — or
+`fill`, a badge's background. To make **everything** in a hovered or selected row take the row's text colour, a
+coloured status mark included, put `data-dzg-row-fg="force"` on the grid's host or any ancestor (1.12.0; light and
+dark alike). `@dzgrid/theme/buttons.css` (`buttons.unlayered.css` with the unlayered copies) is loaded after
+`variables.css`: the popups' buttons' looks, each a variable (1.12.0).
 **Classes are not an API** (1.12.0): the grid's classes, pseudo-elements, `data-*` marks and DOM order are internal
 and may change in any release. Everything a look needs is a variable above, a `theme` key or a setting; if one is
 missing, ask for it rather than styling an internal class. Your own classes (`rowClass`, `ui.cellClass`,
