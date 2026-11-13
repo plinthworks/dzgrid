@@ -72,11 +72,11 @@ export class DzgController<T = unknown> {
   /**
    * Asks the data again, then paints (reload.md, 1.12.0): on a server, the page or the window's blocks fetched again,
    * the rows shown kept meanwhile and the filters, sort, page and selection unchanged; on rows the application gives,
-   * nothing to fetch — they are worked out again and painted. The same as `refresh({})`; `refresh()` only paints.
-   * Nothing without a grid.
+   * nothing to fetch — they are worked out again and painted. The grid's own `api.reload()`, as the element's (one
+   * path); `refresh({})` does the same (a test compares them); `refresh()` only paints. Nothing without a grid.
    */
   reload(): void {
-    this.refresh({});
+    this.#api()?.reload!(); // always set on a grid's api
   }
   /** A host's live change (row-transactions-async.md): the client's rows, or the rows held of a list in blocks. Null without a grid or on pages. */
   applyTransaction(tx: RowTransaction<T>): TransactionResult | null {

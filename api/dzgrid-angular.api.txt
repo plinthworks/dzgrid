@@ -10,7 +10,7 @@
 
 @ @dzgrid/angular
 ## DZGRID_ANGULAR_VERSION
-  declare const DZGRID_ANGULAR_VERSION = "1.11.0";
+  declare const DZGRID_ANGULAR_VERSION = "1.12.0";
 ## DZG_DEFAULTS
   declare const DZG_DEFAULTS: InjectionToken<DzGridDefaults>;
 ## DZG_ENV

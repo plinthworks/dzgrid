@@ -1401,16 +1401,23 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   90 566 / 91 000. `check:api`: the Angular additions accepted (owner « ok comme ça »).
 - For the owner: publish (`docs/release-1.11.0.md`).
 
-## 1.12.0 — minor (2026-11-13; in the tree, not committed; owner « toujours laisser le choix », then « A partout »)
+## 1.12.0 — minor (2026-11-13; prepared, not published; owner « toujours laisser le choix », then « A partout »)
 
 - [x] Every look a choice: icons never clipped, `icons.sortNone`, `data-last-row` / `data-last-col`, the tooltip's side
-  and arrow, 38 variables (presentation-settings.md 24–33; CHANGELOG « Unreleased — 1.12.0 »). Browsers:
+  and arrow, 38 variables (presentation-settings.md 24–33; CHANGELOG « 1.12.0 »). Browsers:
   `node scripts/browser-1-12.mjs`.
 - [x] Owner 2026-11-13 « A partout »: (1) size lines to the measures — DOM 25 200, theme 3 050, filters 12 200,
   filters-base 12 150, `menu.css` 800 and `variables.css` 1 900 (beyond +2 %), K.8 90 980 / 91 000; (2) M8
   `autoColumns<T, C = ColumnDef<T>>`, accepted in `check:api`; (3) `reload()` on the grid's api, `DzgController` and
   `<dz-grid>` (reload.md), `refresh()` unchanged and documented as paint-only; site (server data, `source`, row moves).
-- For the owner: review, commit, publish.
+- [x] Review of 1.12.0 (each fix test first): a tooltip near the window's bottom counts its arrow (browser-1-12 checks
+  both edges; the margin is the arrow's size on both sides, a translation moves it up); Angular `reload()` is the
+  grid's `api.reload()` (`reload-one-path.test.ts` compares the three paths); « last row » = the last displayed body
+  row, any kind, never a pinned one (`presentation-1-12-last-row.test.ts`); the 80 px floor raises an app's smaller
+  `width` too (documented, tested); `merge` typed with C (ngc test). Not confirmed: `data-dzg-icons` left after
+  `theming()`'s destroy (the root goes with the grid in the same destroy; features are fixed).
+- [x] Release prep: the five packages at 1.12.0, CHANGELOG dated, `docs/release-1.12.0.md`.
+- For the owner: commit, publish; whether `refresh({})` also routes through `api.reload()` (+17 B of K.8).
 
 ## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)
 

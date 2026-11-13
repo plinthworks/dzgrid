@@ -25,7 +25,10 @@ Nothing: the application calls `reload()` — after a save, on a server push, be
    out again from those held and painted (decision: the same as `refresh({})`, so one rule for both; a lazy tree's
    loaded children are asked again, as on its own refresh — tree-lazy.md). New rows come from the application
    (`rows`, a transaction), never from `reload()`.
-4. **Angular**: `DzgController.reload()` does what `refresh({})` does; before the grid exists, after it is gone, it does
+4. **Angular**: `DzgController.reload()` is the grid's `api.reload()` — one path with the element's (review 1.12.0);
+   `refresh({})` invalidates the rows then paints, the same requests, state and rows
+   (`packages/angular/test/reload-one-path.test.ts` compares the three on server pages with a request in flight and on
+   given rows; routing it through `api.reload()` too costs 17 B of K.8, left to the owner); before the grid exists, after it is gone, it does
    nothing. `refresh()` paints only, `refresh({})` and `refresh({ purge })` unchanged; their documentation says the
    difference plainly and points to `reload()`.
 5. **The element**: `<dz-grid>`'s `reload()` method is its grid's `api.reload()`; nothing before the grid exists.
@@ -33,5 +36,5 @@ Nothing: the application calls `reload()` — after a save, on a server push, be
    source's own `fetchFailed`, as before).
 
 ## Tests
-`packages/dom/test/reload.test.ts` (1–3, 6), `packages/angular/test/server-side.test.ts` (4),
+`packages/dom/test/reload.test.ts` (1–3, 6), `packages/angular/test/server-side.test.ts` and `reload-one-path.test.ts` (4),
 `packages/element/test/element.test.ts` (5).

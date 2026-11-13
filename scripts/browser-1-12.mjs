@@ -194,9 +194,14 @@ async function run(name, cfg) {
     // (6) The tooltip's arrow: below a cell (block-end), then above one near the window's bottom (block-start); its middle
     // over the cell's middle (inside the cell), mirrored in Arabic.
     const tipAt = async (row) => {
-      await page.mouse.move(0, 0);
-      await page.hover(`.dzg-layer .dzg-row[aria-rowindex="${row}"] .dzg-cell[data-col=grams]`);
-      await page.waitForFunction(() => !document.querySelector('.dzg-tooltip').hidden, null, { timeout: 5000 });
+      // The pointer moved off and back (twice at most): a hover the browser coalesced shows nothing.
+      for (let i = 0; i < 2; i++) {
+        await page.mouse.move(0, 0);
+        await page.waitForFunction(() => document.querySelector('.dzg-tooltip').hidden, null, { timeout: 3000 }).catch(() => {});
+        await frames(page);
+        await page.hover(`.dzg-layer .dzg-row[aria-rowindex="${row}"] .dzg-cell[data-col=grams]`);
+        if (await page.waitForFunction(() => !document.querySelector('.dzg-tooltip').hidden, null, { timeout: 3000 }).then(() => true, () => i === 1 && Promise.reject(new Error('no tooltip')))) break;
+      }
       await frames(page);
       return page.evaluate(({ row, rtl }) => {
         const t = document.querySelector('.dzg-tooltip');
@@ -217,6 +222,19 @@ async function run(name, cfg) {
     const above = await tipAt(9);
     check(`${tag}: no room below: above its cell, block-start, the arrow turned toward it`, above.side === 'block-start' && above.box[3] <= above.cell[2] - 6 && aimed(above) && above.rotate === '180deg', above);
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/1-12-${name}-${css}-${lang}${dark ? '-dark' : ''}${preflight ? '-pf' : ''}-tooltip-above.png` });
+    // At the window's edges the arrow counts too (review 1.12.0): room below for the box and its 4 px gap but not the
+    // arrow — it goes above, inside the window; then no room below and just room above, the arrow counted — above, inside.
+    const h = below.box[3] - below.box[2];
+    await page.setViewportSize({ width: 900, height: Math.round(below.cell[3] + 4 + h + 3) });
+    const edgeLow = await tipAt(3);
+    const winLow = await page.evaluate(() => innerHeight);
+    check(`${tag}: near the window's bottom, the tooltip and its arrow inside the window`, edgeLow.box[3] <= winLow + 0.5 && edgeLow.box[2] >= -0.5, { ...edgeLow, winLow });
+    await page.setViewportSize({ width: 900, height: Math.round(2 * h + 44) });
+    await page.evaluate(({ want }) => { const c = document.querySelector('.dzg-layer .dzg-row[aria-rowindex="3"] .dzg-cell[data-col=grams]').getBoundingClientRect(); scrollBy(0, c.top - want); }, { want: 4 + 6 + h + 1 });
+    const edgeHigh = await tipAt(3);
+    const winHigh = await page.evaluate(() => innerHeight);
+    check(`${tag}: near the window's top, the tooltip and its arrow inside the window`, edgeHigh.box[2] >= -0.5 && edgeHigh.box[3] <= winHigh + 0.5, { ...edgeHigh, winHigh });
+    await page.evaluate(() => scrollTo(0, 0));
     await page.setViewportSize({ width: 900, height: 700 });
     const off = await page.evaluate(() => { const t = document.querySelector('.dzg-tooltip'); t.style.setProperty('--dzg-tooltip-arrow-size', '0'); const h = getComputedStyle(t, '::before').blockSize; t.style.removeProperty('--dzg-tooltip-arrow-size'); return h; });
     check(`${tag}: --dzg-tooltip-arrow-size: 0 turns the arrow off`, off === '0px', off);

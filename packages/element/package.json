@@ -1,6 +1,6 @@
 {
   "name": "@dzgrid/element",
-  "version": "1.11.0",
+  "version": "1.12.0",
   "description": "DzGrid as a Web Component: <dz-grid> for any page or framework, in the page (the theme applies); attributes, properties and dzg-* DOM events.",
   "type": "module",
   "license": "MIT",
@@ -8,8 +8,8 @@
     "./src/define.ts"
   ],
   "peerDependencies": {
-    "@dzgrid/core": "1.11.0",
-    "@dzgrid/dom": "1.11.0"
+    "@dzgrid/core": "1.12.0",
+    "@dzgrid/dom": "1.12.0"
   },
   "exports": {
     ".": {

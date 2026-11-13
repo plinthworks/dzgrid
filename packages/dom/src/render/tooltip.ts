@@ -121,9 +121,11 @@ export class Tooltip {
     const box = this.el.getBoundingClientRect();
     const winBlock = win?.innerHeight ?? 0;
     const winInline = win?.innerWidth ?? 0;
-    // Below the anchor, or above it when there is no room: never over the cell it describes.
+    // Below the anchor, or above it when there is no room (the arrow counted: variables.css gives the tooltip a top margin
+    // of its size, on both sides): never over the cell it describes. `marginTop`: the block start in the grid's
+    // horizontal writing mode, a longhand every engine computes (review 1.12.0).
     const below = r.bottom + 4;
-    const top = below + box.height > winBlock && r.top - 4 - box.height >= 0 ? r.top - 4 - box.height : below;
+    const top = below + box.height + parseFloat(getComputedStyle(this.el).marginTop) > winBlock && r.top - 4 - box.height >= 0 ? r.top - 4 - box.height : below;
     setPx(this.el, 'inset-block-start', top);
     const at = fixedInlineStart(r, dir, winInline, box.width);
     setPx(this.el, 'inset-inline-start', at);

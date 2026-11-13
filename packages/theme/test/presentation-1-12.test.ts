@@ -80,7 +80,9 @@ describe('the base sheet (30–32), both copies', () => {
       expect(body(css, '.dzg-tooltip[data-side=block-start]::before')).toContain('inset-block: 100% auto;');
       expect(body(css, '.dzg-tooltip[data-side=block-start]::before')).toContain('rotate: 180deg;');
       expect(css).toContain('margin-block-start: var(--dzg-tooltip-arrow-size, 0.375rem);');
-      expect(body(css, '.dzg-tooltip[data-side=block-start]')).toContain('margin-block-start: calc(-1 * var(--dzg-tooltip-arrow-size, 0.375rem));');
+      // The margin the same on both sides (the grid reads it to choose the side); above, the box moved up by a translation.
+      expect(body(css, '.dzg-tooltip[data-side=block-start]')).toContain('translate: 0 calc(-2 * var(--dzg-tooltip-arrow-size, 0.375rem));');
+      expect(body(css, '.dzg-tooltip[data-side=block-start]')).not.toContain('margin');
     });
 
     it(`dzgrid${c}.css: the focused cell's tint a colour only (a background image — the column separator — stays)`, () => {

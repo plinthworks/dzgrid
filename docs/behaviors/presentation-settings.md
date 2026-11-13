@@ -179,7 +179,10 @@ everything an application needs is a `--dzg-*` variable (or a `theme` key, or a 
     (1.9.0) stays as it was.
 29. The grid marks the last displayed body row (`data-last-row`) and every cell of the last displayed column, header
     included (`data-last-col`), at each paint: a sort, a filter, a scroll (pooled rows reused), grouping, a column
-    hidden, moved, pinned or collapsed take their new marks; pinned rows are not body rows. Variables:
+    hidden, moved, pinned or collapsed take their new marks; pinned rows are not body rows. « Last » is the last
+    displayed body row whatever its kind (review 1.12.0, `presentation-1-12-last-row.test.ts`): a closed group's row, an
+    open group's last child, the grand total when it ends the list, a tree's last visible child, a detail panel under
+    the last master (the master again once closed); a pinned bottom row never. Variables:
     `--dzg-last-row-line` (a border; default `--dzg-row-line`, today's), `--dzg-last-column-line` (a border; default
     `--dzg-column-line`, i.e. none), `--dzg-header-separator-end` (the resize mark after the last column; default as
     the others, `transparent` drops it). These marks are not a promised hook (owner B): the variables are.

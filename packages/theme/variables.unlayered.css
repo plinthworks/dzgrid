@@ -261,7 +261,7 @@
 }
 
 .dzg-tooltip[data-side=block-start] {
-  margin-block-start: calc(-1 * var(--dzg-tooltip-arrow-size, 0.375rem));
+  translate: 0 calc(-2 * var(--dzg-tooltip-arrow-size, 0.375rem));
 }
 
 .dzg-tooltip[data-side=block-start]::before {

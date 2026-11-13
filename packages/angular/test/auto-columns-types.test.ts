@@ -43,3 +43,15 @@ it('without a type argument, the core\'s columns as before', () => {
   const { columns } = autoColumns(rows, { override: { status: { ui: { cell: 'dot' } } } });
   expect(columns.find((c) => c.id === 'status')!.ui!.cell).toBe('dot');
 });
+
+it('merge is typed with the wrapper\'s columns too (review 1.12.0): a component class taken, a number refused', () => {
+  const { columns } = autoColumns<Seed, DzgColumnDef<Seed>>(rows, { merge: { who: { from: ['name', 'status'], header: 'Who', ui: { cell: StatusDot } } } });
+  expect(columns.find((c) => c.id === 'who')!.ui!.cell).toBe(StatusDot);
+  // @ts-expect-error `ui.cell` is a part's name or a component class.
+  autoColumns<Seed, DzgColumnDef<Seed>>(rows, { merge: { who: { from: ['name'], ui: { cell: 42 } } } });
+});
+
+it('one type argument, as before 1.12.0: the core\'s columns', () => {
+  const { columns } = autoColumns<Seed>(rows, { add: [{ id: 'x', ui: { cell: 'dot' } }] });
+  expect(columns.at(-1)!.id).toBe('x');
+});

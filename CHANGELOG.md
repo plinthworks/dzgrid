@@ -5,7 +5,7 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] — 1.12.0
+## [1.12.0] - 2026-11-13
 
 Every look a choice (owner 2026-11-13, « toujours laisser le choix »): a sensible default and a variable for each.
 The grid's classes, pseudo-elements and `data-*` marks are internal (owner B): style through the variables, the
@@ -19,6 +19,12 @@ complete, English and French).
 - `autoColumns()` takes the columns' type as a second, optional type argument (`autoColumns<Row, DzgColumnDef<Row>>`),
   so Angular columns with a component in `ui.cell` need no cast; without it, the columns are `ColumnDef<Row>[]` as
   before (owner 2026-11-13, accepted in `check:api`).
+- **What you will see without changing anything**: filter boxes have a discreet edge in light mode (an outline;
+  `--dzg-input-border: none` removes it); a column with a filter button and no `minWidth` is at least 80 px wide, an
+  explicit `width` under 80 included (add `minWidth` to keep it narrower); the tooltip's text is the cells' size, and
+  with `variables.css` loaded it has an arrow and sits 6 px further from its cell (`--dzg-tooltip-arrow-size: 0` gives
+  the old place back); the last displayed row and the last column carry `data-last-row` / `data-last-col` (their lines
+  by default are today's — not a promised hook: style them through `--dzg-last-row-line`, `--dzg-last-column-line`).
 - Size lines raised to the measures (owner 2026-11-13): `@dzgrid/dom` 25 200, `@dzgrid/theme` 3 050, `/filters`
   12 200, `/filters-base` 12 150, `menu.css` 800, `variables.css` 1 900 (the last two beyond the +2 % rule).
 
@@ -32,7 +38,8 @@ complete, English and French).
   size, which no reset touches, and the header's buttons sit over the grip. A column narrower than its header's
   content cuts at its title's side, never the gap.
 - **A column with a filter button is never narrower than 80 px** (owner 2026-11-12) when it has no `minWidth` of its
-  own: the button, the grip and the start of the title fit side by side. A `minWidth` you give wins, smaller too.
+  own: the button, the grip and the start of the title fit side by side. A `minWidth` you give wins, smaller too; a
+  `width` under 80 alone is raised to 80 (add `minWidth` to keep it).
 
 
 ### Added
@@ -59,6 +66,10 @@ complete, English and French).
   column's header needs, and the minimum in force.
 - Each feature's layout CSS is exported from its entry (`FILTERS_CSS`, `TREE_CSS`…), for `injectStyles: false`; the
   theme key `columnHoverBg`.
+
+- (Review 1.12.0) A tooltip near the window's bottom edge now counts its arrow: it goes above its cell instead of
+  overflowing the window by the arrow's size. Angular's `ctrl.reload()` is the grid's own `api.reload()` (as the
+  element's).
 
 ### Changed (looks decided by the owner)
 - Filter boxes: a discreet edge in light mode (`--tz-fg-muted` 75 % into the surface, 3:1 at least), drawn as an

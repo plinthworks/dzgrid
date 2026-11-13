@@ -34,6 +34,13 @@ describe('the floor (column-resize.md 21–24)', () => {
     expect(width(m, 'qty')).toBe(50);
   });
 
+  it('the application\'s own width under it is raised too (a minimum, as the 40 px default was); its minWidth lowers it', () => {
+    const m = createColumnModel([{ id: 'qty', width: 60 }, { id: 'name', width: 60, minWidth: 60 }]);
+    m.floor!(floor);
+    expect(width(m, 'qty')).toBe(80);
+    expect(width(m, 'name')).toBe(60);
+  });
+
   it('a maxWidth under it is raised to it', () => {
     const m = createColumnModel([{ id: 'qty', width: 60, maxWidth: 60 }]);
     m.floor!(floor);

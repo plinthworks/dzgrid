@@ -114,7 +114,8 @@ overlapped, a click on the funnel caught the grip.
     The title never goes to a second line.
 22. It is the column's **default** minimum: a `minWidth` the application gives wins, smaller too (the header then cuts
     at its title's side, the button kept clear of the grip). `maxWidth` under it raises to it, as `maxWidth` under
-    `minWidth` does.
+    `minWidth` does. An application's own `width` under it is raised too (it is a minimum, as the 40 px default was):
+    `width: 60` alone draws 80 px, `width: 60, minWidth: 60` draws 60 (review 1.12.0, `columns-floor.test.ts`).
 23. Everything that bounds a width follows it: a drag, the keys, the column menu's widths, a flexible column sharing
     little room, « Ajuster », a restored `GridState` width (raised, never stored lower), the collapse into rows.
 24. Computed by the grid from its features (each says how many header buttons a column gets), again at each
