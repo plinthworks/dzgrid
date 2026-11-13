@@ -96,7 +96,9 @@
 }
 
 .dzg .dzg-popup {
-  padding: calc(var(--dzg-space, 0.25rem) * 3);
+  padding: var(--dzg-popup-padding, calc(var(--dzg-space, 0.25rem) * 3));
+  border: var(--dzg-popup-border, var(--dzg-line, 1px) solid var(--tz-border));
+  border-radius: var(--dzg-popup-radius, var(--dzg-radius, 0.375rem));
   background: var(--dzg-popup-bg, var(--tz-bg));
   box-shadow: var(--dzg-popup-shadow, 0 0.25rem 0.75rem color-mix(in srgb, var(--tz-fg) 20%, transparent));
 }
@@ -106,17 +108,24 @@
 }
 
 .dzg-tooltip {
-  padding-block: calc(var(--dzg-space, 0.25rem) * 1);
-  padding-inline: calc(var(--dzg-space, 0.25rem) * 2);
+  max-inline-size: var(--dzg-tooltip-max-width, 20rem);
+  padding-block: var(--dzg-tooltip-padding-block, calc(var(--dzg-space, 0.25rem) * 1));
+  padding-inline: var(--dzg-tooltip-padding-inline, calc(var(--dzg-space, 0.25rem) * 2));
+  border-radius: var(--dzg-tooltip-radius, var(--dzg-radius, 0.375rem));
   color: var(--dzg-tooltip-fg, var(--tz-bg));
   background: var(--dzg-tooltip-bg, var(--tz-fg));
+  font-family: var(--dzg-tooltip-font-family, inherit);
+  font-size: var(--dzg-tooltip-font-size, var(--dzg-cell-font-size, 1em));
+  font-weight: var(--dzg-tooltip-font-weight, inherit);
+  line-height: var(--dzg-tooltip-line-height, inherit);
+  white-space: var(--dzg-tooltip-white-space, normal);
 }
 
 .dzg-finput,
 .dzg-fop,
 .dzg-fclear {
-  border-color: var(--dzg-input-border, var(--tz-fg-muted));
-  background: var(--dzg-input-bg, var(--tz-bg));
+  border-radius: var(--dzg-input-radius, var(--dzg-radius, 0.375rem));
+  color: var(--dzg-input-fg, var(--tz-fg));
 }
 
 .dzg-overlay button,
@@ -128,6 +137,8 @@
 .dzg-retry,
 .dzg-footer select {
   border-color: var(--dzg-button-border, var(--tz-fg-muted));
+  border-radius: var(--dzg-button-radius, var(--dzg-radius, 0.375rem));
+  color: var(--dzg-button-fg, var(--tz-fg));
   background: var(--dzg-button-bg, var(--dzg-header-bg, var(--tz-bg-raised)));
 }
 
@@ -138,11 +149,15 @@
 
 .dzg-overlay {
   gap: calc(var(--dzg-space, 0.25rem) * 2);
+  color: var(--dzg-overlay-fg, var(--tz-fg-muted));
+  background: var(--dzg-overlay-bg, var(--tz-bg));
 }
 
 .dzg-footer {
   padding-block: calc(var(--dzg-space, 0.25rem) * 1);
   padding-inline: calc(var(--dzg-space, 0.25rem) * 2);
+  color: var(--dzg-footer-fg, var(--tz-fg-muted));
+  background: var(--dzg-footer-bg, var(--dzg-header-bg, var(--tz-bg-raised)));
 }
 
 .dzg-dbody {
@@ -158,18 +173,110 @@
 }
 
 .dzg-sort {
+  color: var(--dzg-sort-fg, var(--tz-fg-muted));
   font-size: var(--dzg-icon-size, 0.75em);
 }
 
-.dzg-fbtn::before,
-.dzg-fbtn::after {
+.dzg-fbtn:where(:not([data-dzg-icons~=filter] *, [data-dzg-icons~=filter-active] [data-dzg-filtered] > *))::before,
+.dzg-fbtn:where(:not([data-dzg-icons~=filter] *))::after {
   inset-block: calc(50% - var(--dzg-icon-size, 12px) / 2) calc(50% - var(--dzg-icon-size, 12px) / 2 + var(--dzg-icon-size, 12px) / 12);
   inset-inline: calc(50% - var(--dzg-icon-size, 12px) / 2);
 }
 
-.dzg-fbtn::after {
+.dzg-fbtn:where(:not([data-dzg-icons~=filter] *))::after {
   inset-block: calc(50% - var(--dzg-icon-size, 12px) / 3) 50%;
   inset-inline: calc(50% - var(--dzg-icon-size, 12px) / 4);
+}
+
+:where(.dzg-row:hover:not([data-spans]), .dzg-row[data-hover]) :where(.dzg-cell) {
+  color: var(--dzg-row-hover-fg);
+}
+
+:where(.dzg-row:focus-within:not([data-dzg-quiet] *)) :where(.dzg-cell) {
+  color: var(--dzg-row-active-fg);
+}
+
+:where(.dzg-row[aria-selected=true]) :where(.dzg-cell) {
+  color: var(--dzg-row-selected-fg);
+}
+
+.dzg-cell {
+  background-image: linear-gradient(var(--dzg-column-separator) 0 0);
+  background-size: var(--dzg-column-separator-size, var(--dzg-line, 1px)) var(--dzg-column-separator-height, 100%);
+  background-position: 100% 50%;
+  background-repeat: no-repeat;
+}
+
+.dzg-cell:dir(rtl) {
+  background-position: 0 50%;
+}
+
+:is(.dzg-seg-start, .dzg-seg-end) > .dzg-cell:last-child,
+.dzg-cell[data-last-col] {
+  background-image: none;
+}
+
+.dzg-row:where([data-last-row]) :is(.dzg-cell, .dzg-check) {
+  border-block-end: var(--dzg-last-row-line, var(--dzg-row-line, var(--dzg-line, 1px) solid var(--tz-border)));
+}
+
+.dzg-cell[data-last-col],
+.dzg-hcell[data-last-col] {
+  border-inline-end: var(--dzg-last-column-line, var(--dzg-column-line, none));
+}
+
+.dzg-hcell:where([data-last-col]) > .dzg-resize:where(:not(:hover))::after {
+  background: var(--dzg-header-separator-end, var(--dzg-header-separator, var(--tz-border)));
+}
+
+.dzg-hcell {
+  padding-inline: calc(var(--dzg-header-padding-inline, var(--dzg-cell-padding-inline, 0.5rem)) * var(--dzg-density, 1));
+}
+
+.dzg-hcell > :is(.dzg-fbtn, .dzg-mbtn) {
+  color: var(--dzg-header-button-fg, var(--tz-fg-muted));
+}
+
+[data-dzg-filtered] > .dzg-fbtn {
+  color: var(--dzg-header-button-active-fg, var(--tz-accent));
+}
+
+.dzg-hgroup {
+  border-inline-end: var(--dzg-header-group-line, var(--dzg-line, 1px) solid var(--tz-border));
+}
+
+.dzg-tooltip::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: calc(var(--dzg-tip-at, 1rem) - var(--dzg-tooltip-arrow-size, 0.375rem));
+  inset-block-end: 100%;
+  inline-size: calc(2 * var(--dzg-tooltip-arrow-size, 0.375rem));
+  block-size: var(--dzg-tooltip-arrow-size, 0.375rem);
+  background: var(--dzg-tooltip-arrow-color, var(--dzg-tooltip-bg, var(--tz-fg)));
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.dzg-tooltip {
+  margin-block-start: var(--dzg-tooltip-arrow-size, 0.375rem);
+}
+
+.dzg-tooltip[data-side=block-start] {
+  margin-block-start: calc(-1 * var(--dzg-tooltip-arrow-size, 0.375rem));
+}
+
+.dzg-tooltip[data-side=block-start]::before {
+  inset-block: 100% auto;
+  rotate: 180deg;
+}
+
+@media (forced-colors: active) {
+  .dzg-tooltip::before {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+}
+.dzg-fopt:where([aria-selected=true]) {
+  background: var(--dzg-option-selected-bg);
 }
 
 .dzg-popup .tz-field__panel {

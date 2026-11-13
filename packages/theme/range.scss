@@ -38,7 +38,7 @@ $edge: var(--dzg-range-edge, var(--tz-success));
     --dzg-re: 0px;
     --dzg-rt: 0px;
     --dzg-rb: 0px;
-    background: $tint;
+    background-color: $tint;
     box-shadow: inset var(--dzg-rs) 0 0 0 $edge, inset calc(-1 * var(--dzg-re)) 0 0 0 $edge, inset 0 var(--dzg-rt) 0 0 $edge, inset 0 calc(-1 * var(--dzg-rb)) 0 0 $edge;
   }
 

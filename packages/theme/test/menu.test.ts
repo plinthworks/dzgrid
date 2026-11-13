@@ -44,8 +44,9 @@ describe('menu.css', () => {
   });
 
   it('the submenu mark: a chevron at the item’s inline end, mirrored in right to left; CanvasText in forced colours', () => {
-    const d = decl(/^\.dzg-msub$/);
-    expect(d).toMatch(/margin-inline-start: auto/);
+    expect(decl(/^\.dzg-msub$/)).toMatch(/margin-inline-start: auto/);
+    // Drawn only where the app gave no submenu icon (1.12.0, presentation-settings.md 24).
+    const d = decl(/^\.dzg-msub:where\(:not\(\[data-dzg-icons~=submenu\] \*\)\)$/);
     expect(d).toMatch(/background: currentColor/);
     expect(d).toMatch(/clip-path: /);
     expect(decl(/^\[dir=rtl\] \.dzg-msub$/)).toMatch(/transform: scaleX\(-1\)/);

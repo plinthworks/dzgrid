@@ -86,7 +86,7 @@ du réglage `theme`.
 | `--dzg-row-line` | `rowLine` | Le trait entre les lignes (une bordure ; `none`) | comme le cadre | variables |
 | `--dzg-column-line` | `columnLine` | Un trait entre les colonnes (une bordure) | `none` | variables |
 | `--dzg-header-line` | `headerLine` | Le trait sous chaque ligne d’en-tête | comme le cadre | variables |
-| `--dzg-header-separator`, `-size`, `-height` | `headerSeparator`, `headerSeparatorSize`, `headerSeparatorHeight` | Les marques entre les cellules d’en-tête redimensionnables | `--tz-border`, `2px`, `50%` | variables |
+| `--dzg-header-separator`, `--dzg-header-separator-size`, `--dzg-header-separator-height` | `headerSeparator`, `headerSeparatorSize`, `headerSeparatorHeight` | Les marques entre les cellules d’en-tête redimensionnables | `--tz-border`, `2px`, `50%` | variables |
 | `--dzg-pinned-column-line` | `pinnedColumnLine` | Le bord des colonnes figées | comme le cadre | variables |
 | `--dzg-pinned-shadow` | `pinnedShadow` | Un `box-shadow` à ce bord tant que du contenu passe dessous, écrit pour le côté de début (mis en miroir par la grille) | aucune | base |
 | `--dzg-detail-line` | `detailLine` | Le filet de début d’un panneau de détail | `3px solid --tz-border` | variables |
@@ -114,17 +114,41 @@ du réglage `theme`.
 | `--dzg-icon-size` | `iconSize` | Marque de tri, chevrons, poignée, entonnoir, les icônes de l’application dans les boutons | celle de chaque marque (entonnoir `12px`) | variables, mises en page des fonctions |
 | `--dzg-popup-bg`, `--dzg-popup-shadow` | `popupBg`, `popupShadow` | Fenêtres de filtre et menus | `--tz-bg`, une ombre douce | variables |
 | `--dzg-tooltip-bg`, `--dzg-tooltip-fg` | `tooltipBg`, `tooltipFg` | L’infobulle | `--tz-fg` sur `--tz-bg` inversés | variables |
-| `--dzg-input-bg`, `--dzg-input-border` | `inputBg`, `inputBorder` | Les champs des filtres | `--tz-bg`, `--tz-fg-muted` | variables |
+| `--dzg-tooltip-font-size`, `--dzg-tooltip-font-family`, `--dzg-tooltip-font-weight`, `--dzg-tooltip-line-height` | `tooltipFontSize`, `tooltipFontFamily`, `tooltipFontWeight`, `tooltipLineHeight` | Le texte de l’infobulle (1.12.0) | la taille des cellules, la police de la grille | base, variables |
+| `--dzg-tooltip-max-width`, `--dzg-tooltip-padding-block`, `--dzg-tooltip-padding-inline`, `--dzg-tooltip-radius` | `tooltipMaxWidth`, `tooltipPaddingBlock`, `tooltipPaddingInline`, `tooltipRadius` | La boîte de l’infobulle (1.12.0) | `20rem`, 1 et 2 unités d’espacement, `--dzg-radius` | variables |
+| `--dzg-tooltip-white-space` | `tooltipWhiteSpace` | `pre-line` garde les retours à la ligne de la valeur (1.12.0) | `normal` | variables |
+| `--dzg-tooltip-arrow-size`, `--dzg-tooltip-arrow-color` | `tooltipArrowSize`, `tooltipArrowColor` | La flèche vers la cellule, du côté où l’infobulle s’ouvre (`0` : aucune ; 1.12.0) | `.375rem`, le fond de l’infobulle | variables |
+| `--dzg-input-bg`, `--dzg-input-border` | `inputBg`, `inputBorder` | Les champs des filtres : leur fond, leur bord (une couleur, ou `none` ; 1.12.0 : jamais effacé par la remise à zéro d’une page) | `--tz-bg` ; clair : `--tz-fg-muted` à 75 % dans `--tz-bg`, sombre : `--tz-fg-muted` | base |
+| `--dzg-input-fg`, `--dzg-input-radius` | `inputFg`, `inputRadius` | Les champs des filtres : texte, coins (1.12.0) | `--tz-fg`, `--dzg-radius` | variables |
 | `--dzg-button-bg`, `--dzg-button-border` | `buttonBg`, `buttonBorder` | Boutons de la pagination, du pied des filtres, de nouvel essai (Appliquer garde l’accent) | `--dzg-header-bg`, `--tz-fg-muted` | variables |
 | `--dzg-menu-item-height`, `--dzg-menu-disabled` | `menuItemHeight`, `menuDisabled` | Éléments de menu (jamais sous 24 px), un élément désactivé | `32px`, `--tz-fg-muted` | `menu.css`, `columns.css` |
 | `--dzg-panel-bg` | `panelBg` | Le dock et le panneau des filtres | `--tz-bg` | `dock.css`, `filters-panel.css` |
 | `--dzg-chip-bg`, `--dzg-chip-hover-bg`, `--dzg-control-active-bg` | `chipBg`, `chipHoverBg`, `controlActiveBg` | Pastilles ; un bouton de panneau enfoncé | mélanges d’accent et de texte | feuilles des fonctions |
 | `--dzg-scrollbar`, `--dzg-scrollbar-thumb`, `--dzg-scrollbar-thumb-active` | `scrollbar`, `scrollbarThumb`, `scrollbarThumbActive` | Barres de défilement fines ou du système, le curseur au repos et sous le pointeur | `thin`, `--tz-border`, `--tz-fg-muted` | `dzgrid.comfort.css` |
+| `--dzg-row-hover-fg`, `--dzg-row-selected-fg`, `--dzg-row-active-fg` | `rowHoverFg`, `rowSelectedFg`, `rowActiveFg` | Le texte d’une ligne survolée, sélectionnée, qui a le focus ; un contenu à couleur propre la garde (1.12.0) | la couleur de la ligne | variables |
+| `--dzg-column-separator`, `--dzg-column-separator-size`, `--dzg-column-separator-height` | `columnSeparator`, `columnSeparatorSize`, `columnSeparatorHeight` | Une marque entre les colonnes du corps : couleur, épaisseur, hauteur (`60%` : un court trait centré) ; pas après la dernière colonne (1.12.0) | aucune, `--dzg-line`, `100%` | variables |
+| `--dzg-last-row-line`, `--dzg-last-column-line` | `lastRowLine`, `lastColumnLine` | Le trait sous la dernière ligne affichée, après la dernière colonne (bordures ; 1.12.0) | `--dzg-row-line`, `--dzg-column-line` | variables |
+| `--dzg-header-separator-end` | `headerSeparatorEnd` | La marque d’élargissement après la dernière colonne (`transparent` l’ôte ; 1.12.0) | comme les autres | variables |
+| `--dzg-header-padding-inline` | `headerPaddingInline` | La marge latérale des titres (× la densité ; 1.12.0) | celle des cellules | variables |
+| `--dzg-header-button-fg`, `--dzg-header-button-active-fg` | `headerButtonFg`, `headerButtonActiveFg` | Les boutons filtre et menu des titres ; l’entonnoir d’une colonne filtrée (1.12.0) | `--tz-fg-muted`, `--tz-accent` | variables |
+| `--dzg-header-group-line` | `headerGroupLine` | Le trait de fin d’un groupe de colonnes (1.12.0) | comme le cadre | variables |
+| `--dzg-sort-fg` | `sortFg` | Les marques de tri (1.12.0) | `--tz-fg-muted` | variables |
+| `--dzg-button-fg`, `--dzg-button-radius` | `buttonFg`, `buttonRadius` | Le texte et les coins des boutons (1.12.0) | `--tz-fg`, `--dzg-radius` | variables |
+| `--dzg-popup-radius`, `--dzg-popup-border`, `--dzg-popup-padding` | `popupRadius`, `popupBorder`, `popupPadding` | Fenêtres de filtre et menus : coins, bord (une bordure), marge (1.12.0) | `--dzg-radius`, comme le cadre, 3 unités d’espacement | variables |
+| `--dzg-option-selected-bg` | `optionSelectedBg` | Une valeur cochée de la liste d’un filtre par valeurs (1.12.0) | aucun | variables |
+| `--dzg-overlay-fg`, `--dzg-overlay-bg` | `overlayFg`, `overlayBg` | Le message de chargement, d’absence de lignes, d’erreur (1.12.0) | `--tz-fg-muted`, `--tz-bg` | variables |
+| `--dzg-footer-fg`, `--dzg-footer-bg` | `footerFg`, `footerBg` | La bande de la pagination (1.12.0) | `--tz-fg-muted`, `--dzg-header-bg` | variables |
 
 En lecture seule (écrites par la grille ; pas de clé) : `--dzg-row-height`, `--dzg-header-height`, `--dzg-density`
 (`.75` compact, `1`, `1.25` spacious : la marge latérale suit la densité ; `.dzg { --dzg-density: 1 }` dans votre
-propre CSS la garde fixe). La surface propre aux colonnes figées : `.dzg-seg-start`, `.dzg-seg-end` dans votre CSS
-(elles suivent le survol et la sélection).
+propre CSS la garde fixe).
+
+**Les classes ne sont pas une API** (1.12.0) : les classes de la grille, ses pseudo-éléments, ses marques `data-*` et
+l’ordre de son DOM sont internes et peuvent changer à toute version. Tout ce qu’une apparence demande est une variable
+ci-dessus, une clé de `theme` ou un réglage ; s’il en manque une, demandez-la plutôt que de viser une classe interne.
+Vos propres classes (`rowClass`, `ui.cellClass`, `ui.headerClass`) restent les vôtres. Une liste déroulante à vous,
+ouverte dans une fenêtre de filtre, doit s’afficher dans la fenêtre (elle est dans la couche du dessus : une liste
+ajoutée à `body` passe dessous).
 
 ### Le réglage `theme`
 

@@ -18,6 +18,7 @@ page, copié — pour chacune :
 | Clé | La marque |
 |---|---|
 | `sortAsc`, `sortDesc` | La flèche d’une colonne triée. |
+| `sortNone` | Une colonne triable qui n’est pas triée (1.12.0) ; sans elle, une telle colonne ne montre aucune marque. Décorative : un lecteur d’écran entend l’état du tri par `aria-sort`, pas par la marque. |
 | `filter` | Le bouton de filtre de l’en-tête. |
 | `filterActive` | Le bouton de filtre d’une colonne filtrée ; sans lui, `filter` dans la couleur d’accent. |
 | `menu` | Le bouton du menu de colonne. |
@@ -28,7 +29,7 @@ page, copié — pour chacune :
 L’icône est dessinée dans la couleur et la taille de la marque (`--dzg-icon-size`), quel que soit son propre
 remplissage. Il faut `theming()` de `@dzgrid/dom/theme`. Une icône qui n’est pas faite de simples formes — un
 `<script>`, un `<style>`, un `<foreignObject>`, un attribut `on…`, un lien hors de l’icône, plus de 20 000 caractères —
-est refusée : celle par défaut reste et un avertissement `invalid-setting` est signalé. Les icônes sont dessinées
+est refusée : celle par défaut reste et un avertissement `invalid-setting` est signalé. Votre icône l’emporte toujours : la marque de la grille n’est pas dessinée dessous, avec les feuilles en couches comme avec les copies `*.unlayered.css` (1.12.0). Les icônes sont dessinées
 comme images `data:` : une politique de sécurité du contenu doit permettre `img-src data:`.
 
 ## Exemple
@@ -50,7 +51,7 @@ createGrid<Plant>(document.getElementById('plantes')!, {
   columns: [{ id: 'name', header: 'Plante' }, { id: 'height', header: 'Hauteur (cm)', type: 'number' }],
   getRowId: (p) => p.id,
   messages: FR,
-  icons: { sortAsc: '<svg viewBox="0 0 16 16"><path d="M8 3l5 8H3z"/></svg>', filter: funnel },
+  icons: { sortAsc: '<svg viewBox="0 0 16 16"><path d="M8 3l5 8H3z"/></svg>', sortNone: '<svg viewBox="0 0 16 16"><path d="M8 2l4 5H4zM8 14l4-5H4z"/></svg>', filter: funnel },
   features: [theming()],
 });
 ```

@@ -1401,6 +1401,17 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   90 566 / 91 000. `check:api`: the Angular additions accepted (owner « ok comme ça »).
 - For the owner: publish (`docs/release-1.11.0.md`).
 
+## 1.12.0 — minor (2026-11-13; in the tree, not committed; owner « toujours laisser le choix », then « A partout »)
+
+- [x] Every look a choice: icons never clipped, `icons.sortNone`, `data-last-row` / `data-last-col`, the tooltip's side
+  and arrow, 38 variables (presentation-settings.md 24–33; CHANGELOG « Unreleased — 1.12.0 »). Browsers:
+  `node scripts/browser-1-12.mjs`.
+- [x] Owner 2026-11-13 « A partout »: (1) size lines to the measures — DOM 25 200, theme 3 050, filters 12 200,
+  filters-base 12 150, `menu.css` 800 and `variables.css` 1 900 (beyond +2 %), K.8 90 980 / 91 000; (2) M8
+  `autoColumns<T, C = ColumnDef<T>>`, accepted in `check:api`; (3) `reload()` on the grid's api, `DzgController` and
+  `<dz-grid>` (reload.md), `refresh()` unchanged and documented as paint-only; site (server data, `source`, row moves).
+- For the owner: review, commit, publish.
+
 ## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)
 
 - **Batch 1 — skeleton (2026-11-10, not committed).** `website/` (Astro Starlight, versions pinned as DzCalendar's,

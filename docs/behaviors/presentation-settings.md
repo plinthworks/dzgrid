@@ -138,3 +138,91 @@ a header title at the end sits on the left in Arabic; `--dzg-header-case` leaves
 `packages/dom/test/presentation.test.ts` (1, 3, 5, 6, 23), `packages/dom/test/theming.test.ts` (16–22),
 `packages/theme/test/presentation-theme.test.ts` (2, 7–15, the variables sheet, contrast pairs), browsers
 `scripts/browser-presentation.mjs` (Chrome fr / ar with axe, Firefox and WebKit once).
+
+# 1.12.0 — every look a choice (owner 2026-11-13)
+
+Written before the code (CLEANROOM). Work list: an application's CSS audit (gaps G1–G13, generic wording) and the
+owner's answers of 2026-11-13, whose rule wins over the rest: **« toujours laisser le choix »** — every look has a
+sensible default and a variable (or a setting) the application changes without fighting the grid. Owner B: **no CSS
+class is promised**; the grid's classes, pseudo-elements and DOM order are internal and may change in any release;
+everything an application needs is a `--dzg-*` variable (or a `theme` key, or a setting). Sources: CSS Cascading 5
+(layers, guaranteed-invalid values), CSS Backgrounds 3, CSS Masking 1 (`clip-path`), Selectors 4 (`:where`, complex
+`:not`), WCAG 2.2 (1.4.3, 1.4.11, 1.4.13).
+
+## Behaviours (numbered after 23, each one a test)
+
+### The application's icons always win (G1, a bug)
+24. A default mark (the sort triangles, the funnel and its hollow, the ⋮ of the column menu, the submenu arrow) is
+    drawn only when the application gave no icon for it: each default rule of the theme sheets is guarded by
+    `:where(:not([data-dzg-icons~=<name>] *))` (no weight added). So an icon is never clipped, shrunk or overdrawn,
+    with the layered sheets **and** with the `*.unlayered.css` copies (under an unlayered reset: Tailwind 3's
+    preflight, Bootstrap's Reboot). The filtered funnel: `filterActive` replaces it on filtered columns, `filter`
+    everywhere.
+25. `icons.sortNone` (opt-in): when given, every **sortable** column that is not sorted keeps a mark `data-dir="none"`
+    drawn with it (decorative, `aria-hidden`; `aria-sort` unchanged); sorted, the asc / desc mark replaces it; sorted
+    back to none, it returns; not given, nothing changes. Live with `update({ icons })`.
+26. `--dzg-sort-fg`: the sort marks' colour (default `--tz-fg-muted`, today's).
+
+### Rows: the hovered and selected text (owner 1, G3)
+27. `--dzg-row-hover-fg`, `--dzg-row-selected-fg`, `--dzg-row-active-fg` (the row holding the focus): the text colour
+    of such a row's cells. Not set: the cells inherit the row's colour, as today (a stale or context row keeps its
+    muted text). Set: the cells take it; content that sets its own colour (an application's part, a badge, a mark)
+    keeps it — the rule weighs nothing (`:where`). Content that should follow uses `color: inherit` /
+    `currentColor` in its own CSS. A selected row under the pointer takes the selected colour (as its background).
+    Defaults of the backgrounds unchanged: a light tint in light mode, a dark band in dark mode.
+
+### Lines between columns, last row, last column (owner 2, 6, G11, G12)
+28. `--dzg-column-separator` (a colour; not set: nothing drawn), `--dzg-column-separator-size` (`--dzg-line`),
+    `--dzg-column-separator-height` (`100%`; `60%` gives a short centred divider): a mark at each body cell's inline
+    end, drawn as the cell's background image (logical: at the left in right to left). Not after the last cell of a
+    pinned part (the pinned edge is there), nor after the last column. The full-height border `--dzg-column-line`
+    (1.9.0) stays as it was.
+29. The grid marks the last displayed body row (`data-last-row`) and every cell of the last displayed column, header
+    included (`data-last-col`), at each paint: a sort, a filter, a scroll (pooled rows reused), grouping, a column
+    hidden, moved, pinned or collapsed take their new marks; pinned rows are not body rows. Variables:
+    `--dzg-last-row-line` (a border; default `--dzg-row-line`, today's), `--dzg-last-column-line` (a border; default
+    `--dzg-column-line`, i.e. none), `--dzg-header-separator-end` (the resize mark after the last column; default as
+    the others, `transparent` drops it). These marks are not a promised hook (owner B): the variables are.
+
+### Filter inputs (owner 3)
+30. The boxes of the filter row and popups draw their edge as a 1 px outline inside a transparent border (as the
+    selection box), not a border: an unlayered reset (`border-width: 0`) cannot erase it. `--dzg-input-border` is its colour,
+    or `none` (no edge); default a discreet line in light mode, `--tz-fg-muted` mixed 75 % into `--tz-bg` (3:1 at
+    least on the input and on the header, WCAG 1.4.11), unchanged in dark mode. An invalid number keeps its 2 px
+    danger outline and its thicker end edge (now in the danger colour). Forced colours: the outline in the system's
+    colour.
+    `--dzg-input-fg`, `--dzg-input-radius`.
+
+### Tooltip (owner 4, 5, G4, G7)
+31. Its text size is the cells' (`--dzg-cell-font-size`, else the grid's) — was 0.875 em. Variables (all in
+    `variables.css`): `--dzg-tooltip-font-size`, `-font-family`, `-font-weight`, `-line-height`, `-max-width`
+    (`20rem`), `-padding-block` / `-padding-inline` (1 and 2 spacing units), `-radius` (`--dzg-radius`),
+    `-white-space` (`normal`; `pre-line` keeps the value's line breaks), `--dzg-tooltip-bg` / `-fg` (1.9.0).
+32. The tooltip says its side: `data-side="block-end"` (below its cell) or `"block-start"` (above, when there is no
+    room below), rewritten at each show. An arrow (a CSS triangle, no border: a reset cannot erase it) points from
+    that side to the cell, at the cell's middle, clamped inside the tooltip; the grid writes the place
+    (`--dzg-tip-at`, from the inline start: right to left needs nothing more). `--dzg-tooltip-arrow-size` (`.375rem`;
+    `0` turns it off), `--dzg-tooltip-arrow-color` (the tooltip's background). The tooltip moves away from its cell by
+    the arrow's size. Forced colours: the arrow in `CanvasText`. The arrow is drawn by `variables.css` (on as soon as
+    that sheet is loaded): the base sheet has no room for it in the audit screen's size (K.8).
+
+### More surfaces (owner « pense à toutes les variables », G5, G9, G10)
+33. Each a variable whose default is today's look (`variables.css` unless the base must read it): header
+    `--dzg-header-padding-inline` (default the cells', × the density), `--dzg-header-button-fg` /
+    `--dzg-header-button-active-fg` (filter and menu buttons, the filtered funnel), `--dzg-header-group-line`;
+    popups `--dzg-popup-radius`, `--dzg-popup-border`, `--dzg-popup-padding`; set filter
+    `--dzg-option-selected-bg`; buttons `--dzg-button-fg`, `--dzg-button-radius`; overlay `--dzg-overlay-fg`,
+    `--dzg-overlay-bg`; pager `--dzg-footer-bg`, `--dzg-footer-fg`. (A menu item's hover tint was left out: `menu.css`
+    has no room under its size line.) Not done, owner's call: `autoColumns` generic in its column type (gap M8) changes
+    three public declarations (`check:api`); the change is ready, not applied. The guide's table lists every variable the
+    sheets read (a test fails on one missing, either way).
+
+## Right to left
+The separator, the last column's line, the arrow's place and the header padding are logical; the separator's
+background position is mirrored by `:dir(rtl)`.
+
+## Tests
+`packages/dom/test/presentation-1-12.test.ts` (25, 29, 32), `packages/theme/test/presentation-1-12.test.ts` (24, 26–33,
+both copies, contrast pairs, the guide's table), browsers `node scripts/browser-1-12.mjs` (Chrome, Firefox, WebKit ×
+layered / unlayered × light / dark × ltr / ar × a page with Tailwind 3's preflight; axe; every variable's default and
+effect, table-driven).

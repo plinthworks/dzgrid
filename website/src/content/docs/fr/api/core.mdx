@@ -4687,13 +4687,15 @@ export declare function sameValues(a: unknown, b: unknown): boolean;
 ### AutoColumnsOptions
 
 ```ts
-export interface AutoColumnsOptions<T> {
+export interface AutoColumnsOptions<T, C extends {
+    readonly id: string;
+} = ColumnDef<T>> {
     readonly sample?: number;
     readonly header?: (field: string) => string;
-    readonly override?: Readonly<Record<string, Partial<ColumnDef<T>>>>;
-    readonly merge?: Readonly<Record<string, MergedColumn<T>>>;
+    readonly override?: Readonly<Record<string, Partial<C>>>;
+    readonly merge?: Readonly<Record<string, MergedColumn<T, C>>>;
     readonly hide?: readonly string[];
-    readonly add?: readonly ColumnDef<T>[];
+    readonly add?: readonly C[];
     readonly order?: readonly string[];
 }
 ```
@@ -4701,7 +4703,9 @@ export interface AutoColumnsOptions<T> {
 ### MergedColumn
 
 ```ts
-export type MergedColumn<T> = Partial<Omit<ColumnDef<T>, 'id'>> & {
+export type MergedColumn<T, C extends {
+    readonly id: string;
+} = ColumnDef<T>> = Partial<Omit<C, 'id'>> & {
     readonly from: readonly string[];
 };
 ```
@@ -4709,8 +4713,10 @@ export type MergedColumn<T> = Partial<Omit<ColumnDef<T>, 'id'>> & {
 ### autoColumns
 
 ```ts
-export declare function autoColumns<T>(rows: readonly T[], o?: AutoColumnsOptions<T>): {
-    columns: ColumnDef<T>[];
+export declare function autoColumns<T, C extends {
+    readonly id: string;
+} = ColumnDef<T>>(rows: readonly T[], o?: AutoColumnsOptions<T, NoInfer<C>>): {
+    columns: C[];
     problems: Problem[];
 };
 ```

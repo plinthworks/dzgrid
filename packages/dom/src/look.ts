@@ -44,6 +44,22 @@ export interface GridTheme {
   readonly inputBorder?: ThemeValue; readonly buttonBg?: ThemeValue; readonly buttonBorder?: ThemeValue; readonly menuItemHeight?: ThemeValue; readonly menuDisabled?: ThemeValue;
   readonly panelBg?: ThemeValue; readonly chipBg?: ThemeValue; readonly chipHoverBg?: ThemeValue; readonly controlActiveBg?: ThemeValue; readonly scrollbar?: ThemeValue;
   readonly scrollbarThumb?: ThemeValue; readonly scrollbarThumbActive?: ThemeValue;
+  // Rows' text (1.12.0): unset, the row's colour.
+  readonly rowHoverFg?: ThemeValue; readonly rowSelectedFg?: ThemeValue; readonly rowActiveFg?: ThemeValue;
+  // A mark between columns (a colour; size, height), the last row's and last column's lines, the resize mark after the last column.
+  readonly columnSeparator?: ThemeValue; readonly columnSeparatorSize?: ThemeValue; readonly columnSeparatorHeight?: ThemeValue; readonly lastRowLine?: ThemeValue; readonly lastColumnLine?: ThemeValue;
+  readonly headerSeparatorEnd?: ThemeValue;
+  // Header: side padding, buttons' colours, a group's end line, the sort marks.
+  readonly headerPaddingInline?: ThemeValue; readonly headerButtonFg?: ThemeValue; readonly headerButtonActiveFg?: ThemeValue; readonly headerGroupLine?: ThemeValue; readonly sortFg?: ThemeValue;
+  // Inputs, buttons, popups, a set filter's ticked value.
+  readonly inputFg?: ThemeValue; readonly inputRadius?: ThemeValue; readonly buttonFg?: ThemeValue; readonly buttonRadius?: ThemeValue; readonly popupRadius?: ThemeValue;
+  readonly popupBorder?: ThemeValue; readonly popupPadding?: ThemeValue; readonly optionSelectedBg?: ThemeValue;
+  // The tooltip and its arrow (`tooltipArrowSize: 0` turns it off).
+  readonly tooltipFontSize?: ThemeValue; readonly tooltipFontFamily?: ThemeValue; readonly tooltipFontWeight?: ThemeValue; readonly tooltipLineHeight?: ThemeValue; readonly tooltipMaxWidth?: ThemeValue;
+  readonly tooltipPaddingBlock?: ThemeValue; readonly tooltipPaddingInline?: ThemeValue; readonly tooltipRadius?: ThemeValue; readonly tooltipWhiteSpace?: ThemeValue; readonly tooltipArrowSize?: ThemeValue;
+  readonly tooltipArrowColor?: ThemeValue;
+  // Overlay and pager footer.
+  readonly overlayFg?: ThemeValue; readonly overlayBg?: ThemeValue; readonly footerBg?: ThemeValue; readonly footerFg?: ThemeValue;
 }
 
 /** An icon: an SVG's text, or an `SVGElement` (copied). Drawn in the mark's colour and size; cleaned, else refused (the default kept). */
@@ -53,6 +69,8 @@ export type GridIcon = string | SVGElement;
 export interface GridIcons {
   readonly sortAsc?: GridIcon;
   readonly sortDesc?: GridIcon;
+  /** A sortable column that is not sorted (1.12.0): not given, such a column shows no mark. Decorative (hidden from screen readers). */
+  readonly sortNone?: GridIcon;
   /** The header's filter button. */
   readonly filter?: GridIcon;
   /** A filtered column's filter button; `filter` (in the accent) otherwise. */

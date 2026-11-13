@@ -172,7 +172,7 @@ grid.addEventListener('dzg-row-move', (e) => {
 - Tant que les lignes sont triées ou regroupées, un déplacement est refusé et la grille dit pourquoi ;
   `whenSorted: 'allow'` envoie quand même l’événement et vous laisse décider.
 - Avec une source serveur, la grille ne fait qu’envoyer l’événement (`apply` est ignoré) : enregistrez le nouvel ordre
-  sur le serveur, puis rafraîchissez.
+  sur le serveur, puis appelez `reload()` (`refresh()` ne fait que redessiner).
 - Dans un [arbre](../tree/), une ligne peut être déposée dans une autre (`target.where: 'inside'`) ; `moveRows(rows,
   move, id, { parentId, setParent })` réécrit pour vous les identifiants de parents.
 - En Angular, la sortie `(rowMove)` porte le même événement, et `ctrl.rowDrag()` l’api (`move`, `step`).

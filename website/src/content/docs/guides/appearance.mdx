@@ -273,6 +273,25 @@ same from code, on this grid only:
   ]}
 />
 
+### Short dividers, the last row and column, hovered text (1.12.0)
+
+```css
+.dzg {
+  --dzg-column-separator: var(--tz-border);         /* a mark between columns… */
+  --dzg-column-separator-height: 60%;               /* …60 % of the row's height, centred */
+  --dzg-column-separator-size: 1px;
+  --dzg-last-column-line: var(--dzg-line, 1px) solid var(--tz-border);   /* close the table after its last column */
+  --dzg-last-row-line: none;                        /* no line under the last row */
+  --dzg-row-hover-bg: light-dark(#eef2ff, #1e1b4b);
+  --dzg-row-hover-fg: light-dark(#1e1b4b, #e0e7ff); /* the hovered row's text */
+  --dzg-input-border: none;                         /* filter boxes without an edge */
+  --dzg-tooltip-arrow-size: 0;                      /* no arrow on the tooltip */
+}
+```
+
+All need `variables.css`. Content that sets its own colour (a coloured mark in a part) keeps it under
+`--dzg-row-hover-fg`; content that should follow the row's text uses `currentColor` or `color: inherit` in its own CSS.
+
 ## Column widths
 
 Widths are column options, not CSS: `width` (pixels), `flex` (a share of the room left), `minWidth`, `maxWidth`,

@@ -41,6 +41,7 @@ export declare class DzGridElement<T = unknown> extends Base {
     set settings(v: Partial<GridSettings<T>>);
     get env(): GridEnv;
     set env(v: GridEnv);
+    reload(): void;
     update(patch: Partial<GridSettings<T>>): void;
     connectedCallback(): void;
     disconnectedCallback(): void;
@@ -88,6 +89,7 @@ export declare class DzGridElement<T = unknown> extends Base {
     set settings(v: Partial<GridSettings<T>>);
     get env(): GridEnv;
     set env(v: GridEnv);
+    reload(): void;
     update(patch: Partial<GridSettings<T>>): void;
     connectedCallback(): void;
     disconnectedCallback(): void;

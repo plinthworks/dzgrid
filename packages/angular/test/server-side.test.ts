@@ -81,6 +81,18 @@ describe('DzgController on a list loaded in blocks (Q-NG A)', () => {
     expect(t.ctl.kernel()!.rows.row(dataKey('s1')!)).toBeUndefined();
   });
 
+  it('reload() asks the window again as refresh({}) does, rows kept (reload.md 4); nothing without a grid', () => {
+    const s = server();
+    const t = mount(infiniteRows(s.data, { blockSize: 10 }));
+    for (const c of s.calls.slice()) s.rows(c);
+    const n = s.calls.length;
+    t.ctl.reload();
+    expect(s.calls.length).toBeGreaterThan(n);
+    expect(t.ctl.kernel()!.rows.row(dataKey('s1')!)).toBeDefined();
+    t.fixture.destroy();
+    expect(() => t.ctl.reload()).not.toThrow();
+  });
+
   it('applyTransaction updates a row held; applyTransactionAsync gathers, done per transaction; null without a grid', async () => {
     const s = server();
     const t = mount(infiniteRows(s.data, { blockSize: 10, batchMs: 5 }));

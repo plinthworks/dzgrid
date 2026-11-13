@@ -1,5 +1,5 @@
 import type { ColumnLayout, ResolvedColumn } from '@dzgrid/core';
-import { CHECK_WIDTH, setAttr, setPx, range } from './rows.js';
+import { CHECK_WIDTH, setAttr, setPx, range, lastColumn } from './rows.js';
 import { swapClasses } from './write.js';
 
 /**
@@ -197,6 +197,7 @@ export class HeaderRenderer {
       el.remove();
       view.cells.delete(id);
     }
+    const last = lastColumn(layout);
     const place = (seg: HTMLElement, slice: ColumnLayout['start'], indices: readonly number[], absolute: boolean) => {
       let cursor: ChildNode | null = seg.firstChild;
       if (cursor && cursor === view.lead) cursor = cursor.nextSibling;
@@ -209,6 +210,7 @@ export class HeaderRenderer {
           view.cells.set(col.id, el);
         }
         setAttr(el, 'aria-colindex', String(p.colIndex(col.id)));
+        setAttr(el, 'data-last-col', col.id === last ? '' : null);
         setPx(el, 'inline-size', slice.widths.sizeAt(c));
         if (absolute) setPx(el, 'inset-inline-start', slice.widths.offsetOf(c));
         else if (el.style.getPropertyValue('inset-inline-start')) el.style.removeProperty('inset-inline-start');

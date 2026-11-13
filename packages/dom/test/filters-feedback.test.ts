@@ -120,7 +120,7 @@ describe('J: the Clear button keeps the column in its name, not in its text; the
     const btn = FILTERS_CSS.match(/:where\(\.dzg-fbtn\)\{([^}]*)\}/)![1]!;
     expect(btn).not.toMatch(/margin-inline-end|margin-inline:/);
     expect(btn).toMatch(/position:relative;z-index:1/);
-    expect(FILTERS_CSS).toContain(':where(.dzg-hcell:has(>.dzg-fbtn))::after{content:"";order:9;flex:none;inline-size:calc(var(--dzg-target-min,24px) - var(--dzg-cell-padding-inline,.5rem)*var(--dzg-density,1))}');
+    expect(FILTERS_CSS).toContain(':where(.dzg-hcell:has(>.dzg-fbtn))::after{content:"";order:9;flex:none;inline-size:calc(var(--dzg-target-min,24px) - var(--dzg-header-padding-inline,var(--dzg-cell-padding-inline,.5rem))*var(--dzg-density,1))}'); // the header's own padding, 1.12.0
   });
 
   it('a column narrower than its header\'s content cuts at its start, so the button stays clear of the grip (2026-11-12)', () => {

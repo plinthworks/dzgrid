@@ -95,13 +95,13 @@ describe('columns.css', () => {
     expect(decl(/^\.dzg-hcell:has\(> \.dzg-reapply\)::after$/)).toBe(gap);
     expect(gap).toMatch(/content: ""/);
     expect(gap).toMatch(/order: 9/);
-    expect(gap).toMatch(/inline-size: calc\(var\(--dzg-target-min, 24px\) - var\(--dzg-cell-padding-inline, 0\.5rem\) \* var\(--dzg-density, 1\)\)/); // the density's padding (1.9.0)
+    expect(gap).toMatch(/inline-size: calc\(var\(--dzg-target-min, 24px\) - var\(--dzg-header-padding-inline, var\(--dzg-cell-padding-inline, 0\.5rem\)\) \* var\(--dzg-density, 1\)\)/); // the header's padding × the density (1.9.0, 1.12.0)
     // Narrower than its content (a column at its 40 px minimum), the cell cuts at its start: the button keeps its gap.
     expect(decl(/^\.dzg-hcell:has\(> \.dzg-mbtn\)$/)).toMatch(/justify-content: flex-end/);
     expect(decl(/^\.dzg-hcell:has\(> \.dzg-reapply\)$/)).toMatch(/justify-content: flex-end/);
     expect(decl(/^\.dzg-reapply$/)).toMatch(/order: 3/);
-    // Its dots: a shape over currentColor, no glyph font.
-    expect(decl(/^\.dzg-mbtn::before$/)).toMatch(/background: (currentColor|radial-gradient)/);
+    // Its dots: a shape over currentColor, no glyph font; only where the app gave no menu icon (1.12.0).
+    expect(decl(/^\.dzg-mbtn:where\(:not\(\[data-dzg-icons~=menu\] \*\)\)::before$/)).toMatch(/background: (currentColor|radial-gradient)/);
     expect(css).not.toMatch(/content: ['"][⋮…]/);
   });
 

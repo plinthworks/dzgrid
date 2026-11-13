@@ -166,6 +166,15 @@ export class DzGridElement<T = unknown> extends Base {
     if (any) this.update(patch as Partial<GridSettings<T>>);
   }
 
+  /**
+   * Asks the data again, then paints: its grid's `api.reload()` (reload.md 5, 1.12.0) — on a server, the page or the
+   * window fetched again, filters, sort, page and selection kept; on given rows, nothing to fetch. `grid.api.refresh()`
+   * only paints. Nothing before the grid exists.
+   */
+  reload(): void {
+    this.#grid?.api.reload?.();
+  }
+
   /** `grid.update`; nothing before the grid exists. A patch the grid refuses (it throws) is told. */
   update(patch: Partial<GridSettings<T>>): void {
     try {

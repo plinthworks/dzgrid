@@ -120,7 +120,8 @@ describe('the site’s examples', () => {
       for (const m of prose.matchAll(/`(?:[\w.?]+\.)?([a-z][A-Za-z]*)\(/g)) {
         const name = m[1]!;
         if (OTHERS.has(name)) continue;
-        if (!new RegExp(`(^|[^\\w$])${name}(\\?)?(<[^>]*>)?\\(|^## ${name}$|(^|[^\\w$])${name}\\??: `, 'm').test(declared)) missing.add(`${f.page}: ${name}`);
+        // A type parameter list may hold one nested `<…>` (autoColumns' `= ColumnDef<T>`, 1.12.0).
+        if (!new RegExp(`(^|[^\\w$])${name}(\\?)?(<(?:[^<>]|<[^<>]*>)*>)?\\(|^## ${name}$|(^|[^\\w$])${name}\\??: `, 'm').test(declared)) missing.add(`${f.page}: ${name}`);
       }
     }
     expect([...missing]).toEqual([]);

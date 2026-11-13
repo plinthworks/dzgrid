@@ -84,3 +84,5 @@ properties. It listens to `dzg-*` events.
     would need a binding language of its own (which field into which node, events, cleanup) that the grid does not
     have; a part is a few lines and builds nodes, never HTML from data. Other children of the element are left as they
     are, beside the grid.
+15. **`reload()`** (1.12.0, reload.md 5): the element's method asks the data again — its grid's `api.reload()`;
+    nothing before the grid exists. `grid.api.refresh()` only paints.

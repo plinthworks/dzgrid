@@ -112,21 +112,23 @@ describe('@dzgrid/theme/variables.css (8–16)', () => {
     const tip = body(vars, '.dzg-tooltip');
     expect(tip).toContain('color: var(--dzg-tooltip-fg, var(--tz-bg));');
     expect(tip).toContain('background: var(--dzg-tooltip-bg, var(--tz-fg));');
-    expect(vars).toContain('border-color: var(--dzg-input-border, var(--tz-fg-muted));');
-    expect(vars).toContain('background: var(--dzg-input-bg, var(--tz-bg));');
+    // 1.12.0: the input's edge and surface read by the base (presentation-settings.md 30).
+    expect(base).toContain('outline: 1px solid var(--dzg-input-border, light-dark(');
+    expect(base).toContain('background: var(--dzg-input-bg, var(--tz-bg));');
     expect(vars).toContain('border-color: var(--dzg-button-border, var(--tz-fg-muted));');
     expect(vars).toContain('background: var(--dzg-button-bg, var(--dzg-header-bg, var(--tz-bg-raised)));');
   });
 
   it('the spacing unit: the base’s gaps as its multiples, .25rem by default (14)', () => {
     expect(body(vars, '.dzg-hcell, .dzg-check')).toContain('gap: calc(var(--dzg-space, 0.25rem) * 1);');
-    expect(body(vars, '.dzg .dzg-popup')).toContain('padding: calc(var(--dzg-space, 0.25rem) * 3);');
+    expect(body(vars, '.dzg .dzg-popup')).toContain('padding: var(--dzg-popup-padding, calc(var(--dzg-space, 0.25rem) * 3));');
     expect(body(vars, '.dzg-overlay')).toContain('gap: calc(var(--dzg-space, 0.25rem) * 2);');
   });
 
   it('the icon size: the sort mark and the funnel, 12 px for the funnel by default — today’s insets (16)', () => {
     expect(body(vars, '.dzg-sort')).toContain('font-size: var(--dzg-icon-size, 0.75em);');
-    const f = body(vars, '.dzg-fbtn::before, .dzg-fbtn::after');
+    // Guarded: only where the app gave no funnel (1.12.0, 24).
+    const f = body(vars, '.dzg-fbtn:where(:not([data-dzg-icons~=filter] *, [data-dzg-icons~=filter-active] [data-dzg-filtered] > *))::before, .dzg-fbtn:where(:not([data-dzg-icons~=filter] *))::after');
     // 24 px button, 12 px funnel: 6 px each side, 6 px above, 7 below (today's inset-block: 6px 7px; inset-inline: 6px).
     expect(f).toContain('inset-inline: calc(50% - var(--dzg-icon-size, 12px) / 2);');
     expect(f).toContain('inset-block: calc(50% - var(--dzg-icon-size, 12px) / 2) calc(50% - var(--dzg-icon-size, 12px) / 2 + var(--dzg-icon-size, 12px) / 12);');
@@ -141,7 +143,8 @@ describe('@dzgrid/theme/variables.css (8–16)', () => {
       '--dzg-tooltip-bg': 'var(--tz-fg)',
       '--dzg-tooltip-fg': 'var(--tz-bg)',
       '--dzg-input-bg': 'var(--tz-bg)',
-      '--dzg-input-border': 'var(--tz-fg-muted)',
+      // 1.12.0 (owner 3): a discreet line in light mode, the muted colour in dark.
+      '--dzg-input-border': 'light-dark(color-mix(in srgb, var(--tz-fg-muted) 75%, var(--tz-bg)), var(--tz-fg-muted))',
       '--dzg-button-bg': 'var(--dzg-header-bg)',
       '--dzg-button-border': 'var(--tz-fg-muted)',
       '--dzg-box-on-bg': 'var(--tz-accent)',
@@ -178,7 +181,7 @@ describe('@dzgrid/theme/variables.css (8–16)', () => {
   });
 
   it('the header buttons keep their gap for the grip whatever the density (15)', () => {
-    expect(file('../columns.css')).toContain('inline-size: calc(var(--dzg-target-min, 24px) - var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1));');
+    expect(file('../columns.css')).toContain('inline-size: calc(var(--dzg-target-min, 24px) - var(--dzg-header-padding-inline, var(--dzg-cell-padding-inline, 0.5rem)) * var(--dzg-density, 1));');
     expect(file('../columns.css')).not.toContain('- var(--dzg-cell-padding-inline, 0.5rem));');
   });
 });

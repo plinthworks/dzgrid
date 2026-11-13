@@ -54,16 +54,29 @@ export class DzgController<T = unknown> {
   ensureColumnVisible(column: string): void {
     this.#api()?.ensureColumnVisible?.(column);
   }
-  /** Paints again. */
+  /**
+   * Paints again, nothing more: no request is sent, the rows stay as held. To ask the data again, `reload()` (1.12.0)
+   * — or this method with an object, `refresh({})`.
+   */
   refresh(): void;
   /**
-   * The rows asked of the server again, then painted (Phase 8, Q-NG A): the window behind the rows shown (the thin busy
-   * line), or with `{ purge: true }` everything let go and the list back at its top.
+   * With an object, the rows are asked again, then painted (Phase 8, Q-NG A) — unlike `refresh()`, which only paints:
+   * `{}` asks the window (or page) behind the rows shown (the thin busy line), as `reload()` does; `{ purge: true }`
+   * lets everything go and the list starts again at its top.
    */
   refresh(o: { readonly purge?: boolean }): void;
   refresh(o?: { readonly purge?: boolean }): void {
     if (o) untracked(this.kernel)?.rows.invalidate(o);
     this.#api()?.refresh();
+  }
+  /**
+   * Asks the data again, then paints (reload.md, 1.12.0): on a server, the page or the window's blocks fetched again,
+   * the rows shown kept meanwhile and the filters, sort, page and selection unchanged; on rows the application gives,
+   * nothing to fetch — they are worked out again and painted. The same as `refresh({})`; `refresh()` only paints.
+   * Nothing without a grid.
+   */
+  reload(): void {
+    this.refresh({});
   }
   /** A host's live change (row-transactions-async.md): the client's rows, or the rows held of a list in blocks. Null without a grid or on pages. */
   applyTransaction(tx: RowTransaction<T>): TransactionResult | null {

@@ -84,7 +84,7 @@ changes nothing by itself; a feature's sheet is named. *Key* is the `theme` sett
 | `--dzg-row-line` | `rowLine` | The line between rows (a border; `none`) | as the frame | variables |
 | `--dzg-column-line` | `columnLine` | A line between columns (a border) | `none` | variables |
 | `--dzg-header-line` | `headerLine` | The line under each header row | as the frame | variables |
-| `--dzg-header-separator`, `-size`, `-height` | `headerSeparator`, `headerSeparatorSize`, `headerSeparatorHeight` | The marks between resizable header cells | `--tz-border`, `2px`, `50%` | variables |
+| `--dzg-header-separator`, `--dzg-header-separator-size`, `--dzg-header-separator-height` | `headerSeparator`, `headerSeparatorSize`, `headerSeparatorHeight` | The marks between resizable header cells | `--tz-border`, `2px`, `50%` | variables |
 | `--dzg-pinned-column-line` | `pinnedColumnLine` | The pinned columns' edge | as the frame | variables |
 | `--dzg-pinned-shadow` | `pinnedShadow` | A `box-shadow` at that edge while content is under it, written for the start side (mirrored by the grid) | none | base |
 | `--dzg-detail-line` | `detailLine` | A detail panel's start rule | `3px solid --tz-border` | variables |
@@ -112,16 +112,38 @@ changes nothing by itself; a feature's sheet is named. *Key* is the `theme` sett
 | `--dzg-icon-size` | `iconSize` | Sort mark, chevrons, grip, funnel, the app's icons in buttons | each mark's own (funnel `12px`) | variables, feature layouts |
 | `--dzg-popup-bg`, `--dzg-popup-shadow` | `popupBg`, `popupShadow` | Filter popups and menus | `--tz-bg`, a soft shadow | variables |
 | `--dzg-tooltip-bg`, `--dzg-tooltip-fg` | `tooltipBg`, `tooltipFg` | The tooltip | `--tz-fg` on `--tz-bg` reversed | variables |
-| `--dzg-input-bg`, `--dzg-input-border` | `inputBg`, `inputBorder` | The filters' boxes | `--tz-bg`, `--tz-fg-muted` | variables |
+| `--dzg-tooltip-font-size`, `--dzg-tooltip-font-family`, `--dzg-tooltip-font-weight`, `--dzg-tooltip-line-height` | `tooltipFontSize`, `tooltipFontFamily`, `tooltipFontWeight`, `tooltipLineHeight` | The tooltip's type (1.12.0) | the cells' size, the grid's font | base, variables |
+| `--dzg-tooltip-max-width`, `--dzg-tooltip-padding-block`, `--dzg-tooltip-padding-inline`, `--dzg-tooltip-radius` | `tooltipMaxWidth`, `tooltipPaddingBlock`, `tooltipPaddingInline`, `tooltipRadius` | The tooltip's box (1.12.0) | `20rem`, 1 and 2 spacing units, `--dzg-radius` | variables |
+| `--dzg-tooltip-white-space` | `tooltipWhiteSpace` | `pre-line` keeps the value's line breaks (1.12.0) | `normal` | variables |
+| `--dzg-tooltip-arrow-size`, `--dzg-tooltip-arrow-color` | `tooltipArrowSize`, `tooltipArrowColor` | The arrow toward the cell, on the side the tooltip opened (`0`: none; 1.12.0) | `.375rem`, the tooltip's background | variables |
+| `--dzg-input-bg`, `--dzg-input-border` | `inputBg`, `inputBorder` | The filters' boxes: their surface, their edge (a colour, or `none`; 1.12.0: never erased by a page's reset) | `--tz-bg`; light: `--tz-fg-muted` 75 % into `--tz-bg`, dark: `--tz-fg-muted` | base |
+| `--dzg-input-fg`, `--dzg-input-radius` | `inputFg`, `inputRadius` | The filters' boxes: text, corners (1.12.0) | `--tz-fg`, `--dzg-radius` | variables |
 | `--dzg-button-bg`, `--dzg-button-border` | `buttonBg`, `buttonBorder` | Pager, filter footer, retry buttons (Apply keeps the accent) | `--dzg-header-bg`, `--tz-fg-muted` | variables |
 | `--dzg-menu-item-height`, `--dzg-menu-disabled` | `menuItemHeight`, `menuDisabled` | Menu items (never under 24 px), a disabled one | `32px`, `--tz-fg-muted` | `menu.css`, `columns.css` |
 | `--dzg-panel-bg` | `panelBg` | The dock and the filters panel | `--tz-bg` | `dock.css`, `filters-panel.css` |
 | `--dzg-chip-bg`, `--dzg-chip-hover-bg`, `--dzg-control-active-bg` | `chipBg`, `chipHoverBg`, `controlActiveBg` | Chips; a pressed panel button | accent / text mixes | feature sheets |
 | `--dzg-scrollbar`, `--dzg-scrollbar-thumb`, `--dzg-scrollbar-thumb-active` | `scrollbar`, `scrollbarThumb`, `scrollbarThumbActive` | Thin or system scrollbars, the thumb at rest and under the pointer | `thin`, `--tz-border`, `--tz-fg-muted` | `dzgrid.comfort.css` |
+| `--dzg-row-hover-fg`, `--dzg-row-selected-fg`, `--dzg-row-active-fg` | `rowHoverFg`, `rowSelectedFg`, `rowActiveFg` | The text of a row under the pointer, selected, holding the focus; content with its own colour keeps it (1.12.0) | the row's colour | variables |
+| `--dzg-column-separator`, `--dzg-column-separator-size`, `--dzg-column-separator-height` | `columnSeparator`, `columnSeparatorSize`, `columnSeparatorHeight` | A mark between body columns: its colour, thickness, height (`60%`: a short centred divider); not after the last column (1.12.0) | none, `--dzg-line`, `100%` | variables |
+| `--dzg-last-row-line`, `--dzg-last-column-line` | `lastRowLine`, `lastColumnLine` | The line under the last row shown, after the last column (borders; 1.12.0) | `--dzg-row-line`, `--dzg-column-line` | variables |
+| `--dzg-header-separator-end` | `headerSeparatorEnd` | The resize mark after the last column (`transparent` drops it; 1.12.0) | as the others | variables |
+| `--dzg-header-padding-inline` | `headerPaddingInline` | Header cells' side padding (× the density; 1.12.0) | the cells' | variables |
+| `--dzg-header-button-fg`, `--dzg-header-button-active-fg` | `headerButtonFg`, `headerButtonActiveFg` | The header's filter and menu buttons; a filtered column's funnel (1.12.0) | `--tz-fg-muted`, `--tz-accent` | variables |
+| `--dzg-header-group-line` | `headerGroupLine` | A column group's end line (1.12.0) | as the frame | variables |
+| `--dzg-sort-fg` | `sortFg` | The sort marks (1.12.0) | `--tz-fg-muted` | variables |
+| `--dzg-button-fg`, `--dzg-button-radius` | `buttonFg`, `buttonRadius` | Buttons' text and corners (1.12.0) | `--tz-fg`, `--dzg-radius` | variables |
+| `--dzg-popup-radius`, `--dzg-popup-border`, `--dzg-popup-padding` | `popupRadius`, `popupBorder`, `popupPadding` | Filter popups and menus: corners, edge (a border), padding (1.12.0) | `--dzg-radius`, as the frame, 3 spacing units | variables |
+| `--dzg-option-selected-bg` | `optionSelectedBg` | A ticked value in a set filter's list (1.12.0) | none | variables |
+| `--dzg-overlay-fg`, `--dzg-overlay-bg` | `overlayFg`, `overlayBg` | The loading, no-rows and error message (1.12.0) | `--tz-fg-muted`, `--tz-bg` | variables |
+| `--dzg-footer-fg`, `--dzg-footer-bg` | `footerFg`, `footerBg` | The pager's strip (1.12.0) | `--tz-fg-muted`, `--dzg-header-bg` | variables |
 
 Read-only (written by the grid; no key): `--dzg-row-height`, `--dzg-header-height`, `--dzg-density` (`.75` compact,
 `1`, `1.25` spacious: the side padding follows the density; `.dzg { --dzg-density: 1 }` in your own CSS keeps it fixed).
-Pinned columns' own surface: `.dzg-seg-start`, `.dzg-seg-end` in your CSS (they follow hover and selection).
+**Classes are not an API** (1.12.0): the grid's classes, pseudo-elements, `data-*` marks and DOM order are internal
+and may change in any release. Everything a look needs is a variable above, a `theme` key or a setting; if one is
+missing, ask for it rather than styling an internal class. Your own classes (`rowClass`, `ui.cellClass`,
+`ui.headerClass`) stay yours. A dropdown of your own opened inside a filter popup must render inside the popup (it
+sits in the top layer: a list appended to `body` falls beneath it).
 
 ### The `theme` setting
 

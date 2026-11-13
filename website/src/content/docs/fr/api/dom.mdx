@@ -89,6 +89,7 @@ export interface GridApi {
     ensureVisible(row: RowKey, column?: string): void;
     ensureColumnVisible?(column: string): void;
     refresh(): void;
+    reload?(): void;
     announce(text: string): void;
 }
 ```

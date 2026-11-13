@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DzGrid browser suite: 1.12.0 looks</title>
+<script type="importmap">{ "imports": {
+  "@dzgrid/core": "/packages/core/src/index.ts",
+  "@dzgrid/core/internal": "/packages/core/src/internal.ts",
+  "@dzgrid/dom/internal": "/packages/dom/src/internal.ts"
+} }</script>
+<script>
+  // The sheets by the query (scripts/browser-1-12.mjs): Tailwind 3's preflight first (an unlayered reset, as a real app
+  // has), then the layered or unlayered copies; `vars=0` leaves variables.css out (today's look, for the defaults).
+  {
+    const q = new URLSearchParams(location.search);
+    const u = q.get('css') === 'unlayered' ? '.unlayered' : '';
+    const sheets = [...(q.get('preflight') ? ['/node_modules/tailwindcss3/src/css/preflight.css'] : []), `/packages/theme/dzgrid${u}.css`, `/packages/theme/columns${u}.css`, `/packages/theme/menu${u}.css`, ...(q.get('vars') === '0' ? [] : [`/packages/theme/variables${u}.css`])];
+    for (const href of sheets) document.write(`<link rel="stylesheet" href="${href}">`);
+  }
+</script>
+<style>
+  body { margin: 16px; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); }
+  #host { inline-size: 820px; block-size: 360px; display: flex; flex-direction: column; }
+  #host > .dzg { flex: 1 1 auto; }
+  /* An application's own part with its own colour (owner 1: it keeps it under a hover foreground). */
+  .app-led { color: rgb(0, 128, 0); }
+</style>
+</head>
+<body>
+<main><h1>DzGrid</h1><div id="host"></div></main>
+<script type="module" src="./v1-12.ts"></script>
+</body>
+</html>

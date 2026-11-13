@@ -340,8 +340,14 @@ grid.source = sourceRows<Asteroid>({ fetch: page });
 - `operations` place chaque étape : `'server'` (le défaut avec une source) envoie filtre, recherche, tri et page au
   serveur ; `{ filter: 'client', sort: 'client', page: 'off' }` demande toutes les lignes une fois et finit dans le
   navigateur. Des pages côté serveur impliquent aussi filtre, recherche et tri sur le serveur.
-- `refresh` (Angular `ctrl.refresh({})`, commande `rows.refresh` en TypeScript seul) redemande et garde les lignes
-  affichées entre-temps ; le réglage `busy` montre une fine barre pendant que vous rechargez.
+- Pour redemander les données — après un enregistrement, sur un message du serveur, derrière votre propre bouton
+  « Actualiser » — appelez **`reload()`** : la page courante (ou les blocs de la fenêtre) est redemandée, les lignes
+  affichées restent entre-temps, et les filtres, le tri, la page et la sélection sont gardés. C’est `grid.api.reload()`
+  en TypeScript seul, `ctrl.reload()` sur le `DzgController` d’Angular, `el.reload()` sur `<dz-grid>`.
+  **`refresh()` ne fait que redessiner et n’envoie aucune requête** ; `ctrl.refresh({})` d’Angular est l’ancienne
+  écriture de `reload()`, et `ctrl.refresh({ purge: true })` lâche toutes les lignes et repart du haut. Sur les lignes
+  que vous donnez (`rows`), il n’y a rien à redemander : `reload()` les recalcule et les redessine. Le réglage `busy`
+  montre une fine barre pendant que vous rechargez.
 
 ## Des colonnes tirées de la première réponse
 

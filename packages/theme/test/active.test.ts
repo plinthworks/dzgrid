@@ -34,7 +34,7 @@ describe('the active cell and its row (owner S12-Q8)', () => {
     expect(c).toMatch(/outline-offset: -2px/);
     // The inner contrast line: one px of the page's background inside the ring (the outline paints over the shadow).
     expect(c).toMatch(/box-shadow: inset 0 0 0 3px var\(--tz-bg\)/);
-    expect(c).toMatch(/background: var\(--dzg-cell-active-bg, color-mix\(in srgb, var\(--tz-accent\) \d+%, var\(--tz-bg\)\)\)/);
+    expect(c).toMatch(/background-color: var\(--dzg-cell-active-bg, color-mix\(in srgb, var\(--tz-accent\) \d+%, var\(--tz-bg\)\)\)/);
     // No size change: neither a border nor a width.
     expect(c).not.toMatch(/border|width|padding|margin/);
   });
@@ -95,7 +95,7 @@ describe('the active cell and its row (owner S12-Q8)', () => {
 describe('Escape\'s quiet state (owner S12-Q16)', () => {
   it('the focused cell\'s ring, inner line and tint, and its row\'s tint, are guarded (`:where(:not([data-dzg-quiet] *))`, the weight unchanged); the quiet rule only drops the ring (over every layer: !important), never a background (an app\'s colour, a block\'s tint stay)', () => {
     expect(decl(CELL)).toMatch(/outline: 2px solid/);
-    expect(decl(CELL)).toMatch(/background: var\(--dzg-cell-active-bg/);
+    expect(decl(CELL)).toMatch(/background-color: var\(--dzg-cell-active-bg/); // a colour only: the column separator's image stays (1.12.0)
     for (const sel of [ROW, ROW_START, ROW_END]) expect(decl(sel), String(sel)).toMatch(/background: var\(--dzg-row-active-bg/);
     const q = decl(/^\[data-dzg-quiet\] \.dzg-cell:focus$/);
     expect(q).toMatch(/outline: none !important/);

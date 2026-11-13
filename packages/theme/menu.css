@@ -52,6 +52,8 @@
     inline-size: 1rem;
     block-size: 1rem;
     margin-inline-start: auto;
+  }
+  .dzg-msub:where(:not([data-dzg-icons~=submenu] *)) {
     background: currentColor;
     clip-path: path("M6 3.5l4.5 4.5L6 12.5l-1.1-1.1L8.3 8 4.9 4.6z");
   }

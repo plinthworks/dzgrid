@@ -18,6 +18,7 @@ copied — for any of them:
 | Key | The mark |
 |---|---|
 | `sortAsc`, `sortDesc` | A sorted column's arrow. |
+| `sortNone` | A sortable column that is not sorted (1.12.0); without it, such a column shows no mark. Decorative: screen readers hear the sort state from `aria-sort`, not from the mark. |
 | `filter` | The header's filter button. |
 | `filterActive` | A filtered column's filter button; without it, `filter` in the accent colour. |
 | `menu` | The column menu's button. |
@@ -28,7 +29,7 @@ copied — for any of them:
 The icon is drawn in the mark's colour and size (`--dzg-icon-size`), whatever its own fill. It needs `theming()` from
 `@dzgrid/dom/theme`. An icon that is not plain shapes — a `<script>`, a `<style>`, a `<foreignObject>`, an `on…`
 attribute, a link out of the icon, more than 20 000 characters — is refused: the default stays and an
-`invalid-setting` warning is told. The icons are drawn as `data:` images: a Content Security Policy must allow
+`invalid-setting` warning is told. Your icon always wins: the grid's own mark is not drawn under it, with the layered sheets and with the `*.unlayered.css` copies alike (1.12.0). The icons are drawn as `data:` images: a Content Security Policy must allow
 `img-src data:`.
 
 ## Example
@@ -50,7 +51,7 @@ createGrid<Plant>(document.getElementById('plants')!, {
   columns: [{ id: 'name', header: 'Plant' }, { id: 'height', header: 'Height (cm)', type: 'number' }],
   getRowId: (p) => p.id,
   messages: EN,
-  icons: { sortAsc: '<svg viewBox="0 0 16 16"><path d="M8 3l5 8H3z"/></svg>', filter: funnel },
+  icons: { sortAsc: '<svg viewBox="0 0 16 16"><path d="M8 3l5 8H3z"/></svg>', sortNone: '<svg viewBox="0 0 16 16"><path d="M8 2l4 5H4zM8 14l4-5H4z"/></svg>', filter: funnel },
   features: [theming()],
 });
 ```

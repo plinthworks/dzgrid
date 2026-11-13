@@ -26,7 +26,9 @@ Avec une source, les filtres, la recherche, le tri et les pages se font sur le s
 [`operations`](../operations/) dit autrement (avec `infiniteRows`, toujours le serveur, en une seule liste). La grille s’occupe seule du reste : le message de chargement, la fine
 barre pendant que des lignes à l’écran se rechargent, une erreur avec « Réessayer », les réponses qui arrivent dans le
 désordre (seule la dernière compte), une sélection sur toutes les pages. Une nouvelle source donnée par `update()`
-redemande depuis le début.
+redemande depuis le début. Pour redemander les mêmes lignes (après un enregistrement), appelez `reload()` —
+`grid.api.reload()`, `ctrl.reload()` d’Angular, `el.reload()` de `<dz-grid>` ; `refresh()` ne fait que redessiner
+([Données du serveur](../../guides/server-data/)).
 
 ## Exemple
 

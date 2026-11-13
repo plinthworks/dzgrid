@@ -21,7 +21,7 @@ export const FILTERS_CSS =
   ':where(.dzg-fbtn){order:1;flex:none;inline-size:24px;block-size:24px;margin-inline-start:auto;position:relative;z-index:1}' +
   // Narrower than that (a column at its minimum), the cell packs at its end, so what is cut is the label's side.
   ':where(.dzg-hcell:has(>.dzg-fbtn)){justify-content:end}' +
-  ':where(.dzg-hcell:has(>.dzg-fbtn))::after{content:"";order:9;flex:none;inline-size:calc(var(--dzg-target-min,24px) - var(--dzg-cell-padding-inline,.5rem)*var(--dzg-density,1))}' +
+  ':where(.dzg-hcell:has(>.dzg-fbtn))::after{content:"";order:9;flex:none;inline-size:calc(var(--dzg-target-min,24px) - var(--dzg-header-padding-inline,var(--dzg-cell-padding-inline,.5rem))*var(--dzg-density,1))}' +
   // Beside a button the label gives way, cut with an ellipsis.
   ':where(.dzg-hcell>.dzg-hlabel){min-inline-size:0;overflow:hidden;text-overflow:ellipsis}' +
   // Step 21, `header.filterBox`: the name, then the box taking what is left.

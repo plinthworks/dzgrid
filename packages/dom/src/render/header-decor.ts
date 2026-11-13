@@ -39,7 +39,8 @@ export function decorateHeader<T>(g: GridContext<T>, col: { id: string; sortable
   const at = sort.findIndex((s) => s.column === col.id);
   setAttr(el, 'aria-sort', at === 0 ? (sort[0]!.dir === 'asc' ? 'ascending' : 'descending') : null);
   let mark = el.querySelector<HTMLElement>(':scope > .dzg-sort');
-  if (at === -1) {
+  // Unsorted: no mark, unless the app gave one for a sortable column (`icons.sortNone`, presentation-settings.md 25).
+  if (at === -1 && !(col.sortable && g.settings.icons?.sortNone)) {
     mark?.remove();
     return null;
   }
@@ -49,8 +50,9 @@ export function decorateHeader<T>(g: GridContext<T>, col: { id: string; sortable
     mark.setAttribute('aria-hidden', 'true');
     el.append(mark);
   }
-  setAttr(mark, 'data-dir', sort[at]!.dir);
-  const n = sort.length > 1 ? formattersFor(g.ctx).number()(at + 1) : '';
+  setAttr(mark, 'data-dir', at === -1 ? 'none' : sort[at]!.dir);
+  const many = at !== -1 && sort.length > 1;
+  const n = many ? formattersFor(g.ctx).number()(at + 1) : '';
   if (mark.textContent !== n) mark.textContent = n;
-  return sort.length > 1 ? g.msg('header.withSort', { header: col.def.header ?? col.id, priority: g.msg('sort.priority', { n: at + 1 }) }) : null;
+  return many ? g.msg('header.withSort', { header: col.def.header ?? col.id, priority: g.msg('sort.priority', { n: at + 1 }) }) : null;
 }

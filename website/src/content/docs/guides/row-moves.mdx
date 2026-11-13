@@ -170,7 +170,7 @@ grid.addEventListener('dzg-row-move', (e) => {
 - While the rows are sorted or grouped, a move is refused and the grid says why; `whenSorted: 'allow'` sends the event
   anyway and lets you decide.
 - With a server source the grid only sends the event (`apply` is ignored): save the new order on the server, then
-  refresh.
+  call `reload()` (`refresh()` only paints).
 - In a [tree](../tree/), a row can be dropped inside another (`target.where: 'inside'`); `moveRows(rows, move, id, {
   parentId, setParent })` rewrites the parent ids for you.
 - In Angular, the `(rowMove)` output carries the same event, and `ctrl.rowDrag()` the api (`move`, `step`).

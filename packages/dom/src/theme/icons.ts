@@ -46,15 +46,15 @@ export function cleanIcon(input: string | SVGElement): { ok: string } | { refuse
 }
 
 /** The icons' names (the setting's keys) and the marks each draws, by how the mark is made. */
-export const ICONS = { sortAsc: 0, sortDesc: 0, filter: 0, filterActive: 0, menu: 0, chevron: 0, submenu: 0, grip: 0 } as const;
+export const ICONS = { sortAsc: 0, sortDesc: 0, sortNone: 0, filter: 0, filterActive: 0, menu: 0, chevron: 0, submenu: 0, grip: 0 } as const;
 
 const on = (name: string, sel: string) => `[data-dzg-icons~=${name}] ${sel}`;
 /** Marks drawn in the text (a `::before` of their own size). */
-const INLINE = [on('sort-asc', '.dzg-sort[data-dir=asc]::before'), on('sort-desc', '.dzg-sort[data-dir=desc]::before'), on('chevron', ':is(.dzg-toggle,.dzg-gtoggle)::before'), on('grip', '.dzg-grip::before')];
+const INLINE = [on('sort-asc', '.dzg-sort[data-dir=asc]::before'), on('sort-desc', '.dzg-sort[data-dir=desc]::before'), on('sort-none', '.dzg-sort[data-dir=none]::before'), on('chevron', ':is(.dzg-toggle,.dzg-gtoggle)::before'), on('grip', '.dzg-grip::before')];
 /** Marks filling a 24 px button (the icon at `--dzg-icon-size`, 1rem by default). */
 const BOX = [on('filter', '.dzg-fbtn::before'), on('filter-active', '[data-dzg-filtered]>.dzg-fbtn::before'), on('menu', '.dzg-mbtn::before')];
 const SUB = on('submenu', '.dzg-msub');
-const VAR = ['sort-asc', 'sort-desc', 'chevron', 'grip', 'filter', 'filter-active', 'menu', 'submenu'];
+const VAR = ['sort-asc', 'sort-desc', 'sort-none', 'chevron', 'grip', 'filter', 'filter-active', 'menu', 'submenu'];
 const mask = (size: string) => `-webkit-mask:var(--dzg-i) center/${size} no-repeat;mask:var(--dzg-i) center/${size} no-repeat`;
 
 /**
@@ -66,9 +66,9 @@ export const ICONS_CSS =
   '@layer dzgrid.layout,dzgrid.theme,dzgrid.skin,dzgrid.bridge,dzgrid.contrast,dzgrid.icons;@layer dzgrid.icons{' +
   [...INLINE, ...BOX, SUB].map((s, i) => `${s}{--dzg-i:var(--dzg-icon-${VAR[i]})}`).join('') +
   `${INLINE.join(',')}{content:"";display:inline-block;inline-size:1em;block-size:1em;vertical-align:-.125em;background:currentColor;${mask('contain')}}` +
-  `${BOX.join(',')}{inset:0;clip-path:none;background:currentColor;${mask('var(--dzg-icon-size,1rem)')}}` +
+  `${BOX.join(',')}{content:"";position:absolute;inset:0;clip-path:none;background:currentColor;${mask('var(--dzg-icon-size,1rem)')}}` +
   `${on('filter', '.dzg-fbtn::after')}{content:none}` +
-  `${SUB}{clip-path:none;${mask('contain')}}` +
+  `${SUB}{clip-path:none;background:currentColor;${mask('contain')}}` +
   // Mirrored in right to left, as the default chevron (the submenu's is, by the menu's own rule).
   `[data-dzg-icons~=chevron]:dir(rtl) :is(.dzg-toggle,.dzg-gtoggle)::before{scale:-1 1}` +
   `@media (forced-colors:active){${[...INLINE, ...BOX, SUB].join(',')}{forced-color-adjust:none;background:CanvasText}}` +

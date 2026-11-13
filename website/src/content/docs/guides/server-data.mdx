@@ -332,8 +332,13 @@ grid.source = sourceRows<Asteroid>({ fetch: page });
 - `operations` places each stage: `'server'` (the default with a source) sends filter, search, sort and page to the
   server; `{ filter: 'client', sort: 'client', page: 'off' }` asks for every row once and finishes in the browser.
   Server pages imply filter, search and sort on the server too.
-- `refresh` (Angular `ctrl.refresh({})`, plain TypeScript `rows.refresh` command) asks again and keeps the rows shown
-  meanwhile; the `busy` setting shows a thin bar while you reload.
+- To fetch again — after a save, on a server push, behind your own « Refresh » button — call **`reload()`**: the
+  current page (or the window's blocks) is asked again, the rows shown stay meanwhile, and the filters, sort, page and
+  selection are kept. It is `grid.api.reload()` in plain TypeScript, `ctrl.reload()` on Angular's `DzgController`,
+  `el.reload()` on `<dz-grid>`. **`refresh()` only paints again and sends no request**; Angular's `ctrl.refresh({})`
+  is the older spelling of `reload()`, and `ctrl.refresh({ purge: true })` lets every row go and starts again at the
+  top. On rows you give (`rows`), there is nothing to fetch: `reload()` works them out again and paints. The `busy`
+  setting shows a thin bar while you reload.
 
 ## Columns from the first answer
 

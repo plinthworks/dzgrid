@@ -27,6 +27,11 @@ $layered: true !default;
 $line: var(--dzg-line, 1px) solid var(--tz-border);
 $focus: max(2px, var(--dzg-focus-width, 2px));
 $icon: var(--dzg-icon-size, 12px);
+// The default funnel only where the app gave no icon (1.12.0, presentation-settings.md 24; dzgrid.scss has the same).
+$no-funnel: ':where(:not([data-dzg-icons~=filter] *, [data-dzg-icons~=filter-active] [data-dzg-filtered] > *))';
+$no-filter: ':where(:not([data-dzg-icons~=filter] *))';
+// The tooltip's arrow (32): `0` turns it off.
+$arrow: var(--dzg-tooltip-arrow-size, 0.375rem);
 
 @if $layered {
   @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
@@ -143,7 +148,9 @@ $icon: var(--dzg-icon-size, 12px);
 
   // ---- Popups, tooltip, inputs, buttons (12, 14) ----
   .dzg .dzg-popup {
-    padding: u(3);
+    padding: var(--dzg-popup-padding, #{u(3)});
+    border: var(--dzg-popup-border, #{$line});
+    border-radius: var(--dzg-popup-radius, var(--dzg-radius, 0.375rem));
     background: var(--dzg-popup-bg, var(--tz-bg));
     box-shadow: var(--dzg-popup-shadow, 0 0.25rem 0.75rem color-mix(in srgb, var(--tz-fg) 20%, transparent));
   }
@@ -152,18 +159,27 @@ $icon: var(--dzg-icon-size, 12px);
     background: var(--dzg-popup-bg, var(--tz-bg));
   }
 
+  // The tooltip (31): every look a variable; unset, the base's. Its arrow (32) is the base's.
   .dzg-tooltip {
-    padding-block: u(1);
-    padding-inline: u(2);
+    max-inline-size: var(--dzg-tooltip-max-width, 20rem);
+    padding-block: var(--dzg-tooltip-padding-block, #{u(1)});
+    padding-inline: var(--dzg-tooltip-padding-inline, #{u(2)});
+    border-radius: var(--dzg-tooltip-radius, var(--dzg-radius, 0.375rem));
     color: var(--dzg-tooltip-fg, var(--tz-bg));
     background: var(--dzg-tooltip-bg, var(--tz-fg));
+    font-family: var(--dzg-tooltip-font-family, inherit);
+    font-size: var(--dzg-tooltip-font-size, var(--dzg-cell-font-size, 1em));
+    font-weight: var(--dzg-tooltip-font-weight, inherit);
+    line-height: var(--dzg-tooltip-line-height, inherit);
+    white-space: var(--dzg-tooltip-white-space, normal);
   }
 
+  // The filter boxes (30): the edge and surface are the base's (`--dzg-input-border`, `--dzg-input-bg`).
   .dzg-finput,
   .dzg-fop,
   .dzg-fclear {
-    border-color: var(--dzg-input-border, var(--tz-fg-muted));
-    background: var(--dzg-input-bg, var(--tz-bg));
+    border-radius: var(--dzg-input-radius, var(--dzg-radius, 0.375rem));
+    color: var(--dzg-input-fg, var(--tz-fg));
   }
 
   // Colours only: each button keeps its own padding (the pager's square arrows, the shortcuts). Apply keeps the accent (its rule weighs more).
@@ -176,6 +192,8 @@ $icon: var(--dzg-icon-size, 12px);
   .dzg-retry,
   .dzg-footer select {
     border-color: var(--dzg-button-border, var(--tz-fg-muted));
+    border-radius: var(--dzg-button-radius, var(--dzg-radius, 0.375rem));
+    color: var(--dzg-button-fg, var(--tz-fg));
     background: var(--dzg-button-bg, var(--dzg-header-bg, var(--tz-bg-raised)));
   }
 
@@ -187,11 +205,15 @@ $icon: var(--dzg-icon-size, 12px);
 
   .dzg-overlay {
     gap: u(2);
+    color: var(--dzg-overlay-fg, var(--tz-fg-muted));
+    background: var(--dzg-overlay-bg, var(--tz-bg));
   }
 
   .dzg-footer {
     padding-block: u(1);
     padding-inline: u(2);
+    color: var(--dzg-footer-fg, var(--tz-fg-muted));
+    background: var(--dzg-footer-bg, var(--dzg-header-bg, var(--tz-bg-raised)));
   }
 
   .dzg-dbody {
@@ -209,18 +231,124 @@ $icon: var(--dzg-icon-size, 12px);
   // ---- Icons (16): the sort mark, and the funnel drawn relative to the icon size (12 px: today's 6 / 7 / 9 / 8 / 12 px
   // insets in its 24 px button) ----
   .dzg-sort {
+    color: var(--dzg-sort-fg, var(--tz-fg-muted));
     font-size: var(--dzg-icon-size, 0.75em);
   }
 
-  .dzg-fbtn::before,
-  .dzg-fbtn::after {
+  .dzg-fbtn#{$no-funnel}::before,
+  .dzg-fbtn#{$no-filter}::after {
     inset-block: calc(50% - #{$icon} / 2) calc(50% - #{$icon} / 2 + #{$icon} / 12);
     inset-inline: calc(50% - #{$icon} / 2);
   }
 
-  .dzg-fbtn::after {
+  .dzg-fbtn#{$no-filter}::after {
     inset-block: calc(50% - #{$icon} / 3) 50%;
     inset-inline: calc(50% - #{$icon} / 4);
+  }
+}
+
+// ---- 1.12.0 (presentation-settings.md 26–33, owner 2026-11-13 « toujours laisser le choix ») ----
+@include layer {
+  // A row's text when hovered, holding the focus, selected (27): no weight, so content with its own colour keeps it;
+  // unset, the cells inherit the row's colour (today). In the backgrounds' order: selected last.
+  :where(.dzg-row:hover:not([data-spans]), .dzg-row[data-hover]) :where(.dzg-cell) {
+    color: var(--dzg-row-hover-fg);
+  }
+
+  :where(.dzg-row:focus-within:not([data-dzg-quiet] *)) :where(.dzg-cell) {
+    color: var(--dzg-row-active-fg);
+  }
+
+  :where(.dzg-row[aria-selected=true]) :where(.dzg-cell) {
+    color: var(--dzg-row-selected-fg);
+  }
+
+  // A mark between columns (28): the cell's background image at its inline end, of a size and a height; no colour, no
+  // image. None after a pinned part's last cell nor after the last column.
+  .dzg-cell {
+    background-image: linear-gradient(var(--dzg-column-separator) 0 0);
+    background-size: var(--dzg-column-separator-size, var(--dzg-line, 1px)) var(--dzg-column-separator-height, 100%);
+    background-position: 100% 50%;
+    background-repeat: no-repeat;
+  }
+
+  .dzg-cell:dir(rtl) {
+    background-position: 0 50%;
+  }
+
+  :is(.dzg-seg-start, .dzg-seg-end) > .dzg-cell:last-child,
+  .dzg-cell[data-last-col] {
+    background-image: none;
+  }
+
+  // The last row and the last column (29), marked by the grid.
+  .dzg-row:where([data-last-row]) :is(.dzg-cell, .dzg-check) {
+    border-block-end: var(--dzg-last-row-line, var(--dzg-row-line, #{$line}));
+  }
+
+  .dzg-cell[data-last-col],
+  .dzg-hcell[data-last-col] {
+    border-inline-end: var(--dzg-last-column-line, var(--dzg-column-line, none));
+  }
+
+  .dzg-hcell:where([data-last-col]) > .dzg-resize:where(:not(:hover))::after {
+    background: var(--dzg-header-separator-end, var(--dzg-header-separator, var(--tz-border)));
+  }
+
+  // The header (26, 33): its side padding apart from the cells', its buttons' colours, a group's end line.
+  .dzg-hcell {
+    padding-inline: calc(var(--dzg-header-padding-inline, var(--dzg-cell-padding-inline, 0.5rem)) * var(--dzg-density, 1));
+  }
+
+  .dzg-hcell > :is(.dzg-fbtn, .dzg-mbtn) {
+    color: var(--dzg-header-button-fg, var(--tz-fg-muted));
+  }
+
+  [data-dzg-filtered] > .dzg-fbtn {
+    color: var(--dzg-header-button-active-fg, var(--tz-accent));
+  }
+
+  .dzg-hgroup {
+    border-inline-end: var(--dzg-header-group-line, #{$line});
+  }
+
+  // The tooltip's arrow (32): on the side its cell is, at the cell's middle (`--dzg-tip-at`, written by the grid), a
+  // clipped square (no border: a reset cannot erase it); the tooltip moved away from its cell by its size.
+  .dzg-tooltip::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: calc(var(--dzg-tip-at, 1rem) - #{$arrow});
+    inset-block-end: 100%;
+    inline-size: calc(2 * #{$arrow});
+    block-size: $arrow;
+    background: var(--dzg-tooltip-arrow-color, var(--dzg-tooltip-bg, var(--tz-fg)));
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  }
+
+  // Below its cell by default (`block-end`); above it, the arrow turned to point down.
+  .dzg-tooltip {
+    margin-block-start: $arrow;
+  }
+
+  .dzg-tooltip[data-side=block-start] {
+    margin-block-start: calc(-1 * #{$arrow});
+  }
+
+  .dzg-tooltip[data-side=block-start]::before {
+    inset-block: 100% auto;
+    rotate: 180deg;
+  }
+
+  @media (forced-colors: active) {
+    .dzg-tooltip::before {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+  }
+
+  // A set filter's ticked value (33): unset, no tint (today); the pointer's tint stays above it (weight).
+  .dzg-fopt:where([aria-selected=true]) {
+    background: var(--dzg-option-selected-bg);
   }
 }
 

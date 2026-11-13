@@ -25,7 +25,9 @@ With a source, filter, search, sort and pages run on the server unless [`operati
 (with `infiniteRows`, always the server, in one list).
 The grid handles the rest by itself: the loading message, the thin bar while rows on screen reload, an error with
 « Retry », answers that arrive out of order (only the latest counts), a selection across every page. A new source
-given with `update()` asks again from the start.
+given with `update()` asks again from the start. To ask the same rows again (after a save), call `reload()` —
+`grid.api.reload()`, Angular's `ctrl.reload()`, `<dz-grid>`'s `el.reload()`; `refresh()` only paints again
+([Server data](../../guides/server-data/)).
 
 ## Example
 

@@ -19,6 +19,8 @@ const K: Record<keyof GridTheme, 0> = {
   boxSize: 0, boxRadius: 0, boxOnBg: 0, boxEdge: 0, iconSize: 0, popupBg: 0, popupShadow: 0, tooltipBg: 0, tooltipFg: 0, inputBg: 0,
   inputBorder: 0, buttonBg: 0, buttonBorder: 0, menuItemHeight: 0, menuDisabled: 0, panelBg: 0, chipBg: 0, chipHoverBg: 0, controlActiveBg: 0, scrollbar: 0,
   scrollbarThumb: 0, scrollbarThumbActive: 0,
+  rowHoverFg: 0, rowSelectedFg: 0, rowActiveFg: 0, columnSeparator: 0, columnSeparatorSize: 0, columnSeparatorHeight: 0, lastRowLine: 0, lastColumnLine: 0, headerSeparatorEnd: 0, headerPaddingInline: 0, headerButtonFg: 0, headerButtonActiveFg: 0, headerGroupLine: 0, sortFg: 0, inputFg: 0, inputRadius: 0, buttonFg: 0, buttonRadius: 0, popupRadius: 0, popupBorder: 0,
+  popupPadding: 0, optionSelectedBg: 0, tooltipFontSize: 0, tooltipFontFamily: 0, tooltipFontWeight: 0, tooltipLineHeight: 0, tooltipMaxWidth: 0, tooltipPaddingBlock: 0, tooltipPaddingInline: 0, tooltipRadius: 0, tooltipWhiteSpace: 0, tooltipArrowSize: 0, tooltipArrowColor: 0, overlayFg: 0, overlayBg: 0, footerBg: 0, footerFg: 0,
 };
 /** The `theme` setting's keys (the guide's table lists the same). */
 export const THEME_KEYS = Object.keys(K) as readonly (keyof GridTheme)[];

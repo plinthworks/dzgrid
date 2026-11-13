@@ -5,6 +5,7 @@ import type { GridEnv } from '@dzgrid/dom';
 import { definePart } from '@dzgrid/dom';
 import { EN } from '@dzgrid/dom/locales/en';
 import { theming } from '@dzgrid/dom/theme';
+import { sourceRows } from '@dzgrid/core/server';
 import { DzGridElement, defineDzGrid } from '../src/index.js';
 
 type R = { id: string; name: string; n: number };
@@ -281,6 +282,23 @@ describe('<dz-grid> events (7, 8, 9)', () => {
     const el = make();
     el.update({ label: 'Villes' });
     expect(el.querySelector('.dzg-viewport')!.getAttribute('aria-label')).toBe('Villes');
+  });
+});
+
+describe('<dz-grid> reload() (reload.md 5)', () => {
+  it('is its grid\'s api.reload(): the data asked again; nothing before the grid exists', () => {
+    const early = document.createElement('dz-grid-test') as DzGridElement<R>;
+    expect(() => early.reload()).not.toThrow();
+    const asked: number[] = [];
+    const el = make('<dz-grid-test></dz-grid-test>', (e) => {
+      e.settings = { operations: 'server' } as never; // never: a server's settings without its query type
+      e.source = sourceRows({ fetch: (req) => (asked.push(req.page?.index ?? 0), { rows: ROWS, total: 3 }) }) as never; // never: the binding's model type
+    });
+    el.rows = undefined as never; // never: the source alone feeds this grid
+    const n = asked.length;
+    expect(n).toBeGreaterThan(0);
+    el.reload();
+    expect(asked.length).toBe(n + 1);
   });
 });
 

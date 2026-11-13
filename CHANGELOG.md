@@ -5,9 +5,28 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased] — 1.12.0
+
+Every look a choice (owner 2026-11-13, « toujours laisser le choix »): a sensible default and a variable for each.
+The grid's classes, pseudo-elements and `data-*` marks are internal (owner B): style through the variables, the
+`theme` keys and the settings; the theming guide's table now lists every variable the sheets read (a test keeps it
+complete, English and French).
+
+### Upgrading from 1.11.0
+- **To fetch the data again, call `reload()`** (new): `grid.api.reload()`, Angular's `ctrl.reload()`, `<dz-grid>`'s
+  `el.reload()`. `refresh()` only paints again and sends no request — an application that called it after a save kept
+  the old rows. Angular's `ctrl.refresh({})` still asks again (it is what `reload()` does); nothing is removed.
+- `autoColumns()` takes the columns' type as a second, optional type argument (`autoColumns<Row, DzgColumnDef<Row>>`),
+  so Angular columns with a component in `ui.cell` need no cast; without it, the columns are `ColumnDef<Row>[]` as
+  before (owner 2026-11-13, accepted in `check:api`).
+- Size lines raised to the measures (owner 2026-11-13): `@dzgrid/dom` 25 200, `@dzgrid/theme` 3 050, `/filters`
+  12 200, `/filters-base` 12 150, `menu.css` 800, `variables.css` 1 900 (the last two beyond the +2 % rule).
 
 ### Fixed
+- **An app's icon is never clipped nor overdrawn** by the grid's own mark, with the `*.unlayered.css` copies too (under
+  an unlayered reset such as Tailwind 3's preflight the funnel was clipped and shrunk, the ⋮ and the submenu arrow cut
+  to the default shapes): each default mark is drawn only where no icon replaces it.
+
 - **The filter button and the resize grip no longer overlap.** A page's reset (`* { margin: 0 }`: Starlight,
   Tailwind's preflight) took away the gap between them, so a click on the funnel started a resize; the gap is now a
   size, which no reset touches, and the header's buttons sit over the grip. A column narrower than its header's
@@ -15,11 +34,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **A column with a filter button is never narrower than 80 px** (owner 2026-11-12) when it has no `minWidth` of its
   own: the button, the grip and the start of the title fit side by side. A `minWidth` you give wins, smaller too.
 
+
 ### Added
+- **`reload()`** on the grid's api, `DzgController` and `<dz-grid>`: asks the data again (on a server, the page or the
+  window's blocks, the rows shown kept meanwhile, filters, sort, page and selection unchanged; on given rows, nothing to
+  fetch — the rows are worked out again and painted). The documentation of `refresh()` now says it only paints.
+- `autoColumns<T, C>()`: the column type a wrapper uses (`DzgColumnDef<T>`), for `override`, `merge`, `add` and the
+  result.
+- `icons.sortNone`: a mark on sortable unsorted columns (decorative; `aria-sort` unchanged).
+- The tooltip says its side (`data-side`) and, with `variables.css`, has an arrow toward its cell's middle, mirrored
+  in right to left, `--dzg-tooltip-arrow-size` (`0`: none) and `--dzg-tooltip-arrow-color`.
+- The grid marks the last displayed row and the last column's cells (through scroll, sort, filter, hidden, moved and
+  pinned columns): `--dzg-last-row-line`, `--dzg-last-column-line`, `--dzg-header-separator-end`.
+- Variables (each a `theme` key, defaults today's look, in `variables.css`): `--dzg-row-hover-fg`,
+  `--dzg-row-selected-fg`, `--dzg-row-active-fg` (content with its own colour keeps it); `--dzg-column-separator`,
+  `-size`, `-height` (a short centred divider between columns); `--dzg-header-padding-inline`,
+  `--dzg-header-button-fg`, `--dzg-header-button-active-fg`, `--dzg-header-group-line`, `--dzg-sort-fg`;
+  `--dzg-input-fg`, `--dzg-input-radius`, `--dzg-button-fg`, `--dzg-button-radius`; `--dzg-popup-radius`,
+  `--dzg-popup-border`, `--dzg-popup-padding`, `--dzg-option-selected-bg`; the tooltip's font size, family, weight,
+  line height, max width, paddings, radius, white space (`pre-line` keeps line breaks); `--dzg-overlay-fg`,
+  `--dzg-overlay-bg`, `--dzg-footer-fg`, `--dzg-footer-bg`.
+
 - `ColumnModel.floor()` and `ColumnModel.minOf()` in `@dzgrid/core` (optional in the type): the smallest width a
   column's header needs, and the minimum in force.
 - Each feature's layout CSS is exported from its entry (`FILTERS_CSS`, `TREE_CSS`…), for `injectStyles: false`; the
   theme key `columnHoverBg`.
+
+### Changed (looks decided by the owner)
+- Filter boxes: a discreet edge in light mode (`--tz-fg-muted` 75 % into the surface, 3:1 at least), drawn as an
+  outline a page's reset cannot erase; `--dzg-input-border: none` takes it away; dark mode unchanged.
+- The tooltip's text is the cells' size (was 0.875 em); with `variables.css` it sits 6 px further from its cell (its arrow).
 
 ## [1.11.0] - 2026-11-10
 

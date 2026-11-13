@@ -104,7 +104,8 @@ $layered: true !default;
     opacity: 0;
   }
 
-  .dzg-mbtn::before {
+  // Only where the app gave no icon (1.12.0, presentation-settings.md 24).
+  .dzg-mbtn:where(:not([data-dzg-icons~=menu] *))::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -145,7 +146,7 @@ $layered: true !default;
     content: '';
     order: 9;
     flex: none;
-    inline-size: calc(var(--dzg-target-min, 24px) - var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1));
+    inline-size: calc(var(--dzg-target-min, 24px) - var(--dzg-header-padding-inline, var(--dzg-cell-padding-inline, 0.5rem)) * var(--dzg-density, 1));
   }
 
   @media (hover: none), (any-pointer: coarse) {

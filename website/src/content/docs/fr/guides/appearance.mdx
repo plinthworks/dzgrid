@@ -281,6 +281,26 @@ règle la même chose depuis le code, sur cette grille seulement :
   ]}
 />
 
+### Traits courts, dernière ligne et colonne, texte survolé (1.12.0)
+
+```css
+.dzg {
+  --dzg-column-separator: var(--tz-border);         /* une marque entre les colonnes… */
+  --dzg-column-separator-height: 60%;               /* …à 60 % de la hauteur de ligne, centrée */
+  --dzg-column-separator-size: 1px;
+  --dzg-last-column-line: var(--dzg-line, 1px) solid var(--tz-border);   /* fermer le tableau après sa dernière colonne */
+  --dzg-last-row-line: none;                        /* pas de trait sous la dernière ligne */
+  --dzg-row-hover-bg: light-dark(#eef2ff, #1e1b4b);
+  --dzg-row-hover-fg: light-dark(#1e1b4b, #e0e7ff); /* le texte de la ligne survolée */
+  --dzg-input-border: none;                         /* des champs de filtre sans bord */
+  --dzg-tooltip-arrow-size: 0;                      /* pas de flèche sur l’infobulle */
+}
+```
+
+Toutes demandent `variables.css`. Un contenu qui fixe sa propre couleur (une marque colorée dans une partie) la garde
+sous `--dzg-row-hover-fg` ; un contenu qui doit suivre le texte de la ligne utilise `currentColor` ou `color: inherit`
+dans sa propre CSS.
+
 ## Largeur des colonnes
 
 Les largeurs sont des options de colonne, pas du CSS : `width` (pixels), `flex` (une part de la place restante),

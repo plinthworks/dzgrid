@@ -110,6 +110,9 @@ export const cellText = <T>(col: ResolvedColumn<T>, row: Readonly<T>, ctx: Local
 /** No text searched: what a cell part is given outside a paint that says (`SlotContext['cell'].search`). */
 const NO_SEARCH = { quick: '', find: '' } as const;
 
+/** The last displayed column's id: the end part's last, else the centre's, else the start's. */
+export const lastColumn = (L: ColumnLayout): string | undefined => (L.end.columns.at(-1) ?? L.center.columns.at(-1) ?? L.start.columns.at(-1))?.id;
+
 export const range = (n: number) => Array.from({ length: n }, (_, i) => i);
 
 
@@ -206,8 +209,12 @@ export class RowRenderer<T> {
    * Another renderer of the same grid into `layer` (its own rows and pool): a tree's pinned parents (copies, never
    * focused), or with `peer` the pinned rows' bands (step 8b-1: real rows, found through this one).
    */
+  /** A spawned renderer: its rows are not the body's (no last-row mark). */
+  #sub = false;
+
   spawn(layer: HTMLElement, peer?: boolean): RowRenderer<T> {
     const r = new RowRenderer<T>(this.#doc, layer, this.#report);
+    r.#sub = true;
     this.#spawned.push(r);
     if (peer) this.#peers.push(r);
     return r;
@@ -308,6 +315,8 @@ export class RowRenderer<T> {
       setAttr(v.el, 'aria-rowindex', String(f.headerRows + 1 + i));
       // Alternate rows from the displayed place (presentation-settings.md 1): pooled rows take their new place's mark.
       setAttr(v.el, 'data-odd', i % 2 ? '' : null);
+      // The last body row (1.12.0, presentation-settings.md 29); a spawned renderer's rows (pinned, sticky) never.
+      setAttr(v.el, 'data-last-row', !this.#sub && i === d.count - 1 ? '' : null);
       f.rowAttrs(k, v.el);
     }
     let cursor: ChildNode | null = this.#layer.firstChild;
@@ -572,6 +581,8 @@ export class RowRenderer<T> {
     }
     // The identity column is the frame's (it moves when columns are hidden or moved).
     setAttr(cell.el, 'role', col.id === f.rowHeader ? 'rowheader' : 'gridcell');
+    // The last displayed column's cells (presentation-settings.md 29).
+    setAttr(cell.el, 'data-last-col', col.id === lastColumn(f.layout) ? '' : null);
     setAttr(cell.el, 'aria-colindex', String(f.colIndex(col.id)));
     if (cell.inlineSize !== w) {
       cell.inlineSize = w;

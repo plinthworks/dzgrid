@@ -160,7 +160,8 @@ one `missing-feature` (path `pinnedRows`).
 1. `[source]` takes `infiniteRows(data, …)` or `serverSideRows(data, …)` as it takes `sourceRows`: no new input.
 2. `DzgController.refresh()` paints again, as before. `refresh({})` first asks the server again for the window, its rows
    kept (the thin busy line); `refresh({ purge: true })` lets every block go and starts again at the top. (Two overloads:
-   `refresh()` is unchanged for the API guard.)
+   `refresh()` is unchanged for the API guard.) 1.12.0 (reload.md 4): `reload()` is `refresh({})` under a name that says
+   it — the documentation of both overloads says plainly that `refresh()` sends no request.
 3. `applyTransaction(tx)`: the client grid's rows, or the rows held of a list in blocks (row-transactions-async.md,
    server-side-groups.md « Live updates and edits »); null without a grid or on server pages.
    `applyTransactionAsync(tx, done?)`: gathered by a block list (50 ms or the next frame); elsewhere applied at once,

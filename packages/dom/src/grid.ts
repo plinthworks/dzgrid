@@ -30,9 +30,9 @@ import { onlyFeatures, shapeOf } from './features.js';
 export interface GridApi {
   focusCell(row: RowKey, column: string): void;
   ensureVisible(row: RowKey, column?: string): void; /** Sideways only, no row (column-layout.md, 16d); always set on a grid's api. */ ensureColumnVisible?(column: string): void;
-  refresh(): void;
-  announce(text: string): void;
-}
+  /** Paints again, nothing more: no request, the rows as held. To ask the data again, `reload()`. */ refresh(): void;
+  /** Asks the data again, then paints (reload.md, 1.12.0): on a server the page or the window's blocks, the rows shown kept meanwhile, filters, sort, page and selection unchanged (`rows.refresh`); on given rows nothing to fetch, they are worked out again and painted. Always set on a grid's api (optional for the API guard). */ reload?(): void;
+  announce(text: string): void; }
 
 export interface GridInstance<T, M extends RowModel<T> = ClientModel<T>> {
   /** On the browser's rows, or on a server's model when the grid was given a `source`. */
@@ -213,7 +213,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   const api: GridApi = {
     focusCell: (row, column) => focus.focusCellAs(row, column, 'api'),
     ensureVisible: (row, column) => focus.ensureVisible(row, column), ensureColumnVisible: (column) => focus.ensureVisible(null, column),
-    refresh: () => schedule(),
+    refresh: () => schedule(), reload: () => void (kernel.dispatch({ type: 'rows.refresh' }, 'api'), schedule()),
     announce: (text) => live.announce(text),
   };
 

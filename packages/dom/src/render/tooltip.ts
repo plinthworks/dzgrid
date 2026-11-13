@@ -1,6 +1,6 @@
 import type { ResolvedColumn } from '@dzgrid/core';
 import { fixedInlineStart, type Dir } from '../dir.js';
-import { setPx } from './rows.js';
+import { setAttr, setPx } from './rows.js';
 import { describe } from './write.js';
 import type { Scope } from './scope.js';
 
@@ -125,6 +125,11 @@ export class Tooltip {
     const below = r.bottom + 4;
     const top = below + box.height > winBlock && r.top - 4 - box.height >= 0 ? r.top - 4 - box.height : below;
     setPx(this.el, 'inset-block-start', top);
-    setPx(this.el, 'inset-inline-start', fixedInlineStart(r, dir, winInline, box.width));
+    const at = fixedInlineStart(r, dir, winInline, box.width);
+    setPx(this.el, 'inset-inline-start', at);
+    // Its side and the arrow's place, at the cell's middle held 12 px inside it (presentation-settings.md 32); the cell's
+    // start unclamped.
+    setAttr(this.el, 'data-side', top < r.top ? 'block-start' : 'block-end');
+    this.el.style.setProperty('--dzg-tip-at', `${Math.round(Math.min(Math.max(12, fixedInlineStart(r, dir, winInline, 0) + r.width / 2 - at), box.width - 12))}px`);
   }
 }

@@ -39,7 +39,7 @@ describe('range.css', () => {
 
   it('the tint: its own variable, the selected row\'s as fallback; the text colour is the cell\'s', () => {
     const tint = decl(/^\.dzg-cell--range$/);
-    expect(tint).toMatch(/background: var\(--dzg-range-bg, var\(--dzg-row-selected-bg, /);
+    expect(tint).toMatch(/background-color: var\(--dzg-range-bg, var\(--dzg-row-selected-bg, /);
     expect(tint).not.toMatch(/(^|[\s;])color:/);
   });
 

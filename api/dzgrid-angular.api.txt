@@ -6,6 +6,7 @@
 # history: owner 2026-11-10: baseline extended to every published entry
 # history: owner 2026-11-10 « ok comme ça, 1.11.0 juste après »: [motion] and an output for every grid event — @dzgrid/angular#DzGrid
 # history: 1.11.0 before publishing: modelUpdated typed by hand (its inferred type named T_1, declared nowhere — scripts/check-types.mjs); numerals, direction, headers: the same unions printed in another order — @dzgrid/angular#DzGrid
+# history: owner 2026-11-13: reload() on the grid's api, DzgController and <dz-grid> — additions only, 1.12.0 — @dzgrid/angular#DzgController
 
 @ @dzgrid/angular
 ## DZGRID_ANGULAR_VERSION
@@ -694,6 +695,7 @@
       refresh(o: {
           readonly purge?: boolean;
       }): void;
+      reload(): void;
       applyTransaction(tx: RowTransaction<T>): TransactionResult | null;
       applyTransactionAsync(tx: RowTransaction<T>, done?: (r: TransactionResult) => void): void;
       announce(text: string): void;
