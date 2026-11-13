@@ -49,8 +49,9 @@ describe('35: the unsorted mark’s own colour', () => {
 });
 
 describe('36: buttons.css, every look of the popups’ buttons a variable, today’s by default', () => {
-  const ALL = '.dzg-overlay button, .dzg-ffoot button, .dzg-fadd, .dzg-frm, .dzg-fpreset, .dzg-pbtn, .dzg-retry';
-  const LIVE = ':where(.dzg-overlay button, .dzg-ffoot button, .dzg-fadd, .dzg-frm, .dzg-fpreset, .dzg-pbtn:not([aria-disabled=true]), .dzg-retry)';
+  // The pager's buttons are not among them (39): they have their own variables.
+  const ALL = '.dzg-overlay button, .dzg-ffoot button, .dzg-fadd, .dzg-frm, .dzg-fpreset, .dzg-retry';
+  const LIVE = ':where(.dzg-overlay button, .dzg-ffoot button, .dzg-fadd, .dzg-frm, .dzg-fpreset, .dzg-retry)';
   for (const c of COPIES) {
     it(`buttons${c}.css`, () => {
       const css = file(`../buttons${c}.css`);
@@ -60,6 +61,8 @@ describe('36: buttons.css, every look of the popups’ buttons a variable, today
       expect(all).toContain('color: var(--dzg-bf, var(--dzg-button-fg, var(--tz-fg)));');
       expect(all).toContain('background: var(--dzg-bb, var(--dzg-button-bg, var(--dzg-header-bg, var(--tz-bg-raised))));');
       expect(all).toContain('font-weight: var(--dzg-button-font-weight, inherit);');
+      // Their text size (39): today's, each inherits its popup's or the overlay's.
+      expect(all).toContain('font-size: var(--dzg-button-font-size, 1em);');
       // The pager's squares and the shortcuts keep their padding; a row's Retry its 24 px.
       expect(body(css, '.dzg-overlay button, .dzg-ffoot button, .dzg-fadd, .dzg-frm, .dzg-retry')).toBe('padding-inline: var(--dzg-button-padding-inline, 0.75rem);');
       expect(body(css, '.dzg-overlay button, .dzg-ffoot button, .dzg-fadd, .dzg-frm')).toBe('min-block-size: var(--dzg-button-height, 2rem);');
@@ -88,6 +91,94 @@ describe('36: buttons.css, every look of the popups’ buttons a variable, today
   it('@dzgrid/theme exports and ships it', () => {
     const pkg = JSON.parse(file('../package.json')) as { exports: Record<string, string>; files: string[] };
     for (const f of ['buttons.css', 'buttons.unlayered.css', 'buttons.scss']) expect([pkg.exports[`./${f}`], pkg.files.includes(f)]).toEqual([`./${f}`, true]);
+  });
+});
+
+describe('39–40: the pagination bar apart from the popups’ buttons, every look a variable, today’s by default', () => {
+  for (const c of COPIES) {
+    it(`pager${c}.css: the pager's buttons read their own variables, never the popups' (but the text size)`, () => {
+      const css = file(`../pager${c}.css`);
+      const b = body(css, '.dzg-pbtn');
+      expect(b).toContain('border-color: var(--dzg-pager-button-border, var(--tz-fg-muted));');
+      expect(b).toContain('border-radius: var(--dzg-pager-button-radius, var(--dzg-radius, 0.375rem));');
+      expect(b).toContain('color: var(--dzg-bf, var(--dzg-pager-button-fg, var(--tz-fg)));');
+      expect(b).toContain('background: var(--dzg-bb, var(--dzg-pager-button-bg, var(--dzg-header-bg, var(--tz-bg-raised))));');
+      expect(b).toContain('font-size: var(--dzg-pager-button-font-size, var(--dzg-button-font-size, 1em));');
+      expect(b).toContain('font-weight: var(--dzg-pager-button-font-weight, inherit);');
+      expect(b).toContain('min-block-size: var(--dzg-pager-button-size, 2rem);');
+      // The arrows square, the worded ones (Select all, Clear) padded.
+      expect(body(css, '.dzg-pbtn[data-go]')).toBe('inline-size: var(--dzg-pager-button-size, 2rem);');
+      expect(body(css, '.dzg-pbtn:not([data-go])')).toBe('padding-inline: var(--dzg-pager-button-padding-inline, 0.75rem);');
+      // Under the pointer and pressed: unset, no change; one that cannot act takes none.
+      const live = ':where(.dzg-pbtn:not([aria-disabled=true]))';
+      expect(body(css, `${live}:hover`)).toBe('--dzg-bf: var(--dzg-pager-button-hover-fg); --dzg-bb: var(--dzg-pager-button-hover-bg);');
+      expect(body(css, `${live}:active`)).toBe('--dzg-bb: var(--dzg-pager-button-active-bg, var(--dzg-pager-button-hover-bg));');
+      const off = body(css, '.dzg-pbtn[aria-disabled=true]');
+      expect(off).toContain('color: var(--dzg-pager-button-disabled-fg, var(--tz-fg-muted));');
+      expect(off).toContain('background: var(--dzg-pager-button-disabled-bg, var(--dzg-pager-button-bg, var(--dzg-header-bg, var(--tz-bg-raised))));');
+      // No popup button variable reaches the pager but the text size.
+      for (const r of read(css).rules.filter((x) => /dzg-pbtn|dzg-footer/.test(x.selector))) {
+        expect(r.body.replace('var(--dzg-button-font-size, 1em)', ''), r.selector).not.toMatch(/--dzg-button-/);
+      }
+    });
+
+    it(`pager${c}.css: the rows-per-page select, each falling back on the pager button's own, then today's; the focus ring`, () => {
+      const css = file(`../pager${c}.css`);
+      const s = body(css, '.dzg-footer select');
+      expect(s).toContain('background: var(--dzg-pager-select-bg, var(--dzg-pager-button-bg, var(--dzg-header-bg, var(--tz-bg-raised))));');
+      expect(s).toContain('color: var(--dzg-pager-select-fg, var(--dzg-pager-button-fg, var(--tz-fg)));');
+      expect(s).toContain('border-color: var(--dzg-pager-select-border, var(--dzg-pager-button-border, var(--tz-fg-muted)));');
+      expect(s).toContain('border-radius: var(--dzg-pager-select-radius, var(--dzg-pager-button-radius, var(--dzg-radius, 0.375rem)));');
+      expect(s).toContain('padding-inline: var(--dzg-pager-select-padding-inline, var(--dzg-pager-button-padding-inline, 0.75rem));');
+      expect(s).toContain('min-block-size: var(--dzg-pager-select-height, var(--dzg-pager-button-size, 2rem));');
+      expect(s).toContain('font-size: var(--dzg-pager-select-font-size, var(--dzg-pager-button-font-size, var(--dzg-button-font-size, 1em)));');
+      expect(s).toContain('font-weight: var(--dzg-pager-select-font-weight, var(--dzg-pager-button-font-weight, inherit));');
+      // Unset: the browser's own ring (today), never a page reset's taken over by ours.
+      expect(body(css, ':where(.dzg-pbtn, .dzg-footer select):focus-visible')).toBe('outline: var(--dzg-pager-focus-ring, revert-layer);');
+    });
+
+    it(`pager${c}.css: the strip, the pager's place, its texts`, () => {
+      const css = file(`../pager${c}.css`);
+      const f = body(css, '.dzg-footer');
+      expect(f).toContain('border-block-start: var(--dzg-footer-line, var(--dzg-line, 1px) solid var(--tz-border));');
+      expect(f).toContain('padding-block: var(--dzg-footer-padding-block, calc(var(--dzg-space, 0.25rem) * 1));');
+      expect(f).toContain('padding-inline: var(--dzg-footer-padding-inline, calc(var(--dzg-space, 0.25rem) * 2));');
+      expect(f).toContain('min-block-size: var(--dzg-footer-height, auto);');
+      expect(f).toContain('gap: var(--dzg-footer-gap, 0.25rem 1rem);');
+      expect(f).toContain('font-size: var(--dzg-footer-font-size, 1em);');
+      expect(f).toContain('justify-content: var(--dzg-footer-justify, normal);');
+      expect(f).toContain('align-items: var(--dzg-footer-align, center);');
+      expect(body(css, '.dzg-footer > nav')).toBe('margin-inline-start: var(--dzg-pager-margin-inline-start, auto);');
+      for (const [sel, name, fg] of [['.dzg-pcount', 'count', 'inherit'], ['.dzg-ppage', 'page', 'var(--tz-fg)'], ['.dzg-psize > span', 'label', 'inherit'], ['.dzg-pseltext', 'selected', 'inherit']] as const) {
+        const t = body(css, sel);
+        expect(t, sel).toContain(`color: var(--dzg-pager-${name}-fg, ${fg});`);
+        expect(t, sel).toContain(`font-weight: var(--dzg-pager-${name}-font-weight, inherit);`);
+        expect(t, sel).toContain(`font-size: var(--dzg-pager-${name}-font-size, 1em);`);
+      }
+      expect(css).not.toMatch(/#[0-9a-f]{3,8}\b|\b(left|right)\b/i);
+    });
+
+    it(`variables${c}.css: the pager's buttons and select no longer read the popups' button variables`, () => {
+      const css = file(`../variables${c}.css`);
+      for (const r of read(css).rules.filter((x) => /--dzg-button-/.test(x.body))) expect(r.selector, r.selector).not.toMatch(/dzg-pbtn|dzg-footer/);
+      expect(body(css, '.dzg-overlay button, .dzg-ffoot button, .dzg-fadd, .dzg-frm, .dzg-fpreset, .dzg-retry')).toContain('color: var(--dzg-button-fg, var(--tz-fg));');
+    });
+  }
+
+  it('buttons.css holds no pager rule; pager.css is layered in dzgrid.theme, its copy unlayered, both compiled from pager.scss (no drift)', () => {
+    for (const c of COPIES) for (const r of read(file(`../buttons${c}.css`)).rules) expect(r.selector).not.toMatch(/dzg-pbtn|dzg-footer|dzg-p(count|page|size|seltext)/);
+    expect(file('../pager.css')).toContain('@layer dzgrid.theme {');
+    expect(file('../pager.unlayered.css')).not.toContain('@layer');
+    expect(file('../pager.css').trim()).toBe(compile(here('../pager.scss'), { style: 'expanded' }).css.trim());
+  });
+
+  it('@dzgrid/theme exports and ships pager.css', () => {
+    const pkg = JSON.parse(file('../package.json')) as { exports: Record<string, string>; files: string[] };
+    for (const f of ['pager.css', 'pager.unlayered.css', 'pager.scss']) expect([pkg.exports[`./${f}`], pkg.files.includes(f)]).toEqual([`./${f}`, true]);
+  });
+
+  it('no other sheet reads the buttons’ variables: menus and panels keep their own look', () => {
+    for (const f of ['menu', 'columns', 'columns-panel', 'dock', 'filters-panel', 'dzgrid', 'edit', 'grouping', 'pivot']) expect(file(`../${f}.css`), f).not.toMatch(/--dzg-(pager-)?button-/);
   });
 });
 

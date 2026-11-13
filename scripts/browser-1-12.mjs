@@ -14,7 +14,9 @@
  * middle, mirrored in Arabic; (7) the last row and last column lines through scroll and sort; (8) axe finds nothing;
  * (9) a header's title, sort mark and filter button in place, start- and end-aligned, whatever the reset; (10) the set
  * filter's list as wide as its longest value; and the 1.12.0 corrections' variables (buttons.css, the unsorted mark,
- * a row's text forced under `data-dzg-row-fg="force"`, `--dzg-row-state-fg`).
+ * a row's text forced under `data-dzg-row-fg="force"`, `--dzg-row-state-fg`); and (39–40) the pagination bar: the popups'
+ * button variables leave the pager's buttons and select as they are, the pager's own change the pager only, each bar
+ * variable's default and effect, the text sizes (a menu item untouched).
  */
 import { mkdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -33,6 +35,17 @@ const frames = (page) => page.evaluate(() => new Promise((r) => requestAnimation
 const RED = 'rgb(255, 0, 0)';
 /** A filter popup's footer, as the grid draws it (made in the grid's root: the popup itself is not open here). */
 const FOOT = '<div class="dzg-ffoot"><button type="button" class="dzg-fclr">Effacer</button><button type="button" class="dzg-fapply">Appliquer</button></div>';
+/** The overlay's Retry and a menu item, made in the grid's root (not shown here); the pager's controls, drawn by pagination(). */
+const RETRY = '<button type="button" class="dzg-retry">Réessayer</button>';
+const MENU = '<div class="dzg-menu" role="menu"><div role="menuitem">Trier</div></div>';
+const NEXT = '.dzg-footer .dzg-pbtn[data-go=next]';
+const FIRST = '.dzg-footer .dzg-pbtn[data-go=first]';
+const CLEAR = '.dzg-footer .dzg-pbtn[data-act=clear]';
+/** The selection's part, hidden while nothing is selected. */
+const SEL = '.dzg-psel, .dzg-psel [hidden]';
+const SELECT = '.dzg-footer select';
+/** `want` for a variable that must leave this element as it is (39: the popups' and the pager's apart). */
+const SAME = (x, d) => x === d;
 
 /**
  * Every variable an app sets (presentation-settings.md 26–33), where it shows: `at` an element the page has (or `make`,
@@ -55,8 +68,8 @@ const VARS = [
   { v: '--dzg-input-bg', at: '.dzg-finput', p: 'background-color', value: RED },
   { v: '--dzg-input-fg', reset: true, at: '.dzg-finput', p: 'color', value: RED },
   { v: '--dzg-input-radius', at: '.dzg-finput', p: 'border-start-start-radius', value: '7px' },
-  { v: '--dzg-button-fg', reset: true, at: '.dzg-pbtn[data-go=next]', p: 'color', value: RED },
-  { v: '--dzg-button-radius', at: '.dzg-pbtn[data-go=next]', p: 'border-start-start-radius', value: '7px' },
+  { v: '--dzg-button-fg', reset: true, make: FOOT, at: '[data-made] .dzg-fclr', p: 'color', value: RED },
+  { v: '--dzg-button-radius', make: FOOT, at: '[data-made] .dzg-fclr', p: 'border-start-start-radius', value: '7px' },
   { v: '--dzg-footer-fg', at: '.dzg-footer', p: 'color', value: RED },
   { v: '--dzg-footer-bg', at: '.dzg-footer', p: 'background-color', value: RED },
   { v: '--dzg-overlay-fg', at: '.dzg-overlay', p: 'color', value: RED },
@@ -93,6 +106,74 @@ const VARS = [
   { v: '--dzg-button-primary-active-bg', reset: true, press: true, make: FOOT, at: '[data-made] .dzg-fapply', p: 'background-color', value: RED },
   // The secondary's hover leaves Apply as it is (its own variables).
   { v: '--dzg-button-hover-bg', reset: true, hover: true, make: FOOT, at: '[data-made] .dzg-fapply', p: 'background-color', value: RED, want: (x, d) => x === d },
+  // 39: the text size of the popups' buttons and Retry; the pager's buttons and select follow it (asked); a menu item not.
+  { v: '--dzg-button-font-size', reset: true, make: FOOT, at: '[data-made] .dzg-fclr', p: 'font-size', value: '21px' },
+  { v: '--dzg-button-font-size', reset: true, make: RETRY, at: '[data-made] .dzg-retry', p: 'font-size', value: '21px' },
+  { v: '--dzg-button-font-size', reset: true, at: NEXT, p: 'font-size', value: '21px' },
+  { v: '--dzg-button-font-size', reset: true, at: SELECT, p: 'font-size', value: '21px' },
+  { v: '--dzg-button-font-size', make: MENU, at: '[data-made] [role=menuitem]', p: 'font-size', value: '21px', want: SAME },
+  // 39: the popups' button variables leave the pager's buttons and its select as they are.
+  { v: '--dzg-button-bg', at: NEXT, p: 'background-color', value: RED, want: SAME },
+  { v: '--dzg-button-border', at: NEXT, p: 'border-inline-start-color', value: RED, want: SAME },
+  { v: '--dzg-button-fg', at: NEXT, p: 'color', value: RED, want: SAME },
+  { v: '--dzg-button-radius', at: NEXT, p: 'border-start-start-radius', value: '7px', want: SAME },
+  { v: '--dzg-button-font-weight', at: NEXT, p: 'font-weight', value: '700', want: SAME },
+  { v: '--dzg-button-height', at: NEXT, p: 'min-block-size', value: '41px', want: SAME },
+  { v: '--dzg-button-padding-inline', show: SEL, at: CLEAR, p: 'padding-inline-start', value: '13px', want: SAME },
+  { v: '--dzg-button-hover-bg', hover: true, at: NEXT, p: 'background-color', value: RED, want: SAME },
+  { v: '--dzg-button-bg', at: SELECT, p: 'background-color', value: RED, want: SAME },
+  { v: '--dzg-button-border', at: SELECT, p: 'border-inline-start-color', value: RED, want: SAME },
+  { v: '--dzg-button-fg', at: SELECT, p: 'color', value: RED, want: SAME },
+  { v: '--dzg-button-radius', at: SELECT, p: 'border-start-start-radius', value: '7px', want: SAME },
+  // 40: the strip (the status bar's too) and the pager's place.
+  { v: '--dzg-footer-line', reset: true, at: '.dzg-footer', p: 'border-block-start-style', value: '3px dashed red', want: 'dashed' },
+  { v: '--dzg-footer-padding-block', at: '.dzg-footer', p: 'padding-block-start', value: '9px' },
+  { v: '--dzg-footer-padding-inline', at: '.dzg-footer', p: 'padding-inline-start', value: '11px' },
+  { v: '--dzg-footer-height', at: '.dzg-footer', p: 'min-block-size', value: '77px' },
+  { v: '--dzg-footer-gap', at: '.dzg-footer', p: 'column-gap', value: '3px 5px', want: '5px' },
+  { v: '--dzg-footer-font-size', at: '.dzg-footer', p: 'font-size', value: '21px' },
+  { v: '--dzg-footer-justify', at: '.dzg-footer', p: 'justify-content', value: 'center' },
+  { v: '--dzg-footer-align', at: '.dzg-footer', p: 'align-items', value: 'flex-end' },
+  { v: '--dzg-pager-margin-inline-start', at: '.dzg-footer > nav', p: 'margin-inline-start', value: '0px' },
+  // 40: the texts.
+  ...[['count', '.dzg-pcount'], ['page', '.dzg-ppage'], ['label', '.dzg-psize > span'], ['selected', '.dzg-pseltext']].flatMap(([n, at]) => [
+    { v: `--dzg-pager-${n}-fg`, show: SEL, at, p: 'color', value: RED },
+    { v: `--dzg-pager-${n}-font-weight`, show: SEL, at, p: 'font-weight', value: '700' },
+    { v: `--dzg-pager-${n}-font-size`, show: SEL, at, p: 'font-size', value: '21px' },
+  ]),
+  // 39–40: the pager's buttons, their own variables; the popups' buttons left as they are.
+  { v: '--dzg-pager-button-bg', reset: true, at: NEXT, p: 'background-color', value: RED },
+  { v: '--dzg-pager-button-fg', reset: true, at: NEXT, p: 'color', value: RED },
+  { v: '--dzg-pager-button-border', reset: true, at: NEXT, p: 'border-inline-start-color', value: RED },
+  { v: '--dzg-pager-button-radius', at: NEXT, p: 'border-start-start-radius', value: '7px' },
+  { v: '--dzg-pager-button-font-size', reset: true, at: NEXT, p: 'font-size', value: '21px' },
+  { v: '--dzg-pager-button-font-weight', reset: true, at: NEXT, p: 'font-weight', value: '700' },
+  { v: '--dzg-pager-button-size', at: NEXT, p: 'min-block-size', value: '41px' },
+  { v: '--dzg-pager-button-size', at: NEXT, p: 'inline-size', value: '41px', want: (x) => Math.abs(parseFloat(x) - 41) < 3 },
+  { v: '--dzg-pager-button-padding-inline', reset: true, show: SEL, at: CLEAR, p: 'padding-inline-start', value: '13px' },
+  { v: '--dzg-pager-button-padding-inline', at: NEXT, p: 'padding-inline-start', value: '13px', want: SAME },
+  { v: '--dzg-pager-button-hover-bg', reset: true, hover: true, at: NEXT, p: 'background-color', value: RED },
+  { v: '--dzg-pager-button-hover-fg', reset: true, hover: true, at: NEXT, p: 'color', value: RED },
+  { v: '--dzg-pager-button-active-bg', reset: true, press: true, at: NEXT, p: 'background-color', value: RED },
+  { v: '--dzg-pager-button-hover-bg', hover: true, at: FIRST, p: 'background-color', value: RED, want: SAME },
+  { v: '--dzg-pager-button-disabled-fg', reset: true, at: FIRST, p: 'color', value: RED },
+  { v: '--dzg-pager-button-disabled-bg', reset: true, at: FIRST, p: 'background-color', value: RED },
+  { v: '--dzg-pager-button-bg', make: FOOT, at: '[data-made] .dzg-fclr', p: 'background-color', value: RED, want: SAME },
+  { v: '--dzg-pager-button-font-size', make: FOOT, at: '[data-made] .dzg-fclr', p: 'font-size', value: '21px', want: SAME },
+  // 40: the select, its own and the pager buttons' (followed); the ring.
+  { v: '--dzg-pager-select-bg', reset: true, at: SELECT, p: 'background-color', value: RED },
+  { v: '--dzg-pager-select-fg', reset: true, at: SELECT, p: 'color', value: RED },
+  { v: '--dzg-pager-select-border', reset: true, at: SELECT, p: 'border-inline-start-color', value: RED },
+  { v: '--dzg-pager-select-radius', native: true, at: SELECT, p: 'border-start-start-radius', value: '7px' },
+  { v: '--dzg-pager-select-padding-inline', native: true, reset: true, at: SELECT, p: 'padding-inline-start', value: '13px' },
+  { v: '--dzg-pager-select-height', native: true, at: SELECT, p: 'min-block-size', value: '41px' },
+  { v: '--dzg-pager-select-font-size', reset: true, at: SELECT, p: 'font-size', value: '21px' },
+  { v: '--dzg-pager-select-font-weight', reset: true, at: SELECT, p: 'font-weight', value: '700' },
+  { v: '--dzg-pager-button-bg', reset: true, at: SELECT, p: 'background-color', value: RED },
+  { v: '--dzg-pager-button-border', reset: true, at: SELECT, p: 'border-inline-start-color', value: RED },
+  { v: '--dzg-pager-select-bg', at: NEXT, p: 'background-color', value: RED, want: SAME },
+  { v: '--dzg-pager-focus-ring', reset: true, focus: '.dzg-footer .dzg-pbtn[data-go=prev]', at: NEXT, p: 'outline-style', value: '3px dashed red', want: 'dashed' },
+  { v: '--dzg-pager-focus-ring', reset: true, focus: '.dzg-footer .dzg-pbtn[data-go=last]', at: SELECT, p: 'outline-color', value: '3px dashed red', want: RED },
 ];
 
 // `reset`: a border, or a button's or an input's colour, which an unlayered reset (Tailwind 3's preflight) takes from the
@@ -100,10 +181,24 @@ const VARS = [
 
 /** Puts the page in the state an entry needs: the tooltip shown, the body at its last row, the markup made. */
 async function stage(page, e) {
-  await page.evaluate(() => { document.querySelectorAll('[data-made]').forEach((x) => x.remove()); });
+  await page.evaluate(() => { document.querySelectorAll('[data-made]').forEach((x) => x.remove()); document.querySelectorAll('[data-shown]').forEach((x) => { x.hidden = true; delete x.dataset.shown; }); });
+  // A part hidden while nothing is selected, shown for the read (WebKit keeps a stale style under display: none).
+  if (e.show) await page.evaluate((sel) => document.querySelectorAll(sel).forEach((x) => { if (x.hidden) { x.hidden = false; x.dataset.shown = ''; } }), e.show);
   if (e.make) await page.evaluate((html) => { const d = document.createElement('div'); d.dataset.made = ''; d.innerHTML = html; document.querySelector('.dzg').append(d); }, e.make);
-  await page.evaluate((bottom) => { const v = document.querySelector('.dzg-viewport'); v.scrollTop = bottom ? v.scrollHeight : 0; }, !!e.bottom);
+  await page.evaluate((bottom) => { document.activeElement?.blur?.(); const v = document.querySelector('.dzg-viewport'); v.scrollTop = bottom ? v.scrollHeight : 0; }, !!e.bottom);
   await frames(page);
+  // Focused from the keyboard (`:focus-visible`): a key, then the focus.
+  // Tab from the control before it (Firefox ignores a modifier key after a pointer press); where Tab skips buttons
+  // (WebKit), a key then the focus.
+  if (e.focus) {
+    await page.evaluate((from) => document.querySelector(from).focus(), e.focus);
+    await page.keyboard.press('Tab');
+    if (!(await page.evaluate((at) => document.activeElement === document.querySelector(at), e.at))) {
+      await page.keyboard.press('Shift');
+      await page.evaluate((at) => document.querySelector(at).focus(), e.at);
+    }
+    await frames(page);
+  }
   // Under the pointer, or pressed (released after the read: `release`).
   if (e.hover || e.press) {
     await page.mouse.move(0, 0);
@@ -119,6 +214,12 @@ async function stage(page, e) {
     if (await page.waitForFunction(() => !document.querySelector('.dzg-tooltip').hidden, null, { timeout: 3000 }).then(() => true, () => false)) break;
   }
 }
+
+/** Released away from the button pressed: no click (a pager button would turn the page). */
+const release = async (page) => {
+  await page.mouse.move(0, 0);
+  await page.mouse.up();
+};
 
 const read = (page, { at, pseudo, p }) => page.evaluate(({ at, pseudo, p }) => {
   const el = document.querySelector(at);
@@ -152,7 +253,7 @@ async function run(name, cfg) {
     for (const e of VARS) {
       await stage(page, e);
       before.push(await read(page, dflt(e)));
-      await page.mouse.up();
+      await release(page);
     }
     const baseInput = await page.evaluate(() => { const s = getComputedStyle(document.querySelector('.dzg-finput')); return { style: s.outlineStyle, width: s.outlineWidth, offset: s.outlineOffset }; });
     check(`${tag}: the filter box edged by default (a line a reset cannot erase)`, baseInput.style === 'solid' && baseInput.width === '1px' && baseInput.offset === '-1px', baseInput);
@@ -160,22 +261,30 @@ async function run(name, cfg) {
     for (const [i, e] of VARS.entries()) {
       await stage(page, e);
       const now = await read(page, dflt(e));
-      await page.mouse.up();
+      await release(page);
       // The arrow is new (owner 5, decided): its default is checked, not compared with 1.11 (which had none).
       if (e.was === 'tooltip') check(`${tag}: ${e.v} unset: the tooltip's background`, now === (await page.evaluate(() => getComputedStyle(document.querySelector('.dzg-tooltip')).backgroundColor)), now);
       else if (e.was) check(`${tag}: ${e.v} unset: ${e.was}`, now === e.was, now);
       else check(`${tag}: ${e.v} unset leaves today's look`, now === before[i], { now, before: before[i] });
+      // Focused from the keyboard indeed: the browser's own ring shows (none would make the comparison empty).
+      if (e.focus) {
+        await stage(page, e);
+        const ring = await read(page, { at: e.at, p: 'outline-style' });
+        check(`${tag}: ${e.at} focused from the keyboard shows the browser's ring by default`, ring !== 'none', ring);
+      }
       await page.evaluate(({ v, value, more }) => { const r = document.querySelector('.dzg'); for (const [k, x] of Object.entries(more ?? {})) r.style.setProperty(k, x); r.style.setProperty(v, value); }, { v: e.v, value: e.value, more: e.with });
       await frames(page);
       await stage(page, e);
       const set = await read(page, e);
-      await page.mouse.up();
+      await release(page);
       const want = e.want ?? e.value;
-      if (!(e.reset && css === 'layered' && preflight)) check(`${tag}: ${e.v} set changes the look${e.want?.length === 2 ? ' (not this one)' : ''}`, typeof want == 'function' ? want(set, now) : set === want, { set, want: String(want), at: e.at });
+      // `native`: WebKit draws its select natively (its corners, padding, height its own — the base's do not reach it today
+      // either); checked in the two others.
+      if (!(e.reset && css === 'layered' && preflight) && !(e.native && name === 'webkit')) check(`${tag}: ${e.v} set changes the look${e.want?.length === 2 ? ' (not this one)' : ''}`, typeof want == 'function' ? want(set, now) : set === want, { set, want: String(want), at: e.at });
       await page.evaluate(({ v, more }) => { const r = document.querySelector('.dzg'); for (const k of [v, ...Object.keys(more ?? {})]) r.style.removeProperty(k); }, { v: e.v, more: e.with });
       await page.mouse.move(0, 0);
     }
-    await page.evaluate(() => { document.querySelectorAll('[data-made]').forEach((x) => x.remove()); document.querySelector('.dzg-viewport').scrollTop = 0; });
+    await page.evaluate(() => { document.querySelectorAll('[data-made]').forEach((x) => x.remove()); document.querySelectorAll('[data-shown]').forEach((x) => { x.hidden = true; delete x.dataset.shown; }); document.querySelector('.dzg-viewport').scrollTop = 0; });
     await frames(page);
 
     // (5) The input edge: `none` takes it away, whatever the reset.

@@ -1,8 +1,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // @dzgrid/theme/buttons.css — every look of the grid's popup buttons a variable (1.12.0, presentation-settings.md 36,
 // owner 2026-11-13 « toujours laisser le choix »): a filter's Clear and Apply, the condition rows' add / remove, the
-// period shortcuts, the pager, the overlay's Retry. Opt-in, after dzgrid.css (and variables.css when loaded); each value
-// read from its own `--dzg-button-*` variable whose fallback is today's look, so loading it changes nothing by itself.
+// period shortcuts, the overlay's Retry (the pagination bar apart: pager.scss, 39–40). Opt-in, after dzgrid.css (and
+// variables.css when loaded); each value read from its own `--dzg-button-*` variable whose fallback is today's look, so
+// loading it changes nothing by itself.
 // Its own file: variables.css had no room under its size line (+2 % rule). In `dzgrid.theme`, after the base in source
 // order. Compiled to buttons.css and buttons.unlayered.css ($layered: false) by `npm run build:theme`; a test fails when
 // they drift. No colour literal, no physical side (guards).
@@ -20,12 +21,12 @@ $layered: true !default;
   }
 }
 
-// Every button of the look (dzgrid.scss « the retry button … »), and those sized to their words (the pager's squares and
-// the shortcuts keep their own padding).
-$all: '.dzg-overlay button, .dzg-ffoot button, .dzg-fadd, .dzg-frm, .dzg-fpreset, .dzg-pbtn, .dzg-retry';
+// Every popup button of the look (dzgrid.scss « the retry button … »), and those sized to their words (the shortcuts keep
+// their own padding). Not the pager's: they have their own variables (pager.scss, 39), so a popup's Clear drawn as a link
+// leaves the pager framed.
+$all: '.dzg-overlay button, .dzg-ffoot button, .dzg-fadd, .dzg-frm, .dzg-fpreset, .dzg-retry';
 $worded: '.dzg-overlay button, .dzg-ffoot button, .dzg-fadd, .dzg-frm, .dzg-retry';
-// Under the pointer or pressed: not a pager button that cannot act (it keeps its muted look).
-$live: ':where(.dzg-overlay button, .dzg-ffoot button, .dzg-fadd, .dzg-frm, .dzg-fpreset, .dzg-pbtn:not([aria-disabled=true]), .dzg-retry)';
+$live: ':where(#{$all})';
 
 @if $layered {
   @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
@@ -40,6 +41,7 @@ $live: ':where(.dzg-overlay button, .dzg-ffoot button, .dzg-fadd, .dzg-frm, .dzg
     color: var(--dzg-bf, var(--dzg-button-fg, var(--tz-fg)));
     background: var(--dzg-bb, var(--dzg-button-bg, var(--dzg-header-bg, var(--tz-bg-raised))));
     font-weight: var(--dzg-button-font-weight, inherit);
+    font-size: var(--dzg-button-font-size, 1em);
   }
 
   #{$worded} {

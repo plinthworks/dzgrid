@@ -36,9 +36,15 @@ complete, English and French).
     sets it, `--dzg-set-list-max-width: 14rem` gives the old width back).
   - Wanted the old « everything white on hover » look? `data-dzg-row-fg="force"` on the grid's host (with
     `--dzg-row-hover-fg` / `--dzg-row-selected-fg`). Without it, content with its own colour keeps it, as in 1.12.0.
+  - **The pager's buttons apart from the popups' buttons** (owner 2026-11-13, « oui ajoute-les »): the pager's
+    buttons and its rows-per-page select no longer read `--dzg-button-*` (1.9.0's `--dzg-button-bg` and `-border`
+    included) — a popup's Clear drawn as a link left the pager borderless. An app that styled the pager through them
+    sets `--dzg-pager-button-*` / `--dzg-pager-select-*` instead, with the new `@dzgrid/theme/pager.css` loaded
+    (where the pager's variables live). Only the text size is shared: `--dzg-pager-button-font-size` falls back on
+    `--dzg-button-font-size`.
   - Size lines: the audit screen (K.8) 91 000 → 92 000 (owner 2026-11-13, « tu peux augmenter »; measured 91 037: the
     header fix in the base); +2 % rule: `/filters` 12 250, `/filters-base` 12 200, `columns.css` 1 224, `variables.css`
-    1 938, `@dzgrid/dom/theme` 2 499, the real Angular example 102 150; `buttons.css` new at 500.
+    1 938, `@dzgrid/dom/theme` 2 499, the real Angular example 102 150; `buttons.css` new at 500, `pager.css` new at 760.
 
 ### Fixed
 - **A header's title stays at its start under a page's reset** (seen with Tailwind 3's preflight and the unlayered
@@ -80,6 +86,19 @@ complete, English and French).
   line height, max width, paddings, radius, white space (`pre-line` keeps line breaks); `--dzg-overlay-fg`,
   `--dzg-overlay-bg`, `--dzg-footer-fg`, `--dzg-footer-bg`.
 
+- **The pagination bar, every look a variable** (owner 2026-11-13, « donne la possibilité de styler la pagination »;
+  presentation-settings.md 39–40), in the **new opt-in sheet `@dzgrid/theme/pager.css`** (`pager.unlayered.css` with the
+  unlayered copies, after `variables.css`), each default today's look: the strip (the status
+  bar's too) `--dzg-footer-line`, `-padding-block`, `-padding-inline`, `-height`, `-gap`, `-font-size`, `-justify`,
+  `-align`; the pager's place `--dzg-pager-margin-inline-start` (`auto`); the texts `--dzg-pager-count-*`, `-page-*`,
+  `-label-*`, `-selected-*` (each `-fg`, `-font-weight`, `-font-size`); the buttons `--dzg-pager-button-bg`, `-fg`,
+  `-border`, `-radius`, `-padding-inline`, `-size`, `-font-size`, `-font-weight`, `-hover-bg`, `-hover-fg`,
+  `-active-bg`, `-disabled-fg`, `-disabled-bg`; the rows-per-page select `--dzg-pager-select-bg`, `-fg`, `-border`,
+  `-radius`, `-padding-inline`, `-height`, `-font-size`, `-font-weight` (each falling back on the pager button's; Safari
+  keeps its native select's corners, padding and height, as today); the
+  ring `--dzg-pager-focus-ring` (unset: the browser's). CSS variables only, not `theme` keys. The select's arrow stays
+  the browser's (in its text colour); which parts show and in which order: `pagination({ footer })`.
+- `--dzg-button-font-size` (`theme.buttonFontSize`): the popups' buttons' and Retry's text size (`1em`, today's).
 - **The set filter's popup as wide as its longest value** (owner 2026-11-13): measured on the whole list at the opening
   and when values arrive (every value written into one hidden copy of a label and read once, no row per value: the list stays windowed), never while a search
   narrows it (the popup does not jump), between `--dzg-set-list-min-width` (14rem) and `--dzg-set-list-max-width`
@@ -88,7 +107,7 @@ complete, English and French).
 - **`--dzg-sort-none-fg`**: the unsorted mark's own colour (`icons.sortNone`), the sorted one's by default — grey the
   unsorted mark, keep the accent on the sort.
 - **`@dzgrid/theme/buttons.css`**: every look of the popups' buttons (a filter's Clear and Apply, add / remove a
-  condition, the period shortcuts, the pager, Retry) a variable: `--dzg-button-font-weight`,
+  condition, the period shortcuts, Retry; the pager apart, above) a variable: `--dzg-button-font-weight`,
   `--dzg-button-padding-inline`, `--dzg-button-height`, `--dzg-button-hover-bg`, `--dzg-button-hover-fg`,
   `--dzg-button-active-bg`, and for the primary one (Apply) `--dzg-button-primary-bg`, `-fg`, `-border`, `-hover-bg`,
   `-hover-fg`, `-active-bg`; defaults today's look (no hover or press look until you set one).

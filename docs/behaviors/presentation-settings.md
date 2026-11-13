@@ -238,9 +238,9 @@ everything an application needs is a `--dzg-*` variable (or a `theme` key, or a 
     (`--dzg-sort-fg`); default the latter (today's look), so an app greys the unsorted mark and keeps the accent on the
     sorted one. `variables.css`.
 36. **Buttons**: the popups' buttons (a filter's Clear and Apply, the condition rows' add / remove, the period
-    shortcuts, the pager, the overlay's Retry) read, beside 1.9.0's `--dzg-button-bg`, `-fg`, `-border` (a colour) and
+    shortcuts, the overlay's Retry; the pager's have their own, 39) read, beside 1.9.0's `--dzg-button-bg`, `-fg`, `-border` (a colour) and
     `-radius`: `--dzg-button-font-weight` (inherited), `--dzg-button-padding-inline` (.75rem; on the footer's, the
-    overlay's, add / remove and Retry: the pager's squares and the shortcuts keep their own) and `--dzg-button-height`
+    overlay's, add / remove and Retry: the shortcuts keep their own) and `--dzg-button-height`
     (2rem, the same buttons but a row's Retry, a 24 px target; a height, not a block padding: the browsers' own button
     padding differs, so no default could be today's in all three), `--dzg-button-hover-bg` / `--dzg-button-hover-fg` / `--dzg-button-active-bg` (under the pointer, pressed:
     unset, no change — today); the primary one (Apply) `--dzg-button-primary-bg` (accent), `-fg` (accent's text),
@@ -263,13 +263,54 @@ everything an application needs is a `--dzg-*` variable (or a `theme` key, or a 
     `--dzg-set-list-min-width` (14rem, today's) and `--dzg-set-list-max-width` (`min(32rem, 90vw)`), read by the set
     chunk's layout.
 
+### The pagination bar, every look a variable (owner 2026-11-13, « oui ajoute-les », « donne la possibilité de styler la pagination »)
+39. **The pager's buttons apart from the popups' buttons.** The pager's buttons (`«` `‹` `›` `»`, and the
+    selection's « Select all N » and « Clear » in the same bar) read none of the popups' button variables
+    (`--dzg-button-*`, 1.9.0's `-bg` and `-border` included): an app that draws a popup's Clear as a link keeps a
+    framed pager. One exception, asked: their text size falls back on `--dzg-button-font-size`. Which control follows
+    which:
+    - a filter popup's Clear and Apply, the condition rows' add / remove, the period shortcuts, the overlay's Retry:
+      `--dzg-button-*` (36), and `--dzg-button-font-size` (`1em`: today, each inherits its popup's or overlay's size);
+    - the pager's buttons: `--dzg-pager-button-*` only;
+    - the rows-per-page `<select>`: `--dzg-pager-select-*`, each falling back on the pager button's same one, then
+      today's (one set styles the pager's controls alike; the select's own set parts them);
+    - menu items (`menu.css`) and the panels' quiet buttons (`_controls.scss`: columns panel, dock, filters panel):
+      none of these, their own look, their text the menu's or the panel's size (unchanged); the header's filter and
+      menu buttons: `--dzg-header-button-*` (33); the filter boxes and the floating row's clear button:
+      `--dzg-input-*` (30).
+40. **Every look of the bar a variable**, default today's (the computed styles with the sheet equal those without it).
+    The strip (`--dzg-footer-*`: it is the status bar's too): `--dzg-footer-bg`, `-fg` (33), `-line` (the line above
+    it, a border; `--dzg-line` solid `--tz-border`), `-padding-block` / `-padding-inline` (1 and 2 spacing units),
+    `-height` (its least height, `auto`), `-gap` (between its parts, `.25rem 1rem`), `-font-size` (`1em`), `-justify`
+    (its parts along the line, `normal`), `-align` (across it, `center`); `--dzg-pager-margin-inline-start` (`auto`:
+    the pager at the inline end; `0` lets `-justify` place it). Texts, each `-fg`, `-font-weight`, `-font-size`
+    (default the strip's colour, weight and size): `--dzg-pager-count-*` (« 1 à 100 sur 150 »), `--dzg-pager-page-*`
+    (« Page 1 sur 2 »; its colour `--tz-fg`), `--dzg-pager-label-*` (« Lignes par page »), `--dzg-pager-selected-*`
+    (« 12 lignes sélectionnées »). Buttons: `--dzg-pager-button-bg` (`--dzg-header-bg`), `-fg` (`--tz-fg`), `-border`
+    (a colour, `--tz-fg-muted`), `-radius` (`--dzg-radius`), `-padding-inline` (`.75rem`, the worded ones; the arrows
+    stay square), `-size` (`2rem`: the arrows' side, every pager button's least height), `-font-size`
+    (`--dzg-button-font-size`, then `1em`), `-font-weight` (inherited), `-hover-bg` / `-hover-fg` / `-active-bg` (unset:
+    no change), `-disabled-fg` (`--tz-fg-muted`) / `-disabled-bg` (the button's); a button that cannot act takes no
+    hover. The select: `--dzg-pager-select-bg`, `-fg`, `-border`, `-radius`, `-padding-inline`, `-height`, `-font-size`,
+    `-font-weight` (WebKit draws the select natively: its corners, padding and height stay its own there, as today —
+    the base's do not reach it either). `--dzg-pager-focus-ring` (an `outline`, on the pager's buttons and select at `:focus-visible`;
+    unset: the browser's own ring, as today — `revert-layer`, never a reset's). Forced colours keep the system's.
+    In their own opt-in sheet `@dzgrid/theme/pager.css` (and `pager.unlayered.css`), after `variables.css`: the base
+    (K.8), `variables.css` and `buttons.css` have no room under their lines (+2 %; the bar's rules weigh ≈ 740 B). CSS
+    variables only, not `theme` keys (39 keys cost ≈ 150 B of `@dzgrid/dom/theme`, past its line); `buttonFontSize`
+    is one. Not reachable without a change of structure or look: the select's arrow (the browser's own, in the
+    select's text colour in Chrome and Firefox; its own colour would mean drawing it, `appearance: none`); a current
+    page mark (there is none: no list of page numbers). Which parts and in which order: `pagination({ footer })`
+    (`['footer.selected', 'footer.count', 'footer.pager']`, fixed at creation; a host's part replaces one); the select
+    is hidden with fewer than two sizes (`pagination: { pageSizes }`); « last » is not drawn when pages go by cursor.
+
 ## Right to left
 The separator, the last column's line, the arrow's place and the header padding are logical; the separator's
 background position is mirrored by `:dir(rtl)`.
 
 ## Tests
 `packages/dom/test/presentation-1-12.test.ts` (25, 29, 32), `packages/theme/test/presentation-1-12.test.ts` (24, 26–33,
-both copies, contrast pairs, the guide's table), `packages/theme/test/presentation-1-12-fixes.test.ts` (34–37),
+both copies, contrast pairs, the guide's table), `packages/theme/test/presentation-1-12-fixes.test.ts` (34–37, 39–40),
 `packages/dom/test/filters-set-width.test.ts` (38), browsers `node scripts/browser-1-12.mjs` (Chrome, Firefox, WebKit ×
 layered / unlayered × light / dark × ltr / ar × a page with Tailwind 3's preflight; axe; every variable's default and
-effect, table-driven; 34 the header's places, 37 the forced row text, 38 the list's width).
+effect, table-driven; 34 the header's places, 37 the forced row text, 38 the list's width; 39–40 the pager apart from the popups' buttons, each bar variable's default and effect).

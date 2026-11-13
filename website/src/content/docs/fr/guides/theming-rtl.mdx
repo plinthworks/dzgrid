@@ -120,7 +120,7 @@ du réglage `theme`.
 | `--dzg-tooltip-arrow-size`, `--dzg-tooltip-arrow-color` | `tooltipArrowSize`, `tooltipArrowColor` | La flèche vers la cellule, du côté où l’infobulle s’ouvre (`0` : aucune ; 1.12.0) | `.375rem`, le fond de l’infobulle | variables |
 | `--dzg-input-bg`, `--dzg-input-border` | `inputBg`, `inputBorder` | Les champs des filtres : leur fond, leur bord (une couleur, ou `none` ; 1.12.0 : jamais effacé par la remise à zéro d’une page) | `--tz-bg` ; clair : `--tz-fg-muted` à 75 % dans `--tz-bg`, sombre : `--tz-fg-muted` | base |
 | `--dzg-input-fg`, `--dzg-input-radius` | `inputFg`, `inputRadius` | Les champs des filtres : texte, coins (1.12.0) | `--tz-fg`, `--dzg-radius` | variables |
-| `--dzg-button-bg`, `--dzg-button-border` | `buttonBg`, `buttonBorder` | Boutons de la pagination, du pied des filtres, de nouvel essai (Appliquer garde l’accent) | `--dzg-header-bg`, `--tz-fg-muted` | variables |
+| `--dzg-button-bg`, `--dzg-button-border` | `buttonBg`, `buttonBorder` | Boutons du pied des filtres, de nouvel essai (Appliquer garde l’accent ; ceux de la pagination : `--dzg-pager-button-*`, 1.12.0) | `--dzg-header-bg`, `--tz-fg-muted` | variables |
 | `--dzg-menu-item-height`, `--dzg-menu-disabled` | `menuItemHeight`, `menuDisabled` | Éléments de menu (jamais sous 24 px), un élément désactivé | `32px`, `--tz-fg-muted` | `menu.css`, `columns.css` |
 | `--dzg-panel-bg` | `panelBg` | Le dock et le panneau des filtres | `--tz-bg` | `dock.css`, `filters-panel.css` |
 | `--dzg-chip-bg`, `--dzg-chip-hover-bg`, `--dzg-control-active-bg` | `chipBg`, `chipHoverBg`, `controlActiveBg` | Pastilles ; un bouton de panneau enfoncé | mélanges d’accent et de texte | feuilles des fonctions |
@@ -139,10 +139,25 @@ du réglage `theme`.
 | `--dzg-overlay-fg`, `--dzg-overlay-bg` | `overlayFg`, `overlayBg` | Le message de chargement, d’absence de lignes, d’erreur (1.12.0) | `--tz-fg-muted`, `--tz-bg` | variables |
 | `--dzg-footer-fg`, `--dzg-footer-bg` | `footerFg`, `footerBg` | La bande de la pagination (1.12.0) | `--tz-fg-muted`, `--dzg-header-bg` | variables |
 | `--dzg-sort-none-fg` | `sortNoneFg` | La marque d’une colonne non triée (`icons.sortNone`), à part de celle d’un tri (1.12.0) | celle des marques de tri | `theming()` |
-| `--dzg-button-font-weight`, `--dzg-button-padding-inline`, `--dzg-button-height` | `buttonFontWeight`, `buttonPaddingInline`, `buttonHeight` | Les boutons des fenêtres : graisse, marge latérale, hauteur (les carrés de la pagination et les raccourcis gardent les leurs ; 1.12.0) | héritée, `.75rem`, `2rem` | `buttons.css` |
-| `--dzg-button-hover-bg`, `--dzg-button-hover-fg`, `--dzg-button-active-bg` | `buttonHoverBg`, `buttonHoverFg`, `buttonActiveBg` | Un bouton sous le pointeur, enfoncé (un bouton de pagination inactif : rien ; 1.12.0) | aucun changement | `buttons.css` |
+| `--dzg-button-font-weight`, `--dzg-button-padding-inline`, `--dzg-button-height` | `buttonFontWeight`, `buttonPaddingInline`, `buttonHeight` | Les boutons des fenêtres : graisse, marge latérale, hauteur (les raccourcis gardent les leurs ; 1.12.0) | héritée, `.75rem`, `2rem` | `buttons.css` |
+| `--dzg-button-hover-bg`, `--dzg-button-hover-fg`, `--dzg-button-active-bg` | `buttonHoverBg`, `buttonHoverFg`, `buttonActiveBg` | Un bouton des fenêtres sous le pointeur, enfoncé (1.12.0) | aucun changement | `buttons.css` |
 | `--dzg-button-primary-bg`, `--dzg-button-primary-fg`, `--dzg-button-primary-border` | `buttonPrimaryBg`, `buttonPrimaryFg`, `buttonPrimaryBorder` | Le bouton principal (Appliquer d’un filtre ; 1.12.0) | `--tz-accent`, `--tz-accent-fg`, `--tz-accent` | `buttons.css` |
 | `--dzg-button-primary-hover-bg`, `--dzg-button-primary-hover-fg`, `--dzg-button-primary-active-bg` | `buttonPrimaryHoverBg`, `buttonPrimaryHoverFg`, `buttonPrimaryActiveBg` | Le bouton principal sous le pointeur, enfoncé (1.12.0) | aucun changement | `buttons.css` |
+| `--dzg-button-font-size` | `buttonFontSize` | La taille du texte des boutons des fenêtres et de Réessayer ; ceux de la pagination s’y rabattent (1.12.0) | `1em` (celle de leur fenêtre) | `buttons.css` |
+| `--dzg-footer-line`, `--dzg-footer-padding-block`, `--dzg-footer-padding-inline`, `--dzg-footer-height` | — | La bande de la pagination (aussi celle de la barre d’état) : le trait au-dessus (une bordure), ses marges, sa hauteur minimale (1.12.0) | comme le cadre, 1 et 2 unités d’espacement, `auto` | `pager.css` |
+| `--dzg-footer-gap`, `--dzg-footer-font-size`, `--dzg-footer-justify`, `--dzg-footer-align` | — | La bande : l’écart entre ses parties, la taille du texte, ses parties le long (`justify-content`) et en travers (`align-items`) (1.12.0) | `.25rem 1rem`, `1em`, `normal`, `center` | `pager.css` |
+| `--dzg-pager-margin-inline-start` | — | La place des boutons de pagination : `auto` au bout de la bande, `0` laisse `--dzg-footer-justify` les placer (1.12.0) | `auto` | `pager.css` |
+| `--dzg-pager-count-fg`, `--dzg-pager-count-font-weight`, `--dzg-pager-count-font-size` | — | « 1 à 100 sur 150 » (1.12.0) | ceux de la bande | `pager.css` |
+| `--dzg-pager-page-fg`, `--dzg-pager-page-font-weight`, `--dzg-pager-page-font-size` | — | « Page 1 sur 2 » (1.12.0) | `--tz-fg`, ceux de la bande | `pager.css` |
+| `--dzg-pager-label-fg`, `--dzg-pager-label-font-weight`, `--dzg-pager-label-font-size` | — | « Lignes par page » (1.12.0) | ceux de la bande | `pager.css` |
+| `--dzg-pager-selected-fg`, `--dzg-pager-selected-font-weight`, `--dzg-pager-selected-font-size` | — | « 12 lignes sélectionnées » (1.12.0) | ceux de la bande | `pager.css` |
+| `--dzg-pager-button-bg`, `--dzg-pager-button-fg`, `--dzg-pager-button-border`, `--dzg-pager-button-radius` | — | Les boutons de la pagination (et Tout sélectionner, Effacer dans la bande), à part de ceux des fenêtres (1.12.0) | `--dzg-header-bg`, `--tz-fg`, `--tz-fg-muted`, `--dzg-radius` | `pager.css` |
+| `--dzg-pager-button-padding-inline`, `--dzg-pager-button-size`, `--dzg-pager-button-font-size`, `--dzg-pager-button-font-weight` | — | Leur marge latérale (ceux qui portent des mots ; les flèches restent carrées), le côté des flèches et la hauteur minimale de tous, la taille et la graisse du texte (1.12.0) | `.75rem`, `2rem`, `--dzg-button-font-size`, héritée | `pager.css` |
+| `--dzg-pager-button-hover-bg`, `--dzg-pager-button-hover-fg`, `--dzg-pager-button-active-bg` | — | Un bouton de pagination sous le pointeur, enfoncé (inactif : rien ; 1.12.0) | aucun changement | `pager.css` |
+| `--dzg-pager-button-disabled-fg`, `--dzg-pager-button-disabled-bg` | — | Un bouton de pagination qui ne peut pas agir (1.12.0) | `--tz-fg-muted`, celui du bouton | `pager.css` |
+| `--dzg-pager-select-bg`, `--dzg-pager-select-fg`, `--dzg-pager-select-border`, `--dzg-pager-select-radius` | — | La liste « Lignes par page » (sa flèche est celle du navigateur, dans la couleur de son texte ; 1.12.0) | ceux des boutons de pagination | `pager.css` |
+| `--dzg-pager-select-padding-inline`, `--dzg-pager-select-height`, `--dzg-pager-select-font-size`, `--dzg-pager-select-font-weight` | — | Sa marge latérale, sa hauteur minimale, son texte (Safari garde la marge et la hauteur de sa liste native ; 1.12.0) | ceux des boutons de pagination | `pager.css` |
+| `--dzg-pager-focus-ring` | — | L’anneau des boutons et de la liste de la pagination (un `outline` ; 1.12.0) | celui du navigateur | `pager.css` |
 | `--dzg-set-list-min-width`, `--dzg-set-list-max-width` | `setListMinWidth`, `setListMaxWidth` | La liste d’un filtre par valeurs : aussi large que sa plus longue valeur, entre ces deux (1.12.0) | `14rem`, `min(32rem, 90vw)` | le filtre par valeurs |
 
 En lecture seule (écrites par la grille ; pas de clé) : `--dzg-row-height`, `--dzg-header-height`, `--dzg-density`
@@ -155,7 +170,7 @@ couleur de texte que vous avez donnée à cette ligne (absente sinon). Un compos
 ligne survolée ou sélectionnée prenne la couleur de texte de la ligne, une marque d’état colorée comprise, posez
 `data-dzg-row-fg="force"` sur l’hôte de la grille ou un de ses ancêtres (1.12.0 ; clair et sombre pareil).
 `@dzgrid/theme/buttons.css` (`buttons.unlayered.css` avec les copies sans couche) se charge après `variables.css` :
-l’apparence des boutons des fenêtres, chacune une variable (1.12.0).
+l’apparence des boutons des fenêtres, chacune une variable (1.12.0). `@dzgrid/theme/pager.css` (`pager.unlayered.css`), après lui : celle de la bande de pagination (1.12.0) ; ses variables (`--dzg-footer-*` sauf ses couleurs, `--dzg-pager-*`) sont des variables CSS seulement, pas des clés de `theme` : posez-les dans votre CSS ou sur le `style` de l’hôte. Quelles parties la bande montre, dans quel ordre : `pagination({ footer })`.
 
 **Les classes ne sont pas une API** (1.12.0) : les classes de la grille, ses pseudo-éléments, ses marques `data-*` et
 l’ordre de son DOM sont internes et peuvent changer à toute version. Tout ce qu’une apparence demande est une variable

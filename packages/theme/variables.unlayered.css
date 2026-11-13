@@ -133,9 +133,7 @@
 .dzg-fadd,
 .dzg-frm,
 .dzg-fpreset,
-.dzg-pbtn,
-.dzg-retry,
-.dzg-footer select {
+.dzg-retry {
   border-color: var(--dzg-button-border, var(--tz-fg-muted));
   border-radius: var(--dzg-button-radius, var(--dzg-radius, 0.375rem));
   color: var(--dzg-button-fg, var(--tz-fg));

@@ -535,6 +535,10 @@
       "file": "packages/theme/buttons.css",
       "maxGzip": 500
     },
+    "@dzgrid/theme/pager.css": {
+      "file": "packages/theme/pager.css",
+      "maxGzip": 760
+    },
     "@dzgrid/theme/print.css": {
       "file": "packages/theme/print.css",
       "maxGzip": 400

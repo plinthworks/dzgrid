@@ -61,7 +61,7 @@ Chacune : une ligne de fiche d'abord (`presentation-settings.md` 34–38, `filte
    touche), dans la mise en page des filtres (injectée : copies en couche et sans couche pareil) et `columns.css`.
    **K.8 91 000 → 92 000** (ta réponse « tu peux augmenter » ; mesuré 91 037).
 2. **`--dzg-sort-none-fg`** : la couleur de la marque « non triée » à part (par défaut celle du tri).
-3. **Les boutons des fenêtres** (Effacer, Appliquer, ajouter / retirer, raccourcis, pagination, Réessayer) : 12
+3. **Les boutons des fenêtres** (Effacer, Appliquer, ajouter / retirer, raccourcis, Réessayer ; la pagination à part, plus bas) : 12
    variables (graisse, marge latérale, hauteur, survol, appui ; le bouton principal et ses états), défauts = l'aspect
    d'aujourd'hui. **Nouvelle feuille `@dzgrid/theme/buttons.css`** (après `variables.css`) : `variables.css` n'avait
    plus la place sous sa ligne (+2 %).
@@ -72,9 +72,33 @@ Chacune : une ligne de fiche d'abord (`presentation-settings.md` 34–38, `filte
    copie cachée d'une étiquette, sans poser de ligne ; jamais pendant une recherche ; entre `--dzg-set-list-min-width` 14rem et `--dzg-set-list-max-width`
    `min(32rem, 90vw)` ; au-delà, points de suspension et texte entier en infobulle).
 
+## La pagination à part (ta réponse « oui ajoute-les », puis « donne la possibilité de styler la pagination »)
+
+Fiche `presentation-settings.md` 39–40 d'abord, tests écrits à la main et rouges d'abord, matrice navigateurs étendue
+(elle échouait avant).
+
+- **Les boutons de la pagination ne lisent plus les variables des boutons des fenêtres** (`--dzg-button-*`, même
+  `-bg` et `-border` de la 1.9.0) : « Effacer » dessiné en lien ne rend plus la pagination sans bord. Seule la taille
+  du texte est commune (`--dzg-pager-button-font-size` se rabat sur `--dzg-button-font-size`). Une appli qui stylait
+  la pagination par `--dzg-button-*` passe à `--dzg-pager-button-*` (avec `pager.css`).
+- **Toute la bande stylable par variables** (**nouvelle feuille `@dzgrid/theme/pager.css`**, après `variables.css` ;
+  `buttons.css` n'avait plus la place sous sa ligne — 922 o pour 500 ; défauts = l'aspect d'aujourd'hui) : la bande
+  (`--dzg-footer-line`, marges, hauteur, écart, taille, `-justify`, `-align`), la place des boutons
+  (`--dzg-pager-margin-inline-start`), les textes (« 1 à 100 sur 150 », « Page 1 sur 2 », « Lignes par page », la
+  sélection : couleur, graisse, taille), les boutons (fond, texte, bord, coins, marge, taille, survol, appui,
+  inactif), la liste « Lignes par page » (les mêmes, qui suivent ceux des boutons par défaut), l'anneau de focus.
+  `--dzg-button-font-size` pour les boutons des fenêtres et Réessayer.
+- **À toi de dire** : ce sont des variables CSS seulement, pas des clés de `theme` — 43 clés coûteraient ≈ 170 o à
+  `@dzgrid/dom/theme` (2 490 / 2 499, au-delà des +2 %). Les noms de la bande sont `--dzg-footer-*` (comme
+  `--dzg-footer-bg` / `-fg` déjà là : la bande sert aussi à la barre d'état), ceux de la pagination `--dzg-pager-*`.
+- **Pas atteignable sans changer la structure** : la flèche de la liste (celle du navigateur, dans la couleur du
+  texte ; une couleur à part demanderait de la dessiner nous-mêmes, `appearance: none`) ; un repère de page courante
+  (il n'y en a pas : pas de liste de numéros). L'ordre et les parties : `pagination({ footer })` ; la liste cachée
+  avec moins de deux tailles (`pagination: { pageSizes }`).
+
 Tailles : **K.8 91 037 / 92 000** (ligne relevée, « tu peux augmenter ») ; +2 % par ligne : `/filters` 12 250,
 `/filters-base` 12 200, `columns.css` 1 224, `variables.css` 1 938, `@dzgrid/dom/theme` 2 499 (les clés de `theme` en
-une chaîne), l'appli Angular réelle 102 150 (mesuré 102 115) ; `buttons.css` nouvelle, 500.
+une chaîne), l'appli Angular réelle 102 150 (mesuré 102 115) ; `buttons.css` nouvelle, 500 ; `pager.css` nouvelle, 760 (mesuré 738).
 
 ## À regarder après (CHANGELOG « Upgrading from 1.11.0 »)
 

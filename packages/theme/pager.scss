@@ -1,0 +1,126 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/pager.css — every look of the pagination bar a variable (1.12.0, presentation-settings.md 39–40, owner
+// 2026-11-13 « oui ajoute-les », « donne la possibilité de styler la pagination »): the strip (the status bar's too), the
+// pager's place, its texts, its buttons apart from the popups' (`--dzg-button-*` never reach them but the text size), the
+// rows-per-page select, the focus ring. Opt-in, after dzgrid.css (and variables.css when loaded); each value read from its
+// own `--dzg-footer-*` / `--dzg-pager-*` variable whose fallback is today's look, so loading it changes nothing by itself.
+// Its own file: buttons.css and variables.css had no room under their size lines (+2 % rule). In `dzgrid.theme`, after
+// the base in source order. Compiled to pager.css and pager.unlayered.css ($layered: false) by `npm run build:theme`; a
+// test fails when they drift. No colour literal, no physical side (guards).
+// ─────────────────────────────────────────────────────────────────────────────
+
+$layered: true !default;
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@function u($n) {
+  @return calc(var(--dzg-space, 0.25rem) * #{$n});
+}
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+@include layer {
+  // The strip (the status bar's too).
+  // Each default today's look (dzgrid.scss, variables.scss, the injected layout); none reads a popup button's variable
+  // but the text size.
+  .dzg-footer {
+    border-block-start: var(--dzg-footer-line, var(--dzg-line, 1px) solid var(--tz-border));
+    padding-block: var(--dzg-footer-padding-block, u(1));
+    padding-inline: var(--dzg-footer-padding-inline, u(2));
+    min-block-size: var(--dzg-footer-height, auto);
+    gap: var(--dzg-footer-gap, 0.25rem 1rem);
+    font-size: var(--dzg-footer-font-size, 1em);
+    justify-content: var(--dzg-footer-justify, normal);
+    align-items: var(--dzg-footer-align, center);
+  }
+
+  .dzg-footer > nav {
+    margin-inline-start: var(--dzg-pager-margin-inline-start, auto);
+  }
+
+  // The texts: « 1 à 100 sur 150 », « Page 1 sur 2 », « Lignes par page », « 12 lignes sélectionnées ».
+  .dzg-pcount {
+    color: var(--dzg-pager-count-fg, inherit);
+    font-weight: var(--dzg-pager-count-font-weight, inherit);
+    font-size: var(--dzg-pager-count-font-size, 1em);
+  }
+
+  .dzg-ppage {
+    color: var(--dzg-pager-page-fg, var(--tz-fg));
+    font-weight: var(--dzg-pager-page-font-weight, inherit);
+    font-size: var(--dzg-pager-page-font-size, 1em);
+  }
+
+  .dzg-psize > span {
+    color: var(--dzg-pager-label-fg, inherit);
+    font-weight: var(--dzg-pager-label-font-weight, inherit);
+    font-size: var(--dzg-pager-label-font-size, 1em);
+  }
+
+  .dzg-pseltext {
+    color: var(--dzg-pager-selected-fg, inherit);
+    font-weight: var(--dzg-pager-selected-font-weight, inherit);
+    font-size: var(--dzg-pager-selected-font-size, 1em);
+  }
+
+  .dzg-pbtn {
+    border-color: var(--dzg-pager-button-border, var(--tz-fg-muted));
+    border-radius: var(--dzg-pager-button-radius, var(--dzg-radius, 0.375rem));
+    color: var(--dzg-bf, var(--dzg-pager-button-fg, var(--tz-fg)));
+    background: var(--dzg-bb, var(--dzg-pager-button-bg, var(--dzg-header-bg, var(--tz-bg-raised))));
+    font-size: var(--dzg-pager-button-font-size, var(--dzg-button-font-size, 1em));
+    font-weight: var(--dzg-pager-button-font-weight, inherit);
+    min-block-size: var(--dzg-pager-button-size, 2rem);
+  }
+
+  // The arrows square; the worded ones (the selection's Select all, Clear) padded.
+  .dzg-pbtn[data-go] {
+    inline-size: var(--dzg-pager-button-size, 2rem);
+  }
+
+  .dzg-pbtn:not([data-go]) {
+    padding-inline: var(--dzg-pager-button-padding-inline, 0.75rem);
+  }
+
+  // Under the pointer, pressed (unset: no change); a button that cannot act takes none and keeps its muted look.
+  :where(.dzg-pbtn:not([aria-disabled=true])):hover {
+    --dzg-bf: var(--dzg-pager-button-hover-fg);
+    --dzg-bb: var(--dzg-pager-button-hover-bg);
+  }
+
+  :where(.dzg-pbtn:not([aria-disabled=true])):active {
+    --dzg-bb: var(--dzg-pager-button-active-bg, var(--dzg-pager-button-hover-bg));
+  }
+
+  .dzg-pbtn[aria-disabled=true] {
+    color: var(--dzg-pager-button-disabled-fg, var(--tz-fg-muted));
+    background: var(--dzg-pager-button-disabled-bg, var(--dzg-pager-button-bg, var(--dzg-header-bg, var(--tz-bg-raised))));
+  }
+
+  // The rows-per-page select: its own, each falling back on the pager button's, then today's.
+  .dzg-footer select {
+    border-color: var(--dzg-pager-select-border, var(--dzg-pager-button-border, var(--tz-fg-muted)));
+    border-radius: var(--dzg-pager-select-radius, var(--dzg-pager-button-radius, var(--dzg-radius, 0.375rem)));
+    color: var(--dzg-pager-select-fg, var(--dzg-pager-button-fg, var(--tz-fg)));
+    background: var(--dzg-pager-select-bg, var(--dzg-pager-button-bg, var(--dzg-header-bg, var(--tz-bg-raised))));
+    font-size: var(--dzg-pager-select-font-size, var(--dzg-pager-button-font-size, var(--dzg-button-font-size, 1em)));
+    font-weight: var(--dzg-pager-select-font-weight, var(--dzg-pager-button-font-weight, inherit));
+    padding-inline: var(--dzg-pager-select-padding-inline, var(--dzg-pager-button-padding-inline, 0.75rem));
+    min-block-size: var(--dzg-pager-select-height, var(--dzg-pager-button-size, 2rem));
+  }
+
+  // The ring: unset, the browser's own (`revert-layer`: the rule steps aside, as if absent — today).
+  :where(.dzg-pbtn, .dzg-footer select):focus-visible {
+    outline: var(--dzg-pager-focus-ring, revert-layer);
+  }
+}

@@ -46,7 +46,8 @@ const told: Problem[] = [];
 const grid = createGrid<P>(document.getElementById('host')!, {
   rows, getRowId: (p) => p.id, columns, messages, locale: ar ? 'ar-DZ' : 'fr-FR', timeZone: 'UTC', direction: ar ? 'rtl' : 'ltr',
   label: ar ? 'البذور' : 'Graines', tooltips: { delayMs: 0 }, ...(icons && { icons }),
-  pagination: { pageSize: 25 }, features: [theming(), filters({ floating: true }), columnMenu(), pagination()],
+  // Two sizes: the rows-per-page select shown (browser-1-12.mjs, 40).
+  pagination: { pageSize: 25, pageSizes: [25, 50] }, features: [theming(), filters({ floating: true }), columnMenu(), pagination()],
   onEvent: (e: GridEvent<P>) => { if (e.type === 'problems') told.push(...e.problems); },
 });
 grid.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'jan', dir: 'asc' }] }, 'host');

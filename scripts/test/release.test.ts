@@ -315,7 +315,13 @@ describe('1.12.0, the five packages', () => {
   it('export buttons.css (1.12.0, presentation-settings.md 36), built like the others', () => {
     const theme = pkg('theme');
     for (const f of ['buttons.css', 'buttons.unlayered.css', 'buttons.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
-    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'variables', 'buttons'\]/);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'variables', 'buttons'[,\]]/); // 1.12.0: 'pager' after it
+  });
+
+  it('export pager.css (1.12.0, presentation-settings.md 39–40), built like the others', () => {
+    const theme = pkg('theme');
+    for (const f of ['pager.css', 'pager.unlayered.css', 'pager.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'buttons', 'pager'\]/);
   });
 
   it('export the Phase 9 filters panel (@dzgrid/dom/filters-panel), its -filters-panel texts and filters-panel.css, built like the others', () => {

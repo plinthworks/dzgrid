@@ -67,6 +67,8 @@ export interface GridTheme {
   readonly buttonFontWeight?: ThemeValue; readonly buttonPaddingInline?: ThemeValue; readonly buttonHeight?: ThemeValue; readonly buttonHoverBg?: ThemeValue;
   readonly buttonHoverFg?: ThemeValue; readonly buttonActiveBg?: ThemeValue; readonly buttonPrimaryBg?: ThemeValue; readonly buttonPrimaryFg?: ThemeValue;
   readonly buttonPrimaryBorder?: ThemeValue; readonly buttonPrimaryHoverBg?: ThemeValue; readonly buttonPrimaryHoverFg?: ThemeValue; readonly buttonPrimaryActiveBg?: ThemeValue;
+  /** The popups' buttons' and the overlay's Retry's text size (`1em`: their popup's); the pager's too unless `--dzg-pager-button-font-size` (a CSS variable) is set. */
+  readonly buttonFontSize?: ThemeValue;
   /** The set filter's list: at least (14rem) and at most (`min(32rem, 90vw)`) as wide as its longest value needs. */
   readonly setListMinWidth?: ThemeValue; readonly setListMaxWidth?: ThemeValue;
 }

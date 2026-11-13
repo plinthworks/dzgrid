@@ -9,11 +9,11 @@
 } }</script>
 <script>
   // The sheets by the query (scripts/browser-1-12.mjs): Tailwind 3's preflight first (an unlayered reset, as a real app
-  // has), then the layered or unlayered copies; `vars=0` leaves variables.css and buttons.css out (today's look, for the defaults).
+  // has), then the layered or unlayered copies; `vars=0` leaves variables.css, buttons.css and pager.css out (today's look, for the defaults).
   {
     const q = new URLSearchParams(location.search);
     const u = q.get('css') === 'unlayered' ? '.unlayered' : '';
-    const sheets = [...(q.get('preflight') ? ['/node_modules/tailwindcss3/src/css/preflight.css'] : []), `/packages/theme/dzgrid${u}.css`, `/packages/theme/columns${u}.css`, `/packages/theme/menu${u}.css`, ...(q.get('vars') === '0' ? [] : [`/packages/theme/variables${u}.css`, `/packages/theme/buttons${u}.css`])];
+    const sheets = [...(q.get('preflight') ? ['/node_modules/tailwindcss3/src/css/preflight.css'] : []), `/packages/theme/dzgrid${u}.css`, `/packages/theme/columns${u}.css`, `/packages/theme/menu${u}.css`, ...(q.get('vars') === '0' ? [] : [`/packages/theme/variables${u}.css`, `/packages/theme/buttons${u}.css`, `/packages/theme/pager${u}.css`])];
     for (const href of sheets) document.write(`<link rel="stylesheet" href="${href}">`);
   }
 </script>

@@ -133,8 +133,15 @@ describe('the guide lists every variable the sheets read, and nothing else (owne
   const kebab = (k: string) => k.replace(/[A-Z]/g, (ch) => `-${ch.toLowerCase()}`);
   const keyed = new Set(THEME_KEYS.map((k) => `--dzg-${kebab(k)}`));
 
-  it('every variable a sheet reads is a theme key (or written by the grid)', () => {
-    expect(used.filter((v) => !keyed.has(v)).sort()).toEqual([]);
+  // The pagination bar's (presentation-settings.md 40): CSS variables only — 43 keys would cost ≈ 170 B of
+  // @dzgrid/dom/theme, past its line. The new strip ones and every --dzg-pager-*; none of them is a key.
+  const BAR = ['--dzg-footer-line', '--dzg-footer-padding-block', '--dzg-footer-padding-inline', '--dzg-footer-height', '--dzg-footer-gap', '--dzg-footer-font-size', '--dzg-footer-justify', '--dzg-footer-align'];
+  const cssOnly = (v: string) => v.startsWith('--dzg-pager-') || BAR.includes(v);
+
+  it('every variable a sheet reads is a theme key (or written by the grid, or one of the pagination bar’s)', () => {
+    expect(used.filter((v) => !keyed.has(v) && !cssOnly(v)).sort()).toEqual([]);
+    expect([...keyed].filter(cssOnly)).toEqual([]);
+    expect(used.filter(cssOnly)).toHaveLength(43); // 8 strip, 35 pager
   });
 
   for (const lang of ['', 'fr/']) {
