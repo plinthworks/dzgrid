@@ -127,6 +127,8 @@ describe('the guide lists every variable the sheets read, and nothing else (owne
     '--dzg-row-height', '--dzg-header-height', '--dzg-density', '--dzg-flash', '--dzg-icon',
     // 1.12.0 corrections: a button's state colours (buttons.css), a hovered / selected row's text colour (37), the set list's measured width (38).
     '--dzg-bb', '--dzg-bf', '--dzg-row-state-fg', '--dzg-set-fit',
+    // 1.12.0 review: the pager button's edge under the pointer and pressed (pager.css).
+    '--dzg-bc',
     // 1.12.0 tooltips and popovers (tooltips.css): the arrow's colours of the tone in force, the reading direction's sign,
     // the slide's start.
     '--dzg-tip-arrow-bg', '--dzg-tip-arrow-edge', '--dzg-tip-sign', '--dzg-tip-from', '--dzg-tip-dist', '--dzg-tip-scale']);
@@ -147,10 +149,10 @@ describe('the guide lists every variable the sheets read, and nothing else (owne
   it('every variable a sheet reads is a theme key (or written by the grid, or one of the pagination bar’s)', () => {
     expect(used.filter((v) => !keyed.has(v) && !cssOnly(v)).sort()).toEqual([]);
     expect([...keyed].filter(cssOnly)).toEqual([]);
-    // 8 strip, 35 pager; 16 popover (9 of its look, its body's height, 6 of its motion), 35 tooltip (5 tones × 4, 6 of its motion, slide,
+    // 8 strip, 38 pager (1.12.0 review: the hover, active and disabled edges); 16 popover (9 of its look, its body's height, 6 of its motion), 35 tooltip (5 tones × 4, 6 of its motion, slide,
     // scale; the richer presets 1.12.0 owner 2026-11-14: pop's duration, easing and scale, rise's distance, duration and
     // easing; the reduced-motion fade's duration).
-    expect(used.filter(cssOnly)).toHaveLength(94);
+    expect(used.filter(cssOnly)).toHaveLength(97);
   });
 
   for (const lang of ['', 'fr/']) {

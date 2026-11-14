@@ -537,7 +537,7 @@
     },
     "@dzgrid/theme/pager.css": {
       "file": "packages/theme/pager.css",
-      "maxGzip": 760
+      "maxGzip": 775
     },
     "@dzgrid/theme/tooltips.css": {
       "file": "packages/theme/tooltips.css",
@@ -593,7 +593,7 @@
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
-      "maxGzip": 25704,
+      "maxGzip": 25730,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal"

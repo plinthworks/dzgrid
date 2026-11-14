@@ -99,7 +99,8 @@ describe('39–40: the pagination bar apart from the popups’ buttons, every lo
     it(`pager${c}.css: the pager's buttons read their own variables, never the popups' (but the text size)`, () => {
       const css = file(`../pager${c}.css`);
       const b = body(css, '.dzg-pbtn');
-      expect(b).toContain('border-color: var(--dzg-pager-button-border, var(--tz-fg-muted));');
+      // Its edge through --dzg-bc, set under the pointer and pressed (1.12.0 review, sheet 40).
+      expect(b).toContain('border-color: var(--dzg-bc, var(--dzg-pager-button-border, var(--tz-fg-muted)));');
       expect(b).toContain('border-radius: var(--dzg-pager-button-radius, var(--dzg-radius, 0.375rem));');
       expect(b).toContain('color: var(--dzg-bf, var(--dzg-pager-button-fg, var(--tz-fg)));');
       expect(b).toContain('background: var(--dzg-bb, var(--dzg-pager-button-bg, var(--dzg-header-bg, var(--tz-bg-raised))));');
@@ -111,11 +112,13 @@ describe('39–40: the pagination bar apart from the popups’ buttons, every lo
       expect(body(css, '.dzg-pbtn:not([data-go])')).toBe('padding-inline: var(--dzg-pager-button-padding-inline, 0.75rem);');
       // Under the pointer and pressed: unset, no change; one that cannot act takes none.
       const live = ':where(.dzg-pbtn:not([aria-disabled=true]))';
-      expect(body(css, `${live}:hover`)).toBe('--dzg-bf: var(--dzg-pager-button-hover-fg); --dzg-bb: var(--dzg-pager-button-hover-bg);');
-      expect(body(css, `${live}:active`)).toBe('--dzg-bb: var(--dzg-pager-button-active-bg, var(--dzg-pager-button-hover-bg));');
+      expect(body(css, `${live}:hover`)).toBe('--dzg-bf: var(--dzg-pager-button-hover-fg); --dzg-bb: var(--dzg-pager-button-hover-bg); --dzg-bc: var(--dzg-pager-button-hover-border);');
+      expect(body(css, `${live}:active`)).toBe('--dzg-bb: var(--dzg-pager-button-active-bg, var(--dzg-pager-button-hover-bg)); --dzg-bc: var(--dzg-pager-button-active-border, var(--dzg-pager-button-hover-border));');
       const off = body(css, '.dzg-pbtn[aria-disabled=true]');
       expect(off).toContain('color: var(--dzg-pager-button-disabled-fg, var(--tz-fg-muted));');
       expect(off).toContain('background: var(--dzg-pager-button-disabled-bg, var(--dzg-pager-button-bg, var(--dzg-header-bg, var(--tz-bg-raised))));');
+      // Its edge: its own, or the button's (today's).
+      expect(off).toContain('border-color: var(--dzg-pager-button-disabled-border, var(--dzg-pager-button-border, var(--tz-fg-muted)));');
       // No popup button variable reaches the pager but the text size.
       for (const r of read(css).rules.filter((x) => /dzg-pbtn|dzg-footer/.test(x.selector))) {
         expect(r.body.replace('var(--dzg-button-font-size, 1em)', ''), r.selector).not.toMatch(/--dzg-button-/);

@@ -1,7 +1,7 @@
-import { place, reveal, type TipLook } from '../render/tooltip.js';
+import { place, reveal, tips, type TipLook } from '../render/tooltip.js';
 import { conceal, custom, play, shapeOf } from '../tooltip/engine.js';
 import { logicalBox, placementOf } from '../dir.js';
-import { dirAt, drawn, floatStyles, type TipContent } from '../tooltip/float.js';
+import { dirAt, drawn, floatStyles, schemeOf, wanted, type TipContent } from '../tooltip/float.js';
 
 /** Why a popover closed (tooltips-popovers.md 10, 13, 14). */
 export type PopoverCloseReason = 'escape' | 'outside' | 'focus' | 'trigger' | 'code' | 'group' | 'gone';
@@ -137,6 +137,16 @@ export function popover(trigger: HTMLElement, options: PopoverOptions): PopoverH
     row = rowOf();
     const dir = dirAt(trigger);
     bubble.dir = dir;
+    schemeOf(bubble, trigger);
+    // No tooltip over it: the shows waiting dropped, one about its trigger (or a cell holding it) hidden (18).
+    for (const b of doc.querySelectorAll('.dzg-tooltip')) {
+      const t = tips.get(b);
+      if (!t) continue;
+      t.drop();
+      // A grid's too, from now on: a cell holding an open popover's trigger shows none.
+      t.ok = wanted;
+      if (t.anchor?.contains(trigger)) t.hide();
+    }
     reveal(bubble, o, undefined);
     custom(bubble, o);
     shapeOf(bubble, o);

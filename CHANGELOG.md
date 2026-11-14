@@ -86,6 +86,15 @@ complete, English and French).
 - Size lines: `@dzgrid/dom/theme` 2 510 → 2 530 (+0.8 %, measured 2 519: the four keys); the rules that draw them are
   `pagination()`'s own CSS (`@dzgrid/dom/pagination` measured 3 366 under its 3 450); K.8 measured 91 873 under its 92 000; the real Angular example 102 700 → 103 000 (+0.3 %, measured 102 965).
 
+### Added — the pager buttons' edges (owner 2026-11-14, « oui »)
+- `--dzg-pager-button-disabled-border` (a button that cannot act; default the button's `--dzg-pager-button-border`, as
+  today), `--dzg-pager-button-hover-border` and `--dzg-pager-button-active-border` (unset: no change; pressed falls back
+  on hover), in `pager.css` (both copies). The rows-per-page select is never disabled: no variable for that state.
+- Size lines (with the two fixes above): `@dzgrid/dom` 25 704 → 25 730 (+0.1 %, measured 25 724: the waiting show
+  dropped by a press, Escape, the focus leaving, a popover opening — the rest in the opt-in entries), `pager.css` 760 →
+  775 (+2 %, measured 767); K.8 measured 91 918 under its 92 000; `@dzgrid/dom/tooltip` 2 753 / 2 800,
+  `@dzgrid/dom/popover` 3 350 / 3 450; the real Angular example 103 000 → 103 050 (+0.05 %, measured 103 014).
+
 ### Upgrading (tooltips)
 - Nothing to change: `tooltips: { delayMs }`, a column's `tooltip` returning a string, `headerTooltip` and a tooltip
   part behave as before. A `variables.css` detail changed before publishing: a tooltip above its cell is placed by the
@@ -97,6 +106,19 @@ complete, English and French).
   measured 102 697).
 
 ### Fixed
+- **A tooltip waiting for its delay never appears late** (owner 2026-11-14, « oui »): a click on its trigger, the trigger
+  turning `disabled`, a popover opening from it, Escape or the focus leaving did not cancel a show still waiting, so it
+  appeared afterwards — over the open popover. A press or a click on the trigger, Escape, the focus leaving, a scroll,
+  `disabled` (the option, `dzTooltipDisabled`, or the attribute when the delay ends), the trigger gone, and a popover
+  opening from the trigger or inside it (a grid cell holding it) now drop it; a popover opening also hides a tooltip
+  shown about its trigger or its cell. The page's `tooltip()`, the grid's cell and header tooltips (with or without
+  `tooltips()`) and Angular's `[dzTooltip]`. Nothing to change.
+- **Tooltips and popovers outside the grid follow the colour scheme**: in a dark page (`data-theme="dark"`, Tailwind's
+  `.dark` mapped by `tailwind.css` / `tailwind3.css`, `--tz-color-scheme`) they stayed light, being placed at the page's
+  end where no `color-scheme` was set. They now take the grid's rule (`color-scheme: var(--tz-color-scheme, light
+  dark)`, injected with them: the layered and unlayered sheets alike), inherit the page's scheme (a switch while one is
+  open is followed at once) and take a wrapper's own at each opening. An app's own dark class: map it once,
+  `.my-dark { --tz-color-scheme: dark }`. The page's `color-scheme` property alone is not read (nor by the grid).
 - **Tooltips and popovers, from the code review before publishing**: a popover now closes when its trigger leaves the
   page or its grid row shows another row without any scroll (a view swapped, a sort, a grid destroyed) — it stayed
   open, pointing at nothing; Tab with the focus on the popover itself (after a click on its words) goes to its first

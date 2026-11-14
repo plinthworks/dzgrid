@@ -61,6 +61,33 @@ Puis `npm run publish:verify`, et dans les applications `npm update @dzgrid/core
   HTML à un texte identique gardait le HTML ; une grille détruite avec son infobulle affichée restait retenue par la
   page ; `[dzPopover]` détruit ouvert émettait `(closed)` sur une sortie détruite (avertissement NG0953 d'Angular).
 
+## Trois corrections avant publication (ta réponse « oui », 2026-11-14)
+
+Chacune : une ligne de fiche d'abord (`tooltips-popovers.md` 18–19, `presentation-settings.md` 40), un test écrit à la
+main et rouge d'abord, la matrice navigateurs étendue.
+
+1. **Une infobulle en attente n'apparaît plus en retard.** Un clic sur le déclencheur, le déclencheur désactivé, une
+   bulle ouverte depuis lui, Échap ou le focus qui part n'annulaient pas l'affichage en attente : l'infobulle sortait
+   ensuite, par-dessus la bulle ouverte. Cause : l'annulation ne visait qu'une infobulle déjà affichée. Maintenant :
+   appui, clic, Échap, focus qui part, défilement, `disabled` (l'option, `dzTooltipDisabled`, ou l'attribut à la fin du
+   délai), déclencheur retiré, bulle ouverte depuis le déclencheur ou depuis l'intérieur (une cellule qui le contient)
+   l'annulent ; une bulle qui s'ouvre cache aussi l'infobulle affichée sur son déclencheur ou sa cellule. `tooltip()`,
+   les infobulles des cellules et des titres de la grille (avec ou sans `tooltips()`), `[dzTooltip]`. Aucune API
+   nouvelle.
+2. **Infobulles et bulles hors grille en mode sombre.** Elles restaient claires : placées en fin de page, sans
+   `color-scheme`, leurs `light-dark()` prenaient le clair. Elles prennent la règle de la grille
+   (`color-scheme: var(--tz-color-scheme, light dark)`, injectée avec elles : copies en couche et sans couche pareil),
+   héritent du mode de la page (un changement pendant qu'une bulle est ouverte est suivi tout de suite) et reprennent
+   celui d'un conteneur à chaque ouverture. Tailwind 3 `.dark` : la correspondance de `tailwind3.css` suffit ; ta propre
+   classe : `.my-dark { --tz-color-scheme: dark }` (recette dans le guide, en et fr).
+3. **`--dzg-pager-button-disabled-border`** (défaut : le bord du bouton, comme aujourd'hui), et pour la symétrie
+   `--dzg-pager-button-hover-border` / `-active-border` (`pager.css`). La liste « Lignes par page » n'est jamais
+   désactivée : pas de variable pour cet état. Tableau des variables du site à jour (en, fr).
+
+Tailles : base `@dzgrid/dom` 25 704 → 25 730 (+0,1 %, mesuré 25 724 ; le reste est dans `/tooltip` 2 753 / 2 800 et
+`/popover` 3 350 / 3 450) ; `pager.css` 760 → 775 (+2 %, mesuré 767) ; K.8 91 918 / 92 000 ; appli Angular réelle 103 000 → 103 050 (+0,05 %,
+mesuré 103 014).
+
 ## Icônes de la pagination (ta demande du 2026-11-14)
 
 - **`icons: { pagerFirst, pagerPrevious, pagerNext, pagerLast }`** (avec `theming()`) : les « « ‹ › » » deviennent tes

@@ -58,7 +58,9 @@ export function installTooltips<T>(g: GridContext<T>): void {
     else tip.hide();
   };
   // A focus that follows a key shows its tooltip at once; one that follows a click does not.
-  scope.on(el.viewport, 'pointerdown', () => { g.keyboardAt = -1e9; });
+  // A press, or the focus leaving, drops a show still waiting (tooltips-popovers.md 18).
+  scope.on(el.viewport, 'pointerdown', () => { g.keyboardAt = -1e9; tip.drop(); });
+  scope.on(el.viewport, 'focusout', () => tip.drop());
   scope.on(el.viewport, 'focusin', (e: FocusEvent) => {
     const t = e.target as HTMLElement;
     const found = tooltipFor(t);

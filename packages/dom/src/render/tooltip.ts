@@ -5,6 +5,9 @@ import type { Scope } from './scope.js';
 
 let ids = 0;
 
+/** Each bubble's tooltip: a popover opening drops the shows waiting and hides one about its trigger (tooltips-popovers.md 18). */
+export const tips = new WeakMap<Element, Tooltip>();
+
 /** A bubble's tone (tooltips-popovers.md 6): `info` is 1.11's dark bubble. */
 export type TipTone = 'info' | 'neutral' | 'success' | 'warning' | 'danger';
 /** Its opening and closing (7): CSS presets of `@dzgrid/theme/tooltips.css`; `pop` and `rise` the richer ones. */
@@ -160,12 +163,15 @@ export class Tooltip {
   close: (el: HTMLElement, look: TipLook, done: () => void) => () => void = (el, _l, done) => (hideBubble(el), done(), () => {});
   /** Told each show (one tooltip at a time in a page and the app's opening animation, `tooltips()`). */
   onShow?: (t: Tooltip) => void;
+  /** Asked when a delay ends: false drops the show (an anchor disabled, or holding an open popover's trigger; 18). */
+  ok?: (anchor: Element) => boolean;
 
   constructor(el: HTMLElement, scope: Scope, fill?: (t: TipFor | null) => boolean) {
     this.el = el;
     this.el.id ||= `dzg-tip-${++ids}`;
     this.#scope = scope;
     this.fill = fill;
+    tips.set(el, this);
     scope.on(el, 'pointerenter', () => this.#keep());
     scope.on(el, 'pointerleave', (e: PointerEvent) => {
       if (!this.#anchor || !this.#anchor.contains(e.relatedTarget as Node | null)) this.hideSoon();
@@ -179,19 +185,24 @@ export class Tooltip {
   /** After `delay` ms (0: now), unless something else is shown or hidden first. */
   showFor(anchor: HTMLElement, tip: TipFor, dir: Dir, delay: number): void {
     this.#keep();
-    this.#cancelShow?.();
-    this.#cancelShow = null;
+    this.drop();
     if (delay <= 0) return this.#show(anchor, tip, dir);
     this.#cancelShow = this.#scope.timeout(() => {
       this.#cancelShow = null;
-      if (anchor.isConnected) this.#show(anchor, tip, dir);
+      // Still on the page, and still wanted (`ok`: the opt-in entries') (18).
+      if (anchor.isConnected && this.ok?.(anchor) !== false) this.#show(anchor, tip, dir);
     }, delay);
+  }
+
+  /** Drops a show waiting for its delay (18). */
+  drop(): void {
+    this.#cancelShow?.();
+    this.#cancelShow = null;
   }
 
   /** A short grace (`hideDelayMs`, 150), so the pointer can cross the gap onto the tooltip. */
   hideSoon(): void {
-    this.#cancelShow?.();
-    this.#cancelShow = null;
+    this.drop();
     if (this.#cancelHide || this.el.hidden || !this.#anchor) return;
     this.#cancelHide = this.#scope.timeout(() => {
       this.#cancelHide = null;
@@ -200,8 +211,7 @@ export class Tooltip {
   }
 
   hide(): void {
-    this.#cancelShow?.();
-    this.#cancelShow = null;
+    this.drop();
     this.#keep();
     if (this.#anchor) describe(this.#anchor, this.el.id, false);
     const was = this.#anchor;

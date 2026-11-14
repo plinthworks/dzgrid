@@ -37,7 +37,7 @@ describe('the initial files of an Angular build', () => {
 describe('the real example\'s ceiling', () => {
   it('is 98 800 in example:bytes (+2 % rule at 1.4.0, 2026-11-04, measured 98 624; 1.3.0: 97 400; owner 2026-10-28, Phase 6 step 12: measured 94 596; S12-Q10 92 500, S9-Q7 92 000, Q17a 90 000 before)', () => {
     const src = readFileSync(fileURLToPath(new URL('../../scripts/example.mjs', import.meta.url)), 'utf8');
-    expect(/const K8 = ([\d_]+);/.exec(src)?.[1]).toBe('103_000'); // 1.12.0 the pager's icons (+2 % rule, measured 102 965); 1.12.0 tooltips and popovers (owner Q-T1 B, +2 % rule, measured 102 697); 1.12.0's five corrections (+2 % rule, measured 102 115); 1.12.0 release (+2 % rule, measured 102 079); 1.11.0 (+2 % rule, measured 101 661): 101 700; 1.10.0 release (+2 % rule, measured 101 165: the 1.10.0 base, the yes / no words): 101 500; +2 % rule at the 1.9.0 release (measured 100 752: the 1.9.0 base); Phase 11 close (measured 99 717); Phase 8 close (measured 99 425); Phase 7 close (measured 98 833); 1.4.0 (measured 98 624); 1.3.0 (2026-11-02, measured 97 173)
+    expect(/const K8 = ([\d_]+);/.exec(src)?.[1]).toBe('103_050'); // 1.12.0 review fixes (owner 2026-11-14 « oui », +2 % rule, measured 103 014: a waiting tooltip dropped); 1.12.0 the pager's icons (+2 % rule, measured 102 965); 1.12.0 tooltips and popovers (owner Q-T1 B, +2 % rule, measured 102 697); 1.12.0's five corrections (+2 % rule, measured 102 115); 1.12.0 release (+2 % rule, measured 102 079); 1.11.0 (+2 % rule, measured 101 661): 101 700; 1.10.0 release (+2 % rule, measured 101 165: the 1.10.0 base, the yes / no words): 101 500; +2 % rule at the 1.9.0 release (measured 100 752: the 1.9.0 base); Phase 11 close (measured 99 717); Phase 8 close (measured 99 425); Phase 7 close (measured 98 833); 1.4.0 (measured 98 624); 1.3.0 (2026-11-02, measured 97 173)
   });
 });
 
@@ -50,7 +50,7 @@ describe.skipIf(skip)('K.8 from the real ng build', () => {
     const m = measureExample(EXAMPLE);
     expect(m.audit.files.length).toBeGreaterThan(0);
     expect(m.baseline.total).toBeGreaterThan(20_000);
-    expect(m.share).toBeLessThanOrEqual(103_000); // 1.12.0 the pager's icons (+2 % rule, measured 102 965); 1.12.0 tooltips and popovers (owner Q-T1 B, +2 % rule, measured 102 697); 1.12.0's five corrections (+2 % rule, measured 102 115); 1.12.0 release (+2 % rule, measured 102 079); 1.11.0 (+2 % rule, measured 101 661): 101 700; 1.10.0 release (+2 % rule, measured 101 165: the 1.10.0 base, the yes / no words): 101 500; the K8 line, +2 % rule at the 1.9.0 release
+    expect(m.share).toBeLessThanOrEqual(103_050); // 1.12.0 review fixes (owner 2026-11-14 « oui », +2 % rule, measured 103 014: a waiting tooltip dropped); 1.12.0 the pager's icons (+2 % rule, measured 102 965); 1.12.0 tooltips and popovers (owner Q-T1 B, +2 % rule, measured 102 697); 1.12.0's five corrections (+2 % rule, measured 102 115); 1.12.0 release (+2 % rule, measured 102 079); 1.11.0 (+2 % rule, measured 101 661): 101 700; 1.10.0 release (+2 % rule, measured 101 165: the 1.10.0 base, the yes / no words): 101 500; the K8 line, +2 % rule at the 1.9.0 release
     // DzGrid loads with the page: a share far below the esbuild profile would mean it did not.
     expect(m.share).toBeGreaterThan(40_000);
     expect(m.wrapper.min).toBeGreaterThan(0);

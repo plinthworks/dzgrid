@@ -517,6 +517,20 @@ a plain surface. Every colour, size, duration and easing is a variable, listed i
 }
 ```
 
+### Light and dark
+
+Tooltips and popovers follow the colour scheme of their trigger's context, as the grid does: the system's by default,
+`data-theme="light"` or `data-theme="dark"` on any ancestor (or `--tz-color-scheme`) to force one. Tailwind's `.dark`
+class is mapped by `@dzgrid/theme/tailwind.css` and `tailwind3.css`. Your own dark class, mapped once:
+
+```css
+.my-dark { --tz-color-scheme: dark; }
+```
+
+A page switching while a bubble is open updates it at once; a wrapper of its own switching updates it at its next
+opening. The page's `color-scheme` property alone is not read (the grid does not read it either): set
+`--tz-color-scheme` beside it.
+
 ## See also
 
 - The [`tooltips`](../../settings/tooltips/) setting, every key.

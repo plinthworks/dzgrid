@@ -1,5 +1,19 @@
 # État du travail — à lire en premier si la session est perdue
 
+Mis à jour : 2026-11-14 (soir). **1.12.0 : trois corrections de plus (propriétaire « oui »), non commitées, non
+publiées.** Fiche `tooltips-popovers.md` 18–19, `presentation-settings.md` 40. (1) Une infobulle en attente est annulée
+par appui / clic / Échap / focus qui part / défilement / `disabled` / déclencheur retiré / bulle ouverte depuis lui ou
+une cellule qui le contient (base : `Tooltip.drop()`, couture `ok`, registre `tips` ; `tooltip()`, grille, `[dzTooltip]`).
+(2) Bulles hors grille : `color-scheme: var(--tz-color-scheme, light dark)` dans la mise en page injectée, et
+`--tz-color-scheme` du conteneur recopié à l'ouverture (`schemeOf`). (3) `--dzg-pager-button-disabled-border`,
+`-hover-border`, `-active-border` (`pager.css`). Tailles : base 25 724 / 25 730 (ligne relevée +0,1 %), `pager.css`
+767 / 775 (+2 %), K.8 91 918 / 92 000. Matrice (11c) ajoutée : elle échouait avant (Chrome, 11 contrôles).
+Appli Angular réelle 103 000 → 103 050 (+0,05 %, mesuré 103 014 ; épinglé aussi dans `perf/test/example-bytes` et
+`step12-budgets`). **`gate:step` vert : 9 566/9 569 (3 sautés)** (premier passage rouge : les épingles 25 704, la section
+fr sans « Voir aussi », llms.txt — corrigés, gate relancé) ; real-app 58/58 ; matrice `browser-1-12.mjs` 16 272/16 272
+(Chrome 5 524, Firefox 5 396, WebKit 5 352) ; `release:check` « the 5 packages at 1.12.0 » ; site 33/33. Reste au
+propriétaire : relire, commiter, publier.
+
 Mis à jour : 2026-11-14. **1.12.0 : infobulles et bulles faites (Q-T1 = B, ajouts du 2026-11-14), non commitées, non
 publiées.** Fiche `docs/behaviors/tooltips-popovers.md`, plan `docs/phase-12-steps/tooltips-plan.md` (réponses en fin).
 Base `@dzgrid/dom` : moteur partagé (`place()` 4 côtés / 3 alignements / bascule, tons, préréglage CSS, `data-reduced`,

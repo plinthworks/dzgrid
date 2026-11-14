@@ -1329,6 +1329,20 @@ a plain surface. Every colour, size, duration and easing is a variable, listed i
 }
 ```
 
+### Light and dark
+
+Tooltips and popovers follow the colour scheme of their trigger's context, as the grid does: the system's by default,
+`data-theme="light"` or `data-theme="dark"` on any ancestor (or `--tz-color-scheme`) to force one. Tailwind's `.dark`
+class is mapped by `@dzgrid/theme/tailwind.css` and `tailwind3.css`. Your own dark class, mapped once:
+
+```css
+.my-dark { --tz-color-scheme: dark; }
+```
+
+A page switching while a bubble is open updates it at once; a wrapper of its own switching updates it at its next
+opening. The page's `color-scheme` property alone is not read (the grid does not read it either): set
+`--tz-color-scheme` beside it.
+
 ## See also
 
 - The [`tooltips`](https://plinthworks.github.io/dzgrid/settings/tooltips/) setting, every key.
@@ -2746,8 +2760,8 @@ changes nothing by itself; a feature's sheet is named. *Key* is the `theme` sett
 | `--dzg-pager-selected-fg`, `--dzg-pager-selected-font-weight`, `--dzg-pager-selected-font-size` | — | « 12 rows selected » (1.12.0) | the strip's | `pager.css` |
 | `--dzg-pager-button-bg`, `--dzg-pager-button-fg`, `--dzg-pager-button-border`, `--dzg-pager-button-radius` | — | The pager's buttons (and Select all, Clear in the strip), apart from the popups' (1.12.0) | `--dzg-header-bg`, `--tz-fg`, `--tz-fg-muted`, `--dzg-radius` | `pager.css` |
 | `--dzg-pager-button-padding-inline`, `--dzg-pager-button-size`, `--dzg-pager-button-font-size`, `--dzg-pager-button-font-weight` | — | Their side padding (the worded ones; the arrows stay square), the arrows' side and every pager button's least height, text size, weight (1.12.0) | `.75rem`, `2rem`, `--dzg-button-font-size`, inherited | `pager.css` |
-| `--dzg-pager-button-hover-bg`, `--dzg-pager-button-hover-fg`, `--dzg-pager-button-active-bg` | — | A pager button under the pointer, pressed (one that cannot act: none; 1.12.0) | no change | `pager.css` |
-| `--dzg-pager-button-disabled-fg`, `--dzg-pager-button-disabled-bg` | — | A pager button that cannot act (1.12.0) | `--tz-fg-muted`, the button's | `pager.css` |
+| `--dzg-pager-button-hover-bg`, `--dzg-pager-button-hover-fg`, `--dzg-pager-button-hover-border`, `--dzg-pager-button-active-bg`, `--dzg-pager-button-active-border` | — | A pager button under the pointer, pressed: background, text, edge colour (one that cannot act: none; pressed falls back on hover; 1.12.0) | no change | `pager.css` |
+| `--dzg-pager-button-disabled-fg`, `--dzg-pager-button-disabled-bg`, `--dzg-pager-button-disabled-border` | — | A pager button that cannot act: text, background, edge colour (1.12.0) | `--tz-fg-muted`, the button's, the button's | `pager.css` |
 | `--dzg-pager-select-bg`, `--dzg-pager-select-fg`, `--dzg-pager-select-border`, `--dzg-pager-select-radius` | — | The rows-per-page select (its arrow is the browser's, in its text colour; 1.12.0) | the pager buttons' | `pager.css` |
 | `--dzg-pager-select-padding-inline`, `--dzg-pager-select-height`, `--dzg-pager-select-font-size`, `--dzg-pager-select-font-weight` | — | The select's side padding, least height, text (Safari keeps its native select's padding and height; 1.12.0) | the pager buttons' | `pager.css` |
 | `--dzg-pager-focus-ring` | — | The pager's buttons' and select's ring (an `outline`; 1.12.0) | the browser's | `pager.css` |

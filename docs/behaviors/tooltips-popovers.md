@@ -105,6 +105,29 @@ the keyboard; clicks a control that opens a bubble that stays (a popover); press
     no external load). Parsed in an inert document (nothing loads or runs while parsing). Its risk, documented: the
     application decides what text reaches it; cleaning stops scripts and loads, not misleading words.
 
+### A show still waiting, and the page's colour scheme (owner 2026-11-14, « oui », in 1.12.0)
+18. **A tooltip waiting for its delay never appears late.** Its show is dropped by a press (`pointerdown`) or a click on
+    its anchor, Escape, the focus leaving its anchor (in a grid: the focus leaving a cell or the grid), a scroll,
+    `disabled: true` (`update()`, Angular's `dzTooltipDisabled`), `destroy()`, and a popover opening from its anchor or
+    from inside it (a grid cell holding the popover's trigger). When the delay ends it is also dropped if its anchor has
+    left the page, is `:disabled`, or is (or holds) the trigger of an open popover (`aria-controls` naming it) — so a
+    tooltip never appears over its own popover. A tooltip already shown: the page's goes on a press, a click, Escape,
+    the focus leaving, a scroll and `disabled: true` (as before); the page's and the grid's go when a popover opens from
+    their anchor or inside it. A grid's shown cell tooltip still stays on a press (tooltips.md). A shown tooltip whose
+    anchor only turns `disabled` by its attribute stays until the pointer or the focus leaves it (nothing watches the
+    attribute); one whose anchor leaves the page goes with `destroy()` (Angular: the directive's end), the grid's at its
+    next paint.
+19. **Tooltips and popovers follow the colour scheme of their anchor's context, as the grid does.** The bubble takes
+    `color-scheme: var(--tz-color-scheme, light dark)` (in the layout injected with `tooltip()` / `popover()`: the
+    layered and unlayered sheets alike), so its `light-dark()` colours (the palette's `--tz-*`) and the system colours
+    resolve as the grid's. It sits at the page's end and in the top layer, so it inherits the page's scheme (`:root`,
+    `body`: `data-theme`, Tailwind's `.dark` mapped by `tailwind.css` / `tailwind3.css`) — a page switching while a
+    bubble is open is followed at once; when its anchor's context says another (a `data-theme` or a class on a wrapper,
+    a grid's host), the bubble takes that `--tz-color-scheme` at each opening (a wrapper switching while it is open:
+    at its next opening). An app's own dark class is mapped once: `.my-dark { --tz-color-scheme: dark }` (and
+    `:root:not(.my-dark) { --tz-color-scheme: light }` to force light). The page's `color-scheme` property alone is not
+    read (the grid does not read it either: without `--tz-color-scheme`, both follow the system).
+
 ## What DzGrid does
 - **One implementation, the weight opt-in** (owner Q-T1 B, 2026-11-14): the base (`render/tooltip.ts`) places (one
   `place()`: 4 sides, 3 alignments, flip, the arrow), shows with its tone, CSS preset and reduced-motion mark, and

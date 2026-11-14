@@ -11,7 +11,8 @@ export type TipContent = string | Node | { readonly html: string } | (() => stri
 
 /** The page's bubbles' own layout (no grid needed): fixed, the top layer's defaults undone; a popover's plain look. */
 const FLOAT_CSS =
-  '@layer dzgrid.layout{:where(.dzg-float){position:fixed;margin:0;z-index:10;box-sizing:border-box}' +
+    // The grid's colour scheme (tooltips-popovers.md 19): `light-dark()` and the system colours resolve as the grid's.
+  '@layer dzgrid.layout{:where(.dzg-float){position:fixed;margin:0;z-index:10;box-sizing:border-box;color-scheme:var(--tz-color-scheme,light dark)}' +
   ':where(.dzg-float[popover]){inset:auto;overflow:visible;border:0;padding:0;background:transparent;color:inherit}' +
   ':where(.dzg-popover){max-inline-size:min(32rem,calc(100vw - 16px));padding:var(--dzg-popover-padding,.75rem);border:1px solid var(--dzg-popover-border,var(--tz-border,GrayText));' +
   'border-radius:var(--dzg-popover-radius,var(--dzg-radius,.375rem));background:var(--dzg-popover-bg,var(--tz-bg,Canvas));color:var(--dzg-popover-fg,var(--tz-fg,CanvasText))}' +
@@ -27,6 +28,24 @@ export function floatStyles(doc: Document, nonce?: string): void {
   style.textContent = FLOAT_CSS;
   doc.head.append(style);
 }
+
+/**
+ * The anchor's context's scheme (tooltips-popovers.md 19): the bubble, at the page's end, inherits the page's; a
+ * wrapper's own `--tz-color-scheme` (a `data-theme`, a class, a grid's host) is written on it at each opening.
+ */
+export function schemeOf(bubble: HTMLElement, anchor: Element): void {
+  const v = (e: Element | null): string => (e ? getComputedStyle(e).getPropertyValue('--tz-color-scheme').trim() : '');
+  const s = v(anchor);
+  if (s && s !== v(bubble.parentElement)) bubble.style.setProperty('--tz-color-scheme', s);
+  else bubble.style.removeProperty('--tz-color-scheme');
+}
+
+/**
+ * A show at the end of its delay is still wanted (tooltips-popovers.md 18): its anchor not disabled, neither an open
+ * popover's trigger nor holding one (a grid's cell) — a tooltip never over its own popover.
+ */
+export const wanted = (a: Element): boolean => !a.matches(`:disabled,${OPEN}`) && !a.querySelector(OPEN);
+const OPEN = '[aria-controls^=dzg-pop-]';
 
 /** The reading direction at an element (its computed `direction`; the nearest `dir` where there is no layout). */
 export function dirAt(el: Element): Dir {

@@ -215,3 +215,50 @@ it('review: destroyed while open, the popover closes without emitting on a destr
   expect(warn.mock.calls.map((c) => String(c[0])).filter((m) => /destroyed/i.test(m))).toEqual([]);
   warn.mockRestore();
 });
+
+@Component({
+  selector: 't-wait',
+  imports: [DzTooltip, DzPopover],
+  template: `
+    <button class="w1" type="button" dzTooltip="Saves" [dzTooltipDisabled]="off()" [disabled]="native()">Save</button>
+    <button class="w2" type="button" dzTooltip="Details" [dzPopover]="'The form'" dzPopoverOpenOn="manual" #p="dzPopover">More</button>
+  `,
+})
+class Waiting {
+  readonly off = signal(false);
+  readonly native = signal(false);
+}
+
+it('1.12.0 (sheet 18): a show waiting for its delay is dropped by dzTooltipDisabled, by [disabled], by a popover opening from the same trigger', () => {
+  vi.useFakeTimers();
+  const fixture = TestBed.createComponent(Waiting);
+  document.body.appendChild(fixture.nativeElement);
+  fixture.detectChanges();
+  const q = (s: string) => document.querySelector<HTMLElement>(s)!;
+  const enter = (s: string) => q(s).dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+  const shown = () => !(document.querySelector<HTMLElement>('.dzg-tooltip.dzg-float')?.hidden ?? true);
+  enter('.w1');
+  vi.advanceTimersByTime(200);
+  fixture.componentInstance.off.set(true);
+  fixture.detectChanges();
+  vi.advanceTimersByTime(1000);
+  expect(shown()).toBe(false);
+  fixture.componentInstance.off.set(false);
+  fixture.detectChanges();
+  enter('.w1');
+  vi.advanceTimersByTime(200);
+  fixture.componentInstance.native.set(true);
+  fixture.detectChanges();
+  vi.advanceTimersByTime(1000);
+  expect(shown()).toBe(false);
+  enter('.w2');
+  vi.advanceTimersByTime(200);
+  // The popover opened by code (a key the app handles) while the tooltip waits.
+  const p = fixture.debugElement.children.find((d) => d.nativeElement === q('.w2'))!.references['p'] as DzPopover;
+  p.open();
+  fixture.detectChanges();
+  vi.advanceTimersByTime(1000);
+  expect(document.querySelector('.dzg-popover')).not.toBeNull();
+  expect(shown()).toBe(false);
+  fixture.destroy();
+});

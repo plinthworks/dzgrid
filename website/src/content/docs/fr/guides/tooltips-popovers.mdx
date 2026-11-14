@@ -528,6 +528,21 @@ listée dans [le tableau des variables](../theming-rtl/#toutes-les-variables) (`
 }
 ```
 
+### Clair et sombre
+
+Les infobulles et les bulles suivent le mode de couleur de leur déclencheur, comme la grille : celui du système par
+défaut, `data-theme="light"` ou `data-theme="dark"` sur n’importe quel ancêtre (ou `--tz-color-scheme`) pour en imposer
+un. La classe `.dark` de Tailwind est reprise par `@dzgrid/theme/tailwind.css` et `tailwind3.css`. Votre propre classe
+sombre, une fois :
+
+```css
+.my-dark { --tz-color-scheme: dark; }
+```
+
+Une page qui change de mode pendant qu’une bulle est ouverte la met à jour aussitôt ; un conteneur qui change le sien,
+à sa prochaine ouverture. La seule propriété `color-scheme` de la page n’est pas lue (la grille ne la lit pas non plus) :
+posez `--tz-color-scheme` à côté.
+
 ## Voir aussi
 
 - Le réglage [`tooltips`](../../settings/tooltips/), toutes ses clés.

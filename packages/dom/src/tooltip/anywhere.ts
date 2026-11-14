@@ -1,6 +1,6 @@
 import { Tooltip, type TipLook, type TipTone } from '../render/tooltip.js';
 import { enhance } from './engine.js';
-import { dirAt, drawn, floatStyles, keyed, pageOf, type TipContent } from './float.js';
+import { dirAt, drawn, floatStyles, keyed, pageOf, schemeOf, wanted, type TipContent } from './float.js';
 
 /** A tooltip on any element of the page (tooltips-popovers.md 1–9). */
 export interface TooltipOptions extends TipLook {
@@ -26,6 +26,8 @@ export interface TooltipHandle {
 
 /** One bubble per document: one tooltip on screen at a time (3). */
 const bubbles = new WeakMap<Document, Tooltip>();
+/** The anchor whose show waits for its delay, per document (18). */
+const waits = new WeakMap<Document, HTMLElement>();
 function bubbleOf(doc: Document, nonce: string | undefined): Tooltip {
   let t = bubbles.get(doc);
   // A page that emptied its body (a single-page app's view swap) gets it back.
@@ -48,6 +50,7 @@ function bubbleOf(doc: Document, nonce: string | undefined): Tooltip {
     return !!tip?.node;
   });
   t.report = (e) => void doc.defaultView?.reportError?.(e);
+  t.ok = wanted;
   // Below and centred unless placed; the app's animation, the fade awaited, one at a time with the grids'.
   enhance(t, 'bottom', t.report);
   bubbles.set(doc, t);
@@ -77,9 +80,13 @@ export function tooltip(el: HTMLElement, options: TooltipOptions): TooltipHandle
     // Its words read in the anchor's direction, and its logical place measured in it.
     const d = dirAt(el);
     t.el.dir = d;
+    schemeOf(t.el, el);
+    waits.set(doc, el);
     t.showFor(el, { text: c.text, node: c.node, ...(c.gone && { gone: c.gone }), tone: look.tone }, d, delay);
   };
+  // A show waiting for this anchor dropped too (tooltips-popovers.md 18).
   const hide = (): void => {
+    if (waits.get(doc) === el) bubbles.get(doc)?.drop();
     if (mine()) bubbles.get(doc)!.hide();
   };
   on(el, 'pointerenter', (e) => void ((e as PointerEvent).pointerType !== 'touch' && show(o.delayMs ?? 500)));
@@ -90,6 +97,7 @@ export function tooltip(el: HTMLElement, options: TooltipOptions): TooltipHandle
   on(el, 'focusin', () => void (keyed(doc) && show(0)));
   on(el, 'focusout', hide);
   on(el, 'pointerdown', hide);
+  on(el, 'click', hide);
   on(doc, 'scroll', hide, true);
   const escape = (): void => hide();
   page.escape.add(escape);
@@ -98,7 +106,8 @@ export function tooltip(el: HTMLElement, options: TooltipOptions): TooltipHandle
     hide,
     update(n) {
       o = { ...o, ...n };
-      if (mine()) o.disabled ? hide() : show(0);
+      if (o.disabled) hide();
+      else if (mine()) show(0);
     },
     get shown() {
       return mine() && !bubbles.get(doc)!.el.hidden;

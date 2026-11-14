@@ -102,9 +102,10 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
     // A grid nested in this one (in a detail) has its own keys: a key from it, or one already taken, is not ours.
     if (e.isComposing || e.keyCode === 229 || e.defaultPrevented || (e.target as Element).closest('.dzg') !== el.root) return;
     g.keyboardAt = g.now();
-    if (e.key === 'Escape' && !g.el.tooltip.hidden) {
-      g.tip.hide();
-      return;
+    if (e.key === 'Escape') {
+      // A show still waiting dropped (tooltips-popovers.md 18); a shown one hidden, the key taken.
+      g.tip.drop();
+      if (!g.el.tooltip.hidden) return g.tip.hide();
     }
     // The select-all box: a checkbox (Space, Enter), before the first header in reading order.
     const t = e.target as HTMLElement;

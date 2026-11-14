@@ -291,8 +291,10 @@ everything an application needs is a `--dzg-*` variable (or a `theme` key, or a 
     (a colour, `--tz-fg-muted`), `-radius` (`--dzg-radius`), `-padding-inline` (`.75rem`, the worded ones; the arrows
     stay square), `-size` (`2rem`: the arrows' side, every pager button's least height), `-font-size`
     (`--dzg-button-font-size`, then `1em`), `-font-weight` (inherited), `-hover-bg` / `-hover-fg` / `-active-bg` (unset:
-    no change), `-disabled-fg` (`--tz-fg-muted`) / `-disabled-bg` (the button's); a button that cannot act takes no
-    hover. The select: `--dzg-pager-select-bg`, `-fg`, `-border`, `-radius`, `-padding-inline`, `-height`, `-font-size`,
+    no change), `-hover-border` / `-active-border` (unset: no change; `-active-border` falls back on `-hover-border`),
+    `-disabled-fg` (`--tz-fg-muted`) / `-disabled-bg` (the button's) / `-disabled-border` (the button's `-border`); a
+    button that cannot act takes no hover. The select has no disabled state (it is never disabled: hidden with fewer
+    than two sizes). The select: `--dzg-pager-select-bg`, `-fg`, `-border`, `-radius`, `-padding-inline`, `-height`, `-font-size`,
     `-font-weight` (WebKit draws the select natively: its corners, padding and height stay its own there, as today —
     the base's do not reach it either). `--dzg-pager-focus-ring` (an `outline`, on the pager's buttons and select at `:focus-visible`;
     unset: the browser's own ring, as today — `revert-layer`, never a reset's). Forced colours keep the system's.

@@ -159,6 +159,13 @@ const VARS = [
   { v: '--dzg-pager-button-hover-bg', hover: true, at: FIRST, p: 'background-color', value: RED, want: SAME },
   { v: '--dzg-pager-button-disabled-fg', reset: true, at: FIRST, p: 'color', value: RED },
   { v: '--dzg-pager-button-disabled-bg', reset: true, at: FIRST, p: 'background-color', value: RED },
+  // 40 (1.12.0 review): the edge of a pager button that cannot act, under the pointer, pressed; the others' left alone.
+  { v: '--dzg-pager-button-disabled-border', reset: true, at: FIRST, p: 'border-inline-start-color', value: RED },
+  { v: '--dzg-pager-button-disabled-border', at: NEXT, p: 'border-inline-start-color', value: RED, want: SAME },
+  { v: '--dzg-pager-button-hover-border', reset: true, hover: true, at: NEXT, p: 'border-inline-start-color', value: RED },
+  { v: '--dzg-pager-button-hover-border', hover: true, at: FIRST, p: 'border-inline-start-color', value: RED, want: SAME },
+  { v: '--dzg-pager-button-active-border', reset: true, press: true, at: NEXT, p: 'border-inline-start-color', value: RED },
+  { v: '--dzg-pager-button-hover-border', reset: true, press: true, at: NEXT, p: 'border-inline-start-color', value: RED },
   { v: '--dzg-pager-button-bg', make: FOOT, at: '[data-made] .dzg-fclr', p: 'background-color', value: RED, want: SAME },
   { v: '--dzg-pager-button-font-size', make: FOOT, at: '[data-made] .dzg-fclr', p: 'font-size', value: '21px', want: SAME },
   // 40: the select, its own and the pager buttons' (followed); the ring.
@@ -476,7 +483,121 @@ async function tipsChecks(page, tag, cfg, name) {
     const v = await page.evaluate(async () => (await window.axe.run(document.body, { runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] })).violations.map((x) => `${x.id}: ${x.nodes.map((n) => n.target).join(' ')}`));
     check(`${tag}: tooltips and popovers, axe finds nothing`, v.length === 0, v);
   }
+  await waitingAndScheme(page, tag, cfg, B, settle);
   check(`${tag}: tooltips page: nothing told`, (await page.evaluate(() => window.told.length)) === 0, await page.evaluate(() => window.told));
+}
+
+/**
+ * (11c) 1.12.0 review (tooltips-popovers.md 18–19, owner 2026-11-14 « oui »): a tooltip waiting for its delay never
+ * appears late — a click on its trigger, the trigger disabled, a popover opened from it by code, a click on a grid cell;
+ * and the page's bubbles take the scheme of their trigger's context as the grid does — the page's `data-theme`, a
+ * wrapper's, a page switching while a popover is open, Tailwind 3's `.dark` class through tailwind3.css's mapping.
+ */
+async function waitingAndScheme(page, tag, cfg, B, settle) {
+  const { dark } = cfg;
+  const away = async () => { await page.mouse.move(2, 690); await settle(); };
+  const shown = () => page.evaluate((B) => !(document.querySelector(B)?.hidden ?? true), B);
+  await page.evaluate(() => { for (const h of window.tips.values()) h.destroy(); for (const h of window.pops.values()) h.destroy(); window.tips.clear(); window.pops.clear(); });
+  await away();
+  // A click on the trigger while its tooltip waits (400 ms): never shown.
+  await page.evaluate(() => window.tips.set('c', window.tooltip(document.getElementById('c'), { content: 'Attente', delayMs: 400 })));
+  await page.hover('#c');
+  await page.mouse.down();
+  await page.mouse.up();
+  await page.waitForTimeout(700);
+  check(`${tag}: a click on the trigger while its tooltip waits: never shown`, !(await shown()));
+  await away();
+  // The trigger disabled while it waits.
+  await page.hover('#c');
+  await page.evaluate(() => { document.getElementById('c').disabled = true; });
+  await page.waitForTimeout(700);
+  check(`${tag}: the trigger disabled while its tooltip waits: never shown`, !(await shown()));
+  await page.evaluate(() => { document.getElementById('c').disabled = false; });
+  await away();
+  // A popover opened by code from the same trigger while its tooltip waits: the popover alone.
+  await page.evaluate(() => {
+    window.tips.set('pop2', window.tooltip(document.getElementById('pop2'), { content: 'Attente', delayMs: 400 }));
+    window.pops.set('pop2', window.popover(document.getElementById('pop2'), { content: 'Formulaire', openOn: 'manual' }));
+  });
+  await page.hover('#pop2');
+  await page.evaluate(() => window.pops.get('pop2').open());
+  await page.waitForTimeout(700);
+  const both = { tip: await shown(), pop: await page.evaluate(() => window.pops.get('pop2').isOpen) };
+  check(`${tag}: a popover opened from the trigger while its tooltip waits: the popover alone`, !both.tip && both.pop, both);
+  await page.evaluate(() => window.pops.get('pop2').close());
+  await away();
+  // The grid: a click on a cell while its tooltip waits.
+  await page.evaluate(() => window.grid.update({ tooltips: { delayMs: 400, header: true, html: window.safeHtml } }));
+  await page.hover('.dzg-layer .dzg-row[aria-rowindex="5"] .dzg-cell[data-col=grams]');
+  await page.mouse.down();
+  await page.mouse.up();
+  await page.waitForTimeout(700);
+  check(`${tag}: a click on a grid cell while its tooltip waits: never shown`, await page.evaluate(() => document.querySelector('.dzg .dzg-tooltip').hidden));
+  await page.evaluate(() => window.grid.update({ tooltips: { delayMs: 0, header: true, html: window.safeHtml } }));
+  await away();
+
+  // The scheme: a neutral tooltip's and a popover's surfaces, dark (luminance under .2) or light (over .5).
+  const surfaces = (id) => page.evaluate(({ id, B }) => {
+    for (const h of window.tips.values()) h.destroy();
+    window.tips.clear();
+    const t = window.tooltip(document.getElementById(id), { content: 'Schéma', tone: 'neutral', animation: 'none', delayMs: 0 });
+    window.tips.set(id, t);
+    t.show();
+    const p = window.pops.get('pop') ?? window.popover(document.getElementById('pop'), { content: 'Bulle', openOn: 'manual', animation: 'none' });
+    window.pops.set('pop', p);
+    return { tip: getComputedStyle(document.querySelector(B)).backgroundColor, scheme: getComputedStyle(document.querySelector(B)).colorScheme };
+  }, { id, B });
+  const popBg = () => page.evaluate(() => getComputedStyle(window.pops.get('pop').el).backgroundColor);
+  const isDark = (c) => lum(c) < 0.2;
+  const isLight = (c) => lum(c) > 0.5;
+  // The page's: html's data-theme in the dark runs, the system's (light) otherwise.
+  const s = await surfaces('c');
+  await page.evaluate(() => window.pops.get('pop').open());
+  await frames(page);
+  const p = await popBg();
+  check(`${tag}: the page's tooltip and popover in the page's scheme (${dark ? 'dark' : 'light'})`, dark ? isDark(s.tip) && isDark(p) : isLight(s.tip) && isLight(p), { s, p });
+  // The page switching while the popover is open: it follows at once.
+  await page.evaluate((dark) => { document.documentElement.dataset.theme = dark ? 'light' : 'dark'; }, dark);
+  await frames(page);
+  const p2 = await popBg();
+  check(`${tag}: the page switching scheme while a popover is open: it follows`, dark ? isLight(p2) : isDark(p2), p2);
+  await page.evaluate((dark) => { if (dark) document.documentElement.dataset.theme = 'dark'; else delete document.documentElement.dataset.theme; }, dark);
+  await page.evaluate(() => window.pops.get('pop').close());
+  await settle();
+  // A wrapper of its own (the other scheme): its trigger's bubble takes it, in the body and the top layer.
+  await page.evaluate((dark) => {
+    const w = document.createElement('div');
+    w.id = 'wrap';
+    w.dataset.theme = dark ? 'light' : 'dark';
+    w.style.cssText = 'position:absolute;inset-block-start:520px;inset-inline-start:40px';
+    w.innerHTML = '<button id="inwrap" type="button">Enveloppe</button>';
+    document.querySelector('main').append(w);
+  }, dark);
+  const w = await surfaces('inwrap');
+  const wp = await page.evaluate(() => {
+    const h = window.popover(document.getElementById('inwrap'), { content: 'Bulle', openOn: 'manual', animation: 'none' });
+    h.open();
+    const bg = getComputedStyle(h.el).backgroundColor;
+    h.destroy();
+    return bg;
+  });
+  check(`${tag}: a wrapper's own scheme: its trigger's tooltip and popover take it`, dark ? isLight(w.tip) && isLight(wp) : isDark(w.tip) && isDark(wp), { w, wp });
+  await page.evaluate(() => document.getElementById('wrap').remove());
+  // Tailwind 3's class strategy: tailwind3.css's mapping (`.dark { --tz-color-scheme: dark }`), the class on html.
+  if (!dark) {
+    await page.evaluate(() => {
+      const st = document.createElement('style');
+      st.id = 'tw3dark';
+      st.textContent = '@layer dzgrid.bridge { .dark { --tz-color-scheme: dark; } }';
+      document.head.append(st);
+      document.documentElement.classList.add('dark');
+    });
+    const t = await surfaces('c');
+    check(`${tag}: Tailwind 3's .dark on html (tailwind3.css's mapping): the tooltip dark`, isDark(t.tip), t);
+    await page.evaluate(() => { document.documentElement.classList.remove('dark'); document.getElementById('tw3dark').remove(); });
+  }
+  await page.evaluate(() => { for (const h of window.tips.values()) h.destroy(); for (const h of window.pops.values()) h.destroy(); window.tips.clear(); window.pops.clear(); });
+  await settle();
 }
 
 /**
