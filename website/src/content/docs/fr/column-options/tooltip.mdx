@@ -24,6 +24,15 @@ Elle peut renvoyer plus que des mots, un `TooltipSpec` :
 | `tone` | `info` (par défaut), `neutral`, `success`, `warning` ou `danger` |
 | `placement` | Où elle s’ouvre, l’un des 12 placements ou `auto` ; demande la fonction [`tooltips()`](../../features/tooltips/) |
 | `html` | Du HTML, affiché nettoyé seulement quand la grille a le nettoyeur (`tooltips: { html: safeHtml }`) ; sinon son `text`, ou rien |
+| `animation`, `shape` | Un effet (dont `morph`) et une forme toute faite (`bubble`, `ticket`, `pill`) ; demandent `tooltips()` |
+| `delayMs`, `maxWidth`, `style` | Son délai au survol, sa largeur maximale, ses propres variables CSS (`--…` seulement) ; demandent `tooltips()` |
+
+**En une ligne, sans fonction** (1.12.0, avec [`tooltips()`](../../features/tooltips/)) : `tooltip: true` montre le
+texte de la cellule tel qu’affiché ; `tooltip: { when: 'truncated' }` seulement quand ce texte est coupé ;
+`tooltip: false` aucune, même sous le `tooltips: { cells: 'truncated' }` de la grille ; `tooltip: { text, tone, shape,
+animation, placement, delayMs, maxWidth, style, when, content }` des options fixes, sans `text` le texte affiché, et
+`content(value, row, context)` la réponse de la cellule posée par-dessus. Tous les cas dans
+[Infobulles et bulles](../../guides/tooltips-popovers/#par-colonne-en-une-ligne).
 
 [`tooltips`](../../settings/tooltips/)`.cells` à false fait taire d’un coup l’infobulle de toutes les colonnes. La
 suite dans [Infobulles et bulles](../../guides/tooltips-popovers/).

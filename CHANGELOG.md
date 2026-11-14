@@ -95,6 +95,36 @@ complete, English and French).
   775 (+2 %, measured 767); K.8 measured 91 918 under its 92 000; `@dzgrid/dom/tooltip` 2 753 / 2 800,
   `@dzgrid/dom/popover` 3 350 / 3 450; the real Angular example 103 000 → 103 050 (+0.05 %, measured 103 014).
 
+### Added — a tooltip per column in one line, ready-made shapes, `morph` (owner 2026-11-14, « ok »)
+- **A column's tooltip without a function** (with `tooltips()`): `tooltip: true` (the cell's text as displayed — dates,
+  numbers, translated values), `tooltip: { when: 'truncated' }` (only when the cell's text is cut), `tooltip: false`
+  (none, whatever the grid says), and `tooltip: { text, tone, shape, animation, placement, delayMs, maxWidth, style,
+  when, content }` — `text` left out meaning the displayed text, `content(value, row, context)` the cell's own answer
+  laid over the column's options (merge: the grid's `tooltips` ← the column's ← the cell's). The grid-wide
+  `tooltips: { cells: 'truncated' }` gives every column that says nothing its cut cells' full text. A function and its
+  `TooltipSpec` take the same new keys. Keyboard focus on the cell opens it at once, as before.
+- **`headerTooltip`** takes the same spec object (`{ text, tone }` without `tooltips()`, the rest with it).
+- **`style`** (custom properties only, written on the bubble while it shows) and **`maxWidth`**, for the grid
+  (`tooltips`), a column, the page's `tooltip()` / `popover()` and Angular (`dzTooltipStyle`, `dzTooltipMaxWidth`,
+  `dzPopoverStyle`, `dzPopoverMaxWidth`); `when: 'truncated'` for `tooltip()` and `dzTooltipWhen`.
+- **Ready-made shapes** `shape: 'bubble' | 'ticket' | 'pill'` (beside an app's SVG path): a speech bubble whose curved
+  tail is part of it (turned per side, mirrored in right to left), notched corners, rounded ends — drawn by
+  `tooltips.css` in the tone's colours, the tone's edge and a soft shadow following the whole outline.
+- **`morph`**, a richer preset to opt into: a small pill at the anchor's side grows into the bubble (320 ms), the
+  words coming in from its first third; it closes the reverse way, faster (180 ms). As quick as an app's GSAP morph
+  (measured side by side): its first frame right after its delay — dressed before it shows, one frame ahead. Pure CSS (a layer's `clip-path`, no layout per frame, no
+  library); its timings are variables (`--dzg-tooltip-morph-*`); nothing moves under reduced motion.
+- Without `tooltips()`, `true`, a column's options object and `cells: 'truncated'` are told once (`missing-feature`,
+  path `columns[i].tooltip` / `settings.tooltips`).
+- Types: `ColumnDef.tooltip` is now `function | boolean | ColumnTooltip<T, V>` and `headerTooltip` `string |
+  TooltipSpec` (an input that accepts more; code that *calls* `def.tooltip` must check it is a function) — waiting for
+  the owner's `check:api` decision; `TooltipSpec` gains `animation`, `shape`, `delayMs`, `maxWidth`, `style`; new
+  `ColumnTooltip`; `TipAnimation` gains `morph`; `TipLook` gains `style`, `maxWidth`.
+- Size lines (+2 % rule): `@dzgrid/dom` 25 730 → 25 800 (measured 25 784), `@dzgrid/dom/popover` 3 450 → 3 519
+  (measured 3 503); K.8 measured 91 972 under its 92 000. For the owner: `@dzgrid/dom/tooltip` measured 3 353 over its
+  2 800 and `tooltips.css` / `tooltips.unlayered.css` 2 843 / 2 798 over 2 000 / 1 950 (proposed at their measure +
+  10 %, as for 1.12.0's other additions: 3 700, 3 150, 3 100).
+
 ### Upgrading (tooltips)
 - Nothing to change: `tooltips: { delayMs }`, a column's `tooltip` returning a string, `headerTooltip` and a tooltip
   part behave as before. A `variables.css` detail changed before publishing: a tooltip above its cell is placed by the

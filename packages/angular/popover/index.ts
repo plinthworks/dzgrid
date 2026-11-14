@@ -23,9 +23,12 @@ export class DzPopover {
   readonly dzPopoverInputs = input<Readonly<Record<string, unknown>>>();
   readonly dzPopoverPlacement = input<TooltipPlacement>();
   readonly dzPopoverFlip = input<boolean>();
-  /** The bubble drawn as this SVG path (`d`, a 100 × 100 box), for an animation that morphs it. */
+  /** A ready-made shape (`bubble`, `ticket`, `pill`), or the bubble drawn as this SVG path (`d`, a 100 × 100 box) to morph. */
   readonly dzPopoverShape = input<string>();
   readonly dzPopoverReducedMotion = input<'none' | 'fade'>();
+  /** Its look through variables only: custom properties written on the bubble while it is open. */
+  readonly dzPopoverStyle = input<Readonly<Record<`--${string}`, string>>>();
+  readonly dzPopoverMaxWidth = input<number | string>();
   readonly dzPopoverTone = input<TipTone>();
   readonly dzPopoverAnimation = input<TipAnimation>();
   readonly dzPopoverAnimate = input<TipAnimate>();
@@ -53,7 +56,7 @@ export class DzPopover {
       const o = {
         content: what == null || typeof what === 'string' ? (what ?? '') : ɵdzDraw(what, () => untracked(this.dzPopoverContext), () => untracked(this.dzPopoverInputs), () => this.close(), ng),
         ...ɵdefined({
-          placement: this.dzPopoverPlacement(), flip: this.dzPopoverFlip(), shape: this.dzPopoverShape(), reducedMotion: this.dzPopoverReducedMotion(), tone: this.dzPopoverTone(), animation: this.dzPopoverAnimation(), animate: this.dzPopoverAnimate(),
+          placement: this.dzPopoverPlacement(), flip: this.dzPopoverFlip(), shape: this.dzPopoverShape(), reducedMotion: this.dzPopoverReducedMotion(), tone: this.dzPopoverTone(), animation: this.dzPopoverAnimation(), animate: this.dzPopoverAnimate(), style: this.dzPopoverStyle(), maxWidth: this.dzPopoverMaxWidth(),
           label: this.dzPopoverLabel(), group: this.dzPopoverGroup(), openOn: this.dzPopoverOpenOn(),
         }),
         onOpen: () => (this.#open.set(true), this.opened.emit()),

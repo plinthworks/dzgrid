@@ -1030,8 +1030,8 @@ Only where you ask for one:
 
 | Where | How |
 |---|---|
-| A cell | The column's [`tooltip`](https://plinthworks.github.io/dzgrid/column-options/tooltip/) function: words, `{ text, tone }`, or HTML (below) |
-| A header | The column's [`headerTooltip`](https://plinthworks.github.io/dzgrid/column-options/header-tooltip/) |
+| A cell | The column's [`tooltip`](https://plinthworks.github.io/dzgrid/column-options/tooltip/): `true`, options in one line (below), or a function — words, `{ text, tone }`, or HTML |
+| A header | The column's [`headerTooltip`](https://plinthworks.github.io/dzgrid/column-options/header-tooltip/): words, or the same options |
 | A header's buttons (filter, column menu, floating filter toggle) | `tooltips: { header: true }` with the [`tooltips()`](https://plinthworks.github.io/dzgrid/features/tooltips/) feature: each says its name |
 | Any element of the page | `tooltip(el, options)` from `@dzgrid/dom/tooltip`; in Angular, the `dzTooltip` directive |
 
@@ -1068,6 +1068,31 @@ createGrid<Crate>(document.getElementById('crates')!, {
 ```
 
 Rest the pointer on a title, then on its funnel button:
+
+## Per column, in one line
+
+With the [`tooltips()`](https://plinthworks.github.io/dzgrid/features/tooltips/) feature, a column says what its cells' tooltips do without writing a
+function — plain data, so it can come from a JSON file. The same option names as the grid's `tooltips` and the page's
+`tooltip()` / `dzTooltip`:
+
+| Case | One line |
+|---|---|
+| The full value of a cut cell, as displayed (dates, numbers, translated values) | `tooltip: { when: 'truncated' }` |
+| The same for every column of the grid | `tooltips: { cells: 'truncated' }` (grid) |
+| Always the cell's text as displayed | `tooltip: true` |
+| No tooltip for this column, whatever the grid says | `tooltip: false` |
+| Fixed words with a tone | `tooltip: { text: 'Counted each March', tone: 'neutral' }` |
+| The morph bubble for this column only | `tooltip: { shape: 'bubble', animation: 'morph' }` |
+| Its place, its hover delay, its width | `tooltip: { placement: 'top', delayMs: 200, maxWidth: 240 }` |
+| Its own colours, through variables only | `tooltip: { style: { '--dzg-tooltip-info-bg': 'teal' } }` |
+| Per cell, over the column's options | `tooltip: { tone: 'warning', content: (value, row) => value > 100 ? { tone: 'danger', text: 'Too many' } : null }` |
+| A header | `headerTooltip: { text: 'Trees planted', tone: 'success', shape: 'pill' }` |
+
+`text` left out means the cell's text as displayed. The options merge: the grid's `tooltips` first, then the column's,
+then what `content` returns for the cell (`null`: no tooltip for that cell). `style` writes only CSS variables (names
+starting with `--`) on the bubble while it shows that column's tooltip. Keyboard focus on the cell opens it at once,
+like any cell tooltip. Without `tooltips()`, a function and `headerTooltip`'s words and tone still work; `true`, the
+options and `cells: 'truncated'` are told once as a `missing-feature` problem.
 
 ## Anywhere in the page
 
@@ -1126,10 +1151,28 @@ A tooltip or a popover opens and closes with one of the presets of `@dzgrid/them
 | `slide` | Moves a few pixels in from the element's side, and follows the flip and the reading direction |
 | `pop` | Richer, opt-in: grows from 80 % with a slight overshoot (260 ms) |
 | `rise` | Richer, opt-in: 12 px from the element's side, with a long soft deceleration (320 ms) |
+| `morph` | Richer, opt-in: a small pill at the element's side, the arrow already there, grows into the bubble (320 ms), the words coming in from its first third; it closes the reverse way, faster (180 ms) |
 | `none` | There at once |
 
-Every preset closes the same short way (100 ms). Only `opacity` and `transform` move: nothing is measured during the
-animation. Durations, easings and delays are variables (below).
+Every preset but `morph` closes the same short way (100 ms). Only `opacity` and `transform` move — and for `morph`, a
+layer's `clip-path` and the words' colour: nothing is laid out or measured during the animation. Durations, easings
+and delays are variables (below); `morph`'s are `--dzg-tooltip-morph-duration`, `-easing`, `-content-duration`,
+`-content-delay` and `-close-duration`. It is pure CSS: no library. Its first frame is the one after its delay (the
+grid's `tooltips.delayMs`, 500 ms by default as the page's `delayMs`; a column's `delayMs` over it).
+
+### Ready-made shapes
+
+`shape` takes a ready-made shape, drawn by `@dzgrid/theme/tooltips.css` in the tone's colours:
+
+| Shape | Its look |
+|---|---|
+| `bubble` | A soft speech bubble: rounder corners, its point a curved tail that is part of it, turned to the side it opened on (mirrored in right to left) |
+| `ticket` | Its four corners notched |
+| `pill` | Fully rounded ends; the arrow kept |
+
+A tone's edge and a soft shadow follow the whole outline, tail and notches included. Each works with every animation,
+`morph` included. Sizes are variables: `--dzg-tooltip-bubble-radius`, `--dzg-tooltip-bubble-tail`,
+`--dzg-tooltip-ticket-notch`, `--dzg-tooltip-pill-padding`, `--dzg-tooltip-shape-shadow`.
 
 **Reduced motion.** When the system asks for reduced motion, or the grid has `motion: false`, nothing moves and nothing
 fades: tooltips and popovers appear and go at once. You may ask for a short fade instead, opacity only (120 ms):
@@ -2723,6 +2766,11 @@ changes nothing by itself; a feature's sheet is named. *Key* is the `theme` sett
 | `--dzg-tooltip-pop-duration`, `--dzg-tooltip-pop-easing`, `--dzg-tooltip-pop-scale` | — | The richer `pop` preset's opening (opt-in, 1.12.0) | `260ms`, a slight overshoot, `.8` | `tooltips.css` |
 | `--dzg-tooltip-rise`, `--dzg-tooltip-rise-duration`, `--dzg-tooltip-rise-easing` | — | The richer `rise` preset's opening (opt-in, 1.12.0) | `12px`, `320ms`, a long soft deceleration | `tooltips.css` |
 | `--dzg-tooltip-reduced-duration` | — | The fade kept under reduced motion with `reducedMotion: 'fade'` (1.12.0) | `120ms` | `tooltips.css` |
+| `--dzg-tooltip-morph-duration`, `--dzg-tooltip-morph-easing` | — | The `morph` preset: the pill growing into the shape (opt-in, 1.12.0) | `320ms`, a soft deceleration (GSAP's `power3.out`) | `tooltips.css` |
+| `--dzg-tooltip-morph-content-duration`, `--dzg-tooltip-morph-content-delay`, `--dzg-tooltip-morph-close-duration` | — | The `morph` preset: the content coming in, and the whole closing | `200ms`, `120ms`, `180ms` | `tooltips.css` |
+| `--dzg-tooltip-bubble-radius`, `--dzg-tooltip-bubble-tail` | — | The `bubble` shape's corners and its tail's size (1.12.0) | `.75rem`, `.5rem` | `tooltips.css` |
+| `--dzg-tooltip-ticket-notch`, `--dzg-tooltip-pill-padding` | — | The `ticket` shape's notches; the `pill` shape's padding at its ends | `.375rem`, `.75rem` | `tooltips.css` |
+| `--dzg-tooltip-shape-shadow` | — | The shadow around a ready-made shape, tail and notches included (a `drop-shadow()`) | a soft shadow | `tooltips.css` |
 | `--dzg-popover-bg`, `--dzg-popover-fg`, `--dzg-popover-border`, `--dzg-popover-radius`, `--dzg-popover-shadow`, `--dzg-popover-padding`, `--dzg-popover-max-width`, `--dzg-popover-font-size`, `--dzg-popover-arrow-color`, `--dzg-popover-max-height` | — | The popover (1.12.0; a taller content scrolls inside) | `--tz-bg`, `--tz-fg`, `--tz-border`, `--dzg-radius`, a soft shadow, `.75rem`, `min(32rem, 100vw - 16px)`, inherited, its background, `100vh - 32px` | `tooltips.css` (a plain surface without it) |
 | `--dzg-popover-open-duration`, `--dzg-popover-open-easing`, `--dzg-popover-open-delay`, `--dzg-popover-close-duration`, `--dzg-popover-close-easing`, `--dzg-popover-close-delay` | — | How a popover opens and closes (1.12.0) | the tooltip's | `tooltips.css` |
 | `--dzg-input-bg`, `--dzg-input-border` | `inputBg`, `inputBorder` | The filters' boxes: their surface, their edge (a colour, or `none`; 1.12.0: never erased by a page's reset) | `--tz-bg`; light: `--tz-fg-muted` 75 % into `--tz-bg`, dark: `--tz-fg-muted` | base |

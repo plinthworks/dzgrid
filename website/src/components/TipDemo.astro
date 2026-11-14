@@ -5,7 +5,8 @@
  * buttons are in the page from the start; their tooltips are given when the demo comes near the screen.
  *
  *   <TipDemo kind="tones" />          one button per tone
- *   <TipDemo kind="animations" />     one button per preset: fade, scale, slide, pop, rise, none
+ *   <TipDemo kind="animations" />     one button per preset: fade, scale, slide, pop, rise, morph, none
+ *   <TipDemo kind="shapes" />         one button per ready-made shape (bubble, ticket, pill), each opened by `morph`
  *   <TipDemo kind="placements" />     the 12 placements around one anchor, with `flip` and right to left
  *   <TipDemo kind="popover" />        a popover holding a small form
  *   <TipDemo kind="custom" />         the app's own animation (`animate`, plain keyframes) on a speech-bubble `shape`
@@ -13,7 +14,7 @@
  * `look` crosses into the page as JSON and is given to every tooltip or popover of the demo (`{ reducedMotion: 'fade' }`).
  * The words are the page's language (English or French), the data made up.
  */
-type Kind = 'tones' | 'animations' | 'placements' | 'popover' | 'custom';
+type Kind = 'tones' | 'animations' | 'shapes' | 'placements' | 'popover' | 'custom';
 interface Props {
   kind: Kind;
   /** Options given to every tooltip or popover of the demo, as JSON (`tone`, `animation`, `reducedMotion`…). */
@@ -26,7 +27,8 @@ const fr = Astro.currentLocale === 'fr';
 const lang = fr ? 'fr' : 'en';
 
 const TONES = ['info', 'neutral', 'success', 'warning', 'danger'] as const;
-const PRESETS = ['fade', 'scale', 'slide', 'pop', 'rise', 'none'] as const;
+const PRESETS = ['fade', 'scale', 'slide', 'pop', 'rise', 'morph', 'none'] as const;
+const SHAPES = ['bubble', 'ticket', 'pill'] as const;
 /** Where each placement's button sits around the anchor: [row, column] of a 5 × 5 grid (columns follow the direction). */
 const AROUND: readonly (readonly [string, number, number])[] = [
   ['top-start', 1, 2], ['top', 1, 3], ['top-end', 1, 4],
@@ -49,6 +51,11 @@ const data = JSON.stringify({ kind, look });
   {kind === 'animations' && (
     <div class="dzg-tipdemo-row">
       {PRESETS.map((a) => <button type="button" data-animation={a}>{a}</button>)}
+    </div>
+  )}
+  {kind === 'shapes' && (
+    <div class="dzg-tipdemo-row">
+      {SHAPES.map((x) => <button type="button" data-shape={x}>{x}</button>)}
     </div>
   )}
   {kind === 'placements' && (
@@ -102,8 +109,10 @@ const data = JSON.stringify({ kind, look });
         slide: 'slide: a few pixels from the anchor’s side',
         pop: 'pop: from 80 % with a slight overshoot (opt-in)',
         rise: 'rise: 12 px, a long soft deceleration (opt-in)',
+        morph: 'morph: a pill that grows into the bubble (opt-in)',
         none: 'none: there at once',
       },
+      shapes: { bubble: 'bubble: a speech bubble, its tail part of it', ticket: 'ticket: its corners notched', pill: 'pill: fully rounded ends' },
       at: 'Opened at',
       custom: { neutral: 'A speech bubble, drawn by its shape', success: 'Harvest booked for Tuesday' },
       form: { label: 'Book a visit', name: 'Your name', day: 'Day', days: ['Monday', 'Tuesday', 'Wednesday'], ok: 'Book', cancel: 'Cancel', done: (n: string, d: string) => `Booked: ${n || 'a visitor'}, ${d}.`, closed: 'Closed by' },
@@ -122,8 +131,10 @@ const data = JSON.stringify({ kind, look });
         slide: 'slide : quelques pixels depuis le côté de l’ancre',
         pop: 'pop : depuis 80 % avec un léger rebond (sur demande)',
         rise: 'rise : 12 px, une longue décélération douce (sur demande)',
+        morph: 'morph : une pilule qui devient la bulle (sur demande)',
         none: 'none : tout de suite là',
       },
+      shapes: { bubble: 'bubble : une bulle de bande dessinée, sa pointe comprise', ticket: 'ticket : ses coins entaillés', pill: 'pill : des bouts tout ronds' },
       at: 'Ouverte en',
       custom: { neutral: 'Une bulle de bande dessinée, dessinée par sa forme', success: 'Récolte réservée pour mardi' },
       form: { label: 'Réserver une visite', name: 'Votre nom', day: 'Jour', days: ['Lundi', 'Mardi', 'Mercredi'], ok: 'Réserver', cancel: 'Annuler', done: (n: string, d: string) => `Réservé : ${n || 'un visiteur'}, ${d}.`, closed: 'Fermée par' },
@@ -169,6 +180,13 @@ const data = JSON.stringify({ kind, look });
           for (const b of this.querySelectorAll<HTMLElement>('[data-animation]')) {
             const animation = b.dataset.animation as keyof typeof say.animations;
             this.#handles.push(tooltip(b, { placement: 'top', tone: 'neutral', ...look, animation, content: say.animations[animation] }));
+          }
+        } else if (kind === 'shapes') {
+          // The ready-made shapes, drawn by tooltips.css; each opens with the morph preset (a pill growing into it).
+          const tones = { bubble: 'info', ticket: 'neutral', pill: 'success' } as const;
+          for (const b of this.querySelectorAll<HTMLElement>('[data-shape]')) {
+            const shape = b.dataset.shape as keyof typeof say.shapes;
+            this.#handles.push(tooltip(b, { placement: 'top', animation: 'morph', tone: tones[shape], ...look, shape, content: say.shapes[shape] }));
           }
         } else if (kind === 'custom') {
           // The app's own animation: plain keyframes through the Web Animations API, played backwards to close; the

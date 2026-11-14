@@ -8,11 +8,15 @@
   box-shadow: var(--dzg-popover-shadow, 0 0.25rem 0.75rem color-mix(in srgb, var(--tz-fg) 20%, transparent));
   font-size: var(--dzg-popover-font-size, inherit);
   outline: none;
+  --dzg-tip-bg: var(--dzg-popover-bg, var(--tz-bg));
+  --dzg-tip-shadow: drop-shadow(0 0.25rem 0.5rem color-mix(in srgb, var(--tz-fg) 20%, transparent));
   --dzg-tip-arrow-bg: var(--dzg-popover-arrow-color, var(--dzg-popover-bg, var(--tz-bg)));
   --dzg-tip-arrow-edge: var(--dzg-popover-border, var(--tz-border));
 }
 
 .dzg-tooltip {
+  --dzg-tip-bg: var(--dzg-tooltip-bg, var(--tz-fg));
+  --dzg-tip-shadow: drop-shadow(0 0 0 transparent);
   --dzg-tip-arrow-bg: var(--dzg-tooltip-arrow-color, var(--dzg-tooltip-bg, var(--tz-fg)));
   --dzg-tip-arrow-edge: transparent;
 }
@@ -21,6 +25,7 @@
   color: var(--dzg-tooltip-info-fg, var(--dzg-tooltip-fg, var(--tz-bg)));
   background: var(--dzg-tooltip-info-bg, var(--dzg-tooltip-bg, var(--tz-fg)));
   outline: var(--dzg-line, 1px) solid var(--dzg-tooltip-info-border, transparent);
+  --dzg-tip-bg: var(--dzg-tooltip-info-bg, var(--dzg-tooltip-bg, var(--tz-fg)));
   outline-offset: calc(-1 * var(--dzg-line, 1px));
   --dzg-tip-arrow-bg: var(--dzg-tooltip-info-arrow, var(--dzg-tooltip-info-bg, var(--dzg-tooltip-bg, var(--tz-fg))));
   --dzg-tip-arrow-edge: var(--dzg-tooltip-info-border, transparent);
@@ -30,6 +35,7 @@
   color: var(--dzg-tooltip-neutral-fg, var(--tz-fg));
   background: var(--dzg-tooltip-neutral-bg, var(--tz-bg-raised));
   outline: var(--dzg-line, 1px) solid var(--dzg-tooltip-neutral-border, var(--tz-border));
+  --dzg-tip-bg: var(--dzg-tooltip-neutral-bg, var(--tz-bg-raised));
   outline-offset: calc(-1 * var(--dzg-line, 1px));
   --dzg-tip-arrow-bg: var(--dzg-tooltip-neutral-arrow, var(--dzg-tooltip-neutral-bg, var(--tz-bg-raised)));
   --dzg-tip-arrow-edge: var(--dzg-tooltip-neutral-border, var(--tz-border));
@@ -39,6 +45,7 @@
   color: var(--dzg-tooltip-success-fg, var(--tz-bg));
   background: var(--dzg-tooltip-success-bg, var(--tz-success));
   outline: var(--dzg-line, 1px) solid var(--dzg-tooltip-success-border, transparent);
+  --dzg-tip-bg: var(--dzg-tooltip-success-bg, var(--tz-success));
   outline-offset: calc(-1 * var(--dzg-line, 1px));
   --dzg-tip-arrow-bg: var(--dzg-tooltip-success-arrow, var(--dzg-tooltip-success-bg, var(--tz-success)));
   --dzg-tip-arrow-edge: var(--dzg-tooltip-success-border, transparent);
@@ -48,6 +55,7 @@
   color: var(--dzg-tooltip-warning-fg, var(--tz-bg));
   background: var(--dzg-tooltip-warning-bg, var(--tz-warning));
   outline: var(--dzg-line, 1px) solid var(--dzg-tooltip-warning-border, transparent);
+  --dzg-tip-bg: var(--dzg-tooltip-warning-bg, var(--tz-warning));
   outline-offset: calc(-1 * var(--dzg-line, 1px));
   --dzg-tip-arrow-bg: var(--dzg-tooltip-warning-arrow, var(--dzg-tooltip-warning-bg, var(--tz-warning)));
   --dzg-tip-arrow-edge: var(--dzg-tooltip-warning-border, transparent);
@@ -57,6 +65,7 @@
   color: var(--dzg-tooltip-danger-fg, var(--tz-bg));
   background: var(--dzg-tooltip-danger-bg, var(--tz-danger));
   outline: var(--dzg-line, 1px) solid var(--dzg-tooltip-danger-border, transparent);
+  --dzg-tip-bg: var(--dzg-tooltip-danger-bg, var(--tz-danger));
   outline-offset: calc(-1 * var(--dzg-line, 1px));
   --dzg-tip-arrow-bg: var(--dzg-tooltip-danger-arrow, var(--dzg-tooltip-danger-bg, var(--tz-danger)));
   --dzg-tip-arrow-edge: var(--dzg-tooltip-danger-border, transparent);
@@ -68,6 +77,7 @@
 
 .dzg-tooltip, .dzg-popover {
   margin-block-start: var(--dzg-tooltip-arrow-size, 0.375rem);
+  --dzg-tip-fill: var(--dzg-tip-bg);
 }
 
 :is(.dzg-tooltip, .dzg-popover)::before,
@@ -128,15 +138,15 @@
   margin-inline-start: var(--dzg-line, 1px);
 }
 
-:is(.dzg-tooltip, .dzg-popover)[data-shape] {
+:is(.dzg-tooltip, .dzg-popover)[data-shape=""] {
   border-color: transparent;
   outline-color: transparent;
   background: transparent;
   box-shadow: none;
 }
 
-:is(.dzg-tooltip, .dzg-popover)[data-shape]::before,
-.dzg-popover[data-shape]::after {
+:is(.dzg-tooltip, .dzg-popover)[data-shape=""]::before,
+.dzg-popover[data-shape=""]::after {
   display: none;
 }
 
@@ -155,6 +165,68 @@
   stroke: var(--dzg-tip-arrow-edge);
   stroke-width: var(--dzg-line, 1px);
   vector-effect: non-scaling-stroke;
+}
+
+:is(.dzg-tooltip, .dzg-popover):is([data-shape=bubble], [data-shape=ticket], [data-shape=pill], [data-animation=morph]) {
+  border-color: transparent;
+  outline-color: transparent;
+  box-shadow: none;
+  filter: drop-shadow(var(--dzg-line, 1px) 0 0 var(--dzg-tip-arrow-edge)) drop-shadow(calc(-1 * var(--dzg-line, 1px)) 0 0 var(--dzg-tip-arrow-edge)) drop-shadow(0 var(--dzg-line, 1px) 0 var(--dzg-tip-arrow-edge)) drop-shadow(0 calc(-1 * var(--dzg-line, 1px)) 0 var(--dzg-tip-arrow-edge)) var(--dzg-tip-shadow);
+}
+
+:is(.dzg-tooltip, .dzg-popover):is([data-shape=bubble], [data-shape=ticket], [data-shape=pill]) {
+  --dzg-tip-shadow: var(--dzg-tooltip-shape-shadow, drop-shadow(0 0.125rem 0.375rem color-mix(in srgb, var(--tz-fg) 25%, transparent)));
+}
+
+.dzg-popover:is([data-shape=bubble], [data-shape=ticket], [data-shape=pill])::before {
+  display: none;
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-shape=pill] {
+  padding-inline: var(--dzg-tooltip-pill-padding, 0.75rem);
+  border-radius: 999px;
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-shape=ticket] {
+  border-radius: 0;
+  background: var(--dzg-tip-fill);
+  --dzg-tip-fill: radial-gradient(circle at 0 0, transparent var(--dzg-tooltip-ticket-notch, 0.375rem), var(--dzg-tip-bg) calc(var(--dzg-tooltip-ticket-notch, 0.375rem) + 0.5px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, transparent var(--dzg-tooltip-ticket-notch, 0.375rem), var(--dzg-tip-bg) calc(var(--dzg-tooltip-ticket-notch, 0.375rem) + 0.5px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, transparent var(--dzg-tooltip-ticket-notch, 0.375rem), var(--dzg-tip-bg) calc(var(--dzg-tooltip-ticket-notch, 0.375rem) + 0.5px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, transparent var(--dzg-tooltip-ticket-notch, 0.375rem), var(--dzg-tip-bg) calc(var(--dzg-tooltip-ticket-notch, 0.375rem) + 0.5px)) 100% 100% / 51% 51% no-repeat;
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-shape=bubble] {
+  border-radius: var(--dzg-tooltip-bubble-radius, 0.75rem);
+  --dzg-tooltip-arrow-size: var(--dzg-tooltip-bubble-tail, 0.5rem);
+}
+
+.dzg-tooltip[data-shape=bubble][data-side]::before,
+.dzg-popover[data-shape=bubble][data-side]::after {
+  inset-block: auto calc(100% - var(--dzg-tooltip-arrow-size, 0.375rem));
+  inset-inline: calc(var(--dzg-tip-at, 1rem) - var(--dzg-tooltip-arrow-size, 0.375rem)) auto;
+  inline-size: calc(2 * var(--dzg-tooltip-arrow-size, 0.375rem));
+  block-size: calc(2 * var(--dzg-tooltip-arrow-size, 0.375rem));
+  margin: 0;
+  clip-path: polygon(0% 58%, 11.9% 50.9%, 22.4% 42.9%, 31.5% 34%, 39.1% 24.2%, 45.3% 13.6%, 50% 2%, 54.7% 13.6%, 60.9% 24.2%, 68.5% 34%, 77.6% 42.9%, 88.1% 50.9%, 100% 58%);
+  rotate: none;
+  scale: none;
+}
+
+.dzg-tooltip[data-shape=bubble][data-side=block-start]::before,
+.dzg-popover[data-shape=bubble][data-side=block-start]::after {
+  inset-block: calc(100% - var(--dzg-tooltip-arrow-size, 0.375rem)) auto;
+  rotate: 180deg;
+}
+
+.dzg-tooltip[data-shape=bubble]:is([data-side=inline-end], [data-side=inline-start])::before,
+.dzg-popover[data-shape=bubble]:is([data-side=inline-end], [data-side=inline-start])::after {
+  inset-block: calc(var(--dzg-tip-at, 1rem) - var(--dzg-tooltip-arrow-size, 0.375rem)) auto;
+  inset-inline: auto calc(100% - var(--dzg-tooltip-arrow-size, 0.375rem));
+  rotate: calc(-90deg * var(--dzg-tip-sign));
+}
+
+.dzg-tooltip[data-shape=bubble][data-side=inline-start]::before,
+.dzg-popover[data-shape=bubble][data-side=inline-start]::after {
+  inset-inline: calc(100% - var(--dzg-tooltip-arrow-size, 0.375rem)) auto;
+  rotate: calc(90deg * var(--dzg-tip-sign));
 }
 
 .dzg-tooltip, .dzg-popover {
@@ -264,14 +336,103 @@
     translate: var(--dzg-tip-from);
   }
 }
+:is(.dzg-tooltip, .dzg-popover)[data-animation=morph] {
+  --dzg-tip-cx: calc(50% + (var(--dzg-tip-at, 1rem) - 50%) * var(--dzg-tip-sign));
+  --dzg-tip-x0: clamp(0px, calc(var(--dzg-tip-cx) - 30%), 40%);
+  --dzg-tip-x1: clamp(0px, calc(70% - var(--dzg-tip-cx)), 40%);
+  --dzg-tip-y0: clamp(0px, calc(var(--dzg-tip-at, 1rem) - 30%), 40%);
+  --dzg-tip-y1: clamp(0px, calc(70% - var(--dzg-tip-at, 1rem)), 40%);
+  --dzg-tip-pill: inset(0 var(--dzg-tip-x1) 55% var(--dzg-tip-x0) round 1.25rem);
+  background: transparent;
+  transition-property: opacity, color, display, overlay;
+  transition-delay: calc(var(--dzg-tooltip-open-delay, 0s) - 16ms);
+  animation: dzg-tip-words var(--dzg-tooltip-morph-content-duration, 200ms) ease-out calc(var(--dzg-tooltip-morph-content-delay, 120ms) - 16ms) backwards;
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-animation=morph][data-side=block-start] {
+  --dzg-tip-pill: inset(55% var(--dzg-tip-x1) 0 var(--dzg-tip-x0) round 1.25rem);
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-animation=morph][data-side=inline-end] {
+  --dzg-tip-pill: inset(var(--dzg-tip-y0) calc(27.5% + 27.5% * var(--dzg-tip-sign)) var(--dzg-tip-y1) calc(27.5% - 27.5% * var(--dzg-tip-sign)) round 1.25rem);
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-animation=morph][data-side=inline-start] {
+  --dzg-tip-pill: inset(var(--dzg-tip-y0) calc(27.5% - 27.5% * var(--dzg-tip-sign)) var(--dzg-tip-y1) calc(27.5% + 27.5% * var(--dzg-tip-sign)) round 1.25rem);
+}
+
+.dzg-tooltip[data-animation=morph]::after, .dzg-popover[data-animation=morph][data-side]::before {
+  content: "";
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  inline-size: auto;
+  block-size: auto;
+  margin: 0;
+  border-radius: inherit;
+  background: var(--dzg-tip-fill);
+  clip-path: inset(0 round 0);
+  rotate: none;
+  scale: none;
+  pointer-events: none;
+  transition: clip-path calc(var(--dzg-tooltip-morph-close-duration, 180ms) * 0.6) ease-out;
+  animation: dzg-tip-morph var(--dzg-tooltip-morph-duration, 320ms) var(--dzg-tooltip-morph-easing, cubic-bezier(0.33, 1, 0.68, 1)) calc(-1 * 16ms);
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-animation=morph] > * {
+  transition: opacity calc(var(--dzg-tooltip-morph-close-duration, 180ms) * 0.3), translate calc(var(--dzg-tooltip-morph-close-duration, 180ms) * 0.3);
+  animation: dzg-tip-rise var(--dzg-tooltip-morph-content-duration, 200ms) ease-out calc(var(--dzg-tooltip-morph-content-delay, 120ms) - 16ms) backwards;
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-animation=morph]:is([hidden], [data-closing]) {
+  color: transparent;
+  transition-duration: calc(var(--dzg-tooltip-morph-close-duration, 180ms) * 0.45), calc(var(--dzg-tooltip-morph-close-duration, 180ms) * 0.3), var(--dzg-tooltip-morph-close-duration, 180ms), var(--dzg-tooltip-morph-close-duration, 180ms);
+  transition-delay: calc(var(--dzg-tooltip-morph-close-duration, 180ms) * 0.55), 0s, 0s, 0s;
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-animation=morph]:is([hidden], [data-closing]) > * {
+  opacity: 0;
+}
+
+.dzg-tooltip[data-animation=morph]:is([hidden], [data-closing])::after,
+.dzg-popover[data-animation=morph][data-side]:is([hidden], [data-closing])::before {
+  clip-path: var(--dzg-tip-pill);
+  transition-delay: calc(var(--dzg-tooltip-morph-close-duration, 180ms) * 0.25);
+  transition-timing-function: ease-in;
+}
+
+@keyframes dzg-tip-morph {
+  from {
+    clip-path: var(--dzg-tip-pill);
+  }
+}
+@keyframes dzg-tip-words {
+  from {
+    color: transparent;
+  }
+}
+@keyframes dzg-tip-rise {
+  from {
+    opacity: 0;
+    translate: 0 0.25rem;
+  }
+}
 :is(.dzg-tooltip, .dzg-popover):is([data-animation=none], [data-animation=custom]),
-[data-motion=off] .dzg-tooltip {
+[data-motion=off] .dzg-tooltip,
+[data-motion=off] .dzg-tooltip::after,
+[data-motion=off] .dzg-tooltip > * {
   transition: none;
+  animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dzg-tooltip, .dzg-popover {
+  .dzg-tooltip, .dzg-popover,
+  :is(.dzg-tooltip, .dzg-popover)[data-animation=morph],
+  :is(.dzg-tooltip, .dzg-popover)[data-animation=morph] > *,
+  .dzg-tooltip[data-animation=morph]::after, .dzg-popover[data-animation=morph][data-side]::before {
     transition: none;
+    animation: none;
   }
   :is(.dzg-tooltip, .dzg-popover)[data-reduced=fade]:not([data-animation=none], [data-animation=custom], [data-motion=off] *) {
     transition: opacity var(--dzg-tooltip-reduced-duration, 120ms) linear, display var(--dzg-tooltip-reduced-duration, 120ms) allow-discrete, overlay var(--dzg-tooltip-reduced-duration, 120ms) allow-discrete;
@@ -287,5 +448,8 @@
   .dzg-popover::after {
     forced-color-adjust: none;
     background: CanvasText;
+  }
+  :is(.dzg-tooltip, .dzg-popover):is([data-shape=bubble], [data-shape=ticket], [data-shape=pill], [data-animation=morph]) {
+    outline-color: CanvasText;
   }
 }

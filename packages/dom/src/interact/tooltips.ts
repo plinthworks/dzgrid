@@ -21,8 +21,10 @@ export function installTooltips<T>(g: GridContext<T>): void {
     const hcell = target.closest<HTMLElement>('.dzg-hcell');
     if (hcell) {
       const col = hcell.dataset['col'] ? columns.get(hcell.dataset['col']) : undefined;
-      const text = col?.def.headerTooltip;
-      return text ? { text, col: col!, row: null, value: null } : null;
+      // Words, or a spec: its text and tone here, its look with `tooltips()` (tooltips-popovers.md 22).
+      const h = col?.def.headerTooltip;
+      const s = typeof h == 'string' ? { text: h } : h;
+      return s?.text ? { ...s, text: s.text, col: col!, row: null, value: null } : null;
     }
     const cell = target.closest<HTMLElement>('.dzg-cell');
     const row = cell?.closest('.dzg-row');

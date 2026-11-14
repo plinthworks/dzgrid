@@ -95,8 +95,9 @@ for (const c of COPIES) {
     });
 
     it('none, the app\'s own, a grid without motion, reduced motion: no transition', () => {
-      expect(body(`${B}:is([data-animation=none], [data-animation=custom]), [data-motion=off] .dzg-tooltip`)).toBe('transition: none;');
-      expect(body('.dzg-tooltip, .dzg-popover', '@media (prefers-reduced-motion: reduce)')).toBe('transition: none;');
+      expect(body(`${B}:is([data-animation=none], [data-animation=custom]), [data-motion=off] .dzg-tooltip, [data-motion=off] .dzg-tooltip::after, [data-motion=off] .dzg-tooltip > *`)).toBe('transition: none; animation: none;');
+      // The morph's layer and a part's elements too (it animates them).
+      expect(body(`.dzg-tooltip, .dzg-popover, ${B}[data-animation=morph], ${B}[data-animation=morph] > *, .dzg-tooltip[data-animation=morph]::after, .dzg-popover[data-animation=morph][data-side]::before`, '@media (prefers-reduced-motion: reduce)')).toBe('transition: none; animation: none;');
       // Unless the app asks a short fade: opacity only, nothing moves or grows.
       const fade = body(`${B}[data-reduced=fade]:not([data-animation=none], [data-animation=custom], [data-motion=off] *)`, '@media (prefers-reduced-motion: reduce)');
       expect(fade).toContain('transition: opacity var(--dzg-tooltip-reduced-duration, 120ms) linear');
@@ -115,11 +116,66 @@ for (const c of COPIES) {
     });
 
     it('an app shape: no box nor arrow, its path filled and edged in the tone\'s colours, under the content', () => {
-      expect(body(`${B}[data-shape]`)).toContain('background: transparent;');
-      expect(body(`${B}[data-shape]::before, .dzg-popover[data-shape]::after`)).toBe('display: none;');
+      expect(body(`${B}[data-shape=""]`)).toContain('background: transparent;');
+      expect(body(`${B}[data-shape=""]::before, .dzg-popover[data-shape=""]::after`)).toBe('display: none;');
       expect(body('.dzg-tip-shape')).toContain('z-index: -1;');
       expect(body('.dzg-tip-shape > path')).toContain('fill: var(--dzg-tip-arrow-bg);');
       expect(body('.dzg-tip-shape > path')).toContain('stroke: var(--dzg-tip-arrow-edge);');
+    });
+
+    it('ready-made shapes (20): the edge and a shadow around the whole outline; pill, ticket, bubble', () => {
+      const S = `${B}:is([data-shape=bubble], [data-shape=ticket], [data-shape=pill]`;
+      const all = body(`${S}, [data-animation=morph])`);
+      expect(all).toContain('outline-color: transparent;');
+      expect(all).toContain('box-shadow: none;');
+      expect(all).toContain('filter: drop-shadow(var(--dzg-line, 1px) 0 0 var(--dzg-tip-arrow-edge)) drop-shadow(calc(-1 * var(--dzg-line, 1px)) 0 0 var(--dzg-tip-arrow-edge)) drop-shadow(0 var(--dzg-line, 1px) 0 var(--dzg-tip-arrow-edge)) drop-shadow(0 calc(-1 * var(--dzg-line, 1px)) 0 var(--dzg-tip-arrow-edge)) var(--dzg-tip-shadow);');
+      expect(body(`${S})`)).toContain('--dzg-tip-shadow: var(--dzg-tooltip-shape-shadow, ');
+      expect(body(`${B}[data-shape=pill]`)).toContain('border-radius: 999px;');
+      expect(body(`${B}[data-shape=pill]`)).toContain('padding-inline: var(--dzg-tooltip-pill-padding, 0.75rem);');
+      // The ticket: four round bites out of its background, the tone's colour.
+      const t = body(`${B}[data-shape=ticket]`);
+      expect(t.match(/radial-gradient\(circle at /g)).toHaveLength(4);
+      expect(t).toContain('transparent var(--dzg-tooltip-ticket-notch, 0.375rem), var(--dzg-tip-bg)');
+      expect(t).toContain('background: var(--dzg-tip-fill);');
+      // The bubble: rounder, its tail the arrow turned per side (the gap the grid reads is its size).
+      expect(body(`${B}[data-shape=bubble]`)).toContain('border-radius: var(--dzg-tooltip-bubble-radius, 0.75rem);');
+      expect(body(`${B}[data-shape=bubble]`)).toContain('--dzg-tooltip-arrow-size: var(--dzg-tooltip-bubble-tail, 0.5rem);');
+      const tail = body('.dzg-tooltip[data-shape=bubble][data-side]::before, .dzg-popover[data-shape=bubble][data-side]::after');
+      expect(tail).toContain('clip-path: polygon(0% 58%');
+      expect(tail).toContain('scale: none;');
+      expect(body('.dzg-tooltip[data-shape=bubble][data-side=block-start]::before, .dzg-popover[data-shape=bubble][data-side=block-start]::after')).toContain('rotate: 180deg;');
+      expect(body('.dzg-tooltip[data-shape=bubble]:is([data-side=inline-end], [data-side=inline-start])::before, .dzg-popover[data-shape=bubble]:is([data-side=inline-end], [data-side=inline-start])::after')).toContain('rotate: calc(-90deg * var(--dzg-tip-sign));');
+      expect(body('.dzg-tooltip[data-shape=bubble][data-side=inline-start]::before, .dzg-popover[data-shape=bubble][data-side=inline-start]::after')).toContain('rotate: calc(90deg * var(--dzg-tip-sign));');
+      // The popover's edge triangle not drawn under a shape (the drop-shadows draw the edge).
+      expect(body('.dzg-popover:is([data-shape=bubble], [data-shape=ticket], [data-shape=pill])::before')).toBe('display: none;');
+    });
+
+    it('morph (7): from a pill at the arrow to the whole box, a layer\'s clip-path; the content from its first third; closing reversed, faster', () => {
+      const M = `${B}[data-animation=morph]`;
+      expect(body(M)).toContain('--dzg-tip-cx: calc(50% + (var(--dzg-tip-at, 1rem) - 50%) * var(--dzg-tip-sign));');
+      // The pill's corners 1.25rem: round, and easing into the bubble's own (from 999px they snapped at the end).
+      expect(body(M)).toContain('--dzg-tip-pill: inset(0 var(--dzg-tip-x1) 55% var(--dzg-tip-x0) round 1.25rem);');
+      expect(body(M)).toContain('background: transparent;');
+      // One frame ahead (16 ms; owner 2026-11-14 « pas aussi fluide que GSAP »): its first painted frame already moves.
+      expect(body(M)).toContain('transition-delay: calc(var(--dzg-tooltip-open-delay, 0s) - 16ms);');
+      expect(body(M)).toContain('animation: dzg-tip-words var(--dzg-tooltip-morph-content-duration, 200ms) ease-out calc(var(--dzg-tooltip-morph-content-delay, 120ms) - 16ms) backwards;');
+      expect(body(`${M} > *`)).toContain('animation: dzg-tip-rise var(--dzg-tooltip-morph-content-duration, 200ms) ease-out calc(var(--dzg-tooltip-morph-content-delay, 120ms) - 16ms) backwards;');
+      expect(body(`${M}[data-side=block-start]`)).toBe('--dzg-tip-pill: inset(55% var(--dzg-tip-x1) 0 var(--dzg-tip-x0) round 1.25rem);');
+      expect(body(`${M}[data-side=inline-end]`)).toBe('--dzg-tip-pill: inset(var(--dzg-tip-y0) calc(27.5% + 27.5% * var(--dzg-tip-sign)) var(--dzg-tip-y1) calc(27.5% - 27.5% * var(--dzg-tip-sign)) round 1.25rem);');
+      const L = '.dzg-tooltip[data-animation=morph]::after, .dzg-popover[data-animation=morph][data-side]::before';
+      expect(body(L)).toContain('z-index: -1;');
+      expect(body(L)).toContain('background: var(--dzg-tip-fill);');
+      expect(body(L)).toContain('clip-path: inset(0 round 0);');
+      // 320 ms, GSAP's power3.out as a curve (the owner's app's tween), one frame ahead.
+      expect(body(L)).toContain('animation: dzg-tip-morph var(--dzg-tooltip-morph-duration, 320ms) var(--dzg-tooltip-morph-easing, cubic-bezier(0.33, 1, 0.68, 1)) calc(-1 * 16ms);');
+      expect(body('from', '@keyframes dzg-tip-morph')).toBe('clip-path: var(--dzg-tip-pill);');
+      expect(body('from', '@keyframes dzg-tip-rise')).toBe('opacity: 0; translate: 0 0.25rem;');
+      // Closing: the content first, the shape back to the pill, the bubble fading last; 180 ms in all.
+      const C = body(`${M}:is([hidden], [data-closing])`);
+      expect(C).toContain('transition-duration: calc(var(--dzg-tooltip-morph-close-duration, 180ms) * 0.45), calc(var(--dzg-tooltip-morph-close-duration, 180ms) * 0.3), var(--dzg-tooltip-morph-close-duration, 180ms), var(--dzg-tooltip-morph-close-duration, 180ms);');
+      expect(body('.dzg-tooltip[data-animation=morph]:is([hidden], [data-closing])::after, .dzg-popover[data-animation=morph][data-side]:is([hidden], [data-closing])::before')).toContain('clip-path: var(--dzg-tip-pill);');
+      // Paint only: no layout property moves.
+      for (const r of rules) expect(r.body, r.selector).not.toMatch(/(transition|animation)[^;]*\b(width|height|inset|margin|padding|top)\b/);
     });
 
     it('logical sides only', () => {

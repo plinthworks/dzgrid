@@ -61,6 +61,25 @@ Puis `npm run publish:verify`, et dans les applications `npm update @dzgrid/core
   HTML à un texte identique gardait le HTML ; une grille détruite avec son infobulle affichée restait retenue par la
   page ; `[dzPopover]` détruit ouvert émettait `(closed)` sur une sortie détruite (avertissement NG0953 d'Angular).
 
+## Infobulles par colonne en une ligne, formes toutes faites, `morph` (ton « ok » du 2026-11-14)
+
+- **Par colonne, sans fonction** (avec `tooltips()`) : `tooltip: true` (le texte affiché de la cellule), `tooltip: {
+  when: 'truncated' }` (seulement quand il est coupé), `tooltip: false` (aucune), ou les options `{ text, tone, shape,
+  animation, placement, delayMs, maxWidth, style, when, content }` ; `content(valeur, ligne)` par cellule par-dessus.
+  Fusion : la grille ← la colonne ← la cellule. `tooltips: { cells: 'truncated' }` pour toute la grille.
+  `headerTooltip` prend le même objet. `style` n'écrit que des variables CSS. Le focus clavier ouvre comme avant.
+- **Formes** `bubble` (bulle de BD, pointe courbe comprise, tournée par côté et en arabe), `ticket` (coins entaillés),
+  `pill` (bouts ronds) : CSS seul, couleurs du ton, bord et ombre autour de tout le contour.
+- **`morph`** : une petite pilule au côté de l'ancre, la flèche déjà là, grandit jusqu'à la bulle (320 ms), les
+  mots dès son premier tiers ; fermeture inverse en 180 ms. Aussi vive que ta bulle GSAP (mesurée côte à côte) : sa
+  première image juste après le délai. CSS seul (un `clip-path`), aucune mise en page par image, durées en
+  variables, rien ne bouge en mouvement réduit. Comparé à ta capture : même déroulé (pilule → forme → mots).
+- **À décider** : `check:api` signale `ColumnDef` (`tooltip` accepte maintenant `true` / `false` / un objet,
+  `headerTooltip` un objet) — c'est un élargissement d'entrée, mais du code qui *appelle* `def.tooltip` doit vérifier
+  que c'est une fonction ; et les lignes de taille `@dzgrid/dom/tooltip` (mesuré 3 353 / 2 800) et `tooltips.css`
+  (2 843 / 2 000, sans couche 2 798 / 1 950) au-delà de +2 % (proposé : mesure + 10 %, 3 700, 3 150, 3 100).
+- Tailles dans la règle : base `@dzgrid/dom` 25 800 (mesuré 25 784), `/popover` 3 519 (3 503) ; K.8 91 972 / 92 000.
+
 ## Trois corrections avant publication (ta réponse « oui », 2026-11-14)
 
 Chacune : une ligne de fiche d'abord (`tooltips-popovers.md` 18–19, `presentation-settings.md` 40), un test écrit à la

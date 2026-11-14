@@ -1,5 +1,6 @@
 import { Tooltip, type TipLook, type TipTone } from '../render/tooltip.js';
 import { enhance } from './engine.js';
+import { cutText } from './feature.js';
 import { dirAt, drawn, floatStyles, keyed, pageOf, schemeOf, wanted, type TipContent } from './float.js';
 
 /** A tooltip on any element of the page (tooltips-popovers.md 1–9). */
@@ -10,6 +11,8 @@ export interface TooltipOptions extends TipLook {
   /** The grace after the pointer leaves, ms. @default 150 */
   readonly hideDelayMs?: number;
   readonly disabled?: boolean;
+  /** `truncated`: only while the anchor's text is cut (an ellipsis). @default 'always' */
+  readonly when?: 'always' | 'truncated';
   /** The page's nonce for the one `<style>` it adds (a strict CSP). */
   readonly nonce?: string;
 }
@@ -71,7 +74,7 @@ export function tooltip(el: HTMLElement, options: TooltipOptions): TooltipHandle
   const mine = (): boolean => bubbles.get(doc)?.anchor === el;
   const show = (delay: number): void => {
     // An open popover's trigger shows none (tooltips-popovers.md 14).
-    if (o.disabled || el.matches('[aria-haspopup][aria-expanded=true]')) return;
+    if (o.disabled || el.matches('[aria-haspopup][aria-expanded=true]') || (o.when === 'truncated' && !cutText(el))) return;
     const t = tip();
     const look = o;
     t.look = () => look;

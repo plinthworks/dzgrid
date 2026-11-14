@@ -22,16 +22,18 @@ jamais ce qu’elle décrit. La cellule qui a le focus la désigne par `aria-des
 |---|---|---|---|
 | `delayMs` | `500` | Combien de temps le pointeur reste avant qu’une infobulle apparaisse, en ms | non |
 | `hideDelayMs` | `150` | Le répit après le départ du pointeur, pour qu’il puisse passer sur l’infobulle, en ms | non |
-| `cells` | `true` | `false` fait taire d’un coup le `tooltip` de toutes les colonnes (la raison d’un enregistrement raté s’affiche toujours) | non |
+| `cells` | `true` | `false` fait taire d’un coup le `tooltip` de toutes les colonnes (la raison d’un enregistrement raté s’affiche toujours) ; `'truncated'` : toute colonne qui ne dit rien montre le texte affiché de sa cellule quand il est coupé (demande `tooltips()`) | non |
 | `tone` | `'info'` | `info`, `neutral`, `success`, `warning` ou `danger` ; le `{ text, tone }` d’une colonne l’emporte | non |
-| `animation` | `'fade'` | `fade`, `scale`, `slide`, `pop`, `rise` ou `none` (les effets de `@dzgrid/theme/tooltips.css`) | non |
+| `animation` | `'fade'` | `fade`, `scale`, `slide`, `pop`, `rise`, `morph` ou `none` (les effets de `@dzgrid/theme/tooltips.css`) | non |
 | `reducedMotion` | `'none'` | Sous mouvement réduit : rien ne bouge (`none`), ou un fondu court, en opacité seule (`fade`) | non |
 | `html` | — | Le nettoyeur, `safeHtml` de `@dzgrid/dom/tooltip`, qui permet au `tooltip` d’une colonne de renvoyer `{ html }` | non |
 | `header` | `false` | Les boutons du titre (filtre, menu de colonne, bascule du filtre flottant) affichent leur nom | oui |
 | `placement` | `'auto'` | L’un des 12 placements (`top`, `bottom`, `start`, `end`, seul ou avec `-start` / `-end`), `left` / `right`, ou `auto` : en dessous, au début de la cellule | oui |
 | `flip` | `true` | `false` : jamais déplacée de l’autre côté quand elle n’a pas la place | oui |
 | `animate` | — | Votre propre animation, `(el, phase, info)`, à la place des effets | oui |
-| `shape` | — | La bulle dessinée selon votre tracé SVG (une boîte de 100 × 100 étirée sur elle) | oui |
+| `shape` | — | Une forme toute faite, `bubble`, `ticket` ou `pill`, ou la bulle dessinée selon votre tracé SVG (une boîte de 100 × 100 étirée sur elle) | oui |
+| `style` | — | Des variables CSS (`--…` seulement) écrites sur la bulle tant qu’elle s’affiche ; celles d’une colonne l’emportent | oui |
+| `maxWidth` | — | Sa largeur maximale : en px, ou une longueur CSS | oui |
 
 Les clés qui demandent la fonction [`tooltips()`](../../features/tooltips/) sont signalées une fois par un problème
 sans elle (`missing-feature`). Une grille avec [`motion`](../motion/) à `false` ouvre et ferme ses infobulles d’un

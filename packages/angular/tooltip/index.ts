@@ -80,8 +80,13 @@ export class DzTooltip {
   readonly dzTooltipInputs = input<Readonly<Record<string, unknown>>>();
   readonly dzTooltipPlacement = input<TooltipPlacement>();
   readonly dzTooltipFlip = input<boolean>();
-  /** The bubble drawn as this SVG path (`d`, a 100 × 100 box), for an animation that morphs it. */
+  /** A ready-made shape (`bubble`, `ticket`, `pill`), or the bubble drawn as this SVG path (`d`, a 100 × 100 box) to morph. */
   readonly dzTooltipShape = input<string>();
+  /** Its look through variables only: custom properties written on the bubble while it shows. */
+  readonly dzTooltipStyle = input<Readonly<Record<`--${string}`, string>>>();
+  readonly dzTooltipMaxWidth = input<number | string>();
+  /** `truncated`: only while the element's text is cut. */
+  readonly dzTooltipWhen = input<'always' | 'truncated'>();
   readonly dzTooltipReducedMotion = input<'none' | 'fade'>();
   readonly dzTooltipTone = input<TipTone>();
   readonly dzTooltipAnimation = input<TipAnimation>();
@@ -102,7 +107,7 @@ export class DzTooltip {
       const o = {
         content: what == null || typeof what === 'string' ? (what ?? '') : ɵdzDraw(what, () => untracked(this.dzTooltipContext), () => untracked(this.dzTooltipInputs), () => this.hide(), ng),
         disabled: this.dzTooltipDisabled() || what == null || what === '',
-        ...ɵdefined({ placement: this.dzTooltipPlacement(), flip: this.dzTooltipFlip(), shape: this.dzTooltipShape(), reducedMotion: this.dzTooltipReducedMotion(), tone: this.dzTooltipTone(), animation: this.dzTooltipAnimation(), animate: this.dzTooltipAnimate(), delayMs: this.dzTooltipDelay() }),
+        ...ɵdefined({ placement: this.dzTooltipPlacement(), flip: this.dzTooltipFlip(), shape: this.dzTooltipShape(), reducedMotion: this.dzTooltipReducedMotion(), tone: this.dzTooltipTone(), animation: this.dzTooltipAnimation(), animate: this.dzTooltipAnimate(), delayMs: this.dzTooltipDelay(), style: this.dzTooltipStyle(), maxWidth: this.dzTooltipMaxWidth(), when: this.dzTooltipWhen() }),
       };
       untracked(() => (this.#handle ? this.#handle.update(o) : (this.#handle = tooltip(el, o))));
     });

@@ -302,10 +302,10 @@
     },
     {
       "name": "tooltips",
-      "type": "{ readonly delayMs?: number; readonly hideDelayMs?: number; readonly cells?: boolean; readonly header?: boolean; readonly html?: (html: string, doc?: Document) => DocumentFragment; readonly tone?: TipTone; readonly animation?: TipAnimation; readonly reducedMotion?: 'none' | 'fade'; readonly animate?: TipAnimate; readonly placement?: TooltipPlacement; readonly flip?: boolean; readonly shape?: string }",
+      "type": "{ readonly delayMs?: number; readonly hideDelayMs?: number; readonly cells?: boolean | 'truncated'; readonly header?: boolean; readonly html?: (html: string, doc?: Document) => DocumentFragment; readonly tone?: TipTone; readonly animation?: TipAnimation; readonly reducedMotion?: 'none' | 'fade'; readonly animate?: TipAnimate; readonly placement?: TooltipPlacement; readonly flip?: boolean; readonly shape?: string; readonly style?: Readonly<Record<`--${string}`, string>>; readonly maxWidth?: number | string }",
       "resolved": null,
       "required": false,
-      "doc": "Where tooltips show and how (tooltips-popovers.md): `delayMs` before one shows on hover (500), `hideDelayMs` of grace after the pointer leaves (150), `cells` false silences every column's `tooltip`, `tone` (`info`), `animation` (`fade`; the presets are `@dzgrid/theme/tooltips.css`'s), `reducedMotion` (`none`, or `fade`: opacity only), `html` the cleaner (`safeHtml` from `@dzgrid/dom/tooltip`) that lets a column's tooltip be HTML. With `tooltips()` from `@dzgrid/dom/tooltip` also: `header` (the header's buttons say their name), `animate` (the app's own animation, the end of the fade awaited), `placement`, `flip` and `shape` (an SVG path drawn as the bubble). Live.",
+      "doc": "Where tooltips show and how (tooltips-popovers.md): `delayMs` before one shows on hover (500), `hideDelayMs` of grace after the pointer leaves (150), `cells` false silences every column's `tooltip`, `tone` (`info`), `animation` (`fade`; the presets are `@dzgrid/theme/tooltips.css`'s), `reducedMotion` (`none`, or `fade`: opacity only), `html` the cleaner (`safeHtml` from `@dzgrid/dom/tooltip`) that lets a column's tooltip be HTML. With `tooltips()` from `@dzgrid/dom/tooltip` also: `header` (the header's buttons say their name), `animate` (the app's own animation, the end of the fade awaited), `placement`, `flip`, `shape` (`bubble`, `ticket`, `pill`, or an SVG path drawn as the bubble), `style` (custom properties written on the bubble), `maxWidth`, and `cells: 'truncated'` (every column that says nothing shows its cell's displayed text when it is cut). A column's `tooltip` options win over these. Live.",
       "default": {
         "code": "{ delayMs: 500 }"
       },
@@ -880,19 +880,19 @@
     },
     {
       "name": "headerTooltip",
-      "type": "string",
+      "type": "string | TooltipSpec",
       "resolved": null,
       "required": false,
-      "doc": "Shown over the header, already translated by the host.",
+      "doc": "Shown over the header, already translated by the host; or a `TooltipSpec` (its text and tone; its look with `tooltips()`).",
       "default": null,
       "source": "packages/core/src/columns/defs.ts"
     },
     {
       "name": "tooltip",
-      "type": "(value: V | null, row: Readonly<T>, context: unknown) => string | TooltipSpec | null",
+      "type": "((value: V | null, row: Readonly<T>, context: unknown) => string | TooltipSpec | null) | boolean | ColumnTooltip<T, V>",
       "resolved": null,
       "required": false,
-      "doc": "`context`: the grid's `settings.context` (step 21). Words with a tone, or HTML (shown only when the grid's `tooltips.html` is given), as a `TooltipSpec` (1.12.0).",
+      "doc": "Shown over a cell, already translated; null for none. The grid never guesses one from the content, except when told: `true` (the cell's text as displayed), or `ColumnTooltip` options (1.12.0, tooltips-popovers.md 21; with `tooltips()`); `false`: none, whatever the grid's `tooltips.cells`. A function: `context` is the grid's `settings.context` (step 21); words with a tone, or HTML (shown only when the grid's `tooltips.html` is given), as a `TooltipSpec`.",
       "default": null,
       "source": "packages/core/src/columns/defs.ts"
     },
@@ -3303,7 +3303,7 @@
       "texts": null,
       "sheet": "@dzgrid/theme/tooltips.css",
       "css": [],
-      "doc": "`tooltips()` (1.12.0, docs/behaviors/tooltips-popovers.md; plan Q-T1 B): what the grid's tooltips do beyond the base — `tooltips.placement` and `flip` (and a column's `{ placement }`), `tooltips.animate` (the app's own animation), a closing that waits for the end of the fade, the header's buttons saying their name (`tooltips.header`), and one tooltip on screen at a time with the page's (`tooltip()`).",
+      "doc": "`tooltips()` (1.12.0, docs/behaviors/tooltips-popovers.md; plan Q-T1 B): what the grid's tooltips do beyond the base — `tooltips.placement` and `flip` (and a column's `{ placement }`), `tooltips.animate` (the app's own animation), a closing that waits for the end of the fade, the header's buttons saying their name (`tooltips.header`), one tooltip on screen at a time with the page's (`tooltip()`), and a column's tooltip in one line (21): `tooltip: true`, its options (`when: 'truncated'`, a look, `content` per cell over them), `false`, and the grid's `cells: 'truncated'`.",
       "source": "packages/dom/src/tooltip/feature.ts"
     }
   ]

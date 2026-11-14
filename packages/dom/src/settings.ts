@@ -103,13 +103,15 @@ export interface GridSettings<T> {
    * (`fade`; the presets are `@dzgrid/theme/tooltips.css`'s), `reducedMotion` (`none`, or `fade`: opacity only), `html`
    * the cleaner (`safeHtml` from `@dzgrid/dom/tooltip`) that lets a column's tooltip be HTML. With `tooltips()` from
    * `@dzgrid/dom/tooltip` also: `header` (the header's buttons say their name), `animate` (the app's own animation, the
-   * end of the fade awaited), `placement`, `flip` and `shape` (an SVG path drawn as the bubble). Live.
+   * end of the fade awaited), `placement`, `flip`, `shape` (`bubble`, `ticket`, `pill`, or an SVG path drawn as the
+   * bubble), `style` (custom properties written on the bubble), `maxWidth`, and `cells: 'truncated'` (every column that
+   * says nothing shows its cell's displayed text when it is cut). A column's `tooltip` options win over these. Live.
    * @default { delayMs: 500 }
    */
   readonly tooltips?: {
     readonly delayMs?: number;
     readonly hideDelayMs?: number;
-    readonly cells?: boolean;
+    readonly cells?: boolean | 'truncated';
     readonly header?: boolean;
     readonly html?: (html: string, doc?: Document) => DocumentFragment;
     readonly tone?: TipTone;
@@ -119,6 +121,8 @@ export interface GridSettings<T> {
     readonly placement?: TooltipPlacement;
     readonly flip?: boolean;
     readonly shape?: string;
+    readonly style?: Readonly<Record<`--${string}`, string>>;
+    readonly maxWidth?: number | string;
   };
   readonly onEvent?: (e: GridEvent<T>) => void;
   /**

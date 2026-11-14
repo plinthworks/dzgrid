@@ -24,6 +24,15 @@ It may return more than words, a `TooltipSpec`:
 | `tone` | `info` (the default), `neutral`, `success`, `warning` or `danger` |
 | `placement` | Where it opens, one of 12 placements or `auto`; needs the [`tooltips()`](../../features/tooltips/) feature |
 | `html` | HTML, shown cleaned only when the grid has the cleaner (`tooltips: { html: safeHtml }`); otherwise its `text`, or nothing |
+| `animation`, `shape` | A preset (`morph` among them) and a ready-made shape (`bubble`, `ticket`, `pill`); need `tooltips()` |
+| `delayMs`, `maxWidth`, `style` | Its hover delay, its widest, its own CSS variables (`--…` only); need `tooltips()` |
+
+**In one line, without a function** (1.12.0, with [`tooltips()`](../../features/tooltips/)): `tooltip: true` shows the
+cell's text as displayed; `tooltip: { when: 'truncated' }` only when the cell's text is cut; `tooltip: false` none,
+even under the grid's `tooltips: { cells: 'truncated' }`; `tooltip: { text, tone, shape, animation, placement, delayMs,
+maxWidth, style, when, content }` fixed options, `text` left out meaning the displayed text, and `content(value, row,
+context)` the cell's own answer laid over them. Every case in
+[Tooltips and popovers](../../guides/tooltips-popovers/#per-column-in-one-line).
 
 [`tooltips`](../../settings/tooltips/)`.cells` false silences every column's tooltip at once. More in
 [Tooltips and popovers](../../guides/tooltips-popovers/).

@@ -1,5 +1,5 @@
 import { place, reveal, tips, type TipLook } from '../render/tooltip.js';
-import { conceal, custom, play, shapeOf } from '../tooltip/engine.js';
+import { conceal, dress, play } from '../tooltip/engine.js';
 import { logicalBox, placementOf } from '../dir.js';
 import { dirAt, drawn, floatStyles, schemeOf, wanted, type TipContent } from '../tooltip/float.js';
 
@@ -147,9 +147,7 @@ export function popover(trigger: HTMLElement, options: PopoverOptions): PopoverH
       t.ok = wanted;
       if (t.anchor?.contains(trigger)) t.hide();
     }
-    reveal(bubble, o, undefined);
-    custom(bubble, o);
-    shapeOf(bubble, o);
+    reveal(bubble, o, undefined, () => dress(bubble, o));
     placeIt();
     trigger.setAttribute('aria-expanded', 'true');
     trigger.setAttribute('aria-controls', bubble.id);

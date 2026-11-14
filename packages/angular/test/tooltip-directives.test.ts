@@ -34,6 +34,7 @@ class TipCard implements OnDestroy {
     <button class="b3" type="button" [dzTooltip]="card" [dzTooltipInputs]="{ who: 'Ann', n: 3 }" [dzTooltipDelay]="0">Card</button>
     <button class="b4" type="button" [dzTooltip]="{ html: html }" [dzTooltipDelay]="0">Html</button>
     <button class="b5" type="button" dzTooltip="Shaped" dzTooltipShape="M0 0 H100 V100 H0 Z" [dzTooltipDelay]="0">Shape</button>
+    <button class="b6" type="button" dzTooltip="Morph" dzTooltipShape="bubble" dzTooltipAnimation="morph" [dzTooltipStyle]="{ '--dzg-tooltip-bubble-radius': '1rem' }" [dzTooltipMaxWidth]="180" dzTooltipWhen="truncated" [dzTooltipDelay]="0">Morph</button>
     <button class="p1" type="button" [dzPopover]="form" [dzPopoverContext]="row()" dzPopoverLabel="Edit the row" #p="dzPopover"
       (opened)="log.push('opened')" (closed)="log.push('closed:' + $event)">Edit</button>
     <ng-template #form let-r let-close="close"><label>Name <input class="f-name" [value]="r.name"></label><button class="f-done" type="button" (click)="close()">Done</button></ng-template>
@@ -118,6 +119,21 @@ it('dzTooltipShape: the bubble drawn as the app\'s path', () => {
   vi.advanceTimersByTime(0);
   expect(bubble()!.hasAttribute('data-shape')).toBe(true);
   expect(bubble()!.querySelector('svg.dzg-tip-shape > path')!.getAttribute('d')).toBe('M0 0 H100 V100 H0 Z');
+});
+
+it('1.12.0 (sheet 20–23): a ready-made shape, the morph, variables, a width and when: the same names as the grid\'s', () => {
+  vi.useFakeTimers();
+  const { enter, bubble, q } = mount();
+  enter('.b6');
+  vi.advanceTimersByTime(0);
+  // jsdom lays nothing out: the label is not cut, so nothing shows; made to look cut, it shows.
+  expect(bubble()?.hidden ?? true).toBe(true);
+  Object.defineProperty(q('.b6'), 'scrollWidth', { configurable: true, value: 90 });
+  Object.defineProperty(q('.b6'), 'clientWidth', { configurable: true, value: 40 });
+  enter('.b6');
+  vi.advanceTimersByTime(0);
+  const b = bubble()!;
+  expect([b.hidden, b.dataset['shape'], b.dataset['animation'], b.style.getPropertyValue('--dzg-tooltip-bubble-radius'), b.style.getPropertyValue('max-inline-size')]).toEqual([false, 'bubble', 'morph', '1rem', '180px']);
 });
 
 describe('dzPopover', () => {

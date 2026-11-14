@@ -52,6 +52,18 @@ the keyboard; clicks a control that opens a bubble that stays (a popover); press
    richer presets, opt-in (owner 2026-11-14, « à activer si le client la veut »): `pop` (grows from 80 % with a slight
    overshoot, 260 ms) and `rise` (12 px from the anchor's side with a long, soft deceleration, 320 ms). Every preset
    closes the same short way (100 ms).
+   A third opt-in preset, `morph` (owner 2026-11-14, « ok »): the bubble opens as a small pill at its anchor's side
+   (60 % of its width, 45 % of its height, at the arrow, the arrow already there) and grows into its full shape, then its
+   content fades in from the shape's first third (a part's elements also rise a few pixels); it closes the reverse way,
+   faster (the content first, then the shape back to the pill, fading). 320 ms to open the shape (GSAP's `power3.out`
+   as a curve), the content over 200 ms from 120 ms; 180 ms to close — each a variable (`--dzg-tooltip-morph-duration`, `-easing`, `-content-duration`, `-content-delay`,
+   `-close-duration`). It follows the side it opened on (after a flip too) and the reading direction. Pure CSS: the
+   shape is a layer under the content whose `clip-path` grows (paint only, no layout per frame); no library.
+   As quick as an app's GSAP one (owner 2026-11-14 « pas aussi fluide que GSAP, elle prend du temps pour s'afficher »,
+   measured side by side): its first frame is the one after its delay — it opens one frame ahead (16 ms), and the
+   bubble is dressed (preset, shape, variables) before it is shown, so the browser starts the right opening; the pill's
+   corners ease into the bubble's (no snap at the end). Its delay is the grid's `tooltips.delayMs` (500 ms by default,
+   as a page tooltip's `delayMs`), a column's `delayMs` over it.
    Only `opacity` and `transform` move (no layout during the animation; no read of the layout per frame). Duration,
    easing and delay of the opening and of the closing are variables. A tooltip moving straight from one anchor to the
    next does not close and reopen: it jumps.
@@ -64,6 +76,39 @@ the keyboard; clicks a control that opens a bubble that stays (a popover); press
    component or `<ng-template>` (a small table, an icon and a title), or HTML given as text **only** when the application
    opted in, cleaned first (below). A screen reader hears the content's text through `aria-describedby` on the anchor
    while it is shown (the header buttons' name tooltips excepted: they are the name already, not read twice).
+
+### Ready-made shapes (owner 2026-11-14, « ok »)
+20. `shape: 'bubble' | 'ticket' | 'pill'` beside an app's SVG path (below): `bubble` — a soft speech bubble, rounder
+    corners, its point a curved tail that is part of its outline (no seam, one shadow around both), mirrored for each
+    side and in right to left; `ticket` — its four corners notched (round bites); `pill` — fully rounded ends, the arrow
+    kept. Drawn by `@dzgrid/theme/tooltips.css` (no SVG, no script): colours from the tone; the edge (a tone with one)
+    and a soft shadow drawn around the whole outline, tail and notches included (`--dzg-tooltip-shape-shadow`; sizes
+    `--dzg-tooltip-bubble-radius`, `--dzg-tooltip-bubble-tail`, `--dzg-tooltip-ticket-notch`,
+    `--dzg-tooltip-pill-padding`). The arrow is hidden only where the shape carries its own point (`bubble`). Each works
+    with every animation, `morph` included. Without the sheet: today's box.
+
+### Per column, per cell (owner 2026-11-14: « toutes les situations par colonne… des variables simples ou un ajout très simple »)
+21. A column's `tooltip` says it in one line, with `tooltips()`:
+    - `tooltip: true` — the cell's text **as displayed** (formatted dates, numbers, translated values), always;
+    - `tooltip: { when: 'truncated' }` — the same, only on cells whose text is cut (ellipsis); the grid-wide
+      `tooltips: { cells: 'truncated' }` gives that to every column that says nothing;
+    - `tooltip: false` — none for this column, whatever the grid says;
+    - `tooltip: { text, tone, shape, animation, placement, delayMs, maxWidth, style, when }` — fixed options for the
+      column; `text` left out means the cell's displayed text;
+    - `tooltip: (value, row) => string | spec | null` — per cell, as before; or `tooltip: { …options, content: (value,
+      row) => … }`, the cell's answer laid over the column's options.
+    Merge: the grid's `tooltips` ← the column's object ← the cell's answer (an option the cell leaves out keeps the
+    column's, then the grid's). The same names everywhere: `tooltips` (grid), a column's `tooltip`, `tooltip()` /
+    `dzTooltip` (page, which also take `when: 'truncated'`). Keyboard focus on the cell opens it at once, like any cell
+    tooltip; hover after its `delayMs`.
+22. `headerTooltip` takes a string or the same spec object (`{ text, tone, shape, animation, placement, … }`): the text
+    and tone work without `tooltips()`, the rest with it.
+23. A column's own look goes through variables only: `style: { '--dzg-tooltip-info-bg': …, '--dzg-tooltip-radius': … }`
+    — only custom properties (`--…`) are written on the bubble while it shows this column's tooltip; anything else is
+    ignored. `maxWidth` (a number of px or a CSS length) caps its width.
+24. Without `tooltips()`: a column's `tooltip` function and `headerTooltip` work as before (text and tone); `true`, an
+    object, `tooltips.cells: 'truncated'`, `style` and `maxWidth` are told once (`missing-feature`, path
+    `columns[i].tooltip` or `settings.tooltips`, detail `tooltips`), and nothing shows for them.
 
 ### Popovers (the bubble that stays)
 10. Opened by a click on its trigger (or a key that clicks it: Enter, Space), or by the application's code; a second
@@ -155,8 +200,15 @@ the keyboard; clicks a control that opens a bubble that stays (a popover); press
   called, told `reduced: true` (the app gives an instant or a fade-only version); on a grid with `motion: false`, never.
   Shown again while its closing runs, it is told `open` again (the app stops its closing there); the late settling is
   ignored. DzGrid never depends on GSAP: the presets are CSS; GSAP is the app's choice.
+- **Shapes and morph in CSS** (20, 7): a named shape is `data-shape="bubble|ticket|pill"` on the bubble; the bubble's
+  tail is the arrow's own pseudo-element given a curved outline (a square across the edge, turned to the side); the
+  ticket's notches are its background (four radial gradients, `--dzg-tip-fill`); the edge and shadow are `filter:
+  drop-shadow()`s, so they follow the outline. `morph` paints the bubble's fill in a layer under its content (the
+  tooltip's `::after`, the popover's `::before`) whose `clip-path` runs from the pill (`--dzg-tip-pill`) to the whole
+  box; the content's colour (and a part's elements' opacity and position) follow. Under reduced motion, nothing moves
+  (8), `reducedMotion: 'fade'` a fade.
 - **An app's shape** (for morphing): `shape`, SVG path data in a 100 × 100 box stretched over the bubble, is drawn as an
-  `<svg class="dzg-tip-shape">` first in the bubble, filled and edged in the tone's colours (`data-shape`: tooltips.css
+  `<svg class="dzg-tip-shape">` first in the bubble, filled and edged in the tone's colours (`data-shape=""`: tooltips.css
   draws no box and no arrow — the arrow, if wanted, is part of the path); `info.shape` is that `<path>`, which a GSAP
   MorphSVG tween can morph. Only path commands and numbers are taken (no `url()`, nothing that loads or runs); anything
   else and the box is kept. The path is drawn as given in both directions: an asymmetric shape is mirrored by the app

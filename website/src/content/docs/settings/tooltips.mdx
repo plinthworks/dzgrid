@@ -22,16 +22,18 @@ it describes. The focused cell points to it with `aria-describedby` while it sho
 |---|---|---|---|
 | `delayMs` | `500` | How long the pointer rests before a tooltip shows, in ms | no |
 | `hideDelayMs` | `150` | The grace after the pointer leaves, so it can cross onto the tooltip, in ms | no |
-| `cells` | `true` | `false` silences every column's `tooltip` at once (a failed save's reason still shows) | no |
+| `cells` | `true` | `false` silences every column's `tooltip` at once (a failed save's reason still shows); `'truncated'`: every column that says nothing shows its cell's text as displayed when it is cut (needs `tooltips()`) | no |
 | `tone` | `'info'` | `info`, `neutral`, `success`, `warning` or `danger`; a column's `{ text, tone }` wins | no |
-| `animation` | `'fade'` | `fade`, `scale`, `slide`, `pop`, `rise` or `none` (the presets of `@dzgrid/theme/tooltips.css`) | no |
+| `animation` | `'fade'` | `fade`, `scale`, `slide`, `pop`, `rise`, `morph` or `none` (the presets of `@dzgrid/theme/tooltips.css`) | no |
 | `reducedMotion` | `'none'` | Under reduced motion: nothing moves (`none`), or a short fade, opacity only (`fade`) | no |
 | `html` | — | The cleaner, `safeHtml` from `@dzgrid/dom/tooltip`, that lets a column's `tooltip` return `{ html }` | no |
 | `header` | `false` | The header's buttons (filter, column menu, floating filter toggle) show their name | yes |
 | `placement` | `'auto'` | One of 12 placements (`top`, `bottom`, `start`, `end`, alone or with `-start` / `-end`), `left` / `right`, or `auto`: below, at the cell's start | yes |
 | `flip` | `true` | `false`: never moved to the other side when it does not fit | yes |
 | `animate` | — | Your own animation, `(el, phase, info)`, in place of the presets | yes |
-| `shape` | — | The bubble drawn as your SVG path (a 100 × 100 box stretched over it) | yes |
+| `shape` | — | A ready-made shape, `bubble`, `ticket` or `pill`, or the bubble drawn as your SVG path (a 100 × 100 box stretched over it) | yes |
+| `style` | — | CSS variables (`--…` only) written on the bubble while it shows; a column's own win | yes |
+| `maxWidth` | — | Its widest: px, or a CSS length | yes |
 
 The keys that need the [`tooltips()`](../../features/tooltips/) feature are told once as a problem without it
 (`missing-feature`). A grid with [`motion`](../motion/) `false` opens and closes its tooltips at once. Placements,

@@ -28,12 +28,31 @@ $layered: true !default;
 $bubble: '.dzg-tooltip, .dzg-popover';
 $arrow: var(--dzg-tooltip-arrow-size, 0.375rem);
 $slide: var(--dzg-tooltip-slide, 6px);
+$line: var(--dzg-line, 1px);
+$tail: var(--dzg-tooltip-bubble-tail, 0.5rem);
+$notch: var(--dzg-tooltip-ticket-notch, 0.375rem);
+$shapes: '[data-shape=bubble], [data-shape=ticket], [data-shape=pill]';
+$morph: '[data-animation=morph]';
+// The morph opens one frame ahead: a CSS animation's first painted frame is its start (nothing seen yet), an app's
+// GSAP tween's first frame has already moved — so the morph's first frame shows the bubble, not the frame after.
+$lead: 16ms;
+// The morph's durations: the shape's opening, the content's (from its first third), the closing (content first, then shape).
+$m-open: var(--dzg-tooltip-morph-duration, 320ms);
+// The content's, from the shape's first third (owner 2026-11-14 « pas aussi fluide que GSAP »: it came in last, late).
+$m-words: var(--dzg-tooltip-morph-content-duration, 200ms) ease-out calc(var(--dzg-tooltip-morph-content-delay, 120ms) - #{$lead}) backwards;
+// The pill's corners: round enough for a pill, then easing into the bubble's own (no snap at the end, as from 999px).
+$pill: 1.25rem;
+$m-close: var(--dzg-tooltip-morph-close-duration, 180ms);
+// The morph's fill under the content: the tooltip's free pseudo-element, the popover's edge one (shapes and morph draw
+// their edge as a drop-shadow).
+$layer: '.dzg-tooltip#{$morph}::after, .dzg-popover#{$morph}[data-side]::before';
 // A tone: its background, its text, its edge (none by default), its arrow (the background's) — each variable written in
 // full (the variables' table test reads the sources).
 @mixin tone($bg, $fg, $edge, $arrow) {
   color: $fg;
   background: $bg;
   outline: var(--dzg-line, 1px) solid $edge;
+  --dzg-tip-bg: #{$bg};
   outline-offset: calc(-1 * var(--dzg-line, 1px));
   --dzg-tip-arrow-bg: #{$arrow};
   --dzg-tip-arrow-edge: #{$edge};
@@ -55,11 +74,15 @@ $slide: var(--dzg-tooltip-slide, 6px);
     box-shadow: var(--dzg-popover-shadow, 0 0.25rem 0.75rem color-mix(in srgb, var(--tz-fg) 20%, transparent));
     font-size: var(--dzg-popover-font-size, inherit);
     outline: none;
+    --dzg-tip-bg: var(--dzg-popover-bg, var(--tz-bg));
+    --dzg-tip-shadow: drop-shadow(0 0.25rem 0.5rem color-mix(in srgb, var(--tz-fg) 20%, transparent));
     --dzg-tip-arrow-bg: var(--dzg-popover-arrow-color, var(--dzg-popover-bg, var(--tz-bg)));
     --dzg-tip-arrow-edge: var(--dzg-popover-border, var(--tz-border));
   }
 
   .dzg-tooltip {
+    --dzg-tip-bg: var(--dzg-tooltip-bg, var(--tz-fg));
+    --dzg-tip-shadow: drop-shadow(0 0 0 transparent);
     --dzg-tip-arrow-bg: var(--dzg-tooltip-arrow-color, var(--dzg-tooltip-bg, var(--tz-fg)));
     --dzg-tip-arrow-edge: transparent;
   }
@@ -94,6 +117,8 @@ $slide: var(--dzg-tooltip-slide, 6px);
   // margin, which the grid reads; the same on every side). ----
   #{$bubble} {
     margin-block-start: $arrow;
+    // What fills the bubble: its tone's background (a ticket's notched one), painted by the morph's layer too.
+    --dzg-tip-fill: var(--dzg-tip-bg);
   }
 
   :is(#{$bubble})::before,
@@ -158,15 +183,15 @@ $slide: var(--dzg-tooltip-slide, 6px);
 
   // ---- An app's shape (owner 2026-11-14, for morphing): no box, no arrow; its path filled and edged in the tone's
   // colours, stretched over the bubble, under the content. ----
-  :is(#{$bubble})[data-shape] {
+  :is(#{$bubble})[data-shape=""] {
     border-color: transparent;
     outline-color: transparent;
     background: transparent;
     box-shadow: none;
   }
 
-  :is(#{$bubble})[data-shape]::before,
-  .dzg-popover[data-shape]::after {
+  :is(#{$bubble})[data-shape=""]::before,
+  .dzg-popover[data-shape=""]::after {
     display: none;
   }
 
@@ -185,6 +210,74 @@ $slide: var(--dzg-tooltip-slide, 6px);
     stroke: var(--dzg-tip-arrow-edge);
     stroke-width: var(--dzg-line, 1px);
     vector-effect: non-scaling-stroke;
+  }
+
+  // ---- Ready-made shapes (20) and the morph: the edge (a tone's) and a soft shadow drawn around the whole outline —
+  // tail, notches and the growing fill included — as drop-shadows ----
+  :is(#{$bubble}):is(#{$shapes}, #{$morph}) {
+    border-color: transparent;
+    outline-color: transparent;
+    box-shadow: none;
+    filter: drop-shadow($line 0 0 var(--dzg-tip-arrow-edge)) drop-shadow(calc(-1 * #{$line}) 0 0 var(--dzg-tip-arrow-edge)) drop-shadow(0 $line 0 var(--dzg-tip-arrow-edge)) drop-shadow(0 calc(-1 * #{$line}) 0 var(--dzg-tip-arrow-edge)) var(--dzg-tip-shadow);
+  }
+
+  :is(#{$bubble}):is(#{$shapes}) {
+    --dzg-tip-shadow: var(--dzg-tooltip-shape-shadow, drop-shadow(0 0.125rem 0.375rem color-mix(in srgb, var(--tz-fg) 25%, transparent)));
+  }
+
+  .dzg-popover:is(#{$shapes})::before {
+    display: none;
+  }
+
+  // `pill`: fully rounded ends, the arrow kept.
+  :is(#{$bubble})[data-shape=pill] {
+    padding-inline: var(--dzg-tooltip-pill-padding, 0.75rem);
+    border-radius: 999px;
+  }
+
+  // `ticket`: its four corners notched — round bites out of its background.
+  :is(#{$bubble})[data-shape=ticket] {
+    border-radius: 0;
+    background: var(--dzg-tip-fill);
+    --dzg-tip-fill: radial-gradient(circle at 0 0, transparent #{$notch}, var(--dzg-tip-bg) calc(#{$notch} + 0.5px)) 0 0 / 51% 51% no-repeat, radial-gradient(circle at 100% 0, transparent #{$notch}, var(--dzg-tip-bg) calc(#{$notch} + 0.5px)) 100% 0 / 51% 51% no-repeat, radial-gradient(circle at 0 100%, transparent #{$notch}, var(--dzg-tip-bg) calc(#{$notch} + 0.5px)) 0 100% / 51% 51% no-repeat, radial-gradient(circle at 100% 100%, transparent #{$notch}, var(--dzg-tip-bg) calc(#{$notch} + 0.5px)) 100% 100% / 51% 51% no-repeat;
+  }
+
+  // `bubble`: a soft speech bubble — rounder corners, its point a curved tail across its edge (a square, half inside,
+  // turned to the side it opened on), the gap the grid reads its size.
+  :is(#{$bubble})[data-shape=bubble] {
+    border-radius: var(--dzg-tooltip-bubble-radius, 0.75rem);
+    --dzg-tooltip-arrow-size: #{$tail};
+  }
+
+  .dzg-tooltip[data-shape=bubble][data-side]::before,
+  .dzg-popover[data-shape=bubble][data-side]::after {
+    inset-block: auto calc(100% - #{$arrow});
+    inset-inline: calc(var(--dzg-tip-at, 1rem) - #{$arrow}) auto;
+    inline-size: calc(2 * #{$arrow});
+    block-size: calc(2 * #{$arrow});
+    margin: 0;
+    clip-path: polygon(0% 58%, 11.9% 50.9%, 22.4% 42.9%, 31.5% 34%, 39.1% 24.2%, 45.3% 13.6%, 50% 2%, 54.7% 13.6%, 60.9% 24.2%, 68.5% 34%, 77.6% 42.9%, 88.1% 50.9%, 100% 58%);
+    rotate: none;
+    scale: none;
+  }
+
+  .dzg-tooltip[data-shape=bubble][data-side=block-start]::before,
+  .dzg-popover[data-shape=bubble][data-side=block-start]::after {
+    inset-block: calc(100% - #{$arrow}) auto;
+    rotate: 180deg;
+  }
+
+  .dzg-tooltip[data-shape=bubble]:is([data-side=inline-end], [data-side=inline-start])::before,
+  .dzg-popover[data-shape=bubble]:is([data-side=inline-end], [data-side=inline-start])::after {
+    inset-block: calc(var(--dzg-tip-at, 1rem) - #{$arrow}) auto;
+    inset-inline: auto calc(100% - #{$arrow});
+    rotate: calc(-90deg * var(--dzg-tip-sign));
+  }
+
+  .dzg-tooltip[data-shape=bubble][data-side=inline-start]::before,
+  .dzg-popover[data-shape=bubble][data-side=inline-start]::after {
+    inset-inline: calc(100% - #{$arrow}) auto;
+    rotate: calc(90deg * var(--dzg-tip-sign));
   }
 
   // ---- Animation (7): opening from `@starting-style`, closing on `[hidden]` ----
@@ -303,17 +396,114 @@ $slide: var(--dzg-tooltip-slide, 6px);
     }
   }
 
+  // `morph` (owner 2026-11-14): the bubble opens as a small pill at its anchor's side — 60 % × 45 % of it, at the arrow
+  // (`--dzg-tip-at`, mirrored in right to left), the arrow already there — and grows into its shape: its fill is a layer
+  // under the content whose `clip-path` runs from the pill to the whole box (paint only, no layout); then the content
+  // comes in (its words' colour; a part's elements rise). Keyframes for the opening (they follow the side the bubble
+  // takes once placed); the closing the reverse, faster: the content, then the shape back to the pill, fading.
+  :is(#{$bubble})#{$morph} {
+    --dzg-tip-cx: calc(50% + (var(--dzg-tip-at, 1rem) - 50%) * var(--dzg-tip-sign));
+    --dzg-tip-x0: clamp(0px, calc(var(--dzg-tip-cx) - 30%), 40%);
+    --dzg-tip-x1: clamp(0px, calc(70% - var(--dzg-tip-cx)), 40%);
+    --dzg-tip-y0: clamp(0px, calc(var(--dzg-tip-at, 1rem) - 30%), 40%);
+    --dzg-tip-y1: clamp(0px, calc(70% - var(--dzg-tip-at, 1rem)), 40%);
+    --dzg-tip-pill: inset(0 var(--dzg-tip-x1) 55% var(--dzg-tip-x0) round #{$pill});
+    background: transparent;
+    transition-property: opacity, color, display, overlay;
+    transition-delay: calc(var(--dzg-tooltip-open-delay, 0s) - #{$lead});
+    animation: dzg-tip-words #{$m-words};
+  }
+
+  :is(#{$bubble})#{$morph}[data-side=block-start] {
+    --dzg-tip-pill: inset(55% var(--dzg-tip-x1) 0 var(--dzg-tip-x0) round #{$pill});
+  }
+
+  :is(#{$bubble})#{$morph}[data-side=inline-end] {
+    --dzg-tip-pill: inset(var(--dzg-tip-y0) calc(27.5% + 27.5% * var(--dzg-tip-sign)) var(--dzg-tip-y1) calc(27.5% - 27.5% * var(--dzg-tip-sign)) round #{$pill});
+  }
+
+  :is(#{$bubble})#{$morph}[data-side=inline-start] {
+    --dzg-tip-pill: inset(var(--dzg-tip-y0) calc(27.5% - 27.5% * var(--dzg-tip-sign)) var(--dzg-tip-y1) calc(27.5% + 27.5% * var(--dzg-tip-sign)) round #{$pill});
+  }
+
+  #{$layer} {
+    content: '';
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    inline-size: auto;
+    block-size: auto;
+    margin: 0;
+    border-radius: inherit;
+    background: var(--dzg-tip-fill);
+    clip-path: inset(0 round 0);
+    rotate: none;
+    scale: none;
+    pointer-events: none;
+    transition: clip-path calc(#{$m-close} * 0.6) ease-out;
+    animation: dzg-tip-morph $m-open var(--dzg-tooltip-morph-easing, cubic-bezier(0.33, 1, 0.68, 1)) calc(-1 * #{$lead});
+  }
+
+  :is(#{$bubble})#{$morph} > * {
+    transition: opacity calc(#{$m-close} * 0.3), translate calc(#{$m-close} * 0.3);
+    animation: dzg-tip-rise #{$m-words};
+  }
+
+  :is(#{$bubble})#{$morph}:is([hidden], [data-closing]) {
+    color: transparent;
+    transition-duration: calc(#{$m-close} * 0.45), calc(#{$m-close} * 0.3), $m-close, $m-close;
+    transition-delay: calc(#{$m-close} * 0.55), 0s, 0s, 0s;
+  }
+
+  :is(#{$bubble})#{$morph}:is([hidden], [data-closing]) > * {
+    opacity: 0;
+  }
+
+  .dzg-tooltip#{$morph}:is([hidden], [data-closing])::after,
+  .dzg-popover#{$morph}[data-side]:is([hidden], [data-closing])::before {
+    clip-path: var(--dzg-tip-pill);
+    transition-delay: calc(#{$m-close} * 0.25);
+    transition-timing-function: ease-in;
+  }
+
+  @keyframes dzg-tip-morph {
+    from {
+      clip-path: var(--dzg-tip-pill);
+    }
+  }
+
+  @keyframes dzg-tip-words {
+    from {
+      color: transparent;
+    }
+  }
+
+  @keyframes dzg-tip-rise {
+    from {
+      opacity: 0;
+      translate: 0 0.25rem;
+    }
+  }
+
   // `none`, the app's own, a grid without motion: no transition at all (8).
   :is(#{$bubble}):is([data-animation=none], [data-animation=custom]),
-  [data-motion=off] .dzg-tooltip {
+  [data-motion=off] .dzg-tooltip,
+  [data-motion=off] .dzg-tooltip::after,
+  [data-motion=off] .dzg-tooltip > * {
     transition: none;
+    animation: none;
   }
 
   // Reduced motion: no transition; `reducedMotion: 'fade'` asks a short fade instead, opacity only — nothing moves or
   // grows (important: over every preset's start).
   @media (prefers-reduced-motion: reduce) {
-    #{$bubble} {
+    #{$bubble},
+    :is(#{$bubble})#{$morph},
+    :is(#{$bubble})#{$morph} > *,
+    #{$layer} {
       transition: none;
+      animation: none;
     }
 
     :is(#{$bubble})[data-reduced=fade]:not([data-animation=none], [data-animation=custom], [data-motion=off] *) {
@@ -333,6 +523,10 @@ $slide: var(--dzg-tooltip-slide, 6px);
     .dzg-popover::after {
       forced-color-adjust: none;
       background: CanvasText;
+    }
+
+    :is(#{$bubble}):is(#{$shapes}, #{$morph}) {
+      outline-color: CanvasText;
     }
   }
 }

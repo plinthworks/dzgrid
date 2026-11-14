@@ -10,8 +10,8 @@ export const tips = new WeakMap<Element, Tooltip>();
 
 /** A bubble's tone (tooltips-popovers.md 6): `info` is 1.11's dark bubble. */
 export type TipTone = 'info' | 'neutral' | 'success' | 'warning' | 'danger';
-/** Its opening and closing (7): CSS presets of `@dzgrid/theme/tooltips.css`; `pop` and `rise` the richer ones. */
-export type TipAnimation = 'fade' | 'scale' | 'slide' | 'pop' | 'rise' | 'none';
+/** Its opening and closing (7): CSS presets of `@dzgrid/theme/tooltips.css`; `pop`, `rise` and `morph` the richer ones. */
+export type TipAnimation = 'fade' | 'scale' | 'slide' | 'pop' | 'rise' | 'none' | 'morph';
 /** The side it opens on, logical (4). */
 export type TipSide = 'block-end' | 'block-start' | 'inline-end' | 'inline-start';
 /** Along the other axis: at the anchor's start (-1), its middle (0), its end (1). */
@@ -53,11 +53,15 @@ export interface TipLook {
   /** False: never moved to the opposite side when it does not fit. @default true */
   readonly flip?: boolean;
   /**
-   * The bubble drawn as the app's shape instead of a box and an arrow (opt-in entries): SVG path data (`d`) in a 100 ×
-   * 100 box stretched over the bubble, filled and edged in the tone's colours. Path commands and numbers only — anything
-   * else and the box is kept.
+   * A ready-made shape of `@dzgrid/theme/tooltips.css` (`bubble`, `ticket`, `pill`; 20), or the bubble drawn as the app's
+   * shape instead of a box and an arrow (opt-in entries): SVG path data (`d`) in a 100 × 100 box stretched over the
+   * bubble, filled and edged in the tone's colours. Path commands and numbers only — anything else and the box is kept.
    */
   readonly shape?: string;
+  /** Its look through variables only (23): custom properties (`--…`) written on the bubble while it shows; others ignored. */
+  readonly style?: Readonly<Record<`--${string}`, string>>;
+  /** Its widest: px, or a CSS length (23). */
+  readonly maxWidth?: number | string;
 }
 
 /** What a tooltip shows: the host's text, and for a part what it is about (a header: null row and value). */
@@ -70,6 +74,12 @@ export interface TipFor {
   readonly said?: boolean;
   readonly tone?: TipTone | undefined;
   readonly placement?: TooltipPlacement | undefined;
+  /** A column's or a cell's own look over the grid's (21; `tooltips()`). */
+  readonly animation?: TipAnimation | undefined;
+  readonly shape?: string | undefined;
+  readonly style?: TipLook['style'] | undefined;
+  readonly maxWidth?: number | string | undefined;
+  readonly delayMs?: number | undefined;
   /** Drawn instead of the text (cleaned HTML, an app's nodes); `gone()` when it is taken out (the page's fill). */
   readonly node?: Node | null;
   readonly gone?: () => void;
@@ -109,11 +119,16 @@ export function place(el: HTMLElement, anchor: Element, dir: Dir, side: TipSide,
 
 type Popoverish = HTMLElement & { showPopover?: () => void; hidePopover?: () => void };
 
-/** Shows a bubble in the top layer where the browser has one (no ancestor clips it); its tone and animation marked. */
-export function reveal(el: HTMLElement, look: TipLook, tone: TipTone | undefined): void {
+/**
+ * Shows a bubble in the top layer where the browser has one (no ancestor clips it); its tone and animation marked, then
+ * `dress` (its own preset, shape, variables) — all before it shows: showing it reads its style, and its opening starts
+ * from what it reads (owner 2026-11-14: the grid's preset shown first, the column's `morph` a moment late).
+ */
+export function reveal(el: HTMLElement, look: TipLook, tone: TipTone | undefined, dress?: () => void): void {
   setAttr(el, 'data-tone', tone ?? look.tone ?? null);
   setAttr(el, 'data-animation', look.animation ?? null);
   setAttr(el, 'data-reduced', look.reducedMotion ?? null);
+  dress?.();
   el.hidden = false;
   if ((el as Popoverish).showPopover) {
     el.setAttribute('popover', 'manual');
@@ -157,7 +172,10 @@ export class Tooltip {
   /** How it opens and closes, read at each show and hide (the grid's live `tooltips` setting). */
   look: () => TipLook & { readonly hideDelayMs?: number } = () => ({});
   report: (e: unknown) => void = () => {};
-  /** Its side, alignment and flip: the grid's own below its cell, at its start (a placement: `tooltips()`, the page's). */
+  /**
+   * Its side, alignment and flip: the grid's own below its cell, at its start (a placement: `tooltips()`, the page's).
+   * Asked before it is measured: the opt-in entries dress the bubble there (its preset, shape and variables).
+   */
   at: (tip: TipFor, dir: Dir) => readonly [TipSide, TipAlign, boolean?] = () => ['block-end', -1];
   /** Its closing: hidden at once here; the app's animation and the end of the fade awaited with `tooltips()`. */
   close: (el: HTMLElement, look: TipLook, done: () => void) => () => void = (el, _l, done) => (hideBubble(el), done(), () => {});
@@ -241,10 +259,13 @@ export class Tooltip {
       if (tip.node) this.el.replaceChildren(tip.node);
       else this.el.textContent = tip.text;
     }
-    reveal(this.el, this.look(), tip.tone);
+    // Dressed (`at`, the opt-in entries') before it shows, then measured and placed in the same task: its first frame
+    // is its opening's.
+    let at!: ReturnType<Tooltip['at']>;
+    reveal(this.el, this.look(), tip.tone, () => void (at = this.at(tip, dir)));
     // A failed save's reason is the cell's description already, a header button's tooltip its name: not twice.
     describe(anchor, this.el.id, !tip.said);
-    place(this.el, anchor, dir, ...this.at(tip, dir));
+    place(this.el, anchor, dir, ...at);
     this.onShow?.(this);
   }
 }

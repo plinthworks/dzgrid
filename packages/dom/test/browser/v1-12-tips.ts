@@ -18,8 +18,12 @@ document.documentElement.lang = ar ? 'ar' : 'fr';
 document.documentElement.dir = ar ? 'rtl' : 'ltr';
 
 const $ = (id: string) => document.getElementById(id)!;
-type P = { id: string; seed: string; grams: number };
-const rows: P[] = Array.from({ length: 30 }, (_, i) => ({ id: `p${i}`, seed: ar ? `بذرة ${i}` : `Graine ${i}`, grams: (i * 37) % 1000 }));
+type P = { id: string; seed: string; grams: number; note: string };
+const rows: P[] = Array.from({ length: 30 }, (_, i) => ({
+  id: `p${i}`, seed: ar ? `بذرة ${i}` : `Graine ${i}`, grams: (i * 37) % 1000,
+  // Every other note too long for its column (cut: its tooltip shows), the others short (none).
+  note: i % 2 ? (ar ? `تُزرع في الربيع، ${i}` : `Semer au printemps, rang ${i}`) : (ar ? `ظل ${i}` : `Ombre ${i}`),
+}));
 /** A cell's own button with a popover about its row (a cell's action icon). */
 const act = definePart('cell', {
   mount(host, c) {
@@ -38,6 +42,8 @@ const columns: ColumnDef<P, any>[] = [
   { id: 'seed', header: ar ? 'البذرة' : 'Graine', width: 160, filter: { kind: 'text' }, tooltip: (v) => ({ html: `<b>${v}</b><img src="x" onerror="window.__hit=1"><script>window.__hit=1</script>` }) },
   { id: 'grams', header: ar ? 'غرام' : 'Grammes', type: 'number', width: 140, tooltip: (v: number | null) => ({ text: `${v} g`, tone: (v ?? 0) > 500 ? 'danger' : 'success' }) },
   { id: 'act', header: '', width: 60, value: () => '', ui: { cell: 'act' } },
+  // A column's tooltip in one line (tooltips-popovers.md 21): its text as shown, only when cut, the morph bubble.
+  { id: 'note', header: ar ? 'ملاحظة' : 'Note', width: 100, tooltip: { when: 'truncated', shape: 'bubble', animation: 'morph', tone: 'neutral' } },
 ];
 const base = ar ? AR : FR;
 const messages: GridMessages = { ...base, text: { ...base.text, ...(ar ? AR_FILTERS : FR_FILTERS).text } };

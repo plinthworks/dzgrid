@@ -14,7 +14,10 @@ Une infobulle sur le titre, pour en dire plus que le titre ne peut.
 
 Elle s’affiche quand le pointeur reste sur le titre (après le délai des
 [`tooltips`](../../settings/tooltips/) de la grille) et dès que le focus du clavier l’atteint. Donnez-la déjà
-traduite. Pour la dessiner vous-même, nommez une partie dans [`ui`](../ui/)`.tooltip`.
+traduite. Pour la dessiner vous-même, nommez une partie dans [`ui`](../ui/)`.tooltip`. Ce peut être aussi l’objet
+d’options des cellules (1.12.0) : `{ text, tone }` marchent seuls ; `shape`, `animation`, `placement`, `delayMs`,
+`maxWidth` et `style` demandent [`tooltips()`](../../features/tooltips/) —
+`headerTooltip: { text: 'Comptés chaque mars', tone: 'success', shape: 'pill' }`.
 
 ## Exemple
 

@@ -17,8 +17,8 @@ Only where you ask for one:
 
 | Where | How |
 |---|---|
-| A cell | The column's [`tooltip`](../../column-options/tooltip/) function: words, `{ text, tone }`, or HTML (below) |
-| A header | The column's [`headerTooltip`](../../column-options/header-tooltip/) |
+| A cell | The column's [`tooltip`](../../column-options/tooltip/): `true`, options in one line (below), or a function — words, `{ text, tone }`, or HTML |
+| A header | The column's [`headerTooltip`](../../column-options/header-tooltip/): words, or the same options |
 | A header's buttons (filter, column menu, floating filter toggle) | `tooltips: { header: true }` with the [`tooltips()`](../../features/tooltips/) feature: each says its name |
 | Any element of the page | `tooltip(el, options)` from `@dzgrid/dom/tooltip`; in Angular, the `dzTooltip` directive |
 
@@ -146,6 +146,50 @@ Rest the pointer on a title, then on its funnel button:
   caption="The titles show their headerTooltip; the funnel buttons say their name (tooltips: { header: true } with tooltips())."
 />
 
+## Per column, in one line
+
+With the [`tooltips()`](../../features/tooltips/) feature, a column says what its cells' tooltips do without writing a
+function — plain data, so it can come from a JSON file. The same option names as the grid's `tooltips` and the page's
+`tooltip()` / `dzTooltip`:
+
+| Case | One line |
+|---|---|
+| The full value of a cut cell, as displayed (dates, numbers, translated values) | `tooltip: { when: 'truncated' }` |
+| The same for every column of the grid | `tooltips: { cells: 'truncated' }` (grid) |
+| Always the cell's text as displayed | `tooltip: true` |
+| No tooltip for this column, whatever the grid says | `tooltip: false` |
+| Fixed words with a tone | `tooltip: { text: 'Counted each March', tone: 'neutral' }` |
+| The morph bubble for this column only | `tooltip: { shape: 'bubble', animation: 'morph' }` |
+| Its place, its hover delay, its width | `tooltip: { placement: 'top', delayMs: 200, maxWidth: 240 }` |
+| Its own colours, through variables only | `tooltip: { style: { '--dzg-tooltip-info-bg': 'teal' } }` |
+| Per cell, over the column's options | `tooltip: { tone: 'warning', content: (value, row) => value > 100 ? { tone: 'danger', text: 'Too many' } : null }` |
+| A header | `headerTooltip: { text: 'Trees planted', tone: 'success', shape: 'pill' }` |
+
+`text` left out means the cell's text as displayed. The options merge: the grid's `tooltips` first, then the column's,
+then what `content` returns for the cell (`null`: no tooltip for that cell). `style` writes only CSS variables (names
+starting with `--`) on the bubble while it shows that column's tooltip. Keyboard focus on the cell opens it at once,
+like any cell tooltip. Without `tooltips()`, a function and `headerTooltip`'s words and tone still work; `true`, the
+options and `cells: 'truncated'` are told once as a `missing-feature` problem.
+
+<LiveDemo
+  height={240}
+  settings={{ label: 'Orchards', tooltips: { delayMs: 250 } }}
+  features={['tooltips']}
+  columns={[
+    { id: 'orchard', header: 'Orchard', width: 140, tooltip: { when: 'truncated', shape: 'bubble', animation: 'morph' } },
+    { id: 'note', header: 'Note', width: 170, tooltip: { when: 'truncated', shape: 'bubble', animation: 'morph', tone: 'neutral' } },
+    { id: 'planted', header: 'Planted', type: 'day', width: 130, tooltip: true },
+    { id: 'trees', header: 'Trees', type: 'number', width: 90, headerTooltip: { text: 'Counted each March', tone: 'success', shape: 'pill', animation: 'morph' }, tooltip: false },
+  ]}
+  rows={[
+    { id: 'o1', orchard: 'Hill orchard', note: 'Pruned in February', planted: '2019-03-14', trees: 140 },
+    { id: 'o2', orchard: 'Mill meadow by the old stone bridge', note: 'Late frost: the blossoms were covered three nights in a row', planted: '2021-04-02', trees: 85 },
+    { id: 'o3', orchard: 'River bend', note: 'Netted against birds', planted: '2017-11-20', trees: 60 },
+    { id: 'o4', orchard: 'Old wall, south side of the walled garden', note: 'Russet pears trained as espaliers along the brick', planted: '2015-10-05', trees: 210 },
+  ]}
+  caption="Rest the pointer on a cut orchard or note: the morph bubble shows its full text. Planted shows its date as displayed; Trees has none, its title a pill. Tab into the grid and move with the arrows: the focus opens them too."
+/>
+
 ## Anywhere in the page
 
 `tooltip(el, options)` gives any element of the page the same tooltip: a toolbar's button, an icon, a field's label.
@@ -244,12 +288,32 @@ A tooltip or a popover opens and closes with one of the presets of `@dzgrid/them
 | `slide` | Moves a few pixels in from the element's side, and follows the flip and the reading direction |
 | `pop` | Richer, opt-in: grows from 80 % with a slight overshoot (260 ms) |
 | `rise` | Richer, opt-in: 12 px from the element's side, with a long soft deceleration (320 ms) |
+| `morph` | Richer, opt-in: a small pill at the element's side, the arrow already there, grows into the bubble (320 ms), the words coming in from its first third; it closes the reverse way, faster (180 ms) |
 | `none` | There at once |
 
-Every preset closes the same short way (100 ms). Only `opacity` and `transform` move: nothing is measured during the
-animation. Durations, easings and delays are variables (below).
+Every preset but `morph` closes the same short way (100 ms). Only `opacity` and `transform` move — and for `morph`, a
+layer's `clip-path` and the words' colour: nothing is laid out or measured during the animation. Durations, easings
+and delays are variables (below); `morph`'s are `--dzg-tooltip-morph-duration`, `-easing`, `-content-duration`,
+`-content-delay` and `-close-duration`. It is pure CSS: no library. Its first frame is the one after its delay (the
+grid's `tooltips.delayMs`, 500 ms by default as the page's `delayMs`; a column's `delayMs` over it).
 
 <TipDemo kind="animations" caption="Each button opens its tooltip with the preset it names." />
+
+### Ready-made shapes
+
+`shape` takes a ready-made shape, drawn by `@dzgrid/theme/tooltips.css` in the tone's colours:
+
+| Shape | Its look |
+|---|---|
+| `bubble` | A soft speech bubble: rounder corners, its point a curved tail that is part of it, turned to the side it opened on (mirrored in right to left) |
+| `ticket` | Its four corners notched |
+| `pill` | Fully rounded ends; the arrow kept |
+
+A tone's edge and a soft shadow follow the whole outline, tail and notches included. Each works with every animation,
+`morph` included. Sizes are variables: `--dzg-tooltip-bubble-radius`, `--dzg-tooltip-bubble-tail`,
+`--dzg-tooltip-ticket-notch`, `--dzg-tooltip-pill-padding`, `--dzg-tooltip-shape-shadow`.
+
+<TipDemo kind="shapes" caption="Each shape opens with morph: a pill at the button's side that grows into it." />
 
 **Reduced motion.** When the system asks for reduced motion, or the grid has `motion: false`, nothing moves and nothing
 fades: tooltips and popovers appear and go at once. You may ask for a short fade instead, opacity only (120 ms):

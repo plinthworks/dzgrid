@@ -483,8 +483,271 @@ async function tipsChecks(page, tag, cfg, name) {
     const v = await page.evaluate(async () => (await window.axe.run(document.body, { runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] })).violations.map((x) => `${x.id}: ${x.nodes.map((n) => n.target).join(' ')}`));
     check(`${tag}: tooltips and popovers, axe finds nothing`, v.length === 0, v);
   }
+  await shapesMorph(page, tag, cfg, name, B, settle);
   await waitingAndScheme(page, tag, cfg, B, settle);
   check(`${tag}: tooltips page: nothing told`, (await page.evaluate(() => window.told.length)) === 0, await page.evaluate(() => window.told));
+}
+
+
+/**
+ * A screenshot of a region read back in the page (a canvas): the box of the pixels near `rgb` (the bubble's fill), and
+ * whether each of `points` (page coordinates) is that colour. Looks, not computed styles: what the user sees.
+ */
+async function pixels(page, box, rgb, points = []) {
+  const shot = await page.screenshot({ clip: box });
+  return page.evaluate(async ({ data, box, rgb, points }) => {
+    const img = await createImageBitmap(await (await fetch(`data:image/png;base64,${data}`)).blob());
+    const c = document.createElement('canvas');
+    c.width = img.width;
+    c.height = img.height;
+    const x = c.getContext('2d');
+    x.drawImage(img, 0, 0);
+    const d = x.getImageData(0, 0, c.width, c.height).data;
+    const k = c.width / box.width;
+    const near = (i) => Math.abs(d[i] - rgb[0]) < 14 && Math.abs(d[i + 1] - rgb[1]) < 14 && Math.abs(d[i + 2] - rgb[2]) < 14;
+    let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity, n = 0;
+    for (let y = 0; y < c.height; y++) for (let i = 0; i < c.width; i++) if (near((y * c.width + i) * 4)) { n++; l = Math.min(l, i); r = Math.max(r, i); t = Math.min(t, y); b = Math.max(b, y); }
+    const at = points.map(([px, py]) => near((Math.round((py - box.y) * k) * c.width + Math.round((px - box.x) * k)) * 4));
+    return { n, l: box.x + l / k, r: box.x + (r + 1) / k, t: box.y + t / k, b: box.y + (b + 1) / k, at };
+  }, { data: shot.toString('base64'), box, rgb, points });
+}
+
+/**
+ * (11d) Ready-made shapes and the morph preset (tooltips-popovers.md 7, 20, 21; owner 2026-11-14 « ok »): on each side
+ * (mirrored in Arabic), the morph's frames held still and looked at — the first a pill at the anchor's side, 60 % × 45 %
+ * of the bubble at the arrow, the arrow already drawn, the words not yet; the middle between; the end the whole bubble
+ * with its words — then its closing (the content first, the shape back, 180 ms in all); the shapes' looks (the pill's
+ * ends, the ticket's notches, the bubble's tail across its edge at the anchor, the arrow kept or not); reduced motion;
+ * no layout per frame; and a grid column's `tooltip: { when: 'truncated', shape: 'bubble', animation: 'morph' }` — by
+ * hover on a cut cell only, and by keyboard focus. `SHOTS=dir` keeps the frames, to set beside the owner's capture.
+ */
+async function shapesMorph(page, tag, cfg, name, B, settle) {
+  const rtl = cfg.lang === 'ar';
+  const shoot = async (file, box) => { if (SHOTS) await page.screenshot({ path: `${SHOTS}/${tag.replace(/ /g, '-')}-${file}.png`, clip: box }); };
+  const fresh = async () => { await page.evaluate(() => { for (const h of window.tips.values()) h.destroy(); window.tips.clear(); }); await settle(); };
+  /** Shown, every animation held at `t` ms (the first frame: 0). */
+  const held = (o, t) => page.evaluate(({ o, t, B }) => {
+    window.tip('c', o);
+    const el = document.querySelector(B);
+    const all = el.getAnimations({ subtree: true });
+    // The bubble's own fade-in finished: the frame's shape seen as drawn (its first frames are see-through).
+    for (const a of all) { a.pause(); a.currentTime = a.transitionProperty === 'opacity' ? 1e4 : t; }
+    const r = el.getBoundingClientRect();
+    const tail = getComputedStyle(el, '::before');
+    return {
+      side: el.dataset.side, names: all.map((a) => a.animationName ?? a.transitionProperty).sort(), color: getComputedStyle(el).color,
+      fill: getComputedStyle(el, '::after').backgroundColor, box: { x: r.left, y: r.top, w: r.width, h: r.height },
+      at: parseFloat(el.style.getPropertyValue('--dzg-tip-at')), tail: tail.display, rotate: tail.rotate,
+    };
+  }, { o, t, B });
+  const seek = (t) => page.evaluate(({ t, B }) => { for (const a of document.querySelector(B).getAnimations({ subtree: true })) if (a.transitionProperty !== 'opacity') a.currentTime = t; }, { t, B });
+  const rgbOf = (c) => c.match(/[\d.]+/g).slice(0, 3).map(Number);
+  const around = (b) => ({ x: Math.max(0, b.x - 16), y: Math.max(0, b.y - 16), width: b.w + 32, height: b.h + 32 });
+  const alpha = (c) => (c.startsWith('rgba') ? Number(c.match(/[\d.]+/g)[3]) : 1);
+
+  for (const placement of ['bottom', 'top', 'end', 'start']) {
+    await fresh();
+    const h = await held({ animation: 'morph', shape: 'bubble', tone: 'success', placement }, 0);
+    const block = h.side.startsWith('block');
+    // The arrow's place on screen along the bubble's edge (`--dzg-tip-at` from the line's start; in Arabic from the right).
+    const ax = block ? (rtl ? h.box.x + h.box.w - h.at : h.box.x + h.at) : null;
+    const ay = block ? null : h.box.y + h.at;
+    const rgb = rgbOf(h.fill);
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    const p0 = await pixels(page, around(h.box), rgb);
+    await shoot(`morph-${placement}-0`, around(h.box));
+    // The pill: about 60 % × 45 % of the bubble (its tail beside it), at the arrow, against the side it opened on.
+    const physical = { 'block-end': 'top', 'block-start': 'bottom', 'inline-end': rtl ? 'right' : 'left', 'inline-start': rtl ? 'left' : 'right' }[h.side];
+    const pw = p0.r - p0.l;
+    const ph = p0.b - p0.t;
+    const atSide = { top: p0.t < h.box.y, bottom: p0.b > h.box.y + h.box.h, left: p0.l < h.box.x, right: p0.r > h.box.x + h.box.w }[physical];
+    const small = block ? pw < h.box.w * 0.7 && ph < h.box.h * 0.85 : pw < h.box.w * 0.62 && ph <= h.box.h * 0.85;
+    const centred = block ? Math.abs((p0.l + p0.r) / 2 - ax) < h.box.w * 0.2 + 2 : Math.abs((p0.t + p0.b) / 2 - ay) < h.box.h * 0.35 + 2;
+    check(`${tag}: morph ${placement} (${h.side}): its first frame a pill at the arrow, the tail already there, no words yet`, p0.n > 20 && small && atSide && centred && h.tail !== 'none' && alpha(h.color) === 0 && JSON.stringify(h.names) === JSON.stringify(['dzg-tip-morph', 'dzg-tip-words', 'opacity']), { h, p0, physical });
+    await seek(175);
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    const p1 = await pixels(page, around(h.box), rgb);
+    await shoot(`morph-${placement}-mid`, around(h.box));
+    check(`${tag}: morph ${placement}: halfway, between the pill and the bubble`, p1.r - p1.l > pw && p1.r - p1.l <= h.box.w + 12, { p0, p1 });
+    await seek(5000);
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    const p2 = await pixels(page, around(h.box), rgb);
+    await shoot(`morph-${placement}-end`, around(h.box));
+    const end = await page.evaluate((B) => ({ color: getComputedStyle(document.querySelector(B)).color, clip: getComputedStyle(document.querySelector(B), '::after').clipPath }), B);
+    // The whole bubble and its tail: as wide as the bubble (less its rounded corners' antialiasing), its words drawn.
+    const whole = block ? p2.r - p2.l >= h.box.w - 2 && p2.b - p2.t >= h.box.h + 2 : p2.r - p2.l >= h.box.w + 2 && p2.b - p2.t >= h.box.h - 2;
+    check(`${tag}: morph ${placement}: its end, the whole bubble with its tail, its words`, whole && alpha(end.color) === 1 && end.clip === 'inset(0px)', { p2, end, box: h.box });
+    // The tail turned toward the anchor (the reading direction mirrors the inline sides).
+    const turn = { 'block-end': 'none', 'block-start': '180deg', 'inline-end': rtl ? '90deg' : '-90deg', 'inline-start': rtl ? '-90deg' : '90deg' }[h.side];
+    check(`${tag}: bubble ${placement}: its tail turned to the anchor (${turn})`, h.rotate === turn, h.rotate);
+  }
+  // Closing: the content first, then the shape back to the pill, the bubble fading last; 180 ms in all, then hidden.
+  await page.evaluate(({ B }) => { for (const a of document.querySelector(B).getAnimations({ subtree: true })) a.finish(); }, { B });
+  await settle();
+  const closing = await page.evaluate((B) => {
+    window.tips.get('c').hide();
+    const el = document.querySelector(B);
+    return el.getAnimations({ subtree: true }).filter((a) => a.transitionProperty && a.transitionProperty !== 'display' && a.transitionProperty !== 'overlay')
+      .map((a) => ({ p: a.transitionProperty, pe: a.effect.pseudoElement, end: Math.round(a.effect.getTiming().delay + a.effect.getTiming().duration) }));
+  }, B);
+  const last = Math.max(...closing.map((c) => c.end));
+  check(`${tag}: morph closing: the shape back to the pill, the bubble fading, 180 ms in all`, closing.some((c) => c.p === 'clip-path' && c.pe === '::after') && closing.some((c) => c.p === 'opacity') && last <= 181 && last >= 170, closing);
+  await page.waitForTimeout(400);
+  check(`${tag}: morph closing: then hidden`, await page.evaluate((B) => document.querySelector(B).hidden, B));
+
+  // The shapes' looks, still: the pill's ends, the ticket's notches, the bubble's tail across its edge at the anchor.
+  for (const shape of ['pill', 'ticket', 'bubble']) {
+    await fresh();
+    const s = await page.evaluate(({ shape, B }) => {
+      window.tip('c', { animation: 'none', shape, tone: 'danger', placement: 'bottom' });
+      const el = document.querySelector(B);
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      // The ticket's fill is its gradients': its colour read through a probe inside it (its colour scheme, its tone).
+      const probe = document.createElement('i');
+      probe.style.color = 'var(--dzg-tip-bg)';
+      el.append(probe);
+      const fill = getComputedStyle(probe).color;
+      probe.remove();
+      return { box: { x: r.left, y: r.top, w: r.width, h: r.height }, at: parseFloat(el.style.getPropertyValue('--dzg-tip-at')), radius: cs.borderStartStartRadius, filter: cs.filter, image: cs.backgroundImage, bg: shape === 'ticket' ? fill : cs.backgroundColor, arrow: getComputedStyle(el, '::before').display };
+    }, { shape, B });
+    const fillRgb = s.bg;
+    const { x, y, w, h } = s.box;
+    const ax = rtl ? x + w - s.at : x + s.at;
+    // Corner (2 px in), the middle of the top edge (2 px in), the tail's middle above the edge, inside by the start edge.
+    // The middle point by the start edge, clear of the words (a font's glyphs would cover the bubble's middle).
+    const pts = [[x + 1.5, y + 1.5], [x + w / 2, y + 2], [ax, y - 3], [x + 4, y + h / 2]];
+    const p = await pixels(page, around(s.box), rgbOf(fillRgb), pts);
+    await shoot(`shape-${shape}`, around(s.box));
+    const [corner, edge, tail, middle] = p.at;
+    const ok = {
+      pill: s.radius === '999px' && s.arrow !== 'none' && !corner && edge && tail,
+      ticket: (s.image.match(/radial-gradient/g) ?? []).length === 4 && s.arrow !== 'none' && !corner && edge,
+      bubble: s.radius === '12px' && s.arrow !== 'none' && !corner && edge && tail,
+    }[shape];
+    check(`${tag}: shape ${shape}: its outline as drawn (corner ${corner ? 'filled' : 'open'}, tail ${tail ? 'drawn' : 'none'}), the edge and shadow a drop-shadow`, ok && middle && s.filter.includes('drop-shadow'), { s, p });
+  }
+
+  // Reduced motion: no animation, the bubble whole at once; `reducedMotion: 'fade'`: the opacity only.
+  await fresh();
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const still = await page.evaluate((B) => { window.tip('c', { animation: 'morph', shape: 'bubble' }); const el = document.querySelector(B); return { a: el.getAnimations({ subtree: true }).map((a) => a.animationName ?? a.transitionProperty).filter((n) => n !== 'display' && n !== 'overlay'), clip: getComputedStyle(el, '::after').clipPath }; }, B);
+  check(`${tag}: morph under reduced motion: nothing moves, the bubble whole at once`, still.a.length === 0 && still.clip === 'inset(0px)', still);
+  await fresh();
+  const fade = await page.evaluate((B) => { window.tip('c', { animation: 'morph', reducedMotion: 'fade' }); return document.querySelector(B).getAnimations({ subtree: true }).map((a) => a.animationName ?? a.transitionProperty).filter((n) => n !== 'display' && n !== 'overlay'); }, B);
+  check(`${tag}: morph under reduced motion with reducedMotion 'fade': the opacity only`, JSON.stringify(fade) === '["opacity"]', fade);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+
+  // No layout per frame while the morph runs a second (Chrome's layout count; as the presets above).
+  if (name === 'chrome') {
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('Performance.enable');
+    const count = async () => (await cdp.send('Performance.getMetrics')).metrics.find((m) => m.name === 'LayoutCount').value;
+    const over = async (animation) => {
+      await fresh();
+      await page.evaluate((animation) => {
+        const r = document.documentElement.style;
+        r.setProperty('--dzg-tooltip-morph-duration', '1000ms');
+        r.setProperty('--dzg-tooltip-morph-content-delay', '700ms');
+        r.setProperty('--dzg-tooltip-morph-content-duration', '300ms');
+        window.tip('c', { animation, shape: 'bubble' });
+      }, animation);
+      await frames(page);
+      const l0 = await count();
+      await page.waitForTimeout(1100);
+      const n = (await count()) - l0;
+      await page.evaluate(() => document.documentElement.removeAttribute('style'));
+      return n;
+    };
+    const quiet = await over('none');
+    const moving = await over('morph');
+    check(`${tag}: morph: no layout per frame while it runs a second (${moving} against ${quiet} still)`, moving <= quiet + 1, { moving, quiet });
+    await cdp.detach();
+  }
+  await fresh();
+
+  // A grid column in one line: `{ when: 'truncated', shape: 'bubble', animation: 'morph' }` — a cut cell's text as shown,
+  // in the morph bubble; a cell that fits, none; the keyboard opens it at once.
+  const T = '.dzg .dzg-tooltip';
+  const cellAt = (row) => `.dzg-layer .dzg-row[aria-rowindex="${row}"] .dzg-cell[data-col=note]`;
+  await page.mouse.move(2, 690);
+  await settle();
+  await page.hover(cellAt(3));
+  await page.waitForTimeout(500);
+  const cut = await page.evaluate(({ T, c }) => { const t = document.querySelector(T); return { shown: !t.hidden, text: t.textContent, cell: document.querySelector(c).textContent, shape: t.dataset.shape, anim: t.dataset.animation, tone: t.dataset.tone, op: getComputedStyle(t).opacity, color: getComputedStyle(t).color }; }, { T, c: cellAt(3) });
+  check(`${tag}: a column's one-line tooltip: a cut cell's text as shown, in the morph bubble`, cut.shown && cut.text === cut.cell && cut.shape === 'bubble' && cut.anim === 'morph' && cut.tone === 'neutral' && cut.op === '1' && alpha(cut.color) === 1, cut);
+  await page.mouse.move(2, 690);
+  await settle();
+  await page.hover(cellAt(2));
+  await page.waitForTimeout(500);
+  check(`${tag}: a cell that fits shows none`, await page.evaluate((T) => document.querySelector(T).hidden, T));
+  await page.mouse.move(2, 690);
+  await settle();
+  // A click on a short note (no tooltip), then a key up onto a cut one.
+  await page.click(cellAt(6));
+  await page.keyboard.press('ArrowUp');
+  await page.waitForTimeout(450);
+  const keyed = await page.evaluate(({ T, c }) => { const t = document.querySelector(T); return { shown: !t.hidden, text: t.textContent, cell: document.querySelector(c).textContent, shape: t.dataset.shape, focus: document.activeElement === document.querySelector(c) }; }, { T, c: cellAt(5) });
+  check(`${tag}: the keyboard's focus on a cut cell opens its bubble at once`, keyed.shown && keyed.focus && keyed.text === keyed.cell && keyed.shape === 'bubble', keyed);
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => document.activeElement?.blur?.());
+  await settle();
+  await morphPacing(page, tag, name, cellAt(3), T, settle);
+}
+
+/**
+ * (11e) The morph as quick as an app's GSAP one (owner 2026-11-14 « pas aussi fluide que GSAP, elle prend du temps pour
+ * s'afficher »; measured against it in the owner's app: GSAP's first frame one frame after its delay, its words half
+ * drawn 200 ms later, settled at 350 ms). A real hover on a cut cell, the grid's delay 300 ms, every frame's
+ * `requestAnimationFrame` time read: the bubble's first visible frame no later than the delay and one frame; its words
+ * half drawn within 200 ms of it; all still within 380 ms; no frame longer than 50 ms (Chrome: no long animation frame
+ * either) and, in Chrome, no layout while it runs.
+ */
+async function morphPacing(page, tag, name, cell, T, settle) {
+  const DELAY = 300;
+  await page.evaluate((d) => window.grid.update({ tooltips: { delayMs: d, header: true, html: window.safeHtml } }), DELAY);
+  await page.mouse.move(2, 690);
+  await settle();
+  const box = await page.evaluate((c) => { const r = document.querySelector(c).getBoundingClientRect(); return { x: r.left + 8, y: r.top + r.height / 2 }; }, cell);
+  await page.evaluate(({ T, DELAY }) => {
+    const w = window;
+    const rec = (w.__pace = { frames: [], t0: null, loaf: [] });
+    try { (rec.po = new PerformanceObserver((l) => rec.loaf.push(...l.getEntries().map((e) => Math.round(e.duration))))).observe({ type: 'long-animation-frame' }); } catch { /* not Chrome */ }
+    document.addEventListener('pointerover', (e) => { rec.t0 ??= e.target.closest('.dzg-cell') ? performance.now() : null; }, { capture: true });
+    const al = (c) => (c.startsWith('rgba') ? Number(c.match(/[\d.]+/g)[3]) : 1);
+    const loop = (now) => {
+      const t = document.querySelector(T);
+      const cs = getComputedStyle(t);
+      const on = !t.hidden && cs.display !== 'none';
+      rec.frames.push({ now, op: on ? Number(cs.opacity) : 0, words: on ? Number(cs.opacity) * al(cs.color) : 0, sig: on ? [cs.opacity, cs.color, getComputedStyle(t, '::after').clipPath].join() : '' });
+      if (now - (rec.start ??= now) < DELAY + 900) requestAnimationFrame(loop); else rec.done = true;
+    };
+    requestAnimationFrame(loop);
+  }, { T, DELAY });
+  let cdp = null;
+  if (name === 'chrome') { cdp = await page.context().newCDPSession(page); await cdp.send('Performance.enable'); }
+  const layouts = async () => (cdp ? (await cdp.send('Performance.getMetrics')).metrics.find((m) => m.name === 'LayoutCount').value : 0);
+  await page.mouse.move(box.x, box.y);
+  await page.waitForFunction(() => window.__pace.frames.some((f) => f.op > 0.01));
+  const l0 = await layouts();
+  await page.waitForFunction(() => window.__pace.done, null, { timeout: 5000 });
+  const l1 = await layouts();
+  if (cdp) await cdp.detach();
+  const { frames, t0, loaf } = await page.evaluate(() => { window.__pace.po?.disconnect(); const { frames, t0, loaf } = window.__pace; return { frames, t0, loaf }; });
+  const deltas = frames.slice(1).map((f, i) => f.now - frames[i].now);
+  const frame = [...deltas].sort((a, b) => a - b)[deltas.length >> 1];
+  const fi = frames.findIndex((f) => f.op > 0.01);
+  const wi = frames.findIndex((f) => f.words >= 0.5);
+  let last = fi;
+  for (let i = fi + 1; i < frames.length; i++) if (frames[i].sig !== frames[i - 1].sig) last = i;
+  const m = { t0: Math.round(t0), frame: Math.round(frame * 10) / 10, first: Math.round(frames[fi]?.now - t0), words: Math.round(frames[wi]?.now - frames[fi]?.now), settled: Math.round(frames[last]?.now - frames[fi]?.now), maxGap: Math.round(Math.max(...deltas.slice(Math.max(0, fi - 1), last + 1))), loaf, layouts: l1 - l0 };
+  if (process.env.VERBOSE) console.log(`     ${tag} morph pacing`, JSON.stringify(m), process.env.VERBOSE === "2" ? JSON.stringify(frames.slice(Math.max(0, fi - 3), fi + 4).map((f) => [Math.round(f.now - t0), f.op, f.sig]))  : "");
+  check(`${tag}: morph by hover: its first visible frame within the grid's delay and one frame (${m.first} ms, delay ${DELAY})`, t0 != null && fi >= 0 && m.first <= DELAY + frame + 4, m);
+  check(`${tag}: morph by hover: its words half drawn within 200 ms of its first frame (${m.words} ms), all still within 380 ms (${m.settled} ms)`, m.words <= 200 && m.settled <= 380, m);
+  check(`${tag}: morph by hover: no long frame while it opens (longest ${m.maxGap} ms${name === 'chrome' ? `, ${loaf.length} long animation frames, ${m.layouts} layouts` : ''})`, m.maxGap <= 50 && loaf.length === 0 && (name !== 'chrome' || m.layouts <= 1), m);
+  await page.evaluate(() => window.grid.update({ tooltips: { delayMs: 0, header: true, html: window.safeHtml } }));
+  await page.mouse.move(2, 690);
+  await settle();
 }
 
 /**

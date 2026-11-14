@@ -33,11 +33,33 @@ export type AggFn<V = unknown> = { agg(values: readonly (V | null)[], ctx: AggCt
  * only when the grid is given a cleaner (`tooltips: { html: safeHtml }`); otherwise its `text`, or nothing.
  */
 export interface TooltipSpec {
+  /** Left out in a column's options: the cell's text as displayed. */
   readonly text?: string;
   readonly html?: string;
   readonly tone?: 'info' | 'neutral' | 'success' | 'warning' | 'danger';
-  /** Where it opens (needs the DOM layer's `tooltips()`). */
+  /** Where it opens (needs the DOM layer's `tooltips()`, as every option below). */
   readonly placement?: TooltipPlacement;
+  /** Its opening and closing: a preset of `@dzgrid/theme/tooltips.css` (tooltips-popovers.md 7). */
+  readonly animation?: 'fade' | 'scale' | 'slide' | 'pop' | 'rise' | 'morph' | 'none';
+  /** A ready-made shape (`bubble`, `ticket`, `pill`) or an app's SVG path data (tooltips-popovers.md 20). */
+  readonly shape?: 'bubble' | 'ticket' | 'pill' | (string & {});
+  /** Before it shows on hover, ms (a keyboard focus: at once). */
+  readonly delayMs?: number;
+  /** Its widest: px, or a CSS length. */
+  readonly maxWidth?: number | string;
+  /** Its look through variables only: custom properties (`--dzg-tooltip-…`) written on the bubble while it shows. */
+  readonly style?: Readonly<Record<`--${string}`, string>>;
+}
+
+/**
+ * A column's tooltip in one line (tooltips-popovers.md 21; needs the DOM layer's `tooltips()`): fixed options, `text`
+ * left out meaning the cell's text as displayed; `when: 'truncated'` only on a cell whose text is cut; `content`, the
+ * cell's own answer, laid over these options.
+ */
+export interface ColumnTooltip<T, V = unknown> extends TooltipSpec {
+  /** @default 'always' */
+  readonly when?: 'always' | 'truncated';
+  readonly content?: (value: V | null, row: Readonly<T>, context: unknown) => string | TooltipSpec | null;
 }
 
 /**
@@ -166,11 +188,15 @@ export interface ColumnDef<T, V = unknown> {
    * reference) to every part of the column. Any other key is a warning `unknown-ui-key` from the DOM layer.
    */
   readonly ui?: { readonly cell?: string; readonly header?: string; readonly tooltip?: string; readonly cellClass?: (c: CellClassContext<T, V>) => string | null | undefined; readonly headerClass?: string; readonly data?: Readonly<Record<string, unknown>> };
-  /** Shown over the header, already translated by the host. */
-  readonly headerTooltip?: string;
-  /** Shown over a cell, already translated; null for none. The grid never guesses one from the content. */
-  /** `context`: the grid's `settings.context` (step 21). Words with a tone, or HTML (shown only when the grid's `tooltips.html` is given), as a `TooltipSpec` (1.12.0). */
-  readonly tooltip?: (value: V | null, row: Readonly<T>, context: unknown) => string | TooltipSpec | null;
+  /** Shown over the header, already translated by the host; or a `TooltipSpec` (its text and tone; its look with `tooltips()`). */
+  readonly headerTooltip?: string | TooltipSpec;
+  /**
+   * Shown over a cell, already translated; null for none. The grid never guesses one from the content, except when told:
+   * `true` (the cell's text as displayed), or `ColumnTooltip` options (1.12.0, tooltips-popovers.md 21; with `tooltips()`);
+   * `false`: none, whatever the grid's `tooltips.cells`. A function: `context` is the grid's `settings.context` (step 21);
+   * words with a tone, or HTML (shown only when the grid's `tooltips.html` is given), as a `TooltipSpec`.
+   */
+  readonly tooltip?: ((value: V | null, row: Readonly<T>, context: unknown) => string | TooltipSpec | null) | boolean | ColumnTooltip<T, V>;
   /**
    * Consecutive rows with the same value show one tall cell (docs/behaviors/spans.md).
    * `true` compares the values' stable text; a function decides; `within` cuts a run

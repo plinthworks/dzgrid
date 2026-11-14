@@ -18,8 +18,8 @@ Seulement là où vous en demandez une :
 
 | Où | Comment |
 |---|---|
-| Une cellule | La fonction [`tooltip`](../../column-options/tooltip/) de la colonne : des mots, `{ text, tone }`, ou du HTML (plus bas) |
-| Un titre | Le [`headerTooltip`](../../column-options/header-tooltip/) de la colonne |
+| Une cellule | Le [`tooltip`](../../column-options/tooltip/) de la colonne : `true`, des options en une ligne (plus bas), ou une fonction — des mots, `{ text, tone }`, ou du HTML |
+| Un titre | Le [`headerTooltip`](../../column-options/header-tooltip/) de la colonne : des mots, ou les mêmes options |
 | Les boutons d’un titre (filtre, menu de colonne, bascule du filtre flottant) | `tooltips: { header: true }` avec la fonction [`tooltips()`](../../features/tooltips/) : chacun dit son nom |
 | N’importe quel élément de la page | `tooltip(el, options)` depuis `@dzgrid/dom/tooltip` ; en Angular, la directive `dzTooltip` |
 
@@ -148,6 +148,51 @@ Laissez le pointeur sur un titre, puis sur son bouton en entonnoir :
   caption="Les titres montrent leur headerTooltip ; les boutons en entonnoir disent leur nom (tooltips: { header: true } avec tooltips())."
 />
 
+## Par colonne, en une ligne
+
+Avec la fonction [`tooltips()`](../../features/tooltips/), une colonne dit ce que font les infobulles de ses cellules
+sans écrire de fonction — de simples données, qui peuvent venir d’un fichier JSON. Les mêmes noms d’options que le
+`tooltips` de la grille et le `tooltip()` / `dzTooltip` de la page :
+
+| Cas | Une ligne |
+|---|---|
+| La valeur entière d’une cellule coupée, telle qu’affichée (dates, nombres, valeurs traduites) | `tooltip: { when: 'truncated' }` |
+| La même chose pour toutes les colonnes de la grille | `tooltips: { cells: 'truncated' }` (grille) |
+| Toujours le texte affiché de la cellule | `tooltip: true` |
+| Pas d’infobulle pour cette colonne, quoi que dise la grille | `tooltip: false` |
+| Des mots fixes, avec un ton | `tooltip: { text: 'Compté chaque mars', tone: 'neutral' }` |
+| La bulle morph pour cette colonne seulement | `tooltip: { shape: 'bubble', animation: 'morph' }` |
+| Sa place, son délai au survol, sa largeur | `tooltip: { placement: 'top', delayMs: 200, maxWidth: 240 }` |
+| Ses propres couleurs, par variables seulement | `tooltip: { style: { '--dzg-tooltip-info-bg': 'teal' } }` |
+| Par cellule, par-dessus les options de la colonne | `tooltip: { tone: 'warning', content: (value, row) => value > 100 ? { tone: 'danger', text: 'Trop' } : null }` |
+| Un titre | `headerTooltip: { text: 'Arbres plantés', tone: 'success', shape: 'pill' }` |
+
+Sans `text`, c’est le texte de la cellule tel qu’affiché. Les options se fusionnent : d’abord le `tooltips` de la
+grille, puis celles de la colonne, puis ce que `content` renvoie pour la cellule (`null` : pas d’infobulle pour cette
+cellule). `style` n’écrit que des variables CSS (des noms commençant par `--`) sur la bulle, le temps qu’elle montre
+l’infobulle de cette colonne. Le focus du clavier sur la cellule l’ouvre tout de suite, comme toute infobulle de
+cellule. Sans `tooltips()`, une fonction et les mots et le ton de `headerTooltip` marchent toujours ; `true`, les
+options et `cells: 'truncated'` sont signalés une fois par un problème `missing-feature`.
+
+<LiveDemo
+  height={240}
+  settings={{ label: 'Vergers', tooltips: { delayMs: 250 } }}
+  features={['tooltips']}
+  columns={[
+    { id: 'orchard', header: 'Verger', width: 140, tooltip: { when: 'truncated', shape: 'bubble', animation: 'morph' } },
+    { id: 'note', header: 'Note', width: 170, tooltip: { when: 'truncated', shape: 'bubble', animation: 'morph', tone: 'neutral' } },
+    { id: 'planted', header: 'Planté le', type: 'day', width: 130, tooltip: true },
+    { id: 'trees', header: 'Arbres', type: 'number', width: 90, headerTooltip: { text: 'Comptés chaque mars', tone: 'success', shape: 'pill', animation: 'morph' }, tooltip: false },
+  ]}
+  rows={[
+    { id: 'o1', orchard: 'Verger de la colline', note: 'Taillé en février', planted: '2019-03-14', trees: 140 },
+    { id: 'o2', orchard: 'Pré du moulin, près du vieux pont de pierre', note: 'Gel tardif : les fleurs couvertes trois nuits de suite', planted: '2021-04-02', trees: 85 },
+    { id: 'o3', orchard: 'Boucle de la rivière', note: 'Filets contre les oiseaux', planted: '2017-11-20', trees: 60 },
+    { id: 'o4', orchard: 'Vieux mur, côté sud du jardin clos', note: 'Poires grises palissées le long de la brique', planted: '2015-10-05', trees: 210 },
+  ]}
+  caption="Laissez le pointeur sur un verger ou une note coupés : la bulle morph montre le texte entier. Planté le montre sa date telle qu’affichée ; Arbres n’en a pas, son titre une pilule. Entrez dans la grille avec Tab et bougez avec les flèches : le focus les ouvre aussi."
+/>
+
 ## Partout dans la page
 
 `tooltip(el, options)` donne la même infobulle à n’importe quel élément de la page : un bouton de barre d’outils, une
@@ -248,12 +293,33 @@ Une infobulle ou une bulle s’ouvre et se ferme avec l’un des effets de `@dzg
 | `slide` | Arrive de quelques pixels depuis le côté de l’élément, et suit la bascule et le sens de lecture |
 | `pop` | Plus riche, sur demande : grandit depuis 80 % avec un léger rebond (260 ms) |
 | `rise` | Plus riche, sur demande : 12 px depuis le côté de l’élément, avec une longue décélération douce (320 ms) |
+| `morph` | Plus riche, sur demande : une petite pilule du côté de l’élément, la flèche déjà là, grandit jusqu’à la bulle (320 ms), les mots arrivant dès son premier tiers ; elle se ferme à l’inverse, plus vite (180 ms) |
 | `none` | Là tout de suite |
 
-Chaque effet se ferme de la même façon courte (100 ms). Seuls `opacity` et `transform` bougent : rien n’est mesuré
-pendant l’animation. Durées, courbes et délais sont des variables (plus bas).
+Chaque effet sauf `morph` se ferme de la même façon courte (100 ms). Seuls `opacity` et `transform` bougent — et pour
+`morph`, le `clip-path` d’un calque et la couleur des mots : rien n’est mis en page ni mesuré pendant l’animation.
+Durées, courbes et délais sont des variables (plus bas) ; celles de `morph` sont `--dzg-tooltip-morph-duration`,
+`-easing`, `-content-duration`, `-content-delay` et `-close-duration`. Du CSS seul : aucune bibliothèque. Sa première
+image est celle qui suit son délai (`tooltips.delayMs` de la grille, 500 ms par défaut comme le `delayMs` de la page ;
+le `delayMs` d’une colonne passe avant).
 
 <TipDemo kind="animations" caption="Chaque bouton ouvre son infobulle avec l’effet qu’il nomme." />
+
+### Formes toutes faites
+
+`shape` prend une forme toute faite, dessinée par `@dzgrid/theme/tooltips.css` aux couleurs du ton :
+
+| Forme | Son allure |
+|---|---|
+| `bubble` | Une bulle de bande dessinée douce : coins plus ronds, sa pointe une queue courbe qui en fait partie, tournée vers le côté où elle s’ouvre (en miroir de droite à gauche) |
+| `ticket` | Ses quatre coins entaillés |
+| `pill` | Des bouts tout ronds ; la flèche gardée |
+
+Le bord d’un ton et une ombre douce suivent tout le contour, pointe et entailles comprises. Chacune marche avec toutes
+les animations, `morph` compris. Les tailles sont des variables : `--dzg-tooltip-bubble-radius`,
+`--dzg-tooltip-bubble-tail`, `--dzg-tooltip-ticket-notch`, `--dzg-tooltip-pill-padding`, `--dzg-tooltip-shape-shadow`.
+
+<TipDemo kind="shapes" caption="Chaque forme s’ouvre avec morph : une pilule du côté du bouton qui grandit jusqu’à elle." />
 
 **Mouvement réduit.** Quand le système demande de réduire les animations, ou que la grille a `motion: false`, rien ne
 bouge et rien ne fond : infobulles et bulles apparaissent et partent d’un coup. Vous pouvez demander à la place un

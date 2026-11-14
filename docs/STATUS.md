@@ -1,5 +1,23 @@
 # État du travail — à lire en premier si la session est perdue
 
+Mis à jour : 2026-11-14 (nuit). **1.12.0 : infobulles par colonne en une ligne, formes toutes faites, `morph`
+(propriétaire « ok » + « toutes les situations par colonne »), non commitées, non publiées — ARRÊTÉ sur `check:api`.**
+Fiche `tooltips-popovers.md` 7 (morph), 20–24. Colonne : `tooltip: true | false | { text, tone, shape, animation,
+placement, delayMs, maxWidth, style, when, content }`, `tooltips.cells: 'truncated'`, `headerTooltip` objet ;
+fusion grille ← colonne ← cellule dans `tooltips()` (`tooltip/feature.ts`), habillage avant mesure dans la couture `at`
+(`engine.ts dress()` : préréglage, forme, variables `--…`, `maxWidth`), délai par colonne en surchargeant `showFor` ;
+base : spec de `headerTooltip` et lignes `missing-feature`. Formes et `morph` en CSS pur dans `tooltips.scss`
+(queue de `bubble` = flèche en carré tourné, encoches de `ticket` = 4 dégradés, bord + ombre en `drop-shadow`,
+`morph` = calque `::after` (bulle `::before`) dont le `clip-path` va d'une pilule au tout, images clés pour l'ouverture,
+transitions pour la fermeture). Tests : `tooltip-column-1-12.test.ts` 13, feuille 27, Angular +1, site 33/33 ;
+`browser-1-12.mjs` (11d) : images de l'animation figées et regardées (pilule, milieu, fin) par côté, fermeture,
+formes au pixel, mouvement réduit, pas de mise en page, colonne au survol et au clavier. Matrice `--tips` (16 configurations par navigateur) : Chrome 1 508 + reprises sombre 764/764 et arabe 1 140/1 140 (la sonde du ticket en sombre corrigée), Firefox 1 404/1 404, WebKit 1 404/1 404 ; un vrai défaut trouvé par Firefox et corrigé (un `<span>` en ligne compté comme coupé : test rouge d'abord). **Bloquant (propriétaire)** :
+`check:api` signale `ColumnDef.tooltip` (fonction → fonction | booléen | `ColumnTooltip`) et `headerTooltip` — à
+accepter (`node scripts/api.mjs --accept "…" --only "@dzgrid/core#ColumnDef"`) ou refuser ; et les lignes
+`@dzgrid/dom/tooltip` (3 353 / 2 800) et `tooltips.css` (2 843 / 2 000 ; sans couche 2 798 / 1 950) au-delà de +2 %
+(proposé : 3 700, 3 150, 3 100). Puis : `pack:local`, `gate:step`, `test:real-app`, matrice complète, `release:check`
+(l'appli Angular réelle 103 050 sera sans doute à relever de quelques octets : +60 dans la base).
+
 Mis à jour : 2026-11-14 (soir). **1.12.0 : trois corrections de plus (propriétaire « oui »), non commitées, non
 publiées.** Fiche `tooltips-popovers.md` 18–19, `presentation-settings.md` 40. (1) Une infobulle en attente est annulée
 par appui / clic / Échap / focus qui part / défilement / `disabled` / déclencheur retiré / bulle ouverte depuis lui ou

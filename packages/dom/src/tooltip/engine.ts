@@ -1,3 +1,4 @@
+import { setAttr } from '../render/write.js';
 import { hideBubble, type TipLook, type TipSide, type TipTone, type Tooltip } from '../render/tooltip.js';
 import { placementOf } from '../dir.js';
 
@@ -10,16 +11,20 @@ import { placementOf } from '../dir.js';
 /** Path data only: commands, numbers, separators — no `url()`, no script, nothing that loads. */
 const PATH = /^[MmLlHhVvCcSsQqTtAaZz\d.,\s+eE-]*$/;
 const SVG = 'http://www.w3.org/2000/svg';
+/** The ready-made shapes, drawn by tooltips.css. */
+const NAMED = /^(bubble|ticket|pill)$/;
 
 /**
- * The app's shape (owner 2026-11-14, for morphing): an `<svg class="dzg-tip-shape">` first in the bubble, its `<path>`
- * drawn from `look.shape` in a 100 × 100 box stretched over it; `data-shape` on the bubble (tooltips.css then draws no
- * box nor arrow). None, or not path data: removed, the box back.
+ * The bubble's shape (owner 2026-11-14): a ready-made one (`bubble`, `ticket`, `pill`) is `data-shape` with its name,
+ * drawn by tooltips.css; an app's (for morphing) an `<svg class="dzg-tip-shape">` first in the bubble, its `<path>` drawn
+ * from the path data in a 100 × 100 box stretched over it, `data-shape` empty (tooltips.css then draws no box nor
+ * arrow). None, or neither: removed, the box back.
  */
-export function shapeOf(el: HTMLElement, look: TipLook): SVGPathElement | null {
+export function shapeOf(el: HTMLElement, shape: string | undefined): SVGPathElement | null {
   let svg = el.querySelector<SVGSVGElement>(':scope > svg.dzg-tip-shape');
-  const d = look.shape && PATH.test(look.shape) ? look.shape : null;
-  el.toggleAttribute('data-shape', !!d);
+  const named = !!shape && NAMED.test(shape);
+  const d = !named && shape && PATH.test(shape) ? shape : null;
+  setAttr(el, 'data-shape', named ? shape! : d ? '' : null);
   if (!d) return svg?.remove(), null;
   if (!svg) {
     svg = el.ownerDocument.createElementNS(SVG, 'svg');
@@ -33,6 +38,25 @@ export function shapeOf(el: HTMLElement, look: TipLook): SVGPathElement | null {
   const path = svg.firstChild as SVGPathElement;
   if (path.getAttribute('d') !== d) path.setAttribute('d', d);
   return path;
+}
+
+/** The variables (and width) written on each bubble, taken off at its next dressing. */
+const worn = new WeakMap<HTMLElement, string[]>();
+
+/**
+ * Dresses a bubble before it is measured (tooltips-popovers.md 7, 20–23): its preset (`custom` while the app animates
+ * it), its shape, and its own variables — the look's, then the column's or the cell's over them (`tip`); only custom
+ * properties are written; `maxWidth` its widest.
+ */
+export function dress(el: HTMLElement, look: TipLook, tip: Partial<TipLook> = {}): void {
+  setAttr(el, 'data-animation', look.animate ? 'custom' : tip.animation ?? look.animation ?? null);
+  shapeOf(el, tip.shape ?? look.shape);
+  for (const k of worn.get(el) ?? []) el.style.removeProperty(k);
+  const w = tip.maxWidth ?? look.maxWidth;
+  const put = Object.entries({ ...look.style, ...tip.style }).filter(([k]) => k.startsWith('--'));
+  if (w != null) put.push(['max-inline-size', typeof w == 'number' ? `${w}px` : w]);
+  for (const [k, v] of put) el.style.setProperty(k, v);
+  worn.set(el, put.map(([k]) => k));
 }
 
 /** The app's animation for a phase (D-4), when given (never on a grid with `motion: false`); what it returns. A throw is reported. */
@@ -82,9 +106,6 @@ export function conceal(el: HTMLElement, look: TipLook, done: () => void, report
   };
 }
 
-/** The app's own animation turns the CSS presets off. */
-export const custom = (el: HTMLElement, look: TipLook): void => void (look.animate && el.setAttribute('data-animation', 'custom'));
-
 /** The tooltip on screen in the page (3): showing another hides it. */
 let shown: Tooltip | null = null;
 /** A grid destroyed: its tooltip no longer the page's (nothing kept of it). */
@@ -95,15 +116,17 @@ export const forget = (t: Tooltip): void => void (shown === t && (shown = null))
  * closing, one at a time in the page.
  */
 export function enhance(t: Tooltip, auto: 'bottom' | 'bottom-start', report: (e: unknown) => void): void {
-  t.at = (tip, dir) => [...placementOf(tip.placement ?? t.look().placement, dir, auto), t.look().flip !== false];
+  // Dressed before it is measured: its shape and width count (a column's look over the grid's).
+  t.at = (tip, dir) => (dress(t.el, t.look(), tip as Partial<TipLook>), [...placementOf(tip.placement ?? t.look().placement, dir, auto), t.look().flip !== false]);
+  // A column's own hover delay (a keyboard focus stays at once).
+  const showFor = t.showFor.bind(t);
+  t.showFor = (a, tip, dir, delay) => showFor(a, tip, dir, delay > 0 ? tip.delayMs ?? delay : delay);
   t.close = (el, look, done) => {
     if (shown === t) shown = null;
     return conceal(el, look, done, report);
   };
   // An opening: it was not the one on screen (a closing forgets it; moving to another anchor is no opening).
   t.onShow = (me) => {
-    custom(me.el, me.look());
-    shapeOf(me.el, me.look());
     if (shown === me) return;
     shown?.hide();
     shown = me;

@@ -131,7 +131,9 @@ describe('the guide lists every variable the sheets read, and nothing else (owne
     '--dzg-bc',
     // 1.12.0 tooltips and popovers (tooltips.css): the arrow's colours of the tone in force, the reading direction's sign,
     // the slide's start.
-    '--dzg-tip-arrow-bg', '--dzg-tip-arrow-edge', '--dzg-tip-sign', '--dzg-tip-from', '--dzg-tip-dist', '--dzg-tip-scale']);
+    '--dzg-tip-arrow-bg', '--dzg-tip-arrow-edge', '--dzg-tip-sign', '--dzg-tip-from', '--dzg-tip-dist', '--dzg-tip-scale',
+    // 1.12.0 shapes and morph (owner 2026-11-14): the fill and shadow in force, the pill's place.
+    '--dzg-tip-bg', '--dzg-tip-fill', '--dzg-tip-shadow', '--dzg-tip-cx', '--dzg-tip-x0', '--dzg-tip-x1', '--dzg-tip-y0', '--dzg-tip-y1', '--dzg-tip-pill']);
   const read = (dir: string, test: (f: string) => boolean) => readdirSync(here(dir), { recursive: true, encoding: 'utf8' }).filter(test).map((f) => readFileSync(here(`${dir}/${f}`), 'utf8')).join('\n');
   const used = [...new Set([...(read('..', (f) => /^[^/]*\.scss$/.test(f)) + read('../../dom/src', (f) => f.endsWith('.ts'))).matchAll(/var\((--dzg-[a-z0-9-]*[a-z0-9])/g)].map((m) => m[1]!))]
     .filter((v) => !WRITTEN.has(v) && !(v.startsWith('--dzg-icon-') && v !== '--dzg-icon-size') && !v.startsWith('--dzg-badge-'));
@@ -143,7 +145,7 @@ describe('the guide lists every variable the sheets read, and nothing else (owne
   const BAR = ['--dzg-footer-line', '--dzg-footer-padding-block', '--dzg-footer-padding-inline', '--dzg-footer-height', '--dzg-footer-gap', '--dzg-footer-font-size', '--dzg-footer-justify', '--dzg-footer-align'];
   // Tooltips and popovers (1.12.0, tooltips-popovers.md): CSS variables only, like the bar's — the tones, the animations,
   // the popover's look (tooltips.css), none a key.
-  const TIPS = /^--dzg-(popover-|tooltip-(info|neutral|success|warning|danger|open|close|pop|reduced)-|tooltip-(slide|scale|rise)$|tooltip-rise-)/;
+  const TIPS = /^--dzg-(popover-|tooltip-(info|neutral|success|warning|danger|open|close|pop|reduced)-|tooltip-(slide|scale|rise|bubble-radius|bubble-tail|ticket-notch|pill-padding|shape-shadow)$|tooltip-(rise|morph)-)/;
   const cssOnly = (v: string) => v.startsWith('--dzg-pager-') || BAR.includes(v) || TIPS.test(v);
 
   it('every variable a sheet reads is a theme key (or written by the grid, or one of the pagination bar’s)', () => {
@@ -152,7 +154,9 @@ describe('the guide lists every variable the sheets read, and nothing else (owne
     // 8 strip, 38 pager (1.12.0 review: the hover, active and disabled edges); 16 popover (9 of its look, its body's height, 6 of its motion), 35 tooltip (5 tones × 4, 6 of its motion, slide,
     // scale; the richer presets 1.12.0 owner 2026-11-14: pop's duration, easing and scale, rise's distance, duration and
     // easing; the reduced-motion fade's duration).
-    expect(used.filter(cssOnly)).toHaveLength(97);
+    // 1.12.0 shapes and morph: the bubble's radius and tail, the ticket's notch, the pill's padding, the shapes' shadow;
+    // the morph's opening, content duration and delay, easing, closing.
+    expect(used.filter(cssOnly)).toHaveLength(107);
   });
 
   for (const lang of ['', 'fr/']) {
