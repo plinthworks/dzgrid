@@ -203,3 +203,15 @@ it('in a grid: a cell component\'s icon opens a popover about its row; it closes
   expect(document.querySelector('.dzg-popover')).toBeNull();
   vi.restoreAllMocks();
 });
+
+it('review: destroyed while open, the popover closes without emitting on a destroyed output', () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  const { q, fixture } = mount();
+  q('.p1').click();
+  fixture.detectChanges();
+  expect(document.querySelector('.dzg-popover')).not.toBeNull();
+  fixture.destroy();
+  expect(document.querySelector('.dzg-popover')).toBeNull();
+  expect(warn.mock.calls.map((c) => String(c[0])).filter((m) => /destroyed/i.test(m))).toEqual([]);
+  warn.mockRestore();
+});

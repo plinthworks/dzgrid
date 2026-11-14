@@ -1,6 +1,6 @@
 ---
 title: "icons"
-description: "Vos propres icônes pour les marques de la grille : tri, filtre, menu, bouton d’ouverture, sous-menu, poignée."
+description: "Vos propres icônes pour les marques de la grille : tri, filtre, menu, bouton d’ouverture, sous-menu, poignée, pagination."
 ---
 
 import CodeTabs from '../../../../components/CodeTabs.astro';
@@ -25,6 +25,7 @@ page, copié — pour chacune :
 | `chevron` | Le bouton d’ouverture d’un arbre, d’un détail et d’un groupe de colonnes, tourné vers la fin de la ligne quand il est fermé ; tourné et inversé comme celui par défaut. |
 | `submenu` | La marque de sous-menu d’une entrée de menu, inversée de droite à gauche. |
 | `grip` | La poignée par laquelle on déplace une ligne. |
+| `pagerFirst`, `pagerPrevious`, `pagerNext`, `pagerLast` | Les marques « « ‹ › » » de la pagination (1.12.0). Dessinez-les orientées comme de gauche à droite (première et précédente vers la gauche) : de droite à gauche elles sont inversées, comme les marques par défaut. Chacune n’est dessinée que si elle est donnée ; les autres gardent leur marque. Dans la couleur du bouton, grisées quand il ne peut pas agir ; les noms des boutons (« Première page », …) ne changent pas. |
 
 L’icône est dessinée dans la couleur et la taille de la marque (`--dzg-icon-size`), quel que soit son propre
 remplissage. Il faut `theming()` de `@dzgrid/dom/theme`. Une icône qui n’est pas faite de simples formes — un

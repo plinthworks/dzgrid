@@ -77,6 +77,15 @@ complete, English and French).
   in 1.11 and appears without animation.
 - The element (`<dz-grid>`): use `tooltip()` and `popover()` from `@dzgrid/dom` directly.
 
+### Added — the pager's icons (owner 2026-11-14)
+- **`icons: { pagerFirst, pagerPrevious, pagerNext, pagerLast }`** (with `theming()`): the pager's « « ‹ › » » marks
+  as your own SVG icons, cleaned and refused like the other icons. Each is drawn only when given (the others keep
+  their character), in the pager button's colour (dimmed on a button that cannot act), at its text size or
+  `--dzg-icon-size`, and mirrored in right to left as the characters are (draw them for left to right). The buttons'
+  names (« First page », …) do not change.
+- Size lines: `@dzgrid/dom/theme` 2 510 → 2 530 (+0.8 %, measured 2 519: the four keys); the rules that draw them are
+  `pagination()`'s own CSS (`@dzgrid/dom/pagination` measured 3 366 under its 3 450); K.8 measured 91 873 under its 92 000; the real Angular example 102 700 → 103 000 (+0.3 %, measured 102 965).
+
 ### Upgrading (tooltips)
 - Nothing to change: `tooltips: { delayMs }`, a column's `tooltip` returning a string, `headerTooltip` and a tooltip
   part behave as before. A `variables.css` detail changed before publishing: a tooltip above its cell is placed by the
@@ -88,6 +97,12 @@ complete, English and French).
   measured 102 697).
 
 ### Fixed
+- **Tooltips and popovers, from the code review before publishing**: a popover now closes when its trigger leaves the
+  page or its grid row shows another row without any scroll (a view swapped, a sort, a grid destroyed) — it stayed
+  open, pointing at nothing; Tab with the focus on the popover itself (after a click on its words) goes to its first
+  control instead of closing it; an open popover's trigger shows no tooltip; a tooltip moving from HTML to words that
+  read the same draws the words; a grid destroyed with its tooltip shown is no longer kept by the page; Angular's
+  `[dzPopover]` destroyed while open no longer emits `(closed)` on its destroyed output (Angular's NG0953 warning).
 - **A keyboard-focused Retry button keeps its focus ring**: its rule had lost its body and ran into the pagination
   footer's, so a focused Retry took the strip's padding, edge and colours.
 - **A header's title stays at its start under a page's reset** (seen with Tailwind 3's preflight and the unlayered

@@ -91,7 +91,8 @@ CSS Fonts 4 (`font-variant-numeric`), CSS Masking 1 (`mask`), SVG 2 (what an ima
     `--dzg-icon-size` sizes the sort mark, the chevrons, the submenu arrow, the grip and the funnel (its insets relative
     to it; 12 px by default for the funnel, today's).
 17. `icons` setting (needs `theming()`): `sortAsc`, `sortDesc`, `filter`, `filterActive` (the filtered column's;
-    default: `filter`), `menu`, `chevron` (tree, detail, groups: turned and mirrored as today's), `submenu`, `grip`.
+    default: `filter`), `menu`, `chevron` (tree, detail, groups: turned and mirrored as today's), `submenu`, `grip`;
+    the pager's `pagerFirst`, `pagerPrevious`, `pagerNext`, `pagerLast` (1.12.0, 41).
     Each an SVG string or an `SVGElement` (copied, never moved). Drawn in the mark's colour (`currentColor` whatever
     the SVG's own fill), at the mark's size, mirrored where the default is.
 18. Cleaned before use: the root must be `<svg>`; no `<script>`, `<style>`, `<foreignObject>`, no other element than
@@ -304,6 +305,16 @@ everything an application needs is a `--dzg-*` variable (or a `theme` key, or a 
     (`['footer.selected', 'footer.count', 'footer.pager']`, fixed at creation; a host's part replaces one); the select
     is hidden with fewer than two sizes (`pagination: { pageSizes }`); « last » is not drawn when pages go by cursor.
 
+### The pager's marks as icons (owner 2026-11-14)
+41. **`icons.pagerFirst`, `pagerPrevious`, `pagerNext`, `pagerLast`** (needs `theming()`, as every icon): the pager's
+    « « ‹ › » » marks drawn as the application's icons, each one only when given — a mark not given keeps its character,
+    unchanged. Cleaned and refused as the others (18), live (19). Drawn at the pager button's text size (`1em`) or
+    `--dzg-icon-size` when set, in the button's colour (`--dzg-pager-button-fg`, and `--dzg-pager-button-disabled-fg` on
+    a button that cannot act), as a mask over that colour (forced colours: the system's text colour). Mirrored in right
+    to left, as the characters are: an icon drawn pointing left in left to right points right in Arabic — previous and
+    first point to the line's start. The buttons' accessible names are unchanged (« First page », …): the icon, as the
+    character, is hidden from screen readers. With the layered and the unlayered sheets, under a page's reset.
+
 ## Right to left
 The separator, the last column's line, the arrow's place and the header padding are logical; the separator's
 background position is mirrored by `:dir(rtl)`.
@@ -311,6 +322,6 @@ background position is mirrored by `:dir(rtl)`.
 ## Tests
 `packages/dom/test/presentation-1-12.test.ts` (25, 29, 32), `packages/theme/test/presentation-1-12.test.ts` (24, 26–33,
 both copies, contrast pairs, the guide's table), `packages/theme/test/presentation-1-12-fixes.test.ts` (34–37, 39–40),
-`packages/dom/test/filters-set-width.test.ts` (38), browsers `node scripts/browser-1-12.mjs` (Chrome, Firefox, WebKit ×
+`packages/dom/test/filters-set-width.test.ts` (38), `packages/dom/test/pager-icons.test.ts` (41), browsers `node scripts/browser-1-12.mjs` (Chrome, Firefox, WebKit ×
 layered / unlayered × light / dark × ltr / ar × a page with Tailwind 3's preflight; axe; every variable's default and
-effect, table-driven; 34 the header's places, 37 the forced row text, 38 the list's width; 39–40 the pager apart from the popups' buttons, each bar variable's default and effect).
+effect, table-driven; 34 the header's places, 37 the forced row text, 38 the list's width; 39–40 the pager apart from the popups' buttons, each bar variable's default and effect; 41 the pager's icons: size, colour, disabled colour, mirrored, names).

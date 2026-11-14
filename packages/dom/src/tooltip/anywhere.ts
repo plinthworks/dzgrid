@@ -43,7 +43,8 @@ function bubbleOf(doc: Document, nonce: string | undefined): Tooltip {
     gone = tip?.gone;
     g?.();
     if (tip?.node) el.replaceChildren(tip.node);
-    else if (!tip) el.replaceChildren();
+    // Words after nodes: the nodes go (the base then writes the words).
+    else el.replaceChildren();
     return !!tip?.node;
   });
   t.report = (e) => void doc.defaultView?.reportError?.(e);
@@ -66,7 +67,8 @@ export function tooltip(el: HTMLElement, options: TooltipOptions): TooltipHandle
   const tip = (): Tooltip => bubbleOf(doc, o.nonce);
   const mine = (): boolean => bubbles.get(doc)?.anchor === el;
   const show = (delay: number): void => {
-    if (o.disabled) return;
+    // An open popover's trigger shows none (tooltips-popovers.md 14).
+    if (o.disabled || el.matches('[aria-haspopup][aria-expanded=true]')) return;
     const t = tip();
     const look = o;
     t.look = () => look;

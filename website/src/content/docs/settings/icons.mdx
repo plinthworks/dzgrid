@@ -1,6 +1,6 @@
 ---
 title: "icons"
-description: "Your own icons for the grid's marks: sort, filter, menu, toggle, submenu, grip."
+description: "Your own icons for the grid's marks: sort, filter, menu, toggle, submenu, grip, pager."
 ---
 
 import CodeTabs from '../../../components/CodeTabs.astro';
@@ -25,6 +25,7 @@ copied — for any of them:
 | `chevron` | A tree's, a detail's and a column group's toggle, pointing to the end of the line when closed; turned and mirrored as the default is. |
 | `submenu` | A menu item's submenu mark, mirrored in right to left. |
 | `grip` | The handle a row is moved by. |
+| `pagerFirst`, `pagerPrevious`, `pagerNext`, `pagerLast` | The pager's « « ‹ › » » marks (1.12.0). Draw them pointing as in left to right (first and previous to the left): in right to left they are mirrored, as the default marks are. Each drawn only when given; the others keep their mark. In the pager button's colour, dimmed when it cannot act; the buttons' names (« First page », …) do not change. |
 
 The icon is drawn in the mark's colour and size (`--dzg-icon-size`), whatever its own fill. It needs `theming()` from
 `@dzgrid/dom/theme`. An icon that is not plain shapes — a `<script>`, a `<style>`, a `<foreignObject>`, an `on…`

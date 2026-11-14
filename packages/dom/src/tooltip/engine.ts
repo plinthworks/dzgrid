@@ -87,6 +87,8 @@ export const custom = (el: HTMLElement, look: TipLook): void => void (look.anima
 
 /** The tooltip on screen in the page (3): showing another hides it. */
 let shown: Tooltip | null = null;
+/** A grid destroyed: its tooltip no longer the page's (nothing kept of it). */
+export const forget = (t: Tooltip): void => void (shown === t && (shown = null));
 
 /**
  * Gives a base bubble the opt-in behaviour: its placement (`auto` meaning `auto`), the app's animation, the awaited

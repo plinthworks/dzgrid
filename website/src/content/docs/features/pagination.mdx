@@ -23,6 +23,10 @@ still works through the API, with a `missing-feature` warning.
 A button that cannot act stays in place, dimmed, and keeps the focus. When every row of a page is ticked and more rows
 match, the footer offers « Select all 1 234 rows ».
 
+The first, previous, next and last marks can be your own icons: `icons: { pagerFirst, pagerPrevious, pagerNext,
+pagerLast }` with `theming()` (see [`icons`](../../settings/icons/)). Drawn in the button's colour, sized by its text
+(or `--dzg-icon-size`), mirrored in Arabic; the buttons keep their names.
+
 ## Options
 
 - `footer`: the footer's parts, in order. By default `['footer.selected', 'footer.count', 'footer.pager']`. A host

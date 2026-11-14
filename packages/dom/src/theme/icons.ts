@@ -45,8 +45,8 @@ export function cleanIcon(input: string | SVGElement): { ok: string } | { refuse
   return { ok: new XMLSerializer().serializeToString(root) };
 }
 
-/** The icons' names (the setting's keys) and the marks each draws, by how the mark is made. */
-export const ICONS = { sortAsc: 0, sortDesc: 0, sortNone: 0, filter: 0, filterActive: 0, menu: 0, chevron: 0, submenu: 0, grip: 0 } as const;
+/** The icons' names (the setting's keys). The pager's are drawn by pagination()'s own CSS (pagination/styles.ts). */
+export const ICONS = { sortAsc: 0, sortDesc: 0, sortNone: 0, filter: 0, filterActive: 0, menu: 0, chevron: 0, submenu: 0, grip: 0, pagerFirst: 0, pagerPrevious: 0, pagerNext: 0, pagerLast: 0 } as const;
 
 const on = (name: string, sel: string) => `[data-dzg-icons~=${name}] ${sel}`;
 /** Marks drawn in the text (a `::before` of their own size). */

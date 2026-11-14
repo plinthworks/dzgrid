@@ -1,6 +1,6 @@
 import type { GridContext } from '../context.js';
 import type { GridFeature } from '../features.js';
-import { enhance } from './engine.js';
+import { enhance, forget } from './engine.js';
 
 const BUTTON = '.dzg-header button[aria-label]';
 
@@ -25,7 +25,7 @@ export function tooltips(): GridFeature {
       g.tipSel = () => `${on() ? `${BUTTON},` : ''}.dzg-hcell,.dzg-cell`;
       // Its name already: not described twice.
       g.tipFor = (t) => (on() && t.matches(BUTTON) ? { text: t.getAttribute('aria-label')!, said: true } : undefined);
-      return { destroy() {} };
+      return { destroy: () => forget(g.tip) };
     },
   };
 }

@@ -325,3 +325,22 @@ describe('placement (with tooltips())', () => {
     expect(tip.getAttribute('data-side')).toBe('block-start');
   });
 });
+
+describe('review', () => {
+  it('a grid destroyed with its tooltip shown is forgotten by the page (no hide() on it later, nothing kept)', async () => {
+    const { g, tip, cell, over } = make({}, false, [tooltips()]);
+    over(cell(1, 'n'));
+    vi.advanceTimersByTime(600);
+    expect(tip.hidden).toBe(false);
+    const { Tooltip } = await import('../src/render/tooltip.js');
+    const spy = vi.spyOn(Tooltip.prototype, 'hide');
+    g.destroy();
+    const b = document.body.appendChild(document.createElement('button'));
+    const { tooltip } = await import('../src/tooltip.js');
+    const h = tooltip(b, { content: 'Page' });
+    h.show();
+    // The page's own bubble may hide; the destroyed grid's is never touched again.
+    expect(spy.mock.contexts.filter((t) => (t as InstanceType<typeof Tooltip>).el === tip)).toHaveLength(0);
+    h.destroy();
+  });
+});

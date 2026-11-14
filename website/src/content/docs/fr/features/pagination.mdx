@@ -23,6 +23,10 @@ quand même par l’API, avec un avertissement `missing-feature`.
 Un bouton qui ne peut pas agir reste à sa place, grisé, et garde le focus. Quand toutes les lignes d’une page sont
 cochées et que d’autres lignes correspondent, le pied propose « Sélectionner les 1 234 lignes ».
 
+Les marques première, précédente, suivante et dernière peuvent être vos propres icônes : `icons: { pagerFirst,
+pagerPrevious, pagerNext, pagerLast }` avec `theming()` (voir [`icons`](../../settings/icons/)). Dessinées dans la
+couleur du bouton, à la taille de son texte (ou `--dzg-icon-size`), inversées en arabe ; les boutons gardent leur nom.
+
 ## Options
 
 - `footer` : les parties du pied, dans l’ordre. Par défaut `['footer.selected', 'footer.count', 'footer.pager']`.

@@ -28,7 +28,9 @@ const NOTES = ar ? ['ملاحظة', 'جاف', 'رطب', 'ملاحظة مفصلة
 const rows: P[] = Array.from({ length: 40 }, (_, i) => ({ id: `p${i}`, seed: ar ? `بذرة ${i}` : `Graine ${i}`, grams: (i * 37) % 1000, jan: i % 4, feb: (i * 3) % 5, note: NOTES[i % 4]!, mar: (i * 7) % 11 }));
 const svg = (d: string) => `<svg viewBox="0 0 16 16"><path d="${d}"/></svg>`;
 const icons = q.get('icons')
-  ? { sortAsc: svg('M8 2l6 10H2z'), sortDesc: svg('M8 14L2 4h12z'), sortNone: svg('M8 1l4 5H4zM8 15l4-5H4z'), filter: svg('M1 1h14v14H1z'), filterActive: svg('M1 1h14L8 15z'), menu: svg('M1 1h14v4H1zM1 11h14v4H1z'), submenu: svg('M4 1l8 7-8 7z'), chevron: svg('M4 1l8 7-8 7z') }
+  ? { sortAsc: svg('M8 2l6 10H2z'), sortDesc: svg('M8 14L2 4h12z'), sortNone: svg('M8 1l4 5H4zM8 15l4-5H4z'), filter: svg('M1 1h14v14H1z'), filterActive: svg('M1 1h14L8 15z'), menu: svg('M1 1h14v4H1zM1 11h14v4H1z'), submenu: svg('M4 1l8 7-8 7z'), chevron: svg('M4 1l8 7-8 7z'),
+      // The pager's (presentation-settings.md 41): drawn for left to right (first and previous point left), asymmetric.
+      pagerFirst: svg('M2 1h2v14H2zM14 1v14L5 8z'), pagerPrevious: svg('M12 1v14L3 8z'), pagerNext: svg('M4 1v14l9-7z'), pagerLast: svg('M12 1h2v14h-2zM2 1v14l9-7z') }
   : undefined;
 const t = ar ? { seed: 'البذرة', grams: 'غرام', jan: 'يناير', feb: 'فبراير', note: 'ملاحظة', mar: 'مارس' } : { seed: 'Graine', grams: 'Grammes', jan: 'Janvier', feb: 'Février', note: 'Note', mar: 'Mars' };
 const columns: ColumnDef<P, any>[] = [

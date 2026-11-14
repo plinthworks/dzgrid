@@ -254,4 +254,30 @@ describe('tooltip(el, options)', () => {
     await Promise.resolve();
     expect(document.querySelector<HTMLElement>('.dzg-tooltip.dzg-float')!.hidden).toBe(false);
   });
+
+  it('review: an open popover\'s trigger shows no tooltip (sheet 14)', () => {
+    const b = button();
+    b.setAttribute('aria-haspopup', 'dialog');
+    b.setAttribute('aria-expanded', 'true');
+    use(tooltip(b, { content: 'Details', delayMs: 0 }));
+    enter(b);
+    vi.advanceTimersByTime(10);
+    expect(bubble()?.hidden ?? true).toBe(true);
+    b.setAttribute('aria-expanded', 'false');
+    enter(b);
+    vi.advanceTimersByTime(10);
+    expect(bubble()!.hidden).toBe(false);
+  });
+
+  it('review: moving from an HTML tooltip to words that read the same draws the words, not the old markup', () => {
+    const a = button('A');
+    const b = button('B');
+    const ha = use(tooltip(a, { content: { html: '<b>Same</b>' } }));
+    const hb = use(tooltip(b, { content: 'Same' }));
+    ha.show();
+    expect(bubble()!.querySelector('b')).not.toBeNull();
+    hb.show();
+    expect(bubble()!.querySelector('b')).toBeNull();
+    expect(bubble()!.textContent).toBe('Same');
+  });
 });

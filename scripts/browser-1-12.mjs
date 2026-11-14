@@ -810,6 +810,25 @@ async function run(name, cfg) {
       return out;
     });
     const dm = await marks();
+    // (11) The pager's marks (presentation-settings.md 41): each button's mark, its box, its colours, its name.
+    const pagerMarks = (size) => page.evaluate((size) => {
+      const r = document.querySelector('.dzg');
+      if (size) r.style.setProperty('--dzg-icon-size', size);
+      const out = {};
+      for (const go of ['first', 'prev', 'next', 'last']) {
+        const b = document.querySelector(`.dzg-footer [data-go=${go}]`);
+        const s = b.querySelector('span');
+        const bs = getComputedStyle(b);
+        const ss = getComputedStyle(s);
+        const br = b.getBoundingClientRect();
+        const sr = s.getBoundingClientRect();
+        out[go] = { text: s.textContent, hidden: s.getAttribute('aria-hidden'), name: b.getAttribute('aria-label'), off: b.getAttribute('aria-disabled'), mask: ss.maskImage || ss.webkitMaskImage, fill: ss.webkitTextFillColor, bg: ss.backgroundColor, color: bs.color, fs: parseFloat(bs.fontSize), w: sr.width, h: sr.height, scale: ss.scale, dx: Math.abs((sr.left + sr.right) / 2 - (br.left + br.right) / 2), dy: Math.abs((sr.top + sr.bottom) / 2 - (br.top + br.bottom) / 2) };
+      }
+      if (size) r.style.removeProperty('--dzg-icon-size');
+      return out;
+    }, size);
+    const pd = await pagerMarks();
+    check(`${tag}: no pager icon: the « ‹ › » characters, painted, no mask, not turned`, ['first', 'prev', 'next', 'last'].every((g, i) => pd[g].text === '\xab\u2039\u203a\xbb'[i] && !/data:/.test(pd[g].mask) && pd[g].fill === pd[g].color && pd[g].scale === 'none'), pd);
     check(`${tag}: no app icon: the default funnel, its hollow, the triangles, the ⋮ and the submenu arrow`, dm.funnel.clip.startsWith('polygon') && dm.hollow === '""' && dm.sort === null && dm.asc.includes('▲') && dm.menu.clip.startsWith('path') && dm.sub.clip.startsWith('path'), dm);
 
     // (10) The set filter's list as wide as its longest value (filter-set.md « The list's width »): no label cut, wider than
@@ -874,6 +893,17 @@ async function run(name, cfg) {
     await page.evaluate(() => document.querySelector('.dzg').style.removeProperty('--dzg-sort-none-fg'));
     check(`${tag}: the unsorted mark in the mark's colour by default, --dzg-sort-none-fg recolours it alone`, nf0.none === nf0.noneColor && nf1.none === RED && nf1.asc === nf0.asc && nf0.asc !== RED, { nf0, nf1 });
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/1-12-${name}-${css}-${lang}${dark ? '-dark' : ''}${preflight ? '-pf' : ''}-icons.png`, clip: { x: 0, y: 0, width: 900, height: 200 } });
+    // (11) The pager's icons: drawn over the hidden character, at the button's text size (or --dzg-icon-size), centred,
+    // in the button's colour (the disabled one on « first »; a layered sheet under an unlayered reset: the reset's button
+    // colour, as every pager colour there), mirrored in Arabic, their names unchanged.
+    const pi = await pagerMarks();
+    const NAMES = lang === 'ar' ? null : ['Première page', 'Page précédente', 'Page suivante', 'Dernière page'];
+    check(`${tag}: the pager's icons drawn (mask), the character not painted, centred, at the button's text size`, ['first', 'prev', 'next', 'last'].every((g) => /data:image\/svg\+xml/.test(pi[g].mask) && pi[g].fill === 'rgba(0, 0, 0, 0)' && Math.abs(pi[g].w - pi[g].fs) < 0.6 && Math.abs(pi[g].h - pi[g].fs) < 0.6 && pi[g].dx < 1.5 && pi[g].dy < 1.5), pi);
+    check(`${tag}: the pager's icons in the button's colour, the disabled one on « first »`, ['first', 'prev', 'next', 'last'].every((g) => pi[g].bg === pi[g].color) && pi.first.off === 'true' && pi.next.off === 'false' && (css === 'layered' && preflight ? true : pi.first.bg !== pi.next.bg), pi);
+    check(`${tag}: the pager's icons ${rtl ? 'mirrored (right to left)' : 'as drawn'}; names and states unchanged`, ['first', 'prev', 'next', 'last'].every((g) => pi[g].scale === (rtl ? '-1 1' : 'none') && pi[g].hidden === 'true' && pi[g].name === pd[g].name && pi[g].off === pd[g].off) && (!NAMES || NAMES.every((n, i) => pi[['first', 'prev', 'next', 'last'][i]].name === n)), { pi, pd });
+    const ps = await pagerMarks('20px');
+    check(`${tag}: --dzg-icon-size sizes the pager's icons`, ['first', 'prev', 'next', 'last'].every((g) => Math.abs(ps[g].w - 20) < 0.6 && Math.abs(ps[g].h - 20) < 0.6), ps);
+    if (SHOTS) await page.locator('.dzg-footer').screenshot({ path: `${SHOTS}/1-12-${name}-${css}-${lang}${dark ? '-dark' : ''}${preflight ? '-pf' : ''}-pager-icons.png` });
     if (name === 'chrome') {
       await page.addScriptTag({ content: AXE });
       const v = await page.evaluate(async () => (await window.axe.run(document.querySelector('#host'), { runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] })).violations.map((x) => `${x.id}: ${x.nodes.length}`));

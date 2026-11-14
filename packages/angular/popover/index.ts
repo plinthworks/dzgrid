@@ -44,6 +44,8 @@ export class DzPopover {
     const el: HTMLElement = inject(ElementRef).nativeElement;
     const ng = { app: inject(ApplicationRef), env: inject(EnvironmentInjector), injector: inject(Injector) };
     const rendered = signal(false);
+    // Destroyed: its outputs are gone too — the closing a destroy causes is not emitted.
+    let live = true;
     afterNextRender(() => rendered.set(true));
     effect(() => {
       if (!rendered()) return;
@@ -55,11 +57,11 @@ export class DzPopover {
           label: this.dzPopoverLabel(), group: this.dzPopoverGroup(), openOn: this.dzPopoverOpenOn(),
         }),
         onOpen: () => (this.#open.set(true), this.opened.emit()),
-        onClose: (r: PopoverCloseReason) => (this.#open.set(false), this.closed.emit(r)),
+        onClose: (r: PopoverCloseReason) => (this.#open.set(false), live && this.closed.emit(r)),
       };
       untracked(() => (this.#handle ? this.#handle.update(o) : (this.#handle = popover(el, o))));
     });
-    inject(DestroyRef).onDestroy(() => this.#handle?.destroy());
+    inject(DestroyRef).onDestroy(() => ((live = false), this.#handle?.destroy()));
   }
 
   open(): void {

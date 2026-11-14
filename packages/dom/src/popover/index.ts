@@ -159,7 +159,8 @@ export function popover(trigger: HTMLElement, options: PopoverOptions): PopoverH
       if (k.key !== 'Tab' || k.defaultPrevented) return;
       const mine = [...bubble.querySelectorAll<HTMLElement>(FOCUSABLE)];
       const at = mine.indexOf(doc.activeElement as HTMLElement);
-      if (k.shiftKey ? at > 0 : at < mine.length - 1 && at >= 0) return;
+      // On the bubble itself (a click on its words), Tab goes on to its first control.
+      if (k.shiftKey ? at > 0 : at < mine.length - 1 && (at >= 0 || doc.activeElement === bubble)) return;
       e.preventDefault();
       const all = [...doc.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((x) => !me.has(x) || x === trigger);
       const to = k.shiftKey ? trigger : all[all.indexOf(trigger) + 1];
@@ -181,6 +182,14 @@ export function popover(trigger: HTMLElement, options: PopoverOptions): PopoverH
       stop.signal.addEventListener('abort', () => ro.disconnect());
     }
     if (win) on(win, 'resize', soon);
+    // Its trigger taken out of the page or its row showing another with no scroll (a view swapped, a sort, a grid
+    // destroyed): checked at the next frame too.
+    const Mut = win?.MutationObserver;
+    if (Mut) {
+      const mo = new Mut(soon);
+      mo.observe(doc.body, { subtree: true, childList: true, attributeFilter: ['aria-rowindex'] });
+      stop.signal.addEventListener('abort', () => mo.disconnect());
+    }
     play(bubble, o, 'open', report);
     // Into it when it has something to focus (an `autofocus` first); else the focus stays on the trigger.
     const first = bubble.querySelector<HTMLElement>('[autofocus]') ?? bubble.querySelector<HTMLElement>(FOCUSABLE);

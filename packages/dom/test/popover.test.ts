@@ -321,4 +321,41 @@ describe('popover(trigger, options)', () => {
       delete (window as unknown as { ResizeObserver?: unknown }).ResizeObserver;
     }
   });
+
+  it('review: closes when its trigger leaves the page with no scroll (a view swapped, a grid destroyed or repainted)', async () => {
+    const raf: FrameRequestCallback[] = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((f) => (raf.push(f), raf.length));
+    const row = document.body.appendChild(document.createElement('div'));
+    row.setAttribute('aria-rowindex', '5');
+    const t = row.appendChild(document.createElement('button'));
+    t.getBoundingClientRect = () => ({ left: 100, right: 140, top: 100, bottom: 120, width: 40, height: 20, x: 100, y: 100, toJSON: () => null });
+    const reasons: PopoverCloseReason[] = [];
+    const h = use(popover(t, { content: 'x', onClose: (r) => reasons.push(r) }));
+    h.open();
+    // Its row shows another row (no scroll: a sort, a reload).
+    row.setAttribute('aria-rowindex', '9');
+    await Promise.resolve();
+    raf.splice(0).forEach((f) => f(0));
+    expect(h.isOpen).toBe(false);
+    row.setAttribute('aria-rowindex', '5');
+    h.open();
+    row.remove();
+    await Promise.resolve();
+    raf.splice(0).forEach((f) => f(0));
+    expect(h.isOpen).toBe(false);
+    expect(reasons).toEqual(['gone', 'gone']);
+  });
+
+  it('review: Tab with the focus on the bubble itself (a click on its words) goes to its first control, it stays open', () => {
+    const t = trigger();
+    const h = use(popover(t, { content: form() }));
+    h.open();
+    h.el!.focus();
+    expect(document.activeElement).toBe(h.el);
+    const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+    h.el!.dispatchEvent(tab);
+    // The browser's own Tab moves on to its first control.
+    expect(tab.defaultPrevented).toBe(false);
+    expect(h.isOpen).toBe(true);
+  });
 });

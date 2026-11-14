@@ -229,7 +229,7 @@ export class Tooltip {
     // Drawn before it is measured: its size is the part's. Cleaned HTML: its nodes.
     if (!this.fill?.(tip)) {
       if (tip.node) this.el.replaceChildren(tip.node);
-      else if (this.el.textContent !== tip.text) this.el.textContent = tip.text;
+      else this.el.textContent = tip.text;
     }
     reveal(this.el, this.look(), tip.tone);
     // A failed save's reason is the cell's description already, a header button's tooltip its name: not twice.

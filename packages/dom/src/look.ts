@@ -94,4 +94,13 @@ export interface GridIcons {
   readonly submenu?: GridIcon;
   /** The handle a row is moved by. */
   readonly grip?: GridIcon;
+  /**
+   * The pager's first, previous, next and last marks (1.12.0, presentation-settings.md 41): each drawn only when given
+   * (the « « ‹ › » » characters otherwise), in the pager button's colour, at its text size or `--dzg-icon-size`; drawn
+   * as for left to right and mirrored in right to left (previous points to the line's start). Names unchanged.
+   */
+  readonly pagerFirst?: GridIcon;
+  readonly pagerPrevious?: GridIcon;
+  readonly pagerNext?: GridIcon;
+  readonly pagerLast?: GridIcon;
 }

@@ -54,6 +54,21 @@ Puis `npm run publish:verify`, et dans les applications `npm update @dzgrid/core
 - Tailles : base `@dzgrid/dom` 25 704 (+2 %, mesuré 25 690) ; nouvelles entrées à leur mesure + 10 % ; appli Angular
   réelle 102 700 (+0,5 %, mesuré 102 697) ; K.8 91 591 / 92 000.
 - Corrigé aussi : le bouton Réessayer garde son anneau de focus (il prenait l'allure du pied).
+- **Relecture du code des infobulles (2026-11-14)**, six défauts corrigés, chacun avec un test rouge d'abord : une bulle
+  restait ouverte quand son déclencheur quittait la page ou que sa ligne de grille changeait sans défilement (tri, vue
+  remplacée, grille détruite) ; Tab depuis la bulle elle-même (après un clic sur son texte) la fermait au lieu d'aller à
+  son premier contrôle ; le déclencheur d'une bulle ouverte montrait encore son infobulle ; une infobulle passant d'un
+  HTML à un texte identique gardait le HTML ; une grille détruite avec son infobulle affichée restait retenue par la
+  page ; `[dzPopover]` détruit ouvert émettait `(closed)` sur une sortie détruite (avertissement NG0953 d'Angular).
+
+## Icônes de la pagination (ta demande du 2026-11-14)
+
+- **`icons: { pagerFirst, pagerPrevious, pagerNext, pagerLast }`** (avec `theming()`) : les « « ‹ › » » deviennent tes
+  icônes SVG, nettoyées comme les autres. Chacune dessinée seulement si tu la donnes (sinon le caractère d'avant), dans
+  la couleur du bouton (grisée quand il ne peut pas agir), à la taille de son texte ou `--dzg-icon-size`, inversée en
+  arabe (dessine-les pour la gauche à droite). Les noms des boutons ne changent pas.
+- Tailles : `@dzgrid/dom/theme` 2 510 → 2 530 (+0,8 %, mesuré 2 519 : les quatre clés) ; le dessin est dans le CSS de
+  `pagination()` (3 366 / 3 450) ; K.8 91 873 / 92 000 ; appli Angular réelle 102 700 → 103 000 (+0,3 %, mesuré 102 965).
 
 ## Ce que la relecture a corrigé
 
