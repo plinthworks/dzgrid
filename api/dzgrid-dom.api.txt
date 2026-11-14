@@ -25,6 +25,10 @@
 # history: owner 2026-11-10: baseline extended to every published entry
 # history: owner 2026-11-11 « corrige tous »: every feature's layout CSS exported for injectStyles: false; GridTheme.columnHoverBg; PivotFeatureOptions.width documented; additions only — @dzgrid/dom/filters#FILTERS_CSS, @dzgrid/dom/pagination#PAGINATION_CSS, @dzgrid/dom/statusbar#STATUS_CSS, @dzgrid/dom/tree#TREE_CSS, @dzgrid/dom/grouping#TREE_CSS, @dzgrid/dom/detail#DETAIL_CSS, @dzgrid/dom/editors#EDITORS_CSS, @dzgrid/dom/spans#SPANS_CSS, @dzgrid/dom/groups#GROUPS_CSS, @dzgrid/dom/filters-panel#FILTERS_PANEL_CSS, @dzgrid/dom/find#FIND_CSS, @dzgrid/dom/dock#DOCK_CSS, @dzgrid/dom/auto-height#WRAP_CSS, @dzgrid/dom/responsive#RESPONSIVE_CSS, @dzgrid/dom/row-drag#ROW_DRAG_CSS, @dzgrid/dom/row-numbers#ROW_NUMBERS_CSS, @dzgrid/dom/import#IMPORT_CSS, @dzgrid/dom#GridTheme, @dzgrid/dom/pivot#PivotFeatureOptions
 # history: owner 2026-11-13: reload() on the grid's api, DzgController and <dz-grid> — additions only, 1.12.0 — @dzgrid/dom#GridApi
+# history: owner 2026-11-14 Q-T1 B: the new entries of tooltips and popovers (additions) — @dzgrid/dom/tooltip#TipAnimate, @dzgrid/dom/tooltip#TipAnimation, @dzgrid/dom/tooltip#TipContent, @dzgrid/dom/tooltip#TipLook, @dzgrid/dom/tooltip#TipSide, @dzgrid/dom/tooltip#TipTone, @dzgrid/dom/tooltip#TooltipHandle, @dzgrid/dom/tooltip#TooltipOptions, @dzgrid/dom/tooltip#TooltipPlacement, @dzgrid/dom/tooltip#safeHtml, @dzgrid/dom/tooltip#tooltip, @dzgrid/dom/tooltip#tooltips, @dzgrid/dom/popover#PopoverCloseReason, @dzgrid/dom/popover#PopoverHandle, @dzgrid/dom/popover#PopoverOptions, @dzgrid/dom/popover#TipAnimate, @dzgrid/dom/popover#TipAnimation, @dzgrid/dom/popover#TipContent, @dzgrid/dom/popover#TipLook, @dzgrid/dom/popover#TipSide, @dzgrid/dom/popover#TipTone, @dzgrid/dom/popover#TooltipPlacement, @dzgrid/dom/popover#popover
+# history: owner 2026-11-14 hook info and shape (the same unpublished entries, accepted earlier in this batch; additions over 1.11) — @dzgrid/dom/tooltip#TipAnimate, @dzgrid/dom/tooltip#TipAnimateInfo, @dzgrid/dom/tooltip#TipLook, @dzgrid/dom/popover#TipAnimate, @dzgrid/dom/popover#TipAnimateInfo, @dzgrid/dom/popover#TipLook
+# history: owner 2026-11-14 a GSAP tween as the hook's answer (the same unpublished entries; additions over 1.11) — @dzgrid/dom/tooltip#TipAnimate, @dzgrid/dom/tooltip#TipThenable, @dzgrid/dom/popover#TipAnimate, @dzgrid/dom/popover#TipThenable
+# history: owner 2026-11-14 a GSAP tween as the hook's answer (the same unpublished entries; additions over 1.11) — @dzgrid/dom/tooltip#TipThenable, @dzgrid/dom/popover#TipThenable
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -4773,3 +4777,132 @@
           'import.failed': string;
       };
   };
+
+@ @dzgrid/dom/tooltip
+## TipAnimate
+  export type TipAnimate = (el: HTMLElement, phase: 'open' | 'close', info: TipAnimateInfo) => void | PromiseLike<unknown> | TipThenable;
+## TipAnimation
+  export type TipAnimation = 'fade' | 'scale' | 'slide' | 'pop' | 'rise' | 'none';
+## TipContent
+  export type TipContent = string | Node | {
+      readonly html: string;
+  } | (() => string | Node | {
+      readonly node: Node;
+      readonly gone?: () => void;
+  });
+## TipLook
+  export interface TipLook {
+      readonly tone?: TipTone;
+      readonly animation?: TipAnimation;
+      readonly animate?: TipAnimate;
+      readonly reducedMotion?: 'none' | 'fade';
+      readonly placement?: TooltipPlacement;
+      readonly flip?: boolean;
+      readonly shape?: string;
+  }
+## TipSide
+  export type TipSide = 'block-end' | 'block-start' | 'inline-end' | 'inline-start';
+## TipTone
+  export type TipTone = 'info' | 'neutral' | 'success' | 'warning' | 'danger';
+## TooltipHandle
+  export interface TooltipHandle {
+      show(): void;
+      hide(): void;
+      update(o: Partial<TooltipOptions>): void;
+      readonly shown: boolean;
+      destroy(): void;
+  }
+## TooltipOptions
+  export interface TooltipOptions extends TipLook {
+      readonly content: TipContent;
+      readonly delayMs?: number;
+      readonly hideDelayMs?: number;
+      readonly disabled?: boolean;
+      readonly nonce?: string;
+  }
+## TooltipPlacement
+  = @dzgrid/core#TooltipPlacement
+## safeHtml
+  export declare function safeHtml(html: string, doc?: Document): DocumentFragment;
+## tooltip
+  export declare function tooltip(el: HTMLElement, options: TooltipOptions): TooltipHandle;
+## tooltips
+  export declare function tooltips(): GridFeature;
+## TipAnimateInfo
+  export interface TipAnimateInfo {
+      readonly side: TipSide;
+      readonly tone: TipTone;
+      readonly dir: Dir;
+      readonly reduced: boolean;
+      readonly shape: SVGPathElement | null;
+  }
+## TipThenable
+  export interface TipThenable {
+      then(onDone: (value: unknown) => unknown): unknown;
+  }
+
+@ @dzgrid/dom/popover
+## PopoverCloseReason
+  export type PopoverCloseReason = 'escape' | 'outside' | 'focus' | 'trigger' | 'code' | 'group' | 'gone';
+## PopoverHandle
+  export interface PopoverHandle {
+      open(): void;
+      close(): void;
+      toggle(): void;
+      readonly isOpen: boolean;
+      readonly el: HTMLElement | null;
+      reposition(): void;
+      update(o: Partial<PopoverOptions>): void;
+      destroy(): void;
+  }
+## PopoverOptions
+  export interface PopoverOptions extends TipLook {
+      readonly content: TipContent;
+      readonly label?: string;
+      readonly group?: string;
+      readonly openOn?: 'click' | 'manual';
+      readonly nonce?: string;
+      readonly onOpen?: () => void;
+      readonly onClose?: (reason: PopoverCloseReason) => void;
+  }
+## TipAnimate
+  export type TipAnimate = (el: HTMLElement, phase: 'open' | 'close', info: TipAnimateInfo) => void | PromiseLike<unknown> | TipThenable;
+## TipAnimation
+  export type TipAnimation = 'fade' | 'scale' | 'slide' | 'pop' | 'rise' | 'none';
+## TipContent
+  export type TipContent = string | Node | {
+      readonly html: string;
+  } | (() => string | Node | {
+      readonly node: Node;
+      readonly gone?: () => void;
+  });
+## TipLook
+  export interface TipLook {
+      readonly tone?: TipTone;
+      readonly animation?: TipAnimation;
+      readonly animate?: TipAnimate;
+      readonly reducedMotion?: 'none' | 'fade';
+      readonly placement?: TooltipPlacement;
+      readonly flip?: boolean;
+      readonly shape?: string;
+  }
+## TipSide
+  export type TipSide = 'block-end' | 'block-start' | 'inline-end' | 'inline-start';
+## TipTone
+  export type TipTone = 'info' | 'neutral' | 'success' | 'warning' | 'danger';
+## TooltipPlacement
+  = @dzgrid/core#TooltipPlacement
+## popover
+  export declare function popover(trigger: HTMLElement, options: PopoverOptions): PopoverHandle;
+## TipAnimateInfo
+  export interface TipAnimateInfo {
+      readonly side: TipSide;
+      readonly tone: TipTone;
+      readonly dir: Dir;
+      readonly reduced: boolean;
+      readonly shape: SVGPathElement | null;
+  }
+## TipThenable
+  export interface TipThenable {
+      then(onDone: (value: unknown) => unknown): unknown;
+  }

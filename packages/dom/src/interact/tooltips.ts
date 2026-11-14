@@ -5,12 +5,19 @@ import type { TipFor } from '../render/tooltip.js';
 /** Tooltips (D11): the host's words only, after a delay on hover, at once on a keyboard focus. */
 export function installTooltips<T>(g: GridContext<T>): void {
   const { el, columns, rows, rowRenderer, scope, tip } = g;
+  const set = () => g.settings.tooltips ?? {};
+  // Read at each show and hide: the setting is live. The grid's tooltip opens below or above its cell, at its start.
+  tip.look = set;
+  tip.report = g.report;
 
   function tooltipFor(target: HTMLElement): TipFor | null {
     // A row a feature added under the headers, a group header: not the column header (its tooltips are the
     // feature's); a grid in a detail panel: its own (step 10 review).
     // A cell being edited: its field is what the user reads (step 5; the bubble says a refusal).
     if (target.closest('.dzg') !== el.root || target.closest('.dzg-hextra, .dzg-hgroup, [data-dzg-editing]')) return null;
+    // `tooltips()`'s own first: a header's button saying its name (tooltips-popovers.md 1).
+    const extra = g.tipFor?.(target);
+    if (extra !== undefined) return extra;
     const hcell = target.closest<HTMLElement>('.dzg-hcell');
     if (hcell) {
       const col = hcell.dataset['col'] ? columns.get(hcell.dataset['col']) : undefined;
@@ -25,14 +32,20 @@ export function installTooltips<T>(g: GridContext<T>): void {
     // A failed save's reason first (S7-O4): read once, through the mark's description.
     const own = node && g.edit?.tip?.(key!, col!.id);
     if (own) return { text: own, col: col!, row: node!.data, value: null, said: true };
-    if (!node || typeof col!.def.tooltip !== 'function') return null;
+    if (!node || typeof col!.def.tooltip !== 'function' || set().cells === false) return null;
     // A host function that throws shows no tooltip; the error is reported.
     try {
       // What the cell shows (an edit's value, step 7), not the row's.
       const raw = g.edit ? g.edit.read(col as never, node.data, key!) : col!.read(node.data);
       const value = isBlank(raw) ? null : col!.codec.coerce(raw, g.ctx);
-      const text = col!.def.tooltip!(value, node.data, g.settings.context);
-      return text ? { text, col: col!, row: node.data, value } : null;
+      const said = col!.def.tooltip!(value, node.data, g.settings.context);
+      const spec = typeof said === 'string' ? { text: said } : said;
+      // HTML only through the app's cleaner (tooltips-popovers.md 16); without it, its words, or nothing.
+      const clean = set().html;
+      const frag = spec?.html != null && clean ? clean(spec.html, g.doc) : null;
+      const text = spec?.text || frag?.textContent || '';
+      // Its tone and placement as the column gave them.
+      return text ? { ...spec, text, node: frag, col: col!, row: node.data, value } : null;
     } catch (err) {
       g.report(err);
       return null;
@@ -53,10 +66,11 @@ export function installTooltips<T>(g: GridContext<T>): void {
     else if (tip.anchor && tip.anchor !== t) tip.hide();
   });
   scope.on(el.viewport, 'pointerover', (e: PointerEvent) => {
-    const t = (e.target as HTMLElement).closest<HTMLElement>('.dzg-hcell, .dzg-cell');
+    // Never on touch alone (tooltips-popovers.md 2): a tap is no hover.
+    const t = e.pointerType === 'touch' ? null : (e.target as HTMLElement).closest<HTMLElement>(g.tipSel?.() ?? '.dzg-hcell,.dzg-cell');
     if (!t || t === tip.anchor) return;
     const found = tooltipFor(t);
-    if (found) tip.showFor(t, found, g.dir, g.settings.tooltips?.delayMs ?? 500);
+    if (found) tip.showFor(t, found, g.dir, set().delayMs ?? 500);
     else tip.hideSoon();
   });
   scope.on(el.viewport, 'pointerout', (e: PointerEvent) => {

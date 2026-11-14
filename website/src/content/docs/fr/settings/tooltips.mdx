@@ -1,25 +1,42 @@
 ---
 title: "tooltips"
-description: "Combien de temps le pointeur reste avant qu’une infobulle apparaisse."
+description: "Où les infobulles de la grille s’affichent et comment : l’attente, le ton, le placement, l’animation."
 ---
 
 import CodeTabs from '../../../../components/CodeTabs.astro';
 import LiveDemo from '../../../../components/LiveDemo.astro';
 import OptionFacts from '../../../../components/OptionFacts.astro';
 
-L’attente avant qu’une infobulle apparaisse sous le pointeur.
+Où les infobulles de la grille s’affichent, et comment elles s’ouvrent et se ferment.
 
 <OptionFacts setting="tooltips" />
 
 ## Ce qu’il fait
 
-`delayMs` : combien de temps le pointeur reste sur un titre ou une cellule avant que son infobulle apparaisse, 500 ms
-par défaut. Le clavier n’attend pas : une infobulle apparaît dès que le focus atteint sa cellule.
-
 Le texte vient des colonnes, jamais deviné depuis la cellule : `tooltip(value, row, context)` pour une cellule,
-`headerTooltip` pour un titre. Le pointeur peut passer sur l’infobulle sans qu’elle parte ; Échap la ferme. Elle
-reste dans la fenêtre, ne couvre jamais ce qu’elle décrit, et s’ouvre vers le début de la ligne de droite à gauche.
-La cellule qui a le focus la désigne par `aria-describedby` tant qu’elle est affichée.
+`headerTooltip` pour un titre. Le clavier n’attend pas : une infobulle apparaît dès que le focus atteint sa cellule. Le
+pointeur peut passer sur l’infobulle sans qu’elle parte ; Échap la ferme. Elle reste dans la fenêtre et ne couvre
+jamais ce qu’elle décrit. La cellule qui a le focus la désigne par `aria-describedby` tant qu’elle est affichée.
+
+| Clé | Défaut | Ce qu’elle fait | Demande `tooltips()` |
+|---|---|---|---|
+| `delayMs` | `500` | Combien de temps le pointeur reste avant qu’une infobulle apparaisse, en ms | non |
+| `hideDelayMs` | `150` | Le répit après le départ du pointeur, pour qu’il puisse passer sur l’infobulle, en ms | non |
+| `cells` | `true` | `false` fait taire d’un coup le `tooltip` de toutes les colonnes (la raison d’un enregistrement raté s’affiche toujours) | non |
+| `tone` | `'info'` | `info`, `neutral`, `success`, `warning` ou `danger` ; le `{ text, tone }` d’une colonne l’emporte | non |
+| `animation` | `'fade'` | `fade`, `scale`, `slide`, `pop`, `rise` ou `none` (les effets de `@dzgrid/theme/tooltips.css`) | non |
+| `reducedMotion` | `'none'` | Sous mouvement réduit : rien ne bouge (`none`), ou un fondu court, en opacité seule (`fade`) | non |
+| `html` | — | Le nettoyeur, `safeHtml` de `@dzgrid/dom/tooltip`, qui permet au `tooltip` d’une colonne de renvoyer `{ html }` | non |
+| `header` | `false` | Les boutons du titre (filtre, menu de colonne, bascule du filtre flottant) affichent leur nom | oui |
+| `placement` | `'auto'` | L’un des 12 placements (`top`, `bottom`, `start`, `end`, seul ou avec `-start` / `-end`), `left` / `right`, ou `auto` : en dessous, au début de la cellule | oui |
+| `flip` | `true` | `false` : jamais déplacée de l’autre côté quand elle n’a pas la place | oui |
+| `animate` | — | Votre propre animation, `(el, phase, info)`, à la place des effets | oui |
+| `shape` | — | La bulle dessinée selon votre tracé SVG (une boîte de 100 × 100 étirée sur elle) | oui |
+
+Les clés qui demandent la fonction [`tooltips()`](../../features/tooltips/) sont signalées une fois par un problème
+sans elle (`missing-feature`). Une grille avec [`motion`](../motion/) à `false` ouvre et ferme ses infobulles d’un
+coup. Placements, animations, contenu et bulles, avec des exemples vivants :
+[Infobulles et bulles](../../guides/tooltips-popovers/).
 
 ## Exemple
 
@@ -116,3 +133,4 @@ grid.rows = [{ id: 'p1', name: 'Dent Grise', metres: 3120 }];
 ## Voir aussi
 
 - [Colonnes](../../guides/columns/#classes-infobulles-cellules-sur-mesure) — `tooltip` et `headerTooltip`.
+- [Infobulles et bulles](../../guides/tooltips-popovers/), et la fonction [`tooltips()`](../../features/tooltips/).

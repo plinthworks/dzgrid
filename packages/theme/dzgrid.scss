@@ -376,8 +376,13 @@ $no-funnel: ':where(:not([data-dzg-icons~=filter] *, [data-dzg-icons~=filter-act
     font-weight: 600;
   }
 
+  // Their focus ring (1.12.0: the block was lost and the footer's rule below took the Retry button).
   .dzg-overlay button:focus-visible,
-  .dzg-retry:focus-visible,
+  .dzg-retry:focus-visible {
+    outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+    outline-offset: 2px;
+  }
+
   // The pagination footer (@dzgrid/dom/pagination, step 17): a strip under the rows on the
   // header's surface, its words in the muted colour; its buttons and select take the retry
   // button's look, narrower; a button that cannot act keeps its place and its focus, in the muted

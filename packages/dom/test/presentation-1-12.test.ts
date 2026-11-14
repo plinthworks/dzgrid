@@ -77,7 +77,9 @@ describe('the tooltip\'s side and arrow (32)', () => {
     el.hidden = true;
     const anchor = document.body.appendChild(document.createElement('div'));
     anchor.getBoundingClientRect = () => ({ ...cell, width: cell.right - cell.left, height: cell.bottom - cell.top, x: cell.left, y: cell.top, toJSON: () => null });
-    el.getBoundingClientRect = () => ({ left: 0, right: tip.width, top: 0, bottom: tip.height, width: tip.width, height: tip.height, x: 0, y: 0, toJSON: () => null });
+    // Its layout box (1.12.0, tooltips-popovers.md: a running `scale` animation does not count).
+    Object.defineProperty(el, 'offsetWidth', { configurable: true, get: () => tip.width });
+    Object.defineProperty(el, 'offsetHeight', { configurable: true, get: () => tip.height });
     const t = new Tooltip(el, new Scope());
     t.showFor(anchor, { text: 'Hello', col: {} as never /* the tooltip reads no column field */, row: null, value: null }, dir, 0);
     return el;

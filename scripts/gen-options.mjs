@@ -37,7 +37,7 @@ export const FEATURES = [
   ['auto-height', 'autoHeight'], ['row-gaps', 'rowGaps'], ['print', 'print'], ['print-menu', 'printOnMenu'],
   ['fresh-rows', 'freshRows'], ['motion-gsap', 'motion'], ['totals-row', 'totalsRow'], ['vertical-headers', 'verticalHeaders'],
   ['theme', 'theming'], ['wrapped-headers', 'wrappedHeaders'], ['column-hover', 'columnHover'], ['responsive', 'responsive'],
-  ['import', 'fileImport'], ['spans', 'spans'], ['groups', 'groups'], ['slots', 'slots'],
+  ['import', 'fileImport'], ['spans', 'spans'], ['groups', 'groups'], ['slots', 'slots'], ['tooltip', 'tooltips'],
 ];
 /** A feature whose entry exports no `*_KEYS` but uses another's texts (`printOnMenu`: `print()`'s table). */
 const TEXTS_OF = { printOnMenu: 'print' };
@@ -47,6 +47,7 @@ const SHEETS = {
   columnsChooser: 'columns-panel', pinnedRows: 'pinned-rows', print: 'print', printOnMenu: 'print', freshRows: 'fresh-rows',
   find: 'find', rowDrag: 'row-drag', dock: 'dock', pivotBar: 'pivot', verticalHeaders: 'vertical-headers',
   filtersPanel: 'filters-panel', rowNumbers: 'row-numbers', quickSearch: 'search', grouping: 'grouping', groupZone: 'grouping',
+  tooltips: 'tooltips',
 };
 
 const parse = (file) => ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.ES2022, true);

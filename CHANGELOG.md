@@ -46,7 +46,50 @@ complete, English and French).
     header fix in the base); +2 % rule: `/filters` 12 250, `/filters-base` 12 200, `columns.css` 1 224, `variables.css`
     1 938, `@dzgrid/dom/theme` 2 499, the real Angular example 102 150; `buttons.css` new at 500, `pager.css` new at 760.
 
+### Added — tooltips and popovers (owner 2026-11-13, « là où on souhaite activer l'infobulle, on pourra le faire »; Q-T1 B, 2026-11-14)
+- **Tones** for every tooltip: `info` (the 1.11 bubble, the default), `neutral`, `success`, `warning`, `danger` — a
+  column's `tooltip` may return `{ text, tone }`; `tooltips: { tone }` for the grid. Each tone's background, text, edge
+  and arrow are variables (`--dzg-tooltip-<tone>-*`), readable in light and dark (checked 4.5:1).
+- **Animations**: `tooltips: { animation }` — `fade` (default), `scale`, `slide`, `none`, and two richer ones to opt
+  into, `pop` (grows with a slight overshoot) and `rise` (a longer, softer slide). Opacity and transforms only; timings
+  are variables. Reduced motion: no animation, or a short fade with `reducedMotion: 'fade'`.
+- **Placement**: `placement` — `top`, `bottom`, `start`, `end`, `left`, `right`, each alone or with `-start` / `-end`
+  (12), and `auto`; `start` / `end` follow the reading direction, `left` / `right` the screen. It moves to the other
+  side when there is no room (`flip: false` keeps it), and stays in the window; the arrow follows.
+- **HTML in a tooltip, by choice**: `tooltips: { html: safeHtml }` and a column's `{ html }` — cleaned (no script, no
+  image, no link, no style, no URL). Without `html`, a column's `{ html }` shows its `text`, or nothing.
+- **`tooltips()`** (new, `@dzgrid/dom/tooltip`), a grid feature: the header's buttons say their name
+  (`tooltips: { header: true }`, off by default), `placement` / `flip` and a column's `{ placement }`, your own
+  animation (`animate(el, phase)`, a GSAP tween or a promise awaited before hiding), a fade-out that keeps the content
+  drawn, one tooltip on screen at a time. Without it, `header`, `animate` and `placement` are told once
+  (`missing-feature`) and ignored.
+- **Tooltips anywhere in the page**: `tooltip(el, options)` (`@dzgrid/dom/tooltip`), `[dzTooltip]` (Angular,
+  `@dzgrid/angular/tooltip`) — words, nodes, an `<ng-template>` with its context, a component with its inputs, or
+  cleaned HTML (Angular's sanitizer first).
+- **Popovers, the bubble that stays**: `popover(trigger, options)` (`@dzgrid/dom/popover`), `[dzPopover]` (Angular,
+  `@dzgrid/angular/popover`: `open()`, `close()`, `toggle()`, `isOpen()`, `(opened)`, `(closed)`). Opened by a click
+  or by code; closed by Escape (focus back), a press outside, Tab past its end, or code; the focus moves into it; a
+  non-modal dialog (`aria-haspopup`, `aria-expanded`, `aria-controls`); one open per group, nesting allowed; follows its
+  trigger on scroll and resize, closes when the trigger is scrolled out of view or its grid row is recycled. Anything
+  inside: a form, a component, a template, a grid.
+- **New opt-in sheet `@dzgrid/theme/tooltips.css`** (and `tooltips.unlayered.css`), after `dzgrid.css` and
+  `variables.css`: tones, the arrow on four sides, the animations, the popover's look. Without it a tooltip looks as
+  in 1.11 and appears without animation.
+- The element (`<dz-grid>`): use `tooltip()` and `popover()` from `@dzgrid/dom` directly.
+
+### Upgrading (tooltips)
+- Nothing to change: `tooltips: { delayMs }`, a column's `tooltip` returning a string, `headerTooltip` and a tooltip
+  part behave as before. A `variables.css` detail changed before publishing: a tooltip above its cell is placed by the
+  grid instead of a CSS `translate` (same place; `translate` is left to the animations).
+- Size lines (rule Q-B): `@dzgrid/dom` 25 200 → 25 704 (+2 %, measured 25 690); new entries at their measure + 10 %:
+  `@dzgrid/dom/tooltip` 2 800, `@dzgrid/dom/popover` 3 450, `tooltips.css` 2 000, `tooltips.unlayered.css` 1 950,
+  `@dzgrid/angular/tooltip` 2 050, `@dzgrid/angular/popover` 1 600; `@dzgrid/dom/theme` 2 499 → 2 510 (its code unchanged,
+  gzip over the grown base); K.8 measured 91 591 under its 92 000; the real Angular example 102 150 → 102 700 (+0.5 %,
+  measured 102 697).
+
 ### Fixed
+- **A keyboard-focused Retry button keeps its focus ring**: its rule had lost its body and ran into the pagination
+  footer's, so a focused Retry took the strip's padding, edge and colours.
 - **A header's title stays at its start under a page's reset** (seen with Tailwind 3's preflight and the unlayered
   copies): a column with a filter button (or the column menu's ⋮) showed its title, its sort mark and its funnel at the
   column's end. The preflight's `button { margin: 0 }` took the margin that pushed the buttons to the end, and the cell's

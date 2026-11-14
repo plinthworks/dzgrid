@@ -1,0 +1,278 @@
+---
+/**
+ * Live tooltips and popovers (1.12.0, docs/behaviors/tooltips-popovers.md), drawn in the browser from the library's
+ * sources (the Vite aliases in astro.config.mjs) with `@dzgrid/theme/tooltips.css`, which the whole site loads. The
+ * buttons are in the page from the start; their tooltips are given when the demo comes near the screen.
+ *
+ *   <TipDemo kind="tones" />          one button per tone
+ *   <TipDemo kind="animations" />     one button per preset: fade, scale, slide, pop, rise, none
+ *   <TipDemo kind="placements" />     the 12 placements around one anchor, with `flip` and right to left
+ *   <TipDemo kind="popover" />        a popover holding a small form
+ *   <TipDemo kind="custom" />         the app's own animation (`animate`, plain keyframes) on a speech-bubble `shape`
+ *
+ * `look` crosses into the page as JSON and is given to every tooltip or popover of the demo (`{ reducedMotion: 'fade' }`).
+ * The words are the page's language (English or French), the data made up.
+ */
+type Kind = 'tones' | 'animations' | 'placements' | 'popover' | 'custom';
+interface Props {
+  kind: Kind;
+  /** Options given to every tooltip or popover of the demo, as JSON (`tone`, `animation`, `reducedMotion`…). */
+  look?: Record<string, unknown>;
+  /** A line under the demo. */
+  caption?: string;
+}
+const { kind, look = {}, caption } = Astro.props;
+const fr = Astro.currentLocale === 'fr';
+const lang = fr ? 'fr' : 'en';
+
+const TONES = ['info', 'neutral', 'success', 'warning', 'danger'] as const;
+const PRESETS = ['fade', 'scale', 'slide', 'pop', 'rise', 'none'] as const;
+/** Where each placement's button sits around the anchor: [row, column] of a 5 × 5 grid (columns follow the direction). */
+const AROUND: readonly (readonly [string, number, number])[] = [
+  ['top-start', 1, 2], ['top', 1, 3], ['top-end', 1, 4],
+  ['start-start', 2, 1], ['start', 3, 1], ['start-end', 4, 1],
+  ['end-start', 2, 5], ['end', 3, 5], ['end-end', 4, 5],
+  ['bottom-start', 5, 2], ['bottom', 5, 3], ['bottom-end', 5, 4],
+];
+const W = fr
+  ? { anchor: 'L’ancre', flip: 'Basculer s’il manque de place (flip)', rtl: 'De droite à gauche', book: 'Réserver une visite', picker: 'Placements' }
+  : { anchor: 'The anchor', flip: 'Flip when there is no room', rtl: 'Right to left', book: 'Book a visit', picker: 'Placements' };
+const data = JSON.stringify({ kind, look });
+---
+
+<dzg-tip-demo class="not-content" data-lang={lang} data-demo={data}>
+  {kind === 'tones' && (
+    <div class="dzg-tipdemo-row">
+      {TONES.map((t) => <button type="button" data-tone={t}>{t}</button>)}
+    </div>
+  )}
+  {kind === 'animations' && (
+    <div class="dzg-tipdemo-row">
+      {PRESETS.map((a) => <button type="button" data-animation={a}>{a}</button>)}
+    </div>
+  )}
+  {kind === 'placements' && (
+    <div class="dzg-tipdemo-placements">
+      <div class="dzg-tipdemo-around" role="group" aria-label={W.picker}>
+        {AROUND.map(([p, row, col]) => (
+          <button type="button" data-placement={p} aria-pressed={p === 'top' ? 'true' : 'false'} style={`grid-row: ${row}; grid-column: ${col}`}>{p}</button>
+        ))}
+        <button type="button" class="dzg-tipdemo-anchor" data-anchor>{W.anchor}</button>
+      </div>
+      <div class="dzg-tipdemo-row">
+        <label><input type="checkbox" data-flip checked /> {W.flip}</label>
+        <label><input type="checkbox" data-rtl /> {W.rtl}</label>
+      </div>
+    </div>
+  )}
+  {kind === 'popover' && (
+    <div class="dzg-tipdemo-row">
+      <button type="button" data-popover>{W.book}</button>
+      <p class="dzg-tipdemo-status" aria-live="polite" data-status></p>
+    </div>
+  )}
+  {kind === 'custom' && (
+    <div class="dzg-tipdemo-row">
+      {(['neutral', 'success'] as const).map((t) => <button type="button" data-custom={t}>{t}</button>)}
+    </div>
+  )}
+  {caption && <p class="dzg-tipdemo-caption">{caption}</p>}
+</dzg-tip-demo>
+
+<script>
+  import type { TipAnimate, TooltipHandle, TooltipOptions, TooltipPlacement } from '@dzgrid/dom/tooltip';
+  import type { PopoverHandle } from '@dzgrid/dom/popover';
+
+  type Lang = 'en' | 'fr';
+  /** A speech bubble in a 100 × 100 box stretched over the bubble: its tail at the bottom, toward the anchor. */
+  const SPEECH = 'M0 0 H100 V80 H60 L50 100 L40 80 H0 Z';
+  /** The demo's words: what each tooltip says, the popover's form. Made-up data. */
+  const SAY = {
+    en: {
+      tones: {
+        info: 'The import runs every night at two.',
+        neutral: 'Last edited by the north depot.',
+        success: 'Saved: 12 crates of pears.',
+        warning: 'Only 3 crates left in stock.',
+        danger: 'Deleting the orchard removes its 40 trees.',
+      },
+      animations: {
+        fade: 'fade: the default, a short fade',
+        scale: 'scale: grows from 96 %, from the arrow’s side',
+        slide: 'slide: a few pixels from the anchor’s side',
+        pop: 'pop: from 80 % with a slight overshoot (opt-in)',
+        rise: 'rise: 12 px, a long soft deceleration (opt-in)',
+        none: 'none: there at once',
+      },
+      at: 'Opened at',
+      custom: { neutral: 'A speech bubble, drawn by its shape', success: 'Harvest booked for Tuesday' },
+      form: { label: 'Book a visit', name: 'Your name', day: 'Day', days: ['Monday', 'Tuesday', 'Wednesday'], ok: 'Book', cancel: 'Cancel', done: (n: string, d: string) => `Booked: ${n || 'a visitor'}, ${d}.`, closed: 'Closed by' },
+    },
+    fr: {
+      tones: {
+        info: 'L’import tourne chaque nuit à deux heures.',
+        neutral: 'Modifié en dernier par le dépôt nord.',
+        success: 'Enregistré : 12 cagettes de poires.',
+        warning: 'Plus que 3 cagettes en stock.',
+        danger: 'Supprimer le verger retire ses 40 arbres.',
+      },
+      animations: {
+        fade: 'fade : par défaut, un fondu court',
+        scale: 'scale : grandit depuis 96 %, du côté de la flèche',
+        slide: 'slide : quelques pixels depuis le côté de l’ancre',
+        pop: 'pop : depuis 80 % avec un léger rebond (sur demande)',
+        rise: 'rise : 12 px, une longue décélération douce (sur demande)',
+        none: 'none : tout de suite là',
+      },
+      at: 'Ouverte en',
+      custom: { neutral: 'Une bulle de bande dessinée, dessinée par sa forme', success: 'Récolte réservée pour mardi' },
+      form: { label: 'Réserver une visite', name: 'Votre nom', day: 'Jour', days: ['Lundi', 'Mardi', 'Mercredi'], ok: 'Réserver', cancel: 'Annuler', done: (n: string, d: string) => `Réservé : ${n || 'un visiteur'}, ${d}.`, closed: 'Fermée par' },
+    },
+  } as const;
+
+  class DzgTipDemo extends HTMLElement {
+    #handles: { destroy(): void }[] = [];
+    #seen: IntersectionObserver | null = null;
+    #started = false;
+    #stop: AbortController | null = null;
+
+    connectedCallback() {
+      if (this.#started) return;
+      // Lazy, as the grids' demos: given when the demo comes within a screen of the view.
+      this.#seen = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          this.#seen?.disconnect();
+          this.#seen = null;
+          void this.#give();
+        }
+      }, { rootMargin: '400px 0px' });
+      this.#seen.observe(this);
+    }
+
+    async #give() {
+      if (this.#started) return;
+      this.#started = true;
+      const lang: Lang = this.dataset.lang === 'fr' ? 'fr' : 'en';
+      const say = SAY[lang];
+      const { kind, look } = JSON.parse(this.dataset.demo ?? '{}') as { kind: string; look: Partial<TooltipOptions> };
+      const stop = (this.#stop = new AbortController());
+      try {
+        if (kind === 'popover') return this.#popover(lang, look);
+        const { tooltip } = await import('@dzgrid/dom/tooltip');
+        if (!this.isConnected) return;
+        if (kind === 'tones') {
+          for (const b of this.querySelectorAll<HTMLElement>('[data-tone]')) {
+            const tone = b.dataset.tone as keyof typeof say.tones;
+            this.#handles.push(tooltip(b, { placement: 'top', ...look, tone, content: say.tones[tone] }));
+          }
+        } else if (kind === 'animations') {
+          for (const b of this.querySelectorAll<HTMLElement>('[data-animation]')) {
+            const animation = b.dataset.animation as keyof typeof say.animations;
+            this.#handles.push(tooltip(b, { placement: 'top', tone: 'neutral', ...look, animation, content: say.animations[animation] }));
+          }
+        } else if (kind === 'custom') {
+          // The app's own animation: plain keyframes through the Web Animations API, played backwards to close; the
+          // bubble stays until `finished` settles. Under reduced motion (`info.reduced`) nothing moves: shown at once.
+          const frames: Keyframe[] = [
+            { opacity: 0, transform: 'translateY(8px) scale(.85)' },
+            { opacity: 1, transform: 'translateY(-2px) scale(1.03)', offset: 0.7 },
+            { opacity: 1, transform: 'none' },
+          ];
+          const animate: TipAnimate = (el, phase, info) =>
+            info.reduced ? undefined : el.animate(phase === 'open' ? frames : [...frames].reverse(), { duration: 220, easing: 'ease-out' }).finished;
+          for (const b of this.querySelectorAll<HTMLElement>('[data-custom]')) {
+            const tone = b.dataset.custom as keyof typeof say.custom;
+            this.#handles.push(tooltip(b, { placement: 'top', ...look, tone, shape: SPEECH, animate, content: say.custom[tone] }));
+          }
+        } else if (kind === 'placements') {
+          const anchor = this.querySelector<HTMLElement>('[data-anchor]')!;
+          const box = this.querySelector<HTMLElement>('.dzg-tipdemo-placements')!;
+          let placement: TooltipPlacement = 'top';
+          const words = () => `${say.at}: ${placement}`;
+          const tip: TooltipHandle = tooltip(anchor, { placement, ...look, content: words });
+          this.#handles.push(tip);
+          const pick = (b: HTMLElement) => {
+            placement = b.dataset.placement as TooltipPlacement;
+            for (const o of this.querySelectorAll('[data-placement]')) o.setAttribute('aria-pressed', String(o === b));
+            tip.update({ placement });
+            tip.show();
+          };
+          for (const b of this.querySelectorAll<HTMLElement>('[data-placement]')) b.addEventListener('click', () => pick(b), { signal: stop.signal });
+          this.querySelector('[data-flip]')?.addEventListener('change', (e) => tip.update({ flip: (e.target as HTMLInputElement).checked }), { signal: stop.signal });
+          // `start` and `end` follow the line: the same placement opens on the other side in right to left.
+          this.querySelector('[data-rtl]')?.addEventListener('change', (e) => {
+            box.dir = (e.target as HTMLInputElement).checked ? 'rtl' : 'ltr';
+            tip.hide();
+          }, { signal: stop.signal });
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async #popover(lang: Lang, look: Partial<TooltipOptions>) {
+      const say = SAY[lang].form;
+      const { popover } = await import('@dzgrid/dom/popover');
+      if (!this.isConnected) return;
+      const trigger = this.querySelector<HTMLElement>('[data-popover]')!;
+      const status = this.querySelector<HTMLElement>('[data-status]')!;
+      const doc = this.ownerDocument;
+      let booked = false;
+      // Made at each opening: a fresh form, its first field focused by the popover.
+      const form = (): Node => {
+        const f = doc.createElement('form');
+        f.className = 'dzg-tipdemo-form';
+        const field = (text: string, control: HTMLElement) => {
+          const l = doc.createElement('label');
+          l.append(text, control);
+          f.append(l);
+        };
+        const name = doc.createElement('input');
+        name.name = 'name';
+        name.autocomplete = 'off';
+        field(say.name, name);
+        const day = doc.createElement('select');
+        day.name = 'day';
+        for (const d of say.days) day.append(new Option(d, d));
+        field(say.day, day);
+        const actions = doc.createElement('div');
+        const ok = doc.createElement('button');
+        ok.type = 'submit';
+        ok.textContent = say.ok;
+        const cancel = doc.createElement('button');
+        cancel.type = 'button';
+        cancel.textContent = say.cancel;
+        cancel.addEventListener('click', () => handle.close());
+        actions.append(ok, cancel);
+        f.append(actions);
+        f.addEventListener('submit', (e) => {
+          e.preventDefault();
+          booked = true;
+          status.textContent = say.done(name.value.trim(), day.value);
+          handle.close();
+        });
+        return f;
+      };
+      const handle: PopoverHandle = popover(trigger, {
+        ...look,
+        label: say.label,
+        content: form,
+        // Why it closed (Escape, a press outside, the focus leaving, the trigger again), unless the form was sent.
+        onClose: (reason) => void (booked || (status.textContent = `${say.closed}: ${reason}`)),
+        onOpen: () => void ((booked = false), (status.textContent = '')),
+      });
+      this.#handles.push(handle);
+    }
+
+    disconnectedCallback() {
+      this.#seen?.disconnect();
+      this.#seen = null;
+      this.#stop?.abort();
+      for (const h of this.#handles) h.destroy();
+      this.#handles = [];
+      this.#started = false;
+    }
+  }
+
+  if (!customElements.get('dzg-tip-demo')) customElements.define('dzg-tip-demo', DzgTipDemo);
+</script>

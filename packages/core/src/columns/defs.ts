@@ -28,6 +28,25 @@ export interface AggCtx {
  */
 export type AggFn<V = unknown> = { agg(values: readonly (V | null)[], ctx: AggCtx): unknown }['agg'];
 
+/**
+ * A cell's tooltip beyond plain words (tooltips-popovers.md 6, 16): `text` with a `tone`, or `html` — cleaned and shown
+ * only when the grid is given a cleaner (`tooltips: { html: safeHtml }`); otherwise its `text`, or nothing.
+ */
+export interface TooltipSpec {
+  readonly text?: string;
+  readonly html?: string;
+  readonly tone?: 'info' | 'neutral' | 'success' | 'warning' | 'danger';
+  /** Where it opens (needs the DOM layer's `tooltips()`). */
+  readonly placement?: TooltipPlacement;
+}
+
+/**
+ * Where a tooltip or a popover opens (tooltips-popovers.md 4): a side — `top`, `bottom`, `start`, `end` (the line's
+ * start and end: mirrored in right to left), or `left`, `right` (the screen's, whatever the direction) — and an
+ * alignment along it (`-start`, `-end`; none: centred). `auto`: the default (below; the grid's at its cell's start).
+ */
+export type TooltipPlacement = 'auto' | `${'top' | 'bottom' | 'start' | 'end' | 'left' | 'right'}${'' | '-start' | '-end'}`;
+
 export interface ColumnDef<T, V = unknown> {
   /** Required and stable: the key of the column's state. */
   readonly id: string;
@@ -150,8 +169,8 @@ export interface ColumnDef<T, V = unknown> {
   /** Shown over the header, already translated by the host. */
   readonly headerTooltip?: string;
   /** Shown over a cell, already translated; null for none. The grid never guesses one from the content. */
-  /** `context`: the grid's `settings.context` (step 21). */
-  readonly tooltip?: (value: V | null, row: Readonly<T>, context: unknown) => string | null;
+  /** `context`: the grid's `settings.context` (step 21). Words with a tone, or HTML (shown only when the grid's `tooltips.html` is given), as a `TooltipSpec` (1.12.0). */
+  readonly tooltip?: (value: V | null, row: Readonly<T>, context: unknown) => string | TooltipSpec | null;
   /**
    * Consecutive rows with the same value show one tall cell (docs/behaviors/spans.md).
    * `true` compares the values' stable text; a function decides; `within` cuts a run

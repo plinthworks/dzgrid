@@ -302,10 +302,10 @@
     },
     {
       "name": "tooltips",
-      "type": "{ readonly delayMs?: number }",
+      "type": "{ readonly delayMs?: number; readonly hideDelayMs?: number; readonly cells?: boolean; readonly header?: boolean; readonly html?: (html: string, doc?: Document) => DocumentFragment; readonly tone?: TipTone; readonly animation?: TipAnimation; readonly reducedMotion?: 'none' | 'fade'; readonly animate?: TipAnimate; readonly placement?: TooltipPlacement; readonly flip?: boolean; readonly shape?: string }",
       "resolved": null,
       "required": false,
-      "doc": "",
+      "doc": "Where tooltips show and how (tooltips-popovers.md): `delayMs` before one shows on hover (500), `hideDelayMs` of grace after the pointer leaves (150), `cells` false silences every column's `tooltip`, `tone` (`info`), `animation` (`fade`; the presets are `@dzgrid/theme/tooltips.css`'s), `reducedMotion` (`none`, or `fade`: opacity only), `html` the cleaner (`safeHtml` from `@dzgrid/dom/tooltip`) that lets a column's tooltip be HTML. With `tooltips()` from `@dzgrid/dom/tooltip` also: `header` (the header's buttons say their name), `animate` (the app's own animation, the end of the fade awaited), `placement`, `flip` and `shape` (an SVG path drawn as the bubble). Live.",
       "default": {
         "code": "{ delayMs: 500 }"
       },
@@ -889,10 +889,10 @@
     },
     {
       "name": "tooltip",
-      "type": "(value: V | null, row: Readonly<T>, context: unknown) => string | null",
+      "type": "(value: V | null, row: Readonly<T>, context: unknown) => string | TooltipSpec | null",
       "resolved": null,
       "required": false,
-      "doc": "`context`: the grid's `settings.context` (step 21).",
+      "doc": "`context`: the grid's `settings.context` (step 21). Words with a tone, or HTML (shown only when the grid's `tooltips.html` is given), as a `TooltipSpec` (1.12.0).",
       "default": null,
       "source": "packages/core/src/columns/defs.ts"
     },
@@ -3293,6 +3293,18 @@
       "css": [],
       "doc": "`slots()`: a host's parts draw the column headers' labels, the overlay, the busy mark (1.4.0) and the tooltip in place of the grid's own (docs/behaviors/parts.md, step 11). The grid keeps the rest: the header's role, sort state, mark, grip and click; the overlay's place and retry button; the tooltip's element, timing, Escape and placement.",
       "source": "packages/dom/src/slots/index.ts"
+    },
+    {
+      "name": "tooltips",
+      "entry": "@dzgrid/dom/tooltip",
+      "signature": "tooltips(): GridFeature",
+      "param": null,
+      "options": [],
+      "texts": null,
+      "sheet": "@dzgrid/theme/tooltips.css",
+      "css": [],
+      "doc": "`tooltips()` (1.12.0, docs/behaviors/tooltips-popovers.md; plan Q-T1 B): what the grid's tooltips do beyond the base — `tooltips.placement` and `flip` (and a column's `{ placement }`), `tooltips.animate` (the app's own animation), a closing that waits for the end of the fade, the header's buttons saying their name (`tooltips.header`), and one tooltip on screen at a time with the page's (`tooltip()`).",
+      "source": "packages/dom/src/tooltip/feature.ts"
     }
   ]
 }

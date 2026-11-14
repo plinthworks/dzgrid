@@ -48,6 +48,14 @@ describe('the DOM layer guards', () => {
     expect(checkSource('el.innerHTML = h;', 'range/html/index.ts').map((f) => f.rule)).toEqual(['html']);
   });
 
+  // 1.12.0 (tooltips-popovers.md 17): the tooltips' HTML cleaner parses in an inert document too, and nothing else of the rule.
+  it('let tooltip/html.ts call parseFromString, and only it', () => {
+    const parse = "const d = new DOMParser().parseFromString(h, 'text/html');";
+    expect(checkSource(parse, 'tooltip/html.ts')).toEqual([]);
+    expect(checkSource(parse, 'tooltip/anywhere.ts').map((f) => f.rule)).toEqual(['html']);
+    expect(checkSource('el.innerHTML = h;', 'tooltip/html.ts').map((f) => f.rule)).toEqual(['html']);
+  });
+
   it('hold for every source of the DOM layer', () => {
     const found = files(SRC, /\.ts$/).flatMap((f) => checkSource(readFileSync(f, 'utf8'), f.slice(SRC.length + 1)).map((x) => `${f.slice(SRC.length + 1)}:${x.line} ${x.rule} ${x.why}`));
     expect(found).toEqual([]);

@@ -1,6 +1,6 @@
 ---
 title: "tooltip"
-description: "The text shown over a cell, from its value and row."
+description: "The text shown over a cell, from its value and row — words, a tone, a placement, or cleaned HTML."
 ---
 
 import OptionFacts from '../../../components/OptionFacts.astro';
@@ -16,6 +16,18 @@ grid's [`context`](../../settings/context/). The grid never guesses one from the
 pointer rests on the cell (after the grid's [`tooltips`](../../settings/tooltips/) delay) and as soon as the keyboard
 focus reaches it.
 
+It may return more than words, a `TooltipSpec`:
+
+| Key | What it does |
+|---|---|
+| `text` | The words (what a screen reader hears) |
+| `tone` | `info` (the default), `neutral`, `success`, `warning` or `danger` |
+| `placement` | Where it opens, one of 12 placements or `auto`; needs the [`tooltips()`](../../features/tooltips/) feature |
+| `html` | HTML, shown cleaned only when the grid has the cleaner (`tooltips: { html: safeHtml }`); otherwise its `text`, or nothing |
+
+[`tooltips`](../../settings/tooltips/)`.cells` false silences every column's tooltip at once. More in
+[Tooltips and popovers](../../guides/tooltips-popovers/).
+
 ## Example
 
 ```ts
@@ -28,7 +40,7 @@ createGrid<Bee>(document.getElementById('hives')!, {
   rows: [{ id: 'h1', hive: 'Clover hill', honey: 12.5 }],
   columns: [
     { id: 'hive', header: 'Hive', tooltip: (v) => (v ? `Hive ${v}` : null) },
-    { id: 'honey', header: 'Honey', type: 'number' },
+    { id: 'honey', header: 'Honey', type: 'number', tooltip: (v) => (Number(v) < 5 ? { text: 'Low: check the hive', tone: 'warning' } : null) },
   ],
   getRowId: (r) => r.id,
   messages: EN,
@@ -38,4 +50,4 @@ createGrid<Bee>(document.getElementById('hives')!, {
 ## See also
 
 - [`headerTooltip`](../header-tooltip/), [`ui`](../ui/).
-- [`tooltips`](../../settings/tooltips/).
+- [`tooltips`](../../settings/tooltips/), [`tooltips()`](../../features/tooltips/).

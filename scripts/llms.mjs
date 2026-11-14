@@ -51,12 +51,12 @@ export function absolute(markdown, slug) {
   });
 }
 
-/** MDX → Markdown: imports, `export const` data and demos dropped, the tabs flattened to their TypeScript block. */
+/** MDX → Markdown: imports, `export const` data and demos (grids, tooltips) dropped, the tabs flattened to their TypeScript block. */
 export function plain(body, slug) {
   let t = body;
   t = t.replace(/^import .*\n/gm, '');
   t = t.replace(/^export const [\s\S]*?;\n/gm, '');
-  t = t.replace(/<LiveDemo\b[\s\S]*?\/>\n?/g, '');
+  t = t.replace(/<(?:LiveDemo|TipDemo)\b[\s\S]*?\/>\n?/g, '');
   t = t.replace(/<CodeTabs>([\s\S]*?)<\/CodeTabs>\n?/g, (_, inner) => {
     const ts = /<Fragment slot="ts">([\s\S]*?)<\/Fragment>/.exec(inner);
     return ts ? `${ts[1].trim()}\n` : '';

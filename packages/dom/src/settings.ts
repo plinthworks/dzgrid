@@ -1,9 +1,10 @@
 import type { OperationsInput, PageOptions, SourceBinding } from '@dzgrid/core';
-import type { AnyFilterKind, ColumnOrGroup, GridEvent, RowIdInput, DataNode, RowKey, SelectionState } from '@dzgrid/core';
+import type { AnyFilterKind, ColumnOrGroup, GridEvent, RowIdInput, DataNode, RowKey, SelectionState, TooltipPlacement } from '@dzgrid/core';
 import type { GridMessages } from './messages.js';
 import type { GridFeature } from './features.js';
 import type { SlotPart } from './part.js';
 import type { GridIcons, GridTheme } from './look.js';
+import type { TipAnimate, TipAnimation, TipTone } from './render/tooltip.js';
 
 /** What a host gives `createGrid` (D3: rows, not a row model, for the client case). */
 export interface GridSettings<T> {
@@ -96,8 +97,29 @@ export interface GridSettings<T> {
    * @default {bundleLabel}
    */
   readonly label?: string;
-  /** @default { delayMs: 500 } */
-  readonly tooltips?: { readonly delayMs?: number };
+  /**
+   * Where tooltips show and how (tooltips-popovers.md): `delayMs` before one shows on hover (500), `hideDelayMs` of grace
+   * after the pointer leaves (150), `cells` false silences every column's `tooltip`, `tone` (`info`), `animation`
+   * (`fade`; the presets are `@dzgrid/theme/tooltips.css`'s), `reducedMotion` (`none`, or `fade`: opacity only), `html`
+   * the cleaner (`safeHtml` from `@dzgrid/dom/tooltip`) that lets a column's tooltip be HTML. With `tooltips()` from
+   * `@dzgrid/dom/tooltip` also: `header` (the header's buttons say their name), `animate` (the app's own animation, the
+   * end of the fade awaited), `placement`, `flip` and `shape` (an SVG path drawn as the bubble). Live.
+   * @default { delayMs: 500 }
+   */
+  readonly tooltips?: {
+    readonly delayMs?: number;
+    readonly hideDelayMs?: number;
+    readonly cells?: boolean;
+    readonly header?: boolean;
+    readonly html?: (html: string, doc?: Document) => DocumentFragment;
+    readonly tone?: TipTone;
+    readonly animation?: TipAnimation;
+    readonly reducedMotion?: 'none' | 'fade';
+    readonly animate?: TipAnimate;
+    readonly placement?: TooltipPlacement;
+    readonly flip?: boolean;
+    readonly shape?: string;
+  };
   readonly onEvent?: (e: GridEvent<T>) => void;
   /**
    * False when the host loads the layout CSS itself (strict CSP).

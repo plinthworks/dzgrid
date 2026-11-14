@@ -3,6 +3,7 @@
 # history: owner 2026-11-10: baseline extended to every published entry
 # history: owner 2026-11-13 « oui lance les 5 corrections »: the new opt-in sheet buttons.css (an addition) — @dzgrid/theme/buttons.css, @dzgrid/theme/buttons.unlayered.css, @dzgrid/theme/buttons.scss
 # history: owner 2026-11-13 « oui ajoute-les », « donne la possibilité de styler la pagination »: the new opt-in sheet pager.css (an addition; buttons.css had no room under its line) — @dzgrid/theme/pager.css, @dzgrid/theme/pager.unlayered.css, @dzgrid/theme/pager.scss
+# history: owner 2026-11-14 Q-T1 B: the new entries of tooltips and popovers (additions) — @dzgrid/theme/tooltips.css, @dzgrid/theme/tooltips.unlayered.css, @dzgrid/theme/tooltips.scss
 
 @ @dzgrid/theme
 
@@ -163,3 +164,9 @@
 @ @dzgrid/theme/pager.unlayered.css
 
 @ @dzgrid/theme/pager.scss
+
+@ @dzgrid/theme/tooltips.css
+
+@ @dzgrid/theme/tooltips.unlayered.css
+
+@ @dzgrid/theme/tooltips.scss

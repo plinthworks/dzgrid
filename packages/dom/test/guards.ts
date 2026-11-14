@@ -14,7 +14,8 @@ import ts from 'typescript';
  * - `html`: no `innerHTML`, `outerHTML`, `insertAdjacentHTML`,
  *   `document.write`: cells hold user data (§7.1); `parseFromString` only in
  *   the icon cleaner, `theme/icons.ts` (an XML document, inert, 1.9.0), and in
- *   the pasted-HTML reader, `range/html/index.ts` (an inert document, step 11b);
+ *   the pasted-HTML reader, `range/html/index.ts` (an inert document, step 11b), and the tooltips' HTML cleaner,
+ *   `tooltip/html.ts` (an inert document, rebuilt from a fixed list, 1.12.0);
  * - `invisible`: no invisible or bidi-control character typed raw, no raw
  *   combining mark outside comments (written as escapes).
  */
@@ -88,7 +89,7 @@ export function checkSource(source: string, file: string): Finding[] {
   const isLocale = /(^|\/)locales\//.test(file);
   // The pasted-HTML reader (Phase 5 step 11b, owner S11b-Q5) parses in an inert document: `parseFromString` there only.
   // So does the icon cleaner (1.9.0, presentation-settings.md 18): an SVG parsed as XML, then checked element by element.
-  const isInert = /(^|\/)(range\/html\/index|theme\/icons)\.ts$/.test(file);
+  const isInert = /(^|\/)(range\/html\/index|theme\/icons|tooltip\/html)\.ts$/.test(file);
 
   const physicalName = (n: ts.Node, name: string) => {
     if (!isDir && PHYSICAL_PROP.test(name)) add('physical', n, name);

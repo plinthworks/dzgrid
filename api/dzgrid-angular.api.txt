@@ -7,6 +7,8 @@
 # history: owner 2026-11-10 « ok comme ça, 1.11.0 juste après »: [motion] and an output for every grid event — @dzgrid/angular#DzGrid
 # history: 1.11.0 before publishing: modelUpdated typed by hand (its inferred type named T_1, declared nowhere — scripts/check-types.mjs); numerals, direction, headers: the same unions printed in another order — @dzgrid/angular#DzGrid
 # history: owner 2026-11-13: reload() on the grid's api, DzgController and <dz-grid> — additions only, 1.12.0 — @dzgrid/angular#DzgController
+# history: owner 2026-11-14 Q-T1 B: the new entries of tooltips and popovers (additions) — @dzgrid/angular/tooltip#DzTipContent, @dzgrid/angular/tooltip#DzTipTemplateContext, @dzgrid/angular/tooltip#DzTooltip, @dzgrid/angular/tooltip#TipAnimate, @dzgrid/angular/tooltip#TipAnimation, @dzgrid/angular/tooltip#TipTone, @dzgrid/angular/tooltip#TooltipPlacement, @dzgrid/angular/tooltip#ɵDzHtml, @dzgrid/angular/tooltip#ɵdefined, @dzgrid/angular/tooltip#ɵdzDraw, @dzgrid/angular/popover#DzPopover, @dzgrid/angular/popover#PopoverCloseReason
+# history: owner 2026-11-14 hook info and shape (the same unpublished entries, accepted earlier in this batch; additions over 1.11) — @dzgrid/angular/tooltip#DzTooltip, @dzgrid/angular/popover#DzPopover
 
 @ @dzgrid/angular
 ## DZGRID_ANGULAR_VERSION
@@ -824,3 +826,231 @@
   declare function uiData<D = Readonly<Record<string, unknown>>>(c: {
       readonly column: ResolvedColumn<any>;
   }): D | undefined;
+
+@ @dzgrid/angular/tooltip
+## DzTipContent
+  type DzTipContent = string | TemplateRef<any> | Type<unknown> | {
+      readonly html: string;
+  } | null | undefined;
+## DzTipTemplateContext
+  interface DzTipTemplateContext<C = unknown> {
+      $implicit: C;
+      context: C;
+      close: () => void;
+  }
+## DzTooltip
+  declare class DzTooltip {
+      #private;
+      readonly dzTooltip: _angular_core.InputSignal<DzTipContent>;
+      readonly dzTooltipContext: _angular_core.InputSignal<unknown>;
+      readonly dzTooltipInputs: _angular_core.InputSignal<Readonly<Record<string, unknown>> | undefined>;
+      readonly dzTooltipPlacement: _angular_core.InputSignal<TooltipPlacement | undefined>;
+      readonly dzTooltipFlip: _angular_core.InputSignal<boolean | undefined>;
+      readonly dzTooltipShape: _angular_core.InputSignal<string | undefined>;
+      readonly dzTooltipReducedMotion: _angular_core.InputSignal<"none" | "fade" | undefined>;
+      readonly dzTooltipTone: _angular_core.InputSignal<TipTone | undefined>;
+      readonly dzTooltipAnimation: _angular_core.InputSignal<TipAnimation | undefined>;
+      readonly dzTooltipAnimate: _angular_core.InputSignal<TipAnimate | undefined>;
+      readonly dzTooltipDelay: _angular_core.InputSignal<number | undefined>;
+      readonly dzTooltipDisabled: _angular_core.InputSignal<boolean>;
+      constructor();
+      show(): void;
+      hide(): void;
+      static ɵfac: _angular_core.ɵɵFactoryDeclaration<DzTooltip, never>;
+      static ɵdir: _angular_core.ɵɵDirectiveDeclaration<DzTooltip, "[dzTooltip]", [
+          "dzTooltip"
+      ], {
+          "dzTooltip": {
+              "alias": "dzTooltip";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzTooltipContext": {
+              "alias": "dzTooltipContext";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzTooltipInputs": {
+              "alias": "dzTooltipInputs";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzTooltipPlacement": {
+              "alias": "dzTooltipPlacement";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzTooltipFlip": {
+              "alias": "dzTooltipFlip";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzTooltipShape": {
+              "alias": "dzTooltipShape";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzTooltipReducedMotion": {
+              "alias": "dzTooltipReducedMotion";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzTooltipTone": {
+              "alias": "dzTooltipTone";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzTooltipAnimation": {
+              "alias": "dzTooltipAnimation";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzTooltipAnimate": {
+              "alias": "dzTooltipAnimate";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzTooltipDelay": {
+              "alias": "dzTooltipDelay";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzTooltipDisabled": {
+              "alias": "dzTooltipDisabled";
+              "required": false;
+              "isSignal": true;
+          };
+      }, {}, never, never, true, never>;
+  }
+## TipAnimate
+  = @dzgrid/dom/tooltip#TipAnimate
+## TipAnimation
+  = @dzgrid/dom/tooltip#TipAnimation
+## TipTone
+  = @dzgrid/dom/tooltip#TipTone
+## TooltipPlacement
+  = @dzgrid/dom/tooltip#TooltipPlacement
+## ɵDzHtml
+  declare class ɵDzHtml {
+      readonly html: _angular_core.InputSignal<string>;
+      static ɵfac: _angular_core.ɵɵFactoryDeclaration<ɵDzHtml, never>;
+      static ɵcmp: _angular_core.ɵɵComponentDeclaration<ɵDzHtml, "dz-html", never, {
+          "html": {
+              "alias": "html";
+              "required": false;
+              "isSignal": true;
+          };
+      }, {}, never, never, true, never>;
+  }
+## ɵdefined
+  declare function ɵdefined<T extends object>(o: T): {
+      [K in keyof T]?: Exclude<T[K], undefined>;
+  };
+## ɵdzDraw
+  declare function ɵdzDraw(what: Exclude<DzTipContent, null | undefined | string>, context: () => unknown, inputs: () => Readonly<Record<string, unknown>> | undefined, close: () => void, ng: {
+      app: ApplicationRef;
+      env: EnvironmentInjector;
+      injector: Injector;
+  }): TipContent;
+
+@ @dzgrid/angular/popover
+## DzPopover
+  declare class DzPopover {
+      #private;
+      readonly dzPopover: _angular_core.InputSignal<DzTipContent>;
+      readonly dzPopoverContext: _angular_core.InputSignal<unknown>;
+      readonly dzPopoverInputs: _angular_core.InputSignal<Readonly<Record<string, unknown>> | undefined>;
+      readonly dzPopoverPlacement: _angular_core.InputSignal<TooltipPlacement | undefined>;
+      readonly dzPopoverFlip: _angular_core.InputSignal<boolean | undefined>;
+      readonly dzPopoverShape: _angular_core.InputSignal<string | undefined>;
+      readonly dzPopoverReducedMotion: _angular_core.InputSignal<"none" | "fade" | undefined>;
+      readonly dzPopoverTone: _angular_core.InputSignal<TipTone | undefined>;
+      readonly dzPopoverAnimation: _angular_core.InputSignal<TipAnimation | undefined>;
+      readonly dzPopoverAnimate: _angular_core.InputSignal<TipAnimate | undefined>;
+      readonly dzPopoverLabel: _angular_core.InputSignal<string | undefined>;
+      readonly dzPopoverGroup: _angular_core.InputSignal<string | undefined>;
+      readonly dzPopoverOpenOn: _angular_core.InputSignal<"click" | "manual" | undefined>;
+      readonly opened: _angular_core.OutputEmitterRef<void>;
+      readonly closed: _angular_core.OutputEmitterRef<PopoverCloseReason>;
+      readonly isOpen: _angular_core.Signal<boolean>;
+      constructor();
+      open(): void;
+      close(): void;
+      toggle(): void;
+      reposition(): void;
+      static ɵfac: _angular_core.ɵɵFactoryDeclaration<DzPopover, never>;
+      static ɵdir: _angular_core.ɵɵDirectiveDeclaration<DzPopover, "[dzPopover]", [
+          "dzPopover"
+      ], {
+          "dzPopover": {
+              "alias": "dzPopover";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzPopoverContext": {
+              "alias": "dzPopoverContext";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzPopoverInputs": {
+              "alias": "dzPopoverInputs";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzPopoverPlacement": {
+              "alias": "dzPopoverPlacement";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzPopoverFlip": {
+              "alias": "dzPopoverFlip";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzPopoverShape": {
+              "alias": "dzPopoverShape";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzPopoverReducedMotion": {
+              "alias": "dzPopoverReducedMotion";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzPopoverTone": {
+              "alias": "dzPopoverTone";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzPopoverAnimation": {
+              "alias": "dzPopoverAnimation";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzPopoverAnimate": {
+              "alias": "dzPopoverAnimate";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzPopoverLabel": {
+              "alias": "dzPopoverLabel";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzPopoverGroup": {
+              "alias": "dzPopoverGroup";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzPopoverOpenOn": {
+              "alias": "dzPopoverOpenOn";
+              "required": false;
+              "isSignal": true;
+          };
+      }, {
+          "opened": "opened";
+          "closed": "closed";
+      }, never, never, true, never>;
+  }
+## PopoverCloseReason
+  = @dzgrid/dom/popover#PopoverCloseReason

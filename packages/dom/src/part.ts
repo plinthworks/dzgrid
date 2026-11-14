@@ -373,6 +373,8 @@ export function unslotted(s: GridSettings<unknown>, paged: unknown): Problem[] {
     // The theme object and the app's icons (presentation-settings.md 23).
     ...(s.theme ? missing('settings.theme', 'theme') : []),
     ...(s.icons ? missing('settings.icons', 'theme') : []),
+    // The app's animation, the header buttons' names, a placement and a shape need `tooltips()` (1.12.0, tooltips-popovers.md).
+    ...(s.tooltips?.animate || s.tooltips?.header || s.tooltips?.placement || s.tooltips?.shape ? missing('settings.tooltips', 'tooltips') : []),
     // A selection rule without its feature (step 21): an error, the grid selects nothing (fail closed).
     ...(s.selection?.canSelect ? missing('settings.selection.canSelect', 'rules', 'error') : []),
     // An edit option with no feature that edits (1.11.0): the column stayed read-only unsaid. Once, its first column;

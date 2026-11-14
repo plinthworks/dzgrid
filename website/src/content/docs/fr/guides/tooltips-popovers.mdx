@@ -1,0 +1,536 @@
+---
+title: "Infobulles et bulles"
+description: "Des infobulles sur les cellules, les titres et partout dans la page — tons, placements, animations, tout contenu — et les bulles qui restent ouvertes."
+---
+
+import CodeTabs from '../../../../components/CodeTabs.astro';
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import TipDemo from '../../../../components/TipDemo.astro';
+
+Une **infobulle** dit quelques mots sur ce que le pointeur survole, ou sur ce que le clavier atteint : on ne clique
+jamais dedans. Une **bulle** (un *popover*) reste ouverte : un clic l’ouvre, et elle peut contenir un formulaire, un
+tableau, même une grille. Les deux viennent du même moteur de DzGrid, dans la grille comme partout dans votre page,
+avec les mêmes tons, placements et animations.
+
+## Où les infobulles s’affichent
+
+Seulement là où vous en demandez une :
+
+| Où | Comment |
+|---|---|
+| Une cellule | La fonction [`tooltip`](../../column-options/tooltip/) de la colonne : des mots, `{ text, tone }`, ou du HTML (plus bas) |
+| Un titre | Le [`headerTooltip`](../../column-options/header-tooltip/) de la colonne |
+| Les boutons d’un titre (filtre, menu de colonne, bascule du filtre flottant) | `tooltips: { header: true }` avec la fonction [`tooltips()`](../../features/tooltips/) : chacun dit son nom |
+| N’importe quel élément de la page | `tooltip(el, options)` depuis `@dzgrid/dom/tooltip` ; en Angular, la directive `dzTooltip` |
+
+Une infobulle apparaît après `delayMs` au survol (500 ms par défaut), et tout de suite quand le focus du clavier
+atteint son élément ; le focus d’un clic n’affiche rien, et un doigt seul n’en ouvre jamais. Le pointeur peut passer
+dessus ; elle part quand le pointeur quitte les deux, après `hideDelayMs` (150 ms). Échap la ferme sans déplacer le
+focus. Une seule infobulle à l’écran à la fois dans une page. Tant qu’elle est affichée, son élément la désigne par
+`aria-describedby`, si bien qu’un lecteur d’écran lit ses mots. `tooltips: { cells: false }` fait taire d’un coup le
+`tooltip` de toutes les colonnes.
+
+Les infobulles de la grille n’ont besoin d’aucune fonction pour les mots, les tons, les effets et le HTML. La fonction
+[`tooltips()`](../../features/tooltips/) ajoute le reste : les boutons du titre, `placement` et `flip`, votre propre
+`animate`, une fermeture qui attend la fin du fondu, et une seule infobulle à la fois avec celles de la page.
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { tooltips } from '@dzgrid/dom/tooltip';
+import { FR } from '@dzgrid/dom/locales/fr';
+import '@dzgrid/theme/tooltips.css';
+
+type Crate = { id: string; fruit: string; kilos: number; late: boolean };
+
+createGrid<Crate>(document.getElementById('cagettes')!, {
+  rows: [{ id: 'c1', fruit: 'Poires', kilos: 18, late: true }],
+  columns: [
+    { id: 'fruit', header: 'Fruit', headerTooltip: 'Ce que contient la cagette' },
+    {
+      id: 'kilos',
+      header: 'Poids (kg)',
+      type: 'number',
+      tooltip: (v, c) => (c.late ? { text: `${v} kg, deux jours de retard`, tone: 'warning' } : `${v} kg`),
+    },
+  ],
+  getRowId: (c) => c.id,
+  messages: FR,
+  tooltips: { delayMs: 300, header: true, placement: 'top', animation: 'scale' },
+  features: [tooltips()],
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzGrid, type DzgColumnOrGroup } from '@dzgrid/angular';
+import { tooltips } from '@dzgrid/dom/tooltip';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Crate = { id: string; fruit: string; kilos: number; late: boolean };
+
+@Component({
+  selector: 'app-cagettes',
+  imports: [DzGrid],
+  template: `<dz-grid [rows]="rows" [columns]="columns" [getRowId]="rowId" [messages]="messages" [tooltips]="tips" [features]="features" />`,
+})
+export class Crates {
+  readonly rows: Crate[] = [{ id: 'c1', fruit: 'Poires', kilos: 18, late: true }];
+  readonly columns: DzgColumnOrGroup<Crate>[] = [
+    { id: 'fruit', header: 'Fruit', headerTooltip: 'Ce que contient la cagette' },
+    {
+      id: 'kilos',
+      header: 'Poids (kg)',
+      type: 'number',
+      tooltip: (v, c) => (c.late ? { text: `${v} kg, deux jours de retard`, tone: 'warning' } : `${v} kg`),
+    },
+  ];
+  readonly rowId = (c: Crate) => c.id;
+  readonly messages = FR;
+  readonly tips = { delayMs: 300, header: true, placement: 'top', animation: 'scale' } as const;
+  readonly features = [tooltips()];
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import type { DzGridElement } from '@dzgrid/element';
+import { tooltips } from '@dzgrid/dom/tooltip';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Crate = { id: string; fruit: string; kilos: number; late: boolean };
+
+const grid = document.querySelector<DzGridElement<Crate>>('dz-grid')!;
+grid.columns = [
+  { id: 'fruit', header: 'Fruit', headerTooltip: 'Ce que contient la cagette' },
+  {
+    id: 'kilos',
+    header: 'Poids (kg)',
+    type: 'number',
+    tooltip: (v, c) => (c.late ? { text: `${v} kg, deux jours de retard`, tone: 'warning' } : `${v} kg`),
+  },
+];
+grid.getRowId = (c) => c.id;
+grid.messages = FR;
+grid.features = [tooltips()];
+grid.settings = { tooltips: { delayMs: 300, header: true, placement: 'top', animation: 'scale' } };
+grid.rows = [{ id: 'c1', fruit: 'Poires', kilos: 18, late: true }];
+```
+
+</Fragment>
+</CodeTabs>
+
+Laissez le pointeur sur un titre, puis sur son bouton en entonnoir :
+
+<LiveDemo
+  height={240}
+  settings={{ label: 'Vergers', tooltips: { header: true, delayMs: 300 } }}
+  features={['filters', 'tooltips']}
+  columns={[
+    { id: 'orchard', header: 'Verger', flex: 1, headerTooltip: 'Le nom du verger sur la carte' },
+    { id: 'variety', header: 'Variété', width: 160, headerTooltip: 'La variété principale qu’on y cultive' },
+    { id: 'trees', header: 'Arbres', type: 'number', width: 140, headerTooltip: 'Arbres plantés, comptés chaque mars' },
+  ]}
+  rows={[
+    { id: 'o1', orchard: 'Verger de la colline', variety: 'Poire Comice', trees: 140 },
+    { id: 'o2', orchard: 'Pré du moulin', variety: 'Reine-claude', trees: 85 },
+    { id: 'o3', orchard: 'Boucle de la rivière', variety: 'Coing rouge', trees: 60 },
+    { id: 'o4', orchard: 'Vieux mur', variety: 'Poire Comice', trees: 210 },
+  ]}
+  caption="Les titres montrent leur headerTooltip ; les boutons en entonnoir disent leur nom (tooltips: { header: true } avec tooltips())."
+/>
+
+## Partout dans la page
+
+`tooltip(el, options)` donne la même infobulle à n’importe quel élément de la page : un bouton de barre d’outils, une
+icône, l’étiquette d’un champ. Elle renvoie une poignée : `show()`, `hide()`, `update()` avec de nouvelles options,
+`destroy()` quand l’élément disparaît. En Angular, la directive `DzTooltip` de `@dzgrid/angular/tooltip` fait de même,
+et se nettoie avec sa vue. Le Web Component n’a pas d’infobulle à lui pour la page : à côté d’un `<dz-grid>`, utilisez
+la fonction de la couche DOM.
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { tooltip } from '@dzgrid/dom/tooltip';
+
+const save = document.querySelector<HTMLButtonElement>('#enregistrer')!;
+const tip = tooltip(save, { content: 'Enregistrer la commande (Ctrl+S)', placement: 'bottom', tone: 'neutral' });
+
+// De nouveaux mots pendant qu’elle s’affiche, et partie avec le bouton.
+tip.update({ content: 'Enregistrée il y a une minute' });
+tip.destroy();
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component } from '@angular/core';
+import { DzTooltip } from '@dzgrid/angular/tooltip';
+
+@Component({
+  selector: 'app-barre-outils',
+  imports: [DzTooltip],
+  template: `
+    <button type="button" dzTooltip="Enregistrer la commande (Ctrl+S)" dzTooltipPlacement="bottom" dzTooltipTone="neutral">Enregistrer</button>
+    <button type="button" [dzTooltip]="'Supprimer la commande'" dzTooltipTone="danger" [dzTooltipDelay]="200">Supprimer</button>
+  `,
+})
+export class Toolbar {}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import { tooltip } from '@dzgrid/dom/tooltip';
+
+// À côté d’un <dz-grid>, un bouton de la page reçoit l’infobulle de la grille.
+const save = document.querySelector<HTMLButtonElement>('#enregistrer')!;
+tooltip(save, { content: 'Enregistrer la commande (Ctrl+S)', placement: 'bottom', tone: 'neutral' });
+```
+
+</Fragment>
+</CodeTabs>
+
+Les options : `content`, `delayMs`, `hideDelayMs`, `disabled`, `nonce` (pour une politique de sécurité stricte :
+l’unique `<style>` qu’elle ajoute le porte), et l’apparence partagée avec la grille — `tone`, `placement`, `flip`,
+`animation`, `reducedMotion`, `animate`, `shape`. Les entrées Angular portent les mêmes noms derrière `dzTooltip` :
+`dzTooltipPlacement`, `dzTooltipTone`, `dzTooltipAnimation`, `dzTooltipDelay`, `dzTooltipFlip`,
+`dzTooltipReducedMotion`, `dzTooltipAnimate`, `dzTooltipShape`, `dzTooltipDisabled`, et `dzTooltipContext` /
+`dzTooltipInputs` pour un modèle ou un composant.
+
+## Les tons
+
+Le ton dit de quel genre de message il s’agit. `info`, la bulle sombre, est le ton par défaut ; `neutral` une surface
+surélevée avec un bord ; `success`, `warning` et `danger` les couleurs de la palette. Chacun se lit en clair comme en
+sombre (texte à 4,5:1), et un affichage en couleurs forcées les dessine tous dans les couleurs du système, avec un bord
+visible. Le ton n’est jamais le seul signe : que les mots le disent aussi.
+
+<TipDemo kind="tones" caption="Laissez le pointeur sur un bouton, ou atteignez-le avec Tab." />
+
+Pour toute la grille, `tooltips: { tone: 'neutral' }` ; pour une cellule, le `tooltip` de la colonne renvoie
+`{ text, tone }` ; dans la page, l’option `tone` ou `dzTooltipTone`.
+
+## Les placements
+
+`placement` est un côté et un alignement : `top`, `bottom`, `start` ou `end`, seul (centré sur son élément) ou suivi
+de `-start` ou `-end` (aligné sur le début ou la fin de l’élément le long de l’autre axe) — 12 placements. `start` et
+`end` sont ceux de la ligne : en arabe ou en hébreu ils s’ouvrent de l’autre côté, comme le reste de la page. Écrivez
+`left` ou `right` (avec les mêmes suffixes) quand vous voulez le côté de l’écran quelle que soit la langue. `auto`, le
+défaut, ouvre en dessous : centré pour les infobulles de la page, au début de la cellule pour celles de la grille.
+
+Quand la fenêtre n’a pas la place de ce côté et l’a de l’autre, la bulle **bascule** de l’autre côté ; `flip: false`
+garde le côté demandé. Le long de l’autre axe, elle glisse pour rester dans la fenêtre. Sa flèche vise le milieu de
+l’élément et suit la bascule. Dans la grille, un `placement` (pour toute la grille, ou le `{ placement }` d’une
+colonne) demande la fonction [`tooltips()`](../../features/tooltips/).
+
+<TipDemo kind="placements" caption="Choisissez un placement : l’infobulle de l’ancre s’ouvre là. Cochez De droite à gauche : start et end changent de côté. Faites défiler jusqu’à ce que l’ancre touche le haut de la fenêtre, puis choisissez top : elle bascule en dessous." />
+
+## Les animations
+
+Une infobulle ou une bulle s’ouvre et se ferme avec l’un des effets de `@dzgrid/theme/tooltips.css` :
+
+| Effet | Comment elle s’ouvre |
+|---|---|
+| `fade` | Un fondu court, par défaut |
+| `scale` | Grandit depuis 96 % avec un fondu, du côté de la flèche |
+| `slide` | Arrive de quelques pixels depuis le côté de l’élément, et suit la bascule et le sens de lecture |
+| `pop` | Plus riche, sur demande : grandit depuis 80 % avec un léger rebond (260 ms) |
+| `rise` | Plus riche, sur demande : 12 px depuis le côté de l’élément, avec une longue décélération douce (320 ms) |
+| `none` | Là tout de suite |
+
+Chaque effet se ferme de la même façon courte (100 ms). Seuls `opacity` et `transform` bougent : rien n’est mesuré
+pendant l’animation. Durées, courbes et délais sont des variables (plus bas).
+
+<TipDemo kind="animations" caption="Chaque bouton ouvre son infobulle avec l’effet qu’il nomme." />
+
+**Mouvement réduit.** Quand le système demande de réduire les animations, ou que la grille a `motion: false`, rien ne
+bouge et rien ne fond : infobulles et bulles apparaissent et partent d’un coup. Vous pouvez demander à la place un
+fondu court, en opacité seule (120 ms) : `reducedMotion: 'fade'`. Une grille avec `motion: false` reste instantanée.
+
+### Votre propre animation
+
+`animate(el, phase, info)` remplace les effets. Elle est appelée une fois la bulle placée (`phase` vaut `'open'`) et
+avant qu’elle soit cachée (`'close'`) ; une bulle qui se ferme reste dessinée jusqu’à ce que la promesse (ou tout
+*thenable*) que vous renvoyez soit réglée, et se cache tout de suite si vous ne renvoyez rien. `info` donne le `side`
+où elle s’est ouverte (`block-start`, `block-end`, `inline-start`, `inline-end`), son `tone`, le sens de lecture
+`dir`, si le mouvement réduit est demandé (`reduced` : à vous de décider ce que cela veut dire — rien du tout, ou un
+fondu), et le `<path>` de sa `shape`. Réaffichée pendant sa fermeture, elle reçoit de nouveau `'open'` : arrêtez la
+fermeture à ce moment-là. Elle n’est jamais appelée sur une grille avec `motion: false`. Pour les infobulles de la
+grille, il faut la fonction [`tooltips()`](../../features/tooltips/).
+
+`shape` dessine la bulle selon votre propre tracé SVG au lieu d’une boîte et d’une flèche : les données du tracé (`d`)
+dans une boîte de 100 × 100, étirée sur la bulle, remplie et bordée des couleurs du ton. Seuls les commandes de tracé
+et les nombres sont acceptés ; tout le reste garde la boîte. Laissez de la place aux mots à l’intérieur (la marge
+intérieure de la bulle est à vous).
+
+```ts
+import { tooltip, type TipAnimate } from '@dzgrid/dom/tooltip';
+
+// De simples images clés par la Web Animations API, jouées à l’envers pour fermer.
+const frames: Keyframe[] = [
+  { opacity: 0, transform: 'translateY(8px) scale(.85)' },
+  { opacity: 1, transform: 'translateY(-2px) scale(1.03)', offset: 0.7 },
+  { opacity: 1, transform: 'none' },
+];
+const bounce: TipAnimate = (el, phase, info) =>
+  info.reduced ? undefined : el.animate(phase === 'open' ? frames : [...frames].reverse(), { duration: 220, easing: 'ease-out' }).finished;
+
+tooltip(document.querySelector<HTMLElement>('#recolte')!, {
+  content: 'Récolte réservée pour mardi',
+  placement: 'top',
+  tone: 'success',
+  // Une bulle de bande dessinée, sa pointe en bas, vers l’élément.
+  shape: 'M0 0 H100 V80 H60 L50 100 L40 80 H0 Z',
+  animate: bounce,
+});
+```
+
+<TipDemo kind="custom" caption="Une forme de bulle de bande dessinée, ouverte et fermée par de simples images clés passées au crochet animate." />
+
+**Une recette avec GSAP.** `info.shape` est un vrai `<path>` : une bibliothèque de morphing peut donc changer une forme
+en une autre. Ci-dessous, GSAP et son extension MorphSVG transforment une barre plate en bulle à l’ouverture, et la
+ramènent à la fermeture, en renvoyant l’animation sous forme de promesse (la bulle qui se ferme l’attend). GSAP est le
+choix de votre application, sous sa propre licence : DzGrid n’en dépend jamais, et le crochet marche de la même façon
+avec n’importe quelle bibliothèque, ou aucune.
+
+```ts
+import { gsap } from 'gsap';
+import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
+import { tooltip, type TipAnimate } from '@dzgrid/dom/tooltip';
+
+gsap.registerPlugin(MorphSVGPlugin);
+
+const BAR = 'M0 40 H100 V60 H60 L50 60 L40 60 H0 Z';
+const BUBBLE = 'M0 0 H100 V80 H60 L50 100 L40 80 H0 Z';
+
+const morph: TipAnimate = (el, phase, info) => {
+  // Mouvement réduit : pas de morphing, rien ne bouge.
+  if (info.reduced || !info.shape) return undefined;
+  // La timeline elle-même : la fermeture l’attend (un tween ou une timeline GSAP a un `then`).
+  if (phase === 'open') {
+    return gsap.timeline()
+      .fromTo(info.shape, { morphSVG: BAR }, { morphSVG: BUBBLE, duration: 0.35, ease: 'back.out(1.6)' })
+      .fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.2 }, 0);
+  }
+  return gsap.timeline()
+    .to(info.shape, { morphSVG: BAR, duration: 0.15 })
+    .to(el, { opacity: 0, duration: 0.12 }, 0);
+};
+
+tooltip(document.querySelector<HTMLElement>('#recolte')!, { content: 'Récolte réservée pour mardi', shape: BUBBLE, animate: morph });
+```
+
+## Le contenu
+
+Une infobulle montre des mots, ou tout ce que vous dessinez :
+
+- **Des mots** : une chaîne. Dans une colonne, `tooltip` en renvoie une (ou null pour aucune), déjà traduite.
+- **Des mots avec un ton** : le `tooltip` d’une colonne renvoie `{ text, tone }`.
+- **Des nœuds** : dans la page, `content` est un `Node`, ou une fonction appelée à chaque ouverture qui renvoie des
+  mots, un nœud, ou `{ node, gone }` (`gone()` est appelée quand on le retire). Dans la grille, une pièce `tooltip`
+  (le `ui.tooltip` de la colonne) la dessine.
+- **Un modèle ou un composant Angular** : `[dzTooltip]` accepte un `<ng-template>` (sa valeur `let-` est
+  `dzTooltipContext`) ou une classe de composant (ses entrées sont `dzTooltipInputs`). La vue est créée à chaque
+  ouverture et détruite quand elle part.
+- **Du HTML, sur demande** : seulement si vous le dites, et nettoyé d’abord.
+
+```ts
+import { Component } from '@angular/core';
+import { DzTooltip } from '@dzgrid/angular/tooltip';
+
+type Hive = { name: string; kilos: number };
+
+@Component({
+  selector: 'app-ruche',
+  imports: [DzTooltip],
+  template: `
+    <button type="button" [dzTooltip]="card" [dzTooltipContext]="hive" dzTooltipTone="neutral">{{ hive.name }}</button>
+    <ng-template #card let-h>
+      <strong>{{ h.name }}</strong>
+      <p>{{ h.kilos }} kg de miel cette année</p>
+    </ng-template>
+  `,
+})
+export class HiveButton {
+  readonly hive: Hive = { name: 'Colline aux trèfles', kilos: 12.5 };
+}
+```
+
+**Le HTML.** Une infobulle n’affiche du HTML donné en texte que si vous le demandez. Dans la grille, passez le
+nettoyeur `safeHtml` de `@dzgrid/dom/tooltip` (la grille seule ne le transporte donc jamais) et laissez le `tooltip`
+d’une colonne renvoyer `{ html }` ; sans le nettoyeur, une telle infobulle montre son `text`, ou rien — jamais le
+balisage brut. Dans la page, `content: { html }` ; en Angular, `[dzTooltip]="{ html }"`, nettoyé d’abord par le
+nettoyeur d’Angular, puis par celui de DzGrid. Le nettoyage garde le texte et une liste fixe d’éléments sans danger
+(`b`, `strong`, `em`, `code`, `kbd`, `p`, listes, tableaux, titres…) avec quelques attributs (`class`, `lang`, `dir`,
+`title`, `colspan`, `rowspan`, `datetime`) ; scripts, styles, images, liens, formulaires, cadres et SVG partent avec
+leur contenu ; aucun attribut d’événement, aucun `style` et aucune URL ne survit. Il est analysé dans un document
+inerte : rien ne se charge ni ne s’exécute. **Le risque qui reste est le vôtre** : le nettoyage arrête les scripts et
+les chargements, pas les mots trompeurs — n’affichez jamais du HTML qu’un inconnu pourrait écrire sans penser à ce
+qu’il dit.
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { safeHtml } from '@dzgrid/dom/tooltip';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Batch = { id: string; batch: string; notes: string };
+
+createGrid<Batch>(document.getElementById('lots')!, {
+  rows: [{ id: 'b1', batch: 'Miel de printemps', notes: '<b>Cru</b>, non chauffé' }],
+  columns: [
+    { id: 'batch', header: 'Lot', tooltip: (_v, b) => ({ html: b.notes, text: 'Cru, non chauffé' }) },
+  ],
+  getRowId: (b) => b.id,
+  messages: FR,
+  tooltips: { html: safeHtml },
+});
+```
+
+## Les bulles
+
+`popover(trigger, options)` de `@dzgrid/dom/popover` (en Angular, `[dzPopover]` de `@dzgrid/angular/popover`) donne
+à un élément une bulle qui reste : une boîte de dialogue non modale, placée et animée comme une infobulle.
+
+- **Ouvrir et fermer.** Un clic sur le déclencheur (ou Entrée, Espace) l’ouvre, un second clic la ferme. Échap la
+  ferme et rend le focus au déclencheur ; un appui hors d’elle et de son déclencheur la ferme, le focus restant là où
+  l’appui l’a mis ; le focus qui la quitte pour autre chose (Tab après son dernier contrôle) la ferme. Votre code
+  l’ouvre et la ferme aussi : `open()`, `close()`, `toggle()` ; `openOn: 'manual'` ne laisse que le code. `onClose`
+  (Angular : `closed`) dit pourquoi : `escape`, `outside`, `focus`, `trigger`, `code`, `group` ou `gone`.
+- **Le focus.** À l’ouverture, le focus va à son premier contrôle (ou à celui marqué `autofocus`) ; sans rien de
+  focalisable, il reste sur le déclencheur. Tab parcourt ses contrôles dans l’ordre, puis continue vers ce qui suit le
+  déclencheur dans la page ; Maj+Tab avant le premier revient au déclencheur. Elle n’est pas modale : pas de piège.
+- **ARIA.** Le déclencheur reçoit `aria-haspopup="dialog"`, `aria-expanded` et `aria-controls` ; la bulle est
+  `role="dialog"`, nommée par `label` ou par le nom du déclencheur.
+- **Groupes et imbrication.** Une seule bulle ouverte à la fois dans un `group` (`'default'` sauf mention contraire) :
+  en ouvrir une ferme les autres, sauf celle d’où elle a été ouverte — une bulle ouverte dans une autre garde son
+  parent ouvert.
+- **Où elle se place.** Dans la couche supérieure du navigateur, si bien qu’aucun ancêtre ne la coupe ; elle reste à
+  côté de son déclencheur quand la page défile ou que la fenêtre change de taille, et se ferme quand son déclencheur
+  quitte la page ou la fenêtre.
+- **Dans une cellule de la grille.** Un déclencheur dessiné dans une cellule (une pièce, un composant de cellule
+  Angular) marche de la même façon ; la bulle se ferme quand sa ligne est recyclée pour en montrer une autre.
+
+Son aspect par défaut est une surface surélevée avec un bord et une ombre (`--dzg-popover-*`) ; `tone`, `animation`,
+`placement`, `flip`, `shape` et `animate` sont ceux de l’infobulle.
+
+<CodeTabs>
+<Fragment slot="ts">
+
+```ts
+import { popover } from '@dzgrid/dom/popover';
+
+const trigger = document.querySelector<HTMLButtonElement>('#filtrer-commandes')!;
+const template = document.querySelector<HTMLTemplateElement>('#filtre-commandes')!;
+
+const pop = popover(trigger, {
+  label: 'Filtrer les commandes',
+  placement: 'bottom-start',
+  // Un formulaire neuf à chaque ouverture.
+  content: () => {
+    const form = template.content.firstElementChild!.cloneNode(true) as HTMLFormElement;
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      console.log(new FormData(form).get('from'));
+      pop.close();
+    });
+    return form;
+  },
+  onClose: (reason) => console.log('fermée par', reason),
+});
+```
+
+</Fragment>
+<Fragment slot="angular">
+
+```ts
+import { Component, signal } from '@angular/core';
+import { DzPopover } from '@dzgrid/angular/popover';
+
+@Component({
+  selector: 'app-filtre-commandes',
+  imports: [DzPopover],
+  template: `
+    <button type="button" [dzPopover]="filter" dzPopoverPlacement="bottom-start" dzPopoverLabel="Filtrer les commandes" #p="dzPopover" (closed)="last.set($event)">
+      Filtrer {{ p.isOpen() ? '▴' : '▾' }}
+    </button>
+    <ng-template #filter let-close="close">
+      <form (submit)="$event.preventDefault(); close()">
+        <label>Depuis le <input name="from" type="date" /></label>
+        <button type="submit">Appliquer</button>
+      </form>
+    </ng-template>
+  `,
+})
+export class OrdersFilter {
+  readonly last = signal('');
+}
+```
+
+</Fragment>
+<Fragment slot="element">
+
+```ts
+import '@dzgrid/element/define';
+import { popover } from '@dzgrid/dom/popover';
+
+// À côté d’un <dz-grid>, un bouton de la barre d’outils de la page ouvre une bulle.
+const trigger = document.querySelector<HTMLButtonElement>('#filtrer-commandes')!;
+const template = document.querySelector<HTMLTemplateElement>('#filtre-commandes')!;
+
+const pop = popover(trigger, {
+  label: 'Filtrer les commandes',
+  placement: 'bottom-start',
+  content: () => template.content.cloneNode(true),
+});
+document.querySelector('#effacer-filtre')!.addEventListener('click', () => pop.close());
+```
+
+</Fragment>
+</CodeTabs>
+
+<TipDemo kind="popover" caption="Ouvrez-la, parcourez le formulaire avec Tab, puis essayez Échap, un clic à côté, ou Réserver." />
+
+En Angular, `#p="dzPopover"` donne au modèle `open()`, `close()`, `toggle()` et `isOpen()` ; les sorties `opened` et
+`closed` disent quand ; le contexte d’un modèle contient `close`, pour la fermer de l’intérieur.
+
+## La feuille de style
+
+Les tons, la flèche sur les quatre côtés, les animations, les formes et l’aspect des bulles sont une feuille à part,
+chargée après `dzgrid.css` :
+
+```ts
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/tooltips.css';
+```
+
+Avec une remise à zéro hors couche (le preflight de Tailwind 3, le Reboot de Bootstrap), chargez plutôt
+`@dzgrid/theme/tooltips.unlayered.css`. Sans la feuille, une infobulle garde la simple bulle sombre de la grille et
+apparaît sans animation, et une bulle est une simple surface. Chaque couleur, taille, durée et courbe est une variable,
+listée dans [le tableau des variables](../theming-rtl/#toutes-les-variables) (`--dzg-tooltip-*`, `--dzg-popover-*`) :
+
+```css
+:root {
+  --dzg-tooltip-open-duration: 200ms;
+  --dzg-tooltip-pop-scale: 0.7;
+  --dzg-popover-radius: 0.75rem;
+}
+```
+
+## Voir aussi
+
+- Le réglage [`tooltips`](../../settings/tooltips/), toutes ses clés.
+- La fonction [`tooltips()`](../../features/tooltips/).
+- Les options de colonne [`tooltip`](../../column-options/tooltip/) et [`headerTooltip`](../../column-options/header-tooltip/).
+- [Accessibilité](../accessibility/).

@@ -23,6 +23,7 @@
  *   variables.scss → variables.css and variables.unlayered.css, 1.9.0 (every presentation knob, opt-in: presentation-settings.md)
  *   buttons.scss  → buttons.css and buttons.unlayered.css, 1.12.0 (the popups' buttons, every look a variable, opt-in: 36)
  *   pager.scss    → pager.css and pager.unlayered.css, 1.12.0 (the pagination bar, every look a variable, opt-in: 39–40)
+ *   tooltips.scss → tooltips.css and tooltips.unlayered.css, 1.12.0 (tones, arrows on four sides, animations, the popover's look: tooltips-popovers.md)
  *   comfort.scss  → dzgrid.comfort.css and dzgrid.comfort.unlayered.css, the owner's third look (decisions.md « Comfort stylesheet »)
  * The tests compile the same way and fail when a file drifts from its source.
  */
@@ -36,7 +37,7 @@ const out = (source, file) => {
   writeFileSync(`${dir}${file}`, `${css}\n`);
   console.log(`build:theme: ${file}`);
 };
-for (const name of ['dzgrid', 'contrast', 'edit', 'menu', 'range', 'fill', 'columns', 'columns-panel', 'pinned-rows', 'print', 'fresh-rows', 'find', 'filters-panel', 'row-numbers', 'search', 'grouping', 'row-drag', 'dock', 'pivot', 'vertical-headers', 'variables', 'buttons', 'pager']) {
+for (const name of ['dzgrid', 'contrast', 'edit', 'menu', 'range', 'fill', 'columns', 'columns-panel', 'pinned-rows', 'print', 'fresh-rows', 'find', 'filters-panel', 'row-numbers', 'search', 'grouping', 'row-drag', 'dock', 'pivot', 'vertical-headers', 'variables', 'buttons', 'pager', 'tooltips']) {
   out(`@use "${name}";`, `${name}.css`);
   out(`@use "${name}" with ($layered: false);`, `${name}.unlayered.css`);
 }

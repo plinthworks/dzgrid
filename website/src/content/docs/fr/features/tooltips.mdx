@@ -1,0 +1,76 @@
+---
+title: "tooltips"
+description: "Les placements, votre propre animation et vos formes, et le nom des boutons des titres pour les infobulles de la grille."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Ce que font les infobulles de la grille au-delà des mots, des tons et des effets.
+
+<FeatureFacts name="tooltips" />
+
+## Ce qu’elle fait
+
+Les infobulles de la grille marchent sans elle : le `tooltip` et le `headerTooltip` d’une colonne, et dans le réglage
+[`tooltips`](../../settings/tooltips/) `delayMs`, `hideDelayMs`, `cells`, `tone`, `animation`, `reducedMotion` et
+`html`. `tooltips()` ajoute :
+
+- `tooltips.header` : les boutons du titre (filtre, menu de colonne, bascule du filtre flottant) affichent leur nom.
+  C’est déjà leur nom : un lecteur d’écran ne l’entend donc pas deux fois.
+- `tooltips.placement` et `flip`, et le `tooltip` d’une colonne qui renvoie `{ placement }` : 12 placements et `auto`.
+- `tooltips.animate`, votre propre animation, et `tooltips.shape`, la bulle dessinée selon votre tracé SVG.
+- Une fermeture qui attend la fin du fondu : une pièce, un modèle ou du HTML reste dessiné pendant qu’il s’efface.
+- Une seule infobulle à l’écran à la fois avec celles de la page (`tooltip()` de la même entrée).
+
+Sans elle, `header`, `animate`, `placement` et `shape` sont signalés une fois par un problème (`missing-feature`,
+chemin `settings.tooltips`, détail `tooltips`), et les infobulles de la grille gardent leur comportement de base.
+Chargez la feuille de style `@dzgrid/theme/tooltips.css` pour les tons, la flèche sur les quatre côtés et les
+animations. Tout le sujet, avec des exemples vivants : [Infobulles et bulles](../../guides/tooltips-popovers/).
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { tooltips } from '@dzgrid/dom/tooltip';
+import { filters } from '@dzgrid/dom/filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+
+type Hive = { id: string; hive: string; honey: number };
+
+createGrid<Hive>(document.getElementById('ruches')!, {
+  rows: [{ id: 'h1', hive: 'Colline aux trèfles', honey: 12.5 }],
+  columns: [
+    { id: 'hive', header: 'Ruche', headerTooltip: 'Le nom de la ruche sur la carte' },
+    { id: 'honey', header: 'Miel (kg)', type: 'number', tooltip: (v) => ({ text: `${v} kg cette année`, placement: 'end' }) },
+  ],
+  getRowId: (h) => h.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_FILTERS.text } },
+  tooltips: { header: true, placement: 'top', animation: 'pop' },
+  features: [filters(), tooltips()],
+});
+```
+
+Laissez le pointeur sur un bouton en entonnoir :
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Ruches', tooltips: { header: true, delayMs: 300 } }}
+  features={['filters', 'tooltips']}
+  columns={[
+    { id: 'hive', header: 'Ruche', flex: 1, headerTooltip: 'Le nom de la ruche sur la carte' },
+    { id: 'honey', header: 'Miel (kg)', type: 'number', width: 160 },
+  ]}
+  rows={[
+    { id: 'h1', hive: 'Colline aux trèfles', honey: 12.5 },
+    { id: 'h2', hive: 'Allée des tilleuls', honey: 9 },
+    { id: 'h3', hive: 'Pente de bruyère', honey: 15.2 },
+  ]}
+/>
+
+## Voir aussi
+
+- [Infobulles et bulles](../../guides/tooltips-popovers/) : placements, animations, contenu, bulles.
+- Le réglage [`tooltips`](../../settings/tooltips/).
+- Les options de colonne [`tooltip`](../../column-options/tooltip/) et [`headerTooltip`](../../column-options/header-tooltip/).

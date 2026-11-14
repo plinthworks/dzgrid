@@ -36,6 +36,25 @@ Puis `npm run publish:verify`, et dans les applications `npm update @dzgrid/core
 - **`autoColumns<Ligne, DzgColumnDef<Ligne>>`** : des colonnes Angular avec un composant dans `ui.cell`, sans cast
   (`override`, `merge`, `add`).
 
+## Infobulles et bulles (tes réponses du 2026-11-13 et Q-T1 B du 2026-11-14)
+
+- **Où tu veux** : la colonne (`tooltip`, `headerTooltip`), toute la grille (`tooltips`), les boutons des titres
+  (`tooltips: { header: true }` avec `features: [tooltips()]`), n'importe quel élément de la page (`tooltip(el, …)`,
+  `[dzTooltip]` en Angular).
+- **Tons** `info` (celui d'avant), `neutral`, `success`, `warning`, `danger`, lisibles en clair et en sombre.
+- **Animations** CSS : `fade`, `scale`, `slide`, `none`, et deux plus riches à activer, `pop` et `rise` ; mouvement réduit
+  = aucune animation, ou un fondu court avec `reducedMotion: 'fade'`. Ton animation à toi (`animate`, GSAP possible,
+  jamais une dépendance de DzGrid), et une forme SVG à toi (`shape`) pour du morphing.
+- **Placement** : `top`, `bottom`, `start`, `end`, `left`, `right` (+ `-start` / `-end`), `auto` ; bascule au bord
+  (`flip: false` pour l'empêcher).
+- **Tout contenu** : texte, nœuds, `<ng-template>`, composant, HTML nettoyé (sur demande : `safeHtml`).
+- **Bulles qui restent** (`popover()`, `[dzPopover]`) : clic, Échap, clic dehors, Tab, code ; le focus entre et revient ;
+  une ouverte par groupe ; même dans une cellule de grille.
+- **Nouvelle feuille** `@dzgrid/theme/tooltips.css` (et sa copie sans couche), après `variables.css`.
+- Tailles : base `@dzgrid/dom` 25 704 (+2 %, mesuré 25 690) ; nouvelles entrées à leur mesure + 10 % ; appli Angular
+  réelle 102 700 (+0,5 %, mesuré 102 697) ; K.8 91 591 / 92 000.
+- Corrigé aussi : le bouton Réessayer garde son anneau de focus (il prenait l'allure du pied).
+
 ## Ce que la relecture a corrigé
 
 - **Une infobulle près du bas de la fenêtre** dépassait de la taille de sa flèche (≈ 6 px) avant de passer au-dessus :

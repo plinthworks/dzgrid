@@ -23,7 +23,7 @@ const fesm = `${root}packages/angular/dist/fesm2022/dzgrid-angular.mjs`;
 const linker = {
   name: 'angular-linker',
   setup(b) {
-    b.onLoad({ filter: /(node_modules[\\/]@angular[\\/].*|dzgrid-angular)\.mjs$/ }, async (args) => {
+    b.onLoad({ filter: /(node_modules[\\/]@angular[\\/].*|dzgrid-angular(-tooltip|-popover)?)\.mjs$/ }, async (args) => {
       const code = readFileSync(args.path, 'utf8');
       if (!code.includes('ɵɵngDeclare')) return { contents: code, loader: 'js' };
       const out = await transformAsync(code, { filename: args.path, babelrc: false, configFile: false, compact: false, sourceMaps: false, plugins: [linkerPlugin] });
@@ -45,14 +45,14 @@ export async function buildFixture() {
     target: 'es2022',
     legalComments: 'none',
     absWorkingDir: root,
-    alias: { '@dzgrid/angular': fesm, 'dzgrid-perf-dataset': `${root}perf/dataset.ts` },
+    alias: { '@dzgrid/angular/tooltip': fesm.replace('angular.mjs', 'angular-tooltip.mjs'), '@dzgrid/angular/popover': fesm.replace('angular.mjs', 'angular-popover.mjs'), '@dzgrid/angular': fesm, 'dzgrid-perf-dataset': `${root}perf/dataset.ts` },
     define: { ngDevMode: 'false', ngJitMode: 'false', ngI18nClosureMode: 'false', ngServerMode: 'false' },
     logLevel: 'warning',
     plugins: [linker],
   });
   mkdirSync(`${here}build`, { recursive: true });
   writeFileSync(`${here}build/index.html`, readFileSync(`${here}index.html`, 'utf8'));
-  for (const css of ['dzgrid.css', 'edit.css', 'clinic.css', 'midnight.css']) copyFileSync(`${root}packages/theme/${css}`, `${here}build/${css}`);
+  for (const css of ['dzgrid.css', 'edit.css', 'clinic.css', 'midnight.css', 'variables.css', 'tooltips.css']) copyFileSync(`${root}packages/theme/${css}`, `${here}build/${css}`);
   const js = readFileSync(`${here}build/main.js`);
   return { bytes: statSync(`${here}build/main.js`).size, gzip: gzipSync(js).length };
 }

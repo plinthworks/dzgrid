@@ -1,25 +1,41 @@
 ---
 title: "tooltips"
-description: "How long the pointer rests before a tooltip shows."
+description: "Where the grid's tooltips show and how: the wait, the tone, the placement, the animation."
 ---
 
 import CodeTabs from '../../../components/CodeTabs.astro';
 import LiveDemo from '../../../components/LiveDemo.astro';
 import OptionFacts from '../../../components/OptionFacts.astro';
 
-The wait before a tooltip appears under the pointer.
+Where the grid's tooltips show, and how they open and close.
 
 <OptionFacts setting="tooltips" />
 
 ## What it does
 
-`delayMs`: how long the pointer rests on a header or a cell before its tooltip shows, 500 ms by default. The
-keyboard does not wait: a tooltip shows as soon as the focus reaches its cell.
-
 The text comes from the columns, never guessed from the cell: `tooltip(value, row, context)` for a cell,
-`headerTooltip` for a header. The pointer can move onto the tooltip without it going; Escape closes it. It stays
-inside the window, never covers what it describes, and opens toward the start of the line in right to left. The
-focused cell points to it with `aria-describedby` while it shows.
+`headerTooltip` for a header. The keyboard does not wait: a tooltip shows as soon as the focus reaches its cell. The
+pointer can move onto the tooltip without it going; Escape closes it. It stays inside the window and never covers what
+it describes. The focused cell points to it with `aria-describedby` while it shows.
+
+| Key | Default | What it does | Needs `tooltips()` |
+|---|---|---|---|
+| `delayMs` | `500` | How long the pointer rests before a tooltip shows, in ms | no |
+| `hideDelayMs` | `150` | The grace after the pointer leaves, so it can cross onto the tooltip, in ms | no |
+| `cells` | `true` | `false` silences every column's `tooltip` at once (a failed save's reason still shows) | no |
+| `tone` | `'info'` | `info`, `neutral`, `success`, `warning` or `danger`; a column's `{ text, tone }` wins | no |
+| `animation` | `'fade'` | `fade`, `scale`, `slide`, `pop`, `rise` or `none` (the presets of `@dzgrid/theme/tooltips.css`) | no |
+| `reducedMotion` | `'none'` | Under reduced motion: nothing moves (`none`), or a short fade, opacity only (`fade`) | no |
+| `html` | — | The cleaner, `safeHtml` from `@dzgrid/dom/tooltip`, that lets a column's `tooltip` return `{ html }` | no |
+| `header` | `false` | The header's buttons (filter, column menu, floating filter toggle) show their name | yes |
+| `placement` | `'auto'` | One of 12 placements (`top`, `bottom`, `start`, `end`, alone or with `-start` / `-end`), `left` / `right`, or `auto`: below, at the cell's start | yes |
+| `flip` | `true` | `false`: never moved to the other side when it does not fit | yes |
+| `animate` | — | Your own animation, `(el, phase, info)`, in place of the presets | yes |
+| `shape` | — | The bubble drawn as your SVG path (a 100 × 100 box stretched over it) | yes |
+
+The keys that need the [`tooltips()`](../../features/tooltips/) feature are told once as a problem without it
+(`missing-feature`). A grid with [`motion`](../motion/) `false` opens and closes its tooltips at once. Placements,
+animations, content and popovers, with live examples: [Tooltips and popovers](../../guides/tooltips-popovers/).
 
 ## Example
 
@@ -116,3 +132,4 @@ grid.rows = [{ id: 'p1', name: 'Grey Tooth', metres: 3120 }];
 ## See also
 
 - [Columns](../../guides/columns/#classes-tooltips-custom-cells) — `tooltip` and `headerTooltip`.
+- [Tooltips and popovers](../../guides/tooltips-popovers/), and the [`tooltips()`](../../features/tooltips/) feature.

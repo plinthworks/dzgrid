@@ -13,6 +13,14 @@
       "types": "./src/popup.ts",
       "default": "./src/popup.ts"
     },
+    "./tooltip": {
+      "types": "./src/tooltip.ts",
+      "default": "./src/tooltip.ts"
+    },
+    "./popover": {
+      "types": "./src/popover.ts",
+      "default": "./src/popover.ts"
+    },
     "./spans": {
       "types": "./src/spans.ts",
       "default": "./src/spans.ts"

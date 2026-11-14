@@ -21,3 +21,4 @@ export type { Part, PartBase, PartHandle, SlotContext, SlotPart } from './part.j
 export type { PartsMessageKey, PartsMessages } from './part-texts.js';
 export type { GridFeature, FeatureHandle } from './features.js';
 export type { HeaderRowSpec } from './render/header.js';
+export type { TipAnimate, TipAnimation, TipSide, TipTone } from './render/tooltip.js';

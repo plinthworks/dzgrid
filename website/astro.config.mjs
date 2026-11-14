@@ -36,6 +36,7 @@ function aliases() {
 const GUIDES = [
   'columns',
   'appearance',
+  'tooltips-popovers',
   'sort-filter-search',
   'selection-ranges',
   'editing',
@@ -73,7 +74,7 @@ export default defineConfig({
       customCss: [
         '@dzgrid/theme/dzgrid.css',
         // Each feature's sheet, for the guides' demos (they change nothing on a grid without the feature).
-        ...['columns', 'menu', 'grouping', 'pivot', 'edit', 'range', 'fill', 'dock', 'columns-panel', 'filters-panel', 'find', 'search', 'print', 'row-drag', 'pinned-rows', 'vertical-headers', 'variables'].map((s) => `@dzgrid/theme/${s}.css`),
+        ...['columns', 'menu', 'grouping', 'pivot', 'edit', 'range', 'fill', 'dock', 'columns-panel', 'filters-panel', 'find', 'search', 'print', 'row-drag', 'pinned-rows', 'vertical-headers', 'variables', 'tooltips'].map((s) => `@dzgrid/theme/${s}.css`),
         './src/styles/custom.css',
       ],
       sidebar: [

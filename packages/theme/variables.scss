@@ -336,14 +336,11 @@ $arrow: var(--dzg-tooltip-arrow-size, 0.375rem);
     clip-path: polygon(50% 0, 100% 100%, 0 100%);
   }
 
-  // Below its cell by default (`block-end`); above it, the arrow turned to point down. The margin is the arrow's size on
-  // both sides (the grid reads it to choose the side, review 1.12.0); above, a translation moves the box up instead.
+  // Below its cell by default (`block-end`); above it, the arrow turned to point down. The margin is the arrow's size:
+  // the grid reads it as the gap on every side and writes the place that gives it back (tooltips-popovers.md 4), so no
+  // `translate` here — the animations of tooltips.css use it.
   .dzg-tooltip {
     margin-block-start: $arrow;
-  }
-
-  .dzg-tooltip[data-side=block-start] {
-    translate: 0 calc(-2 * #{$arrow});
   }
 
   .dzg-tooltip[data-side=block-start]::before {

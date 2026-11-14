@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DzGrid browser suite: tooltips and popovers</title>
+<script type="importmap">{ "imports": {
+  "@dzgrid/core": "/packages/core/src/index.ts",
+  "@dzgrid/core/internal": "/packages/core/src/internal.ts",
+  "@dzgrid/dom/internal": "/packages/dom/src/internal.ts"
+} }</script>
+<script>
+  // The sheets by the query (scripts/browser-1-12.mjs (11)): Tailwind 3's preflight first when asked, then the layered or
+  // unlayered copies, tooltips.css last.
+  {
+    const q = new URLSearchParams(location.search);
+    const u = q.get('css') === 'unlayered' ? '.unlayered' : '';
+    const sheets = [...(q.get('preflight') ? ['/node_modules/tailwindcss3/src/css/preflight.css'] : []), `/packages/theme/dzgrid${u}.css`, `/packages/theme/variables${u}.css`, `/packages/theme/tooltips${u}.css`];
+    for (const href of sheets) document.write(`<link rel="stylesheet" href="${href}">`);
+  }
+</script>
+<style>
+  html, body { block-size: 100%; }
+  body { margin: 0; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); }
+  main { position: relative; block-size: 100vh; }
+  .at { position: absolute; padding: 4px 10px; }
+  #c { inset-block-start: 300px; inset-inline-start: 50%; translate: -50% 0; }
+  #top { inset-block-start: 2px; inset-inline-start: 45%; }
+  #bottom { inset-block-end: 2px; inset-inline-start: 45%; }
+  #lft { inset-block-start: 380px; left: 2px; }
+  #rgt { inset-block-start: 380px; right: 2px; }
+  #host { position: absolute; inset-block-start: 60px; inset-inline-start: 20px; inline-size: 460px; block-size: 200px; display: flex; flex-direction: column; }
+  /* A cell's action icon: a 24 px target (WCAG 2.5.8), whatever a reset does to buttons. */
+  .act { min-inline-size: 24px; min-block-size: 24px; }
+  #pops { position: absolute; inset-block-start: 440px; inset-inline-start: 40px; display: flex; gap: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1 class="at" style="inset-block-start: 0; inset-inline-end: 40%; margin: 0; font-size: 14px">DzGrid</h1>
+  <button id="c" class="at" type="button">Centre</button>
+  <button id="top" class="at" type="button">Haut</button>
+  <button id="bottom" class="at" type="button">Bas</button>
+  <button id="lft" class="at" type="button">Bord</button>
+  <button id="rgt" class="at" type="button">Bord</button>
+  <button id="html" class="at" type="button" style="inset-block-start: 380px; inset-inline-start: 45%">HTML</button>
+  <div id="host"></div>
+  <div id="pops"><button id="pop" type="button">Détails</button><button id="pop2" type="button">Autre</button><button id="after" type="button">Après</button></div>
+</main>
+<script type="module" src="./v1-12-tips.ts"></script>
+</body>
+</html>

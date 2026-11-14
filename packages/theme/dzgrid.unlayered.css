@@ -275,7 +275,11 @@
 }
 
 .dzg-overlay button:focus-visible,
-.dzg-retry:focus-visible,
+.dzg-retry:focus-visible {
+  outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+  outline-offset: 2px;
+}
+
 .dzg-footer {
   padding-block: 0.25rem;
   padding-inline: 0.5rem;

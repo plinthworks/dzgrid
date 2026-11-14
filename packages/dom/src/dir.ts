@@ -1,4 +1,6 @@
+import type { TooltipPlacement } from '@dzgrid/core';
 import type { Scope } from './render/scope.js';
+import type { TipAlign, TipSide } from './render/tooltip.js';
 
 /**
  * The one file that names physical sides (guard `physical`). Everything else
@@ -173,6 +175,25 @@ export const sideways = (e: { readonly deltaX: number; readonly deltaY: number; 
 export function fixedInlineStart(anchor: Pick<DOMRectReadOnly, 'left' | 'right'>, dir: Dir, windowInline: number, boxInline: number): number {
   const start = dir === 'ltr' ? anchor.left : windowInline - anchor.right;
   return Math.max(0, Math.min(start, windowInline - boxInline));
+}
+
+/**
+ * A box in the window's logical coordinates (tooltips-popovers.md 4): its inline start and end measured from the
+ * window's start edge (the left in left to right, the right in right to left), its block start and end from the top.
+ */
+export function logicalBox(r: Pick<DOMRectReadOnly, 'left' | 'right' | 'top' | 'bottom'>, dir: Dir, windowInline: number): { is: number; ie: number; bs: number; be: number } {
+  return dir === 'ltr' ? { is: r.left, ie: r.right, bs: r.top, be: r.bottom } : { is: windowInline - r.right, ie: windowInline - r.left, bs: r.top, be: r.bottom };
+}
+
+/**
+ * A tooltip's or popover's placement as a logical side and an alignment (tooltips-popovers.md 4): `left` and `right` are
+ * the screen's, so they turn into the line's start or end by the direction here; `start` and `end` are the line's;
+ * `-start` / `-end` align the bubble with the anchor's start or end along the other axis, none centres it.
+ */
+export function placementOf(p: TooltipPlacement | undefined, dir: Dir, auto: TooltipPlacement): readonly [TipSide, TipAlign] {
+  const [s, a] = (!p || p === 'auto' ? auto : p).split('-') as [string, string | undefined];
+  const side = s === 'left' ? (dir === 'ltr' ? 'start' : 'end') : s === 'right' ? (dir === 'ltr' ? 'end' : 'start') : s;
+  return [side === 'top' ? 'block-start' : side === 'bottom' ? 'block-end' : (`inline-${side}` as TipSide), a === 'start' ? -1 : a === 'end' ? 1 : 0];
 }
 
 /** A point on the screen (a right-click's), in client coordinates. */

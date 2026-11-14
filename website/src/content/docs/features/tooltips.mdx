@@ -1,0 +1,75 @@
+---
+title: "tooltips"
+description: "Placements, your own animation and shapes, and the header buttons' names for the grid's tooltips."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+What the grid's tooltips do beyond words, tones and presets.
+
+<FeatureFacts name="tooltips" />
+
+## What it does
+
+The grid's tooltips work without it: a column's `tooltip` and `headerTooltip`, the [`tooltips`](../../settings/tooltips/)
+setting's `delayMs`, `hideDelayMs`, `cells`, `tone`, `animation`, `reducedMotion` and `html`. `tooltips()` adds:
+
+- `tooltips.header`: the header's buttons (filter, column menu, floating filter toggle) show their name. It is their
+  name already, so a screen reader does not hear it twice.
+- `tooltips.placement` and `flip`, and a column's `tooltip` returning `{ placement }`: 12 placements and `auto`.
+- `tooltips.animate`, your own animation, and `tooltips.shape`, the bubble drawn as your SVG path.
+- A closing that waits for the end of its fade, so a part, a template or HTML stays drawn while it fades.
+- One tooltip on screen at a time with the page's own (`tooltip()` from the same entry).
+
+Without it, `header`, `animate`, `placement` and `shape` are told once as a problem (`missing-feature`, path
+`settings.tooltips`, detail `tooltips`), and the grid's tooltips keep their base behaviour. Load the style sheet
+`@dzgrid/theme/tooltips.css` for the tones, the arrow on four sides and the animations. The whole story, with live
+examples: [Tooltips and popovers](../../guides/tooltips-popovers/).
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { tooltips } from '@dzgrid/dom/tooltip';
+import { filters } from '@dzgrid/dom/filters';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+
+type Hive = { id: string; hive: string; honey: number };
+
+createGrid<Hive>(document.getElementById('hives')!, {
+  rows: [{ id: 'h1', hive: 'Clover hill', honey: 12.5 }],
+  columns: [
+    { id: 'hive', header: 'Hive', headerTooltip: 'The hive’s name on the map' },
+    { id: 'honey', header: 'Honey (kg)', type: 'number', tooltip: (v) => ({ text: `${v} kg this year`, placement: 'end' }) },
+  ],
+  getRowId: (h) => h.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_FILTERS.text } },
+  tooltips: { header: true, placement: 'top', animation: 'pop' },
+  features: [filters(), tooltips()],
+});
+```
+
+Rest the pointer on a funnel button:
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Hives', tooltips: { header: true, delayMs: 300 } }}
+  features={['filters', 'tooltips']}
+  columns={[
+    { id: 'hive', header: 'Hive', flex: 1, headerTooltip: 'The hive’s name on the map' },
+    { id: 'honey', header: 'Honey (kg)', type: 'number', width: 160 },
+  ]}
+  rows={[
+    { id: 'h1', hive: 'Clover hill', honey: 12.5 },
+    { id: 'h2', hive: 'Lime walk', honey: 9 },
+    { id: 'h3', hive: 'Heather slope', honey: 15.2 },
+  ]}
+/>
+
+## See also
+
+- [Tooltips and popovers](../../guides/tooltips-popovers/): placements, animations, content, popovers.
+- The [`tooltips`](../../settings/tooltips/) setting.
+- The column options [`tooltip`](../../column-options/tooltip/) and [`headerTooltip`](../../column-options/header-tooltip/).

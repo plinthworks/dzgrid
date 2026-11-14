@@ -108,6 +108,7 @@ export const FEATURES: Record<string, Maker> = {
   wrappedHeaders: async (o) => ({ feature: (await import('@dzgrid/dom/wrapped-headers')).wrappedHeaders(o) }),
   responsive: async (o) => ({ feature: (await import('@dzgrid/dom/responsive')).responsive(o), texts: ['detail'] }),
   columnHover: async () => ({ feature: (await import('@dzgrid/dom/column-hover')).columnHover() }),
+  tooltips: async () => ({ feature: (await import('@dzgrid/dom/tooltip')).tooltips() }),
   theming: async () => ({ feature: (await import('@dzgrid/dom/theme')).theming() }),
   rules: async () => ({ feature: (await import('@dzgrid/dom/rules')).rules(), texts: ['rules'] }),
   search: async (_o, _made, lang) => {

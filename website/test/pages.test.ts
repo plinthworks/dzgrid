@@ -24,6 +24,8 @@ const WRITTEN = [
   'guides/export-print', 'guides/state', 'guides/theming-rtl', 'guides/accessibility',
   // 2026-11-12, the owner: « how to change the height, the font » — the look, step by step.
   'guides/appearance',
+  // 1.12.0 (2026-11-14): tooltips anywhere, and popovers.
+  'guides/tooltips-popovers',
   // Batch 3 (2026-11-11): one page per option.
   'settings/index', 'settings/density', 'settings/row-height', 'settings/header-height', 'settings/headers', 'settings/label',
   'settings/messages', 'settings/locale', 'settings/time-zone', 'settings/numerals', 'settings/direction', 'settings/clock',
@@ -204,9 +206,9 @@ describe('the site’s pages', () => {
   });
 
   it('a written page’s French is written in French', () => {
-    // Not the English left in place: no English heading survives on a French page (code names aside).
+    // Not the English left in place: no English heading survives on a French page (code names aside, Angular's `ɵ` ones too).
     for (const slug of WRITTEN) {
-      const en = new Set(headings(read('en', slug)).filter((h) => !/^`?[@\w./-]+`?$/.test(h) && !['TypeScript', 'Angular', 'Guides'].includes(h)));
+      const en = new Set(headings(read('en', slug)).filter((h) => !/^`?[@\wɵ./-]+`?$/.test(h) && !['TypeScript', 'Angular', 'Guides'].includes(h)));
       expect(headings(read('fr', slug)).filter((h) => en.has(h)), slug).toEqual([]);
     }
   });

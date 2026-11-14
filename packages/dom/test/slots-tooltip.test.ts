@@ -162,11 +162,10 @@ describe('tooltip parts', () => {
     const t = make({ parts: { tooltip: part }, tooltips: { delayMs: 0 }, direction: 'rtl' });
     const anchor = t.cell(3, 'n');
     anchor.getBoundingClientRect = () => ({ left: 700, right: 800, top: 100, bottom: 130, width: 100, height: 30, x: 700, y: 100, toJSON() {} }) as DOMRect;
-    // The tooltip measures wide once the part has drawn its content, empty otherwise.
-    t.tip.getBoundingClientRect = () => {
-      const w = t.tip.querySelector('.rich-t') ? 300 : 0;
-      return { left: 0, right: w, top: 0, bottom: 20, width: w, height: 20, x: 0, y: 0, toJSON() {} } as DOMRect;
-    };
+    // The tooltip measures wide once the part has drawn its content, empty otherwise. Its layout box (1.12.0: not its
+    // drawn box, which a running `scale` animation shrinks).
+    Object.defineProperty(t.tip, 'offsetWidth', { configurable: true, get: () => (t.tip.querySelector('.rich-t') ? 300 : 0) });
+    Object.defineProperty(t.tip, 'offsetHeight', { configurable: true, get: () => 20 });
     t.over(anchor);
     // RTL: the start is the right; from the window's right edge (1024 - 800 = 224), within the window.
     expect(window.innerWidth).toBe(1024);

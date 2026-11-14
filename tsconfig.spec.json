@@ -206,6 +206,12 @@
       "@dzgrid/dom/column-hover": [
         "./packages/dom/src/column-hover.ts"
       ],
+      "@dzgrid/dom/tooltip": [
+        "./packages/dom/src/tooltip.ts"
+      ],
+      "@dzgrid/dom/popover": [
+        "./packages/dom/src/popover.ts"
+      ],
       "@dzgrid/dom/locales/en-totals": [
         "./packages/dom/src/locales/en-totals.ts"
       ],
@@ -265,6 +271,12 @@
       ],
       "@dzgrid/element/define": [
         "./packages/element/src/define.ts"
+      ],
+      "@dzgrid/angular/tooltip": [
+        "./packages/angular/tooltip/index.ts"
+      ],
+      "@dzgrid/angular/popover": [
+        "./packages/angular/popover/index.ts"
       ],
       "@dzgrid/angular": [
         "./packages/angular/src/index.ts"

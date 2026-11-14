@@ -1,0 +1,291 @@
+.dzg-popover {
+  max-inline-size: var(--dzg-popover-max-width, min(32rem, 100vw - 16px));
+  padding: var(--dzg-popover-padding, 0.75rem);
+  border: var(--dzg-line, 1px) solid var(--dzg-popover-border, var(--tz-border));
+  border-radius: var(--dzg-popover-radius, var(--dzg-radius, 0.375rem));
+  color: var(--dzg-popover-fg, var(--tz-fg));
+  background: var(--dzg-popover-bg, var(--tz-bg));
+  box-shadow: var(--dzg-popover-shadow, 0 0.25rem 0.75rem color-mix(in srgb, var(--tz-fg) 20%, transparent));
+  font-size: var(--dzg-popover-font-size, inherit);
+  outline: none;
+  --dzg-tip-arrow-bg: var(--dzg-popover-arrow-color, var(--dzg-popover-bg, var(--tz-bg)));
+  --dzg-tip-arrow-edge: var(--dzg-popover-border, var(--tz-border));
+}
+
+.dzg-tooltip {
+  --dzg-tip-arrow-bg: var(--dzg-tooltip-arrow-color, var(--dzg-tooltip-bg, var(--tz-fg)));
+  --dzg-tip-arrow-edge: transparent;
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-tone=info] {
+  color: var(--dzg-tooltip-info-fg, var(--dzg-tooltip-fg, var(--tz-bg)));
+  background: var(--dzg-tooltip-info-bg, var(--dzg-tooltip-bg, var(--tz-fg)));
+  outline: var(--dzg-line, 1px) solid var(--dzg-tooltip-info-border, transparent);
+  outline-offset: calc(-1 * var(--dzg-line, 1px));
+  --dzg-tip-arrow-bg: var(--dzg-tooltip-info-arrow, var(--dzg-tooltip-info-bg, var(--dzg-tooltip-bg, var(--tz-fg))));
+  --dzg-tip-arrow-edge: var(--dzg-tooltip-info-border, transparent);
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-tone=neutral] {
+  color: var(--dzg-tooltip-neutral-fg, var(--tz-fg));
+  background: var(--dzg-tooltip-neutral-bg, var(--tz-bg-raised));
+  outline: var(--dzg-line, 1px) solid var(--dzg-tooltip-neutral-border, var(--tz-border));
+  outline-offset: calc(-1 * var(--dzg-line, 1px));
+  --dzg-tip-arrow-bg: var(--dzg-tooltip-neutral-arrow, var(--dzg-tooltip-neutral-bg, var(--tz-bg-raised)));
+  --dzg-tip-arrow-edge: var(--dzg-tooltip-neutral-border, var(--tz-border));
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-tone=success] {
+  color: var(--dzg-tooltip-success-fg, var(--tz-bg));
+  background: var(--dzg-tooltip-success-bg, var(--tz-success));
+  outline: var(--dzg-line, 1px) solid var(--dzg-tooltip-success-border, transparent);
+  outline-offset: calc(-1 * var(--dzg-line, 1px));
+  --dzg-tip-arrow-bg: var(--dzg-tooltip-success-arrow, var(--dzg-tooltip-success-bg, var(--tz-success)));
+  --dzg-tip-arrow-edge: var(--dzg-tooltip-success-border, transparent);
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-tone=warning] {
+  color: var(--dzg-tooltip-warning-fg, var(--tz-bg));
+  background: var(--dzg-tooltip-warning-bg, var(--tz-warning));
+  outline: var(--dzg-line, 1px) solid var(--dzg-tooltip-warning-border, transparent);
+  outline-offset: calc(-1 * var(--dzg-line, 1px));
+  --dzg-tip-arrow-bg: var(--dzg-tooltip-warning-arrow, var(--dzg-tooltip-warning-bg, var(--tz-warning)));
+  --dzg-tip-arrow-edge: var(--dzg-tooltip-warning-border, transparent);
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-tone=danger] {
+  color: var(--dzg-tooltip-danger-fg, var(--tz-bg));
+  background: var(--dzg-tooltip-danger-bg, var(--tz-danger));
+  outline: var(--dzg-line, 1px) solid var(--dzg-tooltip-danger-border, transparent);
+  outline-offset: calc(-1 * var(--dzg-line, 1px));
+  --dzg-tip-arrow-bg: var(--dzg-tooltip-danger-arrow, var(--dzg-tooltip-danger-bg, var(--tz-danger)));
+  --dzg-tip-arrow-edge: var(--dzg-tooltip-danger-border, transparent);
+}
+
+.dzg-popover[data-tone] {
+  border-color: var(--dzg-tip-arrow-edge);
+}
+
+.dzg-tooltip, .dzg-popover {
+  margin-block-start: var(--dzg-tooltip-arrow-size, 0.375rem);
+}
+
+:is(.dzg-tooltip, .dzg-popover)::before,
+.dzg-popover::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: calc(var(--dzg-tip-at, 1rem) - var(--dzg-tooltip-arrow-size, 0.375rem));
+  inset-block-end: 100%;
+  inline-size: calc(2 * var(--dzg-tooltip-arrow-size, 0.375rem));
+  block-size: var(--dzg-tooltip-arrow-size, 0.375rem);
+  background: var(--dzg-tip-arrow-bg);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  pointer-events: none;
+}
+
+.dzg-popover::before {
+  margin-block-end: var(--dzg-line, 1px);
+  background: var(--dzg-tip-arrow-edge);
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-side=block-start]::before,
+.dzg-popover[data-side=block-start]::after {
+  inset-block: 100% auto;
+  rotate: 180deg;
+}
+
+.dzg-popover[data-side=block-start]::before {
+  margin-block: var(--dzg-line, 1px) 0;
+}
+
+:is(.dzg-tooltip, .dzg-popover):is([data-side=inline-end], [data-side=inline-start])::before,
+.dzg-popover:is([data-side=inline-end], [data-side=inline-start])::after {
+  inset-block: calc(var(--dzg-tip-at, 1rem) - var(--dzg-tooltip-arrow-size, 0.375rem)) auto;
+  inset-inline: auto 100%;
+  inline-size: var(--dzg-tooltip-arrow-size, 0.375rem);
+  block-size: calc(2 * var(--dzg-tooltip-arrow-size, 0.375rem));
+  clip-path: polygon(100% 0, 100% 100%, 0 50%);
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-side=inline-start]::before,
+.dzg-popover[data-side=inline-start]::after {
+  inset-inline: 100% auto;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+:is(.dzg-tooltip, .dzg-popover):is([data-side=inline-end], [data-side=inline-start]):dir(rtl)::before,
+.dzg-popover:is([data-side=inline-end], [data-side=inline-start]):dir(rtl)::after {
+  scale: -1 1;
+}
+
+.dzg-popover[data-side=inline-end]::before {
+  margin-block: 0;
+  margin-inline-end: var(--dzg-line, 1px);
+}
+
+.dzg-popover[data-side=inline-start]::before {
+  margin-block: 0;
+  margin-inline-start: var(--dzg-line, 1px);
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-shape] {
+  border-color: transparent;
+  outline-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-shape]::before,
+.dzg-popover[data-shape]::after {
+  display: none;
+}
+
+.dzg-tip-shape {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.dzg-tip-shape > path {
+  fill: var(--dzg-tip-arrow-bg);
+  stroke: var(--dzg-tip-arrow-edge);
+  stroke-width: var(--dzg-line, 1px);
+  vector-effect: non-scaling-stroke;
+}
+
+.dzg-tooltip, .dzg-popover {
+  --dzg-tip-sign: 1;
+  transition-property: opacity, translate, scale, display, overlay;
+  transition-behavior: allow-discrete;
+  transition-duration: var(--dzg-tooltip-open-duration, 140ms);
+  transition-timing-function: var(--dzg-tooltip-open-easing, cubic-bezier(0.2, 0, 0, 1));
+  transition-delay: var(--dzg-tooltip-open-delay, 0s);
+}
+
+.dzg-popover {
+  transition-duration: var(--dzg-popover-open-duration, var(--dzg-tooltip-open-duration, 140ms));
+  transition-timing-function: var(--dzg-popover-open-easing, var(--dzg-tooltip-open-easing, cubic-bezier(0.2, 0, 0, 1)));
+  transition-delay: var(--dzg-popover-open-delay, var(--dzg-tooltip-open-delay, 0s));
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-animation=pop] {
+  transition-duration: var(--dzg-tooltip-pop-duration, 260ms);
+  transition-timing-function: var(--dzg-tooltip-pop-easing, cubic-bezier(0.34, 1.4, 0.64, 1));
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-animation=rise] {
+  transition-duration: var(--dzg-tooltip-rise-duration, 320ms);
+  transition-timing-function: var(--dzg-tooltip-rise-easing, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+:is(.dzg-tooltip, .dzg-popover):dir(rtl) {
+  --dzg-tip-sign: -1;
+}
+
+:is(.dzg-tooltip, .dzg-popover):is([hidden], [data-closing]) {
+  opacity: 0;
+  transition-duration: var(--dzg-tooltip-close-duration, 100ms);
+  transition-timing-function: var(--dzg-tooltip-close-easing, ease-in);
+  transition-delay: var(--dzg-tooltip-close-delay, 0s);
+}
+
+.dzg-popover:is([hidden], [data-closing]) {
+  transition-duration: var(--dzg-popover-close-duration, var(--dzg-tooltip-close-duration, 100ms));
+  transition-timing-function: var(--dzg-popover-close-easing, var(--dzg-tooltip-close-easing, ease-in));
+  transition-delay: var(--dzg-popover-close-delay, var(--dzg-tooltip-close-delay, 0s));
+}
+
+@starting-style {
+  :is(.dzg-tooltip, .dzg-popover):not([hidden]) {
+    opacity: 0;
+  }
+}
+:is(.dzg-tooltip, .dzg-popover):is([data-animation=scale], [data-animation=pop]) {
+  --dzg-tip-scale: var(--dzg-tooltip-scale, 0.96);
+  transform-origin: 50% 0;
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-animation=pop] {
+  --dzg-tip-scale: var(--dzg-tooltip-pop-scale, 0.8);
+}
+
+:is(.dzg-tooltip, .dzg-popover):is([data-animation=scale], [data-animation=pop])[data-side=block-start] {
+  transform-origin: 50% 100%;
+}
+
+:is(.dzg-tooltip, .dzg-popover):is([data-animation=scale], [data-animation=pop])[data-side=inline-end] {
+  transform-origin: calc(50% - 50% * var(--dzg-tip-sign)) 50%;
+}
+
+:is(.dzg-tooltip, .dzg-popover):is([data-animation=scale], [data-animation=pop])[data-side=inline-start] {
+  transform-origin: calc(50% + 50% * var(--dzg-tip-sign)) 50%;
+}
+
+:is(.dzg-tooltip, .dzg-popover):is([data-animation=scale], [data-animation=pop]):is([hidden], [data-closing]) {
+  scale: var(--dzg-tip-scale);
+}
+
+@starting-style {
+  :is(.dzg-tooltip, .dzg-popover):is([data-animation=scale], [data-animation=pop]):not([hidden]) {
+    scale: var(--dzg-tip-scale);
+  }
+}
+:is(.dzg-tooltip, .dzg-popover):is([data-animation=slide], [data-animation=rise]) {
+  --dzg-tip-dist: var(--dzg-tooltip-slide, 6px);
+  --dzg-tip-from: 0 calc(-1 * var(--dzg-tip-dist));
+}
+
+:is(.dzg-tooltip, .dzg-popover)[data-animation=rise] {
+  --dzg-tip-dist: var(--dzg-tooltip-rise, 12px);
+}
+
+:is(.dzg-tooltip, .dzg-popover):is([data-animation=slide], [data-animation=rise])[data-side=block-start] {
+  --dzg-tip-from: 0 var(--dzg-tip-dist);
+}
+
+:is(.dzg-tooltip, .dzg-popover):is([data-animation=slide], [data-animation=rise])[data-side=inline-end] {
+  --dzg-tip-from: calc(-1 * var(--dzg-tip-dist) * var(--dzg-tip-sign)) 0;
+}
+
+:is(.dzg-tooltip, .dzg-popover):is([data-animation=slide], [data-animation=rise])[data-side=inline-start] {
+  --dzg-tip-from: calc(var(--dzg-tip-dist) * var(--dzg-tip-sign)) 0;
+}
+
+:is(.dzg-tooltip, .dzg-popover):is([data-animation=slide], [data-animation=rise]):is([hidden], [data-closing]) {
+  translate: var(--dzg-tip-from);
+}
+
+@starting-style {
+  :is(.dzg-tooltip, .dzg-popover):is([data-animation=slide], [data-animation=rise]):not([hidden]) {
+    translate: var(--dzg-tip-from);
+  }
+}
+:is(.dzg-tooltip, .dzg-popover):is([data-animation=none], [data-animation=custom]),
+[data-motion=off] .dzg-tooltip {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dzg-tooltip, .dzg-popover {
+    transition: none;
+  }
+  :is(.dzg-tooltip, .dzg-popover)[data-reduced=fade]:not([data-animation=none], [data-animation=custom], [data-motion=off] *) {
+    transition: opacity var(--dzg-tooltip-reduced-duration, 120ms) linear, display var(--dzg-tooltip-reduced-duration, 120ms) allow-discrete, overlay var(--dzg-tooltip-reduced-duration, 120ms) allow-discrete;
+    translate: none !important;
+    scale: none !important;
+  }
+}
+@media (forced-colors: active) {
+  .dzg-tooltip, .dzg-popover {
+    outline: 1px solid CanvasText;
+  }
+  :is(.dzg-tooltip, .dzg-popover)::before,
+  .dzg-popover::after {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+}

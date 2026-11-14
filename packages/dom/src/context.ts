@@ -10,7 +10,7 @@ import type { Geometry } from './render/measure.js';
 import type { RowRenderer } from './render/rows.js';
 import type { FrameScheduler } from './render/scheduler.js';
 import type { Scope } from './render/scope.js';
-import type { Tooltip } from './render/tooltip.js';
+import type { TipFor, Tooltip } from './render/tooltip.js';
 import type { GridSettings } from './settings.js';
 import type { ExportMessageKey, FilterMessageKey, FilterRowsMessageKey, MessageKey, PaginationMessageKey } from './messages.js';
 import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
@@ -155,6 +155,9 @@ export interface GridContext<T> {
   ensureVisible(row: RowKey, column?: string): void;
   /** A shown tooltip asked again for its anchor (its cell's own text changed: a failed save, step 7); none: hidden. */
   retip(anchor: HTMLElement): void;
+  /** `tooltips()` (1.12.0): its own tooltip for a target first (a header's button; undefined: the grid's), and what the pointer is followed on. */
+  tipFor?: (target: HTMLElement) => TipFor | null | undefined;
+  tipSel?: () => string;
   /** Focus back on the grid's focused cell or header (a popup closed with its anchor gone). */
   restoreFocus(): void;
   /** A double-click on a column's resize grip: set by `columns()` (auto-size, Phase 6 step 6); absent, nothing. */

@@ -1,5 +1,22 @@
 # État du travail — à lire en premier si la session est perdue
 
+Mis à jour : 2026-11-14. **1.12.0 : infobulles et bulles faites (Q-T1 = B, ajouts du 2026-11-14), non commitées, non
+publiées.** Fiche `docs/behaviors/tooltips-popovers.md`, plan `docs/phase-12-steps/tooltips-plan.md` (réponses en fin).
+Base `@dzgrid/dom` : moteur partagé (`place()` 4 côtés / 3 alignements / bascule, tons, préréglage CSS, `data-reduced`,
+coutures `at` / `close` / `onShow`), 25 690 / 25 704. Sur demande : `@dzgrid/dom/tooltip` (`tooltip()`, `tooltips()`
+pour la grille, `safeHtml`), `@dzgrid/dom/popover`, `@dzgrid/theme/tooltips.css`, `@dzgrid/angular/tooltip` /
+`/popover`. Placements (12 + `auto`, `left`/`right` par `dir.ts`, `flip`), `pop` / `rise`, `reducedMotion`, crochet
+`animate` (`{ side, tone, dir, reduced, shape }`) et `shape` (chemin SVG) pour GSAP/morphing, fermeture par
+`data-closing`, bulles : Tab dans l'ordre de la page, défilement dans le corps, fermeture quand l'ancre est rognée.
+Retry : anneau rendu. Matrice `browser-1-12.mjs` (11) + (11b) Angular AOT `?page=tips` : Chrome 5 148/5 148,
+Firefox 5 020/5 020, WebKit 4 976/4 976 (Firefox et WebKit relancés seuls après une mesure de forme corrigée dans le
+script : la boîte du chemin compte le coin du trait dans Firefox). Site : guide « Tooltips and popovers » (en, fr, démos
+vivantes, recette GSAP + MorphSVG non exécutée), page `features/tooltips`, réglage `tooltips` et option `tooltip` à jour ;
+tests du site 33/33, build 319 pages. Tailles : base 25 690/25 704, K.8 91 591/92 000, `/dom/theme` 2 510 (gzip), appli Angular réelle 102 150 → 102 700
+(+0,5 %, mesuré 102 697 ; épinglé aussi dans `perf/test/example-bytes` et `step12-budgets`). real-app 58/58, `release:check` « the 5 packages at 1.12.0 ». **`gate:step` vert : 9 539/9 539** (premier passage : 3 épingles 102 150 oubliées et le dossier `build/` du banc Angular — corrigés, gate relancé). Reste au propriétaire : relire, commiter, publier.
+Le dossier `packages/angular/browser/build/` (gitignoré) fait échouer le test des mots interdits quand il existe : le
+supprimer avant le gate (la matrice le reconstruit).
+
 Mis à jour : 2026-11-13 (nuit). **1.12.0, les cinq corrections faites** (propriétaire « oui lance les 5 corrections »),
 non commitées, non publiées. Chacune : ligne de fiche d'abord (`presentation-settings.md` 34–38, `filter-set.md` « The
 list's width »), test à la main rouge d'abord, `browser-1-12.mjs` étendu ((9) titres, (10) liste, table des variables).

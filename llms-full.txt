@@ -1016,6 +1016,328 @@ see many variables at work.
 
 ---
 
+<!-- https://plinthworks.github.io/dzgrid/guides/tooltips-popovers/ -->
+
+# Tooltips and popovers
+
+A **tooltip** says a few words about what the pointer rests on, or what the keyboard reaches: it is never clicked. A
+**popover** is a bubble that stays: a click opens it, and it can hold a form, a table, even a grid. Both are DzGrid's
+own engine, in the grid and anywhere in your page, with the same tones, placements and animations.
+
+## Where tooltips show
+
+Only where you ask for one:
+
+| Where | How |
+|---|---|
+| A cell | The column's [`tooltip`](https://plinthworks.github.io/dzgrid/column-options/tooltip/) function: words, `{ text, tone }`, or HTML (below) |
+| A header | The column's [`headerTooltip`](https://plinthworks.github.io/dzgrid/column-options/header-tooltip/) |
+| A header's buttons (filter, column menu, floating filter toggle) | `tooltips: { header: true }` with the [`tooltips()`](https://plinthworks.github.io/dzgrid/features/tooltips/) feature: each says its name |
+| Any element of the page | `tooltip(el, options)` from `@dzgrid/dom/tooltip`; in Angular, the `dzTooltip` directive |
+
+A tooltip shows after `delayMs` on hover (500 ms by default), and at once when the keyboard's focus reaches its
+element; a click's focus shows nothing, and a finger alone never opens one. The pointer may move onto it; it goes when
+the pointer leaves both, after `hideDelayMs` (150 ms). Escape dismisses it without moving the focus. One tooltip is on
+screen at a time in a page. While it shows, its element points to it with `aria-describedby`, so a screen reader reads
+its words. `tooltips: { cells: false }` silences every column's `tooltip` at once.
+
+The grid's tooltips need no feature for words, tones, presets and HTML. The [`tooltips()`](https://plinthworks.github.io/dzgrid/features/tooltips/)
+feature adds the rest: the header's buttons, `placement` and `flip`, your own `animate`, a closing that waits for the
+end of its fade, and one tooltip at a time with the page's.
+
+```ts
+
+type Crate = { id: string; fruit: string; kilos: number; late: boolean };
+
+createGrid<Crate>(document.getElementById('crates')!, {
+  rows: [{ id: 'c1', fruit: 'Pears', kilos: 18, late: true }],
+  columns: [
+    { id: 'fruit', header: 'Fruit', headerTooltip: 'What the crate holds' },
+    {
+      id: 'kilos',
+      header: 'Weight (kg)',
+      type: 'number',
+      tooltip: (v, c) => (c.late ? { text: `${v} kg, two days late`, tone: 'warning' } : `${v} kg`),
+    },
+  ],
+  getRowId: (c) => c.id,
+  messages: EN,
+  tooltips: { delayMs: 300, header: true, placement: 'top', animation: 'scale' },
+  features: [tooltips()],
+});
+```
+
+Rest the pointer on a title, then on its funnel button:
+
+## Anywhere in the page
+
+`tooltip(el, options)` gives any element of the page the same tooltip: a toolbar's button, an icon, a field's label.
+It returns a handle: `show()`, `hide()`, `update()` with new options, `destroy()` when the element goes. In Angular,
+the `DzTooltip` directive from `@dzgrid/angular/tooltip` does the same, and cleans up with its view. The Web
+Component has no tooltip of its own for the page: next to a `<dz-grid>`, use the DOM layer's function.
+
+```ts
+
+const save = document.querySelector<HTMLButtonElement>('#save')!;
+const tip = tooltip(save, { content: 'Save the order (Ctrl+S)', placement: 'bottom', tone: 'neutral' });
+
+// New words while it shows, and gone with the button.
+tip.update({ content: 'Saved a minute ago' });
+tip.destroy();
+```
+
+The options: `content`, `delayMs`, `hideDelayMs`, `disabled`, `nonce` (for a strict content security policy: the one
+`<style>` it adds carries it), and the look shared with the grid — `tone`, `placement`, `flip`, `animation`,
+`reducedMotion`, `animate`, `shape`. The Angular inputs are the same names after `dzTooltip`: `dzTooltipPlacement`,
+`dzTooltipTone`, `dzTooltipAnimation`, `dzTooltipDelay`, `dzTooltipFlip`, `dzTooltipReducedMotion`, `dzTooltipAnimate`,
+`dzTooltipShape`, `dzTooltipDisabled`, and `dzTooltipContext` / `dzTooltipInputs` for a template or a component.
+
+## Tones
+
+A tone says what kind of message it is. `info` is the dark bubble, the default; `neutral` a raised surface with an
+edge; `success`, `warning` and `danger` the palette's colours. Each is readable in light and dark (text at 4.5:1), and
+a forced-colours display draws them all in the system's colours with a visible edge. The tone is never the only sign:
+let the words say it too.
+
+Grid-wide, `tooltips: { tone: 'neutral' }`; for one cell, a column's `tooltip` returns `{ text, tone }`; on the page,
+the `tone` option or `dzTooltipTone`.
+
+## Placements
+
+`placement` is a side and an alignment: `top`, `bottom`, `start` or `end`, alone (centred on its element) or followed
+by `-start` or `-end` (lined up with the element's start or end along the other axis) — 12 placements. `start` and
+`end` are the line's: in Arabic or Hebrew they open on the other side, like the rest of the page. Write `left` or
+`right` (with the same suffixes) when you mean the screen's side whatever the language. `auto`, the default, opens
+below: centred for the page's tooltips, at the cell's start for the grid's.
+
+When the window has no room on that side and has some on the other, the bubble **flips** there; `flip: false` keeps
+the side asked. Along the other axis it slides to stay inside the window. Its arrow points at the element's middle and
+follows the flip. In the grid, a `placement` (grid-wide, or a column's `{ placement }`) needs the
+[`tooltips()`](https://plinthworks.github.io/dzgrid/features/tooltips/) feature.
+
+## Animations
+
+A tooltip or a popover opens and closes with one of the presets of `@dzgrid/theme/tooltips.css`:
+
+| Preset | How it opens |
+|---|---|
+| `fade` | A short fade, the default |
+| `scale` | Grows from 96 % with a fade, from the arrow's side |
+| `slide` | Moves a few pixels in from the element's side, and follows the flip and the reading direction |
+| `pop` | Richer, opt-in: grows from 80 % with a slight overshoot (260 ms) |
+| `rise` | Richer, opt-in: 12 px from the element's side, with a long soft deceleration (320 ms) |
+| `none` | There at once |
+
+Every preset closes the same short way (100 ms). Only `opacity` and `transform` move: nothing is measured during the
+animation. Durations, easings and delays are variables (below).
+
+**Reduced motion.** When the system asks for reduced motion, or the grid has `motion: false`, nothing moves and nothing
+fades: tooltips and popovers appear and go at once. You may ask for a short fade instead, opacity only (120 ms):
+`reducedMotion: 'fade'`. A grid with `motion: false` stays instant.
+
+### Your own animation
+
+`animate(el, phase, info)` replaces the presets. It is called once the bubble is placed (`phase` is `'open'`) and
+before it is hidden (`'close'`); a closing bubble stays drawn until the promise (or any thenable) you return settles,
+and is hidden at once when you return nothing. `info` tells the `side` it opened on (`block-start`, `block-end`,
+`inline-start`, `inline-end`), its `tone`, the reading direction `dir`, whether reduced motion is asked (`reduced`: you
+decide what that means — nothing at all, or a fade), and the `<path>` of its `shape`. Shown again while it closes, it
+is told `'open'` again: stop the closing there. It is never called on a grid with `motion: false`. For the grid's
+tooltips, it needs the [`tooltips()`](https://plinthworks.github.io/dzgrid/features/tooltips/) feature.
+
+`shape` draws the bubble as your own SVG path instead of a box and an arrow: path data (`d`) in a 100 × 100 box,
+stretched over the bubble, filled and edged in the tone's colours. Only path commands and numbers are accepted;
+anything else keeps the box. Give the words room inside it (the bubble's padding is yours).
+
+```ts
+
+// Plain keyframes through the Web Animations API, played backwards to close.
+const frames: Keyframe[] = [
+  { opacity: 0, transform: 'translateY(8px) scale(.85)' },
+  { opacity: 1, transform: 'translateY(-2px) scale(1.03)', offset: 0.7 },
+  { opacity: 1, transform: 'none' },
+];
+const bounce: TipAnimate = (el, phase, info) =>
+  info.reduced ? undefined : el.animate(phase === 'open' ? frames : [...frames].reverse(), { duration: 220, easing: 'ease-out' }).finished;
+
+tooltip(document.querySelector<HTMLElement>('#harvest')!, {
+  content: 'Harvest booked for Tuesday',
+  placement: 'top',
+  tone: 'success',
+  // A speech bubble, its tail at the bottom, toward the element.
+  shape: 'M0 0 H100 V80 H60 L50 100 L40 80 H0 Z',
+  animate: bounce,
+});
+```
+
+**A recipe with GSAP.** `info.shape` is a real `<path>`, so a morphing library can turn one shape into another. Below,
+GSAP with its MorphSVG plugin morphs a flat bar into the speech bubble as it opens, and back as it closes, and returns
+the timeline (the closing bubble waits for it). GSAP is your application's choice, under its own licence: DzGrid
+never depends on it, and the hook works the same with any library or none.
+
+```ts
+
+gsap.registerPlugin(MorphSVGPlugin);
+
+const BAR = 'M0 40 H100 V60 H60 L50 60 L40 60 H0 Z';
+const BUBBLE = 'M0 0 H100 V80 H60 L50 100 L40 80 H0 Z';
+
+const morph: TipAnimate = (el, phase, info) => {
+  // Reduced motion: no morph, no movement.
+  if (info.reduced || !info.shape) return undefined;
+  // The timeline itself: the closing waits for it (a GSAP tween or timeline is a thenable).
+  if (phase === 'open') {
+    return gsap.timeline()
+      .fromTo(info.shape, { morphSVG: BAR }, { morphSVG: BUBBLE, duration: 0.35, ease: 'back.out(1.6)' })
+      .fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.2 }, 0);
+  }
+  return gsap.timeline()
+    .to(info.shape, { morphSVG: BAR, duration: 0.15 })
+    .to(el, { opacity: 0, duration: 0.12 }, 0);
+};
+
+tooltip(document.querySelector<HTMLElement>('#harvest')!, { content: 'Harvest booked for Tuesday', shape: BUBBLE, animate: morph });
+```
+
+## Content
+
+A tooltip shows words, or anything you draw:
+
+- **Words**: a string. In a column, `tooltip` returns one (or null for none), already translated.
+- **Words with a tone**: a column's `tooltip` returns `{ text, tone }`.
+- **Nodes**: on the page, `content` is a `Node`, or a function called at each opening that returns words, a node, or
+  `{ node, gone }` (`gone()` is called when it is taken out). In the grid, a `tooltip` part (the column's `ui.tooltip`)
+  draws it.
+- **An Angular template or component**: `[dzTooltip]` takes an `<ng-template>` (its `let-` value is
+  `dzTooltipContext`) or a component class (its inputs are `dzTooltipInputs`). The view is made at each opening and
+  destroyed when it goes.
+- **HTML, opt-in**: only when you say so, and cleaned first.
+
+```ts
+
+type Hive = { name: string; kilos: number };
+
+@Component({
+  selector: 'app-hive',
+  imports: [DzTooltip],
+  template: `
+    <button type="button" [dzTooltip]="card" [dzTooltipContext]="hive" dzTooltipTone="neutral">{{ hive.name }}</button>
+    <ng-template #card let-h>
+      <strong>{{ h.name }}</strong>
+      <p>{{ h.kilos }} kg of honey this year</p>
+    </ng-template>
+  `,
+})
+export class HiveButton {
+  readonly hive: Hive = { name: 'Clover hill', kilos: 12.5 };
+}
+```
+
+**HTML.** A tooltip shows HTML given as text only when you opt in. In the grid, pass the cleaner `safeHtml` from
+`@dzgrid/dom/tooltip` (so the grid alone never carries it) and let a column's `tooltip` return `{ html }`; without the
+cleaner, such a tooltip shows its `text`, or nothing — never the raw markup. On the page, `content: { html }`; in
+Angular, `[dzTooltip]="{ html }"`, cleaned by Angular's sanitizer first, then by DzGrid's. The cleaning keeps text and
+a fixed list of harmless elements (`b`, `strong`, `em`, `code`, `kbd`, `p`, lists, tables, headings…) with a few
+attributes (`class`, `lang`, `dir`, `title`, `colspan`, `rowspan`, `datetime`); scripts, styles, images, links, forms,
+frames and SVG go with their content; no event attribute, no `style` and no URL survives. It is parsed in an inert
+document, so nothing loads or runs. **The risk that remains is yours**: cleaning stops scripts and loads, not
+misleading words — never show HTML a stranger could write without thinking about what it says.
+
+```ts
+
+type Batch = { id: string; batch: string; notes: string };
+
+createGrid<Batch>(document.getElementById('batches')!, {
+  rows: [{ id: 'b1', batch: 'Spring honey', notes: '<b>Raw</b>, not heated' }],
+  columns: [
+    { id: 'batch', header: 'Batch', tooltip: (_v, b) => ({ html: b.notes, text: 'Raw, not heated' }) },
+  ],
+  getRowId: (b) => b.id,
+  messages: EN,
+  tooltips: { html: safeHtml },
+});
+```
+
+## Popovers
+
+`popover(trigger, options)` from `@dzgrid/dom/popover` (in Angular, `[dzPopover]` from `@dzgrid/angular/popover`)
+gives an element a bubble that stays: a non-modal dialog, placed and animated like a tooltip.
+
+- **Opening and closing.** A click on the trigger (or Enter, Space) opens it, a second click closes it. Escape closes
+  it and puts the focus back on the trigger; a press outside it and its trigger closes it, the focus staying where the
+  press put it; the focus leaving it for something outside (Tab past its last control) closes it. Your code opens and
+  closes it too: `open()`, `close()`, `toggle()`; `openOn: 'manual'` leaves only the code. `onClose` (Angular:
+  `closed`) tells why: `escape`, `outside`, `focus`, `trigger`, `code`, `group` or `gone`.
+- **Focus.** On opening, the focus moves to its first control (or the one marked `autofocus`); with nothing focusable
+  it stays on the trigger. Tab goes through its controls in order, then on to what follows the trigger in the page;
+  Shift+Tab before the first goes back to the trigger. It is not modal: there is no trap.
+- **ARIA.** The trigger gets `aria-haspopup="dialog"`, `aria-expanded` and `aria-controls`; the popover is
+  `role="dialog"`, named by `label` or by the trigger's own name.
+- **Groups and nesting.** One popover is open at a time in a `group` (`'default'` unless given): opening one closes the
+  others, except one it was opened from — a popover opened inside another keeps its parent open.
+- **Where it sits.** In the browser's top layer, so no ancestor clips it; it stays by its trigger when the page
+  scrolls or the window resizes, and closes when its trigger leaves the page or the window.
+- **In a grid's cell.** A trigger drawn in a cell (a part, an Angular cell component) works the same; the popover
+  closes when its row is recycled to show another row.
+
+Its default look is a raised surface with an edge and a shadow (`--dzg-popover-*`); `tone`, `animation`, `placement`,
+`flip`, `shape` and `animate` are the tooltip's.
+
+```ts
+
+const trigger = document.querySelector<HTMLButtonElement>('#filter-orders')!;
+const template = document.querySelector<HTMLTemplateElement>('#orders-filter')!;
+
+const pop = popover(trigger, {
+  label: 'Filter the orders',
+  placement: 'bottom-start',
+  // A fresh form at each opening.
+  content: () => {
+    const form = template.content.firstElementChild!.cloneNode(true) as HTMLFormElement;
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      console.log(new FormData(form).get('from'));
+      pop.close();
+    });
+    return form;
+  },
+  onClose: (reason) => console.log('closed by', reason),
+});
+```
+
+In Angular, `#p="dzPopover"` gives the template `open()`, `close()`, `toggle()` and `isOpen()`; the outputs `opened`
+and `closed` say when; a template's context has `close`, to close it from inside.
+
+## The style sheet
+
+The tones, the arrow on four sides, the animations, the shapes and the popover's look are an opt-in sheet, loaded after
+`dzgrid.css`:
+
+```ts
+```
+
+With an unlayered reset (Tailwind 3's preflight, Bootstrap's Reboot), load `@dzgrid/theme/tooltips.unlayered.css`
+instead. Without the sheet a tooltip keeps the grid's plain dark bubble and appears without animation, and a popover is
+a plain surface. Every colour, size, duration and easing is a variable, listed in
+[the table of variables](https://plinthworks.github.io/dzgrid/guides/theming-rtl/#every-variable) (`--dzg-tooltip-*`, `--dzg-popover-*`):
+
+```css
+:root {
+  --dzg-tooltip-open-duration: 200ms;
+  --dzg-tooltip-pop-scale: 0.7;
+  --dzg-popover-radius: 0.75rem;
+}
+```
+
+## See also
+
+- The [`tooltips`](https://plinthworks.github.io/dzgrid/settings/tooltips/) setting, every key.
+- The [`tooltips()`](https://plinthworks.github.io/dzgrid/features/tooltips/) feature.
+- The column options [`tooltip`](https://plinthworks.github.io/dzgrid/column-options/tooltip/) and [`headerTooltip`](https://plinthworks.github.io/dzgrid/column-options/header-tooltip/).
+- [Accessibility](https://plinthworks.github.io/dzgrid/guides/accessibility/).
+
+---
+
 <!-- https://plinthworks.github.io/dzgrid/guides/sort-filter-search/ -->
 
 # Sort, filter and search
@@ -2377,6 +2699,18 @@ changes nothing by itself; a feature's sheet is named. *Key* is the `theme` sett
 | `--dzg-tooltip-max-width`, `--dzg-tooltip-padding-block`, `--dzg-tooltip-padding-inline`, `--dzg-tooltip-radius` | `tooltipMaxWidth`, `tooltipPaddingBlock`, `tooltipPaddingInline`, `tooltipRadius` | The tooltip's box (1.12.0) | `20rem`, 1 and 2 spacing units, `--dzg-radius` | variables |
 | `--dzg-tooltip-white-space` | `tooltipWhiteSpace` | `pre-line` keeps the value's line breaks (1.12.0) | `normal` | variables |
 | `--dzg-tooltip-arrow-size`, `--dzg-tooltip-arrow-color` | `tooltipArrowSize`, `tooltipArrowColor` | The arrow toward the cell, on the side the tooltip opened (`0`: none; 1.12.0) | `.375rem`, the tooltip's background | variables |
+| `--dzg-tooltip-info-bg`, `--dzg-tooltip-info-fg`, `--dzg-tooltip-info-border`, `--dzg-tooltip-info-arrow` | — | A tooltip or popover in the `info` tone (1.12.0) | the tooltip's colours, no edge | `tooltips.css` |
+| `--dzg-tooltip-neutral-bg`, `--dzg-tooltip-neutral-fg`, `--dzg-tooltip-neutral-border`, `--dzg-tooltip-neutral-arrow` | — | The `neutral` tone (1.12.0) | `--tz-bg-raised`, `--tz-fg`, `--tz-border` | `tooltips.css` |
+| `--dzg-tooltip-success-bg`, `--dzg-tooltip-success-fg`, `--dzg-tooltip-success-border`, `--dzg-tooltip-success-arrow` | — | The `success` tone (1.12.0) | `--tz-success`, `--tz-bg`, no edge | `tooltips.css` |
+| `--dzg-tooltip-warning-bg`, `--dzg-tooltip-warning-fg`, `--dzg-tooltip-warning-border`, `--dzg-tooltip-warning-arrow` | — | The `warning` tone (1.12.0) | `--tz-warning`, `--tz-bg`, no edge | `tooltips.css` |
+| `--dzg-tooltip-danger-bg`, `--dzg-tooltip-danger-fg`, `--dzg-tooltip-danger-border`, `--dzg-tooltip-danger-arrow` | — | The `danger` tone (1.12.0) | `--tz-danger`, `--tz-bg`, no edge | `tooltips.css` |
+| `--dzg-tooltip-open-duration`, `--dzg-tooltip-open-easing`, `--dzg-tooltip-open-delay`, `--dzg-tooltip-close-duration`, `--dzg-tooltip-close-easing`, `--dzg-tooltip-close-delay` | — | How a tooltip opens and closes (1.12.0; none under reduced motion) | `140ms`, a soft ease-out, `0s`; `100ms`, `ease-in`, `0s` | `tooltips.css` |
+| `--dzg-tooltip-slide`, `--dzg-tooltip-scale` | — | How far the `slide` preset travels, where `scale` starts (1.12.0) | `6px`, `.96` | `tooltips.css` |
+| `--dzg-tooltip-pop-duration`, `--dzg-tooltip-pop-easing`, `--dzg-tooltip-pop-scale` | — | The richer `pop` preset's opening (opt-in, 1.12.0) | `260ms`, a slight overshoot, `.8` | `tooltips.css` |
+| `--dzg-tooltip-rise`, `--dzg-tooltip-rise-duration`, `--dzg-tooltip-rise-easing` | — | The richer `rise` preset's opening (opt-in, 1.12.0) | `12px`, `320ms`, a long soft deceleration | `tooltips.css` |
+| `--dzg-tooltip-reduced-duration` | — | The fade kept under reduced motion with `reducedMotion: 'fade'` (1.12.0) | `120ms` | `tooltips.css` |
+| `--dzg-popover-bg`, `--dzg-popover-fg`, `--dzg-popover-border`, `--dzg-popover-radius`, `--dzg-popover-shadow`, `--dzg-popover-padding`, `--dzg-popover-max-width`, `--dzg-popover-font-size`, `--dzg-popover-arrow-color`, `--dzg-popover-max-height` | — | The popover (1.12.0; a taller content scrolls inside) | `--tz-bg`, `--tz-fg`, `--tz-border`, `--dzg-radius`, a soft shadow, `.75rem`, `min(32rem, 100vw - 16px)`, inherited, its background, `100vh - 32px` | `tooltips.css` (a plain surface without it) |
+| `--dzg-popover-open-duration`, `--dzg-popover-open-easing`, `--dzg-popover-open-delay`, `--dzg-popover-close-duration`, `--dzg-popover-close-easing`, `--dzg-popover-close-delay` | — | How a popover opens and closes (1.12.0) | the tooltip's | `tooltips.css` |
 | `--dzg-input-bg`, `--dzg-input-border` | `inputBg`, `inputBorder` | The filters' boxes: their surface, their edge (a colour, or `none`; 1.12.0: never erased by a page's reset) | `--tz-bg`; light: `--tz-fg-muted` 75 % into `--tz-bg`, dark: `--tz-fg-muted` | base |
 | `--dzg-input-fg`, `--dzg-input-radius` | `inputFg`, `inputRadius` | The filters' boxes: text, corners (1.12.0) | `--tz-fg`, `--dzg-radius` | variables |
 | `--dzg-button-bg`, `--dzg-button-border` | `buttonBg`, `buttonBorder` | Filter footer and retry buttons (Apply keeps the accent; the pager's: `--dzg-pager-button-*`, 1.12.0) | `--dzg-header-bg`, `--tz-fg-muted` | variables |

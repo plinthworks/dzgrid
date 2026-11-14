@@ -1417,6 +1417,12 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   `width` too (documented, tested); `merge` typed with C (ngc test). Not confirmed: `data-dzg-icons` left after
   `theming()`'s destroy (the root goes with the grid in the same destroy; features are fixed).
 - [x] Release prep: the five packages at 1.12.0, CHANGELOG dated, `docs/release-1.12.0.md`.
+- [x] Tooltips and popovers (owner 2026-11-13; Q-T1 B and additions 2026-11-14; sheet
+  `docs/behaviors/tooltips-popovers.md`, plan `docs/phase-12-steps/tooltips-plan.md`): one shared bubble in the base
+  (placement, tones, CSS presets), `tooltips()` / `tooltip()` / `safeHtml` (`@dzgrid/dom/tooltip`), `popover()`
+  (`@dzgrid/dom/popover`), `dzTooltip` / `dzPopover` (`@dzgrid/angular/tooltip`, `/popover`), `tooltips.css`; the app's
+  animation hook and shape for morphing; the Retry focus ring fixed. Browsers: `node scripts/browser-1-12.mjs` (11),
+  (11b) the Angular directives in the AOT fixture (`?page=tips`).
 - [x] Five corrections (owner 2026-11-13 « oui lance les 5 corrections »; presentation-settings.md 34–38,
   filter-set.md « The list's width »; each sheet line first, a test failing first, `browser-1-12.mjs` (9), (10) and
   its table extended): (1) a header's title sent to the column's end under Tailwind 3's preflight — the reset's

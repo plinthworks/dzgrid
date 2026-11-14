@@ -11,6 +11,7 @@ import { AR_MODE, App, stats } from './app';
 import { AppA } from './a';
 import { DetailApp, TreeApp, treeStats } from './tree';
 import { EditApp, editStats } from './edit';
+import { TipsApp, tipStats } from './tips';
 
 declare global {
   interface Window {
@@ -205,9 +206,23 @@ async function mainEdit(): Promise<void> {
   window.fxReady = true;
 }
 
+/** `?page=tips` (1.12.0): the tooltips' and popovers' directives; tooltips.css loaded first. */
+async function mainTips(): Promise<void> {
+  await Promise.all(['variables.css', 'tooltips.css'].map((href) => new Promise((r) => {
+    const l = Object.assign(document.createElement('link'), { rel: 'stylesheet', href: `./${href}`, onload: r, onerror: r });
+    document.head.append(l);
+  })));
+  const appRef: ApplicationRef = await bootstrapApplication(TipsApp, { providers: [provideZonelessChangeDetection()] });
+  await frame();
+  await frame();
+  window.fx = { tipStats, tick: () => appRef.tick() };
+  window.fxReady = true;
+}
+
 async function main(): Promise<void> {
   if (params.get('a') === '1') return mainA();
   const page = params.get('page');
+  if (page === 'tips') return mainTips();
   if (page === 'edit') return mainEdit();
   if (page === 'tree' || page === 'detail') return mainTree(page);
   const appRef: ApplicationRef = await bootstrapApplication(App, {

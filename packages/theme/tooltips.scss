@@ -1,0 +1,338 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/tooltips.css — tones, arrows on four sides, animations, and the popover's look (1.12.0,
+// docs/behaviors/tooltips-popovers.md). Opt-in, after dzgrid.css (and variables.css when loaded); for the grid's tooltip
+// and for the page's tooltips and popovers (@dzgrid/dom/tooltip, /popover; Angular's dzTooltip, dzPopover). Without it a
+// tooltip looks as in 1.12.0 and appears without animation; a popover has a plain surface.
+// Animation (7–8, plan D-3): `opacity`, `translate` and `scale` only, from `@starting-style`, with `display` and
+// `overlay` transitioned discretely so a closing bubble stays drawn (and in the top layer) until it has faded; the grid
+// sets and clears `hidden` (and `data-closing` while an opt-in entry's closing runs: an engine without `overlay`
+// transitions keeps the bubble drawn that way), nothing more. `data-animation` picks the preset (none: `fade`; `pop` and `rise` the richer,
+// opt-in ones); `custom` is the app's own
+// (`animate`). Reduced motion, or a grid with `motion: false`: no transition.
+// Compiled to tooltips.css and tooltips.unlayered.css ($layered: false) by `npm run build:theme`; a test fails when they
+// drift. No colour literal, no physical side (guards).
+// ─────────────────────────────────────────────────────────────────────────────
+
+$layered: true !default;
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+$bubble: '.dzg-tooltip, .dzg-popover';
+$arrow: var(--dzg-tooltip-arrow-size, 0.375rem);
+$slide: var(--dzg-tooltip-slide, 6px);
+// A tone: its background, its text, its edge (none by default), its arrow (the background's) — each variable written in
+// full (the variables' table test reads the sources).
+@mixin tone($bg, $fg, $edge, $arrow) {
+  color: $fg;
+  background: $bg;
+  outline: var(--dzg-line, 1px) solid $edge;
+  outline-offset: calc(-1 * var(--dzg-line, 1px));
+  --dzg-tip-arrow-bg: #{$arrow};
+  --dzg-tip-arrow-edge: #{$edge};
+}
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+@include layer {
+  // ---- The popover's look (15): the raised surface, an edge and a shadow ----
+  .dzg-popover {
+    max-inline-size: var(--dzg-popover-max-width, min(32rem, calc(100vw - 16px)));
+    padding: var(--dzg-popover-padding, 0.75rem);
+    border: var(--dzg-line, 1px) solid var(--dzg-popover-border, var(--tz-border));
+    border-radius: var(--dzg-popover-radius, var(--dzg-radius, 0.375rem));
+    color: var(--dzg-popover-fg, var(--tz-fg));
+    background: var(--dzg-popover-bg, var(--tz-bg));
+    box-shadow: var(--dzg-popover-shadow, 0 0.25rem 0.75rem color-mix(in srgb, var(--tz-fg) 20%, transparent));
+    font-size: var(--dzg-popover-font-size, inherit);
+    outline: none;
+    --dzg-tip-arrow-bg: var(--dzg-popover-arrow-color, var(--dzg-popover-bg, var(--tz-bg)));
+    --dzg-tip-arrow-edge: var(--dzg-popover-border, var(--tz-border));
+  }
+
+  .dzg-tooltip {
+    --dzg-tip-arrow-bg: var(--dzg-tooltip-arrow-color, var(--dzg-tooltip-bg, var(--tz-fg)));
+    --dzg-tip-arrow-edge: transparent;
+  }
+
+  // ---- Tones (6): each a variable per part; the words say it, never the colour alone ----
+  :is(#{$bubble})[data-tone=info] {
+    @include tone(var(--dzg-tooltip-info-bg, var(--dzg-tooltip-bg, var(--tz-fg))), var(--dzg-tooltip-info-fg, var(--dzg-tooltip-fg, var(--tz-bg))), var(--dzg-tooltip-info-border, transparent), var(--dzg-tooltip-info-arrow, var(--dzg-tooltip-info-bg, var(--dzg-tooltip-bg, var(--tz-fg)))));
+  }
+
+  :is(#{$bubble})[data-tone=neutral] {
+    @include tone(var(--dzg-tooltip-neutral-bg, var(--tz-bg-raised)), var(--dzg-tooltip-neutral-fg, var(--tz-fg)), var(--dzg-tooltip-neutral-border, var(--tz-border)), var(--dzg-tooltip-neutral-arrow, var(--dzg-tooltip-neutral-bg, var(--tz-bg-raised))));
+  }
+
+  :is(#{$bubble})[data-tone=success] {
+    @include tone(var(--dzg-tooltip-success-bg, var(--tz-success)), var(--dzg-tooltip-success-fg, var(--tz-bg)), var(--dzg-tooltip-success-border, transparent), var(--dzg-tooltip-success-arrow, var(--dzg-tooltip-success-bg, var(--tz-success))));
+  }
+
+  :is(#{$bubble})[data-tone=warning] {
+    @include tone(var(--dzg-tooltip-warning-bg, var(--tz-warning)), var(--dzg-tooltip-warning-fg, var(--tz-bg)), var(--dzg-tooltip-warning-border, transparent), var(--dzg-tooltip-warning-arrow, var(--dzg-tooltip-warning-bg, var(--tz-warning))));
+  }
+
+  :is(#{$bubble})[data-tone=danger] {
+    @include tone(var(--dzg-tooltip-danger-bg, var(--tz-danger)), var(--dzg-tooltip-danger-fg, var(--tz-bg)), var(--dzg-tooltip-danger-border, transparent), var(--dzg-tooltip-danger-arrow, var(--dzg-tooltip-danger-bg, var(--tz-danger))));
+  }
+
+  .dzg-popover[data-tone] {
+    border-color: var(--dzg-tip-arrow-edge);
+  }
+
+  // ---- The arrow on four sides (4): a clipped square at the anchor's middle (`--dzg-tip-at`), from the side the bubble
+  // opened on; its edge drawn behind it for a bubble with one. The bubble moved away from its anchor by its size (the
+  // margin, which the grid reads; the same on every side). ----
+  #{$bubble} {
+    margin-block-start: $arrow;
+  }
+
+  :is(#{$bubble})::before,
+  .dzg-popover::after {
+    content: '';
+    position: absolute;
+    inset-inline-start: calc(var(--dzg-tip-at, 1rem) - #{$arrow});
+    inset-block-end: 100%;
+    inline-size: calc(2 * #{$arrow});
+    block-size: $arrow;
+    background: var(--dzg-tip-arrow-bg);
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    pointer-events: none;
+  }
+
+  // The popover's edge: its triangle 1 px further out, the surface's over the edge's line where they meet.
+  .dzg-popover::before {
+    margin-block-end: var(--dzg-line, 1px);
+    background: var(--dzg-tip-arrow-edge);
+  }
+
+  :is(#{$bubble})[data-side=block-start]::before,
+  .dzg-popover[data-side=block-start]::after {
+    inset-block: 100% auto;
+    rotate: 180deg;
+  }
+
+  .dzg-popover[data-side=block-start]::before {
+    margin-block: var(--dzg-line, 1px) 0;
+  }
+
+  :is(#{$bubble}):is([data-side=inline-end], [data-side=inline-start])::before,
+  .dzg-popover:is([data-side=inline-end], [data-side=inline-start])::after {
+    inset-block: calc(var(--dzg-tip-at, 1rem) - #{$arrow}) auto;
+    inset-inline: auto 100%;
+    inline-size: $arrow;
+    block-size: calc(2 * #{$arrow});
+    clip-path: polygon(100% 0, 100% 100%, 0 50%);
+  }
+
+  :is(#{$bubble})[data-side=inline-start]::before,
+  .dzg-popover[data-side=inline-start]::after {
+    inset-inline: 100% auto;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+  }
+
+  // Right to left: an arrow pointing toward the line's start points the other way on screen.
+  :is(#{$bubble}):is([data-side=inline-end], [data-side=inline-start]):dir(rtl)::before,
+  .dzg-popover:is([data-side=inline-end], [data-side=inline-start]):dir(rtl)::after {
+    scale: -1 1;
+  }
+
+  .dzg-popover[data-side=inline-end]::before {
+    margin-block: 0;
+    margin-inline-end: var(--dzg-line, 1px);
+  }
+
+  .dzg-popover[data-side=inline-start]::before {
+    margin-block: 0;
+    margin-inline-start: var(--dzg-line, 1px);
+  }
+
+  // ---- An app's shape (owner 2026-11-14, for morphing): no box, no arrow; its path filled and edged in the tone's
+  // colours, stretched over the bubble, under the content. ----
+  :is(#{$bubble})[data-shape] {
+    border-color: transparent;
+    outline-color: transparent;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  :is(#{$bubble})[data-shape]::before,
+  .dzg-popover[data-shape]::after {
+    display: none;
+  }
+
+  .dzg-tip-shape {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    inline-size: 100%;
+    block-size: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .dzg-tip-shape > path {
+    fill: var(--dzg-tip-arrow-bg);
+    stroke: var(--dzg-tip-arrow-edge);
+    stroke-width: var(--dzg-line, 1px);
+    vector-effect: non-scaling-stroke;
+  }
+
+  // ---- Animation (7): opening from `@starting-style`, closing on `[hidden]` ----
+  #{$bubble} {
+    --dzg-tip-sign: 1;
+    transition-property: opacity, translate, scale, display, overlay;
+    transition-behavior: allow-discrete;
+    transition-duration: var(--dzg-tooltip-open-duration, 140ms);
+    transition-timing-function: var(--dzg-tooltip-open-easing, cubic-bezier(0.2, 0, 0, 1));
+    transition-delay: var(--dzg-tooltip-open-delay, 0s);
+  }
+
+  .dzg-popover {
+    transition-duration: var(--dzg-popover-open-duration, var(--dzg-tooltip-open-duration, 140ms));
+    transition-timing-function: var(--dzg-popover-open-easing, var(--dzg-tooltip-open-easing, cubic-bezier(0.2, 0, 0, 1)));
+    transition-delay: var(--dzg-popover-open-delay, var(--dzg-tooltip-open-delay, 0s));
+  }
+
+  // The richer presets, opt-in (owner 2026-11-14, « à activer si le client la veut »): `pop` grows from 80 % with a
+  // slight overshoot, `rise` travels further with a long, soft deceleration. Their opening only: every preset closes
+  // the same short way (below).
+  :is(#{$bubble})[data-animation=pop] {
+    transition-duration: var(--dzg-tooltip-pop-duration, 260ms);
+    transition-timing-function: var(--dzg-tooltip-pop-easing, cubic-bezier(0.34, 1.4, 0.64, 1));
+  }
+
+  :is(#{$bubble})[data-animation=rise] {
+    transition-duration: var(--dzg-tooltip-rise-duration, 320ms);
+    transition-timing-function: var(--dzg-tooltip-rise-easing, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+
+  :is(#{$bubble}):dir(rtl) {
+    --dzg-tip-sign: -1;
+  }
+
+  :is(#{$bubble}):is([hidden], [data-closing]) {
+    opacity: 0;
+    transition-duration: var(--dzg-tooltip-close-duration, 100ms);
+    transition-timing-function: var(--dzg-tooltip-close-easing, ease-in);
+    transition-delay: var(--dzg-tooltip-close-delay, 0s);
+  }
+
+  .dzg-popover:is([hidden], [data-closing]) {
+    transition-duration: var(--dzg-popover-close-duration, var(--dzg-tooltip-close-duration, 100ms));
+    transition-timing-function: var(--dzg-popover-close-easing, var(--dzg-tooltip-close-easing, ease-in));
+    transition-delay: var(--dzg-popover-close-delay, var(--dzg-tooltip-close-delay, 0s));
+  }
+
+  @starting-style {
+    :is(#{$bubble}):not([hidden]) {
+      opacity: 0;
+    }
+  }
+
+  // `scale` and `pop`: from smaller, from the arrow's side.
+  :is(#{$bubble}):is([data-animation=scale], [data-animation=pop]) {
+    --dzg-tip-scale: var(--dzg-tooltip-scale, 0.96);
+    transform-origin: 50% 0;
+  }
+
+  :is(#{$bubble})[data-animation=pop] {
+    --dzg-tip-scale: var(--dzg-tooltip-pop-scale, 0.8);
+  }
+
+  :is(#{$bubble}):is([data-animation=scale], [data-animation=pop])[data-side=block-start] {
+    transform-origin: 50% 100%;
+  }
+
+  :is(#{$bubble}):is([data-animation=scale], [data-animation=pop])[data-side=inline-end] {
+    transform-origin: calc(50% - 50% * var(--dzg-tip-sign)) 50%;
+  }
+
+  :is(#{$bubble}):is([data-animation=scale], [data-animation=pop])[data-side=inline-start] {
+    transform-origin: calc(50% + 50% * var(--dzg-tip-sign)) 50%;
+  }
+
+  :is(#{$bubble}):is([data-animation=scale], [data-animation=pop]):is([hidden], [data-closing]) {
+    scale: var(--dzg-tip-scale);
+  }
+
+  @starting-style {
+    :is(#{$bubble}):is([data-animation=scale], [data-animation=pop]):not([hidden]) {
+      scale: var(--dzg-tip-scale);
+    }
+  }
+
+  // `slide` and `rise`: from the anchor's side toward its place — they follow the flip and the reading direction.
+  :is(#{$bubble}):is([data-animation=slide], [data-animation=rise]) {
+    --dzg-tip-dist: #{$slide};
+    --dzg-tip-from: 0 calc(-1 * var(--dzg-tip-dist));
+  }
+
+  :is(#{$bubble})[data-animation=rise] {
+    --dzg-tip-dist: var(--dzg-tooltip-rise, 12px);
+  }
+
+  :is(#{$bubble}):is([data-animation=slide], [data-animation=rise])[data-side=block-start] {
+    --dzg-tip-from: 0 var(--dzg-tip-dist);
+  }
+
+  :is(#{$bubble}):is([data-animation=slide], [data-animation=rise])[data-side=inline-end] {
+    --dzg-tip-from: calc(-1 * var(--dzg-tip-dist) * var(--dzg-tip-sign)) 0;
+  }
+
+  :is(#{$bubble}):is([data-animation=slide], [data-animation=rise])[data-side=inline-start] {
+    --dzg-tip-from: calc(var(--dzg-tip-dist) * var(--dzg-tip-sign)) 0;
+  }
+
+  :is(#{$bubble}):is([data-animation=slide], [data-animation=rise]):is([hidden], [data-closing]) {
+    translate: var(--dzg-tip-from);
+  }
+
+  @starting-style {
+    :is(#{$bubble}):is([data-animation=slide], [data-animation=rise]):not([hidden]) {
+      translate: var(--dzg-tip-from);
+    }
+  }
+
+  // `none`, the app's own, a grid without motion: no transition at all (8).
+  :is(#{$bubble}):is([data-animation=none], [data-animation=custom]),
+  [data-motion=off] .dzg-tooltip {
+    transition: none;
+  }
+
+  // Reduced motion: no transition; `reducedMotion: 'fade'` asks a short fade instead, opacity only — nothing moves or
+  // grows (important: over every preset's start).
+  @media (prefers-reduced-motion: reduce) {
+    #{$bubble} {
+      transition: none;
+    }
+
+    :is(#{$bubble})[data-reduced=fade]:not([data-animation=none], [data-animation=custom], [data-motion=off] *) {
+      transition: opacity var(--dzg-tooltip-reduced-duration, 120ms) linear, display var(--dzg-tooltip-reduced-duration, 120ms) allow-discrete, overlay var(--dzg-tooltip-reduced-duration, 120ms) allow-discrete;
+      translate: none !important;
+      scale: none !important;
+    }
+  }
+
+  // Forced colours: every tone in the system's colours, with a visible edge and arrow.
+  @media (forced-colors: active) {
+    #{$bubble} {
+      outline: 1px solid CanvasText;
+    }
+
+    :is(#{$bubble})::before,
+    .dzg-popover::after {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+  }
+}

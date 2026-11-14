@@ -80,9 +80,9 @@ describe('the base sheet (30–32), both copies', () => {
       expect(body(css, '.dzg-tooltip[data-side=block-start]::before')).toContain('inset-block: 100% auto;');
       expect(body(css, '.dzg-tooltip[data-side=block-start]::before')).toContain('rotate: 180deg;');
       expect(css).toContain('margin-block-start: var(--dzg-tooltip-arrow-size, 0.375rem);');
-      // The margin the same on both sides (the grid reads it to choose the side); above, the box moved up by a translation.
-      expect(body(css, '.dzg-tooltip[data-side=block-start]')).toContain('translate: 0 calc(-2 * var(--dzg-tooltip-arrow-size, 0.375rem));');
-      expect(body(css, '.dzg-tooltip[data-side=block-start]')).not.toContain('margin');
+      // The margin the same on every side (the grid reads it: the gap, and the place it writes gives it back, 1.12.0
+      // tooltips-popovers.md); above, nothing moves the box — `translate` stays free for the animations.
+      expect(body(css, '.dzg-tooltip[data-side=block-start]')).toBe('');
     });
 
     it(`dzgrid${c}.css: the focused cell's tint a colour only (a background image — the column separator — stays)`, () => {
@@ -126,7 +126,10 @@ describe('the guide lists every variable the sheets read, and nothing else (owne
     '--dzg-header-h', '--dzg-header-lines', '--dzg-header-row-h', '--dzg-i', '--dzg-inset', '--dzg-span-at', '--dzg-up', '--dzg-view-w', '--dzg-wrap-line', '--dzg-tip-at',
     '--dzg-row-height', '--dzg-header-height', '--dzg-density', '--dzg-flash', '--dzg-icon',
     // 1.12.0 corrections: a button's state colours (buttons.css), a hovered / selected row's text colour (37), the set list's measured width (38).
-    '--dzg-bb', '--dzg-bf', '--dzg-row-state-fg', '--dzg-set-fit']);
+    '--dzg-bb', '--dzg-bf', '--dzg-row-state-fg', '--dzg-set-fit',
+    // 1.12.0 tooltips and popovers (tooltips.css): the arrow's colours of the tone in force, the reading direction's sign,
+    // the slide's start.
+    '--dzg-tip-arrow-bg', '--dzg-tip-arrow-edge', '--dzg-tip-sign', '--dzg-tip-from', '--dzg-tip-dist', '--dzg-tip-scale']);
   const read = (dir: string, test: (f: string) => boolean) => readdirSync(here(dir), { recursive: true, encoding: 'utf8' }).filter(test).map((f) => readFileSync(here(`${dir}/${f}`), 'utf8')).join('\n');
   const used = [...new Set([...(read('..', (f) => /^[^/]*\.scss$/.test(f)) + read('../../dom/src', (f) => f.endsWith('.ts'))).matchAll(/var\((--dzg-[a-z0-9-]*[a-z0-9])/g)].map((m) => m[1]!))]
     .filter((v) => !WRITTEN.has(v) && !(v.startsWith('--dzg-icon-') && v !== '--dzg-icon-size') && !v.startsWith('--dzg-badge-'));
@@ -136,12 +139,18 @@ describe('the guide lists every variable the sheets read, and nothing else (owne
   // The pagination bar's (presentation-settings.md 40): CSS variables only — 43 keys would cost ≈ 170 B of
   // @dzgrid/dom/theme, past its line. The new strip ones and every --dzg-pager-*; none of them is a key.
   const BAR = ['--dzg-footer-line', '--dzg-footer-padding-block', '--dzg-footer-padding-inline', '--dzg-footer-height', '--dzg-footer-gap', '--dzg-footer-font-size', '--dzg-footer-justify', '--dzg-footer-align'];
-  const cssOnly = (v: string) => v.startsWith('--dzg-pager-') || BAR.includes(v);
+  // Tooltips and popovers (1.12.0, tooltips-popovers.md): CSS variables only, like the bar's — the tones, the animations,
+  // the popover's look (tooltips.css), none a key.
+  const TIPS = /^--dzg-(popover-|tooltip-(info|neutral|success|warning|danger|open|close|pop|reduced)-|tooltip-(slide|scale|rise)$|tooltip-rise-)/;
+  const cssOnly = (v: string) => v.startsWith('--dzg-pager-') || BAR.includes(v) || TIPS.test(v);
 
   it('every variable a sheet reads is a theme key (or written by the grid, or one of the pagination bar’s)', () => {
     expect(used.filter((v) => !keyed.has(v) && !cssOnly(v)).sort()).toEqual([]);
     expect([...keyed].filter(cssOnly)).toEqual([]);
-    expect(used.filter(cssOnly)).toHaveLength(43); // 8 strip, 35 pager
+    // 8 strip, 35 pager; 16 popover (9 of its look, its body's height, 6 of its motion), 35 tooltip (5 tones × 4, 6 of its motion, slide,
+    // scale; the richer presets 1.12.0 owner 2026-11-14: pop's duration, easing and scale, rise's distance, duration and
+    // easing; the reduced-motion fade's duration).
+    expect(used.filter(cssOnly)).toHaveLength(94);
   });
 
   for (const lang of ['', 'fr/']) {

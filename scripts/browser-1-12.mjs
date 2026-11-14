@@ -16,7 +16,8 @@
  * filter's list as wide as its longest value; and the 1.12.0 corrections' variables (buttons.css, the unsorted mark,
  * a row's text forced under `data-dzg-row-fg="force"`, `--dzg-row-state-fg`); and (39–40) the pagination bar: the popups'
  * button variables leave the pager's buttons and select as they are, the pager's own change the pager only, each bar
- * variable's default and effect, the text sizes (a menu item untouched).
+ * variable's default and effect, the text sizes (a menu item untouched); (11) tooltips and popovers (tipsChecks).
+ * `--tips` runs (11) alone.
  */
 import { mkdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -226,6 +227,311 @@ const read = (page, { at, pseudo, p }) => page.evaluate(({ at, pseudo, p }) => {
   return el ? getComputedStyle(el, pseudo ?? null).getPropertyValue(p) : null;
 }, { at, pseudo, p });
 
+/** Relative luminance of a computed colour (`rgb()` or `color(srgb …)`), for the tones' contrast. */
+const lum = (c) => {
+  const m = c.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)/) ?? c.match(/color\(srgb ([\d.]+) ([\d.]+) ([\d.]+)/);
+  const k = c.startsWith('color(') ? 1 : 255;
+  const [r, g, b] = [1, 2, 3].map((i) => { const v = Number(m[i]) / k; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+
+/**
+ * (11) Tooltips and popovers (docs/behaviors/tooltips-popovers.md; owner 2026-11-13 and Q-T1 B, 2026-11-14), page
+ * v1-12-tips.html: every tone readable (4.5:1 measured), each animation preset's transitions (opacity, translate, scale
+ * only; the richer `pop` and `rise`), none under reduced motion and a fade only with `reducedMotion: 'fade'`, no layout
+ * while it runs (Chrome's layout count), the 12 placements on the screen's or the line's sides with their alignment and
+ * the arrow over the anchor, a flip at each edge (and none with `flip: false`), the popover by click, Escape, a press
+ * outside, Tab past its end and code, its focus in and back, nested; cleaned HTML that ran nothing; the grid's header
+ * button and HTML tooltips with `tooltips()`, a cell's popover; axe with both open.
+ */
+async function tipsChecks(page, tag, cfg, name) {
+  const { css, dark, lang, preflight } = cfg;
+  const rtl = lang === 'ar';
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto(site.url(`v1-12-tips.html?lang=${lang}&css=${css}${dark ? '&dark=1' : ''}${preflight ? '&preflight=1' : ''}`));
+  await page.waitForFunction(() => window.ready === true, null, { timeout: 30000 });
+  await frames(page);
+  const B = '.dzg-tooltip.dzg-float';
+  const settle = () => page.waitForTimeout(450);
+
+  // Tones: text 4.5:1 on its background, the arrow in the background's colour.
+  for (const tone of ['info', 'neutral', 'success', 'warning', 'danger']) {
+    const t = await page.evaluate(({ tone, B }) => {
+      window.tip('c', { tone, animation: 'none' });
+      const el = document.querySelector(B);
+      const s = getComputedStyle(el);
+      return { fg: s.color, bg: s.backgroundColor, arrow: getComputedStyle(el, '::before').backgroundColor, tone: el.dataset.tone };
+    }, { tone, B });
+    check(`${tag}: tone ${tone}: its text ${ratio(t.fg, t.bg).toFixed(2)}:1 on its background, the arrow its colour`, t.tone === tone && ratio(t.fg, t.bg) >= 4.5 && t.arrow === t.bg, t);
+  }
+
+  // Presets: what each transition moves, on opening.
+  const PRESETS = { fade: ['opacity'], scale: ['opacity', 'scale'], slide: ['opacity', 'translate'], pop: ['opacity', 'scale'], rise: ['opacity', 'translate'], none: [] };
+  // Hidden, drawn hidden (a frame), then shown: the opening runs from its starting style.
+  const anims = async (animation, extra = {}) => {
+    await page.evaluate(() => window.tips.get('c')?.destroy());
+    await settle();
+    return page.evaluate(({ animation, extra, B }) => {
+    window.tip('c', { animation, ...extra });
+    const el = document.querySelector(B);
+    return el.getAnimations().map((a) => ({ p: a.transitionProperty, d: a.effect.getTiming().duration })).filter((a) => a.p !== 'display' && a.p !== 'overlay');
+  }, { animation, extra, B });
+  };
+  for (const [preset, want] of Object.entries(PRESETS)) {
+    const a = await anims(preset);
+    const props = [...new Set(a.map((x) => x.p))].sort();
+    check(`${tag}: preset ${preset}: ${want.join(', ') || 'nothing'} moves`, JSON.stringify(props) === JSON.stringify([...want].sort()), a);
+    if (preset === 'pop' || preset === 'rise') check(`${tag}: preset ${preset}: the richer, longer opening`, a.every((x) => x.d === (preset === 'pop' ? 260 : 320)), a);
+    await settle();
+  }
+  // Closing: short, then hidden and out of the window's way.
+  await anims('slide');
+  await settle();
+  const closing = await page.evaluate((B) => { window.tips.get('c').hide(); return document.querySelector(B).getAnimations().filter((a) => a.transitionProperty === 'opacity').map((a) => a.effect.getTiming().duration); }, B);
+  check(`${tag}: a closing fades in 100 ms`, closing.length === 1 && closing[0] === 100, closing);
+  await settle();
+  // No layout while it runs (Chrome: the layout count over the animation's frames).
+  if (name === 'chrome') {
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('Performance.enable');
+    const count = async () => (await cdp.send('Performance.getMetrics')).metrics.find((m) => m.name === 'LayoutCount').value;
+    // Layouts while each preset runs a whole second (its duration set long by its variable), against the same second with
+    // the bubble still: at most one more (the moving box's overflow settled once, at its end) — never one per frame.
+    const over = async (animation) => {
+      await page.evaluate(() => window.tips.get('c')?.destroy());
+      await settle();
+      await page.evaluate((animation) => {
+        for (const v of ['--dzg-tooltip-open-duration', '--dzg-tooltip-pop-duration', '--dzg-tooltip-rise-duration']) document.documentElement.style.setProperty(v, '1000ms');
+        window.tip('c', { animation });
+      }, animation);
+      await frames(page);
+      const l0 = await count();
+      await page.waitForTimeout(1100);
+      const n = (await count()) - l0;
+      await page.evaluate(() => document.documentElement.removeAttribute('style'));
+      return n;
+    };
+    const still = await over('none');
+    for (const preset of ['fade', 'scale', 'slide', 'pop', 'rise']) {
+      const moving = await over(preset);
+      check(`${tag}: ${preset}: no layout per frame while it runs a second (${moving} against ${still} still)`, moving <= still + 1, { moving, still });
+    }
+    await cdp.detach();
+    await settle();
+  }
+  // Reduced motion: nothing; with reducedMotion 'fade', the opacity only.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const still = await anims('pop');
+  check(`${tag}: reduced motion: no animation`, still.length === 0, still);
+  const faded = await anims('pop', { reducedMotion: 'fade' });
+  check(`${tag}: reduced motion with reducedMotion 'fade': a short fade, opacity only`, faded.length === 1 && faded[0].p === 'opacity' && faded[0].d === 120, faded);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await settle();
+
+  // The 12 placements on the centred button, still (animation none): the side on screen, the alignment, the arrow.
+  const geo = (id, o) => page.evaluate(({ id, o, B }) => {
+    window.tip(id, { animation: 'none', ...o });
+    const el = document.querySelector(B);
+    const r = (x) => { const b = x.getBoundingClientRect(); return { l: b.left, r: b.right, t: b.top, b: b.bottom }; };
+    const arrow = getComputedStyle(el, '::before');
+    const a = r(document.getElementById(id));
+    const t = r(el);
+    // The arrow's middle on screen: its box measured through a probe at its place.
+    const probe = document.createElement('div');
+    probe.style.cssText = `position:absolute;inset-inline-start:${arrow.insetInlineStart};inset-block-start:${arrow.insetBlockStart};inset-inline-end:${arrow.insetInlineEnd};inset-block-end:${arrow.insetBlockEnd};inline-size:${arrow.inlineSize};block-size:${arrow.blockSize}`;
+    el.append(probe);
+    const p = r(probe);
+    probe.remove();
+    return { side: el.dataset.side, a, t, p, win: { w: innerWidth, h: innerHeight } };
+  }, { id, o, B });
+  const near = (x, y) => Math.abs(x - y) < 1.5;
+  const SIDES = rtl ? { left: 'inline-end', right: 'inline-start', start: 'inline-start', end: 'inline-end' } : { left: 'inline-start', right: 'inline-end', start: 'inline-start', end: 'inline-end' };
+  for (const side of ['top', 'bottom', 'left', 'right', 'start', 'end']) for (const al of ['', '-start', '-end']) {
+    if ((side === 'start' || side === 'end') && al) continue; // the line's sides: their alignments are the left / right ones'
+    const g = await geo('c', { placement: `${side}${al}` });
+    // Physical side on screen: start/end through the direction.
+    const phys = side === 'start' ? (rtl ? 'right' : 'left') : side === 'end' ? (rtl ? 'left' : 'right') : side;
+    const sideOk = { top: g.t.b <= g.a.t, bottom: g.t.t >= g.a.b, left: g.t.r <= g.a.l, right: g.t.l >= g.a.r }[phys];
+    const logical = { top: 'block-start', bottom: 'block-end', ...SIDES }[side];
+    let alignOk;
+    if (phys === 'top' || phys === 'bottom') {
+      // -start / -end: the line's start and end (left / right in French, right / left in Arabic).
+      const st = rtl ? near(g.t.r, g.a.r) : near(g.t.l, g.a.l);
+      const en = rtl ? near(g.t.l, g.a.l) : near(g.t.r, g.a.r);
+      alignOk = al === '-start' ? st : al === '-end' ? en : near((g.t.l + g.t.r) / 2, (g.a.l + g.a.r) / 2);
+    } else alignOk = al === '-start' ? near(g.t.t, g.a.t) : al === '-end' ? near(g.t.b, g.a.b) : near((g.t.t + g.t.b) / 2, (g.a.t + g.a.b) / 2);
+    // The arrow points at the anchor: its middle over the anchor along the other axis.
+    const arrowOk = phys === 'top' || phys === 'bottom' ? (g.p.l + g.p.r) / 2 >= g.a.l && (g.p.l + g.p.r) / 2 <= g.a.r : (g.p.t + g.p.b) / 2 >= g.a.t && (g.p.t + g.p.b) / 2 <= g.a.b;
+    check(`${tag}: placement ${side}${al}: on the ${phys}, aligned, the arrow at the anchor`, g.side === logical && sideOk && alignOk && arrowOk, g);
+  }
+  // A flip at each edge, and none with flip: false; kept inside the window.
+  const inside = (g) => g.t.l >= -0.5 && g.t.r <= g.win.w + 0.5 && g.t.t >= -0.5 && g.t.b <= g.win.h + 0.5;
+  for (const [id, placement, want] of [['top', 'top', 'block-end'], ['bottom', 'bottom', 'block-start'], ['lft', 'left', rtl ? 'inline-start' : 'inline-end'], ['rgt', 'right', rtl ? 'inline-end' : 'inline-start']]) {
+    const g = await geo(id, { placement });
+    check(`${tag}: at the ${id} edge, ${placement} flips to ${want}, inside the window`, g.side === want && inside(g), g);
+    const kept = await geo(id, { placement, flip: false });
+    check(`${tag}: at the ${id} edge, flip: false keeps ${placement}`, kept.side !== want, kept);
+  }
+  await page.evaluate(() => { for (const h of window.tips.values()) h.destroy(); });
+
+  // The app's own animation through the hook (CSS keyframes by the Web Animations API), with an app shape: told open then
+  // close, the bubble kept drawn until its closing animation has finished; the shape drawn, no box, no arrow.
+  const hooked = await page.evaluate(async (B) => {
+    const phases = [];
+    window.tip('c', {
+      shape: 'M0 0 H100 V80 H60 L50 100 L40 80 H0 Z',
+      animate: (el, phase, info) => {
+        phases.push(`${phase}:${info.side}:${info.reduced}:${!!info.shape}`);
+        const k = [{ opacity: 0, scale: '0.6' }, { opacity: 1, scale: '1' }];
+        return el.animate(phase === 'open' ? k : k.reverse(), { duration: 200, easing: 'ease-out' }).finished;
+      },
+    });
+    const el = document.querySelector(B);
+    await new Promise((r) => setTimeout(r, 300));
+    // The shape's box stretched over the bubble (the path's own box may count its stroke's corners: Firefox).
+    const svg = el.querySelector(':scope > svg.dzg-tip-shape').getBoundingClientRect();
+    const path = el.querySelector(':scope > svg.dzg-tip-shape > path').getBoundingClientRect();
+    const look = { bg: getComputedStyle(el).backgroundColor, arrow: getComputedStyle(el, '::before').display, fill: getComputedStyle(el.querySelector('svg path')).fill, w: svg.width, pw: path.width, h: path.height, box: el.getBoundingClientRect().width };
+    window.tips.get('c').hide();
+    await new Promise((r) => setTimeout(r, 100));
+    const mid = !el.hidden;
+    await new Promise((r) => setTimeout(r, 250));
+    return { phases, look, mid, end: el.hidden };
+  }, B);
+  check(`${tag}: the app's keyframes through animate(): told open and close, kept drawn until its closing ends`, hooked.phases.length === 2 && hooked.phases[0].startsWith('open:') && hooked.phases[1].startsWith('close:') && hooked.mid && hooked.end, hooked);
+  check(`${tag}: an app shape drawn over the bubble, no box, no arrow`, hooked.look.bg === 'rgba(0, 0, 0, 0)' && hooked.look.arrow === 'none' && hooked.look.fill !== 'none' && Math.abs(hooked.look.w - hooked.look.box) < 2 && hooked.look.h > 10, hooked.look);
+  await page.evaluate(() => window.tips.get('c').destroy());
+
+  // Cleaned HTML: the bold kept, no image, nothing ran.
+  const h = await page.evaluate((B) => { window.tip('html', { content: { html: '<b>ok</b><img src="x" onerror="window.__hit=1"><script>window.__hit=1</script><a href="javascript:window.__hit=1">x</a>' } }); return document.querySelector(B).innerHTML; }, B);
+  await page.waitForTimeout(100);
+  check(`${tag}: HTML cleaned: the bold kept, no image, script or link, nothing ran`, h === '<b>ok</b>' && (await page.evaluate(() => window.__hit)) === undefined, h);
+  await page.evaluate(() => window.tips.get('html').destroy());
+
+  // The popover: click, the focus in; Escape, the focus back; a press outside; code; Tab past its end; nested.
+  await page.evaluate(() => { window.pop('pop', { content: window.form, label: 'Note' }); window.pop('pop2', { content: 'Autre' }); });
+  await page.click('#pop');
+  const o1 = await page.evaluate(() => ({ dlg: document.querySelector('.dzg-popover')?.getAttribute('role'), exp: document.getElementById('pop').getAttribute('aria-expanded'), ctl: document.getElementById('pop').getAttribute('aria-controls') === document.querySelector('.dzg-popover')?.id, focus: document.activeElement?.className }));
+  check(`${tag}: popover by click: a dialog, expanded, controlled, the focus in its field`, o1.dlg === 'dialog' && o1.exp === 'true' && o1.ctl && o1.focus === 'note', o1);
+  await page.keyboard.press('Escape');
+  const o2 = await page.evaluate(() => ({ open: !!document.querySelector('.dzg-popover:not([hidden])'), exp: document.getElementById('pop').getAttribute('aria-expanded'), focus: document.activeElement?.id }));
+  check(`${tag}: Escape closes it, the focus back on its trigger`, !o2.open && o2.exp === 'false' && o2.focus === 'pop', o2);
+  await settle();
+  await page.click('#pop');
+  await page.mouse.click(5, 690);
+  check(`${tag}: a press outside closes it`, !(await page.evaluate(() => window.pops.get('pop').isOpen)));
+  await page.evaluate(() => window.pops.get('pop').open());
+  const byCode = await page.evaluate(() => { const was = window.pops.get('pop').isOpen; window.pops.get('pop').close(); return { was, now: window.pops.get('pop').isOpen, focus: document.activeElement?.id }; });
+  check(`${tag}: open() and close() by code, the focus back from inside`, byCode.was && !byCode.now && byCode.focus === 'pop', byCode);
+  await settle();
+  // From its last control (WebKit's Tab skips buttons: the focus put there), Tab: on to what follows the trigger.
+  await page.click('#pop');
+  await page.evaluate(() => document.querySelector('.dzg-popover .ok').focus());
+  await page.keyboard.press('Tab');
+  const tabbed = await page.evaluate(() => ({ open: window.pops.get('pop').isOpen, focus: document.activeElement?.id || document.activeElement?.className }));
+  check(`${tag}: Tab past its last control closes it, the focus on what follows its trigger`, !tabbed.open && tabbed.focus === 'pop2', tabbed);
+  await page.click('#pop');
+  await page.keyboard.press('Shift+Tab');
+  const back = await page.evaluate(() => ({ open: window.pops.get('pop').isOpen, focus: document.activeElement?.id }));
+  check(`${tag}: Shift+Tab before its first control closes it, the focus on its trigger`, !back.open && back.focus === 'pop', back);
+  await settle();
+  await page.evaluate(() => window.pops.get('pop').open());
+  const nested = await page.evaluate(() => {
+    const inner = document.querySelector('.dzg-popover .inner');
+    const h = window.popover(inner, { content: 'Encore', group: 'default' });
+    h.open();
+    const both = window.pops.get('pop').isOpen && h.isOpen;
+    window.pops.get('pop2').open();
+    const r = { both, after: window.pops.get('pop').isOpen || h.isOpen, other: window.pops.get('pop2').isOpen };
+    window.pops.get('pop2').close();
+    return r;
+  });
+  check(`${tag}: a popover nested in another keeps it; another in the group closes both`, nested.both && !nested.after && nested.other, nested);
+  await settle();
+
+  // The grid with tooltips(): a header button names itself, a cell's HTML cleaned, a cell's popover about its row.
+  const head = await page.evaluate(() => {
+    const b = document.querySelector('.dzg-hcell[data-col=seed] .dzg-fbtn');
+    b.dispatchEvent(new PointerEvent('pointerover', { bubbles: true, pointerType: 'mouse' }));
+    const t = document.querySelector('.dzg .dzg-tooltip');
+    return { shown: !t.hidden, text: t.textContent, label: b.getAttribute('aria-label') };
+  });
+  check(`${tag}: in the grid, the filter button's tooltip is its name`, head.shown && head.text === head.label, head);
+  const cellHtml = await page.evaluate(() => {
+    const c = document.querySelector('.dzg-layer .dzg-row[aria-rowindex="3"] .dzg-cell[data-col=seed]');
+    c.dispatchEvent(new PointerEvent('pointerover', { bubbles: true, pointerType: 'mouse' }));
+    return document.querySelector('.dzg .dzg-tooltip').innerHTML;
+  });
+  check(`${tag}: in the grid, a cell's HTML tooltip cleaned`, /^<b>[^<]+<\/b>$/.test(cellHtml) && (await page.evaluate(() => window.__hit)) === undefined, cellHtml);
+  await page.click('.dzg-layer .dzg-row[aria-rowindex="4"] .act');
+  const about = await page.evaluate(() => ({ text: document.querySelector('.dzg-popover .about')?.textContent, seed: window.grid.api.rowAt?.(2)?.seed }));
+  check(`${tag}: a cell's action icon opens a popover about its row`, /2$/.test(about.text ?? ''), about);
+
+  // axe with a tooltip and a popover open.
+  if (name === 'chrome') {
+    await page.evaluate(() => window.tip('c', { animation: 'none' }));
+    await settle();
+    await page.addScriptTag({ content: AXE });
+    const v = await page.evaluate(async () => (await window.axe.run(document.body, { runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] })).violations.map((x) => `${x.id}: ${x.nodes.map((n) => n.target).join(' ')}`));
+    check(`${tag}: tooltips and popovers, axe finds nothing`, v.length === 0, v);
+  }
+  check(`${tag}: tooltips page: nothing told`, (await page.evaluate(() => window.told.length)) === 0, await page.evaluate(() => window.told));
+}
+
+/**
+ * (11b) The Angular directives in a real build (packages/angular/browser, `?page=tips`: ngc, the linker, esbuild, as an
+ * app ships): a template with its context and a component with its inputs in tooltips, cleaned HTML (Angular's
+ * sanitizer, then DzGrid's), a popover holding a template whose `close()` closes it, a component in a popover, and a
+ * grid cell's component opening a popover about its row. Once per browser and language.
+ */
+async function angularTips(name, lang) {
+  const tag = `${name} angular ${lang}`;
+  const b = await browser(name);
+  try {
+    const page = await b.newPage();
+    await page.setViewportSize({ width: 900, height: 700 });
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    await page.goto(site.root(`packages/angular/browser/build/index.html?page=tips${lang === 'ar' ? '&lang=ar' : ''}`));
+    await page.waitForFunction(() => window.fxReady === true || window.fxError, null, { timeout: 30000 });
+    check(`${tag}: the fixture runs`, !(await page.evaluate(() => window.fxError)), await page.evaluate(() => window.fxError));
+    const B = '.dzg-tooltip.dzg-float';
+    // Away first (a tooltip the pointer rests on stays: it may cover the next button), past the grace and the fade.
+    const hover = async (sel) => { await page.mouse.move(890, 690); await page.waitForTimeout(400); await page.hover(sel); await page.waitForFunction((B) => { const t = document.querySelector(B); return t && !t.hidden; }, B, { timeout: 3000 }).catch(() => {}); await page.waitForTimeout(350); };
+    await hover('.fx-t1');
+    const t1 = await page.evaluate((B) => { const t = document.querySelector(B); return { text: t.querySelector('.fx-in')?.textContent, tone: t.dataset.tone, anim: t.dataset.animation, op: getComputedStyle(t).opacity }; }, B);
+    check(`${tag}: a template in a tooltip, its context drawn, toned, popped in`, t1.text === 'Ann' && t1.tone === 'success' && t1.anim === 'pop' && t1.op === '1', t1);
+    await hover('.fx-t2');
+    const t2 = await page.evaluate((B) => { const t = document.querySelector(B); const a = document.querySelector('.fx-t2').getBoundingClientRect(); const r = t.getBoundingClientRect(); return { text: t.querySelector('.fx-card')?.textContent, side: t.dataset.side, right: r.left >= a.right, made: window.fx.tipStats.made }; }, B);
+    check(`${tag}: a component in a tooltip with its inputs, on the right`, t2.text === 'Ann · 3' && t2.right, t2);
+    await hover('.fx-t3');
+    await page.waitForTimeout(400);
+    const t3 = await page.evaluate((B) => ({ html: document.querySelector(B).innerHTML, gone: window.fx.tipStats.gone, hit: window.__hit }), B);
+    check(`${tag}: HTML through Angular's sanitizer and DzGrid's: the bold only, nothing ran; the component destroyed`, t3.html === '<b>Bold</b>' && t3.hit === undefined && t3.gone >= 1, t3);
+    await page.mouse.move(890, 690);
+    await page.click('.fx-p1');
+    const p1 = await page.evaluate(() => ({ dlg: document.querySelector('.dzg-popover')?.getAttribute('aria-label'), focus: document.activeElement?.className }));
+    check(`${tag}: a popover holding a template, named, the focus in its field`, p1.dlg === 'Note' && p1.focus === 'fx-note', p1);
+    await page.click('.dzg-popover .fx-done');
+    const p2 = await page.evaluate(() => ({ open: !!document.querySelector('.dzg-popover:not([data-closing])'), focus: document.activeElement?.className, closed: window.fx.tipStats.closed }));
+    check(`${tag}: its template's close() closes it, the focus back on the trigger`, !p2.open && p2.focus === 'fx-p1' && p2.closed.at(-1) === 'code', p2);
+    await page.waitForTimeout(300);
+    await page.click('.fx-p2');
+    check(`${tag}: a component in a popover`, (await page.evaluate(() => document.querySelector('.dzg-popover .fx-card')?.textContent)) === 'Bob · 7');
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+    await page.click('.dzg-layer .dzg-row[aria-rowindex="4"] .fx-act');
+    check(`${tag}: a grid cell's component opens a popover about its row`, (await page.evaluate(() => document.querySelector('.dzg-popover .fx-about')?.textContent)) === 'Seed 2');
+    await page.evaluate(() => { const v = document.querySelector('.dzg-viewport'); v.scrollTop = 3000; });
+    await page.waitForTimeout(300);
+    check(`${tag}: scrolled until its row is recycled, that popover closes`, !(await page.evaluate(() => document.querySelector('.dzg-popover:not([data-closing])'))));
+    check(`${tag}: no page error`, errors.length === 0, errors);
+  } finally {
+    await b.close().catch(() => {});
+  }
+}
+
 async function run(name, cfg) {
   const { css, dark, lang, preflight } = cfg;
   const tag = `${name} ${css}${dark ? ' dark' : ''} ${lang}${preflight ? ' preflight' : ''}`;
@@ -237,6 +543,11 @@ async function run(name, cfg) {
     await page.setViewportSize({ width: 900, height: 700 });
     const errors = [];
     page.on('pageerror', (e) => errors.push(e.message));
+    if (process.argv.includes('--tips')) {
+      await tipsChecks(page, tag, cfg, name);
+      check(`${tag}: tooltips page: no page error`, errors.length === 0, errors);
+      return;
+    }
     const open = async (more) => {
       await page.goto(url(more));
       await page.waitForFunction(() => window.ready === true, null, { timeout: 30000 });
@@ -569,6 +880,8 @@ async function run(name, cfg) {
       check(`${tag}: with icons, axe finds nothing`, v.length === 0, v);
     }
     check(`${tag}: no page error, nothing told`, errors.length === 0 && (await page.evaluate(() => window.told.length)) === 0, { errors, told: await page.evaluate(() => window.told) });
+    await tipsChecks(page, tag, cfg, name);
+    check(`${tag}: tooltips page: no page error`, errors.length === 0, errors);
     await page.close();
   } finally {
     await b.close().catch(() => {});
@@ -578,8 +891,12 @@ async function run(name, cfg) {
 
 const only = process.argv.find((a) => a.startsWith('--only='))?.slice(7);
 try {
+  // The Angular fixture, built once (needs `npm run build`).
+  const { buildFixture } = await import('../packages/angular/browser/build.mjs');
+  await buildFixture();
   for (const name of ['chrome', 'firefox', 'webkit']) {
     if (only && only !== name) continue;
+    for (const lang of ['fr', 'ar']) if (!process.argv.includes('--first') || lang === 'fr') await angularTips(name, lang);
     for (const css of ['layered', 'unlayered']) for (const dark of [false, true]) for (const lang of ['fr', 'ar']) for (const preflight of [false, true]) {
       // `--first`: one run per browser (layered, light, French), while working.
       if (process.argv.includes('--first') && (css !== 'layered' || dark || lang !== 'fr' || preflight)) continue;

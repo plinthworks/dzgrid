@@ -17,3 +17,7 @@ Rests the pointer on a header or a cell; or moves focus to it with the keyboard.
 
 ## Tests
 `packages/dom/test/tooltip.test.ts`; `slots-gaps.test.ts` (hidden with its column, rebound by a sort, an update of the rows, a registry change; kept by a paint that changes nothing; for the text and the part), `slots-lifecycle-property.test.ts` (random sequences: no part left live for a hidden tooltip), `slots-tooltip.test.ts` (the part: rich content, a header's null row and value, destroyed at hide, `aria-describedby`, Escape, placed after it is drawn, right to left). Not yet in a browser: the top layer (`popover`) is Phase 3, so a tooltip inside a transformed ancestor may be clipped today.
+
+## 1.12.0
+Tones, placements, animations, header buttons' names, HTML by choice, tooltips anywhere in the page and popovers:
+`tooltips-popovers.md`. Everything above holds unchanged.

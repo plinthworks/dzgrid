@@ -266,10 +266,6 @@
   margin-block-start: var(--dzg-tooltip-arrow-size, 0.375rem);
 }
 
-.dzg-tooltip[data-side=block-start] {
-  translate: 0 calc(-2 * var(--dzg-tooltip-arrow-size, 0.375rem));
-}
-
 .dzg-tooltip[data-side=block-start]::before {
   inset-block: 100% auto;
   rotate: 180deg;

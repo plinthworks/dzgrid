@@ -71,6 +71,8 @@ const domAlias = {
   '@dzgrid/dom/vertical-headers': fileURLToPath(new URL('./packages/dom/src/vertical-headers.ts', import.meta.url)),
   '@dzgrid/dom/wrapped-headers': fileURLToPath(new URL('./packages/dom/src/wrapped-headers.ts', import.meta.url)),
   '@dzgrid/dom/column-hover': fileURLToPath(new URL('./packages/dom/src/column-hover.ts', import.meta.url)),
+  '@dzgrid/dom/tooltip': fileURLToPath(new URL('./packages/dom/src/tooltip.ts', import.meta.url)),
+  '@dzgrid/dom/popover': fileURLToPath(new URL('./packages/dom/src/popover.ts', import.meta.url)),
   '@dzgrid/dom/locales/en-totals': fileURLToPath(new URL('./packages/dom/src/locales/en-totals.ts', import.meta.url)),
   '@dzgrid/dom/locales/fr-totals': fileURLToPath(new URL('./packages/dom/src/locales/fr-totals.ts', import.meta.url)),
   '@dzgrid/dom/locales/ar-totals': fileURLToPath(new URL('./packages/dom/src/locales/ar-totals.ts', import.meta.url)),
@@ -96,6 +98,8 @@ const domAlias = {
 const angularTsconfig = fileURLToPath(new URL('./packages/angular/tsconfig.spec.json', import.meta.url));
 const angularAlias = {
   ...domAlias,
+  '@dzgrid/angular/tooltip': fileURLToPath(new URL('./packages/angular/tooltip/index.ts', import.meta.url)),
+  '@dzgrid/angular/popover': fileURLToPath(new URL('./packages/angular/popover/index.ts', import.meta.url)),
   '@dzgrid/angular': fileURLToPath(new URL('./packages/angular/src/index.ts', import.meta.url)),
 };
 

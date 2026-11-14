@@ -14,6 +14,7 @@ Only the names written in these pages exist; do not borrow option names from oth
 
 - [Columns](https://plinthworks.github.io/dzgrid/guides/columns/): Column definitions: values, types, formats, widths, pinning, groups, moving and resizing, the column menu.
 - [Changing the look](https://plinthworks.github.io/dzgrid/guides/appearance/): Row and header heights, the grid's height, the font, colours, lines, one column or one row: each, step by step.
+- [Tooltips and popovers](https://plinthworks.github.io/dzgrid/guides/tooltips-popovers/): Tooltips on cells, headers and anywhere in the page — tones, placements, animations, any content — and popovers, the bubbles that stay.
 - [Sort, filter and search](https://plinthworks.github.io/dzgrid/guides/sort-filter-search/): Sorting, column filters, the floating row, the filters panel, quick search, find.
 - [Selection and ranges](https://plinthworks.github.io/dzgrid/guides/selection-ranges/): Row selection, blocks of cells, the clipboard, the fill handle.
 - [Editing](https://plinthworks.github.io/dzgrid/guides/editing/): Editable cells, editors, validation, saving, undo and redo.

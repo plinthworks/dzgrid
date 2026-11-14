@@ -1,6 +1,6 @@
 ---
 title: "tooltip"
-description: "Le texte affiché sur une cellule, d’après sa valeur et sa ligne."
+description: "Le texte affiché sur une cellule, d’après sa valeur et sa ligne — des mots, un ton, un placement, ou du HTML nettoyé."
 ---
 
 import OptionFacts from '../../../../components/OptionFacts.astro';
@@ -16,6 +16,18 @@ Une infobulle sur chaque cellule, calculée à partir des données.
 Elle s’affiche quand le pointeur reste sur la cellule (après le délai des [`tooltips`](../../settings/tooltips/) de
 la grille) et dès que le focus du clavier l’atteint.
 
+Elle peut renvoyer plus que des mots, un `TooltipSpec` :
+
+| Clé | Ce qu’elle fait |
+|---|---|
+| `text` | Les mots (ce qu’entend un lecteur d’écran) |
+| `tone` | `info` (par défaut), `neutral`, `success`, `warning` ou `danger` |
+| `placement` | Où elle s’ouvre, l’un des 12 placements ou `auto` ; demande la fonction [`tooltips()`](../../features/tooltips/) |
+| `html` | Du HTML, affiché nettoyé seulement quand la grille a le nettoyeur (`tooltips: { html: safeHtml }`) ; sinon son `text`, ou rien |
+
+[`tooltips`](../../settings/tooltips/)`.cells` à false fait taire d’un coup l’infobulle de toutes les colonnes. La
+suite dans [Infobulles et bulles](../../guides/tooltips-popovers/).
+
 ## Exemple
 
 ```ts
@@ -28,7 +40,7 @@ createGrid<Bee>(document.getElementById('ruches')!, {
   rows: [{ id: 'h1', hive: 'Colline aux trèfles', honey: 12.5 }],
   columns: [
     { id: 'hive', header: 'Ruche', tooltip: (v) => (v ? `Ruche ${v}` : null) },
-    { id: 'honey', header: 'Miel', type: 'number' },
+    { id: 'honey', header: 'Miel', type: 'number', tooltip: (v) => (Number(v) < 5 ? { text: 'Bas : vérifier la ruche', tone: 'warning' } : null) },
   ],
   getRowId: (r) => r.id,
   messages: FR,
@@ -38,4 +50,4 @@ createGrid<Bee>(document.getElementById('ruches')!, {
 ## Voir aussi
 
 - [`headerTooltip`](../header-tooltip/), [`ui`](../ui/).
-- [`tooltips`](../../settings/tooltips/).
+- [`tooltips`](../../settings/tooltips/), [`tooltips()`](../../features/tooltips/).
