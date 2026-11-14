@@ -36,76 +36,39 @@ Puis `npm run publish:verify`, et dans les applications `npm update @dzgrid/core
 - **`autoColumns<Ligne, DzgColumnDef<Ligne>>`** : des colonnes Angular avec un composant dans `ui.cell`, sans cast
   (`override`, `merge`, `add`).
 
-## Infobulles et bulles (tes réponses du 2026-11-13 et Q-T1 B du 2026-11-14)
+## Infobulles riches → `@dztooltip` (ta décision du 2026-11-14, « ok partout »)
 
-- **Où tu veux** : la colonne (`tooltip`, `headerTooltip`), toute la grille (`tooltips`), les boutons des titres
-  (`tooltips: { header: true }` avec `features: [tooltips()]`), n'importe quel élément de la page (`tooltip(el, …)`,
-  `[dzTooltip]` en Angular).
-- **Tons** `info` (celui d'avant), `neutral`, `success`, `warning`, `danger`, lisibles en clair et en sombre.
-- **Animations** CSS : `fade`, `scale`, `slide`, `none`, et deux plus riches à activer, `pop` et `rise` ; mouvement réduit
-  = aucune animation, ou un fondu court avec `reducedMotion: 'fade'`. Ton animation à toi (`animate`, GSAP possible,
-  jamais une dépendance de DzGrid), et une forme SVG à toi (`shape`) pour du morphing.
-- **Placement** : `top`, `bottom`, `start`, `end`, `left`, `right` (+ `-start` / `-end`), `auto` ; bascule au bord
-  (`flip: false` pour l'empêcher).
-- **Tout contenu** : texte, nœuds, `<ng-template>`, composant, HTML nettoyé (sur demande : `safeHtml`).
-- **Bulles qui restent** (`popover()`, `[dzPopover]`) : clic, Échap, clic dehors, Tab, code ; le focus entre et revient ;
-  une ouverte par groupe ; même dans une cellule de grille.
-- **Nouvelle feuille** `@dzgrid/theme/tooltips.css` (et sa copie sans couche), après `variables.css`.
-- Tailles : base `@dzgrid/dom` 25 704 (+2 %, mesuré 25 690) ; nouvelles entrées à leur mesure + 10 % ; appli Angular
-  réelle 102 700 (+0,5 %, mesuré 102 697) ; K.8 91 591 / 92 000.
+- **Les tons, placements, formes, animations (dont `morph`), les infobulles partout dans la page et les bulles qui
+  restent** sont partis, avant publication, dans leurs propres paquets : DzTooltip (`@dztooltip/core`,
+  `@dztooltip/angular`, `@dztooltip/theme`, et le pont `@dztooltip/dzgrid` : `features: [dzTooltips({ … })]`), dans
+  `/Users/nadou/Dev/dztooltip`. DzGrid ne publie **aucune** des entrées `@dzgrid/dom/tooltip`, `/popover`,
+  `@dzgrid/angular/tooltip`, `/popover`, `@dzgrid/theme/tooltips.css` (jamais publiées ; retirées de `api/*.api.txt`
+  avec la ligne d'historique « owner 2026-11-14: rich tooltips moved to @dztooltip, never published »).
+- **DzGrid garde** son infobulle simple (celle de la 1.11, ses variables et sa flèche), et :
+  - **par colonne en une ligne** : `tooltip: true` (le texte affiché), `tooltip: { when: 'truncated' }` (seulement
+    quand il est coupé), `tooltip: false` (aucune), les options `{ text, when, delayMs, content }` ; `tooltips: { cells:
+    false | 'truncated' }` pour toute la grille ; `headerTooltip` en mots ou en `{ text }` ;
+  - **une couture** (`FeatureHandle.tooltips` : `TooltipSeam`, `TooltipShow`, `TipFor`) par laquelle une fonction
+    prend la main sur les infobulles des cellules et des titres : la grille décide quand et quoi, la fonction où et
+    comment. Le pont de DzTooltip l'utilise ; un test montre qu'une fonction quelconque peut le faire.
+  - une apparence (`tone`, `placement`, `animation`, `shape`, `style`, `maxWidth`, `html`) sans fonction qui dessine :
+    la grille affiche les mots et le signale une fois (`missing-feature`).
+- **Ta décision « A »** : `ColumnDef.tooltip` (fonction | booléen | `ColumnTooltip`) et `headerTooltip` (mots |
+  `TooltipSpec`) acceptés dans `check:api`.
 - Corrigé aussi : le bouton Réessayer garde son anneau de focus (il prenait l'allure du pied).
-- **Relecture du code des infobulles (2026-11-14)**, six défauts corrigés, chacun avec un test rouge d'abord : une bulle
-  restait ouverte quand son déclencheur quittait la page ou que sa ligne de grille changeait sans défilement (tri, vue
-  remplacée, grille détruite) ; Tab depuis la bulle elle-même (après un clic sur son texte) la fermait au lieu d'aller à
-  son premier contrôle ; le déclencheur d'une bulle ouverte montrait encore son infobulle ; une infobulle passant d'un
-  HTML à un texte identique gardait le HTML ; une grille détruite avec son infobulle affichée restait retenue par la
-  page ; `[dzPopover]` détruit ouvert émettait `(closed)` sur une sortie détruite (avertissement NG0953 d'Angular).
+- Tailles : base `@dzgrid/dom` 25 800 → 25 700 (mesuré 25 653) ; K.8 91 831 / 92 000 ; `@dzgrid/dom/theme` 2 513 / 2 530 ;
+  appli Angular réelle 102 925 / 103 050 (ligne laissée).
 
-## Infobulles par colonne en une ligne, formes toutes faites, `morph` (ton « ok » du 2026-11-14)
+## Deux corrections avant publication (ta réponse « oui », 2026-11-14)
 
-- **Par colonne, sans fonction** (avec `tooltips()`) : `tooltip: true` (le texte affiché de la cellule), `tooltip: {
-  when: 'truncated' }` (seulement quand il est coupé), `tooltip: false` (aucune), ou les options `{ text, tone, shape,
-  animation, placement, delayMs, maxWidth, style, when, content }` ; `content(valeur, ligne)` par cellule par-dessus.
-  Fusion : la grille ← la colonne ← la cellule. `tooltips: { cells: 'truncated' }` pour toute la grille.
-  `headerTooltip` prend le même objet. `style` n'écrit que des variables CSS. Le focus clavier ouvre comme avant.
-- **Formes** `bubble` (bulle de BD, pointe courbe comprise, tournée par côté et en arabe), `ticket` (coins entaillés),
-  `pill` (bouts ronds) : CSS seul, couleurs du ton, bord et ombre autour de tout le contour.
-- **`morph`** : une petite pilule au côté de l'ancre, la flèche déjà là, grandit jusqu'à la bulle (320 ms), les
-  mots dès son premier tiers ; fermeture inverse en 180 ms. Aussi vive que ta bulle GSAP (mesurée côte à côte) : sa
-  première image juste après le délai. CSS seul (un `clip-path`), aucune mise en page par image, durées en
-  variables, rien ne bouge en mouvement réduit. Comparé à ta capture : même déroulé (pilule → forme → mots).
-- **À décider** : `check:api` signale `ColumnDef` (`tooltip` accepte maintenant `true` / `false` / un objet,
-  `headerTooltip` un objet) — c'est un élargissement d'entrée, mais du code qui *appelle* `def.tooltip` doit vérifier
-  que c'est une fonction ; et les lignes de taille `@dzgrid/dom/tooltip` (mesuré 3 353 / 2 800) et `tooltips.css`
-  (2 843 / 2 000, sans couche 2 798 / 1 950) au-delà de +2 % (proposé : mesure + 10 %, 3 700, 3 150, 3 100).
-- Tailles dans la règle : base `@dzgrid/dom` 25 800 (mesuré 25 784), `/popover` 3 519 (3 503) ; K.8 91 972 / 92 000.
-
-## Trois corrections avant publication (ta réponse « oui », 2026-11-14)
-
-Chacune : une ligne de fiche d'abord (`tooltips-popovers.md` 18–19, `presentation-settings.md` 40), un test écrit à la
-main et rouge d'abord, la matrice navigateurs étendue.
-
-1. **Une infobulle en attente n'apparaît plus en retard.** Un clic sur le déclencheur, le déclencheur désactivé, une
-   bulle ouverte depuis lui, Échap ou le focus qui part n'annulaient pas l'affichage en attente : l'infobulle sortait
-   ensuite, par-dessus la bulle ouverte. Cause : l'annulation ne visait qu'une infobulle déjà affichée. Maintenant :
-   appui, clic, Échap, focus qui part, défilement, `disabled` (l'option, `dzTooltipDisabled`, ou l'attribut à la fin du
-   délai), déclencheur retiré, bulle ouverte depuis le déclencheur ou depuis l'intérieur (une cellule qui le contient)
-   l'annulent ; une bulle qui s'ouvre cache aussi l'infobulle affichée sur son déclencheur ou sa cellule. `tooltip()`,
-   les infobulles des cellules et des titres de la grille (avec ou sans `tooltips()`), `[dzTooltip]`. Aucune API
-   nouvelle.
-2. **Infobulles et bulles hors grille en mode sombre.** Elles restaient claires : placées en fin de page, sans
-   `color-scheme`, leurs `light-dark()` prenaient le clair. Elles prennent la règle de la grille
-   (`color-scheme: var(--tz-color-scheme, light dark)`, injectée avec elles : copies en couche et sans couche pareil),
-   héritent du mode de la page (un changement pendant qu'une bulle est ouverte est suivi tout de suite) et reprennent
-   celui d'un conteneur à chaque ouverture. Tailwind 3 `.dark` : la correspondance de `tailwind3.css` suffit ; ta propre
-   classe : `.my-dark { --tz-color-scheme: dark }` (recette dans le guide, en et fr).
-3. **`--dzg-pager-button-disabled-border`** (défaut : le bord du bouton, comme aujourd'hui), et pour la symétrie
+1. **Une infobulle en attente n'apparaît plus en retard** (`tooltips.md` 12) : un appui sur une cellule ou un titre,
+   Échap ou le focus qui quitte la grille annulent l'affichage encore en attente ; un doigt seul n'en ouvre jamais.
+   Aucune API nouvelle.
+2. **`--dzg-pager-button-disabled-border`** (défaut : le bord du bouton, comme aujourd'hui), et pour la symétrie
    `--dzg-pager-button-hover-border` / `-active-border` (`pager.css`). La liste « Lignes par page » n'est jamais
    désactivée : pas de variable pour cet état. Tableau des variables du site à jour (en, fr).
 
-Tailles : base `@dzgrid/dom` 25 704 → 25 730 (+0,1 %, mesuré 25 724 ; le reste est dans `/tooltip` 2 753 / 2 800 et
-`/popover` 3 350 / 3 450) ; `pager.css` 760 → 775 (+2 %, mesuré 767) ; K.8 91 918 / 92 000 ; appli Angular réelle 103 000 → 103 050 (+0,05 %,
-mesuré 103 014).
+Tailles : `pager.css` 760 → 775 (+2 %, mesuré 767).
 
 ## Icônes de la pagination (ta demande du 2026-11-14)
 
@@ -113,8 +76,8 @@ mesuré 103 014).
   icônes SVG, nettoyées comme les autres. Chacune dessinée seulement si tu la donnes (sinon le caractère d'avant), dans
   la couleur du bouton (grisée quand il ne peut pas agir), à la taille de son texte ou `--dzg-icon-size`, inversée en
   arabe (dessine-les pour la gauche à droite). Les noms des boutons ne changent pas.
-- Tailles : `@dzgrid/dom/theme` 2 510 → 2 530 (+0,8 %, mesuré 2 519 : les quatre clés) ; le dessin est dans le CSS de
-  `pagination()` (3 366 / 3 450) ; K.8 91 873 / 92 000 ; appli Angular réelle 102 700 → 103 000 (+0,3 %, mesuré 102 965).
+- Tailles : `@dzgrid/dom/theme` 2 499 → 2 530 (mesuré 2 513, les infobulles riches parties : les quatre clés) ; le
+  dessin est dans le CSS de `pagination()` (3 366 / 3 450).
 
 ## Ce que la relecture a corrigé
 

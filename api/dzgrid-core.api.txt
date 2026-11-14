@@ -13,6 +13,7 @@
 # history: owner 2026-11-10: baseline extended to every published entry
 # history: owner 2026-11-12 « 1 ok … on agrandit »: the header floor (column-resize.md 21–24); additions only — @dzgrid/core#ColumnModel
 # history: owner 2026-11-13: autoColumns generic over the column type (default ColumnDef) — 1.12.0 — @dzgrid/core/auto-columns#AutoColumnsOptions, @dzgrid/core/auto-columns#MergedColumn, @dzgrid/core/auto-columns#autoColumns
+# history: owner 2026-11-14 « A »: a column's tooltip in one line (true, false, a function, ColumnTooltip options) and headerTooltip as words or a TooltipSpec — inputs widened, 1.12.0 — @dzgrid/core#ColumnDef, @dzgrid/core#ColumnTooltip, @dzgrid/core#TooltipSpec, @dzgrid/core#TooltipPlacement
 
 @ @dzgrid/core
 ## AbortHandle
@@ -194,8 +195,8 @@
           readonly headerClass?: string;
           readonly data?: Readonly<Record<string, unknown>>;
       };
-      readonly headerTooltip?: string;
-      readonly tooltip?: (value: V | null, row: Readonly<T>, context: unknown) => string | null;
+      readonly headerTooltip?: string | TooltipSpec;
+      readonly tooltip?: ((value: V | null, row: Readonly<T>, context: unknown) => string | TooltipSpec | null) | boolean | ColumnTooltip<T, V>;
       readonly merge?: true | ((a: SpanCtx<T>, b: SpanCtx<T>) => boolean) | {
           readonly same?: (a: SpanCtx<T>, b: SpanCtx<T>) => boolean;
           readonly within?: readonly string[];
@@ -1636,6 +1637,25 @@
       readonly from: InstantMs;
       readonly to: InstantMs;
   };
+## ColumnTooltip
+  export interface ColumnTooltip<T, V = unknown> extends TooltipSpec {
+      readonly when?: 'always' | 'truncated';
+      readonly content?: (value: V | null, row: Readonly<T>, context: unknown) => string | TooltipSpec | null;
+  }
+## TooltipSpec
+  export interface TooltipSpec {
+      readonly text?: string;
+      readonly html?: string;
+      readonly tone?: 'info' | 'neutral' | 'success' | 'warning' | 'danger';
+      readonly placement?: TooltipPlacement;
+      readonly animation?: 'fade' | 'scale' | 'slide' | 'pop' | 'rise' | 'morph' | 'none';
+      readonly shape?: 'bubble' | 'ticket' | 'pill' | (string & {});
+      readonly delayMs?: number;
+      readonly maxWidth?: number | string;
+      readonly style?: Readonly<Record<`--${string}`, string>>;
+  }
+## TooltipPlacement
+  export type TooltipPlacement = 'auto' | `${'top' | 'bottom' | 'start' | 'end' | 'left' | 'right'}${'' | '-start' | '-end'}`;
 
 @ @dzgrid/core/server
 ## AbortHandle

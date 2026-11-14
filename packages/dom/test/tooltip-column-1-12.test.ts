@@ -1,14 +1,13 @@
-// A tooltip per column in one line, per cell over it, only when cut; ready-made shapes and the morph preset as marks
-// on the bubble (docs/behaviors/tooltips-popovers.md 7, 20–24; owner 2026-11-14). Expectations written by hand; the
-// look and the motion are checked in real browsers by scripts/browser-1-12.mjs.
+// A tooltip per column in one line, per cell over it, only when cut; a look the grid's bubble leaves to a feature; the
+// seam where a feature takes the tooltips over (docs/behaviors/tooltips.md 10, 11, 13; owner 2026-11-14: the rich
+// bubbles moved to DzTooltip, `@dztooltip/dzgrid` the feature). Expectations written by hand.
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
 import { dataKey, type ColumnDef, type GridEvent, type Problem } from '@dzgrid/core';
 import { createGrid, type GridInstance } from '../src/grid.js';
 import type { Geometry, ViewportBox } from '../src/render/measure.js';
 import type { GridSettings } from '../src/settings.js';
-import { tooltip, tooltips } from '../src/tooltip.js';
-import { popover } from '../src/popover.js';
 import type { GridFeature } from '../src/features.js';
+import type { TooltipSeam, TooltipShow } from '../src/render/tooltip.js';
 import { EN } from '../src/locales/en.js';
 
 type R = { id: string; n: number; name: string };
@@ -24,7 +23,7 @@ afterEach(() => {
 
 const ROWS: R[] = Array.from({ length: 10 }, (_, i) => ({ id: `r${i}`, n: 1000 * i + 0.5, name: `Name ${i}` }));
 
-function make(columns: ColumnDef<R, any>[], settings: Partial<GridSettings<R>> = {}, extra: GridFeature[] = [tooltips()]) {
+function make(columns: ColumnDef<R, any>[], settings: Partial<GridSettings<R>> = {}, extra: GridFeature[] = []) {
   const box: { -readonly [K in keyof ViewportBox]: ViewportBox[K] } = { block: 320, inline: 800, scrollTop: 0, scrollInline: 0 };
   const geometry: Geometry = { read: () => ({ ...box }), writeScrollTop: (px) => { box.scrollTop = px; }, writeScrollInline: (px) => { box.scrollInline = px; } };
   const host = document.createElement('div');
@@ -52,7 +51,7 @@ const cut = (el: HTMLElement): void => {
 const N: ColumnDef<R, any> = { id: 'n', header: 'N', type: 'number' };
 const NAME: ColumnDef<R, any> = { id: 'name', header: 'Name' };
 
-describe('a column in one line (with tooltips())', () => {
+describe('a column in one line (10)', () => {
   it('tooltip: true — the cell\'s text as displayed (the number formatted), always', () => {
     const { tip, cell, over } = make([{ ...N, tooltip: true }], { tooltips: { delayMs: 0 } });
     over(cell(3, 'n'));
@@ -89,78 +88,55 @@ describe('a column in one line (with tooltips())', () => {
     expect(tip.hidden).toBe(true);
   });
 
-  it('cells: false silences a column\'s object too', () => {
-    const { tip, cell, over } = make([{ ...NAME, tooltip: true }], { tooltips: { cells: false, delayMs: 0 } });
+  it('cells: false silences a column\'s true and its function', () => {
+    const { tip, cell, over } = make([{ ...NAME, tooltip: true }, { ...N, tooltip: () => 'Fn' }], { tooltips: { cells: false, delayMs: 0 } });
     over(cell(1, 'name'));
     expect(tip.hidden).toBe(true);
-  });
-
-  it('fixed options: text, tone, shape, animation, placement written on the bubble', () => {
-    const { tip, cell, over } = make([{ ...NAME, tooltip: { text: 'A person', tone: 'neutral', shape: 'bubble', animation: 'morph', placement: 'end' } }], { tooltips: { delayMs: 0 } });
-    over(cell(1, 'name'));
-    expect(tip.textContent).toBe('A person');
-    expect([tip.dataset['tone'], tip.dataset['shape'], tip.dataset['animation'], tip.dataset['side']]).toEqual(['neutral', 'bubble', 'morph', 'inline-end']);
-    // A named shape draws no SVG (CSS draws it).
-    expect(tip.querySelector('svg')).toBeNull();
-  });
-
-  // Owner 2026-11-14 (« elle prend du temps pour s'afficher »): the browser starts a bubble's opening when it is shown
-  // (showing it reads its style), so its preset, shape and variables are written before — the grid's `pop` was shown
-  // first, the column's `morph` a moment later, its fade then starting without the morph's lead.
-  it('dressed (the column\'s preset, shape) before it is shown, not after', () => {
-    const { tip, cell, over } = make([{ ...NAME, tooltip: { shape: 'bubble', animation: 'morph' } }], { tooltips: { delayMs: 0, animation: 'pop' } });
-    const seen: string[] = [];
-    new MutationObserver((ms) => { for (const m of ms) seen.push(m.attributeName === 'hidden' ? `hidden:${tip.hidden}` : `${m.attributeName}:${tip.getAttribute(m.attributeName!)}`); })
-      .observe(tip, { attributes: true, attributeFilter: ['hidden', 'data-animation', 'data-shape'] });
-    over(cell(1, 'name'));
-    return Promise.resolve().then(() => {
-      const shown = seen.indexOf('hidden:false');
-      expect(shown).toBeGreaterThan(-1);
-      expect(seen.slice(shown + 1).filter((s) => !s.startsWith('hidden'))).toEqual([]);
-      expect([tip.dataset['animation'], tip.dataset['shape']]).toEqual(['morph', 'bubble']);
-    });
-  });
-
-  it('merge: the grid\'s defaults ← the column\'s object ← the cell\'s answer; text left out → the displayed text', () => {
-    const { tip, cell, over } = make([{
-      ...N,
-      tooltip: { tone: 'warning', shape: 'pill', content: (v: number | null) => (v !== null && v > 4000 ? { tone: 'danger', text: 'Big' } : { animation: 'fade' }) },
-    }, { ...NAME, tooltip: true }], { tooltips: { delayMs: 0, shape: 'ticket', animation: 'pop', tone: 'success' } });
-    over(cell(6, 'n'));
-    expect([tip.textContent, tip.dataset['tone'], tip.dataset['shape'], tip.dataset['animation']]).toEqual(['Big', 'danger', 'pill', 'pop']);
-    over(cell(2, 'n'));
-    expect([tip.textContent, tip.dataset['tone'], tip.dataset['shape'], tip.dataset['animation']]).toEqual(['2,000.5', 'warning', 'pill', 'fade']);
-    // A column that says nothing of its look takes the grid's.
-    over(cell(2, 'name'));
-    expect([tip.textContent, tip.dataset['tone'], tip.dataset['shape'], tip.dataset['animation']]).toEqual(['Name 2', 'success', 'ticket', 'pop']);
-  });
-
-  it('a cell answering null shows nothing; a throw is reported and shows nothing', () => {
-    const err = new Error('boom');
-    const { tip, cell, over, problems } = make([{ ...N, tooltip: { tone: 'info', content: (v: number | null) => { if (v !== null && v > 5000) throw err; return null; } } }], { tooltips: { delayMs: 0 } });
     over(cell(1, 'n'));
     expect(tip.hidden).toBe(true);
-    over(cell(7, 'n'));
-    expect(tip.hidden).toBe(true);
-    void problems;
   });
 
-  it('style: only custom properties, written while this column\'s tooltip shows; maxWidth caps it', () => {
+  it('options: its text; the cell\'s answer over them (words, a spec, null); a throw reported, nothing shown', () => {
+    const err = new Error('boom');
+    const reported: unknown[] = [];
+    (window as Window & { reportError?: (e: unknown) => void }).reportError = (e) => reported.push(e);
     const { tip, cell, over } = make([
-      { ...NAME, tooltip: { maxWidth: 240, style: { '--dzg-tooltip-info-bg': 'teal', color: 'red' } as never } }, // `color`: not a variable, the type refuses it; checked ignored
-      { ...N, tooltip: { maxWidth: '12rem' } },
+      { ...NAME, tooltip: { text: 'A person' } },
+      { ...N, tooltip: { content: (v: number | null) => { if (v !== null && v > 8000) throw err; return v !== null && v > 4000 ? { text: 'Big' } : v !== null && v > 2000 ? 'Mid' : null; } } },
     ], { tooltips: { delayMs: 0 } });
     over(cell(1, 'name'));
-    expect(tip.style.getPropertyValue('--dzg-tooltip-info-bg')).toBe('teal');
-    expect(tip.style.getPropertyValue('color')).toBe('');
-    expect(tip.style.getPropertyValue('max-inline-size')).toBe('240px');
+    expect(tip.textContent).toBe('A person');
+    over(cell(6, 'n'));
+    expect(tip.textContent).toBe('Big');
+    over(cell(3, 'n'));
+    expect(tip.textContent).toBe('Mid');
     over(cell(1, 'n'));
-    expect(tip.style.getPropertyValue('--dzg-tooltip-info-bg')).toBe('');
-    expect(tip.style.getPropertyValue('max-inline-size')).toBe('12rem');
+    vi.advanceTimersByTime(1000);
+    expect(tip.hidden).toBe(true);
+    over(cell(9, 'n'));
+    vi.advanceTimersByTime(1000);
+    expect(tip.hidden).toBe(true);
+    expect(reported).toEqual([err]);
+    delete (window as { reportError?: unknown }).reportError;
+  });
+
+  it('options with content: a cell\'s answer without words keeps the displayed text', () => {
+    const { tip, cell, over } = make([{ ...N, tooltip: { content: (v: number | null) => (v !== null && v > 4000 ? { text: 'Big' } : { delayMs: 0 }) } }], { tooltips: { delayMs: 0 } });
+    over(cell(6, 'n'));
+    expect(tip.textContent).toBe('Big');
+    over(cell(2, 'n'));
+    expect(tip.textContent).toBe('2,000.5');
+  });
+
+  it('a function may answer a spec: its words shown (its look is a feature\'s)', () => {
+    const { tip, cell, over } = make([{ ...N, tooltip: (v: number | null) => ({ text: `Value ${v}`, tone: 'danger' }) }], { tooltips: { delayMs: 0 } });
+    over(cell(2, 'n'));
+    expect(tip.textContent).toBe('Value 2000.5');
+    expect(tip.hasAttribute('data-tone')).toBe(false);
   });
 
   it('delayMs per column on hover; a keyboard focus on the cell opens it at once', () => {
-    const { g, tip, cell, over } = make([{ ...NAME, tooltip: { delayMs: 50, shape: 'bubble', animation: 'morph' } }, { ...N, tooltip: true }], { tooltips: { delayMs: 800 } });
+    const { g, tip, cell, over } = make([{ ...NAME, tooltip: { delayMs: 50 } }, { ...N, tooltip: true }], { tooltips: { delayMs: 800 } });
     over(cell(1, 'name'));
     vi.advanceTimersByTime(49);
     expect(tip.hidden).toBe(true);
@@ -171,91 +147,146 @@ describe('a column in one line (with tooltips())', () => {
     expect(tip.textContent).toBe('Name 1');
     vi.advanceTimersByTime(100);
     expect(tip.textContent).toBe('1,000.5');
-    // The keyboard: at once, with the column's look.
     g.api.focusCell(dataKey('r2')!, 'name');
     document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
     expect(tip.hidden).toBe(false);
-    expect([tip.textContent, tip.dataset['shape'], tip.dataset['animation']]).toEqual(['Name 3', 'bubble', 'morph']);
+    expect(tip.textContent).toBe('Name 3');
     expect(cell(3, 'name').getAttribute('aria-describedby')).toBe(tip.id);
   });
-});
 
-describe('headerTooltip as a spec', () => {
-  it('text and tone without tooltips(); its shape and animation with it', () => {
-    const cols = [{ ...NAME, headerTooltip: { text: 'Who', tone: 'success', shape: 'pill', animation: 'morph' } } as ColumnDef<R, any>];
-    const a = make(cols, { tooltips: { delayMs: 0 } }, []);
-    a.over(a.head('name'));
-    expect([a.tip.textContent, a.tip.dataset['tone']]).toEqual(['Who', 'success']);
-    expect(a.tip.hasAttribute('data-shape')).toBe(false);
-    a.g.destroy();
-    const b = make(cols, { tooltips: { delayMs: 0 } });
-    b.over(b.head('name'));
-    expect([b.tip.textContent, b.tip.dataset['tone'], b.tip.dataset['shape'], b.tip.dataset['animation']]).toEqual(['Who', 'success', 'pill', 'morph']);
+  it('a touch alone shows none (12)', () => {
+    const { tip, cell } = make([{ ...NAME, tooltip: true }], { tooltips: { delayMs: 0 } });
+    cell(1, 'name').dispatchEvent(new PointerEvent('pointerover', { bubbles: true, pointerType: 'touch' }));
+    expect(tip.hidden).toBe(true);
   });
 });
 
-describe('without tooltips()', () => {
-  it('true, an object and cells: \'truncated\' are told once each (missing-feature) and show nothing; a function still works', () => {
-    const { tip, cell, over, problems } = make([{ ...NAME, tooltip: true }, { ...N, tooltip: { tone: 'danger' } }, { id: 'f', header: 'F', value: (r: R) => r.n, tooltip: () => 'Fn' }], { tooltips: { cells: 'truncated', delayMs: 0 } }, []);
+describe('headerTooltip as a spec (10)', () => {
+  it('its words', () => {
+    const { tip, head, over } = make([{ ...NAME, headerTooltip: { text: 'Who' } }], { tooltips: { delayMs: 0 } });
+    over(head('name'));
+    expect(tip.textContent).toBe('Who');
+  });
+});
+
+describe('a look without a feature that draws the tooltips (11)', () => {
+  it('told once each (missing-feature), the words shown; HTML: its text, or nothing; true and a function say nothing', () => {
+    const { tip, cell, head, over, problems } = make([
+      { ...NAME, tooltip: { tone: 'danger', html: '<b>Ann</b>', text: 'Ann' }, headerTooltip: { text: 'Who', placement: 'top' } },
+      { ...N, tooltip: { html: '<b>Only HTML</b>' } },
+      { id: 'f', header: 'F', value: (r: R) => r.n, tooltip: () => 'Fn' },
+      { id: 't', header: 'T', value: (r: R) => r.name, tooltip: true },
+    ], { tooltips: { delayMs: 0 } });
     expect(problems().filter((p) => p.detail === 'tooltips')).toEqual([
-      { code: 'missing-feature', severity: 'warning', path: 'settings.tooltips', detail: 'tooltips' },
       { code: 'missing-feature', severity: 'warning', path: 'columns[0].tooltip', detail: 'tooltips' },
+      { code: 'missing-feature', severity: 'warning', path: 'columns[0].headerTooltip', detail: 'tooltips' },
       { code: 'missing-feature', severity: 'warning', path: 'columns[1].tooltip', detail: 'tooltips' },
     ]);
-    cut(cell(1, 'name'));
     over(cell(1, 'name'));
+    expect([tip.textContent, tip.querySelector('b')]).toEqual(['Ann', null]);
+    over(head('name'));
+    expect(tip.textContent).toBe('Who');
+    over(cell(1, 'n'));
+    vi.advanceTimersByTime(1000);
     expect(tip.hidden).toBe(true);
     over(cell(1, 'f'));
     expect(tip.textContent).toBe('Fn');
   });
 });
 
-describe('the page\'s tooltip and popover: the same names', () => {
-  it('a named shape, morph, style and maxWidth on the page\'s bubble; when: \'truncated\'', () => {
-    const b = document.createElement('button');
-    b.textContent = 'A long label';
-    document.body.append(b);
-    const h = tooltip(b, { content: 'Hi', shape: 'bubble', animation: 'morph', style: { '--dzg-tooltip-bubble-radius': '1rem' }, maxWidth: 200 });
-    h.show();
-    const el = document.querySelector<HTMLElement>('.dzg-tooltip.dzg-float')!;
-    expect([el.dataset['shape'], el.dataset['animation'], el.style.getPropertyValue('--dzg-tooltip-bubble-radius'), el.style.getPropertyValue('max-inline-size')]).toEqual(['bubble', 'morph', '1rem', '200px']);
-    expect(el.querySelector('svg')).toBeNull();
-    // A path is still an app's shape (data-shape empty, its SVG).
-    h.update({ shape: 'M0 0 H100 V100 H0 Z' });
-    expect(el.getAttribute('data-shape')).toBe('');
-    expect(el.querySelector('svg.dzg-tip-shape')).not.toBeNull();
-    h.update({ shape: 'ticket' });
-    expect([el.dataset['shape'], el.querySelector('svg')]).toEqual(['ticket', null]);
-    h.hide();
-    vi.runAllTimers();
-    h.update({ when: 'truncated' });
-    h.show();
-    expect(h.shown).toBe(false);
-    cut(b);
-    h.show();
-    expect(h.shown).toBe(true);
-    h.destroy();
+describe('the seam: a feature takes the tooltips over (13)', () => {
+  /** A feature drawing the tooltips, recording what the grid tells it. */
+  function drawing(over: Partial<TooltipSeam> = {}) {
+    const log: string[] = [];
+    let last: TooltipShow | null = null;
+    let finish: (() => void) | null = null;
+    const seam: TooltipSeam = {
+      show(s) {
+        last = s;
+        log.push(`show:${s.tip.text}:${s.tip.tone ?? '-'}:${s.dir}`);
+        s.el.hidden = false;
+      },
+      hide(el, done) {
+        log.push('hide');
+        finish = () => { el.hidden = true; done(); };
+        return () => log.push('cancel');
+      },
+      ...over,
+    };
+    const feature: GridFeature = { id: 'tooltips', setup: () => ({ tooltips: seam, destroy: () => {} }) };
+    return { feature, log, last: () => last, finish: () => finish?.() };
+  }
+
+  it('the grid decides when and what, the feature shows and hides: the filled element, its anchor, the tip with its look, the direction', () => {
+    const d = drawing();
+    const { tip, cell, over, problems } = make([{ ...NAME, tooltip: { tone: 'danger', placement: 'top' } }], { tooltips: { delayMs: 0 }, direction: 'rtl' }, [d.feature]);
+    // Its look is the feature's: no warning.
+    expect(problems().filter((p) => p.detail === 'tooltips')).toEqual([]);
+    over(cell(1, 'name'));
+    expect(d.log).toEqual(['show:Name 1:danger:rtl']);
+    const s = d.last()!;
+    expect([s.el, s.anchor, s.tip.placement, s.el.textContent]).toEqual([tip, cell(1, 'name'), 'top', 'Name 1']);
+    // Described by the grid; not placed by it (no side, no inset written).
+    expect(cell(1, 'name').getAttribute('aria-describedby')).toBe(tip.id);
+    expect([tip.hasAttribute('data-side'), tip.style.getPropertyValue('inset-block-start')]).toEqual([false, '']);
+    // Escape: the feature's closing; the element stays until it says done.
+    cell(1, 'name').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(d.log).toEqual(['show:Name 1:danger:rtl', 'hide']);
+    expect(cell(1, 'name').getAttribute('aria-describedby')).toBeNull();
+    d.finish();
+    expect(tip.hidden).toBe(true);
   });
 
-  it('a popover takes a named shape and morph', () => {
-    const t = document.createElement('button');
-    document.body.append(t);
-    const p = popover(t, { content: 'Body', shape: 'bubble', animation: 'morph' });
-    p.open();
-    expect([p.el!.dataset['shape'], p.el!.dataset['animation']]).toEqual(['bubble', 'morph']);
-    p.destroy();
-    // An app's animation: `custom` written before it is shown (no CSS fade started first).
-    const seen: string[] = [];
-    new MutationObserver((ms) => { for (const m of ms) { const el = m.target as HTMLElement; if (el.classList.contains('dzg-popover')) seen.push(m.attributeName === 'hidden' ? `hidden:${el.hidden}` : `${m.attributeName}:${m.oldValue}>${el.getAttribute(m.attributeName!)}`); } })
-      .observe(document.body, { subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['hidden', 'data-animation'] });
-    const q = popover(t, { content: 'Body', animation: 'scale', animate: () => undefined });
-    q.open();
-    return Promise.resolve().then(() => {
-      const shown = seen.lastIndexOf('hidden:false');
-      expect(shown).toBeGreaterThan(-1);
-      expect(seen.slice(shown + 1)).toEqual([]);
-      expect(q.el!.dataset['animation']).toBe('custom');
-      q.destroy();
+  it('shown again during its closing: the closing cancelled; its own hide given to the feature', () => {
+    const d = drawing();
+    const { cell, over } = make([{ ...NAME, tooltip: true }], { tooltips: { delayMs: 0 } }, [d.feature]);
+    over(cell(1, 'name'));
+    d.last()!.hide();
+    over(cell(2, 'name'));
+    expect(d.log).toEqual(['show:Name 1:-:ltr', 'hide', 'cancel', 'show:Name 2:-:ltr']);
+  });
+
+  it('targets and tipFor: what else the pointer follows, a target answered first; undefined leaves it to the grid', () => {
+    const d = drawing({
+      targets: () => '.dzg-hcell,.dzg-cell,.extra',
+      tipFor: (t) => (t.classList.contains('extra') ? { text: 'Mine', said: true } : t.closest('[data-col="n"]') ? null : undefined),
     });
+    const { host, cell, over } = make([{ ...NAME, tooltip: true }, { ...N, tooltip: true }], { tooltips: { delayMs: 0 } }, [d.feature]);
+    const x = cell(1, 'name').appendChild(document.createElement('i'));
+    x.className = 'extra';
+    over(x);
+    expect(d.log).toEqual(['show:Mine:-:ltr']);
+    // Its name already: not described twice.
+    expect(x.getAttribute('aria-describedby')).toBeNull();
+    over(cell(2, 'name'));
+    over(cell(2, 'n'));
+    vi.advanceTimersByTime(1000);
+    expect(d.log).toEqual(['show:Mine:-:ltr', 'show:Name 2:-:ltr', 'hide']);
+    void host;
+  });
+
+  it('ok false at the end of the delay drops the show; html: the feature\'s cleaner draws a column\'s HTML', () => {
+    let ok = false;
+    const d = drawing({
+      ok: () => ok,
+      html: (h, doc) => { const f = doc.createDocumentFragment(); const b = f.appendChild(doc.createElement('b')); b.textContent = h.replace(/<[^>]*>/g, ''); return f; },
+    });
+    const { tip, cell, over } = make([{ ...NAME, tooltip: { html: '<b>Bold</b>' } }], { tooltips: { delayMs: 100 } }, [d.feature]);
+    over(cell(1, 'name'));
+    vi.advanceTimersByTime(200);
+    expect(d.log).toEqual([]);
+    ok = true;
+    over(cell(2, 'name'));
+    vi.advanceTimersByTime(200);
+    expect(d.log).toEqual(['show:Bold:-:ltr']);
+    expect(tip.querySelector('b')!.textContent).toBe('Bold');
+  });
+
+  it('the first feature giving a seam wins', () => {
+    const a = drawing();
+    const b = drawing();
+    const { cell, over } = make([{ ...NAME, tooltip: true }], { tooltips: { delayMs: 0 } }, [a.feature, { ...b.feature, id: 'other' }]);
+    over(cell(1, 'name'));
+    expect([a.log, b.log]).toEqual([['show:Name 1:-:ltr'], []]);
   });
 });

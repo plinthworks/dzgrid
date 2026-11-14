@@ -26,14 +26,6 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
-    },
-    "./tooltip": {
-      "types": "./tooltip/index.ts",
-      "default": "./tooltip/index.ts"
-    },
-    "./popover": {
-      "types": "./popover/index.ts",
-      "default": "./popover/index.ts"
     }
   }
 }

@@ -321,14 +321,13 @@ describe('1.12.0, the five packages', () => {
   it('export pager.css (1.12.0, presentation-settings.md 39–40), built like the others', () => {
     const theme = pkg('theme');
     for (const f of ['pager.css', 'pager.unlayered.css', 'pager.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
-    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'buttons', 'pager'[,\]]/);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'buttons', 'pager'\]/);
   });
 
-  it('export tooltips.css (1.12.0, tooltips-popovers.md), built like the others; the new DOM and Angular entries shipped', () => {
+  it('ship no rich tooltip entry (owner 2026-11-14: moved to @dztooltip, never published)', () => {
     const theme = pkg('theme');
-    for (const f of ['tooltips.css', 'tooltips.unlayered.css', 'tooltips.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
-    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'pager', 'tooltips'\]/);
-    for (const e of ['./tooltip', './popover']) expect([pkg('dom').exports[e], pkg('angular').exports[e]].map(Boolean), e).toEqual([true, true]);
+    for (const f of ['tooltips.css', 'tooltips.unlayered.css', 'tooltips.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([undefined, false]);
+    for (const e of ['./tooltip', './popover']) expect([pkg('dom').exports[e], pkg('angular').exports[e]], e).toEqual([undefined, undefined]);
   });
 
   it('export the Phase 9 filters panel (@dzgrid/dom/filters-panel), its -filters-panel texts and filters-panel.css, built like the others', () => {

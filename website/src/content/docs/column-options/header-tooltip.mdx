@@ -14,9 +14,8 @@ A tooltip on the header, to say more than the title can.
 
 It shows when the pointer rests on the header (after the grid's [`tooltips`](../../settings/tooltips/)
 delay) and as soon as the keyboard focus reaches it. Give it already translated. To draw it yourself, name a part in
-[`ui`](../ui/)`.tooltip`. It may also be the cells' options object (1.12.0): `{ text, tone }` work alone; `shape`,
-`animation`, `placement`, `delayMs`, `maxWidth` and `style` need [`tooltips()`](../../features/tooltips/) —
-`headerTooltip: { text: 'Counted each March', tone: 'success', shape: 'pill' }`.
+[`ui`](../ui/)`.tooltip`. It may also be options (1.12.0), `{ text }`: their words show; a look (`tone`,
+`placement`, …) is drawn by [DzTooltip](../../guides/tooltips-popovers/)'s bridge.
 
 ## Example
 

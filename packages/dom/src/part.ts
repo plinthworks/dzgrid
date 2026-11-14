@@ -364,6 +364,9 @@ const leaves = (t: readonly ColumnOrGroup<unknown>[]): ColumnDef<unknown>[] => t
  * (`columns[i].ui.header`; `header.filterBox` also without `filters()`), and paged rows without `pagination()`
  * (`settings.pagination`, step 17): told once, a warning each, the detail naming the feature.
  */
+/** A tooltip's options that only a feature drawing the tooltips honours (tooltips.md 11). */
+const looks = (t: unknown): boolean => typeof t == 'object' && !!t && 'tone placement animation shape style maxWidth html'.split(' ').some((k) => k in t);
+
 export function unslotted(s: GridSettings<unknown>, paged: unknown): Problem[] {
   const has = new Set(s.features?.map((f) => f.id));
   const missing = (path: string, detail?: string, severity: Problem['severity'] = 'warning'): Problem[] => (detail && !has.has(detail) ? [{ code: 'missing-feature', severity, path, detail }] : []);
@@ -373,8 +376,6 @@ export function unslotted(s: GridSettings<unknown>, paged: unknown): Problem[] {
     // The theme object and the app's icons (presentation-settings.md 23).
     ...(s.theme ? missing('settings.theme', 'theme') : []),
     ...(s.icons ? missing('settings.icons', 'theme') : []),
-    // The app's animation, the header buttons' names, a placement, a shape, variables, a width and the cells cut need `tooltips()` (1.12.0, tooltips-popovers.md).
-    ...(s.tooltips?.animate || s.tooltips?.header || s.tooltips?.placement || s.tooltips?.shape || s.tooltips?.style || s.tooltips?.maxWidth || typeof s.tooltips?.cells == 'string' ? missing('settings.tooltips', 'tooltips') : []),
     // A selection rule without its feature (step 21): an error, the grid selects nothing (fail closed).
     ...(s.selection?.canSelect ? missing('settings.selection.canSelect', 'rules', 'error') : []),
     // An edit option with no feature that edits (1.11.0): the column stayed read-only unsaid. Once, its first column;
@@ -387,8 +388,9 @@ export function unslotted(s: GridSettings<unknown>, paged: unknown): Problem[] {
       ...(d?.headerVertical ? missing(`columns[${i}].headerVertical`, 'vertical-headers') : []),
       ...(d?.headerWrap ? missing(`columns[${i}].headerWrap`, 'wrapped-headers') : []),
       ...(d?.collapsePriority !== undefined ? missing(`columns[${i}].collapsePriority`, 'responsive') : []),
-      // A column's tooltip in one line (`true`, options; tooltips-popovers.md 24).
-      ...(d?.tooltip && typeof d.tooltip != 'function' ? missing(`columns[${i}].tooltip`, 'tooltips') : []),
+      // A column's tooltip look (tone, placement, …) needs a feature that draws the tooltips (1.12.0, tooltips.md 11).
+      ...(looks(d?.tooltip) ? missing(`columns[${i}].tooltip`, 'tooltips') : []),
+      ...(looks(d?.headerTooltip) ? missing(`columns[${i}].headerTooltip`, 'tooltips') : []),
       ...Object.keys(d?.ui ?? {}).flatMap((k): Problem[] => {
         const at = `columns[${i}].ui.${k}`;
         const v = d!.ui![k as 'header'];

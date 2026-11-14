@@ -103,7 +103,7 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
     if (e.isComposing || e.keyCode === 229 || e.defaultPrevented || (e.target as Element).closest('.dzg') !== el.root) return;
     g.keyboardAt = g.now();
     if (e.key === 'Escape') {
-      // A show still waiting dropped (tooltips-popovers.md 18); a shown one hidden, the key taken.
+      // A show still waiting dropped (tooltips.md 12); a shown one hidden, the key taken.
       g.tip.drop();
       if (!g.el.tooltip.hidden) return g.tip.hide();
     }

@@ -1,10 +1,9 @@
 import type { OperationsInput, PageOptions, SourceBinding } from '@dzgrid/core';
-import type { AnyFilterKind, ColumnOrGroup, GridEvent, RowIdInput, DataNode, RowKey, SelectionState, TooltipPlacement } from '@dzgrid/core';
+import type { AnyFilterKind, ColumnOrGroup, GridEvent, RowIdInput, DataNode, RowKey, SelectionState } from '@dzgrid/core';
 import type { GridMessages } from './messages.js';
 import type { GridFeature } from './features.js';
 import type { SlotPart } from './part.js';
 import type { GridIcons, GridTheme } from './look.js';
-import type { TipAnimate, TipAnimation, TipTone } from './render/tooltip.js';
 
 /** What a host gives `createGrid` (D3: rows, not a row model, for the client case). */
 export interface GridSettings<T> {
@@ -98,32 +97,12 @@ export interface GridSettings<T> {
    */
   readonly label?: string;
   /**
-   * Where tooltips show and how (tooltips-popovers.md): `delayMs` before one shows on hover (500), `hideDelayMs` of grace
-   * after the pointer leaves (150), `cells` false silences every column's `tooltip`, `tone` (`info`), `animation`
-   * (`fade`; the presets are `@dzgrid/theme/tooltips.css`'s), `reducedMotion` (`none`, or `fade`: opacity only), `html`
-   * the cleaner (`safeHtml` from `@dzgrid/dom/tooltip`) that lets a column's tooltip be HTML. With `tooltips()` from
-   * `@dzgrid/dom/tooltip` also: `header` (the header's buttons say their name), `animate` (the app's own animation, the
-   * end of the fade awaited), `placement`, `flip`, `shape` (`bubble`, `ticket`, `pill`, or an SVG path drawn as the
-   * bubble), `style` (custom properties written on the bubble), `maxWidth`, and `cells: 'truncated'` (every column that
-   * says nothing shows its cell's displayed text when it is cut). A column's `tooltip` options win over these. Live.
+   * The cells' and headers' tooltips (tooltips.md): `delayMs` before one shows on hover (500); `cells` false silences
+   * every column's `tooltip`, `'truncated'` gives every column that says nothing its cell's displayed text when it is
+   * cut. Their look (tones, placements, animations): a tooltip feature such as `@dztooltip/dzgrid`. Live.
    * @default { delayMs: 500 }
    */
-  readonly tooltips?: {
-    readonly delayMs?: number;
-    readonly hideDelayMs?: number;
-    readonly cells?: boolean | 'truncated';
-    readonly header?: boolean;
-    readonly html?: (html: string, doc?: Document) => DocumentFragment;
-    readonly tone?: TipTone;
-    readonly animation?: TipAnimation;
-    readonly reducedMotion?: 'none' | 'fade';
-    readonly animate?: TipAnimate;
-    readonly placement?: TooltipPlacement;
-    readonly flip?: boolean;
-    readonly shape?: string;
-    readonly style?: Readonly<Record<`--${string}`, string>>;
-    readonly maxWidth?: number | string;
-  };
+  readonly tooltips?: { readonly delayMs?: number; readonly cells?: boolean | 'truncated' };
   readonly onEvent?: (e: GridEvent<T>) => void;
   /**
    * False when the host loads the layout CSS itself (strict CSP).

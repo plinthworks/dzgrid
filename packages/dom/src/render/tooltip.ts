@@ -1,160 +1,63 @@
-import type { ResolvedColumn, TooltipPlacement } from '@dzgrid/core';
-import { logicalBox, type Dir } from '../dir.js';
-import { describe, setAttr, setPx } from './write.js';
+import type { ResolvedColumn, TooltipSpec } from '@dzgrid/core';
+import { fixedInlineStart, type Dir } from '../dir.js';
+import { setAttr, setPx } from './rows.js';
+import { describe } from './write.js';
 import type { Scope } from './scope.js';
 
 let ids = 0;
 
-/** Each bubble's tooltip: a popover opening drops the shows waiting and hides one about its trigger (tooltips-popovers.md 18). */
-export const tips = new WeakMap<Element, Tooltip>();
-
-/** A bubble's tone (tooltips-popovers.md 6): `info` is 1.11's dark bubble. */
-export type TipTone = 'info' | 'neutral' | 'success' | 'warning' | 'danger';
-/** Its opening and closing (7): CSS presets of `@dzgrid/theme/tooltips.css`; `pop`, `rise` and `morph` the richer ones. */
-export type TipAnimation = 'fade' | 'scale' | 'slide' | 'pop' | 'rise' | 'none' | 'morph';
-/** The side it opens on, logical (4). */
-export type TipSide = 'block-end' | 'block-start' | 'inline-end' | 'inline-start';
-/** Along the other axis: at the anchor's start (-1), its middle (0), its end (1). */
-export type TipAlign = -1 | 0 | 1;
 /**
- * The application's own animation (D-4; owner 2026-11-14 « CSS normal, ou GSAP pour du morphing »): called once the
- * bubble is placed (`open`) and before it is hidden (`close`); a closing bubble is hidden when what it returns settles
- * (a promise, a WAAPI `animation.finished`, a GSAP tween or timeline), at once otherwise. `info` gives the side it opened
- * on, its tone, the reading direction, whether reduced motion is asked (`reduced`: the app decides — an instant or a
- * fade-only version), and the app's shape (`shape`: the `<path>` drawn from `TipLook.shape`, to morph). Shown again
- * while its closing runs, it is told `open` again (stop the closing there). Never called on a grid with `motion: false`.
- * While given, the CSS presets are off (`data-animation="custom"`). The grid's needs `tooltips()`.
+ * What a grid tooltip shows (tooltips.md): its words, and for a part what it is about (a header: null row and value; a
+ * tooltip feature's own, such as a header button's name: no column). The column's or the cell's look (`tone`,
+ * `placement`, …) rides along for a feature that draws the tooltips (`TooltipSeam`); the grid's own bubble ignores it.
  */
-export type TipAnimate = (el: HTMLElement, phase: 'open' | 'close', info: TipAnimateInfo) => void | PromiseLike<unknown> | TipThenable;
-
-/** Anything with a `then` the closing can wait on: a GSAP tween or timeline (their `then` takes one callback). */
-export interface TipThenable {
-  then(onDone: (value: unknown) => unknown): unknown;
-}
-
-/** What the app's animation is told. */
-export interface TipAnimateInfo {
-  readonly side: TipSide;
-  readonly tone: TipTone;
-  readonly dir: Dir;
-  readonly reduced: boolean;
-  readonly shape: SVGPathElement | null;
-}
-
-/** How a bubble opens, closes and where it goes. */
-export interface TipLook {
-  readonly tone?: TipTone;
-  readonly animation?: TipAnimation;
-  readonly animate?: TipAnimate;
-  /** Under reduced motion: no animation (`none`, the default) or a short fade, opacity only (`fade`). */
-  readonly reducedMotion?: 'none' | 'fade';
-  /** Where it opens (12 placements and `auto`); left and right resolved by the reading direction. */
-  readonly placement?: TooltipPlacement;
-  /** False: never moved to the opposite side when it does not fit. @default true */
-  readonly flip?: boolean;
-  /**
-   * A ready-made shape of `@dzgrid/theme/tooltips.css` (`bubble`, `ticket`, `pill`; 20), or the bubble drawn as the app's
-   * shape instead of a box and an arrow (opt-in entries): SVG path data (`d`) in a 100 × 100 box stretched over the
-   * bubble, filled and edged in the tone's colours. Path commands and numbers only — anything else and the box is kept.
-   */
-  readonly shape?: string;
-  /** Its look through variables only (23): custom properties (`--…`) written on the bubble while it shows; others ignored. */
-  readonly style?: Readonly<Record<`--${string}`, string>>;
-  /** Its widest: px, or a CSS length (23). */
-  readonly maxWidth?: number | string;
-}
-
-/** What a tooltip shows: the host's text, and for a part what it is about (a header: null row and value). */
-export interface TipFor {
+export interface TipFor extends Omit<TooltipSpec, 'text'> {
   readonly text: string;
   readonly col?: ResolvedColumn<any>;
   readonly row?: Readonly<unknown> | null;
   readonly value?: unknown;
-  /** Already the anchor's description or name (a failed save's mark, a header button): no `aria-describedby`. */
+  /** Already the anchor's description or name (a failed save's mark, step 7): the tooltip adds no `aria-describedby`. */
   readonly said?: boolean;
-  readonly tone?: TipTone | undefined;
-  readonly placement?: TooltipPlacement | undefined;
-  /** A column's or a cell's own look over the grid's (21; `tooltips()`). */
-  readonly animation?: TipAnimation | undefined;
-  readonly shape?: string | undefined;
-  readonly style?: TipLook['style'] | undefined;
-  readonly maxWidth?: number | string | undefined;
-  readonly delayMs?: number | undefined;
-  /** Drawn instead of the text (cleaned HTML, an app's nodes); `gone()` when it is taken out (the page's fill). */
-  readonly node?: Node | null;
-  readonly gone?: () => void;
+  /** Drawn instead of the words: the cleaned HTML of a column's `{ html }` (`TooltipSeam.html`). */
+  readonly node?: DocumentFragment | null;
+}
+
+/** What a tooltip feature is told when a grid tooltip shows (`TooltipSeam.show`, tooltips.md 13). */
+export interface TooltipShow {
+  /** The grid's tooltip element, filled (its words, the cleaned HTML, or a part), still hidden: the feature shows it. */
+  readonly el: HTMLElement;
+  readonly anchor: HTMLElement;
+  readonly tip: TipFor;
+  readonly dir: Dir;
+  /** Hides it the grid's way (another bubble of the page opening): the grid then calls `hide` below. */
+  readonly hide: () => void;
 }
 
 /**
- * Places a fixed bubble by its anchor (tooltips-popovers.md 4): on `side`, or — `flip` — the opposite one when the
- * window has no room there and has it there; along the other axis at the anchor's start, middle or end, kept in the
- * window. The gap is 4 px and the bubble's block-start margin (the arrow's size), which the written inset gives back.
- * Writes `data-side` and the arrow's place (`--dzg-tip-at`). Sizes from the layout box: a running `scale` does not count.
+ * The seam where a feature takes over the grid's cell and header tooltips (1.12.0, tooltips.md 13; `@dztooltip/dzgrid`
+ * is one): a feature's handle gives `tooltips`, the first one wins. The grid still decides when (the hover delay, a
+ * keyboard focus, Escape, a press, a scroll, the focus leaving) and what (the column's words, a failed save's reason, a
+ * part); the feature decides where and how it shows and hides.
  */
-export function place(el: HTMLElement, anchor: Element, dir: Dir, side: TipSide, align: TipAlign, flip = true): TipSide {
-  const win = el.ownerDocument.defaultView!;
-  const W = win.innerWidth;
-  const H = win.innerHeight;
-  const a = logicalBox(anchor.getBoundingClientRect(), dir, W);
-  // Measured at the window's start, where its width is not squeezed by a place near the end.
-  setPx(el, 'inset-inline-start', 0);
-  const w = el.offsetWidth;
-  const h = el.offsetHeight;
-  const m = parseFloat(getComputedStyle(el).marginTop) || 0;
-  const g = 4 + m;
-  const block = side[0] === 'b';
-  const [lo, hi, size, room] = block ? [a.bs, a.be, h, H] : [a.is, a.ie, w, W];
-  let end = side.endsWith('d');
-  if (flip && (end ? hi + g + size > room && lo - g - size >= 0 : lo - g - size < 0 && hi + g + size <= room)) end = !end;
-  const main = end ? hi + g : lo - g - size;
-  const [clo, chi, csize, croom] = block ? [a.is, a.ie, w, W] : [a.bs, a.be, h, H];
-  const cross = Math.max(0, Math.min(align < 0 ? clo : align ? chi - csize : (clo + chi - csize) / 2, croom - csize));
-  setPx(el, 'inset-block-start', (block ? main : cross) - m);
-  setPx(el, 'inset-inline-start', block ? cross : main);
-  const used = `${block ? 'block' : 'inline'}-${end ? 'end' : 'start'}` as TipSide;
-  setAttr(el, 'data-side', used);
-  el.style.setProperty('--dzg-tip-at', `${Math.round(Math.min(Math.max(12, (clo + chi) / 2 - cross), csize - 12))}px`);
-  return used;
-}
-
-type Popoverish = HTMLElement & { showPopover?: () => void; hidePopover?: () => void };
-
-/**
- * Shows a bubble in the top layer where the browser has one (no ancestor clips it); its tone and animation marked, then
- * `dress` (its own preset, shape, variables) — all before it shows: showing it reads its style, and its opening starts
- * from what it reads (owner 2026-11-14: the grid's preset shown first, the column's `morph` a moment late).
- */
-export function reveal(el: HTMLElement, look: TipLook, tone: TipTone | undefined, dress?: () => void): void {
-  setAttr(el, 'data-tone', tone ?? look.tone ?? null);
-  setAttr(el, 'data-animation', look.animation ?? null);
-  setAttr(el, 'data-reduced', look.reducedMotion ?? null);
-  dress?.();
-  el.hidden = false;
-  if ((el as Popoverish).showPopover) {
-    el.setAttribute('popover', 'manual');
-    try {
-      (el as Popoverish).showPopover!();
-    } catch {
-      /* already shown */
-    }
-  }
-}
-
-/** Hidden now (its CSS closing runs on `[hidden]`), out of the top layer. */
-export function hideBubble(el: HTMLElement): void {
-  el.hidden = true;
-  try {
-    (el as Popoverish).hidePopover?.();
-  } catch {
-    /* not a popover, or already hidden */
-  }
+export interface TooltipSeam {
+  /** What the pointer is followed on, a selector (the grid's: `.dzg-hcell,.dzg-cell`). Read at each pointer move. */
+  targets?(): string;
+  /** A target's tooltip, asked before the grid reads it: undefined leaves it to the grid, null shows none. */
+  tipFor?(target: HTMLElement): TipFor | null | undefined;
+  /** Asked when a hover delay ends: false drops the show. */
+  ok?(anchor: HTMLElement): boolean;
+  /** Cleans a column's `{ html }` into nodes; without it, a column's HTML shows its `text` or nothing. */
+  html?(html: string, doc: Document): DocumentFragment;
+  /** Shows the filled element by its anchor: places it, dresses it, animates it. */
+  show(s: TooltipShow): void;
+  /** Hides it; `done()` once gone (the grid then takes its content out). Returns a cancel: shown again before the end. */
+  hide(el: HTMLElement, done: () => void): () => void;
 }
 
 /**
- * One tooltip element (D11, WCAG 1.4.13; tooltips-popovers.md): shown after a delay on hover or at once on keyboard
- * focus; the pointer may move onto it; Escape dismisses it; it stays until then. The grid's (one per grid) and the
- * page's (`@dzgrid/dom/tooltip`, one per document) are this class; `tooltips()` and the page's entry give it its
- * placements, its app animation and its awaited closing through the seams below.
+ * One tooltip per grid (D11, WCAG 1.4.13): shown after a delay on hover or at
+ * once on keyboard focus; the pointer may move onto it; Escape dismisses it;
+ * it stays until then. Only the host's text, never the cell's content guessed.
  */
 export class Tooltip {
   readonly el: HTMLElement;
@@ -167,29 +70,16 @@ export class Tooltip {
   #cancelHide: (() => void) | null = null;
   #closing: (() => void) | null = null;
   readonly #scope: Scope;
-  /** A part's (or the page's) turn to draw the content (true: it did); told null when the content goes. */
-  fill: ((t: TipFor | null) => boolean) | undefined;
-  /** How it opens and closes, read at each show and hide (the grid's live `tooltips` setting). */
-  look: () => TipLook & { readonly hideDelayMs?: number } = () => ({});
-  report: (e: unknown) => void = () => {};
-  /**
-   * Its side, alignment and flip: the grid's own below its cell, at its start (a placement: `tooltips()`, the page's).
-   * Asked before it is measured: the opt-in entries dress the bubble there (its preset, shape and variables).
-   */
-  at: (tip: TipFor, dir: Dir) => readonly [TipSide, TipAlign, boolean?] = () => ['block-end', -1];
-  /** Its closing: hidden at once here; the app's animation and the end of the fade awaited with `tooltips()`. */
-  close: (el: HTMLElement, look: TipLook, done: () => void) => () => void = (el, _l, done) => (hideBubble(el), done(), () => {});
-  /** Told each show (one tooltip at a time in a page and the app's opening animation, `tooltips()`). */
-  onShow?: (t: Tooltip) => void;
-  /** Asked when a delay ends: false drops the show (an anchor disabled, or holding an open popover's trigger; 18). */
-  ok?: (anchor: Element) => boolean;
+  /** A feature drawing the tooltips (tooltips.md 13); none: the grid's own bubble. */
+  seam: TooltipSeam | undefined;
+  /** A part's turn to draw the content (true: it did); told null at hide. */
+  readonly #fill: ((t: TipFor | null) => boolean) | undefined;
 
   constructor(el: HTMLElement, scope: Scope, fill?: (t: TipFor | null) => boolean) {
     this.el = el;
     this.el.id ||= `dzg-tip-${++ids}`;
     this.#scope = scope;
-    this.fill = fill;
-    tips.set(el, this);
+    this.#fill = fill;
     scope.on(el, 'pointerenter', () => this.#keep());
     scope.on(el, 'pointerleave', (e: PointerEvent) => {
       if (!this.#anchor || !this.#anchor.contains(e.relatedTarget as Node | null)) this.hideSoon();
@@ -207,39 +97,52 @@ export class Tooltip {
     if (delay <= 0) return this.#show(anchor, tip, dir);
     this.#cancelShow = this.#scope.timeout(() => {
       this.#cancelShow = null;
-      // Still on the page, and still wanted (`ok`: the opt-in entries') (18).
-      if (anchor.isConnected && this.ok?.(anchor) !== false) this.#show(anchor, tip, dir);
+      // Still on the page, and still wanted (the seam's say).
+      if (anchor.isConnected && this.seam?.ok?.(anchor) !== false) this.#show(anchor, tip, dir);
     }, delay);
   }
 
-  /** Drops a show waiting for its delay (18). */
+  /** Drops a show waiting for its delay (a press, Escape, the focus leaving: tooltips.md 12). */
   drop(): void {
     this.#cancelShow?.();
     this.#cancelShow = null;
   }
 
-  /** A short grace (`hideDelayMs`, 150), so the pointer can cross the gap onto the tooltip. */
+  /** A short grace, so the pointer can cross the gap onto the tooltip. */
   hideSoon(): void {
     this.drop();
     if (this.#cancelHide || this.el.hidden || !this.#anchor) return;
     this.#cancelHide = this.#scope.timeout(() => {
       this.#cancelHide = null;
       this.hide();
-    }, this.look().hideDelayMs ?? 150);
+    }, 150);
   }
 
   hide(): void {
     this.drop();
     this.#keep();
-    if (this.#anchor) describe(this.#anchor, this.el.id, false);
     const was = this.#anchor;
+    if (was) describe(was, this.el.id, false);
     this.#anchor = null;
-    // A hidden tooltip keeps no part, and so no row: the part goes once the closing is over.
-    if (!was || this.el.hidden) return void ((this.el.hidden = true), this.fill?.(null));
-    this.#closing = this.close(this.el, this.look(), () => {
-      this.#closing = null;
-      this.fill?.(null);
-    });
+    // A feature's closing (its animation awaited): the part goes once it is over.
+    if (this.seam && was && !this.el.hidden) {
+      this.#closing = this.seam.hide(this.el, () => {
+        this.#closing = null;
+        this.#fill?.(null);
+      });
+      return;
+    }
+    this.el.hidden = true;
+    // A hidden tooltip keeps no part, and so no row.
+    this.#fill?.(null);
+    const el = this.el as HTMLElement & { hidePopover?: () => void };
+    if (el.hasAttribute('popover') && typeof el.hidePopover === 'function') {
+      try {
+        el.hidePopover();
+      } catch {
+        /* already hidden */
+      }
+    }
   }
 
   #keep(): void {
@@ -255,17 +158,42 @@ export class Tooltip {
     this.row = tip.row ?? null;
     this.said = !!tip.said;
     // Drawn before it is measured: its size is the part's. Cleaned HTML: its nodes.
-    if (!this.fill?.(tip)) {
+    if (!this.#fill?.(tip)) {
       if (tip.node) this.el.replaceChildren(tip.node);
       else this.el.textContent = tip.text;
     }
-    // Dressed (`at`, the opt-in entries') before it shows, then measured and placed in the same task: its first frame
-    // is its opening's.
-    let at!: ReturnType<Tooltip['at']>;
-    reveal(this.el, this.look(), tip.tone, () => void (at = this.at(tip, dir)));
-    // A failed save's reason is the cell's description already, a header button's tooltip its name: not twice.
+    // A feature draws it (tooltips.md 13): described here, shown, placed and animated there.
+    const seam = this.seam;
+    if (seam) return describe(anchor, this.el.id, !tip.said), seam.show({ el: this.el, anchor, tip, dir, hide: () => this.hide() });
+    this.el.hidden = false;
+    // The top layer where the browser has it: no host ancestor can clip or trap the tooltip.
+    const el = this.el as HTMLElement & { showPopover?: () => void };
+    if (typeof el.showPopover === 'function') {
+      if (!el.hasAttribute('popover')) el.setAttribute('popover', 'manual');
+      try {
+        el.showPopover();
+      } catch {
+        /* already shown */
+      }
+    }
+    // A failed save's reason is the cell's description already: not twice (a column tooltip shown before goes).
     describe(anchor, this.el.id, !tip.said);
-    place(this.el, anchor, dir, ...at);
-    this.onShow?.(this);
+    const win = anchor.ownerDocument.defaultView;
+    const r = anchor.getBoundingClientRect();
+    const box = this.el.getBoundingClientRect();
+    const winBlock = win?.innerHeight ?? 0;
+    const winInline = win?.innerWidth ?? 0;
+    // Below the anchor, or above it when there is no room (the arrow counted: variables.css gives the tooltip a top margin
+    // of its size, on both sides): never over the cell it describes. `marginTop`: the block start in the grid's
+    // horizontal writing mode, a longhand every engine computes (review 1.12.0).
+    const below = r.bottom + 4;
+    const top = below + box.height + parseFloat(getComputedStyle(this.el).marginTop) > winBlock && r.top - 4 - box.height >= 0 ? r.top - 4 - box.height : below;
+    setPx(this.el, 'inset-block-start', top);
+    const at = fixedInlineStart(r, dir, winInline, box.width);
+    setPx(this.el, 'inset-inline-start', at);
+    // Its side and the arrow's place, at the cell's middle held 12 px inside it (presentation-settings.md 32); the cell's
+    // start unclamped.
+    setAttr(this.el, 'data-side', top < r.top ? 'block-start' : 'block-end');
+    this.el.style.setProperty('--dzg-tip-at', `${Math.round(Math.min(Math.max(12, fixedInlineStart(r, dir, winInline, 0) + r.width / 2 - at), box.width - 12))}px`);
   }
 }

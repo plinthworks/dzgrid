@@ -254,8 +254,8 @@ export interface ColumnDef<T, V = unknown> {
         readonly headerClass?: string;
         readonly data?: Readonly<Record<string, unknown>>;
     };
-    readonly headerTooltip?: string;
-    readonly tooltip?: (value: V | null, row: Readonly<T>, context: unknown) => string | null;
+    readonly headerTooltip?: string | TooltipSpec;
+    readonly tooltip?: ((value: V | null, row: Readonly<T>, context: unknown) => string | TooltipSpec | null) | boolean | ColumnTooltip<T, V>;
     readonly merge?: true | ((a: SpanCtx<T>, b: SpanCtx<T>) => boolean) | {
         readonly same?: (a: SpanCtx<T>, b: SpanCtx<T>) => boolean;
         readonly within?: readonly string[];
@@ -2516,6 +2516,37 @@ export declare function zoneDayBounds(day: Day, zone: string): {
     readonly from: InstantMs;
     readonly to: InstantMs;
 };
+```
+
+### ColumnTooltip
+
+```ts
+export interface ColumnTooltip<T, V = unknown> extends TooltipSpec {
+    readonly when?: 'always' | 'truncated';
+    readonly content?: (value: V | null, row: Readonly<T>, context: unknown) => string | TooltipSpec | null;
+}
+```
+
+### TooltipSpec
+
+```ts
+export interface TooltipSpec {
+    readonly text?: string;
+    readonly html?: string;
+    readonly tone?: 'info' | 'neutral' | 'success' | 'warning' | 'danger';
+    readonly placement?: TooltipPlacement;
+    readonly animation?: 'fade' | 'scale' | 'slide' | 'pop' | 'rise' | 'morph' | 'none';
+    readonly shape?: 'bubble' | 'ticket' | 'pill' | (string & {});
+    readonly delayMs?: number;
+    readonly maxWidth?: number | string;
+    readonly style?: Readonly<Record<`--${string}`, string>>;
+}
+```
+
+### TooltipPlacement
+
+```ts
+export type TooltipPlacement = 'auto' | `${'top' | 'bottom' | 'start' | 'end' | 'left' | 'right'}${'' | '-start' | '-end'}`;
 ```
 
 ## `@dzgrid/core/server`

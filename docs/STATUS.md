@@ -1,5 +1,26 @@
 # État du travail — à lire en premier si la session est perdue
 
+Mis à jour : 2026-11-14 (tard). **Les infobulles riches sont parties dans DzTooltip** (propriétaire « ok partout »),
+avant publication : `/Users/nadou/Dev/dztooltip` (`@dztooltip/core`, `/angular`, `/theme`, `/dzgrid` le pont ;
+`/gsap` plus tard), commits e9dd180 et 6aa06d4 (1.0.0 en préparation, API publique minimale) poussés sur `origin main` ; fiche et plan déplacés là-bas (ici, deux pointeurs).
+**DzGrid 1.12.0 garde** l'infobulle simple de la 1.11 (variables, flèche, `data-side`), l'infobulle d'une colonne en
+une ligne (`tooltip: true | false | fn | { text, when, delayMs, content }`, `tooltips.cells: false | 'truncated'`,
+`headerTooltip` mots ou `{ text }`) — fiche `tooltips.md` 10–13 — et **la couture** `FeatureHandle.tooltips`
+(`TooltipSeam` : `targets`, `tipFor`, `ok`, `html`, `show`, `hide` ; `TooltipShow`, `TipFor`) : la grille décide quand
+et quoi, la fonction où et comment ; une apparence (`tone`, `placement`, …) sans elle : `missing-feature`. `hideDelayMs`
+n'est plus un réglage (150 ms). `check:api` : `ColumnDef` accepté (« A »), la couture ajoutée, les entrées
+`@dzgrid/dom/tooltip`, `/popover`, `@dzgrid/angular/tooltip`, `/popover`, `@dzgrid/theme/tooltips.css` retirées à la
+main avec la ligne « owner 2026-11-14: rich tooltips moved to @dztooltip, never published ». Matrice
+`browser-1-12.mjs` : sections 11–11e parties (DzTooltip `scripts/browser.mjs`, câblé, pas encore lancé). Site : la page
+« Tooltips and popovers » courte (en, fr) avec l'exemple du pont ; `features/tooltips` supprimée ; tableau des
+variables sans les variables parties. Tailles : base 25 800 → 25 700 (mesuré 25 653), K.8 91 831 / 92 000,
+`@dzgrid/dom/theme` 2 513 / 2 530. `pack:local` fait ; **`gate:step` vert : 9 434/9 437 (3 sautés)**, du premier coup ; real-app 58/58 ; matrice
+`browser-1-12.mjs` (sans les infobulles riches) 13 212/13 212 — Chrome 4 440, Firefox 4 408, WebKit 4 364 ; deux
+blocages de `page.hover` de Playwright (Firefox « unlayered dark ar », WebKit « layered dark fr », 30 s dans le même pas
+d'attente) relancés seuls, verts : à surveiller, pas un contrôle rouge ; `release:check` « the 5 packages at 1.12.0 »
+(appli Angular réelle 102 925 / 103 050, ligne laissée) ; site 33/33 ; mots interdits verts. DzTooltip : 1.0.0 en
+préparation (demande du propriétaire), API publique réduite. Reste au propriétaire : relire, commiter, publier.
+
 Mis à jour : 2026-11-14 (nuit). **1.12.0 : infobulles par colonne en une ligne, formes toutes faites, `morph`
 (propriétaire « ok » + « toutes les situations par colonne »), non commitées, non publiées — ARRÊTÉ sur `check:api`.**
 Fiche `tooltips-popovers.md` 7 (morph), 20–24. Colonne : `tooltip: true | false | { text, tone, shape, animation,

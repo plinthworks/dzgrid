@@ -1,7 +1,7 @@
 import type { GridContext } from './context.js';
 import { problem, type FocusPos, type Intent, type KeyOwner, type Problem, type ResolvedColumn, type RowKey, type RowShape } from '@dzgrid/core';
 import type { OverlayState } from './render/overlay.js';
-import type { TipFor } from './render/tooltip.js';
+import type { TipFor, TooltipSeam } from './render/tooltip.js';
 import type { Goal, Move, MoveShape, SpanLookup } from './keys/move.js';
 import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { Frame, RowSpans } from './render/rows.js';
@@ -71,6 +71,11 @@ export interface FeatureHandle {
   readonly spans?: SpanFeature;
   /** Header, overlay and tooltip drawn by parts (the slots feature): the first feature giving them wins. */
   readonly slots?: SlotDrivers;
+  /**
+   * The cells' and headers' tooltips drawn by the feature (1.12.0, tooltips.md 13; `@dztooltip/dzgrid`): the grid
+   * decides when and what, the seam where and how. The first feature giving one wins.
+   */
+  readonly tooltips?: TooltipSeam;
   /**
    * A column header's cell, at each paint, after the base decorated it (sort, grip): what a
    * feature adds beside the label (the filter button, the filtered mark). Level 0 only. `label` is

@@ -95,7 +95,7 @@ function setup(g: GridContext<unknown>): FeatureHandle {
     tooltip(t) {
       // Mounted at show, destroyed at hide: a hidden tooltip keeps no row; another anchor mounts afresh.
       tip.clear();
-      // A header button's name and cleaned HTML stay the grid's (no column, or the app's nodes).
+      // A feature's own tooltip (no column: a header button's name) and cleaned HTML stay the grid's words or nodes.
       return !!t?.col && !t.node && tip.set(g.el.tooltip, partFor('tooltip', t.col) as Part<SlotContext['tooltip']> | null, { text: t.text, value: t.value, row: t.row ?? null, column: t.col });
     },
   };

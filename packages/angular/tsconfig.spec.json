@@ -2,8 +2,6 @@
   "extends": "../../tsconfig.spec.json",
   "include": [
     "src/**/*.ts",
-    "tooltip/**/*.ts",
-    "popover/**/*.ts",
     "test/**/*.ts",
     "test-zone/**/*.ts"
   ],

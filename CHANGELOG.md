@@ -46,36 +46,33 @@ complete, English and French).
     header fix in the base); +2 % rule: `/filters` 12 250, `/filters-base` 12 200, `columns.css` 1 224, `variables.css`
     1 938, `@dzgrid/dom/theme` 2 499, the real Angular example 102 150; `buttons.css` new at 500, `pager.css` new at 760.
 
-### Added — tooltips and popovers (owner 2026-11-13, « là où on souhaite activer l'infobulle, on pourra le faire »; Q-T1 B, 2026-11-14)
-- **Tones** for every tooltip: `info` (the 1.11 bubble, the default), `neutral`, `success`, `warning`, `danger` — a
-  column's `tooltip` may return `{ text, tone }`; `tooltips: { tone }` for the grid. Each tone's background, text, edge
-  and arrow are variables (`--dzg-tooltip-<tone>-*`), readable in light and dark (checked 4.5:1).
-- **Animations**: `tooltips: { animation }` — `fade` (default), `scale`, `slide`, `none`, and two richer ones to opt
-  into, `pop` (grows with a slight overshoot) and `rise` (a longer, softer slide). Opacity and transforms only; timings
-  are variables. Reduced motion: no animation, or a short fade with `reducedMotion: 'fade'`.
-- **Placement**: `placement` — `top`, `bottom`, `start`, `end`, `left`, `right`, each alone or with `-start` / `-end`
-  (12), and `auto`; `start` / `end` follow the reading direction, `left` / `right` the screen. It moves to the other
-  side when there is no room (`flip: false` keeps it), and stays in the window; the arrow follows.
-- **HTML in a tooltip, by choice**: `tooltips: { html: safeHtml }` and a column's `{ html }` — cleaned (no script, no
-  image, no link, no style, no URL). Without `html`, a column's `{ html }` shows its `text`, or nothing.
-- **`tooltips()`** (new, `@dzgrid/dom/tooltip`), a grid feature: the header's buttons say their name
-  (`tooltips: { header: true }`, off by default), `placement` / `flip` and a column's `{ placement }`, your own
-  animation (`animate(el, phase)`, a GSAP tween or a promise awaited before hiding), a fade-out that keeps the content
-  drawn, one tooltip on screen at a time. Without it, `header`, `animate` and `placement` are told once
-  (`missing-feature`) and ignored.
-- **Tooltips anywhere in the page**: `tooltip(el, options)` (`@dzgrid/dom/tooltip`), `[dzTooltip]` (Angular,
-  `@dzgrid/angular/tooltip`) — words, nodes, an `<ng-template>` with its context, a component with its inputs, or
-  cleaned HTML (Angular's sanitizer first).
-- **Popovers, the bubble that stays**: `popover(trigger, options)` (`@dzgrid/dom/popover`), `[dzPopover]` (Angular,
-  `@dzgrid/angular/popover`: `open()`, `close()`, `toggle()`, `isOpen()`, `(opened)`, `(closed)`). Opened by a click
-  or by code; closed by Escape (focus back), a press outside, Tab past its end, or code; the focus moves into it; a
-  non-modal dialog (`aria-haspopup`, `aria-expanded`, `aria-controls`); one open per group, nesting allowed; follows its
-  trigger on scroll and resize, closes when the trigger is scrolled out of view or its grid row is recycled. Anything
-  inside: a form, a component, a template, a grid.
-- **New opt-in sheet `@dzgrid/theme/tooltips.css`** (and `tooltips.unlayered.css`), after `dzgrid.css` and
-  `variables.css`: tones, the arrow on four sides, the animations, the popover's look. Without it a tooltip looks as
-  in 1.11 and appears without animation.
-- The element (`<dz-grid>`): use `tooltip()` and `popover()` from `@dzgrid/dom` directly.
+### Rich tooltips → `@dztooltip` (owner 2026-11-14, « ok partout »)
+- The tones, placements, shapes, animations (`morph` among them), tooltips anywhere in the page and the popovers built
+  for this release moved, before it was published, to their own packages: **DzTooltip** (`@dztooltip/core`,
+  `@dztooltip/angular`, `@dztooltip/theme`, and `@dztooltip/dzgrid`, the bridge:
+  `features: [dzTooltips({ … })]`). DzGrid ships none of `@dzgrid/dom/tooltip`, `/popover`, `@dzgrid/angular/tooltip`,
+  `/popover`, `@dzgrid/theme/tooltips.css` — they were never published.
+
+### Added — a column's tooltip in one line, and the tooltip seam (owner 2026-11-14)
+- **A column's tooltip without a function**: `tooltip: true` (the cell's text as displayed — dates, numbers,
+  translated values), `tooltip: { when: 'truncated' }` (only while the cell's text is cut), `tooltip: false` (none,
+  whatever the grid says), and options `{ text, when, delayMs, content }` — `text` left out meaning the displayed text,
+  `delayMs` the column's own hover delay, `content(value, row, context)` the cell's own answer laid over the options. A
+  function may return such options too. The grid's `tooltips: { cells }`: `false` silences every column's tooltip,
+  `'truncated'` gives every column that says nothing its cut text. `headerTooltip` takes words or options (`{ text }`).
+  Keyboard focus on the cell opens it at once, as before.
+- **A look the grid leaves to a feature**: a column's `tone`, `placement`, `animation`, `shape`, `style`, `maxWidth`
+  and `html` are drawn by a feature that takes the tooltips over (DzTooltip's bridge); without one the grid shows the
+  words (HTML: its `text`, or nothing) and tells it once (`missing-feature`, `columns[i].tooltip` / `.headerTooltip`).
+- **The tooltip seam** (`FeatureHandle.tooltips`, types `TooltipSeam`, `TooltipShow`, `TipFor` in `@dzgrid/dom`): the
+  grid still decides when (delay, keyboard, Escape, a press, a scroll) and what (the words, a failed save's reason, a
+  part, `aria-describedby`); the feature shows and hides the grid's tooltip element, may answer a target first, refuse a
+  show at the end of its delay, and clean a column's HTML. Sheet `tooltips.md` 10–13.
+- Types (owner « A », accepted in `check:api`): `ColumnDef.tooltip` is now `function | boolean | ColumnTooltip<T, V>`
+  and `headerTooltip` `string | TooltipSpec` (inputs that accept more; code that *calls* `def.tooltip` must check it is
+  a function); new `ColumnTooltip`, `TooltipSpec`, `TooltipPlacement` in `@dzgrid/core`.
+- Size lines: `@dzgrid/dom` 25 200 → 25 700 (measured 25 653: the column's options, the seam, the drop of a waiting
+  show); K.8 measured 91 831 under its 92 000.
 
 ### Added — the pager's icons (owner 2026-11-14)
 - **`icons: { pagerFirst, pagerPrevious, pagerNext, pagerLast }`** (with `theming()`): the pager's « « ‹ › » » marks
@@ -83,78 +80,19 @@ complete, English and French).
   their character), in the pager button's colour (dimmed on a button that cannot act), at its text size or
   `--dzg-icon-size`, and mirrored in right to left as the characters are (draw them for left to right). The buttons'
   names (« First page », …) do not change.
-- Size lines: `@dzgrid/dom/theme` 2 510 → 2 530 (+0.8 %, measured 2 519: the four keys); the rules that draw them are
+- Size lines: `@dzgrid/dom/theme` 2 499 → 2 530 (measured 2 513 once the rich tooltips left: the four keys); the rules that draw them are
   `pagination()`'s own CSS (`@dzgrid/dom/pagination` measured 3 366 under its 3 450); K.8 measured 91 873 under its 92 000; the real Angular example 102 700 → 103 000 (+0.3 %, measured 102 965).
 
 ### Added — the pager buttons' edges (owner 2026-11-14, « oui »)
 - `--dzg-pager-button-disabled-border` (a button that cannot act; default the button's `--dzg-pager-button-border`, as
   today), `--dzg-pager-button-hover-border` and `--dzg-pager-button-active-border` (unset: no change; pressed falls back
   on hover), in `pager.css` (both copies). The rows-per-page select is never disabled: no variable for that state.
-- Size lines (with the two fixes above): `@dzgrid/dom` 25 704 → 25 730 (+0.1 %, measured 25 724: the waiting show
-  dropped by a press, Escape, the focus leaving, a popover opening — the rest in the opt-in entries), `pager.css` 760 →
-  775 (+2 %, measured 767); K.8 measured 91 918 under its 92 000; `@dzgrid/dom/tooltip` 2 753 / 2 800,
-  `@dzgrid/dom/popover` 3 350 / 3 450; the real Angular example 103 000 → 103 050 (+0.05 %, measured 103 014).
-
-### Added — a tooltip per column in one line, ready-made shapes, `morph` (owner 2026-11-14, « ok »)
-- **A column's tooltip without a function** (with `tooltips()`): `tooltip: true` (the cell's text as displayed — dates,
-  numbers, translated values), `tooltip: { when: 'truncated' }` (only when the cell's text is cut), `tooltip: false`
-  (none, whatever the grid says), and `tooltip: { text, tone, shape, animation, placement, delayMs, maxWidth, style,
-  when, content }` — `text` left out meaning the displayed text, `content(value, row, context)` the cell's own answer
-  laid over the column's options (merge: the grid's `tooltips` ← the column's ← the cell's). The grid-wide
-  `tooltips: { cells: 'truncated' }` gives every column that says nothing its cut cells' full text. A function and its
-  `TooltipSpec` take the same new keys. Keyboard focus on the cell opens it at once, as before.
-- **`headerTooltip`** takes the same spec object (`{ text, tone }` without `tooltips()`, the rest with it).
-- **`style`** (custom properties only, written on the bubble while it shows) and **`maxWidth`**, for the grid
-  (`tooltips`), a column, the page's `tooltip()` / `popover()` and Angular (`dzTooltipStyle`, `dzTooltipMaxWidth`,
-  `dzPopoverStyle`, `dzPopoverMaxWidth`); `when: 'truncated'` for `tooltip()` and `dzTooltipWhen`.
-- **Ready-made shapes** `shape: 'bubble' | 'ticket' | 'pill'` (beside an app's SVG path): a speech bubble whose curved
-  tail is part of it (turned per side, mirrored in right to left), notched corners, rounded ends — drawn by
-  `tooltips.css` in the tone's colours, the tone's edge and a soft shadow following the whole outline.
-- **`morph`**, a richer preset to opt into: a small pill at the anchor's side grows into the bubble (320 ms), the
-  words coming in from its first third; it closes the reverse way, faster (180 ms). As quick as an app's GSAP morph
-  (measured side by side): its first frame right after its delay — dressed before it shows, one frame ahead. Pure CSS (a layer's `clip-path`, no layout per frame, no
-  library); its timings are variables (`--dzg-tooltip-morph-*`); nothing moves under reduced motion.
-- Without `tooltips()`, `true`, a column's options object and `cells: 'truncated'` are told once (`missing-feature`,
-  path `columns[i].tooltip` / `settings.tooltips`).
-- Types: `ColumnDef.tooltip` is now `function | boolean | ColumnTooltip<T, V>` and `headerTooltip` `string |
-  TooltipSpec` (an input that accepts more; code that *calls* `def.tooltip` must check it is a function) — waiting for
-  the owner's `check:api` decision; `TooltipSpec` gains `animation`, `shape`, `delayMs`, `maxWidth`, `style`; new
-  `ColumnTooltip`; `TipAnimation` gains `morph`; `TipLook` gains `style`, `maxWidth`.
-- Size lines (+2 % rule): `@dzgrid/dom` 25 730 → 25 800 (measured 25 784), `@dzgrid/dom/popover` 3 450 → 3 519
-  (measured 3 503); K.8 measured 91 972 under its 92 000. For the owner: `@dzgrid/dom/tooltip` measured 3 353 over its
-  2 800 and `tooltips.css` / `tooltips.unlayered.css` 2 843 / 2 798 over 2 000 / 1 950 (proposed at their measure +
-  10 %, as for 1.12.0's other additions: 3 700, 3 150, 3 100).
-
-### Upgrading (tooltips)
-- Nothing to change: `tooltips: { delayMs }`, a column's `tooltip` returning a string, `headerTooltip` and a tooltip
-  part behave as before. A `variables.css` detail changed before publishing: a tooltip above its cell is placed by the
-  grid instead of a CSS `translate` (same place; `translate` is left to the animations).
-- Size lines (rule Q-B): `@dzgrid/dom` 25 200 → 25 704 (+2 %, measured 25 690); new entries at their measure + 10 %:
-  `@dzgrid/dom/tooltip` 2 800, `@dzgrid/dom/popover` 3 450, `tooltips.css` 2 000, `tooltips.unlayered.css` 1 950,
-  `@dzgrid/angular/tooltip` 2 050, `@dzgrid/angular/popover` 1 600; `@dzgrid/dom/theme` 2 499 → 2 510 (its code unchanged,
-  gzip over the grown base); K.8 measured 91 591 under its 92 000; the real Angular example 102 150 → 102 700 (+0.5 %,
-  measured 102 697).
+- Size line: `pager.css` 760 → 775 (+2 %, measured 767).
 
 ### Fixed
-- **A tooltip waiting for its delay never appears late** (owner 2026-11-14, « oui »): a click on its trigger, the trigger
-  turning `disabled`, a popover opening from it, Escape or the focus leaving did not cancel a show still waiting, so it
-  appeared afterwards — over the open popover. A press or a click on the trigger, Escape, the focus leaving, a scroll,
-  `disabled` (the option, `dzTooltipDisabled`, or the attribute when the delay ends), the trigger gone, and a popover
-  opening from the trigger or inside it (a grid cell holding it) now drop it; a popover opening also hides a tooltip
-  shown about its trigger or its cell. The page's `tooltip()`, the grid's cell and header tooltips (with or without
-  `tooltips()`) and Angular's `[dzTooltip]`. Nothing to change.
-- **Tooltips and popovers outside the grid follow the colour scheme**: in a dark page (`data-theme="dark"`, Tailwind's
-  `.dark` mapped by `tailwind.css` / `tailwind3.css`, `--tz-color-scheme`) they stayed light, being placed at the page's
-  end where no `color-scheme` was set. They now take the grid's rule (`color-scheme: var(--tz-color-scheme, light
-  dark)`, injected with them: the layered and unlayered sheets alike), inherit the page's scheme (a switch while one is
-  open is followed at once) and take a wrapper's own at each opening. An app's own dark class: map it once,
-  `.my-dark { --tz-color-scheme: dark }`. The page's `color-scheme` property alone is not read (nor by the grid).
-- **Tooltips and popovers, from the code review before publishing**: a popover now closes when its trigger leaves the
-  page or its grid row shows another row without any scroll (a view swapped, a sort, a grid destroyed) — it stayed
-  open, pointing at nothing; Tab with the focus on the popover itself (after a click on its words) goes to its first
-  control instead of closing it; an open popover's trigger shows no tooltip; a tooltip moving from HTML to words that
-  read the same draws the words; a grid destroyed with its tooltip shown is no longer kept by the page; Angular's
-  `[dzPopover]` destroyed while open no longer emits `(closed)` on its destroyed output (Angular's NG0953 warning).
+- **A tooltip waiting for its delay never appears late** (owner 2026-11-14, « oui »): a press on a cell or a header,
+  Escape, or the focus leaving the grid now drop a cell's or a header's show still waiting; a touch alone never shows
+  one. Nothing to change.
 - **A keyboard-focused Retry button keeps its focus ring**: its rule had lost its body and ran into the pagination
   footer's, so a focused Retry took the strip's padding, edge and colours.
 - **A header's title stays at its start under a page's reset** (seen with Tailwind 3's preflight and the unlayered

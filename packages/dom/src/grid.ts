@@ -196,7 +196,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   g.spans = handles.find((h) => h.spans)?.spans ?? null;
   g.slots = handles.find((h) => h.slots)?.slots ?? null;
   told.push(...(initial.features?.some((f) => f.id === 'auto-height') ? [] : columns.visible().filter((c) => c.def.wrap).slice(0, 1).map((c) => problem('missing-feature', 'warning', `columns.${c.id}.wrap`, 'auto-height'))), ...(g.spans ? [] : missingFeatureProblems(initial)), ...unslotted(initial as GridSettings<unknown>, rows.page));
-  g.edit = (g.features = handles).find((h) => h.edit)?.edit; // the edit seam, found once
+  g.edit = (g.features = handles).find((h) => h.edit)?.edit; g.tip.seam = handles.find((h) => h.tooltips)?.tooltips; // the edit and tooltip seams (tooltips.md 13), found once
   scope.add(() => { for (const h of handles) h.destroy(); });
 
   columns.setAvailableInline(geometry.read().inline);
