@@ -1,5 +1,15 @@
 # État du travail — à lire en premier si la session est perdue
 
+Mis à jour : 2026-11-15. **1.12.1 préparée (non commitée, non publiée)** — propriétaire « pas du tout stylé, c'est moche »
+(panneau des colonnes ancré, sombre, preflight Tailwind 3). Fiche `presentation-settings.md` 42–43 : nouvelle apparence
+du panneau (lignes sur une ligne 2rem, recherche un seul champ avec loupe, placeholder + `aria-label`, cadenas à la
+place de la case, pied sur `--dzg-button-*`, tête du dock en boutons carrés avec `title`, 7 variables `--dzg-panel-*`) ;
+titre étroit (cellule conteneur de taille, sous 6.5rem la marque « non triée » sort et le bouton de filtre non filtré
+n'a pas de place au repos ; sonde d'auto-ajustement sans conteneur). Tests `panel-1-12-1.test.ts` (dom, theme), page
+`v1-12-1.html`, matrice (12). **En attente du propriétaire** : `columns-panel.css` 1 686 / 1 400 et `dock.css` 860 / 800
+(au-delà de +2 %, `check:size` rouge sur elles seules) ; une phrase propre au cadenas = nouvelle clé (API).
+`docs/release-1.12.1.md`.
+
 Mis à jour : 2026-11-14 (tard). **Les infobulles riches sont parties dans DzTooltip** (propriétaire « ok partout »),
 avant publication : `/Users/nadou/Dev/dztooltip` (`@dztooltip/core`, `/angular`, `/theme`, `/dzgrid` le pont ;
 `/gsap` plus tard), commits e9dd180 et 6aa06d4 (1.0.0 en préparation, API publique minimale) poussés sur `origin main` ; fiche et plan déplacés là-bas (ici, deux pointeurs).

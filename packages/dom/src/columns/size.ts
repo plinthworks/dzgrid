@@ -8,7 +8,8 @@ import { cellValue } from '../render/rows.js';
  * column's formatted text (a text already met is not measured again); each takes its parent's font and direction, at
  * `max-content`, unseen. Every probe is written, then every width read (one layout), then every probe removed: never a
  * layout read per cell. A row not mounted is measured as its text alone (a lower bound for a part). The widths are whole
- * pixels, rounded up (a clipped Arabic letter is a visible defect); min and max are the layout's.
+ * pixels, rounded up (a clipped Arabic letter is a visible defect); min and max are the layout's. A header probe is no
+ * size container (1.12.1: a narrow header's buttons give way, presentation-settings.md 43): measured as if wide.
  */
 export function fits(g: GridContext<unknown>, ids: readonly string[]): Map<string, number> {
   const { el, columns: m, rows } = g;
@@ -16,7 +17,7 @@ export function fits(g: GridContext<unknown>, ids: readonly string[]): Map<strin
   const all: [string, HTMLElement][] = [];
   const put = (id: string, x: HTMLElement, at: Element | null | undefined, fit = 'max') => {
     if (!at) return;
-    x.style.cssText += `;position:absolute;visibility:hidden;inline-size:${fit}-content`;
+    x.style.cssText += `;position:absolute;visibility:hidden;inline-size:${fit}-content;container-type:normal`;
     at.append(x);
     all.push([id, x]);
   };

@@ -16,7 +16,8 @@
  * filter's list as wide as its longest value; and the 1.12.0 corrections' variables (buttons.css, the unsorted mark,
  * a row's text forced under `data-dzg-row-fg="force"`, `--dzg-row-state-fg`); and (39–40) the pagination bar: the popups'
  * button variables leave the pager's buttons and select as they are, the pager's own change the pager only, each bar
- * variable's default and effect, the text sizes (a menu item untouched). The rich tooltips and popovers (sections 11,
+ * variable's default and effect, the text sizes (a menu item untouched); (12) 1.12.1, the columns panel's look and a
+ * narrow header's title (page `v1-12-1.html`; `--panel` runs only it). The rich tooltips and popovers (sections 11,
  * 11b–11e) moved to DzTooltip with their code (owner 2026-11-14): its scripts/browser.mjs.
  */
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -234,6 +235,113 @@ const read = (page, { at, pseudo, p }) => page.evaluate(({ at, pseudo, p }) => {
   return el ? getComputedStyle(el, pseudo ?? null).getPropertyValue(p) : null;
 }, { at, pseudo, p });
 
+/**
+ * (12) 1.12.1 (presentation-settings.md 42–43; owner 2026-11-15, « pas du tout stylé, c'est moche »): page
+ * `v1-12-1.html`, the columns panel docked at the end and narrow columns with a filter button and the app's unsorted mark.
+ * The panel's rows: box and name centres within 1.5 px, the names aligned, one compact height (2rem); the search one field
+ * (no text above it, its name and placeholder, the magnifier at its start, an edge a reset cannot erase, the ring on the
+ * field); the lock in the box's place; the head's buttons squares with their names as tooltips; the footer's buttons; at
+ * the 80 px floor an unsorted, unfiltered title shows two characters and « … » at least, and sorted too; the filter button back
+ * under the pointer and with the focus; the floor kept; auto-size measures the whole title; axe.
+ */
+async function panel(page, tag, { css, dark, lang, preflight }, name, errors) {
+  const rtl = lang === 'ar';
+  await page.setViewportSize({ width: 1200, height: 700 });
+  await page.goto(site.url(`v1-12-1.html?lang=${lang}&css=${css}${dark ? '&dark=1' : ''}${preflight ? '&preflight=1' : ''}`));
+  await page.waitForFunction(() => window.ready === true, null, { timeout: 30000 });
+  await frames(page);
+  const look = await page.evaluate((rtl) => {
+    const cp = document.querySelector('.dzg-dock:not([hidden]) .dzg-cp');
+    const mid = (r) => (r.top + r.bottom) / 2;
+    const text = (el) => { const g = document.createRange(); g.selectNodeContents(el); return g.getBoundingClientRect(); };
+    const rows = [...cp.querySelectorAll('.dzg-cp-row')].map((li) => {
+      const box = li.querySelector('input').getBoundingClientRect();
+      const t = text(li.querySelector('label'));
+      const lk = getComputedStyle(li, '::before');
+      return { col: li.dataset.col, h: li.getBoundingClientRect().height, dy: Math.abs(mid(box) - mid(t)), start: rtl ? t.right : t.left, boxX: rtl ? box.right : box.left, box: [box.width, box.height], locked: li.querySelector('input').getAttribute('aria-disabled') === 'true', lock: lk.content !== 'none' && lk.content !== 'normal' ? [lk.width, lk.height, lk.backgroundColor] : null, appearance: getComputedStyle(li.querySelector('input')).appearance };
+    });
+    const q = cp.querySelector('.dzg-cp-q');
+    const s = q.querySelector('input');
+    const qr = q.getBoundingClientRect();
+    const sr = s.getBoundingClientRect();
+    const mg = getComputedStyle(q, '::before');
+    const qs = getComputedStyle(q);
+    // Nothing written above the field: every earlier part of the panel hidden or empty.
+    const before = [...cp.children].slice(0, [...cp.children].indexOf(q)).filter((x) => getComputedStyle(x).display !== 'none' && x.textContent.trim());
+    const head = [...document.querySelectorAll('.dzg-dock:not([hidden]) :is(.dzg-dock-tog, .dzg-dock-place, .dzg-dock-x)')].map((b) => { const r = b.getBoundingClientRect(); return { w: r.width, h: r.height, y: mid(r), title: b.title, name: b.getAttribute('aria-label') }; });
+    const foot = [...cp.querySelectorAll('.dzg-cp-foot button')].filter((b) => getComputedStyle(b).display !== 'none').map((b) => { const c = getComputedStyle(b); return { h: b.getBoundingClientRect().height, edge: c.outlineStyle, w: c.outlineWidth }; });
+    return { rows, field: { h: qr.height, text: q.textContent, name: s.getAttribute('aria-label'), hint: s.placeholder, mag: [mg.content, mg.width, mg.height], gapStart: rtl ? qr.right - sr.right : sr.left - qr.left, edge: [qs.outlineStyle, parseFloat(qs.outlineWidth)], before: before.map((x) => x.className) }, head, foot, list: getComputedStyle(cp.querySelector('.dzg-cp-list')).overflowY, rem: parseFloat(getComputedStyle(document.documentElement).fontSize) };
+  }, rtl);
+  const plain = look.rows.filter((r) => !r.locked);
+  check(`${tag}: (12) the panel's box and name on one line (centres within 1.5 px), every name at one start`, look.rows.length === 7 && look.rows.every((r) => r.dy <= 1.5) && look.rows.every((r) => Math.abs(r.start - look.rows[0].start) < 1), look.rows);
+  check(`${tag}: (12) the panel's rows one compact height (2rem), the boxes 1rem in one column`, look.rows.every((r) => Math.abs(r.h - 2 * look.rem) <= 1) && plain.every((r) => Math.abs(r.box[0] - look.rem) < 1.5 && Math.abs(r.boxX - plain[0].boxX) < 1), look.rows);
+  const lk = look.rows.find((r) => r.locked);
+  check(`${tag}: (12) the lock in the box's place: the box kept (transparent), the lock drawn, muted`, lk?.col === 'act' && lk.appearance === 'none' && Math.abs(lk.boxX - plain[0].boxX) < 1 && lk.lock?.[0] === '12px' && lk.lock?.[1] === '14px', lk);
+  const f = look.field;
+  check(`${tag}: (12) the search one field: no text above it, named and hinted, the magnifier at its start, an edge`, Math.abs(f.h - 2 * look.rem) < 1 && f.text === '' && f.name && f.name === f.hint && f.mag[0] === '""' && f.mag[1] === '16px' && f.gapStart >= 16 + 8 - 0.5 && f.edge[0] === 'solid' && f.edge[1] >= 1 && f.before.length === 0, f);
+  check(`${tag}: (12) the head's buttons squares in one line, each with its name as tooltip; the footer's 2rem, edged; the list scrolls`, look.head.length === 3 && look.head.every((b) => Math.abs(b.w - 1.75 * look.rem) < 1 && Math.abs(b.h - 1.75 * look.rem) < 1 && Math.abs(b.y - look.head[0].y) < 1 && b.title && b.title === b.name) && look.foot.length === 2 && look.foot.every((b) => b.h >= 2 * look.rem - 0.5 && b.edge === 'solid') && look.list === 'auto', { head: look.head, foot: look.foot, list: look.list, rem: look.rem });
+  // The ring on the field while the search holds the focus.
+  await page.focus('.dzg-dock .dzg-cp-q input');
+  const ring = await page.evaluate(() => { const c = getComputedStyle(document.querySelector('.dzg-dock .dzg-cp-q')); return [c.outlineStyle, c.outlineWidth]; });
+  check(`${tag}: (12) the search focused: the ring on the field`, ring[0] === 'solid' && ring[1] === '2px', ring);
+  if (SHOTS) await page.locator('.dzg-dock:not([hidden])').screenshot({ path: `${SHOTS}/1-12-1-${name}-${css}-${lang}${dark ? '-dark' : ''}${preflight ? '-pf' : ''}-panel.png` });
+  await page.evaluate(() => document.activeElement.blur());
+  await page.mouse.move(0, 0);
+
+  // (43) Narrow titles: two characters and « … » at least (or the whole title when it fits); the unsorted mark and an
+  // unfiltered button without room at rest.
+  const heads = () => page.evaluate(() => Object.fromEntries(['oven', 'batch', 'kind'].map((id) => {
+    const c = document.querySelector(`.dzg-hrow .dzg-hcell[data-col=${id}]`);
+    const l = c.querySelector(':scope > .dzg-hlabel');
+    const probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap';
+    probe.textContent = `${l.textContent.slice(0, 2)}…`;
+    l.append(probe);
+    const need = probe.getBoundingClientRect().width;
+    probe.remove();
+    // Its room on the line: none when out of the flow and without ink.
+    const room = (x) => (!x ? null : getComputedStyle(x).position === 'absolute' && getComputedStyle(x).opacity === '0' ? 0 : x.getBoundingClientRect().width);
+    const fb = room(c.querySelector(':scope > .dzg-fbtn'));
+    const sm = room(c.querySelector(':scope > .dzg-sort'));
+    return [id, { w: c.getBoundingClientRect().width, label: l.clientWidth, need, whole: l.scrollWidth <= l.clientWidth + 0.5, fb, sm }];
+  })));
+  const ok2 = (h) => h.whole || h.label >= h.need - 0.5;
+  let hs = await heads();
+  check(`${tag}: (12) at 80–90 px a title shows two characters and « … » at least; the unsorted mark and the filter button without room`, Object.values(hs).every((h) => ok2(h) && h.fb === 0 && (h.sm === null || h.sm === 0)) && hs.oven.w === 80 && hs.batch.w === 80, hs);
+  await page.hover('.dzg-hrow .dzg-hcell[data-col=batch]');
+  await frames(page);
+  hs = await heads();
+  check(`${tag}: (12) under the pointer the narrow header's filter button comes back (the unsorted mark not)`, hs.batch.fb === 24 && hs.batch.sm === 0, hs.batch);
+  await page.mouse.move(0, 0);
+  await page.evaluate(() => document.querySelector('.dzg-hrow .dzg-hcell[data-col=oven]').focus());
+  await frames(page);
+  hs = await heads();
+  const named = await page.evaluate(() => { const b = document.querySelector('.dzg-hrow .dzg-hcell[data-col=oven] > .dzg-fbtn'); return !!b.getAttribute('aria-label') && getComputedStyle(b).display !== 'none' && getComputedStyle(b).visibility !== 'hidden'; });
+  check(`${tag}: (12) a narrow header holding the focus shows its filter button, named, never removed`, hs.oven.fb === 24 && named, { oven: hs.oven, named });
+  await page.evaluate(() => { document.activeElement.blur(); window.grid.kernel.dispatch({ type: 'sort.set', sort: [{ column: 'batch', dir: 'asc' }] }, 'host'); window.grid.kernel.dispatch({ type: 'filter.column', column: 'kind', filter: { type: 'text', op: 'contains', value: 'C' } }, 'host'); });
+  await page.mouse.move(0, 0);
+  await frames(page);
+  hs = await heads();
+  check(`${tag}: (12) sorted, a narrow title keeps two characters and « … », its mark shown; a filtered funnel shown at rest`, ok2(hs.batch) && hs.batch.sm > 0 && hs.kind.fb === 24, hs);
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/1-12-1-${name}-${css}-${lang}${dark ? '-dark' : ''}${preflight ? '-pf' : ''}-narrow.png`, clip: { x: 0, y: 0, width: 1200, height: 140 } });
+  await page.evaluate(() => window.grid.kernel.dispatch({ type: 'filter.column', column: 'kind', filter: null }, 'host'));
+  // The floor (column-resize.md 21) still 80 px; auto-size measures the whole title (its probe no container).
+  await page.evaluate(() => window.grid.kernel.dispatch({ type: 'column.state', patch: [{ id: 'oven', width: 40 }] }, 'user'));
+  await frames(page);
+  const floor = await page.evaluate(() => document.querySelector('.dzg-hrow .dzg-hcell[data-col=oven]').getBoundingClientRect().width);
+  await page.evaluate(() => window.moves.autoSize(['batch']));
+  await frames(page);
+  const fit = await page.evaluate(() => { const c = document.querySelector('.dzg-hrow .dzg-hcell[data-col=batch]'); const l = c.querySelector(':scope > .dzg-hlabel'); return { w: c.getBoundingClientRect().width, cut: l.scrollWidth > l.clientWidth + 0.5 }; });
+  check(`${tag}: (12) the 80 px floor holds; auto-size gives the narrow column its whole title`, floor === 80 && fit.w > 100 && !fit.cut, { floor, fit });
+  if (process.argv.includes('--axe') || name === 'chrome') {
+    await page.addScriptTag({ content: AXE });
+    const v = await page.evaluate(async () => (await window.axe.run(document.querySelector('#host'), { runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] })).violations.map((x) => `${x.id}: ${x.nodes.length}`));
+    check(`${tag}: (12) the panel and the narrow headers: axe finds nothing`, v.length === 0, v);
+  }
+  check(`${tag}: (12) no page error, nothing told`, errors.length === 0 && (await page.evaluate(() => window.told.length)) === 0, { errors, told: await page.evaluate(() => window.told) });
+  await page.setViewportSize({ width: 900, height: 700 });
+}
+
 async function run(name, cfg) {
   const { css, dark, lang, preflight } = cfg;
   const tag = `${name} ${css}${dark ? ' dark' : ''} ${lang}${preflight ? ' preflight' : ''}`;
@@ -251,6 +359,10 @@ async function run(name, cfg) {
       await frames(page);
     };
 
+    if (process.argv.includes('--panel')) {
+      await panel(page, tag, cfg, name, errors);
+      return void (await page.close());
+    }
     // (1) Defaults: without variables.css, then with it — the same computed look.
     await open('&vars=0');
     const pf = await page.evaluate(() => [...document.styleSheets].some((x) => x.href?.includes('preflight') && x.cssRules.length > 10));
@@ -607,6 +719,8 @@ async function run(name, cfg) {
       check(`${tag}: with icons, axe finds nothing`, v.length === 0, v);
     }
     check(`${tag}: no page error, nothing told`, errors.length === 0 && (await page.evaluate(() => window.told.length)) === 0, { errors, told: await page.evaluate(() => window.told) });
+    // (12) 1.12.1: the columns panel and the narrow headers, on their own page.
+    await panel(page, tag, cfg, name, errors);
     await page.close();
   } finally {
     await b.close().catch(() => {});

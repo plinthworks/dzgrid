@@ -36,7 +36,8 @@ describe('34: a header with buttons pushed to its end by a growing item, not by 
     expect(FILTERS_CSS).toContain(':where(.dzg-hcell:has(>.dzg-fbtn):not([data-align],:has(.dzg-hfbox)))::before{content:"";order:1;flex:auto;margin-inline-start:calc(-1*var(--dzg-space,.25rem))}');
     expect(FILTERS_CSS).not.toContain('margin-inline-start:auto');
     // The end packing kept (a too-narrow cell cuts the title's side, never the grip's gap).
-    expect(FILTERS_CSS).toContain(':where(.dzg-hcell:has(>.dzg-fbtn)){justify-content:end}');
+    // 1.12.1: the same rule makes the cell a size container (presentation-settings.md 43).
+    expect(FILTERS_CSS).toContain(':where(.dzg-hcell:has(>.dzg-fbtn)){justify-content:end;container-type:inline-size}');
   });
 });
 
@@ -180,8 +181,12 @@ describe('39–40: the pagination bar apart from the popups’ buttons, every lo
     for (const f of ['pager.css', 'pager.unlayered.css', 'pager.scss']) expect([pkg.exports[`./${f}`], pkg.files.includes(f)]).toEqual([`./${f}`, true]);
   });
 
-  it('no other sheet reads the buttons’ variables: menus and panels keep their own look', () => {
-    for (const f of ['menu', 'columns', 'columns-panel', 'dock', 'filters-panel', 'dzgrid', 'edit', 'grouping', 'pivot']) expect(file(`../${f}.css`), f).not.toMatch(/--dzg-(pager-)?button-/);
+  it('no other sheet reads the buttons’ variables: menus and panels keep their own look — but the columns panel’s footer (1.12.1, 42)', () => {
+    for (const f of ['menu', 'columns', 'dock', 'filters-panel', 'dzgrid', 'edit', 'grouping', 'pivot']) expect(file(`../${f}.css`), f).not.toMatch(/--dzg-(pager-)?button-/);
+    // The columns panel: its footer's buttons only, never the pager's.
+    const cp = file('../columns-panel.css');
+    expect(cp).not.toMatch(/--dzg-pager-button-/);
+    expect([...cp.matchAll(/([^{}]+)\{[^}]*--dzg-button-/g)].map((m) => m[1]!.trim())).toEqual(['.dzg-cp-foot button', '.dzg-cp-foot button::before,\n  .dzg-cp-foot button::after', '.dzg-cp-foot button:hover', '.dzg-cp-foot button:active']);
   });
 });
 

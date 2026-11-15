@@ -317,6 +317,42 @@ everything an application needs is a `--dzg-*` variable (or a `theme` key, or a 
     first point to the line's start. The buttons' accessible names are unchanged (« First page », …): the icon, as the
     character, is hidden from screen readers. With the layered and the unlayered sheets, under a page's reset.
 
+### 1.12.1 — the columns panel's look, a narrow header's title (owner 2026-11-15, « pas du tout stylé, c'est moche »)
+Seen in the owner's app (dark, Tailwind 3's preflight, the panel docked): names higher than their boxes, uneven gaps, the
+search's label floating over an empty box, the lock between box and name, the head's « – ⋯ × » loose; with the panel
+open, narrow columns' titles shrank to one letter or nothing.
+
+42. **The columns panel, one polished default look** (`columns-panel.css`, `dock.css`; light and dark, both directions,
+    the layered and unlayered copies, with and without a page's reset). Each row: the box and the name centred on one
+    line, at least `--dzg-panel-row-height` (2rem) high, the name's line taking the row (a description, when there is
+    one, the second line under it: the box and the buttons stay centred over both); the row tinted under the pointer
+    (`--dzg-panel-hover-bg`, `--tz-bg-raised`). The box a native checkbox in the accent, 1rem, no margin. A box that
+    cannot flip (`hideable: false`, the last one shown) is drawn as a lock **in the box's place**, muted, the box itself
+    kept there (transparent, still focused, its ring drawn): its state (`aria-disabled`) and, for the last one, its
+    description are what is heard; no new text (a new message key would change `ColumnsMessages`, an owner decision).
+    The search **one field**: a magnifier at its start, the input after it, the edge and the focus ring drawn on the
+    field (an outline: a reset's `border-width: 0` cannot erase it); `chooser.search` its placeholder **and** its
+    accessible name (`aria-label`) — no text above it (owner 2026-11-15; replaces columns-chooser.md 14 « visible
+    label »: the magnifier stays in view). The list scrolls inside, the search and the footer stay. The footer's « Tout
+    afficher » and « Réinitialiser » read the grid's button variables (`--dzg-button-bg`, `-fg`, `-border`, `-radius`,
+    `-height`, `-padding-inline`, `-font-weight`, `-font-size`, `-hover-bg`, `-hover-fg`, `-active-bg`; 36), their edge
+    an outline too, after a separator line. Docked, the head: the title (`--dzg-panel-title-font-size` .9375rem,
+    `--dzg-panel-title-font-weight` 600), then « Replier », « Placer », « Fermer » as square icon buttons (1.75rem,
+    the same glyph size, a hover tint, the focus ring inside), each with a tooltip (`title`) equal to its accessible
+    name. Variables, defaults the new look: `--dzg-panel-bg` (`--tz-bg`), `--dzg-panel-border` (the head's and the
+    footer's separators, the area's edge; `--tz-border`), `--dzg-panel-padding` (.75rem), `--dzg-panel-gap` (.5rem,
+    between search, list and footer), `--dzg-panel-row-height`, `--dzg-panel-hover-bg`, `--dzg-panel-title-font-size`,
+    `--dzg-panel-title-font-weight`. Every control a visible focus. No class to write: the variables are the way in.
+43. **A narrow header keeps its title.** A header cell with a filter button is a size container; **under 6.5rem**
+    (104 px at the default text size) its title comes first: the unsorted mark (`icons.sortNone`, 25; a hint, the header
+    sorts on a click without it) leaves the line (out of the flow, no ink: no room, no gap), and the filter button of a column **not filtered** takes no room and no ink at
+    rest (no area either: a press near the grip stays the grip's; the grip's room beside it goes to the title, as in a
+    header without buttons): it comes back while the header is under the pointer or holds the focus (the header itself or its button: the keys reach them as before — the header in the
+    grid's arrow order, the button from it — named as before; never `display: none`). A sorted mark and a filtered funnel always show. So at the 80 px floor (column-resize.md 21, unchanged) an
+    unsorted, unfiltered title shows at least two characters and « … »; sorted, still two. Wider, nothing changes.
+    Auto-size measures a header as if wide (its probe is no container). Where: the filters' layout (`FILTERS_CSS`,
+    injected: the layered and the unlayered sheets alike). The column menu's ⋮ is not drawn there (under 96 px).
+
 ## Right to left
 The separator, the last column's line, the arrow's place and the header padding are logical; the separator's
 background position is mirrored by `:dir(rtl)`.
@@ -324,6 +360,7 @@ background position is mirrored by `:dir(rtl)`.
 ## Tests
 `packages/dom/test/presentation-1-12.test.ts` (25, 29, 32), `packages/theme/test/presentation-1-12.test.ts` (24, 26–33,
 both copies, contrast pairs, the guide's table), `packages/theme/test/presentation-1-12-fixes.test.ts` (34–37, 39–40),
-`packages/dom/test/filters-set-width.test.ts` (38), `packages/dom/test/pager-icons.test.ts` (41), browsers `node scripts/browser-1-12.mjs` (Chrome, Firefox, WebKit ×
+`packages/dom/test/filters-set-width.test.ts` (38), `packages/dom/test/pager-icons.test.ts` (41),
+`packages/theme/test/panel-1-12-1.test.ts` and `packages/dom/test/panel-1-12-1.test.ts` (42–43), browsers `node scripts/browser-1-12.mjs` (Chrome, Firefox, WebKit ×
 layered / unlayered × light / dark × ltr / ar × a page with Tailwind 3's preflight; axe; every variable's default and
-effect, table-driven; 34 the header's places, 37 the forced row text, 38 the list's width; 39–40 the pager apart from the popups' buttons, each bar variable's default and effect; 41 the pager's icons: size, colour, disabled colour, mirrored, names).
+effect, table-driven; 34 the header's places, 37 the forced row text, 38 the list's width; 39–40 the pager apart from the popups' buttons, each bar variable's default and effect; 41 the pager's icons: size, colour, disabled colour, mirrored, names; 42 the panel's rows (box and name centres within 1.5 px, heights), search field, lock, head, axe; 43 narrow titles at 80 px, auto-size).

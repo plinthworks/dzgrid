@@ -13,6 +13,11 @@
 // `_controls.scss` (muted, the text colour and the raised surface on hover), the shown tab in the text colour; the area's
 // line alone divides it from the rows: the edge's own line and a grip in its middle show only under the pointer and
 // focused, in the accent (owner 2026-11-07: a grip at rest read as a stray scroll bar beside the list).
+//
+// 1.12.1 (owner 2026-11-15; presentation-settings.md 42): the head the panel's padding, its title from
+// `--dzg-panel-title-font-*`, its line an inset shadow (a reset's `border-width: 0` cannot erase it); « Replier »,
+// « Placer », « Fermer » 1.75rem squares, one glyph size; the dock's ring on its own parts (a panel inside draws its own);
+// the lines in `--dzg-panel-border`, the panel inside padded by `--dzg-panel-padding`.
 // ─────────────────────────────────────────────────────────────────────────────
 
 @use 'controls' as c;
@@ -41,25 +46,26 @@ $layered: true !default;
   }
 
   .dzg-dock-head {
-    gap: 0.25rem;
-    padding: 0.375rem 0.5rem;
-    border-block-end: var(--dzg-line, 1px) solid var(--tz-border);
+    gap: 0.125rem;
+    padding-block: 0.375rem;
+    padding-inline: var(--dzg-panel-padding, 0.75rem) 0.375rem;
+    box-shadow: inset 0 calc(-1 * var(--dzg-line, 1px)) var(--dzg-panel-border, var(--tz-border));
   }
 
   .dzg-dock[data-collapsed] .dzg-dock-head {
-    border-block-end: 0;
+    box-shadow: none;
   }
 
   .dzg-dock[data-area='end'] {
-    border-inline-start: var(--dzg-line, 1px) solid var(--tz-border);
+    border-inline-start: var(--dzg-line, 1px) solid var(--dzg-panel-border, var(--tz-border));
   }
 
   .dzg-dock[data-area='start'] {
-    border-inline-end: var(--dzg-line, 1px) solid var(--tz-border);
+    border-inline-end: var(--dzg-line, 1px) solid var(--dzg-panel-border, var(--tz-border));
   }
 
   .dzg-dock[data-area='bottom'] {
-    border-block-start: var(--dzg-line, 1px) solid var(--tz-border);
+    border-block-start: var(--dzg-line, 1px) solid var(--dzg-panel-border, var(--tz-border));
   }
 
   // The grip: a short bar across the gutter's middle.
@@ -99,11 +105,20 @@ $layered: true !default;
   }
 
   .dzg-dock-title {
-    padding-inline-start: 0.25rem;
-    font-weight: 600;
+    font-size: var(--dzg-panel-title-font-size, 0.9375rem);
+    font-weight: var(--dzg-panel-title-font-weight, 600);
   }
 
   @include c.button('.dzg-dock-head button', true, 0 0.375rem, false);
+
+  // « Replier », « Placer », « Fermer »: squares, one glyph size.
+  .dzg-dock-head button:not(.dzg-dock-tab) {
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+    padding: 0;
+    font-size: 1.125rem;
+    line-height: 1;
+  }
 
   .dzg-dock-tab[aria-selected='true'] {
     color: var(--tz-fg);
@@ -111,7 +126,8 @@ $layered: true !default;
     box-shadow: inset 0 -2px 0 var(--tz-accent);
   }
 
-  .dzg-dock :focus-visible {
+  .dzg-dock-head :focus-visible,
+  .dzg-dock-sep:focus-visible {
     outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
     outline-offset: -2px;
   }
@@ -120,7 +136,7 @@ $layered: true !default;
     inline-size: auto;
     block-size: 100%;
     max-block-size: none;
-    padding: 0.5rem;
+    padding: var(--dzg-panel-padding, 0.75rem);
   }
 
   @media (forced-colors: active) {

@@ -28,6 +28,11 @@ et `--dzg-set-list-max-width` (`min(32rem, 90vw)`). Une valeur plus longue garde
 entier s’affiche au survol et est lu par les lecteurs d’écran. De droite à gauche et en arabe pareil ; la fenêtre reste
 dans l’écran.
 
+**Un titre étroit garde son nom** (1.12.1) : sous 6.5rem, le titre passe d’abord — au moins deux lettres et « … » à la
+largeur minimale de 80 px. Le bouton de filtre d’une colonne non filtrée apparaît sous le pointeur ou avec le focus
+(toujours atteignable au clavier, Alt+↓) ; la marque d’une colonne filtrée et celle d’un tri restent affichées ; la
+marque « non triée » de l’application (`icons.sortNone`) n’y est pas dessinée.
+
 **Deux entrées, une même fonction.** `@dzgrid/dom/filters` a toutes les sortes : ses formulaires de jours et
 d’instants utilisent un calendrier chargé à la demande, qui demande `@tzslot/core` et `@tzslot/dom` installés.
 `@dzgrid/dom/filters-base` est le même `filters()` sans le calendrier : texte, nombre, oui/non et liste de valeurs

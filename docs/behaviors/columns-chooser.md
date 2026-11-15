@@ -71,7 +71,8 @@ buttons and a named handle could not live inside it)
     « Réinitialiser » (`chooser.reset`): as the menu's reset (`column-menu.md` 15). **No « Tout masquer »** (O1).
 
 **Search**
-14. A text box labelled `chooser.search` (visible label, no placeholder alone), `type="search"`. Matching:
+14. A text box named `chooser.search` (1.12.1, owner 2026-11-15: its placeholder and `aria-label`, a magnifier in view;
+    before, a visible label — presentation-settings.md 42), `type="search"`. Matching:
     the header text and the group names, folded as the quick search (case, accents, Arabic hamza forms,
     harakat, tatweel, digits), « contains ». A group matches → all its columns show; a column matches → its
     groups show around it.
@@ -150,7 +151,7 @@ Arabic list is isolated (`<bdi>`).
 - 2.5.7: reordering by a single pointer without dragging (▲ / ▼, 18); Alt+arrows for the keyboard.
 - 2.5.8: checkboxes, ▲, ▼, handles and buttons 24 × 24 px.
 - 2.4.3: focus in on opening, back to the anchor on closing; Tab trapped while modal.
-- 3.3.2: visible label on the search box; 4.1.2: native checkboxes (checked state said by every reader).
+- 3.3.2: the search box's name as its placeholder and `aria-label`, a magnifier beside it (1.12.1, owner); 4.1.2: native checkboxes (checked state said by every reader).
 - 4.1.3: counts and changes said politely; 1.4.10: fits 320 px; forced colours: ticks and focus as shapes.
 
 ## Decided (`docs/phase-6-steps/decisions.md` « Step 1 follow-ups »)

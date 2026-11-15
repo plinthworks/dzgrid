@@ -26,6 +26,11 @@ It opens from the [`columnMenu()`](../column-menu/) when the menu gets it in `us
 own button with `chooserFeature.api(grid).open(button)`. With [`dock()`](../dock/), it is a side panel instead of a
 window. Without the `-columns` texts, the grid is not made: an error names the missing keys.
 
+Its look (`@dzgrid/theme/columns-panel.css`, 1.12.1): the search is one field with a magnifier, its text the placeholder
+and the field's name; each row a box and its name on one line; a column that cannot be hidden shows a lock where its box
+would be. The footer's buttons follow the grid's button variables (`--dzg-button-*`); the panel's own are
+`--dzg-panel-*` (row height, hover, padding, gaps, lines, title) — see [Theming](../../guides/theming-rtl/).
+
 ## Options
 
 - `onClose`: called after the window closed (the focus is already back).

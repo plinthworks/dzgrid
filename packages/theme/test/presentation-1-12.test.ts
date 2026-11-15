@@ -138,14 +138,15 @@ describe('the guide lists every variable the sheets read, and nothing else (owne
   // The pagination bar's (presentation-settings.md 40): CSS variables only — 43 keys would cost ≈ 170 B of
   // @dzgrid/dom/theme, past its line. The new strip ones and every --dzg-pager-*; none of them is a key.
   const BAR = ['--dzg-footer-line', '--dzg-footer-padding-block', '--dzg-footer-padding-inline', '--dzg-footer-height', '--dzg-footer-gap', '--dzg-footer-font-size', '--dzg-footer-justify', '--dzg-footer-align'];
-  const cssOnly = (v: string) => v.startsWith('--dzg-pager-') || BAR.includes(v);
+  // The columns panel's (1.12.1, 42): CSS variables only too (@dzgrid/dom/theme has no room); `--dzg-panel-bg` a key since 1.9.0.
+  const cssOnly = (v: string) => v.startsWith('--dzg-pager-') || BAR.includes(v) || (v.startsWith('--dzg-panel-') && v !== '--dzg-panel-bg');
 
   it('every variable a sheet reads is a theme key (or written by the grid, or one of the pagination bar’s)', () => {
     expect(used.filter((v) => !keyed.has(v) && !cssOnly(v)).sort()).toEqual([]);
     expect([...keyed].filter(cssOnly)).toEqual([]);
     // 8 strip, 38 pager (1.12.0 review: the hover, active and disabled edges). The rich tooltips' variables moved to
-    // DzTooltip (`--dzt-*`, owner 2026-11-14).
-    expect(used.filter(cssOnly)).toHaveLength(46);
+    // DzTooltip (`--dzt-*`, owner 2026-11-14). 1.12.1: 7 of the columns panel's.
+    expect(used.filter(cssOnly)).toHaveLength(53);
   });
 
   for (const lang of ['', 'fr/']) {

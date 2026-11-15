@@ -47,7 +47,7 @@ describe('dock.css', () => {
     // The head's buttons and tabs: the theme's quiet button (muted, no face; the text colour on the raised surface on hover), 24 px.
     expect(decl('.dzg-dock-head button')).toBe('box-sizing: border-box; min-block-size: var(--dzg-target-min, 24px); padding: 0 0.375rem; border: var(--dzg-line, 1px) solid transparent; border-radius: var(--dzg-radius, 0.375rem); color: var(--tz-fg-muted); background: transparent; font: inherit; cursor: pointer;');
     expect(decl('.dzg-dock-head button:hover')).toBe('color: var(--tz-fg); background: var(--tz-bg-raised);');
-    expect(decl('.dzg-dock-box > .dzg-cp')).toBe('inline-size: auto; block-size: 100%; max-block-size: none; padding: 0.5rem;');
+    expect(decl('.dzg-dock-box > .dzg-cp')).toBe('inline-size: auto; block-size: 100%; max-block-size: none; padding: var(--dzg-panel-padding, 0.75rem);'); // 1.12.1 (42)
   });
 
   it('forced colours: the edge CanvasText, Highlight when focused; the shown tab Highlight', () => {

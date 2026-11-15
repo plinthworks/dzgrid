@@ -16,7 +16,7 @@ afterEach(() => {
 });
 
 describe('opening', () => {
-  it('a modal dialog named by its visible title; the focus in the search box, which has a visible label', () => {
+  it('a modal dialog named by its visible title; the focus in the search box, named and hinted by its text (1.12.1)', () => {
     const t = cmake();
     expect(t.api().isOpen).toBe(false);
     expect(t.api().open(t.appButton)).toBe(true);
@@ -28,8 +28,10 @@ describe('opening', () => {
     expect(t.panel()!.contains(title)).toBe(true);
     expect(d.hasAttribute('aria-label')).toBe(false);
     expect(t.focused()).toBe('search');
-    expect(t.search()!.closest('label')!.textContent).toContain('Search a column');
-    expect(t.search()!.hasAttribute('placeholder')).toBe(false);
+    // 1.12.1 (owner 2026-11-15, presentation-settings.md 42): one field, its text the placeholder and the name — before, a
+    // visible label above it and no placeholder.
+    expect(t.search()!.getAttribute('aria-label')).toBe('Search a column');
+    expect(t.search()!.placeholder).toBe('Search a column');
     // The list named; « Show all », « Reset », « Close » after it.
     expect(t.panel()!.querySelector('.dzg-cp-list')!.getAttribute('aria-label')).toBe('Columns');
     expect(t.panel()!.querySelector('.dzg-cp-list')!.getAttribute('role')).toBe('list');

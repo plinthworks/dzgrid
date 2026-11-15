@@ -19,6 +19,15 @@
 // or holds the focus; with a hovering pointer they take no room until then (the name gets the row's width), never
 // removed for touch, the keyboard or assistive technologies; a group's name a
 // section label (small, muted, capitals); the search box outlined (3:1); one focus ring for the dialog's controls.
+//
+// 1.12.1 (owner 2026-11-15, « pas du tout stylé, c'est moche »; presentation-settings.md 42): one polished default look,
+// the same with a page's reset (Tailwind 3's preflight) and either copy. Each row a grid whose first line takes the
+// row (`1fr`: the box and the name centred on one line; a description the second line), at least
+// `--dzg-panel-row-height` high, tinted by `--dzg-panel-hover-bg`; the box a 1rem native checkbox, no margin; a box that
+// cannot flip drawn as a lock in its place (the row's `::before` over the box's cell, the box kept transparent: still
+// focused, its ring drawn). The search one field: a magnifier, then the bare input; its edge and ring outlines on the
+// field (a reset's `border-width: 0` cannot erase an outline). The footer after a line (an inset shadow, same reason),
+// its buttons on the grid's button variables (`--dzg-button-*`), their edge an outline.
 // ─────────────────────────────────────────────────────────────────────────────
 
 @use 'controls' as c;
@@ -43,46 +52,78 @@ $layered: true !default;
   .dzg-cp {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--dzg-panel-gap, 0.5rem);
     box-sizing: border-box;
     inline-size: min(22.5rem, 100vw - 2rem);
     max-block-size: 70vh;
+    line-height: 1.25;
+    accent-color: var(--tz-accent);
   }
 
   .dzg-cp-title {
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: var(--dzg-panel-title-font-size, 0.9375rem);
+    font-weight: var(--dzg-panel-title-font-weight, 600);
   }
 
   .dzg-cp-gl {
     display: block;
-    padding-block: 0.5rem 0.125rem;
+    padding: 0.5rem 0.5rem 0.125rem;
     color: var(--tz-fg-muted);
     font-size: 0.75em;
     font-weight: 600;
     text-transform: uppercase;
   }
 
+  // One field: the magnifier, then the input; the edge and the ring on the field.
   .dzg-cp-q {
     display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    align-items: center;
+    gap: 0.5rem;
+    block-size: 2rem;
+    padding-inline: 0.625rem;
+    outline: var(--dzg-line, 1px) solid var(--dzg-input-border, var(--tz-fg-muted));
+    outline-offset: -1px;
+    border-radius: var(--dzg-radius, 0.375rem);
+    color: var(--tz-fg-muted);
+    background: var(--dzg-input-bg, var(--tz-bg));
   }
 
-  .dzg-cp-q input {
-    box-sizing: border-box;
-    min-block-size: 2rem;
-    padding-inline: 0.5rem;
-    border: var(--dzg-line, 1px) solid var(--tz-fg-muted);
-    border-radius: var(--dzg-radius, 0.375rem);
-    color: inherit;
-    background: var(--tz-bg);
-    font: inherit;
+  .dzg-cp-q::before {
+    content: '';
+    flex: none;
+    inline-size: 16px;
+    block-size: 16px;
+    background: currentColor;
+    clip-path: path(evenodd, 'M7 1.5a5.5 5.5 0 1 0 3.4 9.8l3.7 3.7 1-1-3.7-3.7A5.5 5.5 0 0 0 7 1.5zm0 1.5a4 4 0 1 1 0 8 4 4 0 0 1 0-8z');
+  }
+
+  .dzg-cp-q:focus-within {
+    outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+    outline-offset: -2px;
   }
 
   .dzg-cp :focus-visible {
     outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
     outline-offset: 1px;
+  }
+
+  // Bare inside its field (after the ring above: the field draws it).
+  .dzg-cp .dzg-cp-q input {
+    flex: 1;
+    min-inline-size: 0;
+    block-size: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    color: var(--tz-fg);
+    background: none;
+    font: inherit;
+    appearance: none;
+  }
+
+  .dzg-cp-q input::placeholder {
+    color: var(--tz-fg-muted);
+    opacity: 1;
   }
 
   .dzg-cp-list {
@@ -102,46 +143,51 @@ $layered: true !default;
     list-style: none;
   }
 
-  // The box and the buttons over both lines; the name on the first, the description on the second.
+  // The first line takes the row (the box and the name centred on it); a description the second, under the name.
   .dzg-cp-row {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) repeat(3, auto);
+    grid-template-columns: 1rem minmax(0, 1fr) repeat(3, auto);
+    grid-template-rows: 1fr auto;
     align-items: center;
-    column-gap: 0;
-    min-block-size: 32px;
-    padding: 0.25rem;
+    box-sizing: border-box;
+    min-block-size: var(--dzg-panel-row-height, 2rem);
+    padding: 0.125rem 0.5rem;
     border-radius: var(--dzg-radius, 0.375rem);
   }
 
   .dzg-cp-row:hover {
-    background: c.$hover;
+    background: var(--dzg-panel-hover-bg, var(--tz-bg-raised));
   }
 
-  .dzg-cp-row > :is(input, button) {
+  // Placed, not flowed: the lock (the row's `::before`) shares the box's cell.
+  .dzg-cp-row > input {
+    grid-area: 1/1/3;
+    inline-size: 1rem;
+    block-size: 1rem;
+    margin: 0;
+  }
+
+  .dzg-cp-row > button {
     grid-row: span 2;
   }
 
   // Above 200 rows only (the script marks the list): WebKit hit-tests a freshly drawn skipped row as its item.
   .dzg-cp-list[data-dzg-long] .dzg-cp-row {
     content-visibility: auto;
-    contain-intrinsic-size: auto 32px;
+    contain-intrinsic-size: auto var(--dzg-panel-row-height, 2rem);
   }
 
   .dzg-cp-row label,
   .dzg-cp-desc {
+    padding-inline-start: 0.5rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .dzg-cp-row label,
-  .dzg-cp-desc {
-    padding-inline-start: 0.375rem;
-  }
-
   // Under the name, never beside it: the name is never cut by it.
   .dzg-cp-desc {
-    grid-area: 2 / 2;
+    grid-area: 2/2;
     color: var(--tz-fg-muted);
     font-size: 0.8em;
   }
@@ -204,17 +250,19 @@ $layered: true !default;
     cursor: default;
   }
 
-  // A box that cannot flip (the last shown, `hideable: false`): faded AND a lock before its name, never colour alone.
-  .dzg-cp-row input[aria-disabled=true] {
-    opacity: 0.5;
+  // A box that cannot flip (the last shown, `hideable: false`): a lock in its place, never colour alone; the box kept
+  // there, transparent (still focused, its ring drawn).
+  .dzg-cp-row > input[aria-disabled=true] {
+    appearance: none;
   }
 
-  .dzg-cp-row input[aria-disabled=true] + label::before {
+  .dzg-cp-row:has(> input[aria-disabled=true])::before {
     content: '';
-    display: inline-block;
+    grid-area: 1/1/3;
+    justify-self: center;
     inline-size: 12px;
     block-size: 14px;
-    margin-inline-end: 0.375rem;
+    color: var(--tz-fg-muted);
     background: currentColor;
     clip-path: path("M1 6h10v8H1zM3 6V4a3 3 0 0 1 6 0v2H7.5V4a1.5 1.5 0 0 0-3 0v2z");
   }
@@ -236,11 +284,47 @@ $layered: true !default;
     flex-wrap: wrap;
     justify-content: flex-end;
     gap: 0.5rem;
-    padding-block-start: 0.5rem;
-    border-block-start: var(--dzg-line, 1px) solid var(--tz-border);
+    padding-block-start: var(--dzg-panel-gap, 0.5rem);
+    box-shadow: inset 0 var(--dzg-line, 1px) var(--dzg-panel-border, var(--tz-border));
   }
 
-  @include c.button('.dzg-cp-foot button');
+  // The grid's buttons (buttons.css, presentation-settings.md 36): their variables, today's look by default.
+  // The side room drawn by empty items, not a padding: a reset's `button { padding: 0 }` cannot take it.
+  .dzg-cp-foot button {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--dzg-button-height, 2rem);
+    padding: 0;
+    border: 0;
+    outline: var(--dzg-line, 1px) solid var(--dzg-button-border, var(--tz-border));
+    outline-offset: -1px;
+    border-radius: var(--dzg-button-radius, var(--dzg-radius, 0.375rem));
+    color: var(--dzg-button-fg, var(--tz-fg));
+    background: var(--dzg-button-bg, var(--tz-bg));
+    font: inherit;
+    font-weight: var(--dzg-button-font-weight, inherit);
+    cursor: pointer;
+  }
+
+  // Docked, « Close » is the area's × (the dock's layout hides it, at a weight under the display above).
+  .dzg-dock-box .dzg-cp-foot [data-act=close] {
+    display: none;
+  }
+
+  .dzg-cp-foot button::before,
+  .dzg-cp-foot button::after {
+    content: '';
+    inline-size: var(--dzg-button-padding-inline, 0.75rem);
+  }
+
+  .dzg-cp-foot button:hover {
+    color: var(--dzg-button-hover-fg, var(--tz-fg));
+    background: var(--dzg-button-hover-bg, var(--tz-bg-raised));
+  }
+
+  .dzg-cp-foot button:active {
+    background: var(--dzg-button-active-bg, #{c.$active});
+  }
 
   // Empty, out of the flow (no gap) but in the accessibility tree: a live region hidden until it speaks is often not
   // heard (WCAG 4.1.3, L4a).
@@ -249,7 +333,8 @@ $layered: true !default;
   }
 
   @media (forced-colors: active) {
-    .dzg-cp-row button::before {
+    .dzg-cp-row button::before,
+    .dzg-cp-q::before {
       forced-color-adjust: none;
       background: ButtonText;
     }
@@ -259,7 +344,7 @@ $layered: true !default;
       background: Highlight;
     }
 
-    .dzg-cp-row input[aria-disabled=true] + label::before {
+    .dzg-cp-row:has(> input[aria-disabled=true])::before {
       forced-color-adjust: none;
       background: CanvasText;
     }

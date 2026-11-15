@@ -5,6 +5,34 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.1] - 2026-11-15
+
+The columns panel looks finished, and a narrow column keeps its title (owner 2026-11-15, « pas du tout stylé, c'est
+moche », seen in a real app in dark mode with Tailwind 3's preflight; docs/behaviors/presentation-settings.md 42–43).
+A patch: nothing removed, no public type changed.
+
+### Changed
+- **The columns panel's default look** (`columns-panel.css`, `dock.css`, both copies; light and dark, both directions,
+  with or without a page's reset): each box and its name on one line (centred), rows a compact `2rem` with a hover tint;
+  the search one field — a magnifier, the text as placeholder and accessible name (no label floating above an empty box);
+  a column that cannot be hidden shows a muted lock **in its box's place** (the box kept, still focused and announced as
+  unavailable); the footer's « Show all » and « Reset » follow the grid's button variables (`--dzg-button-*`), after a
+  separator; edges and separators drawn so a reset's `border-width: 0` cannot erase them. Docked: the head's title, then
+  « Collapse », « Place », « Close » as square buttons of one glyph size, each with a tooltip equal to its name; the
+  dock's focus ring on its own parts (a panel inside draws its own).
+- New variables (defaults = the new look): `--dzg-panel-border`, `--dzg-panel-padding`, `--dzg-panel-gap`,
+  `--dzg-panel-row-height`, `--dzg-panel-hover-bg`, `--dzg-panel-title-font-size`, `--dzg-panel-title-font-weight`
+  (`--dzg-panel-bg` as before). The theming guide's table lists them.
+- **A narrow header keeps its title**: a header with a filter button narrower than 6.5rem shows its title first — at
+  least two letters and « … » at the 80 px floor. There the app's unsorted mark (`icons.sortNone`) is not drawn, and the
+  filter button of a column that is not filtered takes no room until the header is hovered or holds the focus (still
+  reached by the keyboard, named as before); a sorted mark and a filtered column's funnel always show. Auto-size still
+  measures the whole title; the 80 px floor is unchanged.
+
+### Upgrading from 1.12.0
+- Nothing to change. What you will see: the panel's new look; the search box's label is now its placeholder and
+  `aria-label`; narrow filterable headers show their title and reveal the filter button on hover or focus.
+
 ## [1.12.0] - 2026-11-13
 
 Every look a choice (owner 2026-11-13, « toujours laisser le choix »): a sensible default and a variable for each.

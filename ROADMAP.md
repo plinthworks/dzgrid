@@ -1433,6 +1433,17 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   +2 % line).
 - For the owner: commit, publish; whether `refresh({})` also routes through `api.reload()` (+17 B of K.8).
 
+## 1.12.1 — patch (2026-11-15; prepared, not published; owner « pas du tout stylé, c'est moche »)
+
+- [x] The columns panel's default look (presentation-settings.md 42): rows on one line, 2rem, hover tint; the search one
+  field (magnifier, placeholder + `aria-label`); the lock in the box's place; the footer on `--dzg-button-*`; the dock's
+  head square buttons with tooltips; seven `--dzg-panel-*` variables; edges a reset cannot erase.
+- [x] A narrow header keeps its title (43): the cell a size container, under 6.5rem the unsorted mark out and an
+  unfiltered button without room at rest; auto-size's probe no container; the 80 px floor unchanged.
+- [x] Browsers: `node scripts/browser-1-12.mjs` (12), page `v1-12-1.html` (`--panel` alone).
+- For the owner: `columns-panel.css` 1 667 / 1 400 and `dock.css` 860 / 800 beyond +2 % (`docs/release-1.12.1.md`);
+  commit, publish.
+
 ## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)
 
 - **Batch 1 — skeleton (2026-11-10, not committed).** `website/` (Astro Starlight, versions pinned as DzCalendar's,
