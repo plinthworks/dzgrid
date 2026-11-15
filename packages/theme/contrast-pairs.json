@@ -46,7 +46,8 @@
     { "what": "chooser row hovered: its description, ▲ ▼ and handle at rest", "fg": "--tz-fg-muted", "bg": "--tz-bg-raised", "min": 4.5 },
     { "what": "theme button pressed, chooser ▲ ▼ handle hovered", "fg": "--tz-fg", "bg": "--dzg-control-active-bg", "min": 4.5 },
     { "what": "focus ring on a hovered chooser row or theme button", "fg": "--dzg-focus-ring", "bg": "--tz-bg-raised", "min": 3 },
-    { "what": "chooser lock (a box that cannot flip, 1.12.1), on the panel and on a hovered row", "fg": "--tz-fg-muted", "bg": "--tz-bg", "min": 3 },
+    { "what": "the columns panel's search placeholder on its field (1.13.0, presentation-settings.md 44)", "fg": "--dzg-panel-search-placeholder", "bg": "--dzg-input-bg", "min": 4.5 },
+    { "what": "chooser lock (a box that cannot flip, 1.13.0), on the panel and on a hovered row", "fg": "--tz-fg-muted", "bg": "--tz-bg", "min": 3 },
     { "what": "ticked box on a selected row", "fg": "--tz-accent", "bg": "--dzg-row-selected-bg", "min": 3 },
     { "what": "selected row's bar at its start (a showcase theme's --dzg-select-bar)", "fg": "--tz-accent", "bg": "--dzg-row-selected-bg", "min": 3 },
     { "what": "resize grip, hover", "fg": "--tz-accent", "bg": "--dzg-header-bg", "min": 3 },
@@ -344,6 +345,7 @@
     "--dzg-box-on-bg": "var(--tz-accent)",
     "--dzg-box-edge": "var(--tz-fg-muted)",
     "--dzg-panel-bg": "var(--tz-bg)",
+    "--dzg-panel-search-placeholder": "var(--tz-fg-muted)",
     "--dzg-group-row-bg": "var(--dzg-header-bg)",
     "--dzg-editor-border": "var(--dzg-focus-ring)"
   }

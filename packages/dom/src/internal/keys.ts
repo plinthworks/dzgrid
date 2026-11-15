@@ -21,7 +21,13 @@ export interface CellPart {
  */
 export function cellKeys(g: GridContext<unknown>, sel: string, at: (cell: HTMLElement) => CellPart | null | undefined, tab: (cell: HTMLElement, i: number) => void, sorts?: boolean): void {
   g.scope.on(g.el.header, 'keydown', (e: KeyboardEvent) => {
-    const t = e.target as HTMLElement;
+    // A key in the frame an arrow key moved the focus (its DOM focus waits for the paint; presentation-settings.md 47):
+    // the paint done now, the key read where the focus is — the cell it reached, its part asked, not the previous
+    // cell's. (Read from the focus, not the event: another such listener may have painted first.)
+    if (g.pendingFocus) g.scheduler.flush();
+    let t = e.target as HTMLElement;
+    const a = (t.getRootNode() as Document).activeElement as HTMLElement;
+    if (t.matches('.dzg-hcell') && g.el.header.contains(a)) t = a;
     const cell = t.closest<HTMLElement>(sel);
     const m = cell && at(cell);
     if (!m) return;

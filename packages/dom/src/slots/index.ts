@@ -66,6 +66,9 @@ function setup(g: GridContext<unknown>): FeatureHandle {
         toggleSort: (multi) => void send({ type: 'sort.toggle', column: col.id, multi }),
         filter: seam()?.edits(col, label) ?? null,
       });
+      // A part's label takes the cell's room, whatever the alignment (presentation-settings.md 46): grown by its own
+      // style (with or without a sheet); the layouts' spacer before the buttons stays out beside it (`[style*=flex-grow]`).
+      label.style.flexGrow = drew ? '1' : '';
       const cell = label.closest<HTMLElement>('.dzg-hcell');
       const now = g.doc.activeElement;
       if (cell && (now === cell || !cell.contains(now))) tab(cell, -1);

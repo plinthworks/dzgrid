@@ -1,4 +1,4 @@
-// 1.12.1 (docs/behaviors/presentation-settings.md 42–43; owner 2026-11-15): the columns panel's search one field — its
+// 1.13.0 (docs/behaviors/presentation-settings.md 42–43; owner 2026-11-15): the columns panel's search one field — its
 // text the placeholder and the accessible name, no text above it; the dock's head buttons with a tooltip equal to their
 // name; a narrow header's title first (the filters' layout: the header cell a size container, the unsorted mark and an
 // unfiltered filter button without room at rest under 6.5rem, back on hover and focus). Expectations by hand.

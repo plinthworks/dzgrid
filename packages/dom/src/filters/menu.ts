@@ -10,6 +10,9 @@ import type { Resolve } from './resolve.js';
 
 type C = SlotContext['filter'];
 
+/** A filterable column's header shows the button: not where `header.filterBox` or `filterButton: false` stands for it (45). */
+export const button = (col: ResolvedColumn<unknown>): boolean => col.def.ui?.header !== 'header.filterBox' && col.def.filterButton !== false;
+
 export interface Menu extends Opener {
   /** Opens the column's popup at `anchor` (by default the header button, else the header cell, else the floating cell). */
   open(column: string, anchor?: HTMLElement | null): boolean;
@@ -129,7 +132,8 @@ export function menu(g: GridContext<unknown>, resolve: Resolve, commit: Commit, 
       const own = label ?? name(col);
       const named = filtered ? g.msg('header.withFilter', { header: own }) : has ? own : undefined;
       // No button where `header.filterBox` stands for it (owner's look, app-feedback 14, 22): the header box is the way in.
-      if (!has || col.def.ui?.header === 'header.filterBox') return b?.remove(), named;
+      // Nor where the column leaves it out (`filterButton: false`, presentation-settings.md 45): its header part offers the filter.
+      if (!has || !button(col)) return b?.remove(), named;
       if (!b) {
         b = g.doc.createElement('button');
         b.type = 'button';

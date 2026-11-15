@@ -90,7 +90,7 @@
   justify-content: flex-end;
 }
 
-.dzg-hcell:has(> .dzg-mbtn, > .dzg-reapply):where(:not([data-align], :has(.dzg-hfbox)))::before {
+.dzg-hcell:has(> .dzg-mbtn, > .dzg-reapply):where(:not([data-align], :has(.dzg-hfbox, > [style*=flex-grow])))::before {
   content: "";
   order: 1;
   flex: auto;

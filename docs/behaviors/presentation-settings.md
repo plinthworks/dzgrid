@@ -317,7 +317,7 @@ everything an application needs is a `--dzg-*` variable (or a `theme` key, or a 
     first point to the line's start. The buttons' accessible names are unchanged (« First page », …): the icon, as the
     character, is hidden from screen readers. With the layered and the unlayered sheets, under a page's reset.
 
-### 1.12.1 — the columns panel's look, a narrow header's title (owner 2026-11-15, « pas du tout stylé, c'est moche »)
+### 1.13.0 — the columns panel's look, a narrow header's title (owner 2026-11-15, « pas du tout stylé, c'est moche »)
 Seen in the owner's app (dark, Tailwind 3's preflight, the panel docked): names higher than their boxes, uneven gaps, the
 search's label floating over an empty box, the lock between box and name, the head's « – ⋯ × » loose; with the panel
 open, narrow columns' titles shrank to one letter or nothing.
@@ -353,6 +353,31 @@ open, narrow columns' titles shrank to one letter or nothing.
     Auto-size measures a header as if wide (its probe is no container). Where: the filters' layout (`FILTERS_CSS`,
     injected: the layered and the unlayered sheets alike). The column menu's ⋮ is not drawn there (under 96 px).
 
+#### Found by the owner's app (2026-11-15, before publishing: « mettre tout en 1.13.0 »)
+44. **The columns panel's search placeholder has its own colour**, `--dzg-panel-search-placeholder` (default
+    `--tz-fg-muted`, at least 4.5:1 on the field, `--dzg-input-bg` / `--tz-bg`, light and dark: a contrast pair). A page's
+    own placeholder rule (Tailwind 3's preflight `input::placeholder` gray 400, an app's `placeholder:text-gray-500`,
+    unlayered) used to win over the layered sheet: 4.18:1 light, 1.76:1 dark in the owner's app. The panel's rule now
+    holds against them (`!important`, the variable the one way in), opacity 1; both copies.
+45. **A column's filter button can be left out**: `filterButton: false` (`ColumnDef`, beside `menu: false`). The header
+    then draws no funnel and keeps no room for it (no 80 px floor for it); the filter stays reachable — a header part's
+    `filter` context (`set`, `openFilter()`, the part provides the way in), Alt+ArrowDown on the header, the column menu,
+    the floating row, the filters panel. The header's name still says « filtered » when a filter is in force. Without
+    a filter (`filter: false`, no `filters()`) it changes nothing. Same rule as `header.filterBox` (parts.md), which never
+    had the button.
+46. **A header part fills its header cell**, whatever the alignment: the label holding a part takes the room left beside
+    the sort mark and the buttons (before, only an aligned header — `headerAlign` set, or a number column — grew its
+    label; with none, an empty spacer took the room and the part stayed as narrow as its content). Its content's own
+    alignment is the part's (`headerAlign` still sets `text-align` in it). The grid's own title is unchanged. The label
+    grows by its own style (`flex-grow`, with or without a sheet); the layouts' spacer before the buttons stays out beside it.
+47. **Enter right after an arrow key on the headers goes into the header part**, not to a sort. An arrow moves the
+    grid's focus at once but the DOM focus at the next frame (the paint): an Enter in the same frame came from the
+    previous header, the part of the new one was not consulted, and the grid sorted the new column. Now a key on a
+    header holding a part (or a floating filter cell) while a focus move is pending first paints (the frame's work done
+    now), then the key is read on the header the focus moved to (`cellKeys`, shared by both): Enter or F2 enter its part when the part takes the focus (parts.md « Keys in a header cell holding a
+    control »), Enter sorts only when it does not. The sort stays on a click on the header, and on Enter on a header
+    whose part takes no focus.
+
 ## Right to left
 The separator, the last column's line, the arrow's place and the header padding are logical; the separator's
 background position is mirrored by `:dir(rtl)`.
@@ -361,6 +386,6 @@ background position is mirrored by `:dir(rtl)`.
 `packages/dom/test/presentation-1-12.test.ts` (25, 29, 32), `packages/theme/test/presentation-1-12.test.ts` (24, 26–33,
 both copies, contrast pairs, the guide's table), `packages/theme/test/presentation-1-12-fixes.test.ts` (34–37, 39–40),
 `packages/dom/test/filters-set-width.test.ts` (38), `packages/dom/test/pager-icons.test.ts` (41),
-`packages/theme/test/panel-1-12-1.test.ts` and `packages/dom/test/panel-1-12-1.test.ts` (42–43), browsers `node scripts/browser-1-12.mjs` (Chrome, Firefox, WebKit ×
+`packages/theme/test/panel-1-12-1.test.ts` and `packages/dom/test/panel-1-12-1.test.ts` (42–43), `packages/theme/test/app-1-13.test.ts` and `packages/dom/test/app-1-13.test.ts` (44–47), browsers `node scripts/browser-1-12.mjs` (Chrome, Firefox, WebKit ×
 layered / unlayered × light / dark × ltr / ar × a page with Tailwind 3's preflight; axe; every variable's default and
-effect, table-driven; 34 the header's places, 37 the forced row text, 38 the list's width; 39–40 the pager apart from the popups' buttons, each bar variable's default and effect; 41 the pager's icons: size, colour, disabled colour, mirrored, names; 42 the panel's rows (box and name centres within 1.5 px, heights), search field, lock, head, axe; 43 narrow titles at 80 px, auto-size).
+effect, table-driven; 34 the header's places, 37 the forced row text, 38 the list's width; 39–40 the pager apart from the popups' buttons, each bar variable's default and effect; 41 the pager's icons: size, colour, disabled colour, mirrored, names; 42 the panel's rows (box and name centres within 1.5 px, heights), search field, lock, head, axe; 43 narrow titles at 80 px, auto-size; 44 the placeholder's contrast and variable under the preflight, 45 no funnel, 46 a part's width at each alignment, 47 an arrow then Enter in one task).

@@ -69,8 +69,8 @@
 }
 
 .dzg-cp-q input::placeholder {
-  color: var(--tz-fg-muted);
-  opacity: 1;
+  color: var(--dzg-panel-search-placeholder, var(--tz-fg-muted)) !important;
+  opacity: 1 !important;
 }
 
 .dzg-cp-list {

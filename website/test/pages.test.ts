@@ -36,7 +36,7 @@ const WRITTEN = [
   'settings/inject-styles', 'settings/nonce',
   // Batch 3 (2026-11-11): one page per column option.
   'column-options/index', 'column-options/agg-func', 'column-options/align', 'column-options/assume-zone',
-  'column-options/chooser', 'column-options/codec', 'column-options/col-span', 'column-options/collapse-priority',
+  'column-options/chooser', 'column-options/codec', 'column-options/filter-button', 'column-options/col-span', 'column-options/collapse-priority',
   'column-options/csv', 'column-options/edit', 'column-options/editable', 'column-options/enum-options',
   'column-options/field', 'column-options/filter', 'column-options/flex', 'column-options/group-show',
   'column-options/groupable', 'column-options/header', 'column-options/header-align', 'column-options/header-short',

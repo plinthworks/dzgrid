@@ -11,7 +11,7 @@ import { floatingRow } from './floating.js';
 import { filterBoxPart } from './header-box.js';
 import { booleanForm, form, NUM_SPEC, rowsOk, several, TEXT_SPEC } from './forms.js';
 import { numberPart, textPart } from './inputs.js';
-import { menu, type Menu } from './menu.js';
+import { button, menu, type Menu } from './menu.js';
 import { setForm, setKit, type SetKit } from './set.js';
 import { resolver } from './resolve.js';
 import { injectFilterStyles } from './styles.js';
@@ -172,7 +172,7 @@ function setup(g: GridContext<unknown>, o: FiltersOptions, keep: (m: Menu) => vo
   keep(popup);
   // The filter button beside the grip and a title stub, 24 × 3 + 8 px at least; a column's own minWidth wins
   // (column-resize.md 21–24).
-  g.columns.floor?.((c) => (popup.can(c) && c.def.ui?.header !== 'header.filterBox' ? 80 : 0));
+  g.columns.floor?.((c) => (popup.can(c) && button(c) ? 80 : 0));
   const row = floatingRow(g, resolve, commit, popup, px);
   // Shown or hidden live (floating-toggle.md): the row's spec in the header rows or not; a hide moves the grid's
   // focus off the row first. The paint reads the view's height before the header changes: one more reads it after.

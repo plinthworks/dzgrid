@@ -28,7 +28,7 @@ next day and finds them where they were.
 4. **The area's head.** One panel: its title. Two or more in one area: **tabs** (below). Then three buttons:
    « Replier » / « Déplier » (collapse, `aria-expanded`), « Placer … » (the menu « Au début · À la fin · En bas »,
    the current place ticked) and « Fermer … » (×). Every button 24 px at least, named with the panel's title; its
-   tooltip (`title`) the same name (1.12.1, presentation-settings.md 42).
+   tooltip (`title`) the same name (1.13.0, presentation-settings.md 42).
 5. **Collapse.** The area shrinks to its head, laid along the edge (a strip of `--dzg-dock-strip`, 2 rem, beside the
    rows; the head's height under them); the rows take the room. « Déplier », a tab, `Enter` on the edge (8), or the
    panel opened again restore it at its size. Collapsing does not hide the panel: its tab stays in the strip.

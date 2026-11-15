@@ -22,10 +22,10 @@ export const FILTERS_CSS =
   // Pushed to the end by an empty item that grows before it (`::before`, order 1: after the title and the sort mark), not
   // by a margin: Tailwind 3's preflight (`button { margin: 0 }`, unlayered) took the auto margin and, with the end packing
   // below, sent the title to the column's end (owner 2026-11-13). Its gap given back; a title that grows itself (an aligned
-  // column's, the filter box) needs none.
-  ':where(.dzg-hcell:has(>.dzg-fbtn):not([data-align],:has(.dzg-hfbox)))::before{content:"";order:1;flex:auto;margin-inline-start:calc(-1*var(--dzg-space,.25rem))}' +
+  // column's, the filter box, a header part's: 46) needs none.
+  ':where(.dzg-hcell:has(>.dzg-fbtn):not([data-align],:has(.dzg-hfbox,>[style*=flex-grow])))::before{content:"";order:1;flex:auto;margin-inline-start:calc(-1*var(--dzg-space,.25rem))}' +
   // Narrower than that (a column at its minimum), the cell packs at its end, so what is cut is the label's side.
-  // A size container (1.12.1, presentation-settings.md 43): under 6.5rem the title comes first — the unsorted mark leaves
+  // A size container (1.13.0, presentation-settings.md 43): under 6.5rem the title comes first — the unsorted mark leaves
   // the line (out of the flow: no room, no gap); an unfiltered button takes no room at rest (no area: a press on the grip
   // stays the grip's), back under the pointer or with the focus; never display: none. Without it the grip's room (the
   // cell's `::after`, which queries its own cell) goes to the title too: a plain header's title reaches the grip the same.

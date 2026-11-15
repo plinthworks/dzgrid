@@ -16,8 +16,8 @@
  * filter's list as wide as its longest value; and the 1.12.0 corrections' variables (buttons.css, the unsorted mark,
  * a row's text forced under `data-dzg-row-fg="force"`, `--dzg-row-state-fg`); and (39–40) the pagination bar: the popups'
  * button variables leave the pager's buttons and select as they are, the pager's own change the pager only, each bar
- * variable's default and effect, the text sizes (a menu item untouched); (12) 1.12.1, the columns panel's look and a
- * narrow header's title (page `v1-12-1.html`; `--panel` runs only it). The rich tooltips and popovers (sections 11,
+ * variable's default and effect, the text sizes (a menu item untouched); (12) 1.13.0, the columns panel's look and a
+ * narrow header's title (page `v1-12-1.html`; `--panel` runs only it, with (13): the owner's app findings, `?app=1`). The rich tooltips and popovers (sections 11,
  * 11b–11e) moved to DzTooltip with their code (owner 2026-11-14): its scripts/browser.mjs.
  */
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -236,7 +236,7 @@ const read = (page, { at, pseudo, p }) => page.evaluate(({ at, pseudo, p }) => {
 }, { at, pseudo, p });
 
 /**
- * (12) 1.12.1 (presentation-settings.md 42–43; owner 2026-11-15, « pas du tout stylé, c'est moche »): page
+ * (12) 1.13.0 (presentation-settings.md 42–43; owner 2026-11-15, « pas du tout stylé, c'est moche »): page
  * `v1-12-1.html`, the columns panel docked at the end and narrow columns with a filter button and the app's unsorted mark.
  * The panel's rows: box and name centres within 1.5 px, the names aligned, one compact height (2rem); the search one field
  * (no text above it, its name and placeholder, the magnifier at its start, an edge a reset cannot erase, the ring on the
@@ -342,6 +342,76 @@ async function panel(page, tag, { css, dark, lang, preflight }, name, errors) {
   await page.setViewportSize({ width: 900, height: 700 });
 }
 
+/**
+ * (13) 1.13.0, found by the owner's app (presentation-settings.md 44–47): page `v1-12-1.html?app=1`, header parts holding
+ * a box (no alignment with and without the filter button, start, centre, end) and the docked panel. (44) The panel's
+ * search placeholder at least 4.5:1 on its field, light and dark, whatever the page's reset; `--dzg-panel-search-placeholder`
+ * recolours it. (45) `filterButton: false`: no funnel, Alt+ArrowDown still opens the filter. (46) A part's label fills
+ * the header's room at every alignment (the same width at each, wider by the button left out). (47) ArrowRight then Enter
+ * in one task: the focus in the next header's box, nothing sorted; then F2 the same.
+ */
+async function appFixes(page, tag, { css, dark, lang, preflight }, errors) {
+  await page.setViewportSize({ width: 1900, height: 700 });
+  await page.goto(site.url(`v1-12-1.html?app=1&lang=${lang}&css=${css}${dark ? '&dark=1' : ''}${preflight ? '&preflight=1' : ''}`));
+  await page.waitForFunction(() => window.ready === true, null, { timeout: 30000 });
+  await frames(page);
+  const ph = () => page.evaluate(() => {
+    const i = document.querySelector('.dzg-dock .dzg-cp-q input');
+    const rgb = (c) => c.match(/[\d.]+/g).slice(0, 3).map(Number);
+    const lum = (c) => { const v = rgb(c).map((x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; }); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; };
+    const fg = getComputedStyle(i, '::placeholder').color;
+    // The field's own colour, else the first painted one behind it.
+    let bg = 'rgba(0, 0, 0, 0)';
+    for (let e = i; e && /rgba\(0, 0, 0, 0\)|transparent/.test(bg); e = e.parentElement) bg = getComputedStyle(e).backgroundColor;
+    const [a, b] = [lum(fg), lum(bg)].sort((x, y) => y - x);
+    return { fg, bg, ratio: Math.round(((a + 0.05) / (b + 0.05)) * 100) / 100 };
+  });
+  const p0 = await ph();
+  check(`${tag}: (13) the panel's search placeholder at least 4.5:1 on its field`, p0.ratio >= 4.5, p0);
+  await page.evaluate((RED) => document.documentElement.style.setProperty('--dzg-panel-search-placeholder', RED), RED);
+  const p1 = await ph();
+  await page.evaluate(() => document.documentElement.style.removeProperty('--dzg-panel-search-placeholder'));
+  check(`${tag}: (13) --dzg-panel-search-placeholder recolours it`, p1.fg === RED, p1);
+  const heads = await page.evaluate(() => Object.fromEntries(['at', 'oven', 'batch', 'kind', 'log'].map((id) => {
+    const c = document.querySelector(`.dzg-hrow .dzg-hcell[data-col=${id}]`);
+    const l = c.querySelector(':scope > .dzg-hlabel');
+    return [id, { cell: c.getBoundingClientRect().width, label: l.getBoundingClientRect().width, box: l.querySelector('input').getBoundingClientRect().width, fbtn: !!c.querySelector(':scope > .dzg-fbtn') }];
+  })));
+  const w = Object.values(heads);
+  const withBtn = [heads.at, heads.batch, heads.kind, heads.log];
+  check(`${tag}: (13) a header part fills its header at every alignment (the same room at each, the box the label's width)`, w.every((h) => Math.abs(h.box - h.label) < 1 && h.label > h.cell / 2) && withBtn.every((h) => Math.abs(h.label - heads.at.label) < 1), heads);
+  check(`${tag}: (13) filterButton: false — no funnel there, its label wider by the button's room`, !heads.oven.fbtn && withBtn.every((h) => h.fbtn) && heads.oven.label >= heads.at.label + 20, heads);
+  await page.evaluate(() => document.querySelector('.dzg-hrow .dzg-hcell[data-col=oven]').focus());
+  await frames(page);
+  await page.keyboard.press('Alt+ArrowDown');
+  await frames(page);
+  const popup = await page.evaluate(() => !!document.querySelector('.dzg-popup:not([hidden]) .dzg-fpop, .dzg-popup:not([hidden])'));
+  check(`${tag}: (13) without its button, Alt+ArrowDown still opens the column's filter`, popup, popup);
+  await page.keyboard.press('Escape');
+  await frames(page);
+  // (47) Two keys in one task, as a fast hand in one frame: the DOM focus has not moved yet when Enter comes.
+  const keys = (k) => page.evaluate((k) => {
+    window.grid.kernel.dispatch({ type: 'sort.set', sort: [] }, 'host');
+    const h = document.querySelector('.dzg-hrow .dzg-hcell[data-col=at]');
+    h.focus();
+    return new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => {
+      const send = (key) => document.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+      const from = document.activeElement === h;
+      send(document.documentElement.dir === 'rtl' ? 'ArrowLeft' : 'ArrowRight');
+      send(k);
+      const a = document.activeElement;
+      r({ from, in: a.matches('.dzg-hcell[data-col=oven] input'), sort: window.grid.kernel.query.sort.length });
+    })));
+  }, k);
+  const e1 = await keys('Enter');
+  check(`${tag}: (13) the next-header arrow then Enter in one frame: into that header's box, nothing sorted`, e1.from && e1.in && e1.sort === 0, e1);
+  const e2 = await keys('F2');
+  check(`${tag}: (13) the same with F2`, e2.from && e2.in && e2.sort === 0, e2);
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/1-13-app-${css}-${lang}${dark ? '-dark' : ''}${preflight ? '-pf' : ''}.png`, clip: { x: 0, y: 0, width: 1900, height: 140 } });
+  check(`${tag}: (13) no page error, nothing told`, errors.length === 0 && (await page.evaluate(() => window.told.length)) === 0, { errors, told: await page.evaluate(() => window.told) });
+  await page.setViewportSize({ width: 900, height: 700 });
+}
+
 async function run(name, cfg) {
   const { css, dark, lang, preflight } = cfg;
   const tag = `${name} ${css}${dark ? ' dark' : ''} ${lang}${preflight ? ' preflight' : ''}`;
@@ -361,6 +431,7 @@ async function run(name, cfg) {
 
     if (process.argv.includes('--panel')) {
       await panel(page, tag, cfg, name, errors);
+      await appFixes(page, tag, cfg, errors);
       return void (await page.close());
     }
     // (1) Defaults: without variables.css, then with it — the same computed look.
@@ -719,8 +790,10 @@ async function run(name, cfg) {
       check(`${tag}: with icons, axe finds nothing`, v.length === 0, v);
     }
     check(`${tag}: no page error, nothing told`, errors.length === 0 && (await page.evaluate(() => window.told.length)) === 0, { errors, told: await page.evaluate(() => window.told) });
-    // (12) 1.12.1: the columns panel and the narrow headers, on their own page.
+    // (12) 1.13.0: the columns panel and the narrow headers, on their own page.
     await panel(page, tag, cfg, name, errors);
+    // (13) 1.13.0: the owner's app findings, on the same page with `?app=1`.
+    await appFixes(page, tag, cfg, errors);
     await page.close();
   } finally {
     await b.close().catch(() => {});

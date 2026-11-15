@@ -9,7 +9,7 @@ import { cellValue } from '../render/rows.js';
  * `max-content`, unseen. Every probe is written, then every width read (one layout), then every probe removed: never a
  * layout read per cell. A row not mounted is measured as its text alone (a lower bound for a part). The widths are whole
  * pixels, rounded up (a clipped Arabic letter is a visible defect); min and max are the layout's. A header probe is no
- * size container (1.12.1: a narrow header's buttons give way, presentation-settings.md 43): measured as if wide.
+ * size container (1.13.0: a narrow header's buttons give way, presentation-settings.md 43): measured as if wide.
  */
 export function fits(g: GridContext<unknown>, ids: readonly string[]): Map<string, number> {
   const { el, columns: m, rows } = g;

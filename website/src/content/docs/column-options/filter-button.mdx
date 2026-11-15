@@ -1,0 +1,68 @@
+---
+title: "filterButton"
+description: "`false`: no filter button (funnel) in the column's header — for a header part that offers the filter itself."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Leaves the funnel out of one column's header, when your own header part already gives the way to its filter.
+
+<OptionFacts column="filterButton" />
+
+## What it does
+
+With `filters()` (`@dzgrid/dom/filters`), each filterable header shows a filter button. A header part (`ui.header`,
+with `slots()`) that draws its own search box or button gets the column's filter in its context (`filter.set`,
+`filter.openFilter()`): two ways in on the same header is one too many. `filterButton: false` draws no button and keeps
+no room for it (the column's 80 px floor for the button goes too). The filter is still there: Alt+ArrowDown on the
+header opens it, as do the column menu and the floating row, and the header still says when it is filtered. Without
+a filter on the column (`filter: false`) it changes nothing.
+
+## Example
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters';
+import { slots } from '@dzgrid/dom/slots';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Plant = { id: string; name: string; water: number };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+
+createGrid<Plant>(document.getElementById('plants')!, {
+  rows: [{ id: 'p1', name: 'Fern', water: 3 }],
+  columns: [
+    // `searchHeader`: your header part, a title and a box calling `c.filter.set(...)`.
+    { id: 'name', header: 'Plant', ui: { header: 'searchHeader' }, filterButton: false },
+    { id: 'water', header: 'Water (days)', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [slots(), filters()],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Plants' }}
+  features={['filters']}
+  columns={[
+    { id: 'name', header: 'Plant', width: 160, filterButton: false },
+    { id: 'water', header: 'Water (days)', type: 'number', flex: 1 },
+  ]}
+  rows={[
+    { id: 'p1', name: 'Fern', water: 3 },
+    { id: 'p2', name: 'Cactus', water: 21 },
+    { id: 'p3', name: 'Basil', water: 2 },
+  ]}
+  caption="Plant has no funnel; focus its header and press Alt+ArrowDown: its filter opens."
+/>
+
+## See also
+
+- [`filter`](../filter/), [`menu`](../menu/), [`ui`](../ui/).

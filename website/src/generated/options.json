@@ -722,6 +722,15 @@
       "source": "packages/core/src/columns/defs.ts"
     },
     {
+      "name": "filterButton",
+      "type": "false",
+      "resolved": null,
+      "required": false,
+      "doc": "`false`: no filter button (funnel) in its header, and no room kept for it (1.13.0, presentation-settings.md 45) — for a header part that offers the filter itself (its `filter` context: `set`, `openFilter()`). The filter stays reachable (Alt+ArrowDown on the header, the column menu, the floating row); the header still says when it is filtered.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
       "name": "chooser",
       "type": "false",
       "resolved": null,

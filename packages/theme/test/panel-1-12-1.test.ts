@@ -1,5 +1,5 @@
 // @vitest-environment node
-// 1.12.1, the columns panel's look and its dock frame (docs/behaviors/presentation-settings.md 42; owner 2026-11-15, « pas
+// 1.13.0, the columns panel's look and its dock frame (docs/behaviors/presentation-settings.md 42; owner 2026-11-15, « pas
 // du tout stylé, c'est moche »): rows a grid whose first line takes the row (box and name on one line), a compact height
 // and a hover tint from `--dzg-panel-*`; the search one field (a magnifier, an outline edge a reset cannot erase); the
 // lock in the box's place; the footer's buttons on the grid's button variables; the dock's head a title and square
@@ -60,7 +60,7 @@ describe.each(['columns-panel.css', 'columns-panel.unlayered.css'])('%s (42)', (
     expect(i).toMatch(/flex: 1;/);
     expect(i).toMatch(/border: 0;/);
     expect(i).toMatch(/outline: 0;/);
-    expect(d('.dzg-cp-q input::placeholder')).toBe('color: var(--tz-fg-muted); opacity: 1;');
+    expect(d('.dzg-cp-q input::placeholder')).toBe('color: var(--dzg-panel-search-placeholder, var(--tz-fg-muted)) !important; opacity: 1 !important;'); // 44 (app-1-13.test.ts)
   });
 
   it('a box that cannot flip: a lock in its place (the row\'s ::before over the box\'s cell), the box kept, transparent', () => {

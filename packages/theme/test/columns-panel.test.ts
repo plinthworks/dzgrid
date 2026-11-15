@@ -48,7 +48,7 @@ describe('columns-panel.css', () => {
     expect(decl(/^\.dzg-cp-list ul$/)).toMatch(/padding-inline-start: /);
   });
 
-  it('rows at least 2rem (`--dzg-panel-row-height`, 1.12.1); in a long list (above 200, marked by the script) drawn only when seen (Q4-3)', () => {
+  it('rows at least 2rem (`--dzg-panel-row-height`, 1.13.0); in a long list (above 200, marked by the script) drawn only when seen (Q4-3)', () => {
     expect(decl(/^\.dzg-cp-row$/)).toMatch(/min-block-size: var\(--dzg-panel-row-height, 2rem\)/);
     expect(decl(/^\.dzg-cp-row$/)).not.toMatch(/content-visibility/);
     const r = decl(/^\.dzg-cp-list\[data-dzg-long\] \.dzg-cp-row$/);
@@ -79,7 +79,7 @@ describe('columns-panel.css', () => {
     expect(decl(/^\.dzg-cp-desc$/)).toMatch(/color: var\(--tz-fg-muted\)/);
     // Owner feedback 2026-11-07 (« pas pro »), replacing the follow-up's « shrinks beside the name »: the row a grid, the
     // description on its own line under the name (grid cell 2 / 2), name and description each one line cut with « … ».
-    // 1.12.1 (42): the box's column 1rem, the first line taking the row; the box placed over both lines, the buttons spanning them.
+    // 1.13.0 (42): the box's column 1rem, the first line taking the row; the box placed over both lines, the buttons spanning them.
     expect(decl(/^\.dzg-cp-row$/)).toMatch(/display: grid; grid-template-columns: 1rem minmax\(0, 1fr\) repeat\(3, auto\); grid-template-rows: 1fr auto;/);
     expect(decl(/^\.dzg-cp-desc$/)).toMatch(/grid-area: 2\/2;/);
     expect(exact('.dzg-cp-row > button')).toBe('grid-row: span 2;');
@@ -96,29 +96,29 @@ describe('columns-panel.css', () => {
     const hov = (r: Rule) => r.at.some((a) => a.includes('hover: hover'));
     expect(exact2('.dzg-cp-row:not(:hover, :focus-within) button', hov)).toBe('inline-size: 0; opacity: 0;');
     expect(css).not.toMatch(/\.dzg-cp-row[^{]*button[^{]*\{[^}]*(visibility|display: none)/);
-    // No column gap (▲ ▼ ⠿ without room leave none); the name's own padding. 1.12.1: the hover tint a variable.
+    // No column gap (▲ ▼ ⠿ without room leave none); the name's own padding. 1.13.0: the hover tint a variable.
     expect(decl(/^\.dzg-cp-row$/)).not.toMatch(/column-gap/);
     expect(decl(/^\.dzg-cp-row label$/)).toMatch(/padding-inline-start: 0\.5rem;/);
     expect(decl(/^\.dzg-cp-row:hover$/)).toBe('background: var(--dzg-panel-hover-bg, var(--tz-bg-raised));');
     expect(decl(/^\.dzg-cp-gl$/)).toMatch(/color: var\(--tz-fg-muted\); font-size: 0\.75em; font-weight: 600; text-transform: uppercase;/);
-    // 1.12.1 (42): the footer's buttons on the grid's button variables (panel-1-12-1.test.ts); the edge an outline.
+    // 1.13.0 (42): the footer's buttons on the grid's button variables (panel-1-12-1.test.ts); the edge an outline.
     expect(decl(/^\.dzg-cp-foot button$/)).toMatch(/outline: var\(--dzg-line, 1px\) solid var\(--dzg-button-border, var\(--tz-border\)\);/);
     expect(decl(/^\.dzg-cp-foot button:hover$/)).toBe('color: var(--dzg-button-hover-fg, var(--tz-fg)); background: var(--dzg-button-hover-bg, var(--tz-bg-raised));');
     // Not the border colour: the high-contrast palette draws borders in the text colour (found by check:contrast).
     expect(decl(/^\.dzg-cp-foot button:active$/)).toBe('background: var(--dzg-button-active-bg, var(--dzg-control-active-bg, color-mix(in srgb, var(--tz-fg) 12%, var(--tz-bg-raised))));');
     expect(decl(/^\.dzg-cp :focus-visible$/)).toBe('outline: 2px solid var(--dzg-focus-ring, var(--tz-accent)); outline-offset: 1px;');
-    // 1.12.1 (42): the edge on the field, an outline (panel-1-12-1.test.ts).
+    // 1.13.0 (42): the edge on the field, an outline (panel-1-12-1.test.ts).
     expect(decl(/^\.dzg-cp-q$/)).toMatch(/outline: var\(--dzg-line, 1px\) solid var\(--dzg-input-border, var\(--tz-fg-muted\)\);/);
   });
 
-  it('a disabled box (the last shown, `hideable: false`): not by colour alone — 1.12.1 (42): a lock in the box\'s place, the box kept transparent', () => {
+  it('a disabled box (the last shown, `hideable: false`): not by colour alone — 1.13.0 (42): a lock in the box\'s place, the box kept transparent', () => {
     expect(decl(/^\.dzg-cp-row > input\[aria-disabled=true\]$/)).toMatch(/appearance: none/);
     const lock = decl(/^\.dzg-cp-row:has\(> input\[aria-disabled=true\]\)::before$/);
     expect(lock).toMatch(/content: ["']{2}/);
     expect(lock).toMatch(/background: currentColor/);
     expect(lock).toMatch(/clip-path: path\(/);
     expect(decl(/^\.dzg-cp-row:has\(> input\[aria-disabled=true\]\)::before$/, media('forced-colors: active'))).toMatch(/background: CanvasText/);
-    // Muted (1.12.1: a disabled look), a 3:1 pair for the shape.
+    // Muted (1.13.0: a disabled look), a 3:1 pair for the shape.
     expect(lock).toMatch(/color: var\(--tz-fg-muted\)/);
     expect(spec.pairs.some((p) => p.what.includes('chooser lock') && p.fg === '--tz-fg-muted' && p.bg === '--tz-bg' && p.min >= 3)).toBe(true);
   });

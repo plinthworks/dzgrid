@@ -186,7 +186,7 @@ function setup(g: GridContext<unknown>, o: DockOptions, apis: WeakMap<object, Do
       setAttr(a.tabs, 'aria-orientation', many ? (col && s !== 'bottom' ? 'vertical' : 'horizontal') : null);
       tx(a.tog, col ? '+' : '−');
       setAttr(a.tog, 'aria-expanded', String(!col));
-      // Each named, its tooltip the same name (1.12.1, presentation-settings.md 42).
+      // Each named, its tooltip the same name (1.13.0, presentation-settings.md 42).
       for (const [x, n] of [[a.tog, T(col ? 'dock.expand' : 'dock.collapse', id)], [a.place, T('dock.place', id)], [a.shut, T('dock.close', id)]] as const) setAttr(x, 'aria-label', n), setAttr(x, 'title', n);
       a.sep.hidden = col;
       setAttr(a.sep, 'aria-label', T(s === 'bottom' ? 'dock.height' : 'dock.width', id));

@@ -1,0 +1,68 @@
+---
+title: "filterButton"
+description: "`false` : pas de bouton de filtre (entonnoir) dans l’en-tête de la colonne — pour une part d’en-tête qui offre elle-même le filtre."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Retire l’entonnoir de l’en-tête d’une colonne, quand votre propre part d’en-tête donne déjà accès à son filtre.
+
+<OptionFacts column="filterButton" />
+
+## Ce qu’il fait
+
+Avec `filters()` (`@dzgrid/dom/filters`), chaque en-tête filtrable montre un bouton de filtre. Une part d’en-tête
+(`ui.header`, avec `slots()`) qui dessine sa propre zone de recherche ou son bouton reçoit le filtre de la colonne dans
+son contexte (`filter.set`, `filter.openFilter()`) : deux accès sur le même en-tête, c’est un de trop.
+`filterButton: false` ne dessine pas le bouton et ne lui garde pas de place (le minimum de 80 px dû au bouton part
+aussi). Le filtre reste là : Alt+Flèche bas sur l’en-tête l’ouvre, comme le menu de colonne et la ligne de filtres, et
+l’en-tête dit toujours quand il est filtré. Sans filtre sur la colonne (`filter: false`), rien ne change.
+
+## Exemple
+
+```ts
+import { createGrid, type GridMessages } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters';
+import { slots } from '@dzgrid/dom/slots';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Plant = { id: string; name: string; water: number };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text } };
+
+createGrid<Plant>(document.getElementById('plantes')!, {
+  rows: [{ id: 'p1', name: 'Fougère', water: 3 }],
+  columns: [
+    // `searchHeader` : votre part d’en-tête, un titre et une zone qui appelle `c.filter.set(...)`.
+    { id: 'name', header: 'Plante', ui: { header: 'searchHeader' }, filterButton: false },
+    { id: 'water', header: 'Arrosage (jours)', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [slots(), filters()],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Plantes' }}
+  features={['filters']}
+  columns={[
+    { id: 'name', header: 'Plante', width: 160, filterButton: false },
+    { id: 'water', header: 'Arrosage (jours)', type: 'number', flex: 1 },
+  ]}
+  rows={[
+    { id: 'p1', name: 'Fougère', water: 3 },
+    { id: 'p2', name: 'Cactus', water: 21 },
+    { id: 'p3', name: 'Basilic', water: 2 },
+  ]}
+  caption="Plante n’a pas d’entonnoir ; mettez le focus sur son en-tête et appuyez sur Alt+Flèche bas : son filtre s’ouvre."
+/>
+
+## Voir aussi
+
+- [`filter`](../filter/), [`menu`](../menu/), [`ui`](../ui/).

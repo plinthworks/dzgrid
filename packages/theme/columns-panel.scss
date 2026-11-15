@@ -20,7 +20,7 @@
 // removed for touch, the keyboard or assistive technologies; a group's name a
 // section label (small, muted, capitals); the search box outlined (3:1); one focus ring for the dialog's controls.
 //
-// 1.12.1 (owner 2026-11-15, « pas du tout stylé, c'est moche »; presentation-settings.md 42): one polished default look,
+// 1.13.0 (owner 2026-11-15, « pas du tout stylé, c'est moche »; presentation-settings.md 42): one polished default look,
 // the same with a page's reset (Tailwind 3's preflight) and either copy. Each row a grid whose first line takes the
 // row (`1fr`: the box and the name centred on one line; a description the second line), at least
 // `--dzg-panel-row-height` high, tinted by `--dzg-panel-hover-bg`; the box a 1rem native checkbox, no margin; a box that
@@ -121,9 +121,12 @@ $layered: true !default;
     appearance: none;
   }
 
+  // Its own variable (presentation-settings.md 44): a page's unlayered placeholder rule (Tailwind 3's preflight gray 400,
+  // an app's `placeholder:text-gray-*`) beat the layered sheet, 1.76:1 in the owner's dark app. Held against it
+  // (`!important`); the variable is the way to change it.
   .dzg-cp-q input::placeholder {
-    color: var(--tz-fg-muted);
-    opacity: 1;
+    color: var(--dzg-panel-search-placeholder, var(--tz-fg-muted)) !important;
+    opacity: 1 !important;
   }
 
   .dzg-cp-list {

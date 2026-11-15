@@ -138,8 +138,8 @@ $layered: true !default;
   // The buttons pushed to the end by an empty item that grows before them (order 1: after the title and the sort mark),
   // not by the buttons' auto margin, which a page's reset takes (Tailwind 3's preflight `button { margin: 0 }`, unlayered,
   // beats the layered copy: the end packing above then sent the title to the end, owner 2026-11-13). A label that grows
-  // itself (an aligned title, the filter box) needs none; the negative margin gives back the gap it adds.
-  .dzg-hcell:has(> .dzg-mbtn, > .dzg-reapply):where(:not([data-align], :has(.dzg-hfbox)))::before {
+  // itself (an aligned title, the filter box, a header part's: presentation-settings.md 46) needs none; the negative margin gives back the gap it adds.
+  .dzg-hcell:has(> .dzg-mbtn, > .dzg-reapply):where(:not([data-align], :has(.dzg-hfbox, > [style*=flex-grow])))::before {
     content: '';
     order: 1;
     flex: auto;

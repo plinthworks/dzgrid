@@ -1433,7 +1433,7 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   +2 % line).
 - For the owner: commit, publish; whether `refresh({})` also routes through `api.reload()` (+17 B of K.8).
 
-## 1.12.1 — patch (2026-11-15; prepared, not published; owner « pas du tout stylé, c'est moche »)
+## 1.13.0 — minor (2026-11-15; prepared as 1.12.1, never published, renumbered: owner « mettre tout en 1.13.0 »; « pas du tout stylé, c'est moche »)
 
 - [x] The columns panel's default look (presentation-settings.md 42): rows on one line, 2rem, hover tint; the search one
   field (magnifier, placeholder + `aria-label`); the lock in the box's place; the footer on `--dzg-button-*`; the dock's
@@ -1441,8 +1441,11 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
 - [x] A narrow header keeps its title (43): the cell a size container, under 6.5rem the unsorted mark out and an
   unfiltered button without room at rest; auto-size's probe no container; the 80 px floor unchanged.
 - [x] Browsers: `node scripts/browser-1-12.mjs` (12), page `v1-12-1.html` (`--panel` alone).
-- For the owner: `columns-panel.css` 1 667 / 1 400 and `dock.css` 860 / 800 beyond +2 % (`docs/release-1.12.1.md`);
-  commit, publish.
+- [x] Found by the owner's app (44–47): `--dzg-panel-search-placeholder` (held against a page's placeholder rule);
+  `ColumnDef.filterButton: false`; a header part fills its header at every alignment (its label's own `flex-grow`);
+  Enter / F2 right after an arrow key read on the header the focus moved to (the pending paint done first). Tests
+  `app-1-13.test.ts` (dom, theme), matrix (13) on `v1-12-1.html?app=1`.
+- For the owner: commit, publish (`docs/release-1.13.0.md`; the panel's size lines accepted 2026-11-15).
 
 ## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)
 

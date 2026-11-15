@@ -1,6 +1,17 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-11-15. **1.12.1 préparée (non commitée, non publiée)** — propriétaire « pas du tout stylé, c'est moche »
+Mis à jour : 2026-11-15 (soir). **1.12.1 jamais publiée → tout en 1.13.0** (propriétaire « mettre tout en 1.13.0 ») :
+cinq paquets renumérotés, CHANGELOG `[1.13.0]`, `docs/release-1.13.0.md`. Quatre corrections trouvées par l'appli du
+propriétaire (fiche `presentation-settings.md` 44–47, pointeurs dans `parts.md`) : (44) `--dzg-panel-search-placeholder`
+(défaut `--tz-fg-muted`, tenu en `!important` contre la règle d'indication de la page) ; (45) `ColumnDef.filterButton:
+false` (pas d'entonnoir ni de minimum 80 px ; Alt+↓, menu, ligne de filtres) ; (46) une part d'en-tête remplit sa
+cellule à tout alignement (`flex-grow` posé par `slots()`, l'espaceur `::before` exclu par `[style*=flex-grow]`) ; (47)
+Entrée / F2 juste après une flèche : `cellKeys` peint d'abord (`scheduler.flush()`) et lit la touche sur l'en-tête
+focalisé. Tests `app-1-13.test.ts` (dom, theme), page `v1-12-1.html?app=1`, matrice (13). `gate:step` vert (9 468/9 471, 3 sautés) ; real-app
+58/58 ; matrice 14 188/14 188 ; `release:check` « the 5 packages at 1.13.0 » (appli Angular 103 109 / 103 150, +2 %) ; site 33/33 ;
+K.8 91 994 / 92 000. Commit : à faire par le coordinateur (pas `playground/`, pas `vite.config.ts`).
+
+Mis à jour : 2026-11-15. **1.13.0 préparée (non commitée, non publiée)** — propriétaire « pas du tout stylé, c'est moche »
 (panneau des colonnes ancré, sombre, preflight Tailwind 3). Fiche `presentation-settings.md` 42–43 : nouvelle apparence
 du panneau (lignes sur une ligne 2rem, recherche un seul champ avec loupe, placeholder + `aria-label`, cadenas à la
 place de la case, pied sur `--dzg-button-*`, tête du dock en boutons carrés avec `title`, 7 variables `--dzg-panel-*`) ;
@@ -8,7 +19,7 @@ titre étroit (cellule conteneur de taille, sous 6.5rem la marque « non triée 
 n'a pas de place au repos ; sonde d'auto-ajustement sans conteneur). Tests `panel-1-12-1.test.ts` (dom, theme), page
 `v1-12-1.html`, matrice (12). **En attente du propriétaire** : `columns-panel.css` 1 686 / 1 400 et `dock.css` 860 / 800
 (au-delà de +2 %, `check:size` rouge sur elles seules) ; une phrase propre au cadenas = nouvelle clé (API).
-`docs/release-1.12.1.md`.
+`docs/release-1.13.0.md`.
 
 Mis à jour : 2026-11-14 (tard). **Les infobulles riches sont parties dans DzTooltip** (propriétaire « ok partout »),
 avant publication : `/Users/nadou/Dev/dztooltip` (`@dztooltip/core`, `/angular`, `/theme`, `/dzgrid` le pont ;

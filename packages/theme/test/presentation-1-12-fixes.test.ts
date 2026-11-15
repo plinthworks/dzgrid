@@ -17,7 +17,7 @@ const body = (css: string, selector: string) => read(css).rules.filter((r) => r.
 const COPIES = ['', '.unlayered'] as const;
 
 describe('34: a header with buttons pushed to its end by a growing item, not by a margin a reset takes', () => {
-  const SPACER = '.dzg-hcell:has(> .dzg-mbtn, > .dzg-reapply):where(:not([data-align], :has(.dzg-hfbox)))::before';
+  const SPACER = '.dzg-hcell:has(> .dzg-mbtn, > .dzg-reapply):where(:not([data-align], :has(.dzg-hfbox, > [style*=flex-grow])))::before'; // 1.13.0: nor beside a header part's label (46)
   for (const c of COPIES) {
     it(`columns${c}.css: the growing item after the title and the sort mark, before the buttons; its gap given back; no auto margin left`, () => {
       const css = file(`../columns${c}.css`);
@@ -33,10 +33,10 @@ describe('34: a header with buttons pushed to its end by a growing item, not by 
 
   it('the filters’ layout draws it for a header with a filter button (both sheets’ copies alike: it is injected), no auto margin left', () => {
     expect(FILTERS_CSS).toContain(':where(.dzg-fbtn){order:1;flex:none;inline-size:24px;block-size:24px;position:relative;z-index:1}');
-    expect(FILTERS_CSS).toContain(':where(.dzg-hcell:has(>.dzg-fbtn):not([data-align],:has(.dzg-hfbox)))::before{content:"";order:1;flex:auto;margin-inline-start:calc(-1*var(--dzg-space,.25rem))}');
+    expect(FILTERS_CSS).toContain(':where(.dzg-hcell:has(>.dzg-fbtn):not([data-align],:has(.dzg-hfbox,>[style*=flex-grow])))::before{content:"";order:1;flex:auto;margin-inline-start:calc(-1*var(--dzg-space,.25rem))}');
     expect(FILTERS_CSS).not.toContain('margin-inline-start:auto');
     // The end packing kept (a too-narrow cell cuts the title's side, never the grip's gap).
-    // 1.12.1: the same rule makes the cell a size container (presentation-settings.md 43).
+    // 1.13.0: the same rule makes the cell a size container (presentation-settings.md 43).
     expect(FILTERS_CSS).toContain(':where(.dzg-hcell:has(>.dzg-fbtn)){justify-content:end;container-type:inline-size}');
   });
 });
@@ -181,7 +181,7 @@ describe('39–40: the pagination bar apart from the popups’ buttons, every lo
     for (const f of ['pager.css', 'pager.unlayered.css', 'pager.scss']) expect([pkg.exports[`./${f}`], pkg.files.includes(f)]).toEqual([`./${f}`, true]);
   });
 
-  it('no other sheet reads the buttons’ variables: menus and panels keep their own look — but the columns panel’s footer (1.12.1, 42)', () => {
+  it('no other sheet reads the buttons’ variables: menus and panels keep their own look — but the columns panel’s footer (1.13.0, 42)', () => {
     for (const f of ['menu', 'columns', 'dock', 'filters-panel', 'dzgrid', 'edit', 'grouping', 'pivot']) expect(file(`../${f}.css`), f).not.toMatch(/--dzg-(pager-)?button-/);
     // The columns panel: its footer's buttons only, never the pager's.
     const cp = file('../columns-panel.css');

@@ -1,6 +1,7 @@
-// 1.12.1 in real browsers (scripts/browser-1-12.mjs (12); presentation-settings.md 42–43): the columns panel docked at
+// 1.13.0 in real browsers (scripts/browser-1-12.mjs (12); presentation-settings.md 42–43): the columns panel docked at
 // the end, narrow columns with a filter button and the app's unsorted mark, a column that cannot be hidden. `?lang=ar`,
-// `?dark=1`, `?css=unlayered`, `?preflight=1`. Made-up rows: a bakery's oven logs.
+// `?dark=1`, `?css=unlayered`, `?preflight=1`. Made-up rows: a bakery's oven logs. `?app=1` (13; presentation-settings.md
+// 44–47): header parts holding a search box at each alignment, one column without its filter button.
 import type { ColumnDef, GridEvent, Problem } from '@dzgrid/core';
 import { createGrid, type GridMessages } from '../../src/index.js';
 import { theming } from '../../src/theme.js';
@@ -16,6 +17,8 @@ import { FR_COLUMNS } from '../../src/locales/fr-columns.js';
 import { AR_COLUMNS } from '../../src/locales/ar-columns.js';
 import { FR_DOCK } from '../../src/locales/fr-dock.js';
 import { AR_DOCK } from '../../src/locales/ar-dock.js';
+import { slots } from '../../src/slots.js';
+import { definePart } from '../../src/part.js';
 
 const q = new URLSearchParams(location.search);
 const ar = q.get('lang') === 'ar';
@@ -29,7 +32,27 @@ const t = ar
   ? { at: 'التاريخ', oven: 'فرن', batch: 'الدفعة', kind: 'النوع', log: 'السجل', ok: 'الحالة', act: 'إجراء' }
   : { at: 'Date de traitement', oven: 'VM', batch: 'Micro-service', kind: 'Type', log: 'Log', ok: 'Statut', act: 'Action' };
 const svg = (d: string) => `<svg viewBox="0 0 16 16"><path d="${d}"/></svg>`;
-const columns: ColumnDef<L, any>[] = [
+// An app's header part (13): a box filling what it is given, taking the focus on Enter or F2.
+const search = definePart('header', {
+  mount(host, c) {
+    const i = document.createElement('input');
+    i.className = 'app-q';
+    i.setAttribute('aria-label', c.label);
+    i.placeholder = c.label;
+    i.style.cssText = 'display:block;inline-size:100%;box-sizing:border-box;min-inline-size:0';
+    host.append(i);
+    return { focus: () => (i.focus(), true) };
+  },
+});
+const app = !!q.get('app');
+const columns: ColumnDef<L, any>[] = app ? [
+  // No alignment: with its filter button, and without (45).
+  { id: 'at', header: t.at, width: 280, filter: { kind: 'text' }, ui: { header: 'search' } },
+  { id: 'oven', header: t.oven, width: 280, filter: { kind: 'text' }, ui: { header: 'search' }, filterButton: false },
+  { id: 'batch', header: t.batch, width: 280, filter: { kind: 'text' }, ui: { header: 'search' }, headerAlign: 'center' },
+  { id: 'kind', header: t.kind, width: 280, filter: { kind: 'text' }, ui: { header: 'search' }, headerAlign: 'end' },
+  { id: 'log', header: t.log, width: 280, filter: { kind: 'text' }, ui: { header: 'search' }, headerAlign: 'start' },
+] : [
   { id: 'at', header: t.at, width: 170, filter: { kind: 'text' } },
   // Narrow ones at the floor (80 px, column-resize.md 21) and a little above: the title first (43).
   { id: 'oven', header: t.oven, width: 80, filter: { kind: 'text' } },
@@ -42,6 +65,8 @@ const columns: ColumnDef<L, any>[] = [
 ];
 const base = ar ? AR : FR;
 const messages: GridMessages = { ...base, text: { ...base.text, ...(ar ? AR_FILTERS : FR_FILTERS).text, ...(ar ? AR_COLUMNS : FR_COLUMNS).text, ...(ar ? AR_DOCK : FR_DOCK).text } };
+// Every header part in view (13).
+if (app) document.getElementById('host')!.style.inlineSize = '1800px';
 const told: Problem[] = [];
 const chooser = columnsChooser();
 const mv = moves();
@@ -50,7 +75,8 @@ const grid = createGrid<L>(document.getElementById('host')!, {
   label: ar ? 'السجلات' : 'Journaux',
   // The app's unsorted mark, as the owner's app has (presentation-settings.md 25).
   icons: { sortNone: svg('M8 1l4 5H4zM8 15l4-5H4z') },
-  features: [theming(), filters(), mv, chooser, dock({ open: { columns: 'end' } })],
+  ...(app && { parts: { search } }),
+  features: [theming(), filters(), mv, chooser, dock({ open: { columns: 'end' } }), ...(app ? [slots()] : [])],
   onEvent: (e: GridEvent<L>) => { if (e.type === 'problems') told.push(...e.problems); },
 });
 Object.assign(window, { grid, told, chooser: chooser.api(grid), moves: mv.api(grid), ready: true });

@@ -5,11 +5,27 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.12.1] - 2026-11-15
+## [1.13.0] - 2026-11-15
 
 The columns panel looks finished, and a narrow column keeps its title (owner 2026-11-15, « pas du tout stylé, c'est
 moche », seen in a real app in dark mode with Tailwind 3's preflight; docs/behaviors/presentation-settings.md 42–43).
-A patch: nothing removed, no public type changed.
+Prepared as 1.12.1, never published: renumbered 1.13.0 (owner 2026-11-15, « mettre tout en 1.13.0 ») with four fixes
+found by the owner's app (presentation-settings.md 44–47). A minor: two additions, nothing removed.
+
+### Added
+- `ColumnDef.filterButton: false`: no filter button (funnel) in that column's header and no room kept for it (nor its
+  80 px floor) — for a header part that offers the filter itself (its `filter` context). The filter stays reachable
+  (Alt+ArrowDown on the header, the column menu, the floating row); the header still says when it is filtered.
+- `--dzg-panel-search-placeholder`: the columns panel's search placeholder colour (default `--tz-fg-muted`, 4.5:1 on the
+  field in light and dark), now held against a page's own placeholder rule (Tailwind 3's preflight, an app's
+  `placeholder:` utility), which made it 4.18:1 light and 1.76:1 dark in a real app.
+
+### Fixed
+- A header part (`ui.header`) fills its header cell whatever the alignment; before, only with `headerAlign` set (or a
+  number column) — with none it stayed as narrow as its content.
+- Enter (or F2) pressed in the same frame as an arrow key on the headers went to the previous header and sorted the
+  new column instead of entering its part's input: the pending paint is now done first and the key read on the header
+  the focus moved to. Enter still sorts a header whose part takes no focus.
 
 ### Changed
 - **The columns panel's default look** (`columns-panel.css`, `dock.css`, both copies; light and dark, both directions,
@@ -30,7 +46,7 @@ A patch: nothing removed, no public type changed.
   measures the whole title; the 80 px floor is unchanged.
 
 ### Upgrading from 1.12.0
-- Nothing to change. What you will see: the panel's new look; the search box's label is now its placeholder and
+- Nothing to change (an app that set `headerAlign: 'start'` only to make its header part fill the cell can drop it; one with its own search box in the header can add `filterButton: false`). What you will see: the panel's new look; the search box's label is now its placeholder and
   `aria-label`; narrow filterable headers show their title and reveal the filter button on hover or focus.
 
 ## [1.12.0] - 2026-11-13

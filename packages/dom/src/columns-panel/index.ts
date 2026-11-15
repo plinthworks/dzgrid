@@ -212,7 +212,7 @@ export function columnsChooser(o: ColumnsChooserOptions = {}): ColumnsChooserFea
         p.className = 'dzg-cp';
         mk('div', p, 'dzg-cp-title', T('title')).id = base;
         top = mk('div', p, 'dzg-cp-top');
-        // One field (1.12.1, presentation-settings.md 42): the text its placeholder and its name, a magnifier beside it.
+        // One field (1.13.0, presentation-settings.md 42): the text its placeholder and its name, a magnifier beside it.
         search = mk('input', mk('label', p, 'dzg-cp-q'));
         search.type = 'search';
         search.placeholder = T('search');
