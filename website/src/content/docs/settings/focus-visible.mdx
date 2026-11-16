@@ -1,0 +1,68 @@
+---
+title: "focusVisible"
+description: "The focused cell's ring after a click too, or for the keyboard only."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+For a screen used mostly with the mouse, where a ring left on the cell you just clicked is in the way.
+
+<OptionFacts setting="focusVisible" />
+
+## What it does
+
+By default (`'always'`) the focused cell shows its ring, a line of the background inside it and a tint, whether the
+keys or a click put the focus there.
+
+`'keyboard'`: after a press of the mouse, a pen or a finger in the grid, the focused cell — and a focused header cell
+or detail panel — shows no ring, no inner line and no tint. The focus stays where the click put it (a screen reader
+still has it) and the row keeps its focused-row tint. Any key in the grid brings the ring back at once, and so does the
+focus coming back from outside the grid (Tab, a shortcut, another window). The grid notes the last gesture itself, so
+it works the same in Firefox, where `:focus-visible` alone does not follow the arrows after a click. The fill handle,
+a block's edges and an open editor are not the focus ring: they stay.
+
+It is not the theme's `focusRing` key, which is the ring's colour.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Lamp = { id: string; street: string; watts: number };
+
+const grid = createGrid<Lamp>(document.getElementById('lamps')!, {
+  rows: [{ id: 'l1', street: 'Mill Lane', watts: 40 }],
+  columns: [{ id: 'street', header: 'Street' }, { id: 'watts', header: 'Watts', type: 'number' }],
+  getRowId: (l) => l.id,
+  messages: EN,
+  focusVisible: 'keyboard',
+});
+
+grid.update({ focusVisible: 'always' });
+```
+
+In Angular, `<dz-grid focusVisible="keyboard">`; on the web component, `<dz-grid focus-visible="keyboard">`.
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Lamps', focusVisible: 'keyboard' }}
+  columns={[
+    { id: 'street', header: 'Street', flex: 1 },
+    { id: 'watts', header: 'Watts', type: 'number', width: 120 },
+  ]}
+  rows={[
+    { id: 'l1', street: 'Mill Lane', watts: 40 },
+    { id: 'l2', street: 'Quay Road', watts: 60 },
+    { id: 'l3', street: 'Orchard Way', watts: 25 },
+  ]}
+  caption="Click a cell: no ring. Press an arrow key: the ring is back."
+/>
+
+## See also
+
+- [`theme`](../theme/) — the ring's colour (`focusRing`) and width (`focusWidth`).
+- [Accessibility](../../guides/accessibility/).

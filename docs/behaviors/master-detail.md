@@ -157,6 +157,31 @@ the keyboard into and out of the detail, works in a grid shown inside the detail
       .sort((a, b) => (at.get(a.id) ?? 1e9) - (at.get(b.id) ?? 1e9));
   };
   ```
+- **The arrows through a nested grid's rows** (1.13.0, owner 2026-11-16, « A »; opt-in `nestedGrid({ arrows: 'rows' })`,
+  default `'panel'` = the stop above). The inner grid's rows read as rows of the outer list: ArrowDown on a master row
+  whose panel is open goes straight to the inner grid's **first row**, at the same column (the inner grid's column of
+  the same id, else its first column the keyboard takes — `keyboard: false` columns skipped); ArrowUp on the inner
+  grid's first row goes back to the **master row** (its column of the same id, else the column it left from);
+  ArrowDown on the inner grid's last row goes to the **row after the panel**, ArrowUp from that row to the inner grid's
+  **last row** (same column rule). The panel's own stop is no longer on the way (Escape still reaches it, Enter from it
+  still goes in); a panel whose grid has no row stays one stop, as before. Only plain arrows: with a modifier (a block,
+  a page), each grid keeps its own; with no row after the panel (the last), Down stays on the inner grid's last row. The
+  inner grid's header row is never on the way (pair it with `headers: 'none'`, hidden-headers.md 8). Its code is a
+  chunk loaded with the first panel that wants it (the `@dzgrid/dom/detail` entry carries its `import()` only); it
+  speaks to the grid around through the page, as a user would — the rows beside the panel, their cells — and the
+  browser brings the row reached into view, the grid redoing that scroll its own way (reading-keyboard.md). A detail that is not a grid (a `definePart('detail', …)` of the application's) keeps the stop:
+  Down reaches the panel, Enter goes in, Escape comes out.
+- **A nested grid that follows the master's sideways scroll** (1.13.0, owner 2026-11-16, « A »; opt-in
+  `nestedGrid({ inlineScroll: 'master' })`, default `'own'`: the inner grid scrolls sideways by itself, as before — a
+  default change would cut off an inner grid wider than the outer one). With `'master'`, the inner grid has no
+  sideways scrollbar of its own (its view clips); it is moved with the outer grid's horizontal scroll (the same
+  distance, on opening and at every scroll), a sideways wheel over it scrolls the outer grid, and a key that brings an
+  inner column into view moves the outer grid with it. Meant for an inner grid whose columns follow the master's (the
+  « follow » recipe above): same widths, same places. Its start: the panel's line and padding are
+  `--dzg-detail-line` (variables.css) and **`--dzg-detail-inset`** (the content's padding at the inline start, default
+  `.5rem`, the base sheet; the spacing's two units with variables.css): `--dzg-detail-inset: 0`, `--dzg-detail-line:
+  none` and the inner grid without its frame (`--dzg-frame: none` on it) put the inner grid's first column exactly
+  under the master's.
 
 ## Where DzGrid differs on purpose
 - The panel is a single focus stop with Enter to go in (APG "cell with widgets"), never a set of
@@ -172,7 +197,8 @@ Step 10: `packages/dom/test/detail*.test.ts` (lazy mount and destroy, `'auto'` h
 per resize, top row kept, Down/Enter/Escape, inner keys ignored by the outer router, LRU restore and
 cap, not selectable or exported, depth 2 ok and 4 a problem, no row data in events, SSR); browser:
 axe, wheel chaining, 1M masters, 200 details opened. Spike: `spikes/s12-variable-heights/`.
-Manual: `docs/a11y-protocol.md` §17. Rows without a detail: `packages/core/test/detail-master.test.ts`,
+Manual: `docs/a11y-protocol.md` §17. The arrows through rows and the sideways follow (1.13.0):
+`packages/dom/test/rustines-1-13.test.ts`, browsers `node scripts/browser-1-12.mjs --panel` (14). Rows without a detail: `packages/core/test/detail-master.test.ts`,
 `packages/dom/test/detail-master.test.ts`; the follow recipe: `packages/dom/test/detail-follow.test.ts`.
 
 ## Blocks, clipboard and fill (Phase 5 Part B)

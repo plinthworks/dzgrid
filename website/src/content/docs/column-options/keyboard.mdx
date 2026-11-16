@@ -1,0 +1,63 @@
+---
+title: "keyboard"
+description: "`false`: the arrow keys, Home and End jump over the column."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+For a column empty on purpose — a spacer, the room under a master's chevron in a detail's grid — that the keys should
+not stop on.
+
+<OptionFacts column="keyboard" />
+
+## What it does
+
+`keyboard: false`: ← and → jump over the column, in the header rows as in the body; Home and End land on the first and
+last columns the keys take; Tab enters the grid past it. Every column skipped, the keys stay where they are.
+
+It is still a column: drawn, sized, sorted, filtered, read by a screen reader (its header names its cells). It can hold
+content, such as a button, which a click reaches. A click on one of its cells focuses it; from there ↑ and ↓ stay in
+it and ← and → leave it. A header group above it stays a stop.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Kite = { id: string; name: string; colour: string };
+
+createGrid<Kite>(document.getElementById('kites')!, {
+  rows: [{ id: 'k1', name: 'Swift', colour: 'Red' }],
+  columns: [
+    { id: 'gap', header: 'Spacer', width: 32, keyboard: false },
+    { id: 'name', header: 'Kite' },
+    { id: 'colour', header: 'Colour' },
+  ],
+  getRowId: (k) => k.id,
+  messages: EN,
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Kites' }}
+  columns={[
+    { id: 'name', header: 'Kite', flex: 1 },
+    { id: 'gap', header: 'Spacer', width: 90, keyboard: false },
+    { id: 'colour', header: 'Colour', flex: 1 },
+  ]}
+  rows={[
+    { id: 'k1', name: 'Swift', colour: 'Red' },
+    { id: 'k2', name: 'Box kite', colour: 'Blue' },
+    { id: 'k3', name: 'Delta', colour: 'Green' },
+  ]}
+  caption="Click a kite's name, press →: the focus goes to Colour, over Spacer."
+/>
+
+## See also
+
+- [`sortable`](../sortable/), [`movable`](../movable/), [`nestedGrid`](../../features/nested-grid/).

@@ -209,8 +209,9 @@ $no-funnel: ':where(:not([data-dzg-icons~=filter] *, [data-dzg-icons~=filter-act
   }
 
   // The focused cell, by the keys or a click (S12-Q8): the ring, a line of the background inside it, a tint; none of
-  // them in Escape's quiet state (S12-Q16), the weight unchanged (`:where`).
-  .dzg-cell:focus:where(:not([data-dzg-quiet] *)) {
+  // them in Escape's quiet state (S12-Q16), nor after a press with `focusVisible: 'keyboard'` (1.13.0,
+  // presentation-settings.md 48: `data-dzg-ring=pointer` on the root), the weight unchanged (`:where`).
+  .dzg-cell:focus:where(:not([data-dzg-quiet] *, [data-dzg-ring=pointer] *)) {
     outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
     outline-offset: -2px;
     box-shadow: inset 0 0 0 3px var(--tz-bg);
@@ -233,6 +234,18 @@ $no-funnel: ':where(:not([data-dzg-icons~=filter] *, [data-dzg-icons~=filter-act
   // next key or press (`data-dzg-quiet` on the root, set by the grid with range()).
   [data-dzg-quiet] .dzg-cell:focus {
     outline: none !important;
+  }
+
+  // `focusVisible: 'keyboard'` (1.13.0, presentation-settings.md 48): after a press, no ring on a cell, a header or a panel
+  // (a `:focus-visible` one too); after a key, the ring on `:focus` for headers and panels as well (Firefox does not
+  // match `:focus-visible` when the grid moves the focus on an arrow after a click).
+  [data-dzg-ring=pointer] :is(.dzg-cell, .dzg-hcell, .dzg-dcell):focus {
+    outline: none !important;
+  }
+
+  [data-dzg-ring=keys] :is(.dzg-hcell, .dzg-dcell):focus {
+    outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+    outline-offset: -2px;
   }
 
   .dzg-sortable {
@@ -688,8 +701,11 @@ $no-funnel: ':where(:not([data-dzg-icons~=filter] *, [data-dzg-icons~=filter-act
     border-inline-start: 3px solid var(--tz-border);
   }
 
+  // Its content's inset at the inline start (1.13.0, master-detail.md): `--dzg-detail-inset: 0` (and
+  // `--dzg-detail-line: none`) puts a nested grid's first column under the master's.
   .dzg-dbody {
     padding: 0.5rem;
+    padding-inline-start: var(--dzg-detail-inset, 0.5rem);
   }
 
   // A lazy tree's loading and error rows (Phase 4 step 7, tree-lazy.md), a block list's rows not arrived (Phase 8,

@@ -16,13 +16,16 @@ const read = (f: string) => readFileSync(here(`../${f}`), 'utf8');
 const css = read('dzgrid.css');
 const s = sheet(css);
 const plain = (r: Rule) => r.at.length === 0;
-const rules = (sel: RegExp, at: (r: Rule) => boolean = plain) => s.rules.filter((r) => r.selector.split(/,\s*/).some((x) => sel.test(x)) && at(r));
+// A comma inside parentheses (`:not(a, b)`) does not split a selector list.
+const rules = (sel: RegExp, at: (r: Rule) => boolean = plain) => s.rules.filter((r) => r.selector.split(/,\s*(?![^(]*\))/).some((x) => sel.test(x)) && at(r));
 const decl = (sel: RegExp, at: (r: Rule) => boolean = plain) => rules(sel, at).map((r) => r.body).join(' ');
 const spec = JSON.parse(read('contrast-pairs.json')) as { derived: Record<string, string>; pairs: { what: string; fg: string; bg: string; min: number; hue?: number }[] };
 
 /** The focused row's selectors: not in Escape's quiet state (S12-Q16), the weight unchanged (`:where`). */
 const Q = String.raw`:where\(:not\(\[data-dzg-quiet\] \*\)\)`;
-const CELL = new RegExp(String.raw`^\.dzg-cell:focus${Q}$`);
+// The cell's: nor after a press with `focusRing: 'keyboard'` (1.13.0, presentation-settings.md 48); its row keeps its tint.
+const QC = String.raw`:where\(:not\(\[data-dzg-quiet\] \*, \[data-dzg-ring=pointer\] \*\)\)`;
+const CELL = new RegExp(String.raw`^\.dzg-cell:focus${QC}$`);
 const ROW = new RegExp(String.raw`^\.dzg-row:focus-within${Q}$`);
 const ROW_START = new RegExp(String.raw`^\.dzg-row:focus-within${Q} \.dzg-seg-start$`);
 const ROW_END = new RegExp(String.raw`^\.dzg-row:focus-within${Q} \.dzg-seg-end$`);
@@ -106,6 +109,6 @@ describe('Escape\'s quiet state (owner S12-Q16)', () => {
     const rule = /\[data-dzg-quiet\] \.dzg-cell:focus \{\s*outline: none !important;\s*\}/;
     expect(read('dzgrid.scss')).toMatch(rule);
     expect(read('dzgrid.unlayered.css')).toMatch(rule);
-    expect(read('dzgrid.unlayered.css')).toContain('.dzg-cell:focus:where(:not([data-dzg-quiet] *))');
+    expect(read('dzgrid.unlayered.css')).toContain('.dzg-cell:focus:where(:not([data-dzg-quiet] *, [data-dzg-ring=pointer] *))');
   });
 });

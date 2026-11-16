@@ -172,6 +172,14 @@ describe('<dz-grid> attributes (5, 6)', () => {
     expect(root().hasAttribute('data-headers')).toBe(false);
   });
 
+  it('headers="none" and focus-visible="keyboard" reach the grid (hidden-headers.md 8, presentation-settings.md 48, 1.13.0)', () => {
+    const el = make('<dz-grid-test headers="none" focus-visible="keyboard"></dz-grid-test>');
+    const root = () => el.querySelector('.dzg')!;
+    expect([root().getAttribute('data-headers'), root().getAttribute('data-dzg-ring')]).toEqual(['none', 'keys']);
+    el.removeAttribute('focus-visible');
+    expect(root().hasAttribute('data-dzg-ring')).toBe(false);
+  });
+
   it('row-height and density reach the rows', () => {
     const el = make('<dz-grid-test row-height="48"></dz-grid-test>');
     const h = () => (el.grid as unknown as { context: { rowHeight(): number } }).context.rowHeight(); // the grid's internal context, read for the height it paints

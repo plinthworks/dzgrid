@@ -10,6 +10,7 @@
 # history: owner 2026-11-14 Q-T1 B: the new entries of tooltips and popovers (additions) — @dzgrid/angular/tooltip#DzTipContent, @dzgrid/angular/tooltip#DzTipTemplateContext, @dzgrid/angular/tooltip#DzTooltip, @dzgrid/angular/tooltip#TipAnimate, @dzgrid/angular/tooltip#TipAnimation, @dzgrid/angular/tooltip#TipTone, @dzgrid/angular/tooltip#TooltipPlacement, @dzgrid/angular/tooltip#ɵDzHtml, @dzgrid/angular/tooltip#ɵdefined, @dzgrid/angular/tooltip#ɵdzDraw, @dzgrid/angular/popover#DzPopover, @dzgrid/angular/popover#PopoverCloseReason
 # history: owner 2026-11-14 hook info and shape (the same unpublished entries, accepted earlier in this batch; additions over 1.11) — @dzgrid/angular/tooltip#DzTooltip, @dzgrid/angular/popover#DzPopover
 # history: owner 2026-11-14: rich tooltips moved to @dztooltip, never published — entries removed: @dzgrid/angular/tooltip, @dzgrid/angular/popover
+# history: owner 2026-11-16 « A, monte à 93 000 »: [focusVisible] input, additions only — @dzgrid/angular#DzGrid
 
 @ @dzgrid/angular
 ## DZGRID_ANGULAR_VERSION
@@ -31,10 +32,11 @@
       readonly messages: _angular_core.InputSignal<GridMessages | undefined>;
       readonly locale: _angular_core.InputSignal<string | undefined>;
       readonly timeZone: _angular_core.InputSignal<string | undefined>;
-      readonly numerals: _angular_core.InputSignal<"latn" | "locale" | undefined>;
-      readonly direction: _angular_core.InputSignal<"auto" | "ltr" | "rtl" | undefined>;
+      readonly numerals: _angular_core.InputSignal<"locale" | "latn" | undefined>;
+      readonly direction: _angular_core.InputSignal<"ltr" | "rtl" | "auto" | undefined>;
       readonly density: _angular_core.InputSignal<"compact" | "comfortable" | "spacious" | undefined>;
-      readonly headers: _angular_core.InputSignal<"shown" | "hidden" | undefined>;
+      readonly headers: _angular_core.InputSignal<"hidden" | "none" | "shown" | undefined>;
+      readonly focusVisible: _angular_core.InputSignal<"always" | "keyboard" | undefined>;
       readonly rowHeight: _angular_core.InputSignal<number | undefined>;
       readonly headerHeight: _angular_core.InputSignal<number | _dzgrid_dom.HeaderHeights | undefined>;
       readonly theme: _angular_core.InputSignal<_dzgrid_dom.GridTheme | undefined>;
@@ -44,6 +46,7 @@
       readonly label: _angular_core.InputSignal<string | undefined>;
       readonly tooltips: _angular_core.InputSignal<{
           readonly delayMs?: number;
+          readonly cells?: boolean | "truncated";
       } | undefined>;
       readonly overscan: _angular_core.InputSignal<{
           readonly rows?: number;
@@ -430,6 +433,11 @@
           };
           "headers": {
               "alias": "headers";
+              "required": false;
+              "isSignal": true;
+          };
+          "focusVisible": {
+              "alias": "focusVisible";
               "required": false;
               "isSignal": true;
           };

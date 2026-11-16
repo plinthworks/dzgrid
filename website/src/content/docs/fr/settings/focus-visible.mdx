@@ -1,0 +1,69 @@
+---
+title: "focusVisible"
+description: "L’anneau de la cellule active après un clic aussi, ou pour le clavier seulement."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Pour un écran surtout utilisé à la souris, où l’anneau laissé sur la cellule qu’on vient de cliquer gêne.
+
+<OptionFacts setting="focusVisible" />
+
+## Ce qu’il fait
+
+Par défaut (`'always'`), la cellule active montre son anneau, un trait du fond à l’intérieur et une teinte, que le
+focus y soit venu par les touches ou par un clic.
+
+`'keyboard'` : après un appui de la souris, d’un stylet ou d’un doigt dans la grille, la cellule active — et un titre
+de colonne ou un volet de détail actif — ne montre ni anneau, ni trait intérieur, ni teinte. Le focus reste où le clic
+l’a mis (un lecteur d’écran l’a toujours) et la ligne garde sa teinte de ligne active. N’importe quelle touche dans la
+grille ramène l’anneau tout de suite, et aussi le focus qui revient de l’extérieur de la grille (Tab, un raccourci, une
+autre fenêtre). La grille note elle-même le dernier geste : cela marche pareil dans Firefox, où `:focus-visible` seul
+ne suit pas les flèches après un clic. La poignée de recopie, les bords d’un bloc et un éditeur ouvert ne sont pas
+l’anneau du focus : ils restent.
+
+Ce n’est pas la clé `focusRing` du thème, qui est la couleur de l’anneau.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Lamp = { id: string; street: string; watts: number };
+
+const grid = createGrid<Lamp>(document.getElementById('lampadaires')!, {
+  rows: [{ id: 'l1', street: 'Rue du Moulin', watts: 40 }],
+  columns: [{ id: 'street', header: 'Rue' }, { id: 'watts', header: 'Watts', type: 'number' }],
+  getRowId: (l) => l.id,
+  messages: FR,
+  focusVisible: 'keyboard',
+});
+
+grid.update({ focusVisible: 'always' });
+```
+
+En Angular, `<dz-grid focusVisible="keyboard">` ; dans le composant web, `<dz-grid focus-visible="keyboard">`.
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Lampadaires', focusVisible: 'keyboard' }}
+  columns={[
+    { id: 'street', header: 'Rue', flex: 1 },
+    { id: 'watts', header: 'Watts', type: 'number', width: 120 },
+  ]}
+  rows={[
+    { id: 'l1', street: 'Rue du Moulin', watts: 40 },
+    { id: 'l2', street: 'Quai du Port', watts: 60 },
+    { id: 'l3', street: 'Allée des Vergers', watts: 25 },
+  ]}
+  caption="Cliquez une cellule : pas d’anneau. Appuyez sur une flèche : l’anneau revient."
+/>
+
+## Voir aussi
+
+- [`theme`](../theme/) — la couleur de l’anneau (`focusRing`) et sa largeur (`focusWidth`).
+- [Accessibilité](../../guides/accessibility/).

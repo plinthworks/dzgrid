@@ -30,6 +30,18 @@ nested grids; past three levels, the grid made tells `unsupported-combination` a
   features.
 - `keep`: how many masters' grids are remembered, the least recently used forgotten first: 20 by default.
 - `onGrid`: called with each grid made, once it is mounted, to wire your own toolbar or events.
+- `arrows: 'rows'` (1.13.0): the arrows go through the inner grid's rows as if they were rows of the outer list. ↓ on
+  the row above an open panel goes to the inner grid's first row, at the same column (else its first column the keys
+  take, `keyboard: false` ones skipped); ↑ on its first row goes back to that row (at the inner grid's column when it
+  has it, else the one you came in at); ↓ on its last row goes to the row after the panel, and ↑ from there to its last
+  row. The panel's own stop is no longer on the way (Escape still reaches it). A panel whose grid has no row stays one
+  stop; an arrow with a modifier stays each grid's own. Pair it with `headers: 'none'` on the inner grid. Its code is a
+  small chunk loaded with the first panel that wants it.
+- `inlineScroll: 'master'` (1.13.0): the inner grid has no sideways scrollbar of its own and moves with the outer grid's
+  horizontal scroll; a sideways wheel over it scrolls the outer grid, and a key that brings one of its columns into view
+  moves the outer grid too. For inner columns that follow the master's (same ids, same widths). To put its first column
+  exactly under the master's, set `--dzg-detail-inset: 0`, `--dzg-detail-line: none` and no frame on the inner grid
+  (`--dzg-frame: none`).
 - `env`: the grid's test seams, for tests only.
 
 ## Example

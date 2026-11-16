@@ -5,14 +5,33 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.13.0] - 2026-11-15
+## [1.13.0] - 2026-11-16
 
 The columns panel looks finished, and a narrow column keeps its title (owner 2026-11-15, « pas du tout stylé, c'est
 moche », seen in a real app in dark mode with Tailwind 3's preflight; docs/behaviors/presentation-settings.md 42–43).
 Prepared as 1.12.1, never published: renumbered 1.13.0 (owner 2026-11-15, « mettre tout en 1.13.0 ») with four fixes
-found by the owner's app (presentation-settings.md 44–47). A minor: two additions, nothing removed.
+found by the owner's app (presentation-settings.md 44–47). Then, still unpublished, the options that retire the owner's
+app's last patches on the grid's internal classes (owner 2026-11-16, « A, monte à 93 000 »). A minor: additions only,
+nothing removed.
 
 ### Added
+- **`focusVisible: 'keyboard'`** (a grid setting, live; Angular `[focusVisible]`, `<dz-grid focus-visible>`): after a
+  press of the pointer in the grid, the focused cell, header cell or detail panel shows no ring, no inner line and no
+  tint; any key — or the focus coming back from outside the grid — brings them back (presentation-settings.md 48). The
+  grid notes the last gesture on its root (`data-dzg-ring`), so it works in Firefox too. Default `'always'`: as before.
+- **`headers: 'none'`**: the header rows kept for screen readers, never shown and never reached by the keys (ArrowUp
+  from the first row stays; Tab enters on a cell) — for a grid in a detail panel (hidden-headers.md 8).
+- **`ColumnDef.keyboard: false`**: the arrows, Home and End jump over the column, in the header and the body, and Tab
+  enters past it; a click still reaches it and it can hold content (reading-keyboard.md).
+- **`nestedGrid({ arrows: 'rows' })`**: the arrows go through a panel's grid as rows of the outer list — Down from the
+  row above an open panel to the inner grid's first row (same column, else its first one the keys take), Up from its
+  first row back, Down from its last row to the row after the panel, Up from there to its last row
+  (master-detail.md). Its code is a small chunk (`detail/through.js`) loaded with the first panel that wants it.
+- **`nestedGrid({ inlineScroll: 'master' })`**: a panel's grid with no sideways scrollbar of its own, moved with the
+  outer grid's horizontal scroll (a sideways wheel over it and a key in it move the outer grid) — for inner columns that
+  follow the master's (master-detail.md).
+- **`--dzg-detail-inset`** (theme key `detailInset`): a detail panel's content inset at its inline start (default
+  `.5rem`); with `--dzg-detail-line: none` and no frame on the inner grid, its first column sits under the master's.
 - `ColumnDef.filterButton: false`: no filter button (funnel) in that column's header and no room kept for it (nor its
   80 px floor) — for a header part that offers the filter itself (its `filter` context). The filter stays reachable
   (Alt+ArrowDown on the header, the column menu, the floating row); the header still says when it is filtered.
@@ -46,7 +65,11 @@ found by the owner's app (presentation-settings.md 44–47). A minor: two additi
   measures the whole title; the 80 px floor is unchanged.
 
 ### Upgrading from 1.12.0
-- Nothing to change (an app that set `headerAlign: 'start'` only to make its header part fill the cell can drop it; one with its own search box in the header can add `filterButton: false`). What you will see: the panel's new look; the search box's label is now its placeholder and
+- Nothing to change (an app that set `headerAlign: 'start'` only to make its header part fill the cell can drop it; one with its own search box in the header can add `filterButton: false`). An app that patched the grid's classes for the focus ring after a click, a detail grid's header row, its keys or its sideways scrollbar can use `focusVisible: 'keyboard'`, `headers: 'none'`, `keyboard: false`, `nestedGrid({ arrows: 'rows', inlineScroll: 'master' })` and `--dzg-detail-inset` instead.
+- Size lines (owner 2026-11-16, « A, monte à 93 000 »): the audit screen (K.8) 92 000 → 93 000 (measured 92 378); by
+  the +2 % rule `@dzgrid/dom` 25 700 → 26 000, `@dzgrid/dom/detail` 4 200 → 4 284, `@dzgrid/theme` 3 050 → 3 110,
+  `variables.css` 1 938 → 1 950, `@dzgrid/dom/theme` 2 530 → 2 550, `@dzgrid/dom/print` 1 710 → 1 720; a new line for
+  the lazy chunk `@dzgrid/dom/detail: through (lazy)`, 1 400 (its measure + 10 %); the real Angular example 103 150 → 103 500 (measured 103 485). What you will see: the panel's new look; the search box's label is now its placeholder and
   `aria-label`; narrow filterable headers show their title and reveal the filter button on hover or focus.
 
 ## [1.12.0] - 2026-11-13

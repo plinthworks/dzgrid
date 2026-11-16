@@ -86,7 +86,7 @@ describe('the base sheet (30–32), both copies', () => {
     });
 
     it(`dzgrid${c}.css: the focused cell's tint a colour only (a background image — the column separator — stays)`, () => {
-      expect(body(base(c), '.dzg-cell:focus:where(:not([data-dzg-quiet] *))')).toContain('background-color: var(--dzg-cell-active-bg');
+      expect(body(base(c), '.dzg-cell:focus:where(:not([data-dzg-quiet] *, [data-dzg-ring=pointer] *))')).toContain('background-color: var(--dzg-cell-active-bg');
     });
   }
 });

@@ -469,7 +469,7 @@
     },
     "@dzgrid/theme": {
       "file": "packages/theme/dzgrid.css",
-      "maxGzip": 3050
+      "maxGzip": 3110
     },
     "@dzgrid/theme/dzgrid.comfort.css": {
       "file": "packages/theme/dzgrid.comfort.css",
@@ -529,7 +529,7 @@
     },
     "@dzgrid/theme/variables.css": {
       "file": "packages/theme/variables.css",
-      "maxGzip": 1938
+      "maxGzip": 1950
     },
     "@dzgrid/theme/buttons.css": {
       "file": "packages/theme/buttons.css",
@@ -585,7 +585,7 @@
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
-      "maxGzip": 25700,
+      "maxGzip": 26000,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal"
@@ -771,11 +771,24 @@
     },
     "@dzgrid/dom/detail": {
       "file": "packages/dom/src/detail.ts",
-      "maxGzip": 4200,
+      "maxGzip": 4284,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
         "@dzgrid/core/detail",
+        "@dzgrid/dom",
+        "@dzgrid/dom/internal",
+        "./through.js"
+      ]
+    },
+    "@dzgrid/dom/detail: through (lazy)": {
+      "files": [
+        "packages/dom/src/detail/through.ts"
+      ],
+      "maxGzip": 1400,
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
         "@dzgrid/dom",
         "@dzgrid/dom/internal"
       ]
@@ -1057,7 +1070,7 @@
     },
     "@dzgrid/dom/theme": {
       "file": "packages/dom/src/theme.ts",
-      "maxGzip": 2530,
+      "maxGzip": 2550,
       "over": "@dzgrid/dom",
       "external": [
         "@dzgrid/core",
@@ -1131,7 +1144,7 @@
     },
     "@dzgrid/dom/print": {
       "file": "packages/dom/src/print.ts",
-      "maxGzip": 1710,
+      "maxGzip": 1720,
       "over": "@dzgrid/dom",
       "external": [
         "@dzgrid/core",
@@ -1318,7 +1331,7 @@
       "css": [
         "packages/theme/dzgrid.css"
       ],
-      "maxGzip": 92000,
+      "maxGzip": 93000,
       "external": [
         "@angular/*",
         "rxjs",

@@ -1,5 +1,25 @@
 # État du travail — à lire en premier si la session est perdue
 
+Mis à jour : 2026-11-16. **1.13.0 (toujours non publiée) : les options qui retirent les rustines de l'appli du
+propriétaire** (« A, monte à 93 000 »). Fiches d'abord : `presentation-settings.md` 48 (`focusVisible: 'keyboard'`, défaut
+`'always'` ; `data-dzg-ring` = `keys` / `pointer` sur la racine, posé par le routeur des touches ; le thème garde l'anneau,
+le trait et la teinte de la cellule hors `pointer`, et met l'anneau sur `:focus` des titres et volets sous `keys` — Firefox),
+`hidden-headers.md` 8 (`headers: 'none'` : jamais montré, jamais atteint au clavier, pas d'arrêt de Tab dans l'en-tête),
+`reading-keyboard.md` (`ColumnDef.keyboard: false`, sauté par ← → Début Fin et Tab), `master-detail.md`
+(`nestedGrid({ arrows: 'rows', inlineScroll: 'master' })`, options et non défaut ; leur code dans un morceau paresseux
+`detail/through.ts` qui parle à la grille autour par la page — lignes voisines par `aria-rowindex`, `focus()` de la
+cellule, vue extérieure par `inlineScroll` / `setInlineScroll` — pour tenir `@dzgrid/dom/detail` dans +2 % ;
+`--dzg-detail-inset`, clé `detailInset`). Tests `rustines-1-13.test.ts` (dom 20, theme 14), Angular et élément (+1 chacun),
+`detail-ssr` (le morceau), épingles de tailles. Matrice `browser-1-12.mjs` (14), page `v1-13.html`, `--rustines` seule.
+Site : `settings/focus-visible`, `column-options/keyboard` (en, fr), `headers` et `nested-grid` complétés, tableau des
+variables. **K.8 92 000 → 93 000** (propriétaire 2026-11-16 ; mesuré 92 378) ; +2 % : DOM 26 000, detail 4 284, theme
+3 110, variables.css 1 950, dom/theme 2 550, print 1 720 ; nouvelle ligne `detail: through (lazy)` 1 400.
+Vérifié (2026-11-16) : `[focusVisible]` accepté dans la base de l'API (« A ») et pages d'API du site régénérées ;
+`pack:local` ; `gate:step` vert (674 fichiers / 9 504 tests, test:tz, typecheck, build, check:size — K.8 92 378 / 93 000 —,
+check:api, check:types) ; `test:real-app` 58 / 58 ; matrice complète `browser-1-12.mjs` 15 212 / 15 212 ; `release:check`
+« the 5 packages at 1.13.0 » (appli Angular réelle 103 150 → 103 500, mesuré 103 485, règle des +2 % ; épingles
+`example-bytes`, `step12-budgets`) ; tests du site verts ; mots interdits verts. Rien commité ni publié.
+
 Mis à jour : 2026-11-15 (soir). **1.12.1 jamais publiée → tout en 1.13.0** (propriétaire « mettre tout en 1.13.0 ») :
 cinq paquets renumérotés, CHANGELOG `[1.13.0]`, `docs/release-1.13.0.md`. Quatre corrections trouvées par l'appli du
 propriétaire (fiche `presentation-settings.md` 44–47, pointeurs dans `parts.md`) : (44) `--dzg-panel-search-placeholder`

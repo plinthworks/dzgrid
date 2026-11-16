@@ -34,6 +34,19 @@ grilles peuvent s’imbriquer dans des grilles imbriquées ; au-delà de trois n
 - `keep` : combien de grilles de maîtres sont retenues, la moins récemment utilisée oubliée d’abord : 20 par défaut.
 - `onGrid` : appelée avec chaque grille créée, une fois montée, pour brancher votre propre barre d’outils ou vos
   événements.
+- `arrows: 'rows'` (1.13.0) : les flèches passent par les lignes de la grille imbriquée comme si c’étaient des lignes de
+  la liste. ↓ sur la ligne au-dessus d’un volet ouvert va à la première ligne de la grille imbriquée, dans la même
+  colonne (sinon sa première colonne prise par le clavier, les `keyboard: false` sautées) ; ↑ sur sa première ligne
+  revient à cette ligne (dans la colonne de la grille imbriquée si elle l’a, sinon celle d’où vous êtes entré) ; ↓ sur
+  sa dernière ligne va à la ligne après le volet, et ↑ depuis celle-ci à sa dernière ligne. L’arrêt du volet n’est plus
+  sur le chemin (Échap y mène toujours). Un volet dont la grille n’a aucune ligne reste un arrêt ; une flèche avec une
+  touche de modification reste à chaque grille. À marier avec `headers: 'none'` sur la grille imbriquée. Son code est
+  un petit morceau chargé avec le premier volet qui le demande.
+- `inlineScroll: 'master'` (1.13.0) : la grille imbriquée n’a pas de barre de défilement horizontale à elle et suit le
+  défilement horizontal de la grille autour ; une molette de côté au-dessus d’elle fait défiler la grille autour, et une
+  touche qui amène une de ses colonnes en vue déplace aussi la grille autour. Pour des colonnes qui suivent celles du
+  maître (mêmes identifiants, mêmes largeurs). Pour caler sa première colonne exactement sous celle du maître :
+  `--dzg-detail-inset: 0`, `--dzg-detail-line: none` et pas de cadre sur la grille imbriquée (`--dzg-frame: none`).
 - `env` : les points d’accroche de test de la grille, pour les tests seulement.
 
 ## Exemple

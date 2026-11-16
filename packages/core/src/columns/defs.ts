@@ -116,6 +116,12 @@ export interface ColumnDef<T, V = unknown> {
    * (Alt+ArrowDown on the header, the column menu, the floating row); the header still says when it is filtered.
    */
   readonly filterButton?: false;
+  /**
+   * `false`: the arrow keys, Home and End jump over it, in the header as in the body, and Tab enters the grid past it
+   * (1.13.0, reading-keyboard.md « A column the keyboard skips »): a column empty on purpose (the space under a master's
+   * chevron in a detail's grid). Still drawn, named for screen readers, and reached by a click.
+   */
+  readonly keyboard?: false;
   /** `false`: left out of the column chooser's list (still hideable by the menu). Phase 6 step 4, columns-chooser.md 6. */
   readonly chooser?: false;
   /** @default true */

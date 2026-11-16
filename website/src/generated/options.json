@@ -140,10 +140,10 @@
     },
     {
       "name": "headers",
-      "type": "'shown' | 'hidden'",
+      "type": "'shown' | 'hidden' | 'none'",
       "resolved": null,
       "required": false,
-      "doc": "`'hidden'`: no header row on screen, kept for screen readers and shown while the keyboard is in it (docs/behaviors/hidden-headers.md, 1.9.0). Live. Default `'shown'`.",
+      "doc": "`'hidden'`: no header row on screen, kept for screen readers and shown while the keyboard is in it (docs/behaviors/hidden-headers.md, 1.9.0). `'none'` (1.13.0, 8): kept for screen readers too, never shown and never reached by the keys (a grid in a detail panel). Live. Default `'shown'`.",
       "default": {
         "code": "'shown'"
       },
@@ -152,6 +152,22 @@
       "angular": true,
       "element": {
         "attribute": "headers"
+      }
+    },
+    {
+      "name": "focusVisible",
+      "type": "'always' | 'keyboard'",
+      "resolved": null,
+      "required": false,
+      "doc": "`'keyboard'`: after a press of the pointer in the grid, the focused cell, header or panel shows no ring, no inner line and no tint, until the next key (presentation-settings.md 48, 1.13.0). Live. Default `'always'`: by the keys or a click.",
+      "default": {
+        "code": "'always'"
+      },
+      "source": "packages/dom/src/settings.ts",
+      "live": true,
+      "angular": true,
+      "element": {
+        "attribute": "focus-visible"
       }
     },
     {
@@ -727,6 +743,15 @@
       "resolved": null,
       "required": false,
       "doc": "`false`: no filter button (funnel) in its header, and no room kept for it (1.13.0, presentation-settings.md 45) — for a header part that offers the filter itself (its `filter` context: `set`, `openFilter()`). The filter stays reachable (Alt+ArrowDown on the header, the column menu, the floating row); the header still says when it is filtered.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "keyboard",
+      "type": "false",
+      "resolved": null,
+      "required": false,
+      "doc": "`false`: the arrow keys, Home and End jump over it, in the header as in the body, and Tab enters the grid past it (1.13.0, reading-keyboard.md « A column the keyboard skips »): a column empty on purpose (the space under a master's chevron in a detail's grid). Still drawn, named for screen readers, and reached by a click.",
       "default": null,
       "source": "packages/core/src/columns/defs.ts"
     },
@@ -1595,6 +1620,24 @@
           "resolved": null,
           "required": false,
           "doc": "Called with each grid made, once it is mounted (a host wiring its own toolbar or events).",
+          "default": null,
+          "source": "packages/dom/src/detail/nested.ts"
+        },
+        {
+          "name": "arrows",
+          "type": "'rows'",
+          "resolved": null,
+          "required": false,
+          "doc": "`'rows'` (1.13.0, master-detail.md « The arrows through a nested grid's rows »): the arrows go through this grid's rows as rows of the outer list — Down from the row above the panel to this grid's first row, Up from its first row back to it, Down from its last row to the row after the panel, Up from there to its last row (same column, else the first one the keys take). Absent: the panel is one stop, Enter goes in, Escape comes out. Its code is a chunk loaded with the first panel that wants it.",
+          "default": null,
+          "source": "packages/dom/src/detail/nested.ts"
+        },
+        {
+          "name": "inlineScroll",
+          "type": "'master'",
+          "resolved": null,
+          "required": false,
+          "doc": "`'master'` (1.13.0, master-detail.md « A nested grid that follows the master's sideways scroll »): no sideways scrollbar of its own; moved with the outer grid's horizontal scroll, and a key bringing one of its columns into view moves the outer grid. For columns that follow the master's (same ids, widths). Absent: it scrolls by itself.",
           "default": null,
           "source": "packages/dom/src/detail/nested.ts"
         },

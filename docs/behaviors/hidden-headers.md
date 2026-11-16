@@ -31,10 +31,18 @@ and the keys that start from the header.
 6. Print and exports keep their header row; the application leaves it out with `header: false` (CSV, Excel; print:
    `print(grid, { header: false })`). JSON has no header row.
 7. Pinned top rows sit at the top of the grid (no header above them).
+8. **`headers: 'none'`: a header row that never shows** (1.13.0, owner 2026-11-16, « A »; a grid in a detail panel,
+   whose rows read under the master's own titles). As `'hidden'` (1–3, 5–7: the rows stay in the accessibility tree
+   with their roles and names, so a screen reader still says each cell's column), except that the keyboard never goes
+   there: ArrowUp from the first row (and from the top pinned rows) stays, Tab enters on a cell, and a grid without rows
+   offers no tab stop in the header. So the header rows never show, not even while focused (a focus an application
+   gives them by its own code stays invisible: it is the application's). The root says `data-headers="none"`. Live,
+   like `'hidden'`. The keys that live in the header (Enter to sort, the column menu's, the filter popup's) are then
+   out of reach by keyboard too: what remains is 5's list.
 
 ## Where DzGrid differs on purpose
 - The headers are hidden from the eyes only; never taken out of the grid's structure.
 
 ## Tests
-`packages/dom/test/hidden-headers.test.ts` (attribute, live update, the view's height, roles kept, print option);
+`packages/dom/test/rustines-1-13.test.ts` (8); `packages/dom/test/hidden-headers.test.ts` (attribute, live update, the view's height, roles kept, print option);
 browser `scripts/browser-lot-a.mjs` (Chrome fr and ar: no header on screen, shown while focused, axe clean).

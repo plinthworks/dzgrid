@@ -22,8 +22,13 @@ header cell, the headers appear at their usual place, Enter still sorts and the 
 back into the rows hides them again. The mouse has no header to click: sorting and filtering stay on the keyboard, the
 cell menu, the dock's panels and your own code.
 
+`'none'` (1.13.0): the same, except that the keyboard never goes there either — ↑ from the first row stays, Tab
+enters on a cell — so the header rows never show, focused or not. For a grid in a detail panel, whose rows read under
+the master's own titles ([`nestedGrid`](../../features/nested-grid/)); a screen reader still says each cell's column.
+The keys that live in the header (sort, menu, filter) are then out of reach by keyboard too.
+
 Print and the CSV and Excel exports keep their header row; `header: false` on them leaves it out. The grid's root says
-`data-headers="hidden"`.
+`data-headers="hidden"` (or `"none"`).
 
 ## Example
 

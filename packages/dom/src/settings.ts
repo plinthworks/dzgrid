@@ -29,10 +29,17 @@ export interface GridSettings<T> {
   readonly density?: 'compact' | 'comfortable' | 'spacious';
   /**
    * `'hidden'`: no header row on screen, kept for screen readers and shown while the keyboard is in it
-   * (docs/behaviors/hidden-headers.md, 1.9.0). Live. Default `'shown'`.
+   * (docs/behaviors/hidden-headers.md, 1.9.0). `'none'` (1.13.0, 8): kept for screen readers too, never shown and never
+   * reached by the keys (a grid in a detail panel). Live. Default `'shown'`.
    * @default 'shown'
    */
-  readonly headers?: 'shown' | 'hidden';
+  readonly headers?: 'shown' | 'hidden' | 'none';
+  /**
+   * `'keyboard'`: after a press of the pointer in the grid, the focused cell, header or panel shows no ring, no inner line
+   * and no tint, until the next key (presentation-settings.md 48, 1.13.0). Live. Default `'always'`: by the keys or a click.
+   * @default 'always'
+   */
+  readonly focusVisible?: 'always' | 'keyboard';
   /**
    * False: one sort only — Shift+click, Shift+Enter and a header part's `toggleSort(true)` act as a plain
    * click (sort.md « One sort only »); the app's own `sort.set` of several is kept. True by default. Fixed.

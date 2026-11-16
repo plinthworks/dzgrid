@@ -4,7 +4,9 @@ Préparé le 2026-11-15 comme 1.12.1, jamais publiée, renumérotée 1.13.0 (« 
 corrections trouvées par ton appli (fiche `presentation-settings.md` 44–47). Au départ : ta remarque « pas du tout stylé, c'est moche » sur le panneau des colonnes ancré, dans ton
 appli en sombre avec le preflight de Tailwind 3). **Rien n'est publié, aucune étiquette n'est poussée.** C'est toi qui
 publies. Les **cinq** paquets sont en **1.13.0** (`@dzgrid/core`, `dom`, `theme`, `angular`, `element`), leurs pairs
-`@dzgrid/*` en `^1.13.0`. Une mineure : deux ajouts (`ColumnDef.filterButton`, `--dzg-panel-search-placeholder`), rien retiré.
+`@dzgrid/*` en `^1.13.0`. Une mineure : des ajouts seulement (`ColumnDef.filterButton`, `--dzg-panel-search-placeholder`,
+puis le 2026-11-16 `focusVisible`, `headers: 'none'`, `ColumnDef.keyboard`, `nestedGrid({ arrows, inlineScroll })`,
+`--dzg-detail-inset`), rien retiré.
 
 ## Avant
 
@@ -59,6 +61,32 @@ Puis `npm run publish:verify`, et dans les applications `npm update @dzgrid/core
   trier (l'affichage en attente est fait d'abord, la touche lue sur le bon en-tête). Entrée trie toujours un en-tête
   dont la part ne prend pas le focus ; le clic trie comme avant.
 
+## Les options qui retirent les rustines de ton appli (2026-11-16, « A, monte à 93 000 »)
+
+Toujours avant publication. Chacune : ligne de fiche d'abord, tests écrits à la main et rouges d'abord, matrice.
+
+- **`focusVisible: 'keyboard'`** (réglage, vivant ; Angular `[focusVisible]`, `<dz-grid focus-visible>`) — retire la
+  **rustine 5**. Après un clic, pas d'anneau, de trait intérieur ni de teinte sur la cellule, le titre ou le volet ;
+  une touche (ou le focus qui revient de l'extérieur) les ramène. La grille note elle-même le dernier geste
+  (`data-dzg-ring` sur sa racine) : marche dans Firefox. Défaut `'always'` (comme avant). Pas la clé `focusRing` du
+  thème (la couleur).
+- **`headers: 'none'`** — retire la **rustine 6 (CSS)**. L'en-tête reste pour les lecteurs d'écran, jamais montré, jamais
+  atteint au clavier (↑ depuis la première ligne reste, Tab entre sur une cellule).
+- **`keyboard: false`** sur une colonne — retire le saut de la colonne du chevron de la **rustine 6 (code)**. ← → Début
+  Fin la sautent, en-tête compris ; un clic y va toujours.
+- **`nestedGrid({ arrows: 'rows' })`** — retire `intoDetail` / `toMaster` / `onKey` de la **rustine 6 (code)**. ↓ depuis la
+  ligne maître ouverte → première ligne du détail (même colonne, sinon la première prise par le clavier) ; ↑ depuis sa
+  première ligne → la ligne maître ; ↓ depuis sa dernière → la ligne après le volet ; ↑ depuis celle-ci → sa dernière
+  ligne. Un détail qui n'est pas une grille garde l'arrêt unique (Entrée, Échap). Code dans un petit morceau chargé au
+  premier volet qui le demande (`@dzgrid/dom/detail` n'en porte que l'`import()`).
+- **`nestedGrid({ inlineScroll: 'master' })`** + **`--dzg-detail-inset`** (clé `detailInset`) — retire la **rustine 2**
+  et le `scrollLeft` posé par ton code. Pas de barre horizontale propre, suit le défilement du maître (molette de côté et
+  touches comprises). Défaut : comme avant (option, pas le défaut : une grille imbriquée plus large que le maître serait
+  coupée). `--dzg-detail-inset: 0`, `--dzg-detail-line: none` et `--dzg-frame: none` sur la grille du détail : sa
+  première colonne exactement sous celle du maître.
+- Pas touché : les rustines 1, 3, 4 (déjà retirées par la 1.13.0 : 44, `filterButton`), le Tab par les boutons des
+  cellules (noté dans ton LISEZMOI).
+
 ## Tailles
 
 - Règle des +2 % : `@dzgrid/dom/internal` 3 800 → 3 876 (mesuré 3 871 : Entrée après une flèche), `@dzgrid/dom/slots`
@@ -66,6 +94,10 @@ Puis `npm run publish:verify`, et dans les applications `npm update @dzgrid/core
   `@dzgrid/dom/filters` 12 338 / 12 350, `/filters-base` 12 285 / 12 300 ; `columns-panel.css` 1 706 / 1 720,
   `dock.css` sous 880 (tes « ok » du 2026-11-15). **K.8 91 994 / 92 000.** La base `@dzgrid/dom` inchangée
   (25 668 / 25 700) : la correction du clavier vit dans `@dzgrid/dom/internal`, pas dans la base.
+- **2026-11-16 (tes options, « A, monte à 93 000 »)** : **K.8 92 000 → 93 000** (mesuré 92 378) ; règle des +2 % :
+  base `@dzgrid/dom` 25 700 → 26 000 (25 977), `@dzgrid/dom/detail` 4 200 → 4 284 (4 277), `@dzgrid/theme` 3 050 → 3 110
+  (3 093), `variables.css` 1 938 → 1 950, `@dzgrid/dom/theme` 2 530 → 2 550, `@dzgrid/dom/print` 1 710 → 1 720 ;
+  nouvelle ligne `@dzgrid/dom/detail: through (lazy)` 1 400 (mesure 1 239 + 10 %) ; appli Angular réelle 103 150 → 103 500 (mesuré 103 485, règle des +2 %).
 
 ## Vérifié (2026-11-15)
 

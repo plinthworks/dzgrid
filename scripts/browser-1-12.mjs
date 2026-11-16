@@ -17,7 +17,8 @@
  * a row's text forced under `data-dzg-row-fg="force"`, `--dzg-row-state-fg`); and (39–40) the pagination bar: the popups'
  * button variables leave the pager's buttons and select as they are, the pager's own change the pager only, each bar
  * variable's default and effect, the text sizes (a menu item untouched); (12) 1.13.0, the columns panel's look and a
- * narrow header's title (page `v1-12-1.html`; `--panel` runs only it, with (13): the owner's app findings, `?app=1`). The rich tooltips and popovers (sections 11,
+ * narrow header's title (page `v1-12-1.html`; `--panel` runs only it, with (13): the owner's app findings, `?app=1`, and
+ * (14): the app's last patches as options, page `v1-13.html`; `--rustines` runs (14) alone). The rich tooltips and popovers (sections 11,
  * 11b–11e) moved to DzTooltip with their code (owner 2026-11-14): its scripts/browser.mjs.
  */
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -412,6 +413,162 @@ async function appFixes(page, tag, { css, dark, lang, preflight }, errors) {
   await page.setViewportSize({ width: 900, height: 700 });
 }
 
+/**
+ * (14) 1.13.0, the owner's app's last patches as options (owner 2026-11-16, « A »; presentation-settings.md 48,
+ * hidden-headers.md 8, reading-keyboard.md, master-detail.md): page `v1-13.html`, a master wider than its host with
+ * `focusVisible: 'keyboard'`, panels holding grids that follow it (`arrows: 'rows'`, `inlineScroll: 'master'`, `headers:
+ * 'none'`, an empty first column the keys skip). After a real click: no ring, no inner line, no tint on a cell, a header,
+ * a panel; any key: the ring back, on a header and a panel too (`:focus`, Firefox). The panel's header rows never on
+ * screen; the arrows through its rows both ways; its first column skipped; its sideways scroll the master's (a scroll, a
+ * sideways wheel over it, a key in it), no scrollbar of its own; `--dzg-detail-inset: 0` with `--dzg-detail-line: none`
+ * (and no frame, `--dzg-frame: none`) put its first column under the master's (the default: 0.5rem and the 3px line apart); axe.
+ */
+async function rustines(page, tag, { css, dark, lang, preflight }, name, errors) {
+  const rtl = lang === 'ar';
+  await page.setViewportSize({ width: 1000, height: 700 });
+  await page.goto(site.url(`v1-13.html?lang=${lang}&css=${css}${dark ? '&dark=1' : ''}${preflight ? '&preflight=1' : ''}`));
+  await page.waitForFunction(() => window.ready === true, null, { timeout: 30000 });
+  await frames(page);
+  // The focused element's look: its ring (outline), inner line (box-shadow), own tint, against a cell beside it.
+  const look = () => page.evaluate(() => {
+    const a = document.activeElement;
+    const s = getComputedStyle(a);
+    const sib = a.matches('.dzg-cell') ? [...a.parentElement.querySelectorAll('.dzg-cell')].find((c) => c !== a) : null;
+    return { what: a.className, col: a.dataset?.col ?? null, outline: s.outlineStyle === 'none' || parseFloat(s.outlineWidth) === 0 ? 'none' : `${s.outlineStyle} ${s.outlineWidth}`, shadow: s.boxShadow, bg: s.backgroundColor, sib: sib ? getComputedStyle(sib).backgroundColor : null, ring: document.querySelector('#host > .dzg').getAttribute('data-dzg-ring') };
+  });
+  const centre = (sel) => page.evaluate((sel) => { const r = document.querySelector(sel).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, sel);
+  const cell = (row, col) => `#host > .dzg > .dzg-viewport .dzg-layer > .dzg-row[aria-rowindex="${row}"] > * .dzg-cell[data-col="${col}"], #host > .dzg > .dzg-viewport .dzg-layer > .dzg-row[aria-rowindex="${row}"] > .dzg-cell[data-col="${col}"]`;
+  const at = async (sel) => { const c = await centre(sel); await page.mouse.click(c.x, c.y); await frames(page); };
+  // (48) A click on a body cell: nothing of the focus drawn on it; a key: back.
+  await at(cell(3, 'temp'));
+  const c0 = await look();
+  check(`${tag}: (14) after a click, the cell holds the focus without a ring, an inner line or a tint`, c0.col === 'temp' && c0.ring === 'pointer' && c0.outline === 'none' && c0.shadow === 'none' && c0.bg === c0.sib, c0);
+  await page.keyboard.press('ArrowRight');
+  await frames(page);
+  const c1 = await look();
+  check(`${tag}: (14) any key: the ring, the inner line and the tint back`, c1.ring === 'keys' && /solid/.test(c1.outline) && parseFloat(c1.outline.split(' ')[1]) >= 2 && c1.shadow !== 'none' && c1.bg !== c1.sib, c1);
+  // A header: a click, then an arrow (Firefox draws no :focus-visible there).
+  await at('#host > .dzg > .dzg-viewport .dzg-header .dzg-hcell[data-col="oven"]');
+  const h0 = await look();
+  check(`${tag}: (14) after a click on a header, no ring`, /dzg-hcell/.test(h0.what) && h0.outline === 'none', h0);
+  await page.keyboard.press(rtl ? 'ArrowLeft' : 'ArrowRight');
+  await frames(page);
+  const h1 = await look();
+  check(`${tag}: (14) an arrow from it: the next header with its ring`, h1.col === 'temp' && /solid/.test(h1.outline), h1);
+  // (8) The panel's grid: its header rows never on screen; the arrows through its rows.
+  await page.evaluate(() => window.grid.kernel.dispatch({ type: 'rows.expand', rows: [window.grid.kernel.rows.displayed.keyAt(1)], expanded: true }, 'api'));
+  await frames(page);
+  await at(cell(3, 'temp'));
+  const where = () => page.evaluate(() => {
+    const a = document.activeElement;
+    const inner = a.closest('.dzg') !== document.querySelector('#host > .dzg');
+    return { inner, col: a.dataset?.col ?? null, row: a.closest('.dzg-row')?.getAttribute('aria-rowindex') ?? null, dcell: a.matches('.dzg-dcell') };
+  });
+  await page.keyboard.press('ArrowDown');
+  await frames(page);
+  const w1 = await where();
+  check(`${tag}: (14) ArrowDown from an open master: the panel grid's first row, same column`, w1.inner && w1.col === 'temp' && w1.row === '2', w1);
+  const hidden = await page.evaluate(() => [...document.querySelectorAll('.dzg-dbody .dzg-hrow')].map((r) => { const b = r.getBoundingClientRect(); return { w: b.width, h: b.height, clip: getComputedStyle(r).clipPath }; }));
+  check(`${tag}: (14) headers: 'none' — the panel grid's header row not on screen (clipped to nothing)`, hidden.length > 0 && hidden.every((r) => /inset\(50%\)/.test(r.clip)), hidden);
+  await page.keyboard.press('Home');
+  await frames(page);
+  const w2 = await where();
+  check(`${tag}: (14) Home in the panel grid: its first column the keys take (the empty one skipped)`, w2.inner && w2.col === 'oven', w2);
+  await page.keyboard.press('ArrowUp');
+  await frames(page);
+  const w3 = await where();
+  check(`${tag}: (14) ArrowUp from its first row: back on the master, same column`, !w3.inner && w3.col === 'oven' && w3.row === '3', w3);
+  for (const k of ['ArrowDown', 'ArrowDown', 'ArrowDown', 'ArrowDown']) await page.keyboard.press(k), await frames(page);
+  const w4 = await where();
+  check(`${tag}: (14) ArrowDown from its last row: the row after the panel`, !w4.inner && w4.col === 'oven' && w4.row === '5', w4);
+  await page.keyboard.press('ArrowUp');
+  await frames(page);
+  const w5 = await where();
+  check(`${tag}: (14) ArrowUp from there: the panel grid's last row`, w5.inner && w5.col === 'oven' && w5.row === '4', w5);
+  // The master scrolled out above the view (the panel at the view's top): ArrowUp from the panel grid's first row brings
+  // it into view, under the header.
+  await page.evaluate(() => {
+    const vp = document.querySelector('#host > .dzg > .dzg-viewport');
+    const panel = document.querySelector('#host > .dzg > .dzg-viewport .dzg-layer > .dzg-row[aria-rowindex="4"]');
+    vp.scrollTop += panel.getBoundingClientRect().top - vp.querySelector('.dzg-header').getBoundingClientRect().bottom;
+  });
+  await frames(page);
+  await at('.dzg-dbody .dzg-row[aria-rowindex="2"] .dzg-cell[data-col="oven"]');
+  await page.keyboard.press('ArrowUp');
+  await page.waitForTimeout(150);
+  await frames(page);
+  const seen = await page.evaluate(() => {
+    const a = document.activeElement.getBoundingClientRect();
+    const h = document.querySelector('#host > .dzg > .dzg-viewport .dzg-header').getBoundingClientRect();
+    const v = document.querySelector('#host > .dzg > .dzg-viewport').getBoundingClientRect();
+    return { row: document.activeElement.closest('.dzg-row').getAttribute('aria-rowindex'), top: a.top, bottom: a.bottom, under: h.bottom, end: v.bottom };
+  });
+  check(`${tag}: (14) ArrowUp to a master scrolled out: on it, in view under the header`, seen.row === '3' && seen.top >= seen.under - 1 && seen.bottom <= seen.end + 1, seen);
+  const hidden2 = await page.evaluate(() => [...document.querySelectorAll('.dzg-dbody .dzg-hrow')].every((r) => /inset\(50%\)/.test(getComputedStyle(r).clipPath)));
+  check(`${tag}: (14) still no header row on screen in the panel after the keys`, hidden2, hidden2);
+  // The panel: a click on its edge (its padding), then a key.
+  const pad = await page.evaluate((rtl) => { const r = document.querySelector('.dzg-dcell').getBoundingClientRect(); return { x: rtl ? r.right - 5 : r.left + 5, y: r.top + 4 }; }, rtl);
+  await page.mouse.click(pad.x, pad.y);
+  await frames(page);
+  const p0 = await look();
+  check(`${tag}: (14) after a click on a panel, no ring on it`, /dzg-dcell/.test(p0.what) && p0.outline === 'none', p0);
+  await page.keyboard.press('Shift');
+  await frames(page);
+  const p1 = await look();
+  check(`${tag}: (14) a key: the panel's ring back`, /dzg-dcell/.test(p1.what) && /solid/.test(p1.outline), p1);
+  // inlineScroll: 'master' — no scrollbar of its own, the master's scroll followed.
+  const sx = () => page.evaluate(() => {
+    const o = document.querySelector('#host > .dzg > .dzg-viewport');
+    const i = document.querySelector('.dzg-dbody .dzg-viewport');
+    return { outer: o.scrollLeft, inner: i.scrollLeft, ox: getComputedStyle(i).overflowX, bar: i.offsetHeight - i.clientHeight, wide: i.scrollWidth > i.clientWidth };
+  });
+  const s0 = await sx();
+  check(`${tag}: (14) the panel grid: wider than its view, clipped, no sideways scrollbar`, s0.ox === 'hidden' && s0.wide && s0.bar === 0, s0);
+  await page.evaluate((rtl) => { const o = document.querySelector('#host > .dzg > .dzg-viewport'); o.scrollLeft = rtl ? -150 : 150; }, rtl);
+  await frames(page);
+  const s1 = await sx();
+  check(`${tag}: (14) the master scrolled sideways: the panel grid moved the same`, Math.abs(s1.outer) > 100 && Math.abs(s1.inner - s1.outer) < 1, s1);
+  const ic = await centre('.dzg-dbody .dzg-viewport');
+  await page.mouse.move(ic.x, ic.y);
+  await page.mouse.wheel(rtl ? -120 : 120, 0);
+  await page.waitForTimeout(250);
+  await frames(page);
+  const s2 = await sx();
+  check(`${tag}: (14) a sideways wheel over the panel grid scrolls the master (and the panel with it)`, Math.abs(s2.outer) > Math.abs(s1.outer) + 20 && Math.abs(s2.inner - s2.outer) < 1, { s1, s2 });
+  await page.evaluate(() => { document.querySelector('#host > .dzg > .dzg-viewport').scrollLeft = 0; });
+  await frames(page);
+  await at('.dzg-dbody .dzg-row[aria-rowindex="2"] .dzg-cell[data-col="oven"]');
+  await page.keyboard.press('End');
+  await frames(page);
+  await frames(page);
+  const s3 = await sx();
+  const end = await where();
+  check(`${tag}: (14) End in the panel grid: its last column shown, the master moved with it`, end.inner && end.col === 'at' && Math.abs(s3.outer) > 100 && Math.abs(s3.inner - s3.outer) < 1, { s3, end });
+  // --dzg-detail-inset: the panel grid's first column under the master's.
+  await page.evaluate(() => { document.querySelector('#host > .dzg > .dzg-viewport').scrollLeft = 0; });
+  await frames(page);
+  const edges = () => page.evaluate((rtl) => {
+    const e = (el) => { const r = el.getBoundingClientRect(); return rtl ? r.right : r.left; };
+    return { master: e(document.querySelector('#host > .dzg > .dzg-viewport .dzg-layer .dzg-cell[data-col="open"]')), inner: e(document.querySelector('.dzg-dbody .dzg-layer .dzg-cell[data-col="open"]')) };
+  }, rtl);
+  const e0 = await edges();
+  check(`${tag}: (14) by default the panel grid starts after the panel's line, .5rem and its frame`, Math.abs(Math.abs(e0.inner - e0.master) - (css === 'layered' && preflight ? 8 : 12)) < 1.5, e0); // under an unlayered reset the layered borders go (theming.md: the unlayered copies for such an app)
+  // The panel grid's own frame too (`--dzg-frame`, here on both grids: each moves by its line).
+  await page.evaluate(() => { const s = document.documentElement.style; s.setProperty('--dzg-detail-inset', '0px'); s.setProperty('--dzg-detail-line', 'none'); s.setProperty('--dzg-frame', 'none'); });
+  await frames(page);
+  await frames(page);
+  const e1 = await edges();
+  check(`${tag}: (14) --dzg-detail-inset: 0, --dzg-detail-line: none (and no frame): its first column under the master's`, Math.abs(e1.inner - e1.master) < 1, e1);
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/1-13-rustines-${name}-${css}-${lang}${dark ? '-dark' : ''}${preflight ? '-pf' : ''}.png` });
+  if (name === 'chrome') {
+    await page.addScriptTag({ content: AXE });
+    const v = await page.evaluate(async () => (await window.axe.run(document.querySelector('#host'), { runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] })).violations.map((x) => `${x.id}: ${x.nodes.length}`));
+    check(`${tag}: (14) axe finds nothing`, v.length === 0, v);
+  }
+  check(`${tag}: (14) no page error, nothing told`, errors.length === 0 && (await page.evaluate(() => window.told.length)) === 0, { errors, told: await page.evaluate(() => window.told) });
+  await page.setViewportSize({ width: 900, height: 700 });
+}
+
 async function run(name, cfg) {
   const { css, dark, lang, preflight } = cfg;
   const tag = `${name} ${css}${dark ? ' dark' : ''} ${lang}${preflight ? ' preflight' : ''}`;
@@ -429,9 +586,14 @@ async function run(name, cfg) {
       await frames(page);
     };
 
+    if (process.argv.includes('--rustines')) {
+      await rustines(page, tag, cfg, name, errors);
+      return void (await page.close());
+    }
     if (process.argv.includes('--panel')) {
       await panel(page, tag, cfg, name, errors);
       await appFixes(page, tag, cfg, errors);
+      await rustines(page, tag, cfg, name, errors);
       return void (await page.close());
     }
     // (1) Defaults: without variables.css, then with it — the same computed look.
@@ -794,6 +956,8 @@ async function run(name, cfg) {
     await panel(page, tag, cfg, name, errors);
     // (13) 1.13.0: the owner's app findings, on the same page with `?app=1`.
     await appFixes(page, tag, cfg, errors);
+    // (14) 1.13.0: the owner's app's last patches as options, page `v1-13.html`.
+    await rustines(page, tag, cfg, name, errors);
     await page.close();
   } finally {
     await b.close().catch(() => {});

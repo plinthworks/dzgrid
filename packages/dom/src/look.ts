@@ -25,7 +25,7 @@ export interface GridTheme {
   // Lines.
   readonly frame?: ThemeValue; readonly frameRadius?: ThemeValue; readonly rowLine?: ThemeValue; readonly columnLine?: ThemeValue; readonly headerLine?: ThemeValue;
   readonly headerSeparator?: ThemeValue; readonly headerSeparatorSize?: ThemeValue; readonly headerSeparatorHeight?: ThemeValue; readonly pinnedColumnLine?: ThemeValue;
-  readonly pinnedShadow?: ThemeValue; readonly detailLine?: ThemeValue;
+  readonly pinnedShadow?: ThemeValue; readonly detailLine?: ThemeValue; readonly detailInset?: ThemeValue;
   // Rows and cells.
   readonly rowOddBg?: ThemeValue; readonly rowHoverBg?: ThemeValue; readonly rowSelectedBg?: ThemeValue; readonly rowActiveBg?: ThemeValue; readonly cellActiveBg?: ThemeValue;
   /** The hovered column's tint, drawn by `columnHover()`; unset, nothing is drawn. */

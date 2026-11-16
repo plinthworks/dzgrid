@@ -3,7 +3,7 @@ import { sameFocus } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 import type { MoveFn } from '../features.js';
 import type { FocusControl } from './focus.js';
-import { moveFocus, type Goal } from './move.js';
+import { moveFocus, type Goal, type MoveShape } from './move.js';
 import { ownerOf } from './owner.js';
 import { rowLayout } from '../render/viewport.js';
 import { setAttr } from '../render/write.js';
@@ -27,7 +27,7 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
     const h = g.rowHeight();
     const page = Math.max(1, Math.floor(g.geometry.read().block / h) - 1);
     const L = rowLayout(g);
-    const m = step(null, {
+    const shape: MoveShape = {
       rows: d, cols: columns.visible().map((c) => c.id), page,
       bands: g.bands.length, extras: g.headerRows.length, checkBox: !!headerRenderer.checkBox,
       // A detail is one stop (D8); over rows of their own heights a page is a distance (D7), and at
@@ -37,9 +37,21 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
         const at = L.indexAt((r < 0 ? -h : L.offsetOf(r as never)) + n * page * h);
         return r < 0 ? at : n > 0 ? Math.max(at, r + 1) : Math.min(at, r - 1);
       } }),
-    }, from, goal, intent, moveFocus);
+    };
+    let m = step(null, shape, from, goal, intent, moveFocus);
+    // A column the keys skip (`keyboard: false`, reading-keyboard.md): on the same way past it (from an edge, inward); a
+    // group header above it stays a stop. None the keys take that way: nowhere.
+    const col = 'axis' in intent && intent.axis === 'col';
+    const skip = (p: FocusPos): boolean => (p.kind === 'cell' || !((p.level ?? 0) < 0)) && columns.get(p.column)?.def.keyboard === false;
+    for (let n = 0; col && m && m.to !== 'checkBox' && skip(m.to); n++) {
+      const at = m.to;
+      const next = n < 99 ? step(null, shape, at, m.goal, { kind: 'move', axis: 'col', delta: intent.kind === 'edge' ? (intent.to === 'first' ? 1 : -1) : (intent as { delta: 1 | -1 }).delta }, moveFocus) : null;
+      m = next && (next.to === 'checkBox' || next.to.column !== at.column) ? next : null;
+    }
+    // `headers: 'none'` (hidden-headers.md 8): the keys never go to the header.
+    if (m && g.settings.headers == 'none' && (m.to === 'checkBox' || m.to.kind === 'header')) return;
     // A column key on a whole row keeps the focus there, brought back into view as a move would.
-    if (!m) return void (from.kind === 'cell' && 'axis' in intent && intent.axis === 'col' && focus.ensureVisible(from.row));
+    if (!m) return void (from.kind === 'cell' && col && focus.ensureVisible(from.row));
     goal = m.goal;
     if (m.to === 'checkBox') headerRenderer.checkBox!.focus({ preventScroll: true });
     else focus.focusTo(m.to);
@@ -59,7 +71,13 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
   // (range's Escape); a fill cancelled, an editor given up, a modifier held: not quiet. A block set while quiet
   // (`api.set`) ends it.
   const quiet = (on?: unknown): void => setAttr(el.root, 'data-dzg-quiet', on ? '' : null);
-  for (const type of ['keydown', 'pointerdown', 'focusin']) scope.on(el.root, type, () => quiet(), { capture: true });
+  // `focusVisible: 'keyboard'` (presentation-settings.md 48): the last gesture on the root (`data-dzg-ring`), read by the
+  // theme — a press, or a key; the focus leaving the grid counts as a key (it comes back by Tab, a shortcut, the window).
+  // A focused element taken out by a paint is not a leave.
+  for (const type of ['keydown', 'pointerdown', 'focusin', 'focusout']) scope.on(el.root, type, (e: Event) => {
+    if (type != 'focusout') quiet();
+    if (g.settings.focusVisible == 'keyboard' && type != 'focusin' && (type != 'focusout' || (!el.root.contains((e as FocusEvent).relatedTarget as Node | null) && (e.target as Node).isConnected))) setAttr(el.root, 'data-dzg-ring', type == 'pointerdown' ? 'pointer' : 'keys');
+  }, { capture: true });
   let cleared = false;
   scope.add(kernel.subscribe((ev) => void (ev.type === 'rangeChanged' && (ev.range ? quiet() : (cleared = true)))));
 

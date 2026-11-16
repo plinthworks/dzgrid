@@ -28,6 +28,7 @@ export const UPDATE_POLICY: UpdatePolicy = {
   direction: 'live',
   density: 'live',
   headers: 'live',
+  focusVisible: 'live',
   rowHeight: 'live',
   headerHeight: 'live',
   selection: 'live',

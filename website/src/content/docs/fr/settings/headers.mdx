@@ -22,8 +22,14 @@ première ligne met le focus sur un titre, l’en-tête apparaît à sa place, E
 du filtre marchent toujours ; ↓ pour revenir dans les lignes les cache à nouveau. La souris n’a pas d’en-tête où
 cliquer : le tri et les filtres restent au clavier, au menu de cellule, aux panneaux du dock et à votre code.
 
+`'none'` (1.13.0) : pareil, sauf que le clavier n’y va jamais non plus — ↑ depuis la première ligne reste, Tab entre
+sur une cellule — : l’en-tête ne se montre jamais, avec ou sans focus. Pour une grille dans un volet de détail, dont
+les lignes se lisent sous les titres du maître ([`nestedGrid`](../../features/nested-grid/)) ; un lecteur d’écran dit
+toujours la colonne de chaque cellule. Les touches qui vivent dans l’en-tête (tri, menu, filtre) ne sont alors plus
+atteintes au clavier non plus.
+
 L’impression et les exports CSV et Excel gardent leur ligne d’en-tête ; `header: false` les en prive. La racine de la grille porte
-`data-headers="hidden"`.
+`data-headers="hidden"` (ou `"none"`).
 
 ## Exemple
 

@@ -1,0 +1,64 @@
+---
+title: "keyboard"
+description: "`false` : les flèches, Début et Fin sautent la colonne."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Pour une colonne vide exprès — un espace, la place sous le chevron d’un maître dans la grille d’un détail — où le
+clavier ne doit pas s’arrêter.
+
+<OptionFacts column="keyboard" />
+
+## Ce qu’elle fait
+
+`keyboard: false` : ← et → sautent la colonne, dans les lignes d’en-tête comme dans les lignes ; Début et Fin vont à la
+première et à la dernière colonne prises par le clavier ; Tab entre dans la grille après elle. Toutes les colonnes
+sautées : les touches restent où elles sont.
+
+C’est toujours une colonne : dessinée, dimensionnée, triée, filtrée, lue par un lecteur d’écran (son titre nomme ses
+cellules). Elle peut porter un contenu, un bouton par exemple, qu’un clic atteint. Un clic sur une de ses cellules lui
+donne le focus ; de là, ↑ et ↓ restent dedans, ← et → en sortent. Un groupe de colonnes au-dessus reste un arrêt.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Kite = { id: string; name: string; colour: string };
+
+createGrid<Kite>(document.getElementById('cerfs-volants')!, {
+  rows: [{ id: 'k1', name: 'Martinet', colour: 'Rouge' }],
+  columns: [
+    { id: 'gap', header: 'Espace', width: 32, keyboard: false },
+    { id: 'name', header: 'Cerf-volant' },
+    { id: 'colour', header: 'Couleur' },
+  ],
+  getRowId: (k) => k.id,
+  messages: FR,
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Cerfs-volants' }}
+  columns={[
+    { id: 'name', header: 'Cerf-volant', flex: 1 },
+    { id: 'gap', header: 'Espace', width: 90, keyboard: false },
+    { id: 'colour', header: 'Couleur', flex: 1 },
+  ]}
+  rows={[
+    { id: 'k1', name: 'Martinet', colour: 'Rouge' },
+    { id: 'k2', name: 'Boîte', colour: 'Bleu' },
+    { id: 'k3', name: 'Delta', colour: 'Vert' },
+  ]}
+  caption="Cliquez le nom d’un cerf-volant, appuyez sur → : le focus va à Couleur, par-dessus Espace."
+/>
+
+## Voir aussi
+
+- [`sortable`](../sortable/), [`movable`](../movable/), [`nestedGrid`](../../features/nested-grid/).

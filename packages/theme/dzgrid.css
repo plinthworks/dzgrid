@@ -109,7 +109,7 @@
     inline-size: var(--dzg-select-bar, 0);
     background: var(--tz-accent);
   }
-  .dzg-cell:focus:where(:not([data-dzg-quiet] *)) {
+  .dzg-cell:focus:where(:not([data-dzg-quiet] *, [data-dzg-ring=pointer] *)) {
     outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
     outline-offset: -2px;
     box-shadow: inset 0 0 0 3px var(--tz-bg);
@@ -126,6 +126,13 @@
   }
   [data-dzg-quiet] .dzg-cell:focus {
     outline: none !important;
+  }
+  [data-dzg-ring=pointer] :is(.dzg-cell, .dzg-hcell, .dzg-dcell):focus {
+    outline: none !important;
+  }
+  [data-dzg-ring=keys] :is(.dzg-hcell, .dzg-dcell):focus {
+    outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+    outline-offset: -2px;
   }
   .dzg-sortable {
     cursor: pointer;
@@ -455,6 +462,7 @@
   }
   .dzg-dbody {
     padding: 0.5rem;
+    padding-inline-start: var(--dzg-detail-inset, 0.5rem);
   }
   .dzg-row[data-kind=loading] {
     color: var(--dzg-context-fg, var(--tz-fg-muted));

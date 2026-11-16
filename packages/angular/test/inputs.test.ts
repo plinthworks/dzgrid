@@ -29,7 +29,7 @@ class CtxCell {
   selector: 't-host',
   imports: [DzGrid],
   template: `<dz-grid #g="dzGrid" [rows]="rows()" [columns]="columns" [getRowId]="id" [messages]="messages()" [locale]="locale()" [direction]="direction()"
-    [density]="density()" [headers]="headers()" [rowHeight]="rowHeight()" [headerHeight]="headerHeight()" [theme]="theme()" [icons]="icons()" [context]="context()" [parts]="parts" [features]="features" [selection]="selection()" [pagination]="paging()" [label]="label()"
+    [density]="density()" [headers]="headers()" [focusVisible]="focusVisible()" [rowHeight]="rowHeight()" [headerHeight]="headerHeight()" [theme]="theme()" [icons]="icons()" [context]="context()" [parts]="parts" [features]="features" [selection]="selection()" [pagination]="paging()" [label]="label()"
     [(quick)]="quick" [(filter)]="filter" [(selected)]="selected"
     (gridEvent)="all.push($event)" (cellClicked)="clicks.push($event)" (rowClicked)="rowClicks.push($event)" (problems)="problems.push($event)"
     (gridReady)="ready.push($event)" />`,
@@ -46,7 +46,8 @@ class Host {
   readonly headerHeight = signal<number | undefined>(undefined);
   readonly theme = signal<GridTheme | undefined>(undefined);
   readonly icons = signal<GridIcons | undefined>(undefined);
-  readonly headers = signal<'shown' | 'hidden' | undefined>(undefined);
+  readonly headers = signal<'shown' | 'hidden' | 'none' | undefined>(undefined);
+  readonly focusVisible = signal<'always' | 'keyboard' | undefined>(undefined);
   readonly context = signal<unknown>(undefined);
   readonly label = signal<string | undefined>(undefined);
   readonly selection = signal<{ mode: 'none' | 'single' | 'multi'; checkbox?: boolean; click?: boolean; canSelect?: (r: { data: R }) => boolean | string } | undefined>({ mode: 'multi' });
@@ -161,6 +162,18 @@ describe('live and fixed inputs', () => {
     t.host.headers.set(undefined);
     t.run();
     expect(root().hasAttribute('data-headers')).toBe(false);
+  });
+
+  it("headers 'none' and focusVisible reach the grid, live (hidden-headers.md 8, presentation-settings.md 48, 1.13.0)", () => {
+    const t = mount();
+    const root = () => t.el.querySelector('.dzg')!;
+    t.host.headers.set('none');
+    t.host.focusVisible.set('keyboard');
+    t.run();
+    expect([root().getAttribute('data-headers'), root().getAttribute('data-dzg-ring')]).toEqual(['none', 'keys']);
+    t.host.focusVisible.set(undefined);
+    t.run();
+    expect(root().hasAttribute('data-dzg-ring')).toBe(false);
   });
 
   it('rowHeight reaches the grid, live, over the density; cleared, the density comes back (owner D1, D3)', () => {

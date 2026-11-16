@@ -260,7 +260,9 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
 
     // ---- grid attributes ----
     setAttr(el.root, 'data-density', settings.density ?? 'comfortable');
-    setAttr(el.root, 'data-headers', settings.headers == 'hidden' ? 'hidden' : null);
+    setAttr(el.root, 'data-headers', (settings.headers != 'shown' && settings.headers) || null);
+    // `focusVisible: 'keyboard'` (presentation-settings.md 48): the last gesture, noted by the keys' router; `keys` at first.
+    setAttr(el.root, 'data-dzg-ring', settings.focusVisible == 'keyboard' ? el.root.getAttribute('data-dzg-ring') ?? 'keys' : null);
     const H = g.headerHeight();
     for (const [v, px] of [['--dzg-row-height', h], ['--dzg-header-height', H]] as const) if (el.root.style.getPropertyValue(v) !== `${px}px`) el.root.style.setProperty(v, `${px}px`);
     // Every header row counts: the group rows, the column headers and those the features add; the pinned rows too (step
@@ -312,7 +314,8 @@ export function createPainter<T>(g: GridContext<T>, after: { rovingStop(d: Displ
     if (headerHeight !== lastHead) lastHead >= 0 && g.schedule(), (lastHead = headerHeight);
     // Hidden headers (hidden-headers.md 1–4): out of the flow and clipped to nothing, written on the rows (nothing for a CSP;
     // still read by screen readers), unless the focus is in them.
-    const hide = settings.headers == 'hidden' && !el.header.contains(root.activeElement);
+    // `'none'` (8): never shown, even focused.
+    const hide = settings.headers == 'none' || (settings.headers == 'hidden' && !el.header.contains(root.activeElement));
     for (const r of el.header.children) if (r.classList.contains('dzg-hrow')) Object.assign((r as HTMLElement).style, { position: hide ? 'absolute' : '', clipPath: hide ? 'inset(50%)' : '' });
     if (headerRenderer.checkName) {
       const text = g.msg('selection.column');

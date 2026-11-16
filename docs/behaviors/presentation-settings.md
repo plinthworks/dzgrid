@@ -131,6 +131,21 @@ is layout the grid must compute, none is cheap. 2.10 and 2.11 need nothing new; 
 (`headerWrap`, `header-wrap.md`) and 6.5 (`columnHover()`, `column-hover.md`) are built. 1.6 **won't be done**: the
 grid's height always comes from its container, never from its rows (`virtual-scroll.md`). 1.2 stays « only if asked ».
 
+#### The owner's app's last patches, as options (2026-11-16, « A, monte à 93 000 »)
+48. **The focus ring for the keyboard only**, opt-in: `focusVisible: 'keyboard'` (a grid setting, live; default `'always'`
+    = today, S12-Q8: the focused cell shows its ring, the line inside it and its tint whether the keys or a click put
+    it there). With `'keyboard'`, after a press of the pointer in the grid (mouse, pen, touch) the focused cell, header
+    cell or detail panel shows **no ring, no inner line, no tint** (the row keeps its focused-row tint, the focus stays
+    where it is, a screen reader still has it); **any key** in the grid brings them back at once (WCAG 2.4.7), and so
+    does the focus coming back from outside the grid (Tab, a shortcut, the window). By the grid's own note of the last
+    gesture (`data-dzg-ring` on its root, set on a press and on a key), not by `:focus-visible` alone: Firefox does not
+    match it when the grid moves the focus on an arrow key after a click, so the keyboard ring is drawn on `:focus`
+    under that note (header cells and detail panels included, which by default draw it on `:focus-visible` only). The
+    fill handle, a block's edges, the editor are not the focus ring: they stay. It reaches a grid nested in a detail
+    (the gesture is the page's). The two sheets' rules, both copies; Angular `[focusVisible]`, `<dz-grid focus-visible>` (not the theme's `focusRing`, the ring's colour).
+    Headers that never show, a column the keys skip, the arrows through a detail's grid, a detail's grid that follows
+    the master's sideways scroll and `--dzg-detail-inset`: hidden-headers.md 8, reading-keyboard.md, master-detail.md.
+
 ## Right to left
 Every new line and mark is logical. The pinned shadow and the chevron icon are mirrored by the grid (`scale: -1 1`);
 a header title at the end sits on the left in Arabic; `--dzg-header-case` leaves Arabic as it is.
@@ -386,6 +401,6 @@ background position is mirrored by `:dir(rtl)`.
 `packages/dom/test/presentation-1-12.test.ts` (25, 29, 32), `packages/theme/test/presentation-1-12.test.ts` (24, 26–33,
 both copies, contrast pairs, the guide's table), `packages/theme/test/presentation-1-12-fixes.test.ts` (34–37, 39–40),
 `packages/dom/test/filters-set-width.test.ts` (38), `packages/dom/test/pager-icons.test.ts` (41),
-`packages/theme/test/panel-1-12-1.test.ts` and `packages/dom/test/panel-1-12-1.test.ts` (42–43), `packages/theme/test/app-1-13.test.ts` and `packages/dom/test/app-1-13.test.ts` (44–47), browsers `node scripts/browser-1-12.mjs` (Chrome, Firefox, WebKit ×
+`packages/theme/test/panel-1-12-1.test.ts` and `packages/dom/test/panel-1-12-1.test.ts` (42–43), `packages/theme/test/app-1-13.test.ts` and `packages/dom/test/app-1-13.test.ts` (44–47), `packages/dom/test/rustines-1-13.test.ts` and `packages/theme/test/rustines-1-13.test.ts` (48), browsers `node scripts/browser-1-12.mjs` (Chrome, Firefox, WebKit ×
 layered / unlayered × light / dark × ltr / ar × a page with Tailwind 3's preflight; axe; every variable's default and
-effect, table-driven; 34 the header's places, 37 the forced row text, 38 the list's width; 39–40 the pager apart from the popups' buttons, each bar variable's default and effect; 41 the pager's icons: size, colour, disabled colour, mirrored, names; 42 the panel's rows (box and name centres within 1.5 px, heights), search field, lock, head, axe; 43 narrow titles at 80 px, auto-size; 44 the placeholder's contrast and variable under the preflight, 45 no funnel, 46 a part's width at each alignment, 47 an arrow then Enter in one task).
+effect, table-driven; 34 the header's places, 37 the forced row text, 38 the list's width; 39–40 the pager apart from the popups' buttons, each bar variable's default and effect; 41 the pager's icons: size, colour, disabled colour, mirrored, names; 42 the panel's rows (box and name centres within 1.5 px, heights), search field, lock, head, axe; 43 narrow titles at 80 px, auto-size; 44 the placeholder's contrast and variable under the preflight, 45 no funnel, 46 a part's width at each alignment, 47 an arrow then Enter in one task; (14) 48 no ring after a click on a cell, a header, a panel and back on a key, `headers: 'none'`, a skipped column, the arrows through a detail's grid, its sideways follow and `--dzg-detail-inset`).

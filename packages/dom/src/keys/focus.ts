@@ -53,10 +53,13 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
     return cell?.dataset['col'] && key ? { kind: 'cell', row: key, column: cell.dataset['col'] } : null;
   }
 
+  /** The first column the keys take (`keyboard: false` skipped, reading-keyboard.md), else the first. */
+  const firstCol = () => columns.visible().find((c) => c.def.keyboard !== false) ?? columns.visible()[0];
+
   function current(): FocusPos | null {
     const f = kernel.focus;
     if (f) return f;
-    const first = columns.visible()[0];
+    const first = firstCol();
     if (!first) return null;
     const d = rows.displayed;
     return d.count ? { kind: 'cell', row: d.keyAt(d.index(0)!), column: first.id } : { kind: 'header', column: first.id };
@@ -141,10 +144,11 @@ export function installFocus<T>(g: GridContext<T>): FocusControl<T> {
     let target: HTMLElement | null = null;
     if (f?.kind === 'cell') target = rowRenderer.cell(f.row, f.column);
     else if (f?.kind === 'header') target = headerRenderer.cell(f.column, f.level ?? 0);
-    else if (visible[0]) target = d.count ? rowRenderer.cell(d.keyAt(d.index(0)!), visible[0].id) : headerRenderer.cell(visible[0].id);
+    else if (visible[0]) target = d.count ? rowRenderer.cell(d.keyAt(d.index(0)!), firstCol()!.id) : g.settings.headers == 'none' ? null : headerRenderer.cell(visible[0].id);
     // The first cell scrolled out with nothing focused: the first cell in view takes the stop,
-    // so Tab still enters the grid (and the keys start from the first cell, `current()`).
-    target ??= el.layer.querySelector<HTMLElement>('.dzg-cell') ?? el.header.querySelector<HTMLElement>('.dzg-hcell[data-col]');
+    // so Tab still enters the grid (and the keys start from the first cell, `current()`). Never a header that does not
+    // show (`headers: 'none'`, hidden-headers.md 8).
+    target ??= el.layer.querySelector<HTMLElement>('.dzg-cell') ?? (g.settings.headers == 'none' ? null : el.header.querySelector<HTMLElement>('.dzg-hcell[data-col]'));
     if (target === stop) return;
     if (stop) stop.tabIndex = -1;
     stop = target;

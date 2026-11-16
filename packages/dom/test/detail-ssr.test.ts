@@ -27,10 +27,12 @@ describe('@dzgrid/dom/detail without a DOM', () => {
 
   it('reaches the base only through the grid’s context, the types and createGrid by the package’s name', () => {
     const entry = files(SRC).filter((f) => /^detail(\/|\.ts$)/.test(relative(SRC, f)));
-    expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['detail.ts', 'detail/index.ts', 'detail/nested.ts', 'detail/styles.ts']);
+    // 1.13.0: `through.ts`, the lazy chunk of `nestedGrid({ arrows, inlineScroll })` (master-detail.md), `import()`ed by nested.ts.
+    expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['detail.ts', 'detail/index.ts', 'detail/nested.ts', 'detail/styles.ts', 'detail/through.ts']);
     const imports = entry.flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`));
     expect(imports.filter((s) => !/: @dzgrid\/(core|core\/internal|core\/detail)$/.test(s)).sort()).toEqual([
       'detail.ts: ./detail/index.js', 'detail.ts: ./detail/nested.js', 'detail/index.ts: ../dir.js', 'detail/index.ts: ./styles.js', 'detail/nested.ts: @dzgrid/dom',
+      'detail/through.ts: ../dir.js',
     ]);
     // Nothing else imports it, nor the core's detail entry: a grid without details carries none of it. But the automatic
     // row height's own entry (Phase 6 step 9): its rows of their own heights are the core's sparse layout (an app with

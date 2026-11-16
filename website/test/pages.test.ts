@@ -27,7 +27,7 @@ const WRITTEN = [
   // 1.12.0 (2026-11-14): tooltips anywhere, and popovers.
   'guides/tooltips-popovers',
   // Batch 3 (2026-11-11): one page per option.
-  'settings/index', 'settings/density', 'settings/row-height', 'settings/header-height', 'settings/headers', 'settings/label',
+  'settings/index', 'settings/density', 'settings/row-height', 'settings/header-height', 'settings/headers', 'settings/focus-visible', 'settings/label',
   'settings/messages', 'settings/locale', 'settings/time-zone', 'settings/numerals', 'settings/direction', 'settings/clock',
   'settings/motion', 'settings/theme', 'settings/icons', 'settings/row-class', 'settings/overlay', 'settings/busy', 'settings/context',
   'settings/rows', 'settings/get-row-id', 'settings/columns', 'settings/same-row', 'settings/filter-kinds', 'settings/multi-sort',
@@ -36,7 +36,7 @@ const WRITTEN = [
   'settings/inject-styles', 'settings/nonce',
   // Batch 3 (2026-11-11): one page per column option.
   'column-options/index', 'column-options/agg-func', 'column-options/align', 'column-options/assume-zone',
-  'column-options/chooser', 'column-options/codec', 'column-options/filter-button', 'column-options/col-span', 'column-options/collapse-priority',
+  'column-options/chooser', 'column-options/codec', 'column-options/filter-button', 'column-options/keyboard', 'column-options/col-span', 'column-options/collapse-priority',
   'column-options/csv', 'column-options/edit', 'column-options/editable', 'column-options/enum-options',
   'column-options/field', 'column-options/filter', 'column-options/flex', 'column-options/group-show',
   'column-options/groupable', 'column-options/header', 'column-options/header-align', 'column-options/header-short',

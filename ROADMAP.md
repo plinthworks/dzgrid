@@ -1445,6 +1445,15 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   `ColumnDef.filterButton: false`; a header part fills its header at every alignment (its label's own `flex-grow`);
   Enter / F2 right after an arrow key read on the header the focus moved to (the pending paint done first). Tests
   `app-1-13.test.ts` (dom, theme), matrix (13) on `v1-12-1.html?app=1`.
+- [x] The owner's app's last patches as options (owner 2026-11-16, « A, monte à 93 000 »): `focusVisible: 'keyboard'`
+  (presentation-settings.md 48), `headers: 'none'` (hidden-headers.md 8), `ColumnDef.keyboard: false`
+  (reading-keyboard.md), `nestedGrid({ arrows: 'rows', inlineScroll: 'master' })` in a lazy chunk and
+  `--dzg-detail-inset` (master-detail.md). Tests `rustines-1-13.test.ts` (dom, theme), Angular and element inputs,
+  matrix (14) on `v1-13.html` (`--rustines` alone). Sizes: **K.8 92 000 → 93 000** (owner 2026-11-16; measured 92 378);
+  +2 % lines: DOM 26 000, detail 4 284, theme 3 110, variables.css 1 950, dom/theme 2 550, print 1 720; new lazy line
+  `@dzgrid/dom/detail: through (lazy)` 1 400.
+  `[focusVisible]` accepted into the API baseline (« A »); the real Angular example 103 150 → 103 500 (measured 103 485,
+  +2 %). Gate green, real app 58 / 58, matrix 15 212 / 15 212, release:check at 1.13.0.
 - For the owner: commit, publish (`docs/release-1.13.0.md`; the panel's size lines accepted 2026-11-15).
 
 ## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)

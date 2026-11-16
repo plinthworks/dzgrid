@@ -17,5 +17,15 @@ Tabs into the grid, moves with the arrows, pages, jumps to the ends, tabs out.
 - Scroll keys are handled by the grid, also when focus is on the scroll area itself: native key scrolling would move too far above ~125 000 rows (S11).
 - Programmatic focus never scrolls natively (`preventScroll`); the grid scrolls logically. A native scroll right after a focus move is redone logically. Then, the cell outside the window, the window alone is scrolled (`window.scrollBy`, block axis).
 
+## A column the keyboard skips (1.13.0, owner 2026-11-16, « A »)
+- `keyboard: false` on a column (`ColumnDef`; default true): the arrows, Home and End jump over it, in the header rows
+  as in the body — ArrowRight from the column before it lands on the column after it, Home on the first column the
+  keyboard takes; Tab enters the grid on the first such column. It is still a column: drawn, sized, sorted, filtered,
+  read by a screen reader (its header names its cells), and it can hold content — a chevron, a button — which a click
+  reaches. A click on it focuses it; the arrows from there go on (Up and Down stay in it, Left and Right leave it).
+  A group header above it stays a stop. Every column skipped: the keys stay where they are.
+- For a column whose cells are empty on purpose (the space under a master's chevron in a detail's grid, a spacer).
+
 ## Tests
+`packages/dom/test/rustines-1-13.test.ts` (« A column the keyboard skips »);
 `conformance/cases/keyboard-intent/*`, `conformance/cases/focus-fallback/*`, `packages/core/test/keys.test.ts`, `packages/dom/test/keyboard.test.ts`, `review-p2*.test.ts`; `npm run test:browser` (focus through updates, Shift+Tab back, a million rows); `packages/dom/test/a11y-l4a.test.ts` and `node scripts/browser-a11y.mjs --check focus,reflow` (the window following the focus at 320 px).
