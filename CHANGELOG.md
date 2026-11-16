@@ -28,8 +28,9 @@ nothing removed.
   first row back, Down from its last row to the row after the panel, Up from there to its last row
   (master-detail.md). Its code is a small chunk (`detail/through.js`) loaded with the first panel that wants it.
 - **`nestedGrid({ inlineScroll: 'master' })`**: a panel's grid with no sideways scrollbar of its own, moved with the
-  outer grid's horizontal scroll (a sideways wheel over it and a key in it move the outer grid) — for inner columns that
-  follow the master's (master-detail.md).
+  outer grid's horizontal scroll (a sideways wheel over it, a key in it and the browser bringing one of its cells into
+  view — Tab, find in the page, `scrollIntoView` — move the outer grid) — for inner columns that follow the master's
+  (master-detail.md); the wheel reaches the outer grid wherever the inner grid sits in the panel (inside a component too).
 - **Both for an Angular detail grid**: `<dz-grid [dzgNested]="cell()" dzgNestedArrows="rows" dzgNestedInlineScroll="master">`
   (new inputs, read when the inner grid is made) — the arrows and the sideways follow as `nestedGrid`'s. Their seam, for
   any host making its own grid in a panel: the detail context's `adopt(grid, { arrows, inlineScroll })` (master-detail.md).

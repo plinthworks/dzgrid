@@ -176,8 +176,12 @@ the keyboard into and out of the detail, works in a grid shown inside the detail
   default change would cut off an inner grid wider than the outer one). With `'master'`, the inner grid has no
   sideways scrollbar of its own (its view clips); it is moved with the outer grid's horizontal scroll (the same
   distance, on opening and at every scroll), a sideways wheel over it scrolls the outer grid, and a key that brings an
-  inner column into view moves the outer grid with it. Meant for an inner grid whose columns follow the master's (the
-  « follow » recipe above): same widths, same places. Its start: the panel's line and padding are
+  inner column into view moves the outer grid with it — so does whatever else scrolls its view sideways (the browser
+  bringing a cell or a control into view: Tab, find in the page, `scrollIntoView`, a focus), the outer grid giving the
+  place back, with no loop between the two and no layout forced: the places are read in the scroll events only. The
+  wheel goes on to the outer grid because the panel's rule lets the view of any grid inside the panel chain
+  (`.dzg-dbody .dzg-viewport`), wherever it sits there (an Angular component around it). Meant for an inner grid
+  whose columns follow the master's (the « follow » recipe above): same widths, same places. Its start: the panel's line and padding are
   `--dzg-detail-line` (variables.css) and **`--dzg-detail-inset`** (the content's padding at the inline start, default
   `.5rem`, the base sheet; the spacing's two units with variables.css): `--dzg-detail-inset: 0`, `--dzg-detail-line:
   none` and the inner grid without its frame (`--dzg-frame: none` on it) put the inner grid's first column exactly

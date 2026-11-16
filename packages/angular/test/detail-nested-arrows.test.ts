@@ -8,7 +8,7 @@ import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { dataKey, detailKey, type ColumnDef, type GridKernel, type RowKey } from '@dzgrid/core';
 import type { Geometry, GridFeature, SlotPart } from '@dzgrid/dom';
-import { detail } from '@dzgrid/dom/detail';
+import { DETAIL_CSS, detail } from '@dzgrid/dom/detail';
 import { EN_DETAIL } from '@dzgrid/dom/locales/en-detail';
 import { DZG_ENV, DzGrid, DzgController, componentPart, type DzgPartContext } from '@dzgrid/angular';
 import { MESSAGES, fakeEnv } from './support';
@@ -158,6 +158,24 @@ describe('[dzgNested] dzgNestedInlineScroll="master": an Angular detail grid fol
     const at = inner.get('P1')!.box.scrollInline;
     expect(at).toBeGreaterThan(300);
     expect(t.vp.scrollLeft).toBe(at);
+  });
+
+  it('the browser scrolling its view sideways (Tab, find in page) moves the master; the wheel rule reaches it inside its component', async () => {
+    const t = await mount({ arrows: undefined });
+    await t.open('P1');
+    const vp = t.vp.querySelector<HTMLElement>('.dzg-dbody .dzg-viewport')!;
+    // Inside the component's host, not a direct child of the panel.
+    expect(vp.parentElement!.parentElement!.classList.contains('dzg-dbody')).toBe(false);
+    const sel = /:where\(([^)]*)\)\{overscroll-behavior:auto\}/.exec(DETAIL_CSS)![1]!;
+    expect(vp.matches(sel)).toBe(true);
+    expect(t.vp.matches(sel)).toBe(false);
+    // jsdom lays nothing out: the inner view's room as a browser would measure it.
+    Object.defineProperties(vp, { scrollWidth: { value: 1200 }, clientWidth: { value: 560 } });
+    vp.scrollLeft = 450;
+    vp.dispatchEvent(new Event('scroll'));
+    expect(t.vp.scrollLeft).toBe(450);
+    t.vp.dispatchEvent(new Event('scroll'));
+    expect(inner.get('P1')!.box.scrollInline).toBe(450);
   });
 
   it('let go with its component: the master\'s scroll no longer reaches it', async () => {

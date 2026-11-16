@@ -1,5 +1,14 @@
 # État du travail — à lire en premier si la session est perdue
 
+Mis à jour : 2026-11-16 (fin). **`inlineScroll: 'master'` avec un détail Angular, deux trous corrigés dans 1.13.0**
+(propriétaire « B, on corrige d'abord ») : (1) la molette de côté sur le détail passe au maître — la règle du panneau
+vise toute grille dedans (`.dzg-dbody .dzg-viewport`, plus seulement `.dzg-dbody>.dzg`, que l'hôte du composant
+Angular cassait ; `detail/styles.ts`) ; (2) un défilement de la vue du détail fait par le navigateur (Tab, recherche de
+la page, `scrollIntoView`) passe au maître, qui le rend (`detail/through.ts`, `back` ; son écho ignoré, pas de boucle).
+Fiche `master-detail.md`, CHANGELOG. Tests `rustines-1-13.test.ts` (+2), Angular `detail-nested-arrows.test.ts` (+1),
+Chrome `packages/angular/browser/run.mjs` (« through », +2, rouges avant), matrice (14) +1. detail 4 348 / 4 360.
+L'appli du propriétaire n'a plus que la rustine 3. Rien commité ni publié.
+
 Mis à jour : 2026-11-16 (suite). **Deux défauts trouvés par l'appli Angular du propriétaire, corrigés dans 1.13.0** :
 (1) `nestedGrid({ arrows, inlineScroll })` n'atteignait pas une grille de détail Angular — maintenant
 `<dz-grid [dzgNested]="cell()" dzgNestedArrows="rows" dzgNestedInlineScroll="master">` (le contexte du volet offre

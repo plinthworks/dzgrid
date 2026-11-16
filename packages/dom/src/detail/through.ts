@@ -14,7 +14,8 @@ import type { NestedGridOptions } from './nested.js';
  *   the column the keys came in at, else its first cell. The browser brings it into view; the grid redoes that scroll
  *   its own way (reading-keyboard.md). A grid without rows, a row not drawn: nothing here, the panel's stop as before.
  * - `inlineScroll`: the outer view's sideways scroll given to this grid (at once, and at each scroll); what this grid
- *   scrolls to by itself (a key, a focus) given to the outer view. Its own scrollbar is off (`nestedGrid`, at once).
+ *   scrolls to by itself (a key, a focus) or the browser scrolls its view to (Tab, find in the page) given to the outer
+ *   view. Its own scrollbar is off (`hold`, at once).
  *
  * Given the options, the panel's box, the grid and its context (both may be made again); returns `wire` (again after the
  * grid is made again) and `off`.
@@ -66,13 +67,27 @@ export function through(
   // The sideways scroll: the outer view's, given to this grid; this grid's own writes given to the outer view.
   const conv = scrollConvention(doc);
   let own: ((px: number) => void) | undefined;
+  /** This grid's view, listened to (made again with the grid); its sideways scroll as last seen or written. */
+  let vp: HTMLElement | undefined;
+  let last = 0;
+  const at = (): number => inlineScroll(ctx().el.viewport, ctx().dir, conv);
   const follow = (): void => {
     const c = ctx();
     own?.(inlineScroll(outer, c.dir, conv));
+    last = at();
     c.schedule();
+  };
+  // What the browser scrolls this grid's view to by itself (a cell or a control brought into view: Tab, find in the
+  // page, `scrollIntoView`) given to the outer view, which gives it back (`follow`); the echo of `follow` (the same
+  // place) and a scroll that moved nothing sideways left alone: no loop.
+  const back = (): void => {
+    const x = at();
+    if (Math.abs(x - last) > 1) (last = x), setInlineScroll(outer, x, ctx().dir, conv);
   };
   const wire = (): void => {
     if (!o.inlineScroll) return;
+    vp?.removeEventListener('scroll', back);
+    (vp = ctx().el.viewport).addEventListener('scroll', back, { passive: true });
     const geo = ctx().geometry as { writeScrollInline(px: number): void };
     const was = geo.writeScrollInline;
     own = was;
@@ -89,6 +104,7 @@ export function through(
       outer.removeEventListener('keydown', into, true);
       host.removeEventListener('keydown', out, true);
       outer.removeEventListener('scroll', follow);
+      vp?.removeEventListener('scroll', back);
     },
   };
 }

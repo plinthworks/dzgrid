@@ -558,6 +558,17 @@ async function rustines(page, tag, { css, dark, lang, preflight }, name, errors)
   const s3 = await sx();
   const end = await where();
   check(`${tag}: (14) End in the panel grid: its last column shown, the master moved with it`, end.inner && end.col === 'at' && Math.abs(s3.outer) > 100 && Math.abs(s3.inner - s3.outer) < 1, { s3, end });
+  // The browser scrolling the panel grid's view by itself (a cell brought into view: Tab, find in the page): the master
+  // follows, and the two stay still afterwards (no loop between them).
+  await page.evaluate(() => { document.querySelector('#host > .dzg > .dzg-viewport').scrollLeft = 0; });
+  await frames(page);
+  await page.evaluate(() => document.querySelector('.dzg-dbody .dzg-row[aria-rowindex="2"] .dzg-cell[data-col="at"]').scrollIntoView({ block: 'nearest', inline: 'nearest' }));
+  await frames(page);
+  await frames(page);
+  const s4 = await sx();
+  await page.waitForTimeout(200);
+  const s5 = await sx();
+  check(`${tag}: (14) a panel grid cell brought into view by the browser: the master moved with it, then both still`, Math.abs(s4.outer) > 100 && Math.abs(s4.inner - s4.outer) < 1 && s5.outer === s4.outer && s5.inner === s4.inner, { s4, s5 });
   // --dzg-detail-inset: the panel grid's first column under the master's.
   await page.evaluate(() => { document.querySelector('#host > .dzg > .dzg-viewport').scrollLeft = 0; });
   await frames(page);

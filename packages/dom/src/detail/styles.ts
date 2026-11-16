@@ -3,13 +3,14 @@
  * none. Same rules as `LAYOUT_CSS`: no colour, logical sides only, zero specificity. The content box
  * fills a fixed panel (its own scrollbar when the content is taller) and takes its content's height
  * with `'auto'` (measured). A grid in a panel lets the wheel go on to the grid around it at its edge
- * (the browser's chaining, which the base's `contain` stops for a grid on the page). The master's chevron is the tree's (`.dzg-toggle`, a 24 px target, WCAG
+ * (the browser's chaining, which the base's `contain` stops for a grid on the page), wherever it sits in the panel (a
+ * host's component around it: Angular's `[dzgNested]`). The master's chevron is the tree's (`.dzg-toggle`, a 24 px target, WCAG
  * 2.5.8), pointing to the inline end when closed and down when open; the theme colours both alike.
  */
 export const DETAIL_CSS =
   // In the cascade layer dzgrid.layout, as the base's (owner T1, docs/behaviors/theming.md).
   '@layer dzgrid.layout{' +
-  ':where(.dzg-dbody){box-sizing:border-box;block-size:100%;overflow:auto}:where(.dzg-dbody[data-auto]){block-size:auto;overflow:visible}:where(.dzg-dbody>.dzg){box-sizing:border-box;block-size:100%}:where(.dzg-dbody>.dzg>.dzg-viewport){overscroll-behavior:auto}' +
+  ':where(.dzg-dbody){box-sizing:border-box;block-size:100%;overflow:auto}:where(.dzg-dbody[data-auto]){block-size:auto;overflow:visible}:where(.dzg-dbody>.dzg){box-sizing:border-box;block-size:100%}:where(.dzg-dbody .dzg-viewport){overscroll-behavior:auto}' +
   ':where(.dzg-toggle){display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;inline-size:var(--dzg-target-min,24px);block-size:var(--dzg-target-min,24px);margin-inline-end:.125rem;cursor:pointer}' +
   ':where(.dzg-toggle)::before{content:"\\203a";font-size:var(--dzg-icon-size,1.25em);line-height:1;rotate:var(--dzg-chevron)}' +
   // A row without a detail keeps the slot, empty (Q16-3 A; B, the text at the edge: `display:none`).

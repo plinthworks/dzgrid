@@ -293,6 +293,26 @@ try {
         return { overflow: getComputedStyle(inner).overflowX, bar: inner.offsetHeight - inner.clientHeight, outer: Math.abs(outer.scrollLeft), inner: Math.abs(inner.scrollLeft) };
       });
       check(`${lang} through: the panel grid has no sideways scrollbar and follows the master's scroll`, sc.overflow === 'hidden' && sc.bar === 0 && sc.outer === 300 && sc.inner === 300, sc);
+      // A sideways wheel over the panel grid (inside its component, not a direct child of the panel) scrolls the master.
+      const sx = () => page.evaluate(() => ({ outer: Math.abs(document.querySelector('dzg-fixture .host > dz-grid > .dzg > .dzg-viewport').scrollLeft), inner: Math.abs(document.querySelector('.dzg-dbody .dzg-viewport').scrollLeft) }));
+      const ib = await page.locator('.dzg-dbody .dzg-viewport').first().boundingBox();
+      await page.mouse.move(ib.x + ib.width / 2, ib.y + ib.height / 2);
+      await page.mouse.wheel(lang === 'ar' ? 120 : -120, 0);
+      await page.waitForTimeout(250);
+      await frames(page, 2);
+      const wh = await sx();
+      check(`${lang} through: a sideways wheel over the panel grid scrolls the master (the panel with it)`, wh.outer < 280 && Math.abs(wh.inner - wh.outer) < 1, wh);
+      // The browser bringing a panel cell into view (Tab, find in the page): the master follows; both still afterwards.
+      await page.evaluate(() => {
+        document.querySelector('dzg-fixture .host > dz-grid > .dzg > .dzg-viewport').scrollLeft = 0;
+        const cells = [...document.querySelector('.dzg-dbody .dzg-viewport .dzg-row').querySelectorAll('.dzg-cell')];
+        requestAnimationFrame(() => cells.at(-1).scrollIntoView({ block: 'nearest', inline: 'nearest' }));
+      });
+      await frames(page, 4);
+      const bi = await sx();
+      await page.waitForTimeout(200);
+      const bi2 = await sx();
+      check(`${lang} through: a panel cell brought into view by the browser: the master moved with it, then both still`, bi.outer > 50 && Math.abs(bi.inner - bi.outer) < 1 && bi2.outer === bi.outer && bi2.inner === bi.inner, { bi, bi2 });
       const a = await axe(page);
       check(`${lang} through: axe, no violation`, a.length === 0, a);
       check(`${lang} through: no error in the page`, errors.length === 0, errors);

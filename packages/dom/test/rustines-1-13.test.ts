@@ -9,6 +9,7 @@ import { createGrid, type GridInstance } from '../src/grid.js';
 import type { Geometry, ViewportBox } from '../src/render/measure.js';
 import type { GridContext, GridEnv } from '../src/context.js';
 import { detail, nestedGrid, type NestedGridOptions } from '../src/detail.js';
+import { DETAIL_CSS } from '../src/detail/styles.js';
 import { EN } from '../src/locales/en.js';
 import { EN_DETAIL } from '../src/locales/en-detail.js';
 import { cleanup, emake, k, rowsOf, type R } from './support-edit.js';
@@ -357,6 +358,38 @@ describe("nestedGrid({ inlineScroll: 'master' }) (master-detail.md « A nested g
     const at = t.inner.get('P1')!.box.scrollInline;
     expect(at).toBeGreaterThan(0);
     expect(t.ctx.el.viewport.scrollLeft).toBe(at);
+  });
+
+  it('the browser scrolling the inner view sideways (Tab, find in page, scrollIntoView) moves the master; its own echo left alone', async () => {
+    const t = nest({ inlineScroll: 'master' });
+    await t.open('P1');
+    const vp = t.innerRoot('P1').viewport;
+    // jsdom lays nothing out: the inner view's room as a browser would measure it.
+    Object.defineProperties(vp, { scrollWidth: { value: 1200 }, clientWidth: { value: 560 } });
+    vp.scrollLeft = 500;
+    vp.dispatchEvent(new Event('scroll'));
+    expect(t.ctx.el.viewport.scrollLeft).toBe(500);
+    // The master's scroll comes back to the inner grid (the follow).
+    t.ctx.el.viewport.dispatchEvent(new Event('scroll'));
+    expect(t.inner.get('P1')!.box.scrollInline).toBe(500);
+    // A scroll event of the inner view that moved nothing sideways (its vertical scroll): the master not written again.
+    t.ctx.el.viewport.scrollLeft = 0;
+    vp.dispatchEvent(new Event('scroll'));
+    expect(t.ctx.el.viewport.scrollLeft).toBe(0);
+  });
+
+  it('the wheel rule reaches a panel grid wherever it sits in the panel, never the grid around it', async () => {
+    const t = nest();
+    await t.open('P1');
+    const sel = /:where\(([^)]*)\)\{overscroll-behavior:auto\}/.exec(DETAIL_CSS)![1]!;
+    expect(t.innerRoot('P1').viewport.matches(sel)).toBe(true);
+    expect(t.ctx.el.viewport.matches(sel)).toBe(false);
+    // A grid wrapped by a host's element inside the panel (Angular's component): still matched.
+    const wrap = document.createElement('div');
+    const r = t.innerRoot('P1').root;
+    r.replaceWith(wrap);
+    wrap.append(r);
+    expect(t.innerRoot('P1').viewport.matches(sel)).toBe(true);
   });
 
   it("by default ('own') the inner grid scrolls by itself, apart", async () => {
