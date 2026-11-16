@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-11-16 (fin). **`inlineScroll: 'master'` avec un détail Angular, deux trous corrigés dans 1.13.0**
+Mis à jour : 2026-11-16. **1.13.0 publiée sur npm par le propriétaire (les cinq paquets vérifiés ; étiquette v1.13.0 à poser).** En cours : DzTooltip 1.0.0 (les six manques de l'audit, « ★ partout »). Avant : 2026-11-16 (fin). **`inlineScroll: 'master'` avec un détail Angular, deux trous corrigés dans 1.13.0**
 (propriétaire « B, on corrige d'abord ») : (1) la molette de côté sur le détail passe au maître — la règle du panneau
 vise toute grille dedans (`.dzg-dbody .dzg-viewport`, plus seulement `.dzg-dbody>.dzg`, que l'hôte du composant
 Angular cassait ; `detail/styles.ts`) ; (2) un défilement de la vue du détail fait par le navigateur (Tab, recherche de
