@@ -7,6 +7,7 @@ import type { GridContext, GridEnv } from '../context.js';
 import type { GridInstance } from '../grid.js';
 import type { PartHandle, SlotContext, SlotPart } from '../part.js';
 import type { GridSettings } from '../settings.js';
+import { hold, type Hold } from './hold.js';
 
 /** What a nested grid's settings are made from: the panel's context (the master row, its key, the depth). */
 export type NestedContext = SlotContext['detail'];
@@ -76,13 +77,11 @@ export function nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<'detail'> {
           memory.set(c.master, was ?? { query: grid.kernel.query, top: t, at: i === undefined ? i : d.keyAt(i), off: i === undefined ? 0 : t - ctx.layout!.offsetOf(i), open: [...grid.kernel.expansion], focus: grid.kernel.focus });
           for (const k of memory.keys()) if (memory.size > (o.keep ?? 20)) memory.delete(k);
         };
-        /** `arrows`, `inlineScroll` (1.13.0): their chunk's hold on this grid, once loaded (`through.ts`). */
-        let th: { wire(): void; off(): void } | undefined;
+        /** `arrows`, `inlineScroll` (1.13.0): their hold on this grid (`hold`). */
+        let th: Hold | undefined;
         const make = (): void => {
           grid = createGrid<C>(host, s, o.env?.(c));
           ctx = (grid as unknown as { context: GridContext<C> }).context;
-          // Following the master's sideways scroll: no scrollbar of its own, from the first paint.
-          if (o.inlineScroll) ctx.el.viewport.style.overflowX = 'hidden';
           th?.wire();
           // A host callback that throws after the grid is made: the grid goes too (the part's mount failed).
           try {
@@ -145,8 +144,7 @@ export function nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<'detail'> {
         };
         host.addEventListener('keydown', peek, true);
         host.addEventListener('keydown', esc);
-        let gone = 0;
-        if (o.arrows || o.inlineScroll) void import('./through.js').then((m) => void (gone || (th = m.through(o, host, () => grid, () => ctx))));
+        th = hold(o, host, () => grid, () => ctx);
         const h: PartHandle<NestedContext> = {
           // Another master row (new data), language or app context (a new object, parts.md; the « follow the
           // master's columns » recipe): the host's settings again, given to the grid in place (its focus, scroll
@@ -171,8 +169,7 @@ export function nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<'detail'> {
           focus,
           destroy() {
             save();
-            gone = 1;
-            th?.off();
+            th!.off();
             host.removeEventListener('keydown', peek, true);
             host.removeEventListener('keydown', esc);
             // An open field leaves as a blur keeps it (Q5): its text sent while its row is held.

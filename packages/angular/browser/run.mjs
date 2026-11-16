@@ -267,6 +267,37 @@ try {
       check(`${lang} detail: no error in the page`, errors.length === 0, errors);
       await page.close();
     }
+    {
+      // 1.13.0 (master-detail.md): `dzgNestedArrows="rows"`, `dzgNestedInlineScroll="master"` on the panel's grid.
+      const { page, errors } = await open(`page=detail&through=1${q}`);
+      const at = () => page.evaluate(() => { const a = document.activeElement; return { inner: !!a?.closest('.dzg-dbody'), row: a?.closest('.dzg-row')?.getAttribute('aria-rowindex'), col: a?.getAttribute('data-col') }; });
+      const key = async (k, n = 1) => { for (let i = 0; i < n; i++) await page.keyboard.press(k), await frames(page, 2); };
+      await page.click('dzg-fixture .host > dz-grid > .dzg > .dzg-viewport .dzg-layer .dzg-row[aria-rowindex="2"] .dzg-cell[data-col="n"]');
+      await key('ArrowDown');
+      const w1 = await at();
+      check(`${lang} through: ArrowDown from the open master m0: its panel grid's first row, same column`, w1.inner && w1.row === '2' && w1.col === 'n', w1);
+      await key('ArrowUp');
+      const w2 = await at();
+      check(`${lang} through: ArrowUp from its first row: back on the master, same column`, !w2.inner && w2.row === '2' && w2.col === 'n', w2);
+      await key('ArrowDown', 13);
+      const w3 = await at();
+      check(`${lang} through: ArrowDown from its last row: the next master (m1)`, !w3.inner && w3.row === '4' && w3.col === 'n', w3);
+      await key('ArrowUp');
+      const w4 = await at();
+      check(`${lang} through: ArrowUp from there: the panel grid's last row`, w4.inner && w4.row === '13' && w4.col === 'n', w4);
+      const sc = await page.evaluate(async () => {
+        const outer = document.querySelector('dzg-fixture .host > dz-grid > .dzg > .dzg-viewport');
+        const inner = document.querySelector('.dzg-dbody .dzg-viewport');
+        outer.scrollLeft = (getComputedStyle(outer).direction === 'rtl' ? -1 : 1) * 300;
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        return { overflow: getComputedStyle(inner).overflowX, bar: inner.offsetHeight - inner.clientHeight, outer: Math.abs(outer.scrollLeft), inner: Math.abs(inner.scrollLeft) };
+      });
+      check(`${lang} through: the panel grid has no sideways scrollbar and follows the master's scroll`, sc.overflow === 'hidden' && sc.bar === 0 && sc.outer === 300 && sc.inner === 300, sc);
+      const a = await axe(page);
+      check(`${lang} through: axe, no violation`, a.length === 0, a);
+      check(`${lang} through: no error in the page`, errors.length === 0, errors);
+      await page.close();
+    }
   }
   if (only === 'tree') throw Object.assign(new Error('only'), { only: true });
   const { page, errors } = await open('bench=1');

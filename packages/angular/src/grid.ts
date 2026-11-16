@@ -143,6 +143,16 @@ export class DzGrid<T> implements AfterContentInit {
    * while composing, nor when it only hid this grid's tooltip); past three levels, `detail.depth` told.
    */
   readonly dzgNested = input<SlotContext['detail']>();
+  /**
+   * With `[dzgNested]` (1.13.0, master-detail.md): `'rows'`, the arrows go through this grid's rows as rows of the outer
+   * list (`nestedGrid({ arrows: 'rows' })`'s). Read when the grid is made.
+   */
+  readonly dzgNestedArrows = input<'rows'>();
+  /**
+   * With `[dzgNested]` (1.13.0, master-detail.md): `'master'`, no sideways scrollbar of its own, moved with the outer
+   * grid's horizontal scroll (`nestedGrid({ inlineScroll: 'master' })`'s). Read when the grid is made.
+   */
+  readonly dzgNestedInlineScroll = input<'master'>();
   /** Fixed: taken when the grid is made; a later change is `unsupported-live-change`. */
   readonly operations = input<S<T>['operations']>();
   readonly pagination = input<S<T>['pagination']>();
@@ -245,6 +255,8 @@ export class DzGrid<T> implements AfterContentInit {
   private readonly _el: HTMLElement = inject(ElementRef).nativeElement;
   private readonly _browser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly _templates = contentChildren(DzgPart);
+  /** `dzgNestedArrows`, `dzgNestedInlineScroll`: their end (the panel's `adopt`). */
+  private _unnest?: () => void;
   private readonly _grid = signal<GridInstance<T, RowModel<T>> | null>(null);
   /** The kernel, from its creation (before the first paint) until the grid is gone. */
   private _k: GridKernel<T, RowModel<T>> | null = null;
@@ -339,6 +351,7 @@ export class DzGrid<T> implements AfterContentInit {
     });
     inject(DestroyRef).onDestroy(() => {
       this._gone = true;
+      this._unnest?.();
       untracked(this._grid)?.destroy();
       this._grid.set(null);
       this._k = null;
@@ -360,7 +373,7 @@ export class DzGrid<T> implements AfterContentInit {
     const g = this._zone.runOutsideAngular(() =>
       createGrid<T, RowModel<T>>(this._el, { ...s, features: [early, ...(s.features ?? [])], onEvent: (e) => this._hear(e) }, this._env),
     );
-    if (this.dzgNested()) this._nest(g.kernel);
+    if (this.dzgNested()) this._nest(g);
     this.controller._attach(g.kernel, g, s.features);
     this._grid.set(g);
     if (held) this._state(), this._zone.runOutsideAngular(() => g.kernel.rows.hold?.(() => {}));
@@ -447,11 +460,20 @@ export class DzGrid<T> implements AfterContentInit {
     if (by.join('\0') !== api.by().join('\0')) this._zone.runOutsideAngular(() => api.setBy(by, { host: true }));
   }
 
-  /** Inside a detail panel (`dzgNested`): the depth told, Escape back to the panel; on the host element, outside the zone. */
-  private _nest(k: GridKernel<T, RowModel<T>>): void {
+  /**
+   * Inside a detail panel (`dzgNested`): the depth told, Escape back to the panel, the arrows and the sideways scroll
+   * given to the panel (`adopt`, until this grid goes); on the host element, outside the zone.
+   */
+  private _nest(g: GridInstance<T, RowModel<T>>): void {
     const el = this._el;
-    const told = detailConflicts({ depth: this.dzgNested()!.depth });
-    if (told.length) emit(k, { type: 'problems', source: 'host', problems: told });
+    const c = this.dzgNested()!;
+    const told = detailConflicts({ depth: c.depth });
+    if (told.length) emit(g.kernel, { type: 'problems', source: 'host', problems: told });
+    const arrows = this.dzgNestedArrows();
+    const inlineScroll = this.dzgNestedInlineScroll();
+    if (arrows || inlineScroll) {
+      this._unnest = this._zone.runOutsideAngular(() => c.adopt?.(g, { arrows, inlineScroll }));
+    }
     // The tooltip's state before the grid's own keydown (which hides it, and leaves the key unused).
     let tip = false;
     this._zone.runOutsideAngular(() => {

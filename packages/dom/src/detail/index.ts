@@ -8,6 +8,7 @@ import type { DetailMessageKey } from '../part-texts.js';
 import type { Frame } from '../render/rows.js';
 import { sideways } from '../dir.js';
 import { injectDetailStyles, DETAIL_CSS } from './styles.js';
+import { hold } from './hold.js';
 /** Its layout CSS, for a page that sets `injectStyles: false` and loads it itself. */
 export { DETAIL_CSS };
 
@@ -237,9 +238,10 @@ function setup<T>(g: GridContext<unknown>, o: DetailFeatureOptions<T>, sizes: Ma
           panels.set(s, (p = { key, box, handle: null, last: null, rev: -1 }));
           if (ro) boxes.set(box, p), ro.observe(box);
         }
-        set(p.box, 'aria-label', g.msg('detail.label', { name: nameOf(node.master) }));
+        const box = p.box;
+        set(box, 'aria-label', g.msg('detail.label', { name: nameOf(node.master) }));
         if (part?.slot !== 'detail') continue;
-        const c: SlotContext['detail'] = { ...g.partBase!, row: node.data, key, master: node.master, height: L.heightOf(i as DisplayIndex), depth: depth + 1, leave: () => leave(key) };
+        const c: SlotContext['detail'] = { ...g.partBase!, row: node.data, key, master: node.master, height: L.heightOf(i as DisplayIndex), depth: depth + 1, leave: () => leave(key), adopt: (grid, n) => hold(n, box, () => grid, () => (grid as unknown as { context: GridContext<unknown> }).context).off };
         const l = p.last;
         try {
           if (!p.handle) {

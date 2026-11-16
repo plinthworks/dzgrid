@@ -98,6 +98,9 @@ Toujours avant publication. Chacune : ligne de fiche d'abord, tests écrits à l
   base `@dzgrid/dom` 25 700 → 26 000 (25 977), `@dzgrid/dom/detail` 4 200 → 4 284 (4 277), `@dzgrid/theme` 3 050 → 3 110
   (3 093), `variables.css` 1 938 → 1 950, `@dzgrid/dom/theme` 2 530 → 2 550, `@dzgrid/dom/print` 1 710 → 1 720 ;
   nouvelle ligne `@dzgrid/dom/detail: through (lazy)` 1 400 (mesure 1 239 + 10 %) ; appli Angular réelle 103 150 → 103 500 (mesuré 103 485, règle des +2 %).
+- **2026-11-16 (deux défauts trouvés par ton appli : les options du détail pour Angular, Ctrl+Début sur une colonne
+  `keyboard: false`)** — règle des +2 % : `@dzgrid/dom/detail` 4 284 → 4 360 (4 349), `@dzgrid/angular` 8 650 → 8 800
+  (8 790 : `dzgNestedArrows`, `dzgNestedInlineScroll`), appli Angular réelle 103 500 → 103 650 (103 593) ; K.8 92 485 / 93 000.
 
 ## Vérifié (2026-11-15)
 

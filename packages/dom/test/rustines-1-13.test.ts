@@ -11,7 +11,7 @@ import type { GridContext, GridEnv } from '../src/context.js';
 import { detail, nestedGrid, type NestedGridOptions } from '../src/detail.js';
 import { EN } from '../src/locales/en.js';
 import { EN_DETAIL } from '../src/locales/en-detail.js';
-import { cleanup, emake, k, type R } from './support-edit.js';
+import { cleanup, emake, k, rowsOf, type R } from './support-edit.js';
 
 afterEach(cleanup);
 
@@ -153,6 +153,43 @@ describe('a column the keyboard skips (reading-keyboard.md)', () => {
     expect(m.g.kernel.focus).toEqual({ kind: 'cell', row: k('r2'), column: 'n' });
     m.press('ArrowRight');
     expect(m.g.kernel.focus).toEqual({ kind: 'cell', row: k('r2'), column: 's' });
+  });
+
+  it('Ctrl+Home and Ctrl+End land on the first / last column the keys take, from the body and the header, both directions', () => {
+    const cols: ColumnDef<R, any>[] = [{ id: 'gap', header: 'Gap', width: 24, keyboard: false }, ...COLS];
+    for (const direction of ['ltr', 'rtl'] as const) {
+      const m = emake({ columns: cols, rows: rowsOf(5), settings: { direction } });
+      m.g.api.focusCell(k('r2'), 's');
+      m.press('Home', { ctrlKey: true });
+      expect(m.g.kernel.focus).toEqual({ kind: 'cell', row: k('r0'), column: 'name' });
+      m.press('End', { ctrlKey: true });
+      expect(m.g.kernel.focus).toEqual({ kind: 'cell', row: k('r4'), column: 's' });
+      // From the header row: Home and End there, then Ctrl+Home into the body.
+      m.g.api.focusCell(k('r0'), 's');
+      m.press('ArrowUp');
+      m.press('Home');
+      expect(m.g.kernel.focus).toEqual({ kind: 'header', column: 'name' });
+      m.press('End');
+      expect(m.g.kernel.focus).toEqual({ kind: 'header', column: 's' });
+      m.press('Home', { ctrlKey: true });
+      expect(m.g.kernel.focus).toEqual({ kind: 'cell', row: k('r0'), column: 'name' });
+      m.press('ArrowUp');
+      m.press('End', { ctrlKey: true });
+      expect(m.g.kernel.focus).toEqual({ kind: 'cell', row: k('r4'), column: 's' });
+      cleanup();
+    }
+  });
+
+  it('from the select-all box, Right and Down go to the first column the keys take', () => {
+    const cols: ColumnDef<R, any>[] = [{ id: 'gap', header: 'Gap', width: 24, keyboard: false }, ...COLS];
+    const m = emake({ columns: cols, rows: rowsOf(5), settings: { selection: { mode: 'multi', checkbox: true } } });
+    const box = m.host.querySelector<HTMLElement>('.dzg-hcell .dzg-box')!;
+    box.focus();
+    m.press('ArrowRight', {}, box);
+    expect(m.g.kernel.focus).toEqual({ kind: 'header', column: 'name' });
+    box.focus();
+    m.press('ArrowDown', {}, box);
+    expect(m.g.kernel.focus).toEqual({ kind: 'cell', row: k('r0'), column: 'name' });
   });
 
   it('every column skipped: the keys stay', () => {

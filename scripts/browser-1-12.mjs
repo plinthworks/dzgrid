@@ -485,6 +485,20 @@ async function rustines(page, tag, { css, dark, lang, preflight }, name, errors)
   await frames(page);
   const w5 = await where();
   check(`${tag}: (14) ArrowUp from there: the panel grid's last row`, w5.inner && w5.col === 'oven' && w5.row === '4', w5);
+  // Ctrl/Cmd+Home and End (1.13.0, reading-keyboard.md): the first / last row at the first / last column the keys take.
+  const mod = process.platform === 'darwin' ? 'Meta' : 'Control';
+  await page.keyboard.press(`${mod}+Home`);
+  await frames(page);
+  const w6 = await where();
+  await page.keyboard.press(`${mod}+End`);
+  await frames(page);
+  const w7 = await where();
+  check(`${tag}: (14) Ctrl/Cmd+Home in the panel grid: its first row, the first column the keys take (the empty one skipped)`, w6.inner && w6.col === 'oven' && w6.row === '2', w6);
+  check(`${tag}: (14) Ctrl/Cmd+End: its last row and last column`, w7.inner && w7.row === '4' && !!w7.col && w7.col !== 'open', w7);
+  // Back to the start (the last column moved the master sideways: `inlineScroll: 'master'`).
+  await page.keyboard.press(`${mod}+Home`);
+  await page.evaluate(() => void (document.querySelector('#host > .dzg > .dzg-viewport').scrollLeft = 0));
+  await frames(page);
   // The master scrolled out above the view (the panel at the view's top): ArrowUp from the panel grid's first row brings
   // it into view, under the header.
   await page.evaluate(() => {

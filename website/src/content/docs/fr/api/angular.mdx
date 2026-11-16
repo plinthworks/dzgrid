@@ -91,7 +91,13 @@ declare class DzGrid<T> implements AfterContentInit {
         readonly height: number;
         readonly depth?: number;
         leave?(): void;
+        adopt?(grid: GridInstance<any, any>, o: {
+            readonly arrows?: "rows";
+            readonly inlineScroll?: "master";
+        }): () => void;
     }) | undefined>;
+    readonly dzgNestedArrows: _angular_core.InputSignal<"rows" | undefined>;
+    readonly dzgNestedInlineScroll: _angular_core.InputSignal<"master" | undefined>;
     readonly operations: _angular_core.InputSignal<_dzgrid_core.OperationsInput | undefined>;
     readonly pagination: _angular_core.InputSignal<_dzgrid_core.PageOptions | undefined>;
     readonly filterKinds: _angular_core.InputSignal<readonly _dzgrid_core.AnyFilterKind[] | undefined>;
@@ -364,6 +370,7 @@ declare class DzGrid<T> implements AfterContentInit {
     private readonly _el;
     private readonly _browser;
     private readonly _templates;
+    private _unnest?;
     private readonly _grid;
     private _k;
     private readonly _b;
@@ -536,6 +543,16 @@ declare class DzGrid<T> implements AfterContentInit {
         };
         "dzgNested": {
             "alias": "dzgNested";
+            "required": false;
+            "isSignal": true;
+        };
+        "dzgNestedArrows": {
+            "alias": "dzgNestedArrows";
+            "required": false;
+            "isSignal": true;
+        };
+        "dzgNestedInlineScroll": {
+            "alias": "dzgNestedInlineScroll";
             "required": false;
             "isSignal": true;
         };

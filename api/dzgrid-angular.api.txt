@@ -11,6 +11,7 @@
 # history: owner 2026-11-14 hook info and shape (the same unpublished entries, accepted earlier in this batch; additions over 1.11) — @dzgrid/angular/tooltip#DzTooltip, @dzgrid/angular/popover#DzPopover
 # history: owner 2026-11-14: rich tooltips moved to @dztooltip, never published — entries removed: @dzgrid/angular/tooltip, @dzgrid/angular/popover
 # history: owner 2026-11-16 « A, monte à 93 000 »: [focusVisible] input, additions only — @dzgrid/angular#DzGrid
+# history: owner 2026-11-16 « A »: [dzgNestedArrows], [dzgNestedInlineScroll] (the 1.13.0 detail options for an Angular detail), additions only — @dzgrid/angular#DzGrid
 
 @ @dzgrid/angular
 ## DZGRID_ANGULAR_VERSION
@@ -73,7 +74,13 @@
           readonly height: number;
           readonly depth?: number;
           leave?(): void;
+          adopt?(grid: GridInstance<any, any>, o: {
+              readonly arrows?: "rows";
+              readonly inlineScroll?: "master";
+          }): () => void;
       }) | undefined>;
+      readonly dzgNestedArrows: _angular_core.InputSignal<"rows" | undefined>;
+      readonly dzgNestedInlineScroll: _angular_core.InputSignal<"master" | undefined>;
       readonly operations: _angular_core.InputSignal<_dzgrid_core.OperationsInput | undefined>;
       readonly pagination: _angular_core.InputSignal<_dzgrid_core.PageOptions | undefined>;
       readonly filterKinds: _angular_core.InputSignal<readonly _dzgrid_core.AnyFilterKind[] | undefined>;
@@ -346,6 +353,7 @@
       private readonly _el;
       private readonly _browser;
       private readonly _templates;
+      private _unnest?;
       private readonly _grid;
       private _k;
       private readonly _b;
@@ -518,6 +526,16 @@
           };
           "dzgNested": {
               "alias": "dzgNested";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzgNestedArrows": {
+              "alias": "dzgNestedArrows";
+              "required": false;
+              "isSignal": true;
+          };
+          "dzgNestedInlineScroll": {
+              "alias": "dzgNestedInlineScroll";
               "required": false;
               "isSignal": true;
           };

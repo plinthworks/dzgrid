@@ -42,6 +42,8 @@ nested grids; past three levels, the grid made tells `unsupported-combination` a
   moves the outer grid too. For inner columns that follow the master's (same ids, same widths). To put its first column
   exactly under the master's, set `--dzg-detail-inset: 0`, `--dzg-detail-line: none` and no frame on the inner grid
   (`--dzg-frame: none`).
+- In Angular, a detail component that makes its own `<dz-grid [dzgNested]="cell()">` gets both with
+  `dzgNestedArrows="rows"` and `dzgNestedInlineScroll="master"` beside `[dzgNested]` (read when the inner grid is made).
 - `env`: the grid's test seams, for tests only.
 
 ## Example

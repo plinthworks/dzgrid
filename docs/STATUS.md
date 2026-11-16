@@ -1,5 +1,12 @@
 # État du travail — à lire en premier si la session est perdue
 
+Mis à jour : 2026-11-16 (suite). **Deux défauts trouvés par l'appli Angular du propriétaire, corrigés dans 1.13.0** :
+(1) `nestedGrid({ arrows, inlineScroll })` n'atteignait pas une grille de détail Angular — maintenant
+`<dz-grid [dzgNested]="cell()" dzgNestedArrows="rows" dzgNestedInlineScroll="master">` (le contexte du volet offre
+`adopt(grid, options)`, `detail/hold.ts` partagé avec `nestedGrid`) ; (2) Ctrl/Cmd+Début/Fin (et les flèches depuis la
+case « tout sélectionner ») tombaient sur une colonne `keyboard: false` (`keys/router.ts`). Tests
+`detail-nested-arrows.test.ts`, `rustines-1-13.test.ts` ; Chrome : `packages/angular/browser/run.mjs` (« through »),
+matrice (14). +2 % : detail 4 360, Angular 8 800, appli Angular réelle 103 650 ; K.8 92 485 / 93 000. Avant :
 Mis à jour : 2026-11-16. **1.13.0 (toujours non publiée) : les options qui retirent les rustines de l'appli du
 propriétaire** (« A, monte à 93 000 »). Fiches d'abord : `presentation-settings.md` 48 (`focusVisible: 'keyboard'`, défaut
 `'always'` ; `data-dzg-ring` = `keys` / `pointer` sur la racine, posé par le routeur des touches ; le thème garde l'anneau,

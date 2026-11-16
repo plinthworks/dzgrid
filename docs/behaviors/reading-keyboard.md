@@ -24,6 +24,9 @@ Tabs into the grid, moves with the arrows, pages, jumps to the ends, tabs out.
   read by a screen reader (its header names its cells), and it can hold content — a chevron, a button — which a click
   reaches. A click on it focuses it; the arrows from there go on (Up and Down stay in it, Left and Right leave it).
   A group header above it stays a stop. Every column skipped: the keys stay where they are.
+- Every key that moves the focus skips it (1.13.0, found by the owner's app before publishing): Ctrl/Cmd+Home and
+  Ctrl/Cmd+End land on the first / last row at the first / last column the keyboard takes, from the body or the header,
+  left to right and right to left; ArrowRight and ArrowDown from the select-all box go to the first such column.
 - For a column whose cells are empty on purpose (the space under a master's chevron in a detail's grid, a spacer).
 
 ## Tests

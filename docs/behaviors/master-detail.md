@@ -182,6 +182,11 @@ the keyboard into and out of the detail, works in a grid shown inside the detail
   `.5rem`, the base sheet; the spacing's two units with variables.css): `--dzg-detail-inset: 0`, `--dzg-detail-line:
   none` and the inner grid without its frame (`--dzg-frame: none` on it) put the inner grid's first column exactly
   under the master's.
+- **Both for a grid the application makes in a panel** (1.13.0, found by the owner's Angular app before publishing):
+  Angular's `<dz-grid [dzgNested]="cell()" dzgNestedArrows="rows" dzgNestedInlineScroll="master">` behaves as
+  `nestedGrid({ arrows: 'rows', inlineScroll: 'master' })` (each alone too; read when the inner grid is made, let go
+  with it). The seam: the panel's context offers `adopt(grid, { arrows, inlineScroll })` (`detail()`'s), which another
+  host can call with a grid it made in the panel; it returns their end.
 
 ## Where DzGrid differs on purpose
 - The panel is a single focus stop with Enter to go in (APG "cell with widgets"), never a set of
@@ -198,7 +203,7 @@ per resize, top row kept, Down/Enter/Escape, inner keys ignored by the outer rou
 cap, not selectable or exported, depth 2 ok and 4 a problem, no row data in events, SSR); browser:
 axe, wheel chaining, 1M masters, 200 details opened. Spike: `spikes/s12-variable-heights/`.
 Manual: `docs/a11y-protocol.md` §17. The arrows through rows and the sideways follow (1.13.0):
-`packages/dom/test/rustines-1-13.test.ts`, browsers `node scripts/browser-1-12.mjs --panel` (14). Rows without a detail: `packages/core/test/detail-master.test.ts`,
+`packages/dom/test/rustines-1-13.test.ts`, Angular `packages/angular/test/detail-nested-arrows.test.ts`, browsers `node scripts/browser-1-12.mjs --panel` (14). Rows without a detail: `packages/core/test/detail-master.test.ts`,
 `packages/dom/test/detail-master.test.ts`; the follow recipe: `packages/dom/test/detail-follow.test.ts`.
 
 ## Blocks, clipboard and fill (Phase 5 Part B)

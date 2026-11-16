@@ -81,7 +81,13 @@ export class TreeApp {
 }
 
 type Master = { id: string; name: string; n: number };
-type Visit = { id: string; date: string; n: number };
+type Visit = { id: string; date: string; n: number; name: string };
+/**
+ * `?page=detail&through=1` (1.13.0, master-detail.md): the panels' grids with `dzgNestedArrows="rows"` and
+ * `dzgNestedInlineScroll="master"`, no header row, their columns the master's (with a wide last one: the master scrolls sideways).
+ */
+const THROUGH = new URLSearchParams(location.search).has('through');
+const WIDE = { id: 'more', header: '…', width: 1400 } as const;
 const MASTERS: Master[] = Array.from({ length: 2000 }, (_, i) => ({ id: `m${i}`, name: `${W.patient} ${i}`, n: (i * 37) % 1000 }));
 
 /** A panel: the master's visits in a grid of its own; its button emits `open` with the master's key. */
@@ -90,15 +96,19 @@ const MASTERS: Master[] = Array.from({ length: 2000 }, (_, i) => ({ id: `m${i}`,
   imports: [DzGrid],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<button type="button" class="fx-vb" (click)="cell().emit('open', cell().master)">{{ words.open }}</button>
-    <div class="fx-vh"><dz-grid [dzgNested]="cell()" [rows]="rows()" [columns]="columns" [getRowId]="id" [messages]="messages" [locale]="locale" [label]="label()" /></div>`,
+    <div class="fx-vh"><dz-grid [dzgNested]="cell()" [dzgNestedArrows]="through ? 'rows' : undefined" [dzgNestedInlineScroll]="through ? 'master' : undefined"
+      [headers]="through ? 'none' : 'shown'" [rows]="rows()" [columns]="columns" [getRowId]="id" [messages]="messages" [locale]="locale" [label]="label()" /></div>`,
   styles: `:host { display: block; } .fx-vh { block-size: 180px; } .fx-vh .dzg { block-size: 100%; }`,
 })
 class Visits implements OnDestroy {
   readonly cell = input.required<DzgPartContext<'detail'>>();
   readonly words = W;
-  readonly rows = computed(() => Array.from({ length: 12 }, (_, i): Visit => ({ id: `${(this.cell().row as Master).id}.v${i}`, date: `2026-0${1 + (i % 9)}-1${i % 10}`, n: i })));
+  readonly through = THROUGH;
+  readonly rows = computed(() => Array.from({ length: 12 }, (_, i): Visit => ({ id: `${(this.cell().row as Master).id}.v${i}`, date: `2026-0${1 + (i % 9)}-1${i % 10}`, n: i, name: `${W.visit} ${i}` })));
   readonly label = computed(() => `${W.visits} ${(this.cell().row as Master).name}`);
-  readonly columns: ColumnOrGroup<Visit>[] = [{ id: 'date', header: W.date, type: 'day', width: 160 }, { id: 'n', header: W.n, type: 'number', width: 100 }];
+  readonly columns: ColumnOrGroup<Visit>[] = THROUGH
+    ? [{ id: 'name', header: W.name, width: 220 }, { id: 'n', header: W.n, type: 'number', width: 120 }, WIDE]
+    : [{ id: 'date', header: W.date, type: 'day', width: 160 }, { id: 'n', header: W.n, type: 'number', width: 100 }];
   readonly id = (r: Visit): string => r.id;
   readonly messages = MSG;
   readonly locale = LOCALE;
@@ -127,6 +137,7 @@ export class DetailApp {
   readonly columns: ColumnOrGroup<Master>[] = [
     { id: 'name', header: W.name, width: 220 },
     { id: 'n', header: W.n, type: 'number', width: 120 },
+    ...(THROUGH ? [WIDE] : []),
   ];
   readonly id = (r: Master): string => r.id;
   readonly messages = MSG;

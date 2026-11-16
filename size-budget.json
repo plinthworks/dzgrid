@@ -771,7 +771,7 @@
     },
     "@dzgrid/dom/detail": {
       "file": "packages/dom/src/detail.ts",
-      "maxGzip": 4284,
+      "maxGzip": 4360,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -1086,7 +1086,8 @@
         "@dzgrid/core",
         "@dzgrid/core/internal",
         "@dzgrid/core/detail",
-        "@dzgrid/dom/internal"
+        "@dzgrid/dom/internal",
+        "./through.js"
       ]
     },
     "@dzgrid/dom/import": {
@@ -1366,7 +1367,7 @@
     },
     "@dzgrid/angular": {
       "file": "packages/angular/dist/fesm2022/dzgrid-angular.mjs",
-      "maxGzip": 8650,
+      "maxGzip": 8800,
       "external": [
         "@angular/*",
         "@dzgrid/*",

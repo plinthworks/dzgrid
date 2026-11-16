@@ -30,6 +30,9 @@ nothing removed.
 - **`nestedGrid({ inlineScroll: 'master' })`**: a panel's grid with no sideways scrollbar of its own, moved with the
   outer grid's horizontal scroll (a sideways wheel over it and a key in it move the outer grid) — for inner columns that
   follow the master's (master-detail.md).
+- **Both for an Angular detail grid**: `<dz-grid [dzgNested]="cell()" dzgNestedArrows="rows" dzgNestedInlineScroll="master">`
+  (new inputs, read when the inner grid is made) — the arrows and the sideways follow as `nestedGrid`'s. Their seam, for
+  any host making its own grid in a panel: the detail context's `adopt(grid, { arrows, inlineScroll })` (master-detail.md).
 - **`--dzg-detail-inset`** (theme key `detailInset`): a detail panel's content inset at its inline start (default
   `.5rem`); with `--dzg-detail-line: none` and no frame on the inner grid, its first column sits under the master's.
 - `ColumnDef.filterButton: false`: no filter button (funnel) in that column's header and no room kept for it (nor its
@@ -42,6 +45,9 @@ nothing removed.
 ### Fixed
 - A header part (`ui.header`) fills its header cell whatever the alignment; before, only with `headerAlign` set (or a
   number column) — with none it stayed as narrow as its content.
+- Ctrl/Cmd+Home and Ctrl/Cmd+End landed on a `keyboard: false` column (the first or last one), and ArrowRight or
+  ArrowDown from the select-all box on a first such column: every key that moves the focus now skips them, in the
+  header and the body, both directions (reading-keyboard.md).
 - Enter (or F2) pressed in the same frame as an arrow key on the headers went to the previous header and sorted the
   new column instead of entering its part's input: the pending paint is now done first and the key read on the header
   the focus moved to. Enter still sorts a header whose part takes no focus.
@@ -65,11 +71,11 @@ nothing removed.
   measures the whole title; the 80 px floor is unchanged.
 
 ### Upgrading from 1.12.0
-- Nothing to change (an app that set `headerAlign: 'start'` only to make its header part fill the cell can drop it; one with its own search box in the header can add `filterButton: false`). An app that patched the grid's classes for the focus ring after a click, a detail grid's header row, its keys or its sideways scrollbar can use `focusVisible: 'keyboard'`, `headers: 'none'`, `keyboard: false`, `nestedGrid({ arrows: 'rows', inlineScroll: 'master' })` and `--dzg-detail-inset` instead.
+- Nothing to change (an app that set `headerAlign: 'start'` only to make its header part fill the cell can drop it; one with its own search box in the header can add `filterButton: false`). An app that patched the grid's classes for the focus ring after a click, a detail grid's header row, its keys or its sideways scrollbar can use `focusVisible: 'keyboard'`, `headers: 'none'`, `keyboard: false`, `nestedGrid({ arrows: 'rows', inlineScroll: 'master' })` (Angular: `dzgNestedArrows="rows" dzgNestedInlineScroll="master"` beside `[dzgNested]`) and `--dzg-detail-inset` instead.
 - Size lines (owner 2026-11-16, « A, monte à 93 000 »): the audit screen (K.8) 92 000 → 93 000 (measured 92 378); by
-  the +2 % rule `@dzgrid/dom` 25 700 → 26 000, `@dzgrid/dom/detail` 4 200 → 4 284, `@dzgrid/theme` 3 050 → 3 110,
+  the +2 % rule `@dzgrid/dom` 25 700 → 26 000, `@dzgrid/dom/detail` 4 200 → 4 360 (with the Angular detail options), `@dzgrid/theme` 3 050 → 3 110,
   `variables.css` 1 938 → 1 950, `@dzgrid/dom/theme` 2 530 → 2 550, `@dzgrid/dom/print` 1 710 → 1 720; a new line for
-  the lazy chunk `@dzgrid/dom/detail: through (lazy)`, 1 400 (its measure + 10 %); the real Angular example 103 150 → 103 500 (measured 103 485). What you will see: the panel's new look; the search box's label is now its placeholder and
+  the lazy chunk `@dzgrid/dom/detail: through (lazy)`, 1 400 (its measure + 10 %); the real Angular example 103 150 → 103 650 (measured 103 593); `@dzgrid/angular` 8 650 → 8 800 (measured 8 790: the two detail inputs). What you will see: the panel's new look; the search box's label is now its placeholder and
   `aria-label`; narrow filterable headers show their title and reveal the filter button on hover or focus.
 
 ## [1.12.0] - 2026-11-13

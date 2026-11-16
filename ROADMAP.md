@@ -1454,6 +1454,11 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   `@dzgrid/dom/detail: through (lazy)` 1 400.
   `[focusVisible]` accepted into the API baseline (« A »); the real Angular example 103 150 → 103 500 (measured 103 485,
   +2 %). Gate green, real app 58 / 58, matrix 15 212 / 15 212, release:check at 1.13.0.
+- [x] Two defects from the owner's Angular app (1.13.0, before publishing): `dzgNestedArrows="rows"` and
+  `dzgNestedInlineScroll="master"` beside `[dzgNested]` (the panel context's `adopt`, master-detail.md); Ctrl/Cmd+Home
+  and End (and the select-all box's arrows) skip `keyboard: false` columns (reading-keyboard.md). Tests
+  `detail-nested-arrows.test.ts`, `rustines-1-13.test.ts`; Chrome: `packages/angular/browser/run.mjs` (« through »),
+  matrix (14). +2 %: detail 4 360 (4 349), Angular 8 800 (8 790), real Angular example 103 650 (103 593); K.8 92 485.
 - For the owner: commit, publish (`docs/release-1.13.0.md`; the panel's size lines accepted 2026-11-15).
 
 ## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)

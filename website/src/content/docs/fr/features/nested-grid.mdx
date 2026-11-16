@@ -47,6 +47,9 @@ grilles peuvent s’imbriquer dans des grilles imbriquées ; au-delà de trois n
   touche qui amène une de ses colonnes en vue déplace aussi la grille autour. Pour des colonnes qui suivent celles du
   maître (mêmes identifiants, mêmes largeurs). Pour caler sa première colonne exactement sous celle du maître :
   `--dzg-detail-inset: 0`, `--dzg-detail-line: none` et pas de cadre sur la grille imbriquée (`--dzg-frame: none`).
+- En Angular, un composant de détail qui crée sa propre `<dz-grid [dzgNested]="cell()">` obtient les deux avec
+  `dzgNestedArrows="rows"` et `dzgNestedInlineScroll="master"` à côté de `[dzgNested]` (lus à la création de la grille
+  imbriquée).
 - `env` : les points d’accroche de test de la grille, pour les tests seulement.
 
 ## Exemple

@@ -39,9 +39,9 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
       } }),
     };
     let m = step(null, shape, from, goal, intent, moveFocus);
-    // A column the keys skip (`keyboard: false`, reading-keyboard.md): on the same way past it (from an edge, inward); a
-    // group header above it stays a stop. None the keys take that way: nowhere.
-    const col = 'axis' in intent && intent.axis === 'col';
+    // A column the keys skip (`keyboard: false`, reading-keyboard.md): on the same way past it (from an edge, inward —
+    // Ctrl/Cmd+Home and End too); a group header above it stays a stop. None the keys take that way: nowhere.
+    const col = 'axis' in intent && intent.axis != 'row';
     const skip = (p: FocusPos): boolean => (p.kind === 'cell' || !((p.level ?? 0) < 0)) && columns.get(p.column)?.def.keyboard === false;
     for (let n = 0; col && m && m.to !== 'checkBox' && skip(m.to); n++) {
       const at = m.to;
@@ -129,7 +129,7 @@ export function installKeys<T>(g: GridContext<T>, focus: FocusControl<T>, toggle
     const t = e.target as HTMLElement;
     if (headerRenderer.checkBox && t === headerRenderer.checkBox) {
       const step = intentFor(e, { dir: g.dir, owner: 'header', mac: g.mac });
-      const first = columns.visible()[0];
+      const first = columns.visible().find((c) => c.def.keyboard !== false);
       if (e.key === ' ' || e.key === 'Enter') toggleAll();
       else if (first && step?.kind === 'move' && step.delta > 0) {
         const d = rows.displayed;

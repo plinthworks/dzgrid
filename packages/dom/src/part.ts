@@ -3,6 +3,7 @@ import type { AppMessageKey, ExportMessageKey, FilterMessageKey, FilterRowsMessa
 import type { GroupMessageKey, PivotMessageKey, PivotBarMessageKey, PartsMessageKey, DetailMessageKey, EditMessageKey, EditorsMessageKey, RulesMessageKey, TreeMessageKey, RangeMessageKey, FillMessageKey, ColumnsMessageKey, ColumnsChooserMessageKey, ColumnMenuMessageKey, ContextMenuMessageKey, ContextMenuXlsxKey, PinnedMessageKey, TotalsMessageKey, ImportMessageKey, PrintMessageKey, FreshMessageKey, StatusMessageKey, FindMessageKey, ClearFiltersKey, RowDragMessageKey, FiltersPanelMessageKey, DockMessageKey, RowNumbersMessageKey } from './part-texts.js';
 import type { GridFeature } from './features.js';
 import type { GridSettings } from './settings.js';
+import type { GridInstance } from './grid.js';
 
 /**
  * One contract for everything a host may draw in the grid (Phase 3, the
@@ -299,6 +300,12 @@ export interface SlotContext {
     readonly depth?: number;
     /** Puts the focus back on this panel's cell, as Escape from a control inside does (a nested grid's Escape). Given by `detail()`. */
     leave?(): void;
+    /**
+     * A grid the host made in this panel itself (Angular's `<dz-grid [dzgNested]>`) given `nestedGrid`'s `arrows: 'rows'`
+     * and `inlineScroll: 'master'` (1.13.0, master-detail.md), as a `nestedGrid` grid has them; returns their end (the
+     * grid destroyed). Given by `detail()`.
+     */
+    adopt?(grid: GridInstance<any, any>, o: { readonly arrows?: 'rows'; readonly inlineScroll?: 'master' }): () => void;
   };
 }
 
