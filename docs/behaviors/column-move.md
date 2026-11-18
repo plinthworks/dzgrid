@@ -52,9 +52,9 @@ chooser. On a touch screen, a finger on a header scrolls: the column moves throu
    (source `user`), never a re-sort or re-filter. The click that follows the release is swallowed (no sort).
 8. **Escape** during a drag cancels it (sentence `move.cancelled`); `pointercancel`, a lost capture, the
    window losing focus, new column definitions, a direction change or the grid destroyed cancel quietly.
-9. Released outside the grid and outside any registered drop target: cancelled quietly. Dragging out of
-   the header row **never hides** the column (differs on purpose: a column is hidden by the menu or the
-   chooser only).
+9. Released outside the grid and outside any registered drop target: cancelled quietly. By default dragging
+   out never hides the column. **Opt-in `columns({ dragOutHides: true })` (1.14.0, owner 2026-11-18)**: rules
+   22–28 below; without it, nothing changes.
 10. **Drop targets** (protocol for Phase 7's group zone, `group-drop-zone.md`): while the pointer is over a
     registered target whose `accept(column)` is true, the insertion bar is hidden and the target gets
     `data-dzg-drop="over"`; releasing there calls its `drop(column)` and patches nothing.
@@ -90,6 +90,35 @@ Ctrl+arrows for Spaces; read by `metaKey` on macOS, `ctrlKey` elsewhere)
 **Events and state**
 21. `columnsChanged` carries the new state; `GridState` saves `order` and `pinned` (`grid-state.md`).
 
+**Dragging out hides (opt-in `dragOutHides: true`, 1.14.0; owner 2026-11-18: « comme si dans le panel on l'avait
+enlevée »)** — a known behaviour of other grids' public demos, in our own words.
+22. **Out** means the pointer is **40 px or more outside the grid's box** (the drag layer's: the root's padding box), on any side: above
+    the header row, below the last row, or past either inline edge. The distance is per axis and the same on both
+    sides, so right to left needs nothing of its own. Less than 40 px outside is not out (a slip past the edge does
+    not hide). A registered drop target that accepts the column wins over « out » (rule 10).
+23. While out, for a column that **can** be hidden: the ghost shows the hide state — `data-dzg-hide` on it, its text
+    replaced by a crossed mark and the chooser's sentence, « ⊘ {column} masquée » (`chooser.hidden`), opaque, dashed,
+    widened to its words, `position: fixed` and placed in the window so neither the grid's own clipping nor a holder's
+    hides it out there (an ancestor with a `transform` would still hold it: its box then) — and the insertion bar is hidden. The source header stays dimmed. Coming back inside (or under
+    40 px) gives the header's text and the bar back. Decided: the mark is the character ⊘ in the ghost's own colour, not a drawn
+    icon (sizes: `columns.css` and `@dzgrid/dom/columns` stay near their budgets; forced colours keep it).
+24. A column **cannot** be hidden this way when it has `hideable: false` or it is the **last shown** column: no hide
+    state (the ghost stays plain, the bar hidden as for any point outside), and releasing out cancels quietly (rule 9).
+    Decided: no « cannot hide » text — the plain ghost already says nothing will happen, and a refusal the user did
+    not ask for is not announced.
+25. Released while out with the hide state: **one** `column.state` patch `{ id, hidden: true }` (source `user`), one
+    `columnsChanged`, the same effect as unticking the column in the chooser (`columns-chooser.md`): its order, width
+    and pin kept, `GridState` saves `hidden` (`grid-state.md`). Said politely: `drag.hidden` « {column} masquée ».
+    The click after the release is swallowed (no sort). Escape while out cancels as rule 8 (« Déplacement annulé »).
+26. Pinned columns behave the same (start, end, centre). A column in a header group leaves the group as the chooser's
+    untick does (`spans.md`).
+27. **Pointer type**: the same as the move — the mouse only (Q-M3: a finger scrolls, a pen clicks). With `drag: false`
+    nothing is dragged, so nothing is hidden by dragging.
+28. **Accessible equivalents (WCAG 2.5.7, 2.1.1)**: dragging out is a pointer shortcut, never the only way: the column
+    menu's « Masquer la colonne » (`column-menu.md`, reached by Alt+↓ / the ⋮ button), the chooser's checkbox
+    (`columns-chooser.md`), and the API (`column.state`). They follow the same refusals (`hideable: false`, the last shown
+    column).
+
 ## Keyboard
 
 | Where | Key (Windows, Linux) | Key (Mac) | LTR | RTL |
@@ -103,7 +132,8 @@ Ctrl+arrows for Spaces; read by `metaKey` on macOS, `ctrlKey` elsewhere)
 
 ## Announcements
 Polite (the grid's live region), one per gesture: `move.placed` after a drop or a key; `move.edge`,
-`move.locked`, `move.cancelled` (Escape only). Nothing during a pointer drag.
+`move.locked`, `move.cancelled` (Escape only); `chooser.hidden` after a drag out that hid (25). Nothing during a pointer
+drag.
 
 ## Texts (`locales/{en,fr,ar}-columns`)
 | Key | en | fr | ar |
@@ -113,20 +143,27 @@ Polite (the grid's live region), one per gesture: `move.placed` after a drop or 
 | `move.locked` | {column}: cannot be moved | {column} : ne se déplace pas | {column}: لا يمكن نقله |
 | `move.cancelled` | Move cancelled | Déplacement annulé | أُلغي النقل |
 
+Dragging out (22–28) adds no key: the ghost's hide state and the sentence are the chooser's `chooser.hidden`
+(« {column} hidden » / « {column} masquée » / « {column} مخفي », same bundles), the same words for the same effect.
+`columns({ dragOutHides: true })` requires it (missing: the setup throws, as for the other keys); without the option it
+is not needed. Decided so: a new key would change the published bundles' types (`check:api`).
+
 ## Right to left
 Logical start and end only; the ghost and the bar placed with `inset-inline-*`; auto-scroll near the
 logical edges (the start edge is on the right). Checked in Chrome, Firefox and WebKit (S2: scroll sign in
 RTL differs by engine).
 
 ## WCAG notes
-- 2.5.7: dragging is never the only way: keys (14), the menu (`column-menu.md`), the chooser.
+- 2.5.7: dragging is never the only way: keys (14), the menu (`column-menu.md`), the chooser; hiding by dragging
+  out (22–28) has the menu's « Masquer », the chooser's checkbox and the API as its single-pointer and keyboard paths.
 - 2.5.8: no new small target (the header is the target).
 - 1.4.11: the bar at 3:1; not colour alone (it is a shape).
 - 4.1.3: the place said politely; 2.4.11: the moved header kept in view.
 - 2.1.4 does not apply (modifier keys).
 
 ## Where DzGrid differs on purpose
-- Dragging out never hides a column. No finger drag (Q-M3). Keys never cross a pinned edge.
+- Dragging out hides a column only when the application opts in (`dragOutHides: true`, 22–28). No finger drag
+  (Q-M3). Keys never cross a pinned edge.
 
 ## Decided (`docs/phase-6-steps/decisions.md` « Step 1 follow-ups »)
 - Mac (owner): Cmd+Shift+arrows on macOS, Ctrl+Shift+arrows elsewhere.
@@ -177,3 +214,14 @@ one the other way. A key move is then not undone exactly by the reverse key. Exa
 limit »): full order a, h (hidden), L (locked), b — shown a, L, b. Ctrl+Shift+Left on b gives b, a, L (full b, a, L, h);
 Ctrl+Shift+Right then gives a, b, L, not a, L, b. Without a locked column, a move and its reverse are always exact
 (1 000-seed property). To revisit with the chooser (step 4) if the owner wants it.
+
+## As built (1.14.0, dragging out hides, 2026-11-18)
+
+- `columns({ dragOutHides: true })`; « out » measured against the drag layer's box (the root's padding box: 1 px inside
+  its border). The ghost's text becomes « ⊘ » + `chooser.hidden`; `data-dzg-hide` on it, reset at each drag's start.
+- Tests: `packages/dom/test/columns-drag-hide.test.ts` (40 px on each side, back inside, Escape, pinned, right to left,
+  `hideable: false`, the last column, a drop target first, finger and pen, `gridState`, the text required with the
+  option only, the ghost placed in the window), `packages/theme/test/columns.test.ts`; browser
+  `node scripts/browser-1-12.mjs --dragout` (section 15, page `v1-14.html`): Chrome, Firefox, WebKit × layered /
+  unlayered × light / dark × fr / ar × with and without Tailwind 3's preflight (under the preflight with the layered
+  sheets the dashed border goes — the unlayered copies for such an app; the words stay).

@@ -18,7 +18,8 @@
  * button variables leave the pager's buttons and select as they are, the pager's own change the pager only, each bar
  * variable's default and effect, the text sizes (a menu item untouched); (12) 1.13.0, the columns panel's look and a
  * narrow header's title (page `v1-12-1.html`; `--panel` runs only it, with (13): the owner's app findings, `?app=1`, and
- * (14): the app's last patches as options, page `v1-13.html`; `--rustines` runs (14) alone). The rich tooltips and popovers (sections 11,
+ * (14): the app's last patches as options, page `v1-13.html`; `--rustines` runs (14) alone; (15) 1.14.0, dragging a header
+ * out hides it, page `v1-14.html`, `--dragout` alone). The rich tooltips and popovers (sections 11,
  * 11b–11e) moved to DzTooltip with their code (owner 2026-11-14): its scripts/browser.mjs.
  */
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -594,6 +595,90 @@ async function rustines(page, tag, { css, dark, lang, preflight }, name, errors)
   await page.setViewportSize({ width: 900, height: 700 });
 }
 
+/**
+ * (15) 1.14.0, dragging a header out hides it (opt-in `columns({ dragOutHides: true })`, column-move.md 22–28; owner
+ * 2026-11-18): page `v1-14.html`, a grid with room on every side. 38 px above the grid's border is not out, 41 px is (40
+ * from its padding box, the drag layer's: the 1 px border), and 60 px: the ghost's
+ * hide state (« ⊘ {column} masquée », opaque, dashed, its words whole, readable 4.5:1), no bar; back inside, the move
+ * again; released out, hidden, kept by gridState, said; a pinned column out past the inline end side; `hideable: false`
+ * never; nothing thrown, nothing told.
+ */
+async function dragOut(page, tag, { css, dark, lang, preflight }, name, errors) {
+  const rtl = lang === 'ar';
+  await page.setViewportSize({ width: 1100, height: 700 });
+  await page.goto(site.url(`v1-14.html?lang=${lang}&css=${css}${dark ? '&dark=1' : ''}${preflight ? '&preflight=1' : ''}`));
+  await page.waitForFunction(() => window.ready === true, null, { timeout: 30000 });
+  await frames(page);
+  const box = (sel) => page.evaluate((s) => { const r = document.querySelector(s).getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom, x: (r.left + r.right) / 2, y: (r.top + r.bottom) / 2 }; }, sel);
+  const H = (c) => `#host .dzg-hcell[data-col=${c}]:not(.dzg-hgroup):not(.dzg-hextra)`;
+  const g = await box('#host > .dzg');
+  const ghost = () => page.evaluate(() => {
+    const e = document.querySelector('.dzg-move-ghost');
+    const bar = document.querySelector('.dzg-move-bar');
+    if (!e) return null;
+    const c = getComputedStyle(e);
+    const rgb = (v) => (v.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
+    const lum = ([r, g2, b]) => [r, g2, b].map((x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; }).reduce((a, x, i) => a + x * [0.2126, 0.7152, 0.0722][i], 0);
+    const [L1, L2] = [lum(rgb(c.color)), lum(rgb(c.backgroundColor))].sort((a, b) => b - a);
+    const gr = e.getBoundingClientRect();
+    return { at: { t: gr.top, b: gr.bottom, l: gr.left, r: gr.right }, position: c.position, hide: e.hasAttribute('data-dzg-hide'), text: e.textContent, opacity: c.opacity, border: c.borderTopStyle, whole: e.scrollWidth <= e.clientWidth + 1, ratio: (L1 + 0.05) / (L2 + 0.05), bg: c.backgroundColor, bar: bar ? bar.hidden || getComputedStyle(bar).display === 'none' : null };
+  });
+  const said = () => page.evaluate(() => new Promise((r) => setTimeout(() => r(document.querySelector('#host .dzg-live')?.textContent ?? ''), 120)));
+  const press = async (c) => {
+    const h = await box(H(c));
+    await page.mouse.move(h.x, h.y);
+    await page.mouse.down();
+    await page.mouse.move(h.x + (rtl ? -12 : 12), h.y, { steps: 3 });
+    return h;
+  };
+  const to = async (x, y) => { await page.mouse.move(x, y, { steps: 4 }); await frames(page); };
+  const name1 = rtl ? 'الحرارة' : 'Température';
+
+  // 38 px above the border: not out; 41 px (40 from the padding box): out; 60 px: out, the hide state.
+  const h = await press('temp');
+  await to(h.x, g.t - 38);
+  const near = await ghost();
+  check(`${tag}: (15) 38 px above the grid: no hide state, the header's text`, near && !near.hide && near.text === name1, near);
+  await to(h.x, g.t - 41);
+  check(`${tag}: (15) 41 px above the grid's border (40 from its padding box): out`, (await ghost())?.hide === true);
+  await to(h.x, g.t - 60);
+  const out = await ghost();
+  check(`${tag}: (15) 60 px above: the hide state « ⊘ ${name1} ${rtl ? 'مخفي' : 'masquée'} », no bar`, out?.hide && out.text === `⊘ ${name1} ${rtl ? 'مخفي' : 'masquée'}` && out.bar === true, out);
+  check(`${tag}: (15) the hide state opaque, dashed, its words whole, readable (4.5:1)`, out && out.opacity === '1' && (out.border === 'dashed' || (css === 'layered' && preflight)) && out.whole && out.ratio >= 4.5, out); // an unlayered reset takes the layered border style (theming.md: the unlayered copies for such an app); the words say it still
+  // Seen out there: fixed, under the pointer (its start at the pointer, half a line above it), above the grid's box.
+  check(`${tag}: (15) the hide state's ghost fixed at the pointer, above the grid (not clipped by it)`, out && out.position === 'fixed' && out.at.b < g.t && Math.abs((rtl ? out.at.r : out.at.l) - h.x) < 1.5 && out.at.t < g.t - 60 && out.at.b > g.t - 60, { out, g, x: h.x });
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/1-14-dragout-${name}-${css}-${lang}${dark ? '-dark' : ''}${preflight ? '-pf' : ''}.png`, clip: { x: 0, y: 0, width: 1100, height: 260 } });
+  // Back inside: the plain ghost and the bar again.
+  await to(h.x, h.y);
+  const back = await ghost();
+  check(`${tag}: (15) back over the header: the move again (no hide state, the bar shown)`, back && !back.hide && back.text === name1 && back.bar === false, back);
+  // Out again, released: hidden, kept, said.
+  await to(h.x, g.t - 60);
+  await page.mouse.up();
+  await frames(page);
+  const s1 = await said();
+  const st1 = await page.evaluate(() => ({ hidden: window.hidden(), header: !!document.querySelector('#host .dzg-hcell[data-col=temp]'), layer: !!document.querySelector('.dzg-move') }));
+  check(`${tag}: (15) released out: hidden, kept by gridState, said « ${name1} ${rtl ? 'مخفي' : 'masquée'} »`, st1.hidden.join() === 'temp' && !st1.header && !st1.layer && s1 === `${name1} ${rtl ? 'مخفي' : 'masquée'}`, { st1, s1 });
+
+  // A pinned column out past the inline end side (the right in French, the left in Arabic).
+  const p = await press('oven');
+  await to(rtl ? g.l - 60 : g.r + 60, p.y);
+  const side = await ghost();
+  await page.mouse.up();
+  await frames(page);
+  check(`${tag}: (15) a pinned column out past the end side: the hide state, then hidden`, side?.hide && (await page.evaluate(() => window.hidden().join())) === 'oven,temp', side);
+
+  // hideable: false: never.
+  const b0 = await press('batch');
+  await to(b0.x, g.t - 60);
+  const locked = await ghost();
+  await page.mouse.up();
+  await frames(page);
+  check(`${tag}: (15) hideable: false: no hide state, still shown`, locked && !locked.hide && (await page.evaluate(() => window.hidden().join())) === 'oven,temp' && !!(await page.$(H('batch'))), locked);
+  check(`${tag}: (15) no page error, nothing told`, errors.length === 0 && (await page.evaluate(() => window.told.length)) === 0, { errors, told: await page.evaluate(() => window.told) });
+  await page.setViewportSize({ width: 900, height: 700 });
+}
+
 async function run(name, cfg) {
   const { css, dark, lang, preflight } = cfg;
   const tag = `${name} ${css}${dark ? ' dark' : ''} ${lang}${preflight ? ' preflight' : ''}`;
@@ -611,6 +696,10 @@ async function run(name, cfg) {
       await frames(page);
     };
 
+    if (process.argv.includes('--dragout')) {
+      await dragOut(page, tag, cfg, name, errors);
+      return void (await page.close());
+    }
     if (process.argv.includes('--rustines')) {
       await rustines(page, tag, cfg, name, errors);
       return void (await page.close());
@@ -983,6 +1072,8 @@ async function run(name, cfg) {
     await appFixes(page, tag, cfg, errors);
     // (14) 1.13.0: the owner's app's last patches as options, page `v1-13.html`.
     await rustines(page, tag, cfg, name, errors);
+    // (15) 1.14.0: dragging a header out hides it (opt-in), page `v1-14.html`.
+    await dragOut(page, tag, cfg, name, errors);
     await page.close();
   } finally {
     await b.close().catch(() => {});

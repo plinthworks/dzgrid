@@ -12,8 +12,8 @@ For a column that must stay on screen.
 
 ## What it does
 
-`hideable: false` disables the column menu's « Hide column » for it, and the columns chooser cannot untick
-it. A saved state that hides it is told, and the column stays shown. Your code can still hide it with
+`hideable: false` disables the column menu's « Hide column » for it, the columns chooser cannot untick
+it, and dragging its header out of the grid never hides it (`columns({ dragOutHides: true })`). A saved state that hides it is told, and the column stays shown. Your code can still hide it with
 [`hidden`](../hidden/).
 
 The grid never lets the user hide the last shown column, whatever this option says.

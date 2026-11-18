@@ -1,7 +1,7 @@
 import { intentFor, type ColumnState, type FocusPos, type GridKernel, type KeyOwner, type Side } from '@dzgrid/core';
 import { emit } from '@dzgrid/core/internal';
 import type { GridFeature } from '../features.js';
-import type { ColumnsMessageKey } from '../part-texts.js';
+import type { ColumnsChooserMessageKey, ColumnsMessageKey } from '../part-texts.js';
 import { INTERACTIVE } from '../keys/owner.js';
 import { logicalSpan, logicalX, travel, type Dir } from '../dir.js';
 import { widthOf } from '../render/header-decor.js';
@@ -24,6 +24,13 @@ export interface ColumnsOptions {
    * on a data change (`fitContent()` does it again).
    */
   readonly fitOnLoad?: 'content';
+  /**
+   * `true` (1.14.0, column-move.md 22–28): a header dragged 40 px or more outside the grid's box, on any side, shows the
+   * hide state and, released there, is hidden — as unticked in the chooser (one `column.state` patch, `columnsChanged`,
+   * kept by `gridState`), said « {column} hidden ». Never a `hideable: false` column nor the last shown one. Needs the
+   * chooser's `chooser.hidden` text (in the `-columns` bundles). Default false: dragging out cancels.
+   */
+  readonly dragOutHides?: boolean;
 }
 /** What a move did: `edge` at its segment's edge (O2), `locked` a `movable: false` column, `unknown` no such shown column. */
 export type MoveResult = 'moved' | 'edge' | 'locked' | 'unknown';
@@ -63,7 +70,7 @@ export interface ColumnsFeature extends GridFeature {
 
 type Pt = { readonly clientX: number; readonly clientY: number };
 /** A press on a header (`on`: dragging, past 4 px); `at` the last point, `to` the gap's patch (null: the same place; undefined: no gap), `over` a target. */
-type Drag = { readonly id: string; readonly p0: Pt; readonly pid: number; readonly dir: Dir; readonly cell: HTMLElement; on?: boolean; at?: Pt; to?: ColumnState[] | null | undefined; over?: Element | null };
+type Drag = { readonly id: string; readonly p0: Pt; readonly pid: number; readonly dir: Dir; readonly cell: HTMLElement; on?: boolean; at?: Pt; to?: ColumnState[] | null | undefined; over?: Element | null; out?: boolean };
 
 /**
  * `columns(options)`: moving columns (docs/behaviors/column-move.md; step02-plan). A header pressed with the mouse and
@@ -85,12 +92,12 @@ export function columns(o: ColumnsOptions = {}): ColumnsFeature {
     id: 'columns',
     api: (grid) => apis.get(grid.kernel) ?? null,
     setup(g) {
-      const missing = COLUMNS_KEYS.filter((k) => g.settings.messages.text[k] === undefined);
+      const missing = (o.dragOutHides ? [...COLUMNS_KEYS, 'chooser.hidden' as const] : COLUMNS_KEYS).filter((k) => g.settings.messages.text[k] === undefined);
       if (missing.length) throw new TypeError(`columns: missing ${missing.join(', ')}`);
       const { kernel, columns: m, el, doc, win, scope } = g;
       const raf = g.env.raf ?? win;
       const targets = new Map<Element, DropTarget>();
-      const text = (key: ColumnsMessageKey, id: string, p?: Record<string, number>) => g.msg(key, { column: m.get(id)?.def.header ?? id, ...p });
+      const text = (key: ColumnsMessageKey | ColumnsChooserMessageKey, id: string, p?: Record<string, number>) => g.msg(key, { column: m.get(id)?.def.header ?? id, ...p });
       const placed = (id: string) => {
         const v = m.visible();
         g.live.announce(text('move.placed', id, { n: v.findIndex((c) => c.id === id) + 1, total: v.length }));
@@ -210,6 +217,7 @@ export function columns(o: ColumnsOptions = {}): ColumnsFeature {
       layer.setAttribute('aria-hidden', 'true');
       const ghost = div('dzg-move-ghost', layer);
       const bar = div('dzg-move-bar', layer);
+      const label = (x: Drag) => x.cell.querySelector('.dzg-hlabel')?.textContent || x.id;
       const mark = (t: Element | null): void => {
         if (d?.over && d.over !== t) d.over.removeAttribute('data-dzg-drop');
         t?.setAttribute('data-dzg-drop', 'over');
@@ -257,6 +265,10 @@ export function columns(o: ColumnsOptions = {}): ColumnsFeature {
           }
         }
         mark(over);
+        // Out (M22–M24): 40 px past the grid's box (the layer's) on a side, a column that may be hidden, not the last shown;
+        // a target wins. The ghost then says « ⊘ {column} hidden » (`data-dzg-hide` for the theme); the patch is the hide.
+        const out = !over && !!o.dragOutHides && m.get(x.id)?.def.hideable !== false && m.visible().length > 1 && Math.max(R.left - p.clientX, p.clientX - R.right, R.top - p.clientY, p.clientY - R.bottom) >= 40;
+        if (out !== !!x.out) (x.out = out), setAttr(ghost, 'data-dzg-hide', out ? '' : null), (ghost.textContent = out ? '⊘ ' + text('chooser.hidden', x.id) : label(x));
         const inside = !over && within(r);
         const lx = logicalX(p, r, dir);
         const L = m.layout;
@@ -273,7 +285,8 @@ export function columns(o: ColumnsOptions = {}): ColumnsFeature {
         }
         x.to = undefined;
         let at = 0;
-        if (inside) {
+        if (out) x.to = [{ id: x.id, hidden: true }];
+        else if (inside) {
           const s: Side | null = L.start.columns.length && lx < cs ? 'start' : L.end.columns.length && lx >= ce ? 'end' : null;
           const w = L[s ?? 'center'].widths;
           const [lo, hi, o0] = s === 'start' ? [e, cs, e] : s === 'end' ? [ce, inl, ce] : [cs, ce, cs - box.scrollInline];
@@ -281,10 +294,12 @@ export function columns(o: ColumnsOptions = {}): ColumnsFeature {
           const res = land(m, x.id, s, i < 0 ? 0 : i + +(lx - o0 - w.offsetOf(i) > w.sizeAt(i) / 2));
           if (res) (x.to = res.patch), (at = Math.max(lo, Math.min(hi - 2, o0 + w.offsetOf(res.g) - 1)));
         }
-        bar.hidden = x.to === undefined;
+        bar.hidden = out || x.to === undefined;
         setPx(bar, 'inset-inline-start', logicalSpan(r, R, dir).start + at);
-        setPx(ghost, 'inset-inline-start', logicalX(p, R, dir));
-        setPx(ghost, 'inset-block-start', p.clientY - R.top);
+        // Out, the ghost is fixed (the theme): placed in the window, past the grid's and its holders' clipping.
+        const V = out ? ({ left: 0, top: 0, right: doc.documentElement.clientWidth } as DOMRect) : R;
+        setPx(ghost, 'inset-inline-start', logicalX(p, V, dir));
+        setPx(ghost, 'inset-block-start', p.clientY - V.top);
         return moved;
       };
       const tick = (): void => {
@@ -297,7 +312,8 @@ export function columns(o: ColumnsOptions = {}): ColumnsFeature {
         el.header.setPointerCapture?.(x.pid);
         setAttr(el.root, 'data-dzg-dragging', '');
         doc.getSelection?.()?.removeAllRanges();
-        ghost.textContent = x.cell.querySelector('.dzg-hlabel')?.textContent || x.id;
+        ghost.textContent = label(x);
+        setAttr(ghost, 'data-dzg-hide', null);
         setPx(ghost, 'inline-size', Math.min(240, widthOf(g, x.id)));
         setPx(bar, 'block-size', el.header.offsetHeight + g.geometry.read().block);
         el.root.append(layer);
@@ -338,7 +354,7 @@ export function columns(o: ColumnsOptions = {}): ColumnsFeature {
             } catch (err) {
               g.report(err);
             }
-          } else if (x.to) kernel.dispatch({ type: 'column.state', patch: x.to }, 'user'), placed(x.id);
+          } else if (x.to) kernel.dispatch({ type: 'column.state', patch: x.to }, 'user'), x.out ? g.live.announce(text('chooser.hidden', x.id)) : placed(x.id);
         });
         scope.on(el.root, 'pointerdown', () => void (swallow = false), { capture: true });
         scope.on(el.root, 'click', (e) => void (swallow && ((swallow = false), e.stopPropagation(), e.preventDefault())), { capture: true });

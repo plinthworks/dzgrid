@@ -5,6 +5,18 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased — 1.14.0
+
+### Added
+- **`columns({ dragOutHides: true })`** (opt-in, owner 2026-11-18; column-move.md 22–28): a header dragged 40 px or
+  more past the grid's box, on any side, shows a hide state — the light copy reads « ⊘ {column} hidden » (the
+  chooser's `chooser.hidden` text, no new key), opaque and dashed, placed in the window so nothing clips it — and the
+  landing bar goes; coming back cancels it; released there, the column is hidden as unticking it in the columns
+  chooser does (one `column.state` patch, `columnsChanged` from the user, kept by `gridState`), said « {column}
+  hidden ». Never a `hideable: false` column nor the last shown one (no hide state; releasing out does nothing);
+  pinned columns the same; the mouse only, as moving. Default `false`: dragging out still does nothing.
+  `@dzgrid/theme/columns.css`: `.dzg-move-ghost[data-dzg-hide]`.
+
 ## [1.13.0] - 2026-11-16
 
 The columns panel looks finished, and a narrow column keeps its title (owner 2026-11-15, « pas du tout stylé, c'est

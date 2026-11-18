@@ -118,11 +118,11 @@ const SIZE_CEILINGS = {
   '@dzgrid/theme/fill.css': 460, // owner S12-Q9: 300 → 460 (measured 415)
   // Phase 6 (owner Q-B, 2026-10-26): moving columns, keyboard resize, auto-size in their own entry over the DOM base
   // (part 1, step 2, stops at 2 300: step02-plan §4); its texts and styles apart, shared with the menu, chooser and groups.
-  '@dzgrid/dom/columns': 4250, // 1.10.0 release (+2 % rule, measured 4 207: gzip over the grown DOM base); before: 4200, owner Q6-6 (2026-10-27): 3 500 → 4 200 (step 6: the resize mode and auto-size, measured 3 996)
+  '@dzgrid/dom/columns': 4450, // owner « A » 2026-11-18 (1.14.0 drag out to hide, measured 4 409); before 4 250: 1.10.0 release (+2 % rule, measured 4 207: gzip over the grown DOM base); before: 4200, owner Q6-6 (2026-10-27): 3 500 → 4 200 (step 6: the resize mode and auto-size, measured 3 996)
   '@dzgrid/dom/locales/en-columns': 600, // Q6-6: 500 → 550; Q8-1: 600 (the group texts)
   '@dzgrid/dom/locales/fr-columns': 720, // Q6-6: 600 → 650; Q8-1: 720
   '@dzgrid/dom/locales/ar-columns': 900, // Q6-6: 800 → 850; Q8-1: 900
-  '@dzgrid/theme/columns.css': 1240, // 1.13.0 (+2 % rule, measured 1 232): no spacer beside a header part's label (46); before 1 224: 1.12.0 (owner 2026-11-13 « oui lance les 5 corrections », +2 % rule, measured 1 215): the header's buttons pushed by a growing item, not a margin a reset takes; before: Q6-6: 1 100 → 1 200 (the mode's outline)
+  '@dzgrid/theme/columns.css': 1260, // 1.14.0 (+2 % rule, measured 1 255): dragOutHides' hide state (column-move.md 23); before 1 240: 1.13.0 (+2 % rule, measured 1 232): no spacer beside a header part's label (46); before 1 224: 1.12.0 (owner 2026-11-13 « oui lance les 5 corrections », +2 % rule, measured 1 215): the header's buttons pushed by a growing item, not a margin a reset takes; before: Q6-6: 1 100 → 1 200 (the mode's outline)
   // Phase 6 step 3 (owner Q-B, Q3-2): the column menu over the popup host; its texts in their own bundles.
   '@dzgrid/dom/column-menu': 4300, // owner Q3-5 (2026-10-26): 3 000 → 4 300 (measured 3 951, the full menu kept)
   '@dzgrid/dom/locales/en-column-menu': 510, // Phase 9 « Clear all filters » (2 % rule, measured 505); Q3-5: 450 → 500

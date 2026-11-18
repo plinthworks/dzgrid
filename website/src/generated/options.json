@@ -2066,6 +2066,15 @@
           "doc": "`'content'` (1.10.0, column-resize.md 16–21): once, when the first rows are shown, the shown columns fitted to their content as « fit all » does — flexible columns, `resizable: false` ones and widths already set left alone; not again on a data change (`fitContent()` does it again).",
           "default": null,
           "source": "packages/dom/src/columns/index.ts"
+        },
+        {
+          "name": "dragOutHides",
+          "type": "boolean",
+          "resolved": null,
+          "required": false,
+          "doc": "`true` (1.14.0, column-move.md 22–28): a header dragged 40 px or more outside the grid's box, on any side, shows the hide state and, released there, is hidden — as unticked in the chooser (one `column.state` patch, `columnsChanged`, kept by `gridState`), said « {column} hidden ». Never a `hideable: false` column nor the last shown one. Needs the chooser's `chooser.hidden` text (in the `-columns` bundles). Default false: dragging out cancels.",
+          "default": null,
+          "source": "packages/dom/src/columns/index.ts"
         }
       ],
       "texts": {

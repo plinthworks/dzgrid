@@ -1,5 +1,13 @@
 # État du travail — à lire en premier si la session est perdue
 
+Mis à jour : 2026-11-18. **1.14.0 en préparation : `columns({ dragOutHides: true })`** (propriétaire « comme si dans le
+panel on l'avait enlevée », option, défaut inchangé). Fiche `column-move.md` 9 et 22–28 (40 px hors du cadre, tout côté ;
+fantôme « ⊘ {colonne} masquée » = `chooser.hidden`, pas de nouvelle clé ; fixe dans la fenêtre ; jamais `hideable: false`
+ni la dernière ; souris seulement). Tests `columns-drag-hide.test.ts` (18), thème (+1), matrice `browser-1-12.mjs --dragout`
+(15) 480/480 dans les trois moteurs. Site (en, fr) : `features/columns`, guide, `hideable`. CHANGELOG « Unreleased — 1.14.0 ».
+Tailles : `columns.css` 1 255 / 1 260 (+2 %) ; **`@dzgrid/dom/columns` 4 409 / 4 250 (au-delà de +2 %, à décider par le
+propriétaire)** ; K.8 inchangé 92 485. check:api : rien de retiré. Pas de gate complet (règle 2026-11-16). Rien commité.
+
 Mis à jour : 2026-11-16. **1.13.0 publiée sur npm par le propriétaire (les cinq paquets vérifiés ; étiquette v1.13.0 à poser).** En cours : DzTooltip 1.0.0 (les six manques de l'audit, « ★ partout »). Avant : 2026-11-16 (fin). **`inlineScroll: 'master'` avec un détail Angular, deux trous corrigés dans 1.13.0**
 (propriétaire « B, on corrige d'abord ») : (1) la molette de côté sur le détail passe au maître — la règle du panneau
 vise toute grille dedans (`.dzg-dbody .dzg-viewport`, plus seulement `.dzg-dbody>.dzg`, que l'hôte du composant

@@ -31,6 +31,14 @@ describe('columns.css', () => {
     expect(read('columns.unlayered.css')).toBe(out('@use "columns" with ($layered: false);'));
   });
 
+  it('dragged out with dragOutHides (1.14.0, column-move.md 23): the hide state opaque, dashed, widened to its words, fixed (out of the grid, clipping ancestors)', () => {
+    const h = decl(/^\.dzg-move-ghost\[data-dzg-hide\]$/);
+    expect(h).toMatch(/opacity: 1/);
+    expect(h).toMatch(/position: fixed/);
+    expect(h).toMatch(/border-style: dashed/);
+    expect(h).toMatch(/min-inline-size: max-content/);
+  });
+
   it('the layer covers the grid, above its cells, takes no pointer', () => {
     const l = decl(/^\.dzg-move$/);
     expect(l).toMatch(/position: absolute/);

@@ -35,6 +35,14 @@ missing keys.
 - `fitOnLoad`: `'content'` fits the shown columns to their content once, when the first rows are shown. Flexible
   columns, `resizable: false` ones and widths already set (a saved state, the user) are left alone. A data change never
   fits again; `fitContent()` on the api does.
+- `dragOutHides` (1.14.0): `true` lets the user hide a column by dragging its header out of the grid — 40 px or more
+  past the grid's box, on any side (above the header row, below the rows, past either edge). Out there the light copy
+  reads « ⊘ Name hidden » and the landing bar goes; coming back cancels it; releasing hides the column, as unticking
+  it in the columns chooser does (one change of the columns' state, kept by [`gridState()`](../grid-state/)), and the
+  grid says « Name hidden ». A column with [`hideable: false`](../../column-options/hideable/) and the last shown column
+  are never hidden this way: releasing out there does nothing. The mouse only, as for moving. Dragging is never the only
+  way: the column menu's « Hide column » and the chooser's boxes do the same from the keyboard. Uses the `-columns`
+  text `chooser.hidden`. By default `false`: dragging out does nothing.
 
 ## Example
 
@@ -47,7 +55,7 @@ import '@dzgrid/theme/columns.css';
 
 type Book = { id: string; title: string; shelf: string; pages: number };
 
-const moves = columns({ fitOnLoad: 'content' });
+const moves = columns({ fitOnLoad: 'content', dragOutHides: true });
 
 const grid = createGrid<Book>(document.getElementById('books')!, {
   rows: [{ id: 'b1', title: 'The Salt Road', shelf: 'A3', pages: 312 }],

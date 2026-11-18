@@ -55,6 +55,16 @@ $layered: true !default;
     text-overflow: ellipsis;
   }
 
+  // Dragged out of the grid with `dragOutHides` (1.14.0, column-move.md 23): the hide state — the ghost opaque, dashed,
+  // widened to its words (« ⊘ {column} hidden », written by the script), fixed (placed by the script in the window): out of
+  // the grid, its root's and its holders' overflow would clip it.
+  .dzg-move-ghost[data-dzg-hide] {
+    position: fixed;
+    min-inline-size: max-content;
+    border-style: dashed;
+    opacity: 1;
+  }
+
   .dzg-move-bar {
     position: absolute;
     inset-block-start: 0;

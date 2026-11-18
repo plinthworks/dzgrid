@@ -12,8 +12,9 @@ Pour une colonne qui doit rester à l’écran.
 
 ## Ce qu’il fait
 
-`hideable: false` désactive le « Masquer la colonne » du menu de colonne pour elle, et le sélecteur de
-colonnes ne peut pas la décocher. Un état enregistré qui la masque est signalé, et la colonne reste affichée. Votre
+`hideable: false` désactive le « Masquer la colonne » du menu de colonne pour elle, le sélecteur de
+colonnes ne peut pas la décocher, et glisser son titre hors de la grille ne la masque jamais
+(`columns({ dragOutHides: true })`). Un état enregistré qui la masque est signalé, et la colonne reste affichée. Votre
 code peut toujours la masquer avec [`hidden`](../hidden/).
 
 La grille ne laisse jamais l’utilisateur masquer la dernière colonne affichée, quoi que dise cette option.

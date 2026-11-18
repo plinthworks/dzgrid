@@ -748,7 +748,10 @@ cells (`badge`, `cellBoolean`) are in `@dzgrid/dom/parts`. In Angular a part is 
 ## Moving, resizing, hiding
 
 - `columns()` from `@dzgrid/dom/columns`: drag a header to move it, drag its edge to resize, double click the edge to
-  fit the content; the keyboard does the same (texts `-columns`, CSS `columns.css`).
+  fit the content; the keyboard does the same (texts `-columns`, CSS `columns.css`). With
+  `columns({ dragOutHides: true })` (1.14.0), a header dragged out of the grid (40 px past its box) hides its column,
+  as the chooser's box would; never a `hideable: false` column nor the last shown one
+  ([options](https://plinthworks.github.io/dzgrid/features/columns/#options)).
 - `columnMenu()` from `@dzgrid/dom/column-menu`: the menu on each header (sort, pin, size, hide, group…; texts
   `-column-menu`, CSS `menu.css`). Give it the other features it can drive in `use`.
 - `columnsChooser()` from `@dzgrid/dom/columns-panel`: a panel to show, hide and order columns (see

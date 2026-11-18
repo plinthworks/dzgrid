@@ -36,6 +36,15 @@ un seul changement de l’état des colonnes, que [`gridState()`](../grid-state/
 - `fitOnLoad` : `'content'` ajuste une fois les colonnes affichées à leur contenu, quand les premières lignes
   s’affichent. Les colonnes flexibles, celles en `resizable: false` et les largeurs déjà fixées (un état gardé,
   l’utilisateur) ne bougent pas. Un changement de données n’ajuste plus jamais ; `fitContent()` de l’API le refait.
+- `dragOutHides` (1.14.0) : `true` permet de masquer une colonne en glissant son titre hors de la grille — à 40 px ou
+  plus du cadre de la grille, de n’importe quel côté (au-dessus des titres, sous les lignes, au-delà d’un bord). Là, la
+  copie légère affiche « ⊘ Nom masquée » et la barre d’arrivée disparaît ; revenir annule ; relâcher masque la colonne,
+  comme la décocher dans le sélecteur de colonnes (un seul changement de l’état des colonnes, gardé par
+  [`gridState()`](../grid-state/)), et la grille dit « Nom masquée ». Une colonne en
+  [`hideable: false`](../../column-options/hideable/) et la dernière colonne affichée ne se masquent jamais ainsi :
+  relâcher là ne fait rien. À la souris seulement, comme le déplacement. Glisser n’est jamais le seul moyen : le
+  « Masquer la colonne » du menu de colonne et les cases du sélecteur font de même au clavier. Utilise le texte
+  `chooser.hidden` des textes `-columns`. Par défaut `false` : glisser dehors ne fait rien.
 
 ## Exemple
 
@@ -48,7 +57,7 @@ import '@dzgrid/theme/columns.css';
 
 type Book = { id: string; title: string; shelf: string; pages: number };
 
-const moves = columns({ fitOnLoad: 'content' });
+const moves = columns({ fitOnLoad: 'content', dragOutHides: true });
 
 const grid = createGrid<Book>(document.getElementById('books')!, {
   rows: [{ id: 'b1', title: 'La Route du sel', shelf: 'A3', pages: 312 }],

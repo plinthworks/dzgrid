@@ -554,6 +554,9 @@ fonction `slots()` de `@dzgrid/dom/slots`. Des cellules toutes faites (`badge`, 
 
 - `columns()` de `@dzgrid/dom/columns` : faites glisser un titre pour le déplacer, son bord pour le redimensionner,
   double-cliquez le bord pour ajuster au contenu ; le clavier fait de même (textes `-columns`, CSS `columns.css`).
+  Avec `columns({ dragOutHides: true })` (1.14.0), un titre glissé hors de la grille (à 40 px de son cadre) masque sa
+  colonne, comme la case du sélecteur ; jamais une colonne en `hideable: false` ni la dernière affichée
+  ([options](../../features/columns/#options)).
 - `columnMenu()` de `@dzgrid/dom/column-menu` : le menu de chaque titre (trier, figer, taille, masquer, regrouper… ;
   textes `-column-menu`, CSS `menu.css`). Donnez-lui dans `use` les autres fonctions qu’il peut piloter.
 - `columnsChooser()` de `@dzgrid/dom/columns-panel` : un panneau pour afficher, masquer et ordonner les colonnes (voir

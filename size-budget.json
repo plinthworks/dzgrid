@@ -509,7 +509,7 @@
     },
     "@dzgrid/theme/columns.css": {
       "file": "packages/theme/columns.css",
-      "maxGzip": 1240
+      "maxGzip": 1260
     },
     "@dzgrid/theme/menu.css": {
       "file": "packages/theme/menu.css",
@@ -886,7 +886,7 @@
     },
     "@dzgrid/dom/columns": {
       "file": "packages/dom/src/columns.ts",
-      "maxGzip": 4250,
+      "maxGzip": 4450,
       "over": "@dzgrid/dom",
       "external": [
         "@dzgrid/core",

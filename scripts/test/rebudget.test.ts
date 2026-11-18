@@ -402,10 +402,10 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
   });
 
   it('Phase 6 step 6 (owner Q6-6): @dzgrid/dom/columns 4 200 (the resize mode and auto-size in the same entry, measured 3 996), columns.css 1 200, the -columns texts 550 / 650 / 850; each line at its measure plus a small margin, within the grant; the DOM base keeps 21 980 (the double-click seam, +71)', () => {
-    expect(ceilingFor('@dzgrid/dom/columns')).toBe(4250); // 1.10.0 release (+2 % rule, gzip noise over the grown base): 4 250
-    expect(() => sizeBudget(4251, ceilingFor('@dzgrid/dom/columns'))).toThrow(/ceiling/);
-    expect(ceilingFor('@dzgrid/theme/columns.css')).toBe(1240); // 1.13.0 (+2 % rule, 46) // 1.12.0 (+2 % rule): the header's buttons pushed by a growing item
-    expect(() => sizeBudget(1241, ceilingFor('@dzgrid/theme/columns.css'))).toThrow(/ceiling/);
+    expect(ceilingFor('@dzgrid/dom/columns')).toBe(4450); // owner « A » 2026-11-18 (drag out to hide); before 4 250: 1.10.0 release (+2 % rule, gzip noise over the grown base): 4 250
+    expect(() => sizeBudget(4451, ceilingFor('@dzgrid/dom/columns'))).toThrow(/ceiling/);
+    expect(ceilingFor('@dzgrid/theme/columns.css')).toBe(1260); // 1.14.0 (+2 % rule, dragOutHides' hide state) // 1.13.0 (+2 % rule, 46) // 1.12.0 (+2 % rule): the header's buttons pushed by a growing item
+    expect(() => sizeBudget(1261, ceilingFor('@dzgrid/theme/columns.css'))).toThrow(/ceiling/);
     // Q8-1 (step 7): 600 / 720 / 900 since.
     for (const [lang, c] of [['en', 600], ['fr', 720], ['ar', 900]] as const) {
       expect(ceilingFor(`@dzgrid/dom/locales/${lang}-columns`), lang).toBe(c);
@@ -414,8 +414,8 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, { maxGzip: number | null }> }).entries;
     // The lines, by hand: measure 3 996 → 4 100; 1 111 → 1 150; texts 512 → 530, 614 → 630, 746 → 800 (kept).
     // The Phase 6 close (measure + 10 %, capped by Q6-6): 3 988 → 4 200; 1 111 → 1 200.
-    expect(e['@dzgrid/dom/columns']?.maxGzip).toBe(4250); // 1.10.0 release (+2 % rule)
-    expect(e['@dzgrid/theme/columns.css']?.maxGzip).toBe(1240); // 1.13.0 (+2 % rule) // 1.12.0 (+2 % rule)
+    expect(e['@dzgrid/dom/columns']?.maxGzip).toBe(4450); // owner « A » 2026-11-18; before 4 250 (1.10.0, +2 % rule)
+    expect(e['@dzgrid/theme/columns.css']?.maxGzip).toBe(1260); // 1.14.0 (+2 % rule) // 1.13.0 (+2 % rule) // 1.12.0 (+2 % rule)
     expect(['en', 'fr', 'ar'].map((l) => e[`@dzgrid/dom/locales/${l}-columns`]?.maxGzip)).toEqual([600, 720, 900]); // Q8-1 (step 7)
     expect(e['@dzgrid/dom']?.maxGzip).toBe(DOM);
   });
