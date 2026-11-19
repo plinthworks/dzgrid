@@ -23,6 +23,10 @@ cells' side padding still follows the density. While `rowHeight` is set, the col
 Under a `rowHeight`, every row keeps that height, even with `@dzgrid/dom/auto-height`: a column's `wrap` puts its
 text on several lines and cuts what does not fit.
 
+A function of the row (1.14.0), with the [`rowHeights()`](../../features/row-heights/) feature: each data row as tall
+as it says, `rowHeight: (row) => (row.photo ? 64 : 32)`. Without the feature, the density's height and a
+`missing-feature` warning.
+
 ## Example
 
 <CodeTabs>
@@ -115,3 +119,4 @@ grid.rows = [{ id: 't1', port: 'Gull Harbour', high: 4.2 }];
 
 - [`density`](../density/) — three heights, and the cells' padding.
 - [`headerHeight`](../header-height/) — the header rows apart.
+- [`rowHeights`](../../features/row-heights/) — a height per row, from its data.

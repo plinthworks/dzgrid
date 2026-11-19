@@ -196,3 +196,35 @@ describe('windowless file checks (skipped when the tool is absent)', () => {
     }
   });
 });
+
+describe('title and footer rows (1.14.0, xlsx-export.md 6–10)', () => {
+  const defs = [{ id: 'a', header: 'A', pinned: 'start' as const }, { id: 'b', header: 'B' }];
+  const rows = [{ a: 'x', b: 'y' }];
+
+  it('the title at 14 pt, the filter name and the frozen rows follow the table moved down', () => {
+    const parts = unzip(file(defs, rows, { title: 'T', subtitle: 'S' }).bytes);
+    expect(parts.get('xl/styles.xml')).toContain('<b/><sz val="14"/>');
+    expect(parts.get('xl/workbook.xml')).toContain("!$A$4:$B$5</definedName>");
+    expect(parts.get('xl/worksheets/sheet1.xml')).toContain('<pane ySplit="4" topLeftCell="A5"');
+  });
+
+  it('absent: the same bytes as before', () => {
+    expect(file(defs, rows, { title: undefined }).bytes).toEqual(file(defs, rows).bytes);
+  });
+
+  it('a text past 32 767 characters is cut to Excel\'s cap', () => {
+    const r = file(defs, rows, { footer: 'z'.repeat(40_000) });
+    expect(readXlsx(r.bytes).cells['A4']).toHaveLength(32_767);
+    expect(r.summary.problems).toEqual([]);
+  });
+
+  it('a list holding something else than texts is left out, told once', () => {
+    const r = file(defs, rows, { subtitle: ['ok', 3 as never] }); // a wrong item on purpose
+    expect(readXlsx(r.bytes).cells['A1']).toBe('A');
+    expect(r.summary.problems.map((p) => p.path)).toEqual(['xlsx.subtitle']);
+  });
+
+  it('a function given to the core (the DOM export asks it first) is told and left out', () => {
+    expect(file(defs, rows, { title: () => 'T' }).summary.problems.map((p) => [p.code, p.path])).toEqual([['invalid-setting', 'xlsx.title']]);
+  });
+});

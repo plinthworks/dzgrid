@@ -66,3 +66,33 @@ reapply), `packages/core/test/grouping*.test.ts`; display at step 5.
     The cost does not grow with the number of crossings; the application's function is called once per non-empty cell.
 18. **Row totals** in pivot mode are the group's totals of 1–8 (over all its rows): the value columns are totalled even
     when the data columns are folded away.
+
+## Show a value as a share (1.14.0, owner 2026-11-18 « oui lance 1 à 5 »; opt-in)
+Gap analysis row « Afficher les valeurs en » (❌). Behaviour borrowed from spreadsheets' and grids' « show values as »:
+a number column read as a percentage of a total, without a column computed by hand.
+
+19. **`showAs: 'percentOfTotal' | 'percentOfGroup'`** on a number column, with the feature `showAs()`
+    (`@dzgrid/dom/show-as`, its own entry). Without the feature: the value as before and one `missing-feature` warning
+    at the first such column (detail `show-as`, as `wrap` without `autoHeight()`); on a column that is not a number one, or another value: the value as
+    before and `invalid-column` at `columns.<id>.showAs`.
+20. **The total** (decided): the sum of the column's numbers over **the rows that pass the filters and the search**, every
+    page, every group open or closed — what a totals row sums (8). A filter changes the shares of the rows left; they add
+    up to 100 % again. An empty or unreadable cell counts for nothing and shows nothing. An edit counts at once (13).
+21. **`percentOfTotal`**: a row shows its number over the total; a group row its group's sum over the total; a group
+    footer as its group; the grand total and a totals row (`totalsRow()`) 100 %. **`percentOfGroup`**: a row over the sum
+    of its own group (its nearest group row); a group row over the sum of the group above it, a top group over the total;
+    a footer as its group; the grand total 100 %. Not grouped: as `percentOfTotal`. A total of 0: nothing shown (no
+    division by zero). Negative numbers give negative shares, as a spreadsheet does.
+22. **Written** in the grid's language and digits (`Intl.NumberFormat`, style percent, the `numerals` setting), with
+    `showAs({ digits })` fraction digits (default 1: « 12,5 % », « ١٢٫٥٪ »), isolated left to right in any direction as
+    every number. A group row shows the share whatever the column's `aggFunc` (a share of a group is of its sum).
+23. **What reads the share, what reads the value**: the screen, find and print show the share (what the user reads).
+    **The value stays the data**: sorting, the filters (a number filter compares the value, not the share), the quick
+    search, editing (the editor opens on the value), the clipboard and the files. **Exports (decided): CSV and Excel
+    write the value** with the column's own format, never the share — a file is data a spreadsheet recomputes (its own
+    « show as » or a formula), and a share written as a number would no longer add up once a row is removed there. An
+    application that wants the share in the file adds a column whose `value` computes it.
+24. **Browser rows only**: on a server's rows (`source`) the total of every page is not known: the value as before and
+    one `unsupported-combination` warning at `columns.<id>.showAs`. In a tree (no group rows), `percentOfGroup` is
+    `percentOfTotal`.
+Tests: `packages/dom/test/show-as.test.ts` (by hand); `scripts/browser-1-14.mjs --only share` in Chrome, Firefox, WebKit.

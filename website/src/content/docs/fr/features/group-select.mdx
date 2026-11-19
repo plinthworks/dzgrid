@@ -1,0 +1,50 @@
+---
+title: "groupSelect"
+description: "Cocher la case d’une ligne de groupe coche toutes les lignes dessous ; à moitié cochée quand certaines le sont."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Une case sur chaque ligne de groupe, qui vaut pour ses lignes.
+
+<FeatureFacts name="groupSelect" />
+
+## Ce qu’elle fait
+
+À côté de [`grouping()`](../grouping/), avec la sélection par cases (`selection: { mode: 'multi', checkbox: true }`),
+`groupSelect()` donne une case à chaque ligne de groupe. Un clic dessus, ou Espace sur la ligne de groupe, coche toutes
+les lignes dessous — à tous les niveaux, ouverts ou fermés, les lignes que gardent les filtres — ou, quand elles le
+sont toutes, les décoche. La case se montre cochée, décochée ou à moitié cochée (`mixed`) d’après ses lignes, et un
+lecteur d’écran l’entend nommée par le libellé du groupe. La ligne de groupe elle-même n’est jamais sélectionnée : la
+sélection reste les clés des lignes, sous « tout » aussi (décocher un groupe ajoute ses lignes aux exceptions).
+
+Sur des groupes chargés d’un serveur, la case agit sur les lignes que le navigateur détient : un groupe jamais ouvert
+montre sa case indisponible jusqu’à ce qu’il le soit. Sans `grouping()`, la grille donne un avertissement
+`missing-feature`.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { grouping } from '@dzgrid/dom/grouping';
+import { groupSelect } from '@dzgrid/dom/group-select';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_GROUP } from '@dzgrid/dom/locales/fr-group';
+import '@dzgrid/theme/grouping.css';
+
+type Plant = { id: string; bed: string; name: string };
+
+createGrid<Plant>(document.getElementById('jardin')!, {
+  rows: [{ id: 'p1', bed: 'Nord', name: 'Menthe' }, { id: 'p2', bed: 'Nord', name: 'Sauge' }],
+  columns: [{ id: 'name', header: 'Plante' }, { id: 'bed', header: 'Massif' }],
+  getRowId: (r) => r.id,
+  selection: { mode: 'multi', checkbox: true },
+  messages: { ...FR, text: { ...FR.text, ...FR_GROUP.text } },
+  features: [grouping({ by: ['bed'] }), groupSelect()],
+});
+```
+
+## Voir aussi
+
+- La fonction [`grouping`](../grouping/).
+- Le réglage [`selection`](../../settings/selection/).

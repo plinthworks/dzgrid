@@ -125,6 +125,8 @@ function setup(g: GridContext<unknown>, o: FindOptions, apis: WeakMap<object, Fi
   };
   /** A cell's text as it shows it (through the edits): its codec's display, blank for a blank or unreadable value. */
   const textOf = (col: ResolvedColumn<unknown>, row: object, key: RowKey): string => {
+    const s = g.share?.(key, col);
+    if (s !== undefined) return s;
     try {
       const raw = g.edit ? g.edit.read(col, row, key) : col.read(row);
       const v = isBlank(raw) ? null : col.codec.coerce(raw, g.ctx);

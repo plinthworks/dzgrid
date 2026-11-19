@@ -117,8 +117,8 @@ export class DzGrid<T> implements AfterContentInit {
   readonly headers = input<S<T>['headers']>();
   /** `'keyboard'`: no focus ring after a click, until the next key (presentation-settings.md 48, 1.13.0); live. */
   readonly focusVisible = input<S<T>['focusVisible']>();
-  /** Row height in px over the density's (owner D1, D3, virtual-scroll.md « Row height »); live. */
-  readonly rowHeight = input<number>();
+  /** Row height in px over the density's (owner D1, D3, virtual-scroll.md « Row height »); 1.14.0 a function of the row, with `rowHeights()` in `features`; live. */
+  readonly rowHeight = input<S<T>['rowHeight']>();
   /** The header rows' height in px, over the row height (density.md « Header height », 1.9.0); `{ columns, groups }` apart (1.10.0); live. */
   readonly headerHeight = input<S<T>['headerHeight']>();
   /** CSS variables on the grid's root by typed keys, and the app's own icons (presentation-settings.md, 1.9.0; need `theming()`); live. */

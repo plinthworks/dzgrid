@@ -141,6 +141,8 @@ function lines(state: () => State): SlotPart<'detail'> {
         let ctx = c;
         let last = '';
         const text = (col: ResolvedColumn<unknown>): string => {
+          const s = g.share?.(ctx.master, col);
+          if (s !== undefined) return s;
           try {
             const raw = g.edit ? g.edit.read(col, ctx.row, ctx.master) : col.read(ctx.row);
             const v = isBlank(raw) ? null : col.codec.coerce(raw, g.ctx);

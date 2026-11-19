@@ -75,7 +75,7 @@ function setup(g: GridContext<unknown>): FeatureHandle {
     let s = '';
     let id = '';
     // A fixed row height wins (choice 1): nothing wraps into a taller row.
-    if (typeof g.settings.rowHeight !== 'number') for (const x of [L.start, L.center, L.end]) x.columns.forEach((c, i) => c.def.wrap && ((id ||= c.id), (s += ` ${c.id} ${x.widths.sizeAt(i)}`)));
+    if (!/^[nf]/.test(typeof g.settings.rowHeight)) for (const x of [L.start, L.center, L.end]) x.columns.forEach((c, i) => c.def.wrap && ((id ||= c.id), (s += ` ${c.id} ${x.widths.sizeAt(i)}`)));
     // The wrapped cells' line height (`--dzg-wrap-line`) and font size, off one of them: a theme's change measures again.
     const w = s && g.el.viewport.querySelector('.dzg-body .dzg-cell[data-wrap]');
     const cs = w && g.doc.defaultView!.getComputedStyle(w);

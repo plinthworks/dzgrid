@@ -37,7 +37,10 @@ An Excel file asked without the `xlsx` option, or `'all'` on server rows without
 - `maxCells`: above this many cells (rows × columns) a browser export is refused. Default 10 000 000.
 - `deliver(file)`: takes the file instead of the grid's download (tests, your own saving).
 - `loadRun`: where the export's code comes from (by default fetched at the first export).
-- `xlsx`: `true` (or its options) for Excel files too. Absent: CSV and JSON only.
+- `xlsx`: `true` (or its options) for Excel files too. Absent: CSV and JSON only. Its `title`, `subtitle` and `footer`
+  (1.14.0): rows above and under the table, merged across it — a text, texts one row each, or a function of the export
+  (`{ rows, scope, query, now, ctx }`), e.g. `` footer: (x) => `${x.rows} rows` ``. The filter buttons and the frozen rows
+  stay on the table.
 - `text`: `'value'` (default), or `'display'` for each cell as the grid shows it.
 - `separator`: `','`, `';'` or a tab. Default: the locale's.
 - `bom`: a BOM first, so Excel reads UTF-8 (Arabic). Default `true`.

@@ -34,6 +34,7 @@ export type ExportFormat = 'csv' | 'xlsx' | 'json';
  * `treeColumn` are the CSV options', shared. `sheetName` defaults to the `export.fileName` text, `rtl` to the grid's direction.
  */
 export type XlsxExportOptions = Omit<XlsxOptions, 'text' | 'enums' | 'header' | 'columns' | 'levelHeader' | 'treeColumn' | 'chunkRows'>;
+export type { XlsxText, XlsxTextContext } from '@dzgrid/core/xlsx';
 
 /** `csvExport()`'s options: how the file is written (step 10's), and the export's own. */
 export interface CsvExportOptions extends Omit<CsvOptions, 'chunkRows'> {

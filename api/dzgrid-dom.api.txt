@@ -31,6 +31,8 @@
 # history: owner 2026-11-14 a GSAP tween as the hook's answer (the same unpublished entries; additions over 1.11) — @dzgrid/dom/tooltip#TipThenable, @dzgrid/dom/popover#TipThenable
 # history: owner 2026-11-14: the tooltip seam (FeatureHandle.tooltips; TipFor, TooltipSeam, TooltipShow) and tooltips.cells — additions only, 1.12.0 — @dzgrid/dom#FeatureHandle, @dzgrid/dom#TipFor, @dzgrid/dom#TooltipSeam, @dzgrid/dom#TooltipShow, @dzgrid/dom#GridSettings
 # history: owner 2026-11-14: rich tooltips moved to @dztooltip, never published — entries removed: @dzgrid/dom/tooltip, @dzgrid/dom/popover
+# history: owner 2026-11-19 « AA »: rowHeight accepts a function (1.14.0); headers 'none' and focusVisible as published in 1.13.0 — @dzgrid/dom#GridSettings
+# history: owner 2026-11-19 « AA »: the 1.14.0 entries show-as, editors-textarea, group-select, row-heights (additions) — @dzgrid/dom/row-heights#rowHeights, @dzgrid/dom/show-as#showAs, @dzgrid/dom/show-as#ShowAsOptions, @dzgrid/dom/editors-textarea#TextareaEditor, @dzgrid/dom/editors-textarea#textareaEditor, @dzgrid/dom/editors-textarea#TEXTAREA_CSS, @dzgrid/dom/group-select#groupSelect
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -144,10 +146,11 @@
       readonly numerals?: 'latn' | 'locale';
       readonly direction?: 'auto' | 'ltr' | 'rtl';
       readonly density?: 'compact' | 'comfortable' | 'spacious';
-      readonly headers?: 'shown' | 'hidden';
+      readonly headers?: 'shown' | 'hidden' | 'none';
+      readonly focusVisible?: 'always' | 'keyboard';
       readonly multiSort?: boolean;
       readonly sameRow?: (a: T, b: T) => boolean;
-      readonly rowHeight?: number;
+      readonly rowHeight?: number | ((row: Readonly<T>) => number);
       readonly headerHeight?: number | HeaderHeights;
       readonly selection?: {
           readonly mode: 'none' | 'single' | 'multi';
@@ -4807,3 +4810,27 @@
           'import.failed': string;
       };
   };
+
+@ @dzgrid/dom/row-heights
+## rowHeights
+  export declare function rowHeights(): GridFeature;
+
+@ @dzgrid/dom/show-as
+## showAs
+  export declare function showAs(o?: ShowAsOptions): GridFeature;
+## ShowAsOptions
+  export interface ShowAsOptions {
+      readonly digits?: number;
+  }
+
+@ @dzgrid/dom/editors-textarea
+## TextareaEditor
+  export type TextareaEditor = typeof import('./editors-textarea/index.js').textareaEditor;
+## textareaEditor
+  export declare function textareaEditor(x: EdEnv, f: HTMLTextAreaElement): Ed;
+## TEXTAREA_CSS
+  export declare const TEXTAREA_CSS: string;
+
+@ @dzgrid/dom/group-select
+## groupSelect
+  export declare function groupSelect(): GridFeature;

@@ -56,9 +56,11 @@ export interface GridSettings<T> {
    * The row height in px at 16 px text, over the density's (owner D1, virtual-scroll.md « Row height »):
    * from 24 to 1 000, grown with the reader's text size; header rows follow unless `headerHeight` is set. Anything else
    * is told (`invalid-setting`, a warning) and the density's height is used. Live.
+   * 1.14.0: a function of the row, each data row its own height, with the feature `rowHeights()` of
+   * `@dzgrid/dom/row-heights` (virtual-scroll.md « Row height by a function »); without it, `missing-feature`.
    * @default {densityHeight}
    */
-  readonly rowHeight?: number;
+  readonly rowHeight?: number | ((row: Readonly<T>) => number);
   /**
    * The column headers' row and the column-group rows above it, in px at 16 px text (density.md « Header height »,
    * 1.9.0): the same rule as `rowHeight` (24 to 1 000, grown with the text size, else told and ignored); a feature's

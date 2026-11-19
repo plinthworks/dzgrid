@@ -35,6 +35,11 @@ export interface EditorsOptions {
    * column opens a text field read by its codec, and one warning `missing-feature` per column.
    */
   readonly list?: ListEditor;
+  /**
+   * The long-text editor, `textareaEditor` of `@dzgrid/dom/editors-textarea` (1.14.0, editors.md 18–22), for the columns
+   * with `edit: { editor: 'textarea' }`. Without it they open the one-line field, and one warning `missing-feature` per column.
+   */
+  readonly textarea?: (x: EdEnv, field: HTMLTextAreaElement) => Ed;
 }
 /** The list editor's shape (`@dzgrid/dom/editors-list`). */
 export type ListEditor = (x: EdEnv, value: unknown, opts: readonly EnumOption[], label: (v: unknown) => string, name: string, done: (move: boolean) => void) => Ed;
@@ -65,13 +70,13 @@ export interface EdEnv {
   /** None: no calendar (`@dzgrid/dom/editors-base` without `loadCalendar`). */
   readonly cal: Once<0, CalendarKit> | null;
 }
-type Kind = 'text' | 'number' | 'day' | 'instant' | 'boolean' | 'list' | Part<SlotContext['editor']>;
+type Kind = 'text' | 'number' | 'day' | 'instant' | 'boolean' | 'list' | 'textarea' | Part<SlotContext['editor']>;
 type Start = SlotContext['editor']['start'];
 type Via = 'enter' | 'tab' | 'escape' | 'blur' | 'lost';
 /** The editor open: its cell, its column, what it is, the nodes a part owns, the server page and query it opened on. */
 interface Open { readonly k: RowKey; readonly c: string; readonly col: ResolvedColumn<unknown>; readonly e: Ed; readonly own: Set<Node>; readonly at: unknown }
 
-const BUILT = ['text', 'number', 'day', 'instant', 'boolean', 'list'];
+const BUILT = ['text', 'number', 'day', 'instant', 'boolean', 'list', 'textarea'];
 /** More options than this: a text field read by the codec (the searchable list is later; editors.md 16). */
 const MAX = 500;
 
@@ -245,7 +250,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
 
   /** A text, number or date field: the step-5 `<input>`. */
   const field = (col: ResolvedColumn<unknown>, kd: Kind, name: string): HTMLInputElement => {
-    const f = doc.createElement('input');
+    const f = doc.createElement(kd === 'textarea' ? 'textarea' : 'input') as HTMLInputElement;
     const a = (n: string, v: string): void => f.setAttribute(n, v);
     f.className = 'dzg-field';
     a('autocomplete', 'off');
@@ -255,7 +260,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
     // The cap (S5-O5, review R3): a whole number ≥ 1 (at most 2^31 − 1); 0 or Infinity: none; anything else 1 000.
     const max = col.def.edit?.maxLength ?? 1000;
     if (max !== 0 && max !== Infinity) f.maxLength = Number.isInteger(max) && max > 0 ? Math.min(max, 2 ** 31 - 1) : 1000;
-    if (kd === 'text') a('dir', 'auto');
+    if (kd === 'text' || kd === 'textarea') a('dir', 'auto');
     else a('dir', 'ltr'), a('spellcheck', 'false'), kd === 'number' && a('inputmode', 'decimal');
     return f;
   };
@@ -278,6 +283,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
     const name = msg('editors.fieldName', { column: head(col!), row: shown(rh, g.edit!.read(rh, node.data, k)) });
     let opts: readonly EnumOption[] | null = null;
     if (kd === 'list' && !o.list) (kd = 'text'), tell(once(`${c}\nl`, problem('missing-feature', 'warning', `columns.${c}.edit`, '@dzgrid/dom/editors-list')));
+    if (kd === 'textarea' && !o.textarea) (kd = 'text'), tell(once(`${c}\nt`, problem('missing-feature', 'warning', `columns.${c}.edit`, '@dzgrid/dom/editors-textarea')));
     if (kd === 'list') {
       const src = optionsOf(col!);
       try {
@@ -324,7 +330,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
       const f = field(col!, kd, name);
       const d = kd === 'day' || kd === 'instant';
       if (!d) f.value = ch ?? textOf(col!, v);
-      s.e = d ? dateEd(env, f, col!, v, ch, () => blur(s)) : { root: f, focus: f, input: () => ({ text: f.value }), drop() {} };
+      s.e = d ? dateEd(env, f, col!, v, ch, () => blur(s)) : kd === 'textarea' ? o.textarea!(env, f as never) : { root: f, focus: f, input: () => ({ text: f.value }), drop() {} };
     }
     const e = s.e;
     if (!H.open(k, c, e.root, lost)) return false;

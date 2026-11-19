@@ -99,7 +99,7 @@ export function totalsRow(): TotalsRowFeature {
           return '';
         }
       };
-      const cell = (n: FooterNode, col: ResolvedColumn<unknown>): string => (col.id === labelColumn() ? g.msg('totals.label') : textOf(col, n.aggs[col.id]));
+      const cell = (n: FooterNode, col: ResolvedColumn<unknown>): string => (col.id === labelColumn() ? g.msg('totals.label') : g.share?.(n, col) ?? textOf(col, n.aggs[col.id]));
       /** A cell's text written as the base writes it: the text node, isolated when the value needs it. */
       const put = (cv: CellView, type: string, text: string): void => {
         if (cv.text.data !== text) cv.text.data = text;

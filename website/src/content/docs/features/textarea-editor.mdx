@@ -1,0 +1,56 @@
+---
+title: "textareaEditor"
+description: "A multi-line field over the cell for long text: Enter for a new line, Ctrl+Enter to keep."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+The long-text field of the editors, given as `editors({ textarea: textareaEditor })`.
+
+<FeatureFacts name="textareaEditor" />
+
+## What it does
+
+`textareaEditor` is not a feature of its own: give it to [`editors()`](../editors/) and set `edit: { editor:
+'textarea' }` on a column. It has its own entry, `@dzgrid/dom/editors-textarea`, so a grid without long text does not
+load it.
+
+The field opens over the cell, from its top, as wide as the cell; it grows with its lines up to
+`--dzg-textarea-max-block` (`12em` by default), then scrolls inside; near the bottom of the view it grows upward. It
+covers the rows under it while open. **Enter** (or Shift+Enter, Alt+Enter) inserts a new line; **Ctrl+Enter**
+(Cmd+Enter on a Mac) keeps the text; Tab keeps it and moves on; Escape gives up; a click outside keeps it. The arrows,
+Home and End move in the text. Line breaks are kept in the value; `maxLength`, `required`, `pattern` and `validate`
+check it as any text. The field is named by the column and the row, its direction follows its text.
+
+Without it, a `textarea` column opens the one-line field and the grid tells one `missing-feature` warning per column.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { textareaEditor } from '@dzgrid/dom/editors-textarea';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+import '@dzgrid/theme/edit.css';
+
+type Visit = { id: string; place: string; note: string };
+
+createGrid<Visit>(document.getElementById('visits')!, {
+  rows: [{ id: 'v1', place: 'Lighthouse', note: 'Closed on Mondays' }],
+  columns: [
+    { id: 'place', header: 'Place' },
+    { id: 'note', header: 'Note', width: 240, editable: true, edit: { editor: 'textarea', maxLength: 2000 } },
+  ],
+  getRowId: (r) => r.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text } },
+  features: [edit<Visit>(), editors({ textarea: textareaEditor })],
+});
+```
+
+## See also
+
+- The [`editors`](../editors/) feature, which takes it.
+- The [`edit`](../../column-options/edit/) column option.

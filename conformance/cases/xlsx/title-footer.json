@@ -1,0 +1,41 @@
+{
+  "id": "title-footer",
+  "suite": "xlsx",
+  "description": "1.14.0 (xlsx-export.md 6-9): a title, two subtitle rows, a footer, each merged across the written columns; an empty row after the subtitle and before the footer; the table moved down, its filter on the table only, the panes frozen under its header.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      { "id": "a", "header": "Ville" },
+      { "id": "b", "header": "Ventes", "type": "number" }
+    ],
+    "rows": [
+      { "a": "Alger", "b": 12 },
+      { "a": "Oran", "b": 30 }
+    ],
+    "options": {
+      "title": "Ventes 2026",
+      "subtitle": ["Filtre : aucun", "Export du 18/11/2026"],
+      "footer": "2 lignes"
+    }
+  },
+  "expected": {
+    "cells": {
+      "A1": "Ventes 2026",
+      "A2": "Filtre : aucun",
+      "A3": "Export du 18/11/2026",
+      "A5": "Ville",
+      "B5": "Ventes",
+      "A6": "Alger",
+      "B6": 12,
+      "A7": "Oran",
+      "B7": 30,
+      "A9": "2 lignes"
+    },
+    "merges": ["A1:B1", "A2:B2", "A3:B3", "A9:B9"],
+    "bold": ["A1", "A5", "B5"],
+    "italic": ["A2", "A3", "A9"],
+    "pane": { "x": 0, "y": 5 },
+    "filter": "A5:B7",
+    "problems": []
+  }
+}

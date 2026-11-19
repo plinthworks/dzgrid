@@ -228,6 +228,12 @@ export interface ColumnDef<T, V = unknown> {
   /** `'text'`: in a CSV file, a digits-only value is written `="0123"` so Excel keeps it as text (csv-export.md). */
   readonly csv?: 'text';
   /**
+   * 1.14.0, with `showAs()` of `@dzgrid/dom/show-as` (aggregation.md 19–24): a number column shown as its share of the
+   * total of the filtered rows (`percentOfTotal`) or of its group's sum (`percentOfGroup`). The value stays the data:
+   * sort, filters, edits, the clipboard and the files read it.
+   */
+  readonly showAs?: 'percentOfTotal' | 'percentOfGroup';
+  /**
    * Whether a data row's cell can be edited (editing.md 1): `true`, or a rule told the row and the
    * grid's `settings.context`; only `true` means yes. Never a detail, filler or loading row.
    * @default false

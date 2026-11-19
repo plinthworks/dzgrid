@@ -6,7 +6,7 @@ import { rowPx, type GridSettings } from './settings.js';
 
 /** A `rowHeight` or `headerHeight` the grid does not take, told (null and undefined are no value). */
 export const rowHeightProblems = (v: unknown, key = 'rowHeight'): Problem[] =>
-  v == null || rowPx(v) ? [] : key == 'headerHeight' && ((v as object).constructor ?? Object) == Object ? ['columns', 'groups'].flatMap((k) => rowHeightProblems((v as Record<string, unknown>)[k], `${key}.${k}`)) : [problem('invalid-setting', 'warning', `settings.${key}`, String(v))];
+  v == null || rowPx(v) || (key == 'rowHeight' && typeof v == 'function') ? [] : key == 'headerHeight' && ((v as object).constructor ?? Object) == Object ? ['columns', 'groups'].flatMap((k) => rowHeightProblems((v as Record<string, unknown>)[k], `${key}.${k}`)) : [problem('invalid-setting', 'warning', `settings.${key}`, String(v))];
 
 /**
  * Which settings change live and which a grid takes only at creation. The
@@ -107,6 +107,8 @@ export function applyUpdate<T>(g: GridContext<T>, input: Partial<GridSettings<T>
   const contextChanged = 'locale' in patch || 'timeZone' in patch || 'numerals' in patch || (!!patch.messages && ctxKey(ctxOf(next)) !== ctxKey(g.ctx)); // a language or its yes / no words
   const nextCtx = contextChanged ? ctxOf(next) : g.ctx;
   g.settings = next;
+  // A new row height function (`rowHeights()`): the rows laid out again with it.
+  if ('rowHeight' in patch && patch.rowHeight !== prev.rowHeight && [patch.rowHeight, prev.rowHeight].some((f) => typeof f == 'function')) delete g.laid;
   if (patch.columns && patch.columns !== prev.columns) g.kernel.dispatch({ type: 'columns.set', defs: patch.columns }, 'host');
   if (contextChanged) {
     g.ctx = nextCtx;

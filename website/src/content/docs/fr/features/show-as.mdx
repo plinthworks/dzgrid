@@ -1,0 +1,56 @@
+---
+title: "showAs"
+description: "Une colonne de nombres montrée en part du total ou de son groupe, dans la langue du lecteur."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Lit une colonne de nombres en pourcentages — du total, ou de chaque groupe — sans colonne calculée à la main.
+
+<FeatureFacts name="showAs" />
+
+## Ce qu’elle fait
+
+Avec `showAs()` dans `features`, une colonne de nombres avec [`showAs`](../../column-options/show-as/) montre chaque
+cellule en part : `'percentOfTotal'` de la somme de la colonne, `'percentOfGroup'` de la somme du groupe de la ligne
+(une ligne de groupe, du groupe au-dessus). Le total porte sur les lignes que gardent les filtres et la recherche, sur
+toutes les pages et dans tous les groupes, ouverts ou fermés : filtrez, et les lignes qui restent refont 100 %. Une
+ligne de groupe montre la part de son groupe, le total général et la [ligne de total](../totals-row/) 100 %. Une
+cellule vide, ou un total de 0, ne montre rien.
+
+La part est écrite dans la langue et les chiffres de la grille, isolée de gauche à droite dans une grille de droite à
+gauche. Seul le texte change : le tri, les filtres (un filtre de nombre compare la valeur), l’édition, la copie et les
+fichiers lisent la valeur. Un fichier CSV ou Excel porte les nombres, jamais les parts. La recherche dans la page et
+l’impression montrent la part. Sur des lignes serveur le total n’est pas connu : la valeur est montrée et un
+avertissement donné.
+
+## Options
+
+- `digits` : les décimales de la part, de 0 à 20. Par défaut 1 (« 12,5 % »).
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { showAs } from '@dzgrid/dom/show-as';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Shop = { id: string; town: string; sales: number };
+
+createGrid<Shop>(document.getElementById('magasins')!, {
+  rows: [{ id: 's1', town: 'Chênebourg', sales: 300 }, { id: 's2', town: 'Bord-de-Rivière', sales: 100 }],
+  columns: [
+    { id: 'town', header: 'Ville' },
+    { id: 'sales', header: 'Ventes', type: 'number' },
+    { id: 'share', header: 'Part', field: 'sales', type: 'number', showAs: 'percentOfTotal' },
+  ],
+  getRowId: (r) => r.id,
+  messages: FR,
+  features: [showAs()],
+});
+```
+
+## Voir aussi
+
+- L’option de colonne [`showAs`](../../column-options/show-as/).
+- [`grouping`](../grouping/) et [`totalsRow`](../totals-row/).

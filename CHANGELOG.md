@@ -16,6 +16,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   hidden ». Never a `hideable: false` column nor the last shown one (no hide state; releasing out does nothing);
   pinned columns the same; the mouse only, as moving. Default `false`: dragging out still does nothing.
   `@dzgrid/theme/columns.css`: `.dzg-move-ghost[data-dzg-hide]`.
+- **Show a value as a share** (owner 2026-11-18 « oui lance 1 à 5 », opt-in; aggregation.md 19–24): `ColumnDef.showAs:
+  'percentOfTotal' | 'percentOfGroup'` with `showAs({ digits })` from the new entry `@dzgrid/dom/show-as`. The total is
+  the column's sum over the rows the filters and the search keep (every page, every group, edits at once); a group row
+  shows its sum's share (`percentOfGroup`: of the group above it), the grand total and the totals row 100 %; written by
+  `Intl` in the grid's language and digits, isolated left to right. Screen, find, print and the narrow screen's lines
+  say the share; **the value stays the data**: sort, filters, editing, the clipboard and **CSV / Excel files write the
+  value** (decided: a file is data a spreadsheet recomputes). Server rows: the value and `unsupported-combination`.
+  Without the feature: `missing-feature` (as `wrap` without `autoHeight()`).
+- **A long-text editor** (opt-in; editors.md 18–22): `edit: { editor: 'textarea' }` with `editors({ textarea:
+  textareaEditor })` from the new entry `@dzgrid/dom/editors-textarea`. A multi-line box over the cell, growing to
+  `--dzg-textarea-max-block` (12em), upward near the view's bottom; **Enter** (Shift, Alt) inserts a line,
+  **Ctrl/Cmd+Enter** keeps (the block's bulk edit with `fill()`), Tab keeps and moves, Escape gives up; `dir="auto"`,
+  named as any field. Without it: the one-line field and `missing-feature`.
+- **Excel title and footer rows** (opt-in; xlsx-export.md 6–11): `xlsx: { title, subtitle, footer }` — a text, texts
+  one row each, or a function of the export `({ rows, scope, query, now, ctx })`. Rows merged across the table, the
+  title bold 14 pt, the others italic, an empty row between them and the table; the filter buttons, the
+  `_FilterDatabase` name and the frozen panes stay on the table (the title frozen with the header). A bad value or a
+  function that throws: left out, `invalid-setting` (the error reported). Absent: the same bytes. Types `XlsxText`,
+  `XlsxTextContext` (`@dzgrid/core/xlsx`, re-exported by `@dzgrid/dom/export`).
+- **Ticking a group ticks its rows** (opt-in; row-grouping.md 25–29): `groupSelect()` from the new entry
+  `@dzgrid/dom/group-select`, beside `grouping()` with checkbox selection. A group row's box (a checkbox named by its
+  label) is ticked, unticked or `mixed` from every row under it (open or closed, after the filters); a click on it or
+  Space on the group row ticks them all, or unticks them; under « all » it adds or removes exceptions. Groups from a
+  server: the rows held; a group never opened shows its box `aria-disabled`.
+- **Row height by a function** (opt-in; virtual-scroll.md « Row height by a function » 1–6): `rowHeight: (row) =>
+  number` with `rowHeights()` from the new entry `@dzgrid/dom/row-heights` (Angular `[rowHeight]` takes it too). Asked
+  once per row key, again when its data changes, on `refresh()`, a new density or text size, or a new function;
+  scaled with the text size, held to 24…1 000 (a bad answer: the density's height, `invalid-setting`; a throw:
+  reported). Exact scrolling (running totals, binary search); detail panels keep theirs; pinned rows keep the
+  density's; with `autoHeight()` the function wins. Without the feature: `missing-feature`. Measured on 100 000 rows
+  (Chrome / Firefox / WebKit): first paint 50 / 82 / 71 ms (one height: 34 / 60 / 58), a new function 31 / 39 / 35 ms,
+  scroll frames p95 18.3 / 18 / 18 ms as with one height (virtual-scroll.md « Row height by a function » 6).
+
+### Changed
+- `api.refresh()` lays the rows out again (no data asked): a `rowHeights()` function is asked again for every row.
 
 ## [1.13.0] - 2026-11-16
 

@@ -210,3 +210,26 @@ dark: axe 0 with each editor open.
   `loadCalendar` brings a calendar (`CalendarKit`). Every other editor and option is the same.
 - `@dzgrid/dom/editors` is unchanged: a 1.1.0 application keeps its calendar without a change.
 - Tests: `packages/dom/test/editors-base{,-bundle}.test.ts` (the entry bundled by esbuild with no `@tzslot/*` to find).
+
+## Long text (1.14.0, owner 2026-11-18 « oui lance 1 à 5 »; opt-in)
+Gap analysis row « Éditeur grand texte » (🟡). Behaviour borrowed from spreadsheets and grids' large-text fields: a
+comment or a reason typed over several lines in a box larger than the cell.
+
+18. **`edit: { editor: 'textarea' }`** on a column, with `editors({ textarea: textareaEditor })` (`@dzgrid/dom/editors-textarea`,
+    its own entry as the list's). Without it: the single-line text field, and one `missing-feature` warning per column
+    (detail `@dzgrid/dom/editors-textarea`). Opened as any field (F2, Enter, a character typed, a double click or tap).
+19. **The box**: a multi-line field (`<textarea>`, `dir="auto"`, the cell's font, its words wrapped) laid over the cell
+    from the cell's top, as wide as the cell, at least as tall; it grows with its lines up to
+    `--dzg-textarea-max-block` (default `12em`), then scrolls inside. Near the bottom of the view, where it would be cut,
+    it grows upward from the cell's bottom instead. It covers the rows under it while open, never moves them.
+20. **Keys** (decided, as a spreadsheet's cell): **Enter** (and Shift+Enter, Alt+Enter) inserts a new line;
+    **Ctrl+Enter** (Cmd+Enter on a Mac) keeps the text — with `fill()` and the cell in a block, in every cell of the
+    block, as any field's Ctrl/Cmd+Enter; **Tab** / Shift+Tab keep it and go to the next / previous editable cell (as any
+    field); **Escape** gives it up; a click outside keeps it (a blur). The arrows, Home, End, PageUp and PageDown move in
+    the text, never in the grid.
+21. **Value**: the text as typed, line breaks kept (`\n`); `maxLength`, `required`, `pattern` and `validate` check it as a
+    text field's (the cap is `edit.maxLength`, 1 000 by default as any field). A refusal keeps it open under the bubble.
+22. **Accessible**: named as any field (« {column}, {row} »), multi-line by its role (`textarea`); its keys are said by
+    the application's own help (no new text). Right to left: `dir="auto"`, logical sides only.
+Tests: `packages/dom/test/editors-textarea.test.ts` (by hand); `scripts/browser-1-14.mjs --only textarea` in Chrome, Firefox,
+WebKit.

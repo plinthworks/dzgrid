@@ -178,3 +178,37 @@ describe('the cell menu', () => {
     expect(t.entries()).not.toContain('export.xlsx');
   });
 });
+
+describe('title and footer rows (1.14.0, xlsx-export.md 6–10)', () => {
+  it('a function gets the export (rows written, scope, query, now, ctx) and its texts become rows above and under the table', async () => {
+    const seen: Record<string, unknown>[] = [];
+    const t = xmake({
+      options: {
+        canExport: true,
+        xlsx: {
+          title: (c) => (seen.push({ ...c }), 'Gnomes'),
+          subtitle: ['Garden A'],
+          footer: (c) => [`${c.rows} rows`, `scope ${c.scope}`],
+        },
+      },
+    });
+    expect(await t.feature.run('displayed', { format: 'xlsx' })).toBe('done');
+    const c = seen[0]!;
+    expect([c['rows'], c['scope'], typeof c['now'], (c['ctx'] as { locale: string }).locale]).toEqual([30, 'displayed', 'number', 'en-US']);
+    expect(c['query']).toBe(t.g.kernel.query);
+    const s = readXlsx(await bytes(t.delivered[0]!.blob!));
+    expect([s.cells['A1'], s.cells['A2'], s.cells['A3'], s.cells['A4'], s.cells['A5']]).toEqual(['Gnomes', 'Garden A', undefined, 'Name', 'ann0']);
+    expect([s.cells['A36'], s.cells['A37']]).toEqual(['30 rows', 'scope displayed']);
+    expect(s.filter).toBe('A4:B34');
+    expect(s.pane).toEqual({ x: 0, y: 4 });
+  });
+
+  it('a function that throws: reported, that part left out with one warning; the file is still made', async () => {
+    const t = xmake({ options: { canExport: true, xlsx: { title: () => { throw new Error('no'); }, footer: 'End' } } });
+    expect(await t.feature.run('displayed', { format: 'xlsx' })).toBe('done');
+    expect(t.report).toHaveBeenCalledTimes(1);
+    expect(t.problems().map((p) => [p.code, p.path])).toEqual([['invalid-setting', 'xlsx.title']]);
+    const s = readXlsx(await bytes(t.delivered[0]!.blob!));
+    expect([s.cells['A1'], s.cells['A33']]).toEqual(['Name', 'End']);
+  });
+});

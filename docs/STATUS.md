@@ -1,5 +1,25 @@
 # État du travail — à lire en premier si la session est perdue
 
+Mis à jour : 2026-11-19. **1.14.0 : les cinq ajouts (propriétaire 2026-11-18 « oui lance 1 à 5 »), chacun optionnel,
+non commités.** Fiches d'abord : `aggregation.md` 19–24 (`showAs: 'percentOfTotal' | 'percentOfGroup'`, entrée
+`@dzgrid/dom/show-as` ; total = lignes gardées par filtres et recherche ; **les fichiers écrivent la valeur**, l'écran,
+find, impression, lignes étroites la part ; serveur : refusé, dit), `editors.md` 18–22 (`edit.editor: 'textarea'` +
+`editors({ textarea: textareaEditor })`, entrée `@dzgrid/dom/editors-textarea` ; Entrée = ligne, Ctrl/Cmd+Entrée garde ;
+Début/Fin/Pages pris : Chrome Mac faisait défiler la grille), `xlsx-export.md` 6–11 (`xlsx: { title, subtitle, footer }`,
+texte, textes ou fonction de l'export ; types `XlsxText` dans `@dzgrid/core/xlsx`), `row-grouping.md` 25–29
+(`groupSelect()`, entrée `@dzgrid/dom/group-select` — sorti de `grouping` : +570 o gz là), `virtual-scroll.md` « Row
+height by a function » (`rowHeight: (row) => number` + `rowHeights()`, entrée `@dzgrid/dom/row-heights` ; `refresh()`
+refait la disposition). Tests à la main : `show-as` 12, `editors-textarea` 9, `grouping-select` 8 (+1 serveur),
+`row-heights` 11, xlsx cœur +5, conformance 2, export DOM 2. Navigateurs : `scripts/browser-1-14.mjs` (page
+`playground/v1-14.html`, hors git) 25/25 Chrome, Firefox, WebKit. 100 000 lignes : première peinture 50 / 82 / 71 ms
+(une hauteur 34 / 60 / 58), défilement p95 18 ms comme une hauteur. Site (en, fr) : 4 pages de fonctions, l'option
+`showAs`, `row-height`, `editors`, `csv-export`. Tailles (+2 %) : DOM 26 120 (mesuré 26 115), K.8 92 610 / 93 000,
+editors 6 765, find 2 690, export xlsx 1 122 ; nouvelles lignes show-as 1 050, row-heights 560, editors-textarea 1 060,
+group-select 835. **Au propriétaire** : `@dzgrid/core/xlsx` 7 328 / 7 150 (+2,5 %, au-delà de +2 %) ; **check:api
+signale** `GridSettings.rowHeight` et `[rowHeight]` d'Angular élargis à une fonction (à accepter ou passer par
+`rowHeights(fn)`), et les 4 nouvelles entrées à accepter (tests `api-surface` et 3 tests d'API du site rouges d'ici là) ;
+`rebudget-review` « columns 4 250 » rouge avant ce lot (dragOutHides). Pas de gate complet (règle 2026-11-16).
+
 Mis à jour : 2026-11-18. **1.14.0 en préparation : `columns({ dragOutHides: true })`** (propriétaire « comme si dans le
 panel on l'avait enlevée », option, défaut inchangé). Fiche `column-move.md` 9 et 22–28 (40 px hors du cadre, tout côté ;
 fantôme « ⊘ {colonne} masquée » = `chooser.hidden`, pas de nouvelle clé ; fixe dans la fenêtre ; jamais `hideable: false`

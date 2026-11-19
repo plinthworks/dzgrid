@@ -122,3 +122,28 @@ walk against a hand-written oracle); DOM and browser at step 5.
 Grouping stays refused beside `sourceRows` and `infiniteRows` (`unsupported-combination`, path `source`). Beside
 `serverSideRows` (steps 6–7) the band, the menu item, `[(groupBy)]` and `rowGroups` work as on the client; `setBy` asks
 the server again; the open groups stay open across a sort or a filter; the totals are the server's.
+
+## Ticking a group ticks its rows (1.14.0, owner 2026-11-18 « oui lance 1 à 5 »; opt-in)
+Gap analysis row « Sélection hiérarchique » (🟡: « groupes : jamais sélectionnables »). Behaviour borrowed: a group
+row's box stands for every row under it.
+
+25. **`groupSelect()`** (`@dzgrid/dom/group-select`, its own entry) beside `grouping()`, with checkbox selection
+    (`selection: { mode: 'multi', checkbox: true }`): a group row shows a box in the box column. Without it: rule 8
+    unchanged (no box, Space does nothing); without `grouping()`: one `missing-feature` warning (`features.groupSelect`).
+26. **Its state comes from its rows**: ticked when every row under it (every level below, open or closed, after the
+    filters and the search) is ticked; unticked when none is; partly ticked otherwise (`aria-checked="mixed"`, the
+    box's dash). A group row itself is never selected (no `aria-selected`, not in the count, not in a file of
+    `selected`): the selection stays the rows' keys (`include` or « all except », as `selection.md`).
+27. **A click on its box, or Space on the group row** (any column): partly ticked or unticked → every row under it
+    ticked; ticked → every row under it unticked. One `selectionChanged` (source `user`), said as any selection
+    (« 3 lignes sélectionnées »). Under « all » (`exclude`), unticking a group adds its rows to the exceptions. A
+    selection rule (`selection-rules.md`) still decides row by row.
+28. **Accessible**: the box is a `checkbox` named by the group's label (« Nord (3) »), `aria-checked` true / false /
+    mixed; the row keeps its tree level and open state.
+29. **Server-side groups** (`server-side-groups.md`): the box acts on the rows the browser holds under the group — those
+    of its open subgroups loaded; the state is read from them, and under « all » with nothing excepted it is ticked. A
+    group with no row held (never opened) shows its box unavailable (`aria-disabled`, unchanged by a click or Space)
+    until opened: the browser cannot name rows it never received (the « all except » of the whole query stays the
+    header box's).
+Tests: `packages/dom/test/grouping-select.test.ts` (by hand); `scripts/browser-1-14.mjs --only groups` in Chrome, Firefox,
+WebKit.

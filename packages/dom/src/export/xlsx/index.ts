@@ -1,4 +1,5 @@
 import type { DisplayedRows } from '@dzgrid/core';
+import type { CsvScope } from '@dzgrid/core/csv';
 import { crc32, xlsxParts, zipFile, XLSX_MIME, type XlsxInput, type XlsxSummary, type ZipEntry } from '@dzgrid/core/xlsx';
 import type { GridContext } from '../../context.js';
 import type { CsvExportOptions } from '../index.js';
@@ -23,9 +24,21 @@ interface Open {
  */
 export async function build(
   g: GridContext<unknown>, o: CsvExportOptions, held: { readonly rows: DisplayedRows<unknown>; readonly at: Uint32Array | null }, aggFuncs: XlsxInput<unknown>['aggFuncs'], columns: readonly string[],
-  spans: Partial<Pick<XlsxInput<unknown>, 'spans' | 'spanColumns'>>, env: SliceEnv, done: (rows: number) => void,
+  spans: Partial<Pick<XlsxInput<unknown>, 'spans' | 'spanColumns'>>, env: SliceEnv, done: (rows: number) => void, c?: { readonly scope: CsvScope; readonly rows: number },
 ): Promise<{ readonly blob: Blob | null; readonly sum: XlsxSummary } | null> {
-  const x = o.xlsx === true ? {} : o.xlsx!;
+  const x: Record<string, unknown> = { ...(o.xlsx === true ? {} : o.xlsx!) };
+  // The title, subtitle and footer a function gives (xlsx-export.md 6, 10): asked here, the core gets texts; one that throws
+  // is reported and left out (0, no text: the core tells `invalid-setting`).
+  for (const k of ['title', 'subtitle', 'footer']) {
+    if (typeof x[k] == 'function') {
+      try {
+        x[k] = (x[k] as (c: object) => unknown)({ ...c, query: g.kernel.query, now: Date.now(), ctx: g.ctx });
+      } catch (err) {
+        g.report(err);
+        x[k] = 0;
+      }
+    }
+  }
   const { layout } = g.columns;
   const widths: Record<string, number> = {};
   for (const s of [layout.start, layout.center, layout.end]) s.columns.forEach((c, i) => (widths[c.id] = s.widths.sizeAt(i)));
@@ -38,7 +51,7 @@ export async function build(
     // CSV's options shared with Excel (its `tree`, `spans`, `instants` are CSV's own).
     {
       text: o.text, enums: o.enums, header: o.header, levelHeader: o.levelHeader, treeColumn: o.treeColumn ?? gr?.column(), groupRows: o.groupRows,
-      ...(gr && !gr.by().length && { tree: 'none' as const }), ...x, columns, sheetName: x.sheetName ?? g.msg('export.fileName'), rtl: x.rtl ?? g.dir === 'rtl', chunkRows: 200,
+      ...(gr && !gr.by().length && { tree: 'none' as const }), ...x, columns, sheetName: (x['sheetName'] as string) ?? g.msg('export.fileName'), rtl: (x['rtl'] as boolean) ?? g.dir === 'rtl', chunkRows: 200,
     },
   );
   const enc = new TextEncoder();

@@ -11,6 +11,7 @@ import { createGrid, type GridInstance } from '../src/grid.js';
 import type { Geometry, ViewportBox } from '../src/render/measure.js';
 import type { GridContext } from '../src/context.js';
 import { grouping } from '../src/grouping.js';
+import { groupSelect } from '../src/group-select.js';
 import { gridState } from '../src/state.js';
 import { csvExport, type CsvExportOptions } from '../src/export.js';
 import { EN } from '../src/locales/en.js';
@@ -244,5 +245,23 @@ describe('grouping beside other servers: refused as before', () => {
     t.g.kernel.dispatch({ type: 'rows.expand', rows: [t.g.kernel.rows.displayed.keyAt(0 as never) as RowKey], expanded: true }, 'user'); // never: as above
     expect(t.calls.at(-1)!.req).toMatchObject({ quick: 'zz', group: { path: ['Nord'] } });
     expect(JSON.stringify(told(t.events))).not.toContain('Nord');
+  });
+});
+
+describe('a group row’s box on a server (1.14.0, row-grouping.md 29)', () => {
+  const sel = { selection: { mode: 'multi', checkbox: true } };
+  it('never opened: unavailable, unchanged by a click; opened: its held rows ticked by a click', () => {
+    const t = make({ features: [grouping({ by: ['region'] }), groupSelect()], settings: sel });
+    t.groups(t.calls[0]!, ['Nord', 'Sud']);
+    const box = () => t.row(0).querySelector<HTMLElement>('.dzg-check .dzg-box')!;
+    expect([box().getAttribute('role'), box().getAttribute('aria-disabled'), box().getAttribute('aria-checked')]).toEqual(['checkbox', 'true', 'false']);
+    box().click();
+    expect(t.g.kernel.selection.keys.size).toBe(0);
+    t.g.kernel.dispatch({ type: 'rows.expand', rows: [t.g.kernel.rows.displayed.keyAt(0 as never)], expanded: true }, 'user'); // never: a position of the rows shown
+    t.leaves(t.calls.at(-1)!, 2);
+    expect(box().getAttribute('aria-disabled')).toBe(null);
+    box().click();
+    expect([...t.g.kernel.selection.keys].map(String).sort()).toEqual([String(dataKey('Nord0')), String(dataKey('Nord1'))]);
+    expect(box().getAttribute('aria-checked')).toBe('true');
   });
 });

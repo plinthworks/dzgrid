@@ -1,0 +1,58 @@
+---
+title: "textareaEditor"
+description: "Un champ sur plusieurs lignes par-dessus la cellule pour un texte long : Entrée pour une ligne, Ctrl+Entrée pour garder."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Le champ de texte long des éditeurs, donné par `editors({ textarea: textareaEditor })`.
+
+<FeatureFacts name="textareaEditor" />
+
+## Ce qu’il fait
+
+`textareaEditor` n’est pas une fonction à part : donnez-le à [`editors()`](../editors/) et mettez `edit: { editor:
+'textarea' }` sur une colonne. Il a sa propre entrée, `@dzgrid/dom/editors-textarea`, et une grille sans texte long ne
+le charge pas.
+
+Le champ s’ouvre par-dessus la cellule, depuis son haut, aussi large qu’elle ; il grandit avec ses lignes jusqu’à
+`--dzg-textarea-max-block` (`12em` par défaut), puis défile à l’intérieur ; près du bas de la vue il grandit vers le
+haut. Il couvre les lignes du dessous tant qu’il est ouvert. **Entrée** (ou Maj+Entrée, Alt+Entrée) insère une nouvelle
+ligne ; **Ctrl+Entrée** (Cmd+Entrée sur Mac) garde le texte ; Tab le garde et passe à la suite ; Échap abandonne ; un
+clic ailleurs le garde. Les flèches, Début et Fin bougent dans le texte. Les retours à la ligne restent dans la valeur ;
+`maxLength`, `required`, `pattern` et `validate` la vérifient comme tout texte. Le champ est nommé par la colonne et la
+ligne, son sens suit son texte.
+
+Sans lui, une colonne `textarea` ouvre le champ sur une ligne et la grille donne un avertissement `missing-feature` par
+colonne.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { textareaEditor } from '@dzgrid/dom/editors-textarea';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_EDIT } from '@dzgrid/dom/locales/fr-edit';
+import { FR_EDITORS } from '@dzgrid/dom/locales/fr-editors';
+import '@dzgrid/theme/edit.css';
+
+type Visit = { id: string; place: string; note: string };
+
+createGrid<Visit>(document.getElementById('visites')!, {
+  rows: [{ id: 'v1', place: 'Phare', note: 'Fermé le lundi' }],
+  columns: [
+    { id: 'place', header: 'Lieu' },
+    { id: 'note', header: 'Note', width: 240, editable: true, edit: { editor: 'textarea', maxLength: 2000 } },
+  ],
+  getRowId: (r) => r.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_EDIT.text, ...FR_EDITORS.text } },
+  features: [edit<Visit>(), editors({ textarea: textareaEditor })],
+});
+```
+
+## Voir aussi
+
+- La fonction [`editors`](../editors/), qui le prend.
+- L’option de colonne [`edit`](../../column-options/edit/).

@@ -24,6 +24,10 @@ menu de colonne ne propose pas la densité.
 Sous un `rowHeight`, chaque ligne garde cette hauteur, même avec `@dzgrid/dom/auto-height` : le `wrap` d’une colonne
 met son texte sur plusieurs lignes et coupe ce qui ne tient pas.
 
+Une fonction de la ligne (1.14.0), avec la fonction [`rowHeights()`](../../features/row-heights/) : chaque ligne de
+données aussi haute qu’elle le dit, `rowHeight: (row) => (row.photo ? 64 : 32)`. Sans elle, la hauteur de la densité et
+un avertissement `missing-feature`.
+
 ## Exemple
 
 <CodeTabs>
@@ -116,3 +120,4 @@ grid.rows = [{ id: 't1', port: 'Port-aux-Mouettes', high: 4.2 }];
 
 - [`density`](../density/) — trois hauteurs, et la marge des cellules.
 - [`headerHeight`](../header-height/) — les lignes d’en-tête à part.
+- [`rowHeights`](../../features/row-heights/) — une hauteur par ligne, d’après ses données.

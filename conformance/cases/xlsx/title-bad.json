@@ -1,0 +1,17 @@
+{
+  "id": "title-bad",
+  "suite": "xlsx",
+  "description": "1.14.0 (xlsx-export.md 10): a title that is no text nor list of texts is left out with one warning; a footer with one column is not merged; no header: no filter, the footer still after an empty row.",
+  "input": {
+    "locale": "en-US",
+    "columns": [{ "id": "a", "header": "A" }],
+    "rows": [{ "a": "x" }],
+    "options": { "title": 42, "footer": ["", "End"], "header": false }
+  },
+  "expected": {
+    "cells": { "A1": "x", "A4": "End" },
+    "merges": [],
+    "filter": null,
+    "problems": [{ "code": "invalid-setting", "severity": "warning", "path": "xlsx.title" }]
+  }
+}

@@ -153,6 +153,22 @@
       "types": "./src/auto-height.ts",
       "default": "./src/auto-height.ts"
     },
+    "./row-heights": {
+      "types": "./src/row-heights.ts",
+      "default": "./src/row-heights.ts"
+    },
+    "./show-as": {
+      "types": "./src/show-as.ts",
+      "default": "./src/show-as.ts"
+    },
+    "./editors-textarea": {
+      "types": "./src/editors-textarea.ts",
+      "default": "./src/editors-textarea.ts"
+    },
+    "./group-select": {
+      "types": "./src/group-select.ts",
+      "default": "./src/group-select.ts"
+    },
     "./row-gaps": {
       "types": "./src/row-gaps.ts",
       "default": "./src/row-gaps.ts"

@@ -185,7 +185,7 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
     if (shape.by !== was) emit(kernel, { type: 'groupByChanged', source, by: shape.by });
   };
   // What print and the export read, and the state's part (checked by the core; a restore is the host's).
-  g.grouped = { column: labelColumn, by: () => shape.reads!(), label: labelOf, cell: (n, c) => (c.id === labelColumn() ? labelOf(n) : textOf(c, n.aggs?.[c.id])), aggFuncs: o.aggFuncs };
+  g.grouped = { column: labelColumn, by: () => shape.reads!(), label: labelOf, cell: (n, c) => (c.id === labelColumn() ? labelOf(n) : g.share?.(n, c) ?? textOf(c, n.aggs?.[c.id])), aggFuncs: o.aggFuncs };
   const initial = shape.by;
   g.rowGroups = {
     initial,
@@ -336,7 +336,7 @@ function setup(g: GridContext<unknown>, o: GroupingFeatureOptions, s: GroupShape
         }
         const totals = node.kind === 'group' || node.kind === 'footer' ? node.aggs ?? {} : null;
         // The totals in the other cells (aggregation.md 1); the group column holds the label.
-        if (totals) for (const [id, cv] of v.cells) if (cv.col && id !== col) put(cv, cv.col.type, textOf(cv.col, totals[id]));
+        if (totals) for (const [id, cv] of v.cells) if (cv.col && id !== col) put(cv, cv.col.type, g.share?.(node, cv.col) ?? textOf(cv.col, totals[id]));
         const cell = col === undefined ? undefined : v.cells.get(col);
         if (!cell || (!tg && !totals)) return;
         const c = cell.el;

@@ -1,0 +1,49 @@
+---
+title: "groupSelect"
+description: "Ticking a group row's box ticks every row under it; partly ticked when some are."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+A box on each group row that stands for its rows.
+
+<FeatureFacts name="groupSelect" />
+
+## What it does
+
+Beside [`grouping()`](../grouping/), with checkbox selection (`selection: { mode: 'multi', checkbox: true }`),
+`groupSelect()` gives each group row a box. A click on it, or Space on the group row, ticks every row under it — every
+level below, open or closed, the rows the filters keep — or, when they all are, unticks them. The box shows ticked,
+unticked or partly ticked (`mixed`) from its rows, and is named by the group's label for a screen reader. The group row
+itself is never selected: the selection stays the rows' keys, also under « all » (unticking a group adds its rows to
+the exceptions).
+
+On groups loaded from a server, the box acts on the rows the browser holds: a group never opened shows its box
+unavailable until it is. Without `grouping()`, the grid tells one `missing-feature` warning.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { grouping } from '@dzgrid/dom/grouping';
+import { groupSelect } from '@dzgrid/dom/group-select';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_GROUP } from '@dzgrid/dom/locales/en-group';
+import '@dzgrid/theme/grouping.css';
+
+type Plant = { id: string; bed: string; name: string };
+
+createGrid<Plant>(document.getElementById('garden')!, {
+  rows: [{ id: 'p1', bed: 'North', name: 'Mint' }, { id: 'p2', bed: 'North', name: 'Sage' }],
+  columns: [{ id: 'name', header: 'Plant' }, { id: 'bed', header: 'Bed' }],
+  getRowId: (r) => r.id,
+  selection: { mode: 'multi', checkbox: true },
+  messages: { ...EN, text: { ...EN.text, ...EN_GROUP.text } },
+  features: [grouping({ by: ['bed'] }), groupSelect()],
+});
+```
+
+## See also
+
+- The [`grouping`](../grouping/) feature.
+- The [`selection`](../../settings/selection/) setting.

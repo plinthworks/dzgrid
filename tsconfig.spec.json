@@ -242,6 +242,18 @@
       "@dzgrid/dom/auto-height": [
         "./packages/dom/src/auto-height.ts"
       ],
+      "@dzgrid/dom/row-heights": [
+        "./packages/dom/src/row-heights.ts"
+      ],
+      "@dzgrid/dom/show-as": [
+        "./packages/dom/src/show-as.ts"
+      ],
+      "@dzgrid/dom/editors-textarea": [
+        "./packages/dom/src/editors-textarea.ts"
+      ],
+      "@dzgrid/dom/group-select": [
+        "./packages/dom/src/group-select.ts"
+      ],
       "@dzgrid/dom/print": [
         "./packages/dom/src/print.ts"
       ],

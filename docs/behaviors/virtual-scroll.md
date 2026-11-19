@@ -44,6 +44,36 @@ and a job title). The application may change either while the grid is shown.
 ### Tests (row height)
 `packages/dom/test/row-height.test.ts`; `npm run test:browser -- --only demos` (the HR demo, 52 px rows).
 
+## Row height by a function (1.14.0, owner 2026-11-18 « oui lance 1 à 5 »; opt-in)
+Gap analysis row « Hauteur de ligne » (🟡, no height per row from a function). The application knows a row's height
+from its data (a row with a photo, a row with a long note) without the grid measuring anything.
+
+1. **`rowHeight: (row) => number`** with the feature `rowHeights()` (`@dzgrid/dom/row-heights`, its own entry: a grid of
+   one height carries none of it). The function gets the row's data and gives its height in px at 16 px text, scaled as
+   a number `rowHeight` is (the reader's text size, whole px), held between 24 (WCAG 2.5.8) and 1 000. The other rows
+   (group rows, totals rows, fillers) and the header rows keep the density's height. Without the feature: the density's
+   height and one warning `missing-feature` at `settings.rowHeight` (detail `row-heights`).
+2. **Asked once per row**: a row's answer is kept by its key and asked again only when its data changes (a transaction,
+   an edit saved), when the rows are worked out again with no change of data (`refresh()`, a new density or text size:
+   every row asked again), or when the function itself changes (`update({ rowHeight })`).
+3. **Exact scrolling**: the rows' offsets are running totals (a Fenwick tree), the row at an offset found by binary
+   search, so the scrollbar, PageUp / PageDown, `ensureVisible`, the keys and the end of the list are exact whatever the
+   heights, also past the browser's height limit (scaled scrolling). A change keeps the row at the top of the view where
+   it was, as for a number.
+4. **Bad answers never throw**: a function that throws is reported (`onError`) and that row takes the density's height;
+   an answer that is not a finite number is the density's height, a number out of 24…1 000 is clamped; told once per
+   grid as `invalid-setting` at `settings.rowHeight` (the answer as detail, never the row).
+5. **With detail panels**: a panel keeps its own height (given or measured); its master row takes the function's.
+   **With pinned rows**: the pinned bands keep the density's height (their rows are drawn one height). **With
+   `autoHeight()`**: the function wins, as a number does (nothing measured).
+6. **Performance** (measured 2026-11-19, 100 000 rows, `scripts/browser-1-14.mjs --only heights`; the same grid with one
+   number height beside): first paint Chrome 50 ms (34), Firefox 82 ms (60), WebKit 71 ms (58); a new function, every row
+   asked again and laid out, 31 / 39 / 35 ms; a scroll of 120 frames by 240 px: median 16.7 / 17 / 17 ms, p95 18.3 / 18 /
+   18 ms — as with one height (18.5 / 18 / 18).
+
+Tests: `packages/dom/test/row-heights.test.ts` (by hand); `scripts/browser-1-14.mjs --only heights` in Chrome, Firefox and
+WebKit.
+
 ## The grid's height comes from its container (owner, 2026-11-10)
 **Rule: the grid's height always comes from its container, never from its rows.** A grid that grew and shrank with
 its rows would jump each time a filter or a search changes the count (the page below it moving up and down under the

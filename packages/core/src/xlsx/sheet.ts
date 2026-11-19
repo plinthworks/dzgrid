@@ -6,6 +6,9 @@ import type { SpanCell } from '../spans/map.js';
 import { groupChains } from '../spans/bands.js';
 import { dayToEpochDay, type Day } from '../value/day.js';
 import { csvColumns, type CsvInput, type CsvSummary } from '../csv/chunks.js';
+import type { CsvScope } from '../csv/rows.js';
+import type { Query } from '../model/query.js';
+import type { LocaleCtx } from '../value/locale.js';
 import { labelOf, readValue } from '../csv/writers.js';
 import { wallMs, wallText } from '../csv/wall.js';
 import { styleBook, type CellLook } from './styles.js';
@@ -59,7 +62,27 @@ export interface XlsxOptions<T = any> {
   readonly chunkRows?: number;
   /** A grouped grid's group, footer and grand total rows (Phase 7): written (default), or `false` for the data rows only. */
   readonly groupRows?: boolean | undefined;
+  /**
+   * 1.14.0 (xlsx-export.md 6–10): rows above the table, bold at 14 pt — a text, or texts one row each, merged across it. A
+   * function is the DOM export's (`csvExport({ xlsx })` asks it with the export); here it is told `invalid-setting`.
+   */
+  readonly title?: XlsxText | undefined;
+  /** Rows under the title, italic; then an empty row before the table. */
+  readonly subtitle?: XlsxText | undefined;
+  /** Rows under the table after an empty row, italic. */
+  readonly footer?: XlsxText | undefined;
 }
+
+/** What a title, subtitle or footer function is told by the DOM export (1.14.0): the rows written, the scope, the query in force, when (epoch ms), the language. */
+export interface XlsxTextContext {
+  readonly rows: number;
+  readonly scope: CsvScope;
+  readonly query: Query;
+  readonly now: number;
+  readonly ctx: LocaleCtx;
+}
+/** A text, texts one row each, or (in the DOM export) a function of the export giving them; one that throws is reported and left out. */
+export type XlsxText = string | readonly string[] | ((c: XlsxTextContext) => string | readonly string[]);
 
 /** What the file is written from: CSV's input, and the grid's layout. */
 export interface XlsxInput<T> extends CsvInput<T> {
@@ -136,7 +159,16 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
   const depth = Math.max(0, ...cols.map((c) => chainOf(c).length));
   const H = hdr ? depth + 1 : 0;
   const tell = (code: Problem['code'], path: string, k?: number) => problems.push(problem(code, code === 'xlsx-too-large' ? 'error' : 'warning', path, k === undefined ? undefined : String(k)));
-  if (W > XLSX_COLUMNS || H + total > XLSX_ROWS) {
+  // The title, subtitle and footer rows (xlsx-export.md 6–10): texts only, a bad value left out and told; cut past Excel's cap.
+  const lines = (k: 'title' | 'subtitle' | 'footer', st: CellLook): [string, CellLook][] => {
+    const a: unknown[] = W ? [o[k] ?? []].flat() : [];
+    return a.some((x) => typeof x != 'string') ? (tell('invalid-setting', `xlsx.${k}`), []) : a.map((x) => [(x as string).slice(0, MAX_TEXT), st]);
+  };
+  const tops = [...lines('title', { bold: true, big: true }), ...lines('subtitle', { italic: true })];
+  const foot = lines('footer', { italic: true });
+  /** The rows above the table: the title's and subtitle's, and an empty one. */
+  const T = tops.length && tops.length + 1;
+  if (W > XLSX_COLUMNS || T + H + total + (foot.length && foot.length + 1) > XLSX_ROWS) {
     tell('xlsx-too-large', 'xlsx');
     return { rows: 0, columns: n, ...counts, problems };
   }
@@ -144,7 +176,7 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
   let px = 0;
   while (px < n && pinned.has(cols[px]!.id)) px++;
   const X = o.freeze === false || !px ? 0 : px + lead;
-  const Y = o.freeze === false ? 0 : H;
+  const Y = o.freeze === false ? 0 : T + H;
   const book = styleBook();
   const look = (l: CellLook) => book.xf(l);
 
@@ -192,11 +224,11 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
   if (hdr) {
     const hl: CellLook = { bold: true, border: true };
     const gl = look({ ...hl, center: true });
-    const put = (r: number, j: number, s: string, st: number) => (head[r]![j] = s ? textCell(L[j]! + (r + 1), s, st) : `<c r="${L[j]}${r + 1}" s="${st}"/>`);
+    const put = (r: number, j: number, s: string, st: number) => (head[r]![j] = s ? textCell(L[j]! + (T + r + 1), s, st) : `<c r="${L[j]}${T + r + 1}" s="${st}"/>`);
     const leaf = (j: number, label: string, top: number, st: number) => {
       put(top, j, label, st);
       for (let r = top + 1; r < H; r++) put(r, j, '', st);
-      if (top < H - 1) merges.push(`${L[j]}${top + 1}:${L[j]}${H}`);
+      if (top < H - 1) merges.push(`${L[j]}${T + top + 1}:${L[j]}${T + H}`);
     };
     if (lead) leaf(0, o.levelHeader ?? 'Level', 0, hook ? hooked(hl, { column: '', value: o.levelHeader ?? 'Level', row: null, header: true }) : look(hl));
     for (let k = 0; k < depth; k++) {
@@ -207,7 +239,7 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
         while (g && e < n && chainOf(cols[e]!)[k]?.id === g.id && e + lead !== X) e++;
         if (g) {
           for (let c = j; c < e; c++) put(k, c + lead, c === j ? g.label : '', gl);
-          if (e - j > 1) merges.push(`${L[j + lead]}${k + 1}:${L[e - 1 + lead]}${k + 1}`);
+          if (e - j > 1) merges.push(`${L[j + lead]}${T + k + 1}:${L[e - 1 + lead]}${T + k + 1}`);
         }
         j = e;
       }
@@ -241,7 +273,10 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
   });
   const pane = X || Y ? `<pane${X ? ` xSplit="${X}"` : ''}${Y ? ` ySplit="${Y}"` : ''} topLeftCell="${colName(X)}${Y + 1}" activePane="${X && Y ? 'bottomRight' : Y ? 'bottomLeft' : 'topRight'}" state="frozen"/>` : '';
   let out = `${HEAD}<worksheet xmlns="${NS}" xmlns:r="${REL}">${outline ? '<sheetPr><outlinePr summaryBelow="0"/></sheetPr>' : ''}<sheetViews><sheetView workbookViewId="0"${o.rtl ? ' rightToLeft="1"' : ''}>${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"${top ? ` outlineLevelRow="${top}"` : ''}/>${colsXml && `<cols>${colsXml}</cols>`}<sheetData>`;
-  head.forEach((cells, r) => (out += `<row r="${r + 1}">${cells.join('')}</row>`));
+  /** A title or footer row: one text cell merged across the written columns (an empty text: an empty row). */
+  const line = (y: number, [s, l]: [string, CellLook]): string => (W > 1 && merges.push(`A${y}:${L[W - 1]}${y}`), `<row r="${y}">${s && textCell(`A${y}`, s, look(l))}</row>`);
+  tops.forEach((t, r) => (out += line(r + 1, t)));
+  head.forEach((cells, r) => (out += `<row r="${T + r + 1}">${cells.join('')}</row>`));
 
   // ---- Each column's cell, built once: the value read as CSV reads it, then typed.
   const display = o.text === 'display';
@@ -356,7 +391,7 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
     const r = at ? at[k]! : k;
     const node: RowNode<T> = rows.nodeAt(r as DisplayIndex);
     if (skip(node)) continue;
-    const y = H + ++written;
+    const y = T + H + ++written;
     if (outRow) outRow[r] = y;
     const lv = levelAt ? levelAt.call(rows, r as DisplayIndex) : 0;
     let over: SpanCell[] | null = null;
@@ -397,7 +432,8 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
     }
   }
   for (const [s, j] of merged.values()) merges.push(`${L[j + lead]}${outRow![s.row]}:${L[j + lead + s.cols - 1]}${outRow![s.row + s.rows - 1]}`);
-  const range = hdr ? `${L[0]}${H}:${L[W - 1]}${H + written}` : '';
+  const range = hdr ? `${L[0]}${T + H}:${L[W - 1]}${T + H + written}` : '';
+  foot.forEach((t, r) => (out += line(T + H + written + 2 + r, t)));
   out += `</sheetData>${range && `<autoFilter ref="${range}"/>`}${merges.length ? `<mergeCells count="${merges.length}">${merges.map((m) => `<mergeCell ref="${m}"/>`).join('')}</mergeCells>` : ''}</worksheet>`;
   yield { entry: 'xl/worksheets/sheet1.xml', text: out };
 

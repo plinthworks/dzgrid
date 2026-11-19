@@ -1,0 +1,47 @@
+---
+title: "rowHeights"
+description: "Each row as tall as a function of its data says, scrolled exactly."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+A height per row from its data, without measuring anything: `rowHeight: (row) => number`.
+
+<FeatureFacts name="rowHeights" />
+
+## What it does
+
+With `rowHeights()` in `features`, the [`rowHeight`](../../settings/row-height/) setting may be a function of the row:
+each data row is as tall as it says, in px at a 16 px text size, grown with the reader's text size and held between 24
+and 1 000. Group rows, totals rows and the header rows keep the density's height; a detail panel keeps its own; the
+pinned rows keep the density's height too.
+
+A row is asked once: its answer is kept by its key and asked again when its data changes, on `refresh()`, on a new
+density or text size, or when the function changes. The scroll stays exact whatever the heights: the scrollbar, the
+page keys and `ensureVisible` land on the right row, also past a million rows. A function that throws is reported and
+the row takes the density's height; an answer that is not a number takes it too, a number out of range is held to it,
+and one `invalid-setting` warning is told. With [`autoHeight()`](../auto-height/), the function wins.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { rowHeights } from '@dzgrid/dom/row-heights';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Bird = { id: string; name: string; photo: boolean };
+
+createGrid<Bird>(document.getElementById('birds')!, {
+  rows: [{ id: 'b1', name: 'Robin', photo: true }, { id: 'b2', name: 'Wren', photo: false }],
+  columns: [{ id: 'name', header: 'Bird' }],
+  getRowId: (r) => r.id,
+  rowHeight: (r) => (r.photo ? 64 : 32),
+  messages: EN,
+  features: [rowHeights()],
+});
+```
+
+## See also
+
+- The [`rowHeight`](../../settings/row-height/) setting.
+- [`autoHeight`](../auto-height/) — rows as tall as their wrapped text, measured.

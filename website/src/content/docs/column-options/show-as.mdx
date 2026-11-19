@@ -1,0 +1,33 @@
+---
+title: "showAs"
+description: "A number column shown as its share of the total or of its group."
+---
+
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Percentages instead of the numbers, the numbers kept as the data.
+
+<OptionFacts column="showAs" />
+
+## What it does
+
+With the [`showAs()`](../../features/show-as/) feature from `@dzgrid/dom/show-as`, `'percentOfTotal'` shows each cell
+as its share of the column's sum over the rows the filters keep, and `'percentOfGroup'` as its share of its group's
+sum. The value stays the data: sorted, filtered, edited, copied and exported as the number. Without the feature the
+numbers show and the grid tells a `missing-feature` warning; on a column that is not a number one, an `invalid-column`
+warning.
+
+## Example
+
+```ts
+import type { ColumnDef } from '@dzgrid/core';
+
+type Shop = { id: string; sales: number };
+
+export const share: ColumnDef<Shop> = { id: 'share', header: 'Share', field: 'sales', type: 'number', showAs: 'percentOfGroup' };
+```
+
+## See also
+
+- The [`showAs()`](../../features/show-as/) feature.
+- [`aggFunc`](../agg-func/).

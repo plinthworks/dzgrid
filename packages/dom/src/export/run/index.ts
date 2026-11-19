@@ -235,7 +235,7 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
         // The Excel file's code and the JSON file's: chunks of their own, each loaded at its first export (CSV's first
         // download unchanged).
         const made = await (xl
-          ? race(import('../xlsx/index.js')).then((x) => x.build(g, o, rows, fns, request.columns, spans, env, (n) => progress('building', Math.min(n, held.count), held.count)))
+          ? race(import('../xlsx/index.js')).then((x) => x.build(g, o, rows, fns, request.columns, spans, env, (n) => progress('building', Math.min(n, held.count), held.count), { scope, rows: held.count }))
           : race(import('../json/index.js')).then((x) => x.build(g, o, held, request.columns, env)));
         if (!made) return finish('cancelled');
         sum = made.sum;

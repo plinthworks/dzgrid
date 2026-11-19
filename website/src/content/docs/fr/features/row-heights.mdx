@@ -1,0 +1,48 @@
+---
+title: "rowHeights"
+description: "Chaque ligne aussi haute que le dit une fonction de ses données, défilement exact."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Une hauteur par ligne d’après ses données, sans rien mesurer : `rowHeight: (row) => number`.
+
+<FeatureFacts name="rowHeights" />
+
+## Ce qu’elle fait
+
+Avec `rowHeights()` dans `features`, le réglage [`rowHeight`](../../settings/row-height/) peut être une fonction de la
+ligne : chaque ligne de données est aussi haute qu’elle le dit, en px pour un texte de 16 px, agrandie avec la taille du
+texte du lecteur et tenue entre 24 et 1 000. Les lignes de groupe, de total et d’en-tête gardent la hauteur de la
+densité ; un panneau de détail garde la sienne ; les lignes épinglées gardent aussi celle de la densité.
+
+Une ligne est demandée une fois : sa réponse est gardée par sa clé et redemandée quand ses données changent, à
+`refresh()`, à une nouvelle densité ou taille de texte, ou quand la fonction change. Le défilement reste exact quelles
+que soient les hauteurs : la barre, les touches de page et `ensureVisible` tombent sur la bonne ligne, au-delà d’un
+million de lignes aussi. Une fonction qui lève une erreur est signalée et la ligne prend la hauteur de la densité ; une
+réponse qui n’est pas un nombre aussi, un nombre hors limites y est ramené, et un avertissement `invalid-setting` est
+donné. Avec [`autoHeight()`](../auto-height/), la fonction l’emporte.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { rowHeights } from '@dzgrid/dom/row-heights';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Bird = { id: string; name: string; photo: boolean };
+
+createGrid<Bird>(document.getElementById('oiseaux')!, {
+  rows: [{ id: 'b1', name: 'Rouge-gorge', photo: true }, { id: 'b2', name: 'Troglodyte', photo: false }],
+  columns: [{ id: 'name', header: 'Oiseau' }],
+  getRowId: (r) => r.id,
+  rowHeight: (r) => (r.photo ? 64 : 32),
+  messages: FR,
+  features: [rowHeights()],
+});
+```
+
+## Voir aussi
+
+- Le réglage [`rowHeight`](../../settings/row-height/).
+- [`autoHeight`](../auto-height/) — des lignes aussi hautes que leur texte à la ligne, mesuré.

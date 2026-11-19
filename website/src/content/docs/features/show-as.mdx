@@ -1,0 +1,54 @@
+---
+title: "showAs"
+description: "A number column shown as its share of the total or of its group, in the reader's language."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Reads a number column as percentages — of the total, or of each group — with no column computed by hand.
+
+<FeatureFacts name="showAs" />
+
+## What it does
+
+With `showAs()` in `features`, a number column with [`showAs`](../../column-options/show-as/) shows each cell as a
+share: `'percentOfTotal'` of the column's sum, `'percentOfGroup'` of the sum of the row's group (a group row of the
+group above it). The total is over the rows that pass the filters and the search, on every page and in every group,
+open or closed: filter, and the rows left add up to 100 % again. A group row shows its group's share, the grand total
+and the [totals row](../totals-row/) 100 %. An empty cell, or a total of 0, shows nothing.
+
+The share is written in the grid's language and digits, isolated left to right in a right-to-left grid. Only the text
+changes: the sort, the filters (a number filter compares the value), editing, copying and the files read the value. A
+CSV or Excel file carries the numbers, never the shares. Find and print show the share. On a server's rows the total is
+not known: the value is shown and one warning told.
+
+## Options
+
+- `digits`: the share's fraction digits, 0 to 20. Default 1 (« 12.5% »).
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { showAs } from '@dzgrid/dom/show-as';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Shop = { id: string; town: string; sales: number };
+
+createGrid<Shop>(document.getElementById('shops')!, {
+  rows: [{ id: 's1', town: 'Oakfield', sales: 300 }, { id: 's2', town: 'Riverside', sales: 100 }],
+  columns: [
+    { id: 'town', header: 'Town' },
+    { id: 'sales', header: 'Sales', type: 'number' },
+    { id: 'share', header: 'Share', field: 'sales', type: 'number', showAs: 'percentOfTotal' },
+  ],
+  getRowId: (r) => r.id,
+  messages: EN,
+  features: [showAs()],
+});
+```
+
+## See also
+
+- The [`showAs`](../../column-options/show-as/) column option.
+- [`grouping`](../grouping/) and [`totalsRow`](../totals-row/).

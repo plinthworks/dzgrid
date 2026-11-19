@@ -73,7 +73,7 @@ la phase 3, aujourd'hui dépassée : presque tous ses « P5…P10 » sont faits)
 |---|---|---|---|---|---|---|
 | Édition de cellule | F2, Entrée, frappe, double clic | C | `features/edit`, `features/editors` | ✅ | — | haute |
 | Éditeurs texte, nombre, date, case | Les champs de base | C | `features/editors` (jour, date-heure avec fuseau) | ✅ | — | haute |
-| Éditeur grand texte | Zone multi-ligne en surimpression | C | part `edit.editor` à écrire soi-même | 🟡 pas d'éditeur multi-ligne prêt | S | moyenne |
+| Éditeur grand texte | Zone multi-ligne en surimpression | C | 1.14.0 : `edit.editor: 'textarea'` + `@dzgrid/dom/editors-textarea` | ✅ | — | moyenne |
 | Select / rich select | Liste avec recherche, clavier | C / E | `features/list-editor` | ✅ | — | haute |
 | Rich select à valeurs asynchrones | La liste cherche dans le serveur en tapant | E | absent : au-delà de 500 options, champ texte | ❌ | M | haute |
 | Édition de ligne entière | Toute la ligne passe en édition, une validation | C | absent (édition cellule par cellule) | ❌ | M | moyenne |
@@ -90,7 +90,7 @@ la phase 3, aujourd'hui dépassée : presque tous ses « P5…P10 » sont faits)
 | Fonctionnalité | Ce que ça fait | Niveau | DzGrid aujourd'hui | Verdict | Effort | Utilité |
 |---|---|---|---|---|---|---|
 | Sélection de lignes (cases, tout sélectionner) | Une ou plusieurs lignes | C | `settings/selection`, `features/rules` (lignes non cochables) | ✅ | — | haute |
-| Sélection hiérarchique | Cocher un groupe coche ses enfants | E | arbre : `tree-selection.md` ; groupes : jamais sélectionnables | 🟡 manque sur les lignes de groupe | S | moyenne |
+| Sélection hiérarchique | Cocher un groupe coche ses enfants | E | groupes : 1.14.0 `groupSelect()` ; arbre : `tree-selection.md` (pas de cascade) | 🟡 manque sur l'arbre | S | moyenne |
 | Sélection de cellules / plages | Rectangles au clavier et à la souris | E | `features/range` | ✅ | — | haute |
 | Poignée de plage | Agrandir la plage par une poignée | E | `features/range` | ✅ | — | moyenne |
 | Poignée de recopie (fill) | Recopier, prolonger une série | E | `features/fill` | ✅ | — | moyenne |
@@ -107,7 +107,7 @@ la phase 3, aujourd'hui dépassée : presque tous ses « P5…P10 » sont faits)
 | Groupes collants | Les groupes restent sous l'en-tête | E | `row-grouping.md` 18, `tree-sticky.md` | ✅ | — | moyenne |
 | Agrégation | Somme, moyenne, min, max, compte, propre | E | `column-options/agg-func` | ✅ | — | moyenne |
 | Lignes de total | Pieds de groupe, grand total | E | `features/totals-row`, `aggregation.md` | ✅ | — | haute |
-| « Afficher les valeurs en » | % du total, du parent, de la ligne | E | absent | ❌ | S | moyenne |
+| « Afficher les valeurs en » | % du total, du parent, de la ligne | E | 1.14.0 : `showAs` + `@dzgrid/dom/show-as` (% du total, du groupe ; pas « de la ligne ») | 🟡 | S | moyenne |
 | Pivot | Valeurs d'une colonne en colonnes | E | `features/pivot`, `features/pivot-bar` | ✅ | — | basse |
 | Données en arbre | Chemin, enfants imbriqués, parent id | E | `features/tree` | ✅ | — | moyenne |
 | Arbre filtré | Ancêtres gardés | E | `tree-filter.md` | ✅ | — | moyenne |
@@ -148,7 +148,7 @@ la phase 3, aujourd'hui dépassée : presque tous ses « P5…P10 » sont faits)
 | Zone de dépôt externe | Déposer une ligne hors de la grille | C | `row-move.md` « Other grids and zones » | ✅ | — | basse |
 | De grille à grille | Déposer à une place précise d'une autre grille | C | la racine d'une autre grille, pas l'écart exact | 🟡 pas de position précise | M | basse |
 | Lignes épinglées | En haut, en bas | C | `features/pinned-rows` | ✅ | — | moyenne |
-| Hauteur de ligne | Fixe, auto selon contenu | C | `settings/row-height`, `features/auto-height`, `settings/density` | 🟡 pas de hauteur par ligne calculée par une fonction | S | basse |
+| Hauteur de ligne | Fixe, auto selon contenu | C | `settings/row-height` (1.14.0 : une fonction, `rowHeights()`), `features/auto-height`, `settings/density` | ✅ | — | basse |
 | Fusion de lignes (row span) | Une cellule sur plusieurs lignes | C | `column-options/merge`, `column-options/row-span` | ✅ | — | moyenne |
 | Style de lignes | Classes selon les données | C | `settings/row-class`, `cell-class.md` | ✅ | — | haute |
 | Animation des lignes | Les lignes glissent après un tri | C | `features/motion` (GSAP, à installer) | ✅ | — | basse |
@@ -166,7 +166,7 @@ la phase 3, aujourd'hui dépassée : presque tous ses « P5…P10 » sont faits)
 | Excel : images, liens, notes | Contenu riche dans le fichier | E | absent (exclu dans `xlsx-export.md`) | ❌ | M | basse |
 | Excel : maître / détail | Les détails dans le fichier | E | absent (panneaux jamais écrits) | ❌ | M | moyenne |
 | Excel : formules, protection, mise en page, tableaux Excel | Fichier avancé | E | absent | ❌ | M | basse |
-| Excel : contenu en plus (titre, pied) | Lignes avant / après | E | non trouvé | ❌ | S | moyenne |
+| Excel : contenu en plus (titre, pied) | Lignes avant / après | E | 1.14.0 : `xlsx: { title, subtitle, footer }` | ✅ | — | moyenne |
 | Import Excel / CSV | Lire un fichier déposé | E | `features/file-import` | ✅ | — | moyenne |
 | Export PDF | PDF propre (styles, filigrane, langues) | E | via l'impression du navigateur (`features/print`) | 🟡 pas de PDF généré, pas de filigrane | L | moyenne |
 | Impression | Vue imprimable | C | `features/print`, `features/print-on-menu` | ✅ | — | moyenne |

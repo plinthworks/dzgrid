@@ -117,3 +117,26 @@ Numbered (step 7, 2026-11-05; `conformance/cases/xlsx/group-*`, `packages/core/t
 ## Pivot (Phase 10, `pivot.md` 27; plan D18 A; checked 2026-11-07, no code)
 The created bands are header groups: written as merged header rows, as any header group; cells typed by their value
 column (a count as a number).
+
+## Title and footer rows (1.14.0, owner 2026-11-18 « oui lance 1 à 5 »; opt-in)
+Gap analysis `docs/gap-aggrid-2026-11.md` row « Excel : contenu en plus (titre, pied) ». Spreadsheet behaviour borrowed:
+a report's title above its table, a note under it.
+
+6. **`xlsx: { title, subtitle, footer }`**: each a text, a list of texts (one row each), or a function of the export
+   `({ rows, scope, query, now, ctx }) => string | string[]` — `rows` the rows the file writes, `scope` `displayed` /
+   `all` / `selected`, `query` the filters, search and sort in force, `now` epoch ms (the core has no clock: the DOM
+   layer asks the function and hands the core the texts). Absent: nothing changes, byte for byte.
+7. **Where**: the title rows first, then the subtitle rows, then **one empty row**, then the table (its header rows and
+   rows); after the table **one empty row**, then the footer rows. Each such row is one text cell in column A merged
+   across the table's written columns (one column: no merge). An empty text writes an empty row.
+8. **Look**: the title bold at 14 pt, the subtitle and the footer italic at 11 pt; no fill, no colour (the `xlsxStyle`
+   hook is not called for them: they are no column's cells).
+9. **Kept out of the data**: the filter buttons and the hidden `_FilterDatabase` name cover the table only (its last
+   header row to its last row); the frozen panes freeze the title rows with the header rows (the title stays at the top
+   while scrolling); the outline levels, the merges of spans and of header groups move down with the table.
+10. **Bad input never throws**: a value that is neither a text nor a list of texts nor a function, or a function that
+    throws or returns anything else: that part is left out and one warning `invalid-setting` at `xlsx.title`
+    (`xlsx.subtitle`, `xlsx.footer`); a function's error is reported to the grid (`onError`). A text past 32 767
+    characters is cut to Excel's cap (not told: these are the application's own texts). Excel's row limit counts these
+    rows.
+11. **CSV, JSON**: unchanged (a CSV has no merged rows; a title line would break its readers).

@@ -264,6 +264,12 @@ export interface GridContext<T> {
   panelTop?: (host: HTMLElement) => void;
   /** Set by the pivot: a column's header as the application gave it (the columns panel's names, columns-chooser.md 9). */
   colName?: (id: string) => string | undefined;
+  /**
+   * A row's cell as a share (`@dzgrid/dom/show-as`, 1.14.0, aggregation.md 19–24): its text, or undefined when the column
+   * shows its value. A footer by its group (the grand total, a totals row: 100 %). Read by the grouping, the totals row,
+   * print, find and the narrow screen's lines, so each says what the cell says.
+   */
+  share?: ((n: RowNode<unknown> | RowKey, col: ResolvedColumn<unknown>) => string | undefined) | undefined;
   /** Find's text in force (`@dzgrid/dom/find`), '' or absent: none — what a cell part is given (`search.find`). */
   findText?: string;
   msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | TotalsMessageKey | ImportMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | ClearFiltersKey | RowDragMessageKey | FiltersPanelMessageKey | DockMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey | PivotMessageKey | PivotBarMessageKey, params?: Readonly<Record<string, string | number>>): string;

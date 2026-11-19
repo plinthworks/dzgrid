@@ -200,10 +200,10 @@
     },
     {
       "name": "rowHeight",
-      "type": "number",
+      "type": "number | ((row: Readonly<T>) => number)",
       "resolved": null,
       "required": false,
-      "doc": "The row height in px at 16 px text, over the density's (owner D1, virtual-scroll.md « Row height »): from 24 to 1 000, grown with the reader's text size; header rows follow unless `headerHeight` is set. Anything else is told (`invalid-setting`, a warning) and the density's height is used. Live.",
+      "doc": "The row height in px at 16 px text, over the density's (owner D1, virtual-scroll.md « Row height »): from 24 to 1 000, grown with the reader's text size; header rows follow unless `headerHeight` is set. Anything else is told (`invalid-setting`, a warning) and the density's height is used. Live. 1.14.0: a function of the row, each data row its own height, with the feature `rowHeights()` of `@dzgrid/dom/row-heights` (virtual-scroll.md « Row height by a function »); without it, `missing-feature`.",
       "default": {
         "token": "densityHeight"
       },
@@ -972,6 +972,15 @@
       "resolved": null,
       "required": false,
       "doc": "`'text'`: in a CSV file, a digits-only value is written `=\"0123\"` so Excel keeps it as text (csv-export.md).",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "showAs",
+      "type": "'percentOfTotal' | 'percentOfGroup'",
+      "resolved": null,
+      "required": false,
+      "doc": "1.14.0, with `showAs()` of `@dzgrid/dom/show-as` (aggregation.md 19–24): a number column shown as its share of the total of the filtered rows (`percentOfTotal`) or of its group's sum (`percentOfGroup`). The value stays the data: sort, filters, edits, the clipboard and the files read it.",
       "default": null,
       "source": "packages/core/src/columns/defs.ts"
     },
@@ -1761,6 +1770,15 @@
           "resolved": null,
           "required": false,
           "doc": "The list editor, `listEditor` of `@dzgrid/dom/editors-list` (owner S6-O7: its own entry). Without it a list column opens a text field read by its codec, and one warning `missing-feature` per column.",
+          "default": null,
+          "source": "packages/dom/src/editors/index.ts"
+        },
+        {
+          "name": "textarea",
+          "type": "(x: EdEnv, field: HTMLTextAreaElement) => Ed",
+          "resolved": null,
+          "required": false,
+          "doc": "The long-text editor, `textareaEditor` of `@dzgrid/dom/editors-textarea` (1.14.0, editors.md 18–22), for the columns with `edit: { editor: 'textarea' }`. Without it they open the one-line field, and one warning `missing-feature` per column.",
           "default": null,
           "source": "packages/dom/src/editors/index.ts"
         }
@@ -3354,6 +3372,66 @@
       "css": [],
       "doc": "`slots()`: a host's parts draw the column headers' labels, the overlay, the busy mark (1.4.0) and the tooltip in place of the grid's own (docs/behaviors/parts.md, step 11). The grid keeps the rest: the header's role, sort state, mark, grip and click; the overlay's place and retry button; the tooltip's element, timing, Escape and placement.",
       "source": "packages/dom/src/slots/index.ts"
+    },
+    {
+      "name": "rowHeights",
+      "entry": "@dzgrid/dom/row-heights",
+      "signature": "rowHeights(): GridFeature",
+      "param": null,
+      "options": [],
+      "texts": null,
+      "sheet": null,
+      "css": [],
+      "doc": "`rowHeights()`: each data row as tall as `rowHeight: (row) => number` says (1.14.0, docs/behaviors/virtual-scroll.md « Row height by a function » 1–6). The answers are kept by row key and asked again only when the row's data changes, when the rows are laid out again with no change of data (`refresh()`, a new density or text size), or when the function changes. The offsets are running totals (a Fenwick tree), the row at an offset found by binary search: the scroll is exact. A number `rowHeight` (or none): unchanged. Composes with the detail panels' layout (theirs kept).",
+      "source": "packages/dom/src/row-heights/index.ts"
+    },
+    {
+      "name": "showAs",
+      "entry": "@dzgrid/dom/show-as",
+      "signature": "showAs(o?: ShowAsOptions): GridFeature",
+      "param": "o",
+      "options": [
+        {
+          "name": "digits",
+          "type": "number",
+          "resolved": null,
+          "required": false,
+          "doc": "The share's fraction digits, 0 to 20 (default 1: « 12.5% »).",
+          "default": null,
+          "source": "packages/dom/src/show-as/index.ts"
+        }
+      ],
+      "texts": null,
+      "sheet": null,
+      "css": [],
+      "doc": "`showAs()`: a number column with `showAs: 'percentOfTotal' | 'percentOfGroup'` shows its cells as a share (1.14.0, docs/behaviors/aggregation.md 19–24). The total is the column's sum over the rows that pass the filters and the search (every page, every group), edits counted at once; a group row shows its sum's share, a footer its group's, the grand total and the totals row 100 %. Only the text changes: sort, filters, edits, the clipboard and the files read the value. The screen's data rows are written here after each paint; the group rows, the totals row, print, find and the narrow screen's lines ask `g.share`. Browser rows only (a server's: told, the value shown).",
+      "source": "packages/dom/src/show-as/index.ts"
+    },
+    {
+      "name": "textareaEditor",
+      "entry": "@dzgrid/dom/editors-textarea",
+      "signature": "textareaEditor(x: EdEnv, f: HTMLTextAreaElement): Ed",
+      "param": null,
+      "options": [],
+      "texts": null,
+      "sheet": null,
+      "css": [
+        "TEXTAREA_CSS"
+      ],
+      "doc": "The long-text editor (1.14.0, editors.md 18–22): a `<textarea>` made by the editors as their text field (named, `dir` auto, the column's cap), given here its keys and its size. Enter (Shift, Alt) inserts a line; Ctrl/Cmd+Enter keeps (the editors' own, before this), Tab keeps and moves, Escape gives up. It grows with its lines to its maximum, upward when the view ends under it. Its own entry, `@dzgrid/dom/editors-textarea`: `editors({ textarea: textareaEditor })`.",
+      "source": "packages/dom/src/editors-textarea/index.ts"
+    },
+    {
+      "name": "groupSelect",
+      "entry": "@dzgrid/dom/group-select",
+      "signature": "groupSelect(): GridFeature",
+      "param": null,
+      "options": [],
+      "texts": null,
+      "sheet": null,
+      "css": [],
+      "doc": "`groupSelect()`: beside `grouping()` with checkbox selection, a group row's box ticks every row under it (1.14.0, docs/behaviors/row-grouping.md 25–29) — every level below, open or closed, after the filters (a server's groups: the rows held) — and shows ticked, unticked or partly ticked from them; a click on it or Space on the group row. The selection stays the rows' keys (`include` or « all except »); a group row is never selected itself. Its own entry.",
+      "source": "packages/dom/src/group-select/index.ts"
     }
   ]
 }

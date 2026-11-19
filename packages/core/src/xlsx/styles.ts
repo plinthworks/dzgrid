@@ -11,6 +11,8 @@ export interface CellLook {
   readonly border?: boolean | undefined;
   readonly center?: boolean | undefined;
   readonly indent?: number | undefined;
+  /** A title's font: 14 pt (1.14.0). */
+  readonly big?: boolean | undefined;
 }
 
 /**
@@ -27,7 +29,7 @@ export function styleBook() {
   const id = (m: Map<string, number>, k: string): number => m.get(k) ?? (m.set(k, m.size), m.size - 1);
   return {
     xf(l: CellLook, cap = Infinity): number {
-      const font = id(fonts, (l.bold ? 'b' : '') + (l.italic ? 'i' : '') + (l.color ?? ''));
+      const font = id(fonts, (l.bold ? 'b' : '') + (l.italic ? 'i' : '') + (l.big ? 'L' : '') + (l.color ?? ''));
       const fill = l.fill ? id(fills, l.fill) : 0;
       const f = l.fmt ?? 0;
       const fmt = typeof f === 'number' ? f : id(fmts, f) + 164;
@@ -48,7 +50,7 @@ export function styleBook() {
     text(): string {
       const list = <K>(tag: string, m: Map<K, number>, item: (k: K) => string) => `<${tag} count="${m.size}">${[...m.keys()].map(item).join('')}</${tag}>`;
       return `<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${fmts.size ? list('numFmts', fmts, (k) => `<numFmt numFmtId="${fmts.get(k)! + 164}" formatCode="${esc(k)}"/>`) : ''}${list('fonts', fonts, (k) =>
-        `<font>${k.includes('b') ? '<b/>' : ''}${k.includes('i') ? '<i/>' : ''}<sz val="11"/>${k.length > 2 && /[0-9A-F]{8}$/.test(k) ? `<color rgb="${k.slice(-8)}"/>` : ''}<name val="Calibri"/><family val="2"/></font>`)}${list('fills', fills, (k) =>
+        `<font>${k.includes('b') ? '<b/>' : ''}${k.includes('i') ? '<i/>' : ''}<sz val="${k.includes('L') ? 14 : 11}"/>${k.length > 2 && /[0-9A-F]{8}$/.test(k) ? `<color rgb="${k.slice(-8)}"/>` : ''}<name val="Calibri"/><family val="2"/></font>`)}${list('fills', fills, (k) =>
         `<fill><patternFill patternType="${k === '' ? 'none' : k === 'g' ? 'gray125' : `solid"><fgColor rgb="${k}"/><bgColor indexed="64"/></patternFill></fill>`}${k.length > 1 ? '' : '"/></fill>'}`)}<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="thin"><color auto="1"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="${xml.length}">${xml.join('')}</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
     },
   };

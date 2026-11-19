@@ -164,7 +164,7 @@ export function preparePrint(grid: PrintableGrid, o: PrintOptions = {}): Promise
   const read = g.edit?.read ?? null;
   const map = g.spans?.map;
   const cellText = (j: number, node: RowNode<unknown>): string =>
-    node.kind == 'data' ? cellValue(cols[j]!, node.data, g.ctx, read, node.key).text : (node === g.foot?.node ? g.foot : gr)!.cell(node as never, cols[j]!);
+    node.kind == 'data' ? g.share?.(node, cols[j]!) ?? cellValue(cols[j]!, node.data, g.ctx, read, node.key).text : (node === g.foot?.node ? g.foot : gr)!.cell(node as never, cols[j]!);
   const row = (node: RowNode<unknown>, i: number): HTMLTableRowElement => {
     const tr = doc.createElement('tr');
     // A group or a totals row, set apart without colour; a totals row also marked as such, for the page breaks (11).

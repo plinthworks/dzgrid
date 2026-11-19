@@ -22,7 +22,7 @@
     },
     "@dzgrid/core/xlsx": {
       "file": "packages/core/src/xlsx.ts",
-      "maxGzip": 7150,
+      "maxGzip": 7350,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/rules": {
@@ -509,7 +509,7 @@
     },
     "@dzgrid/theme/columns.css": {
       "file": "packages/theme/columns.css",
-      "maxGzip": 1260
+      "maxGzip": 1290
     },
     "@dzgrid/theme/menu.css": {
       "file": "packages/theme/menu.css",
@@ -585,7 +585,7 @@
     },
     "@dzgrid/dom": {
       "file": "packages/dom/src/index.ts",
-      "maxGzip": 26000,
+      "maxGzip": 26120,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal"
@@ -673,7 +673,7 @@
     },
     "@dzgrid/dom/export: xlsx (lazy)": {
       "file": "packages/dom/src/export/xlsx/index.ts",
-      "maxGzip": 1100,
+      "maxGzip": 1122,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -748,6 +748,17 @@
         "@dzgrid/dom/internal"
       ]
     },
+    "@dzgrid/dom/group-select": {
+      "file": "packages/dom/src/group-select.ts",
+      "maxGzip": 835,
+      "over": "@dzgrid/dom",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/core/detail",
+        "@dzgrid/dom/internal"
+      ]
+    },
     "@dzgrid/dom/pivot": {
       "file": "packages/dom/src/pivot.ts",
       "maxGzip": 2650,
@@ -805,7 +816,7 @@
     },
     "@dzgrid/dom/editors": {
       "file": "packages/dom/src/editors.ts",
-      "maxGzip": 6720,
+      "maxGzip": 6765,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
@@ -817,7 +828,7 @@
     },
     "@dzgrid/dom/editors-base": {
       "file": "packages/dom/src/editors-base.ts",
-      "maxGzip": 6720,
+      "maxGzip": 6765,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
@@ -842,6 +853,15 @@
       "file": "packages/dom/src/editors-list.ts",
       "maxGzip": 1350,
       "over": "@dzgrid/dom/popup",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/editors-textarea": {
+      "file": "packages/dom/src/editors-textarea.ts",
+      "maxGzip": 1060,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -886,7 +906,7 @@
     },
     "@dzgrid/dom/columns": {
       "file": "packages/dom/src/columns.ts",
-      "maxGzip": 4450,
+      "maxGzip": 4500,
       "over": "@dzgrid/dom",
       "external": [
         "@dzgrid/core",
@@ -927,7 +947,7 @@
     },
     "@dzgrid/dom/find": {
       "file": "packages/dom/src/find.ts",
-      "maxGzip": 2660,
+      "maxGzip": 2690,
       "over": "@dzgrid/dom",
       "external": [
         "@dzgrid/core",
@@ -1038,6 +1058,17 @@
         "@dzgrid/dom/internal"
       ]
     },
+    "@dzgrid/dom/show-as": {
+      "file": "packages/dom/src/show-as.ts",
+      "maxGzip": 1050,
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/core/totals",
+        "@dzgrid/dom/internal"
+      ],
+      "over": "@dzgrid/dom"
+    },
     "@dzgrid/dom/vertical-headers": {
       "file": "packages/dom/src/vertical-headers.ts",
       "maxGzip": 510,
@@ -1121,6 +1152,17 @@
         "@dzgrid/core/detail",
         "@dzgrid/dom/internal"
       ]
+    },
+    "@dzgrid/dom/row-heights": {
+      "file": "packages/dom/src/row-heights.ts",
+      "maxGzip": 560,
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/core/detail",
+        "@dzgrid/dom/internal"
+      ],
+      "over": "@dzgrid/dom"
     },
     "@dzgrid/dom/row-gaps": {
       "file": "packages/dom/src/row-gaps.ts",
