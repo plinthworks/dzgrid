@@ -1,6 +1,6 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-11-19 (suite). **1.14.0 préparée (non commitée, non publiée ; propriétaire « vérification puis tu
+Mis à jour : 2026-11-19. **1.14.0 publiée sur npm par le propriétaire (les cinq paquets vérifiés ; étiquette v1.14.0 à poser).** Suite, plus tard (propriétaire « le reste on le fera après ») : sparklines, détail des maîtres dans Excel, les questions de docs/gap-aggrid-2026-11.md. Avant : 2026-11-19 (suite). **1.14.0 préparée (non commitée, non publiée ; propriétaire « vérification puis tu
 publies »)** : cinq paquets en 1.14.0, CHANGELOG `[1.14.0] - 2026-11-19` (notes de mise à jour : `rowHeight` peut être une
 fonction, le reste optionnel), `docs/release-1.14.0.md`, pages d'API régénérées. Revue indépendante : deux défauts corrigés,
 tests rouges d'abord — `showAs` imprimait vide une ligne épinglée (`show-as.test.ts`) ; `groupSelect()` sous `rules()`
