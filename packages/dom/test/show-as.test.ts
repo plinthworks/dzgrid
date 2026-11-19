@@ -123,3 +123,20 @@ describe('bad input (19, 24)', () => {
     ]);
   });
 });
+
+describe('a pinned row (1.14.0 review)', () => {
+  it('not counted in the total: the screen and print both show its value, never a blank (print asked the share)', async () => {
+    const { preparePrint } = await import('../src/print.js');
+    const { EN_PRINT } = await import('../src/locales/en-print.js');
+    const pins = pinnedRows<R>({ top: [{ id: 'ref', region: null, fruit: 'ref', qty: 3, price: 0, day: '2026-03-01' }] });
+    const t = gmake({
+      columns: cols('percentOfTotal'), grouping: null, features: [showAs(), pins as never], // a feature typed for R, the list typed for unknown
+      settings: { messages: { ...BUNDLES.en, text: { ...BUNDLES.en.text, ...EN_PINNED.text, ...EN_PRINT.text } } },
+    });
+    await preparePrint(t.g);
+    const tr = [...document.querySelectorAll<HTMLTableRowElement>('body > .dzg-print tbody tr')];
+    const qtyAt = [...document.querySelectorAll('body > .dzg-print thead tr:last-child th')].findIndex((th) => th.textContent === 'Qty');
+    // The pinned row first (its value, 3), then r1 at 10 / 25.5 — the total without the pinned row.
+    expect([tr[0]!.cells[qtyAt]!.textContent, tr[1]!.cells[qtyAt]!.textContent]).toEqual(['3', '39.2%']);
+  });
+});

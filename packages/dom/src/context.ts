@@ -270,6 +270,8 @@ export interface GridContext<T> {
    * print, find and the narrow screen's lines, so each says what the cell says.
    */
   share?: ((n: RowNode<unknown> | RowKey, col: ResolvedColumn<unknown>) => string | undefined) | undefined;
+  /** Set by `rules()`: an unselected row the selection rule refuses now — what `groupSelect()` counts as ticked, as the header box does. */
+  refused?: ((key: RowKey) => boolean) | undefined;
   /** Find's text in force (`@dzgrid/dom/find`), '' or absent: none — what a cell part is given (`search.find`). */
   findText?: string;
   msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | TotalsMessageKey | ImportMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | ClearFiltersKey | RowDragMessageKey | FiltersPanelMessageKey | DockMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey | PivotMessageKey | PivotBarMessageKey, params?: Readonly<Record<string, string | number>>): string;

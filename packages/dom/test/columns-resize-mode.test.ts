@@ -293,6 +293,6 @@ describe('the budget line (owner Q6-6: the grant 3 500 → 4 200)', () => {
   it('@dzgrid/dom/columns is set from the step-6 measure, at most 4 250 (1.10.0 release, +2 % rule: gzip over the grown base; the grant 4 200 before)', () => {
     const b = JSON.parse(readFileSync(`${process.cwd()}/size-budget.json`, 'utf8')).entries['@dzgrid/dom/columns'].maxGzip as number;
     expect(b).toBeGreaterThan(2900);
-    expect(b).toBeLessThanOrEqual(4250);
+    expect(b).toBeLessThanOrEqual(4500); // 1.14.0 (owner « A », dragOutHides): 4 250 → 4 500
   });
 });

@@ -267,7 +267,7 @@ export function columns(o: ColumnsOptions = {}): ColumnsFeature {
         mark(over);
         // Out (M22–M24): 40 px past the grid's box (the layer's) on a side, a column that may be hidden, not the last shown;
         // a target wins. The ghost then says « ⊘ {column} hidden » (`data-dzg-hide` for the theme); the patch is the hide.
-        const out = !over && !!o.dragOutHides && m.get(x.id)?.def.hideable !== false && m.visible().length > 1 && Math.max(R.left - p.clientX, p.clientX - R.right, R.top - p.clientY, p.clientY - R.bottom) >= 40;
+        const out = !over && !!o.dragOutHides && m.get(x.id)?.def.hideable !== false && m.visible().length > 1 && Math.max(-logicalX(p, R, dir), logicalX(p, R, dir) - R.width, R.top - p.clientY, p.clientY - R.bottom) >= 40;
         if (out !== !!x.out) (x.out = out), setAttr(ghost, 'data-dzg-hide', out ? '' : null), (ghost.textContent = out ? '⊘ ' + text('chooser.hidden', x.id) : label(x));
         const inside = !over && within(r);
         const lx = logicalX(p, r, dir);

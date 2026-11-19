@@ -137,7 +137,8 @@ row's box stands for every row under it.
 27. **A click on its box, or Space on the group row** (any column): partly ticked or unticked → every row under it
     ticked; ticked → every row under it unticked. One `selectionChanged` (source `user`), said as any selection
     (« 3 lignes sélectionnées »). Under « all » (`exclude`), unticking a group adds its rows to the exceptions. A
-    selection rule (`selection-rules.md`) still decides row by row.
+    selection rule (`selection-rules.md`) still decides row by row. Under a rule, a row it refuses counts as ticked for the
+    box's state, as for the header box: ticked when every other row is, so its click can untick (1.14.0 review).
 28. **Accessible**: the box is a `checkbox` named by the group's label (« Nord (3) »), `aria-checked` true / false /
     mixed; the row keeps its tree level and open state.
 29. **Server-side groups** (`server-side-groups.md`): the box acts on the rows the browser holds under the group — those

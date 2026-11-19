@@ -151,3 +151,15 @@ describe('with detail panels, auto height (5)', () => {
     expect(t.L().heightOf(t.at(k('R4')))).toBe(32);
   });
 });
+
+describe('keyboard paging over rows of their own heights (1.14.0 review)', () => {
+  it('PageDown moves a page of distance (9 × 32 = 288 px): from R0 to R6 (256…320), then to R12 (512…576)', () => {
+    const t = make({ settings: { rowHeight: tall } });
+    t.g.api.focusCell(k('R0'), 'id');
+    const press = () => (document.activeElement as HTMLElement).dispatchEvent(new KeyboardEvent('keydown', { key: 'PageDown', bubbles: true, cancelable: true }));
+    press();
+    expect(t.g.kernel.focus).toMatchObject({ kind: 'cell', row: k('R6') });
+    press();
+    expect(t.g.kernel.focus).toMatchObject({ kind: 'cell', row: k('R12') });
+  });
+});

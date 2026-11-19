@@ -37,12 +37,12 @@ function setup(g: GridContext<unknown>): FeatureHandle {
     for (let j = i < 0 ? L.count : i + 1; j < L.count && lv(j) > lv(i); j++) if (L.nodeAt(j as DisplayIndex).kind === 'data') out.push(L.keyAt(j as DisplayIndex));
     return out;
   };
-  /** 'true', 'false' or 'mixed'; no row held: as « all » says (the box then unavailable). */
+  /** 'true', 'false' or 'mixed' (a row a selection rule refuses counts as ticked, as for the header box); no row held: as « all » says (the box then unavailable). */
   const state = (key: RowKey): string => {
     const s = kernel.selection;
     const ks = under(key);
     const n = ks.filter((k) => isSelected(s, k)).length;
-    return ks.length ? (n === ks.length ? 'true' : n ? 'mixed' : 'false') : String(s.mode === 'exclude' && !s.keys.size);
+    return ks.length ? (!n ? 'false' : n + ks.filter((k) => g.refused?.(k)).length === ks.length ? 'true' : 'mixed') : String(s.mode === 'exclude' && !s.keys.size);
   };
   /** Every row under it ticked, or (all ticked) unticked: one selection, the user's. */
   const flip = (key: RowKey): true => {

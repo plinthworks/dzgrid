@@ -55,7 +55,7 @@ declare class DzGrid<T> implements AfterContentInit {
     readonly density: _angular_core.InputSignal<"compact" | "comfortable" | "spacious" | undefined>;
     readonly headers: _angular_core.InputSignal<"hidden" | "none" | "shown" | undefined>;
     readonly focusVisible: _angular_core.InputSignal<"always" | "keyboard" | undefined>;
-    readonly rowHeight: _angular_core.InputSignal<number | undefined>;
+    readonly rowHeight: _angular_core.InputSignal<number | ((row: Readonly<T>) => number) | undefined>;
     readonly headerHeight: _angular_core.InputSignal<number | _dzgrid_dom.HeaderHeights | undefined>;
     readonly theme: _angular_core.InputSignal<_dzgrid_dom.GridTheme | undefined>;
     readonly icons: _angular_core.InputSignal<_dzgrid_dom.GridIcons | undefined>;

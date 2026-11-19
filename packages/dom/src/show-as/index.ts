@@ -94,6 +94,8 @@ function setup(g: GridContext<unknown>, o: ShowAsOptions): FeatureHandle {
     // A footer by its group; the grand total and a totals row by the total ('').
     const k = typeof n == 'string' ? n : n.kind === 'footer' ? n.group ?? '' : n.key;
     const m = sums(c);
+    // A row the total does not count (a pinned row): its value, as the screen shows it.
+    if (k !== '' && !m.up.has(k as RowKey)) return undefined;
     const own = k === '' ? m.sum.get('') : m.own.get(k as RowKey) ?? m.sum.get(k as RowKey);
     const up = m.up.get(k as RowKey);
     const of = c.def.showAs === 'percentOfGroup' && up !== undefined ? m.sum.get(up)! : m.sum.get('')!;

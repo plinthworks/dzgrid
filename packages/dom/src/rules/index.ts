@@ -30,6 +30,7 @@ function setup(g: GridContext<unknown>): FeatureHandle {
   const k = g.kernel;
   const gate = ruleGate(() => g.settings.selection?.canSelect, (key) => g.rows.row(key), () => k.selection, () => g.settings.context, g.report);
   setSelectionGate(k, gate);
+  g.refused = (key) => gate.on && !isSelected(k.selection, key) && gate.refused(key);
 
   // The user's refusal said, every time (the live region empties first); with what was accepted in
   // the same command, one sentence. A host's is told as a problem, never said.
@@ -58,6 +59,7 @@ function setup(g: GridContext<unknown>): FeatureHandle {
     destroy() {
       off();
       setSelectionGate(k);
+      delete g.refused;
     },
   };
 }

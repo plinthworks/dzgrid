@@ -78,6 +78,7 @@ a number column read as a percentage of a total, without a column computed by ha
 20. **The total** (decided): the sum of the column's numbers over **the rows that pass the filters and the search**, every
     page, every group open or closed — what a totals row sums (8). A filter changes the shares of the rows left; they add
     up to 100 % again. An empty or unreadable cell counts for nothing and shows nothing. An edit counts at once (13).
+    A pinned row (`pinnedRows()`) is not counted and shows its value, on screen and in print (1.14.0 review).
 21. **`percentOfTotal`**: a row shows its number over the total; a group row its group's sum over the total; a group
     footer as its group; the grand total and a totals row (`totalsRow()`) 100 %. **`percentOfGroup`**: a row over the sum
     of its own group (its nearest group row); a group row over the sum of the group above it, a top group over the total;

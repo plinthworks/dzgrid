@@ -1461,6 +1461,17 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   matrix (14). +2 %: detail 4 360 (4 349), Angular 8 800 (8 790), real Angular example 103 650 (103 593); K.8 92 485.
 - For the owner: commit, publish (`docs/release-1.13.0.md`; the panel's size lines accepted 2026-11-15).
 
+## 1.14.0 — minor (2026-11-19; owner « vérification puis tu publies »)
+
+- [x] `columns({ dragOutHides: true })` (column-move.md 22–28); `showAs` + `showAs()` (aggregation.md 19–24); the
+  textarea editor (editors.md 18–22); Excel title / subtitle / footer (xlsx-export.md 6–11); `groupSelect()`
+  (row-grouping.md 25–29); `rowHeight` by a function + `rowHeights()` (virtual-scroll.md). All opt-in.
+- [x] Independent review: a pinned row printed blank under `showAs`; `groupSelect()` under a selection rule could not
+  untick — both fixed, tests first. Five stale pins / guards from the 1.14.0 commits fixed.
+- [x] Gate green, real app 58 / 58, matrices 75 / 75 (1.14) and 15 836 / 15 836 (1.12), release:check at 1.14.0 (real
+  Angular example 103 800, +2 %), site 36 / 36, the owner's app 199 OK on the local pack. K.8 92 611 / 93 000.
+- For the owner: commit, publish (`docs/release-1.14.0.md`).
+
 ## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)
 
 - **Batch 1 — skeleton (2026-11-10, not committed).** `website/` (Astro Starlight, versions pinned as DzCalendar's,

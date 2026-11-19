@@ -106,3 +106,30 @@ describe('bad input', () => {
     expect(t.host.querySelector('.dzg-body .dzg-box[role=checkbox]')).toBe(null);
   });
 });
+
+describe('under a selection rule (row-grouping.md 27, 1.14.0 review)', () => {
+  it('a group whose rows are all ticked or refused reads ticked, and its click unticks them (as the header box)', async () => {
+    const { rules } = await import('../src/rules.js');
+    const { EN_RULES } = await import('../src/locales/en-rules.js');
+    const { BUNDLES } = await import('./support-grouping.js');
+    const t = gmake({
+      grouping: { by: ['region'] }, features: [groupSelect(), rules()],
+      // r3 can never be ticked.
+      settings: { selection: { mode: 'multi', checkbox: true, canSelect: (n) => n.data.id !== 'r3' }, messages: { ...BUNDLES.en, text: { ...BUNDLES.en.text, ...EN_RULES.text } } },
+    });
+    const d = t.g.kernel.rows.displayed;
+    let nord: RowKey | undefined;
+    for (let i = 0; i < d.count; i++) {
+      const n = d.nodeAt(i as never); // a display index
+      if (n.kind === 'group' && n.path.join('/') === 'Nord') nord = n.key;
+    }
+    const box = () => t.row(nord!)!.querySelector<HTMLElement>('.dzg-check .dzg-box')!;
+    click(box());
+    const keys = () => [...t.g.kernel.selection.keys].map((x) => String(x).replace(/^d:\d+:/, '')).sort().join(',');
+    expect(keys()).toBe('r1,r4');
+    expect(box().getAttribute('aria-checked')).toBe('true');
+    click(box());
+    expect(keys()).toBe('');
+    expect(box().getAttribute('aria-checked')).toBe('false');
+  });
+});

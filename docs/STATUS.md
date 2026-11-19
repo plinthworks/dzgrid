@@ -1,5 +1,15 @@
 # État du travail — à lire en premier si la session est perdue
 
+Mis à jour : 2026-11-19 (suite). **1.14.0 préparée (non commitée, non publiée ; propriétaire « vérification puis tu
+publies »)** : cinq paquets en 1.14.0, CHANGELOG `[1.14.0] - 2026-11-19` (notes de mise à jour : `rowHeight` peut être une
+fonction, le reste optionnel), `docs/release-1.14.0.md`, pages d'API régénérées. Revue indépendante : deux défauts corrigés,
+tests rouges d'abord — `showAs` imprimait vide une ligne épinglée (`show-as.test.ts`) ; `groupSelect()` sous `rules()`
+restait partiel et ne décochait plus (`grouping-select.test.ts` ; `g.refused` posé par `rules()`) ; fiches
+`aggregation.md` 20, `row-grouping.md` 27. Test ajouté : Page bas sur des hauteurs variables. Vérifié : voir
+`docs/release-1.14.0.md` « Vérifié » (gate vert, real-app 58/58, matrices 75/75 et 15 836/15 836, release:check, site
+36/36, mots interdits, appli du propriétaire 199 OK). Appli Angular réelle 103 800 (+2 %). Reste au propriétaire :
+commiter (pas `playground/` ni `vite.config.ts`), publier, étiqueter v1.14.0.
+
 Mis à jour : 2026-11-19. **1.14.0 : les cinq ajouts (propriétaire 2026-11-18 « oui lance 1 à 5 »), chacun optionnel,
 non commités.** Fiches d'abord : `aggregation.md` 19–24 (`showAs: 'percentOfTotal' | 'percentOfGroup'`, entrée
 `@dzgrid/dom/show-as` ; total = lignes gardées par filtres et recherche ; **les fichiers écrivent la valeur**, l'écran,

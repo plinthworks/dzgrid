@@ -5,7 +5,10 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased — 1.14.0
+## [1.14.0] - 2026-11-19
+
+Six opt-in additions from the ag-Grid gap analysis (owner 2026-11-18, « oui lance 1 à 5 », and dragging a header out to
+hide it). A minor: additions only, nothing removed; every default unchanged.
 
 ### Added
 - **`columns({ dragOutHides: true })`** (opt-in, owner 2026-11-18; column-move.md 22–28): a header dragged 40 px or
@@ -49,8 +52,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (Chrome / Firefox / WebKit): first paint 50 / 82 / 71 ms (one height: 34 / 60 / 58), a new function 31 / 39 / 35 ms,
   scroll frames p95 18.3 / 18 / 18 ms as with one height (virtual-scroll.md « Row height by a function » 6).
 
+### Fixed (before release, independent review)
+- `showAs`: a pinned row (not counted in the total) printed blank in the share column; it prints its value, as the screen
+  shows it.
+- `groupSelect()` under a selection rule (`rules()`): a group whose rows were all ticked except those the rule refuses
+  stayed « partly ticked », and its box could never untick them; it now reads ticked, as the header box does, and its
+  click unticks them.
+
 ### Changed
 - `api.refresh()` lays the rows out again (no data asked): a `rowHeights()` function is asked again for every row.
+
+### Upgrading from 1.13.0
+- Nothing to change. **`GridSettings.rowHeight` (Angular `[rowHeight]`) may now be a function** `(row) => number`: code
+  that reads the setting back and assumed a number should check `typeof` (accepted in `check:api`, owner « AA »). The
+  function needs `rowHeights()` (`@dzgrid/dom/row-heights`); without it, the density's height and `missing-feature`.
+- Everything else is opt-in: `columns({ dragOutHides: true })`, `showAs` with `showAs()`, `edit: { editor: 'textarea' }`
+  with `editors({ textarea: textareaEditor })`, `xlsx: { title, subtitle, footer }`, `groupSelect()`. Four new entries:
+  `@dzgrid/dom/show-as`, `@dzgrid/dom/editors-textarea`, `@dzgrid/dom/group-select`, `@dzgrid/dom/row-heights`.
+- `api.refresh()` also lays the rows out again (no request; it asks a row height function again).
+- Size lines (owner « A », « AA »): `@dzgrid/dom/columns` 4 250 → 4 500, `@dzgrid/core/xlsx` 7 150 → 7 350; by the +2 %
+  rule `@dzgrid/dom` 26 000 → 26 120, `/editors` 6 765, `/find` 2 690, the xlsx chunk 1 122, `columns.css` 1 290; new
+  lines for the four entries. K.8 under 93 000.
 
 ## [1.13.0] - 2026-11-16
 

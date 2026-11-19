@@ -178,10 +178,11 @@ export interface GridSettings<T> {
     readonly numerals?: 'latn' | 'locale';
     readonly direction?: 'auto' | 'ltr' | 'rtl';
     readonly density?: 'compact' | 'comfortable' | 'spacious';
-    readonly headers?: 'shown' | 'hidden';
+    readonly headers?: 'shown' | 'hidden' | 'none';
+    readonly focusVisible?: 'always' | 'keyboard';
     readonly multiSort?: boolean;
     readonly sameRow?: (a: T, b: T) => boolean;
-    readonly rowHeight?: number;
+    readonly rowHeight?: number | ((row: Readonly<T>) => number);
     readonly headerHeight?: number | HeaderHeights;
     readonly selection?: {
         readonly mode: 'none' | 'single' | 'multi';
@@ -4168,6 +4169,58 @@ export declare function fileImport(o: FileImportOptions): FileImportFeature;
 
 ```ts
 export declare const IMPORT_CSS: string;
+```
+
+## `@dzgrid/dom/row-heights`
+
+### rowHeights
+
+```ts
+export declare function rowHeights(): GridFeature;
+```
+
+## `@dzgrid/dom/show-as`
+
+### showAs
+
+```ts
+export declare function showAs(o?: ShowAsOptions): GridFeature;
+```
+
+### ShowAsOptions
+
+```ts
+export interface ShowAsOptions {
+    readonly digits?: number;
+}
+```
+
+## `@dzgrid/dom/editors-textarea`
+
+### TextareaEditor
+
+```ts
+export type TextareaEditor = typeof import('./editors-textarea/index.js').textareaEditor;
+```
+
+### textareaEditor
+
+```ts
+export declare function textareaEditor(x: EdEnv, f: HTMLTextAreaElement): Ed;
+```
+
+### TEXTAREA_CSS
+
+```ts
+export declare const TEXTAREA_CSS: string;
+```
+
+## `@dzgrid/dom/group-select`
+
+### groupSelect
+
+```ts
+export declare function groupSelect(): GridFeature;
 ```
 
 ## Paquets de textes
