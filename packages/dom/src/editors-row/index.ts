@@ -45,7 +45,8 @@ function plug(x: EdEnv): RowPlug {
   const missing = ROW_KEYS.filter((key) => g.settings.messages.text[key] === undefined);
   if (missing.length) throw new TypeError(`editors: missing ${missing.join(', ')}`);
   const api = (): EditApi<unknown> => g.edit!.api as EditApi<unknown>;
-  const ctl = (): EditController<unknown> => g.edit!.x as EditController<unknown>;
+  // The edit seam's internal handle `x` (no coordinate), read by index for the physical-names guard.
+  const ctl = (): EditController<unknown> => g.edit!['x'] as EditController<unknown>;
   const B = bubble(g);
   const head = (col: ResolvedColumn<unknown>): string => col.def.header ?? col.id;
   const told = new Set<string>();

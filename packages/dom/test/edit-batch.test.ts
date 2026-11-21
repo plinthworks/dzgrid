@@ -232,6 +232,32 @@ describe('rows that move or leave (edit-batch.md 10)', () => {
   });
 });
 
+describe('review before 1.15.0', () => {
+  it('the root says how many cells are pending, and stops saying it once discarded while none is on screen', async () => {
+    const t = batched();
+    keep(t, 'r1', 'n', '10');
+    await flush();
+    expect(t.ctx.el.root.getAttribute('data-dzg-pending')).toBe('1');
+    t.g.kernel.dispatch({ type: 'filter.column', column: 'n', filter: { type: 'number', op: 'gt', value: 15 } }, 'api');
+    await flush();
+    expect(t.cell('r1', 'n')).toBeNull();
+    t.bapi().discardAll();
+    await flush();
+    expect(t.ctx.el.root.hasAttribute('data-dzg-pending')).toBe(false);
+  });
+
+  it('saveAll() resolves when the grid is destroyed before the application answered (edit-batch.md 12)', async () => {
+    const t = batched();
+    keep(t, 'r1', 'n', '10');
+    let done: unknown = null;
+    void t.bapi().saveAll().then((r) => (done = r));
+    expect(t.held).toHaveLength(1);
+    t.g.destroy();
+    await flush();
+    expect(done).toEqual({ sent: 1, refused: [] });
+  });
+});
+
 describe('set up', () => {
   it('without edit(): one missing-feature warning, no api', () => {
     const b = editBatch<R>();

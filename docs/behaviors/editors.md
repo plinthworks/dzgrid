@@ -248,7 +248,8 @@ server while the user types; the APG « combobox with list autocomplete » patte
     `aria-controls`), opening with the cell's text selected (a printable key: that character); its listbox in the same
     popup as the simple list's (below the cell, above near the bottom, never covering the field).
 25. **Asking**: on opening, with the text shown; then 250 ms after the last keystroke. A newer ask **aborts** the one
-    before (its `signal`); an answer that comes after a newer ask is ignored. Closing the field aborts what is asked.
+    before (its `signal`); an answer that comes after a newer ask is ignored. Closing the field aborts what is asked, and says nothing more
+    (a search rejecting once aborted is not « Search failed »).
 26. **States**, each in the listbox and said politely: *loading* (`aria-busy="true"`, « Searching… »,
     `edit.searching`), *no result* (« No result », `edit.noResult`), *error* (a throw or a rejection: « Search
     failed », `edit.searchFailed`; typing again asks again; the error is not a cell refusal and is never told as row

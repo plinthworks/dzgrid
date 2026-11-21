@@ -138,6 +138,19 @@ describe('the searching list (editors.md 23–29)', () => {
     expect(t.of('cellEdited')).toEqual([]);
   });
 
+  it('closing aborts the ask: its rejection (a fetch aborted) says nothing — no « Search failed » after the field is gone', async () => {
+    const t = grid();
+    t.open();
+    const said = vi.spyOn(t.ctx.live, 'announce');
+    t.press('Escape');
+    t.press('Escape');
+    expect(t.asks[0]!.signal.aborted).toBe(true);
+    // What a fetch does with an aborted signal: it rejects.
+    t.asks[0]!.no(new DOMException('aborted', 'AbortError'));
+    await settle();
+    expect(said.mock.calls.map((c) => c[0])).not.toContain('Search failed');
+  });
+
   it('a click on an option keeps it', async () => {
     const t = grid();
     t.open();

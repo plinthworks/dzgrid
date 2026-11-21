@@ -5,7 +5,7 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased — 1.15.0
+## [1.15.0] - 2026-11-21
 
 The option that retires the owner's app's last patch on DzGrid's own classes (owner 2026-11-21, « ★ partout »), and
 form editing — batch, full row, a list searched on the server (owner 2026-11-21, « fais-les tous »; gap analysis Q-G2
@@ -66,6 +66,24 @@ form editing — batch, full row, a list searched on the server (owner 2026-11-2
   editors-search 1 350 (1 200), `forms.css` 600 (513), the -forms texts 300 / 350 / 500; K.8 92 853 / 93 000.
 - `@dzgrid/dom` 26 120 → 26 250 (measured 26 245 with the row seam), `@dzgrid/theme` 3 110 → 3 170 (measured 3 167), `variables.css` 1 950 → 1 970
   (measured 1 966), by the +2 % rule; K.8 92 814 / 93 000.
+- The real Angular build (`example:bytes`) 103 800 → 104 000 by the +2 % rule (measured 103 979).
+
+### Fixed (before release, independent review)
+- The searching list: closing the field aborts its ask, and a search that rejects once aborted (what `fetch` does) no
+  longer says « Search failed » after the field is gone.
+- `editBatch()`: `saveAll()` resolves (`{ sent, refused: [] }`) when the grid is destroyed before the application
+  answered, instead of never; the root's `data-dzg-pending` count is cleared when the last pending changes are
+  discarded while none of their cells is on screen.
+
+### Upgrading from 1.14.0
+- Nothing to change; every addition is opt-in. **`GridEvent` gains `pendingChange`** (`{ count }`, sent only by
+  `editBatch()`): an exhaustive `switch` over `GridEvent['type']` needs a case for it (accepted in `check:api`, as
+  `groupByChanged` and `rowMove` before). **`SaveOrigin` gains `'batch'` and `'row'`**: a `save` that switches on
+  `origin` sees them only with `editBatch()` or the row editor.
+- **The base texts gain `header.sortButton`** (en / fr / ar, « Sort by {column} »): a bundle of your own may add it;
+  without it the `sortMark: 'always'` button is named by the column's title.
+- New entries: `@dzgrid/dom/edit-batch`, `@dzgrid/dom/editors-row`, `@dzgrid/dom/editors-search`,
+  `@dzgrid/dom/locales/<en|fr|ar>-forms`, `@dzgrid/theme/forms.css`.
 
 ## [1.14.0] - 2026-11-19
 

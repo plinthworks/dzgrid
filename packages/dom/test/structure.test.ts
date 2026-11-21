@@ -152,7 +152,7 @@ describe('the DOM layer’s shape', () => {
 
   it('keeps the popup host out of the base: only the entries import it', () => {
     const offenders = files(SRC)
-      .filter((f) => !/^(filters|editors|editors-list|column-menu|columns-panel|context-menu|menu)\//.test(relative(SRC, f)) && relative(SRC, f) !== 'popup.ts')
+      .filter((f) => !/^(filters|editors|editors-list|editors-search|column-menu|columns-panel|context-menu|menu)\//.test(relative(SRC, f)) && relative(SRC, f) !== 'popup.ts')
       .filter((f) => /^import (?!type )[^;]*from '\.{1,2}\/(?:.*\/)?popup\.js'/m.test(readFileSync(f, 'utf8')))
       .map((f) => relative(SRC, f));
     expect(offenders).toEqual([]);
@@ -257,14 +257,15 @@ describe('the DOM layer’s shape', () => {
     // @dzgrid/dom/edit: value imports from the core, its internal entry, @dzgrid/core/edit, its own folder and the
     // guarded writes (render/write.ts, no import of its own: an entry using it pulls nothing else in).
     const entry = files(SRC).filter((f) => /^edit(\/|\.ts$)/.test(relative(SRC, f)));
-    expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['edit.ts', 'edit/index.ts', 'edit/marks.ts', 'edit/stale.ts']);
+    expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['edit.ts', 'edit/index.ts', 'edit/marks.ts', 'edit/row-rule.ts', 'edit/stale.ts']); // 1.15.0: the row rule, shared by edit-batch and editors-row
     const offenders = entry
       .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
       .filter((s) => !/: @dzgrid\/(core|core\/internal|core\/edit)$/.test(s) && !/^edit(\/[^:]+)?\.ts: \.\/(edit\/)?[a-z-]+\.js$/.test(s) && !/^edit\/[a-z]+\.ts: \.\.\/render\/write\.js$/.test(s));
     expect(offenders).toEqual([]);
     expect(readFileSync(join(SRC, 'render/write.ts'), 'utf8')).not.toMatch(/^import /m);
     // Nothing else imports it (its types aside: the editors name `EditApi`), nor the core's edit controller: a grid that does not edit carries none of it.
-    expect(files(SRC).filter((f) => !/^edit(\/|\.ts$)/.test(relative(SRC, f)) && /from '(\.{1,2}\/(?:.*\/)?edit(\/|\.js')|@dzgrid\/core\/edit')/.test(readFileSync(f, 'utf8').replace(/^import type .*$/gm, ''))).map((f) => relative(SRC, f))).toEqual([]);
+    // 1.15.0: the batch and the row editor sit over it (opt-in entries beside edit(), measured `over` it); types aside.
+    expect(files(SRC).filter((f) => !/^(edit|edit-batch|editors-row)(\/|\.ts$)/.test(relative(SRC, f)) && /from '(\.{1,2}\/(?:.*\/)?edit(\/|\.js')|@dzgrid\/core\/edit')/.test(readFileSync(f, 'utf8').replace(/^(import|export) type .*$/gm, ''))).map((f) => relative(SRC, f))).toEqual([]);
   });
 
   it('has the editors entry reach the base only through the grid’s context, the types and a few pure helpers (Phase 5 step 5)', () => {
@@ -272,7 +273,7 @@ describe('the DOM layer’s shape', () => {
     // the direction helpers (no import of their own besides types); never @dzgrid/dom/edit's code (the grid hands its API).
     // Step 6: the popup host too (measured apart, `over` it); the calendar chunk (editors/dates/) by import() only.
     const entry = files(SRC).filter((f) => /^editors(\/[^/]+|\.ts|-base\.ts)$/.test(relative(SRC, f)));
-    expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['editors-base.ts', 'editors.ts', 'editors/bubble.ts', 'editors/dates.ts', 'editors/host.ts', 'editors/index.ts']);
+    expect(entry.map((f) => relative(SRC, f)).sort()).toEqual(['editors-base.ts', 'editors.ts', 'editors/bubble.ts', 'editors/cells.ts', 'editors/dates.ts', 'editors/host.ts', 'editors/index.ts']); // 1.15.0: cells.ts, the field helpers shared with editors-row
     const offenders = entry
       .flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => `${relative(SRC, f)}: ${m[1]}`))
       .filter((s) => !/: @dzgrid\/(core|core\/internal|dom\/internal)$/.test(s) && !/^editors(\/[^:]+|-base)?\.ts: \.\/(editors\/)?[a-z-]+\.js$/.test(s) && !/^editors\/[a-z]+\.ts: \.\.\/(render\/write|dir|popup)\.js$/.test(s));
@@ -280,7 +281,8 @@ describe('the DOM layer’s shape', () => {
     expect(readFileSync(join(SRC, 'dir.ts'), 'utf8').match(/^import (?!type ).*$/gm) ?? []).toEqual([]);
     // Nothing imports it: a grid that does not edit (or edits only by its API) carries none of it; the base's host is gone.
     // (Types aside: the list's entry names the editors' `Ed` shape, step 6.)
-    expect(files(SRC).filter((f) => !/^editors(\/|\.ts$|-base\.ts$)/.test(relative(SRC, f)) && /from '\.{1,2}\/(?:.*\/)?editors(\/|\.js')/.test(readFileSync(f, 'utf8').replace(/^import type .*$/gm, ''))).map((f) => relative(SRC, f))).toEqual([]);
+    // 1.15.0: the row editor sits over it (an opt-in entry for editors({ row }), measured `over` it); types aside.
+    expect(files(SRC).filter((f) => !/^(editors|editors-row)(\/|\.ts$|-base\.ts$)/.test(relative(SRC, f)) && /from '\.{1,2}\/(?:.*\/)?editors(\/|\.js')/.test(readFileSync(f, 'utf8').replace(/^(import|export) type .*$/gm, ''))).map((f) => relative(SRC, f))).toEqual([]);
     expect(files(SRC).map((f) => relative(SRC, f))).not.toContain('render/editor.ts');
     // Never the filters (layering, phase plan §4), not even their types: what both use lives in @dzgrid/dom/internal or dates/.
     expect(files(SRC).filter((f) => /^editors(\/|\.ts$)/.test(relative(SRC, f)) && /from '[^']*filters[^']*'/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);

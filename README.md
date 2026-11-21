@@ -167,16 +167,16 @@ Minified and gzipped, each entry bundled as a consumer ships it, the packages it
 | `@dzgrid/dom/locales/{en,fr,ar}-pinned` | the pinned rows' messages | 116 / 130 / 156 |
 | `@dzgrid/dom/locales/{en,fr,ar}-print` | printing's messages | 132 / 140 / 160 |
 | `@dzgrid/dom/locales/{en,fr,ar}-fresh` | the new rows' sentence | 115 / 132 / 197 |
-| `@dzgrid/theme` | the stylesheet / its comfortable density (`dzgrid.comfort.css`) | 3 093 / 565 |
+| `@dzgrid/theme` | the stylesheet / its comfortable density (`dzgrid.comfort.css`) | 3 167 / 565 |
 | `@dzgrid/theme/{edit,range,fill}.css` | editing, blocks, the fill handle | 2 266 / 481 / 457 |
 | `@dzgrid/theme/{columns,columns-panel,pinned-rows}.css` | columns, the columns chooser, pinned rows | 1 262 / 1 706 / 332 |
 | `@dzgrid/theme/print.css` | printing / its unlayered copy | 369 / 326 |
 | `@dzgrid/theme/{midnight,clinic}.css` | the showcase themes | 446 / 497 |
 | `@dzgrid/theme/{tailwind,tailwind3,bootstrap}.css` | the framework bridges | 325 / 325 / 340 |
-| `@dzgrid/angular` | the Angular wrapper | 8 790 |
+| `@dzgrid/angular` | the Angular wrapper | 8 826 |
 | `@dzgrid/element` | the Web Component, over the DOM layer | 1 690 |
-| profile: the audit screen (K.8) | everything above it uses, first load, with the theme and one language | 92 611 |
-| the same screen in a real Angular 21 build | DzGrid's share of the first load (`ng build`, `npm run example:bytes`, at the 1.14.0 release) | 103 734 |
+| profile: the audit screen (K.8) | everything above it uses, first load, with the theme and one language | 92 853 |
+| the same screen in a real Angular 21 build | DzGrid's share of the first load (`ng build`, `npm run example:bytes`, at the 1.15.0 release) | 103 979 |
 
 Optional peers: `@tzslot/core` and `@tzslot/dom` 2.4 (date filters and date editors), `gsap` 3.13 (motion).
 

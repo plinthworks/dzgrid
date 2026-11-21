@@ -178,7 +178,7 @@ describe('layering of the base and the server entry', () => {
     const both = await gz({ stdin: { contents: "export * from './index.ts';\nexport * from './edit.ts';", resolveDir: SRC, loader: 'ts' } });
     const alone = await gz({ entryPoints: [SRC + 'index.ts'] });
     const entry = JSON.parse(readFileSync(fileURLToPath(new URL('../../../size-budget.json', import.meta.url)), 'utf8')).entries['@dzgrid/core/edit'];
-    expect(entry).toMatchObject({ file: 'packages/core/src/edit.ts', maxGzip: 3175, over: '@dzgrid/core' }); // Q8-5: 3 100 → 3 150 (compression with the base's fold seam); owner « set include only » (2026-10-29): 3 150 → 3 160
+    expect(entry).toMatchObject({ file: 'packages/core/src/edit.ts', maxGzip: 3238, over: '@dzgrid/core' }); // 1.15.0 form editing's hold seam: 3 175 → 3 238 (+2 %); Q8-5: 3 100 → 3 150 (compression with the base's fold seam); owner « set include only » (2026-10-29): 3 150 → 3 160
     expect(both - alone).toBeLessThanOrEqual(entry.maxGzip);
   });
 

@@ -119,11 +119,11 @@ function searchWith(x: EdEnv, value: unknown, search: OptionSearch<unknown>, lab
       if (my !== seq || over) return;
       over = true;
       sub?.unsubscribe();
-      Array.isArray(v) ? fill(v) : no();
+      Array.isArray(v) ? fill(v) : fail();
     };
-    const no = (): void => {
-      if (my !== seq) return;
-      over = true;
+    // An ask closed or aborted (its fetch rejects) says nothing (editors.md 25).
+    const no = (): void => void (my === seq && !over && ((over = true), fail()));
+    const fail = (): void => {
       items = els = [];
       lb.replaceChildren();
       at = -1;

@@ -67,7 +67,8 @@ changed; then presses the application's « Save all » (one request) or « Cance
 12. **Leaving with changes**: the grid never opens a browser dialog. It tells `pendingChange` (`{ count }`) each time
     the count changes — Angular `(pendingChange)`, the element `dzg-pending-change` — and `count` is there to read: the
     application warns (its own `beforeunload`, a route guard). `reload()` and a server refresh keep the pending
-    changes. Destroying the grid drops them (as today's waiting saves).
+    changes. Destroying the grid drops them (as today's waiting saves); a `saveAll()` not answered yet then resolves
+    (`{ sent, refused: [] }`, the answer ignored), never left hanging.
 13. **Accessibility**: the mark is a shape and a description; saving says « Saving » once per request; refusals as
     `edit-save.md`; a discard is said politely. Right to left: the triangle at the inline-start corner (right in Arabic).
 

@@ -80,18 +80,21 @@ function setup<T>(g: GridContext<unknown>, o: EditBatchOptions<T>, apis: WeakMap
     emit(kernel, { type: 'problems', source: 'host', problems: [problem('missing-feature', 'warning', 'features.editBatch', 'edit')] });
     return { destroy() {} };
   }
-  // Found when used: the edit seam is gathered once every feature is set up.
-  const ctl = (): EditController<T> => g.edit!.x as EditController<T>;
-  const I = () => ctl().x!;
+  // Found when used: the edit seam is gathered once every feature is set up. The internal handles are named `x` (no
+  // coordinate): read by index so the physical-names guard (`.x`) stays meaningful.
+  const ctl = (): EditController<T> => g.edit!['x'] as EditController<T>;
+  const I = () => ctl()['x']!;
   const api = (): EditApi<T> => g.edit!.api as EditApi<T>;
   const col = (c: string): ResolvedColumn<unknown> => g.columns.get(c)!;
   /** The value a pending cell replaces: the last saved, else the row's own. */
   const base = (e: EditEntry): unknown => (e.l ? e.l.v : col(e.c).read(e.d as never));
   /** Pending: staged, in a gesture not sent yet (a batch being sent is not pending). */
-  const held = (e: EditEntry): boolean => e.s === 'pending' && !e.x && !I().waiting.get(e.g)?.go;
+  const held = (e: EditEntry): boolean => e.s === 'pending' && !e['x'] && !I().waiting.get(e.g)?.go;
   const list = (): EditEntry[] => [...I().cells.values()].filter(held);
 
   let count = 0;
+  /** The `saveAll()`s not answered yet. */
+  const open = new Set<() => void>();
   /** The pending cells when last counted: those a paste or a fill saved at once takes over (edit-batch.md 11). */
   let was = new Set<EditEntry>();
   /** `pendingChange` when the count moved (edit-batch.md 12). */
@@ -111,7 +114,7 @@ function setup<T>(g: GridContext<unknown>, o: EditBatchOptions<T>, apis: WeakMap
       else {
         // An older value of the cell is being saved: that one shows again.
         const fl = x.flying.get(e.f)!;
-        Object.assign(e, { s: 'saving', g: e.f, v: fl.x.cells.get(e)?.v });
+        Object.assign(e, { s: 'saving', g: e.f, v: fl['x'].cells.get(e)?.v });
       }
     }
     x.show(es, source);
@@ -205,7 +208,10 @@ function setup<T>(g: GridContext<unknown>, o: EditBatchOptions<T>, apis: WeakMap
       x.waiting.set(G.g, G);
       return new Promise((done) => {
         const over = (): boolean => !x.waiting.has(G.g) && !x.flying.has(G.g);
-        const off = kernel.subscribe((ev) => void (ev.type === 'editStates' && over() && (off(), done(result(G.g, es)))));
+        // Answered, or the grid destroyed first (its answer ignored): resolved either way, never left hanging.
+        const fin = (): void => (off(), open.delete(fin), done(result(G.g, es)));
+        const off = kernel.subscribe((ev) => void (ev.type === 'editStates' && over() && fin()));
+        open.add(fin);
         x.states('api', [...G.cells.keys(), ...x.pump()]);
       });
     },
@@ -226,6 +232,8 @@ function setup<T>(g: GridContext<unknown>, o: EditBatchOptions<T>, apis: WeakMap
   return {
     afterRows() {
       const on = new Set(list().map((e) => `${e.k}\n${e.c}`));
+      // Said even when no pending cell is on screen (scrolled, filtered, another page).
+      setAttr(el.root, 'data-dzg-pending', on.size ? String(on.size) : null);
       for (const c of drawn) if (!c.isConnected) mark(c, false);
       if (!on.size && !drawn.size) return;
       g.rowRenderer.forEach((key, v) => {
@@ -234,9 +242,9 @@ function setup<T>(g: GridContext<unknown>, o: EditBatchOptions<T>, apis: WeakMap
           if (want || drawn.has(cv.el)) mark(cv.el, want);
         }
       });
-      setAttr(el.root, 'data-dzg-pending', on.size ? String(on.size) : null);
     },
     destroy() {
+      for (const f of [...open]) f();
       apis.delete(kernel);
       unhear();
       box.remove();

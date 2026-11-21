@@ -1472,7 +1472,7 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   Angular example 103 800, +2 %), site 36 / 36, the owner's app 199 OK on the local pack. K.8 92 611 / 93 000.
 - For the owner: commit, publish (`docs/release-1.14.0.md`).
 
-## 1.15.0 — minor (in preparation, 2026-11-21; owner « ★ partout »)
+## 1.15.0 — minor (2026-11-21; owner « ★ partout », « fais-les tous », then « vérification puis tu publies »)
 
 - [x] `sortMark: 'always'` (presentation-settings.md 49): the sort mark kept unsorted, a named button beside a header
   part — the owner's app's last patch on `.dzg-*` classes retired. Tests by hand (dom 14, theme 8), browsers 38 / 38
@@ -1481,7 +1481,13 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   WebKit, 81 / 81 — the tree and pivot pages plus a form (a cell part, `header-height`, live properties,
   `focus-visible`, `editBatch()`'s `dzg-pending-change`, `headers="none"`) and a framework smoke page from the built
   packages. No defect, no engine quirk. A React / Vue page left.
-- For the owner: the full verification (gate, real app, release:check), then publish.
+- [x] Form editing: `editBatch()` (edit-batch.md), `editors({ row: rowEditor })` (edit-row.md), `edit: { search }` +
+  `searchEditor` (editors.md 23–29); paste / fill saved at once by default. All opt-in.
+- [x] Independent review: a closed search field said « Search failed » when its aborted fetch rejected; `saveAll()`
+  never resolved if the grid was destroyed first; `data-dzg-pending` stayed after discarding off-screen changes — all
+  fixed, tests first. Seven stale guards / size pins from the 1.15.0 commits fixed.
+- [x] Full verification: see `docs/release-1.15.0.md` « Vérifié ».
+- For the owner: publish (`docs/release-1.15.0.md`).
 
 ## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)
 
