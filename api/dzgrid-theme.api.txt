@@ -7,6 +7,7 @@
 # history: owner 2026-11-14: rich tooltips moved to @dztooltip, never published — entries removed: @dzgrid/theme/tooltips.css, @dzgrid/theme/tooltips.unlayered.css, @dzgrid/theme/tooltips.scss
 # history: 1.14.0 published
 # history: owner 2026-11-21 « on le garde »: the forms texts and sheet of 1.15.0 form editing — @dzgrid/theme/forms.css, @dzgrid/theme/forms.unlayered.css, @dzgrid/theme/forms.scss
+# history: owner 2026-11-21 « commence par les mini-courbes et le reste »: 1.16.0 entries (sparkline, tree-select, xlsx-detail), additions — @dzgrid/theme/sparkline.css, @dzgrid/theme/sparkline.unlayered.css, @dzgrid/theme/sparkline.scss
 
 @ @dzgrid/theme
 
@@ -173,3 +174,9 @@
 @ @dzgrid/theme/forms.unlayered.css
 
 @ @dzgrid/theme/forms.scss
+
+@ @dzgrid/theme/sparkline.css
+
+@ @dzgrid/theme/sparkline.unlayered.css
+
+@ @dzgrid/theme/sparkline.scss

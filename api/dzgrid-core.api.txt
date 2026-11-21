@@ -16,6 +16,7 @@
 # history: owner 2026-11-14 « A »: a column's tooltip in one line (true, false, a function, ColumnTooltip options) and headerTooltip as words or a TooltipSpec — inputs widened, 1.12.0 — @dzgrid/core#ColumnDef, @dzgrid/core#ColumnTooltip, @dzgrid/core#TooltipSpec, @dzgrid/core#TooltipPlacement
 # history: 1.14.0 published
 # history: owner 2026-11-21 « on le garde »: GridEvent gains pendingChange (batch editing, 1.15.0) — @dzgrid/core#GridEvent
+# history: owner 2026-11-21 « commence par les mini-courbes et le reste »: 1.16.0 entries (sparkline, tree-select, xlsx-detail), additions — @dzgrid/core/xlsx-detail#xlsxDetails
 
 @ @dzgrid/core
 ## AbortHandle
@@ -3067,3 +3068,7 @@
   export declare function sheetPath(workbook: string, rels: string): string | null;
 ## zipEntries
   export declare function zipEntries(b: Uint8Array): Map<string, ZipEntry> | null;
+
+@ @dzgrid/core/xlsx-detail
+## xlsxDetails
+  export declare function xlsxDetails<T>(c: XlsxDetailContext<T>): XlsxDetailBlocks;

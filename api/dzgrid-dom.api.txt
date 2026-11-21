@@ -37,6 +37,7 @@
 # history: owner 2026-11-21 « ★ partout » (1.15.0 sortMark, presentation-settings.md 49): the sort button's name added to the base bundles, an addition as the yes / no words of 2026-11-10 — @dzgrid/dom/locales/en#EN, @dzgrid/dom/locales/fr#FR, @dzgrid/dom/locales/ar#AR
 # history: owner 2026-11-21 « on le garde »: the 1.15.0 entries edit-batch, editors-row, editors-search; Angular (pendingChange) — @dzgrid/dom/edit-batch#editBatch, @dzgrid/dom/edit-batch#BATCH_KEYS, @dzgrid/dom/edit-batch#EditBatchApi, @dzgrid/dom/edit-batch#EditBatchFeature, @dzgrid/dom/edit-batch#EditBatchOptions, @dzgrid/dom/edit-batch#PendingChange, @dzgrid/dom/edit-batch#SaveAllResult, @dzgrid/dom/edit-batch#RowRefusal, @dzgrid/dom/edit-batch#RowRule, @dzgrid/dom/editors-row#rowEditor, @dzgrid/dom/editors-row#ROW_KEYS, @dzgrid/dom/editors-row#RowEditor, @dzgrid/dom/editors-row#RowPlug, @dzgrid/dom/editors-row#RowRefusal, @dzgrid/dom/editors-row#RowRule, @dzgrid/dom/editors-search#searchEditor, @dzgrid/dom/editors-search#SEARCH_KEYS, @dzgrid/dom/editors-search#SearchEditor, @dzgrid/dom/editors-search#OptionSearch
 # history: owner 2026-11-21 « on le garde »: the forms texts and sheet of 1.15.0 form editing — @dzgrid/dom/locales/en-forms#EN_FORMS, @dzgrid/dom/locales/fr-forms#FR_FORMS, @dzgrid/dom/locales/ar-forms#AR_FORMS
+# history: owner 2026-11-21 « commence par les mini-courbes et le reste »: 1.16.0 entries (sparkline, tree-select, xlsx-detail), additions — @dzgrid/dom/tree-select#treeSelect, @dzgrid/dom/sparkline#sparklines, @dzgrid/dom/sparkline#SPARKLINE_KEYS, @dzgrid/dom/sparkline#SparklineOptions, @dzgrid/dom/sparkline#SparklineValues, @dzgrid/dom/locales/en-sparkline#EN_SPARKLINE, @dzgrid/dom/locales/fr-sparkline#FR_SPARKLINE, @dzgrid/dom/locales/ar-sparkline#AR_SPARKLINE
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -5072,5 +5073,64 @@
           "edit.searching": string;
           "edit.noResult": string;
           "edit.searchFailed": string;
+      };
+  };
+
+@ @dzgrid/dom/tree-select
+## treeSelect
+  export declare function treeSelect(): GridFeature;
+
+@ @dzgrid/dom/sparkline
+## sparklines
+  export declare function sparklines(options?: SparklineOptions): GridFeature;
+## SPARKLINE_KEYS
+  export declare const SPARKLINE_KEYS: readonly [
+      "sparkline.summary",
+      "sparkline.point"
+  ];
+## SparklineOptions
+  = @dzgrid/core#SparklineOptions
+## SparklineValues
+  = @dzgrid/core#SparklineValues
+
+@ @dzgrid/dom/locales/en-sparkline
+## EN_SPARKLINE
+  export declare const EN_SPARKLINE: {
+      locale: string;
+      text: {
+          "sparkline.summary": {
+              one: string;
+              other: string;
+          };
+          "sparkline.point": string;
+      };
+  };
+
+@ @dzgrid/dom/locales/fr-sparkline
+## FR_SPARKLINE
+  export declare const FR_SPARKLINE: {
+      locale: string;
+      text: {
+          "sparkline.summary": {
+              one: string;
+              other: string;
+          };
+          "sparkline.point": string;
+      };
+  };
+
+@ @dzgrid/dom/locales/ar-sparkline
+## AR_SPARKLINE
+  export declare const AR_SPARKLINE: {
+      locale: string;
+      text: {
+          "sparkline.summary": {
+              one: string;
+              two: string;
+              few: string;
+              many: string;
+              other: string;
+          };
+          "sparkline.point": string;
       };
   };

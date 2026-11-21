@@ -4468,6 +4468,43 @@ export type SearchEditor = ((x: EdEnv, value: unknown, search: OptionSearch<unkn
 = @dzgrid/core#OptionSearch
 ```
 
+## `@dzgrid/dom/tree-select`
+
+### treeSelect
+
+```ts
+export declare function treeSelect(): GridFeature;
+```
+
+## `@dzgrid/dom/sparkline`
+
+### sparklines
+
+```ts
+export declare function sparklines(options?: SparklineOptions): GridFeature;
+```
+
+### SPARKLINE_KEYS
+
+```ts
+export declare const SPARKLINE_KEYS: readonly [
+    "sparkline.summary",
+    "sparkline.point"
+];
+```
+
+### SparklineOptions
+
+```ts
+= @dzgrid/core#SparklineOptions
+```
+
+### SparklineValues
+
+```ts
+= @dzgrid/core#SparklineValues
+```
+
 ## Paquets de textes
 
 Un paquet par langue et par fonction, ajouté aux `messages` de la grille (voir [Fonctions](../../features/)).
@@ -6888,6 +6925,54 @@ export declare const AR_FORMS: {
         "edit.searching": string;
         "edit.noResult": string;
         "edit.searchFailed": string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-sparkline`
+
+```ts
+export declare const EN_SPARKLINE: {
+    locale: string;
+    text: {
+        "sparkline.summary": {
+            one: string;
+            other: string;
+        };
+        "sparkline.point": string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-sparkline`
+
+```ts
+export declare const FR_SPARKLINE: {
+    locale: string;
+    text: {
+        "sparkline.summary": {
+            one: string;
+            other: string;
+        };
+        "sparkline.point": string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-sparkline`
+
+```ts
+export declare const AR_SPARKLINE: {
+    locale: string;
+    text: {
+        "sparkline.summary": {
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        "sparkline.point": string;
     };
 };
 ```
