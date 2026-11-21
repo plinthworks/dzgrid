@@ -34,3 +34,9 @@ describe.each(['dzgrid.css', 'dzgrid.unlayered.css'])('%s (49)', (f) => {
     expect(body(f, 'button.dzg-sort:focus-visible')).toBe('outline: 2px solid var(--dzg-focus-ring, var(--tz-accent)); outline-offset: -2px;');
   });
 });
+
+describe.each(['variables.css', 'variables.unlayered.css'])('%s (49)', (f) => {
+  it('the kept mark unsorted takes the unsorted colour, --dzg-sort-none-fg (the sorted one\'s by default), drawn or not by an icon', () => {
+    expect(body(f, '.dzg-sort[data-dir=none]')).toBe('color: var(--dzg-sort-none-fg, var(--dzg-sort-fg, var(--tz-fg-muted)));');
+  });
+});

@@ -177,6 +177,10 @@
   font-size: var(--dzg-icon-size, 0.75em);
 }
 
+.dzg-sort[data-dir=none] {
+  color: var(--dzg-sort-none-fg, var(--dzg-sort-fg, var(--tz-fg-muted)));
+}
+
 .dzg-fbtn:where(:not([data-dzg-icons~=filter] *, [data-dzg-icons~=filter-active] [data-dzg-filtered] > *))::before,
 .dzg-fbtn:where(:not([data-dzg-icons~=filter] *))::after {
   inset-block: calc(50% - var(--dzg-icon-size, 12px) / 2) calc(50% - var(--dzg-icon-size, 12px) / 2 + var(--dzg-icon-size, 12px) / 12);

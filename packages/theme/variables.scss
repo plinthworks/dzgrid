@@ -237,6 +237,11 @@ $arrow: var(--dzg-tooltip-arrow-size, 0.375rem);
     font-size: var(--dzg-icon-size, 0.75em);
   }
 
+  // Unsorted (`icons.sortNone`, or the two-way arrow of `sortMark: 'always'`, presentation-settings.md 49): its own colour.
+  .dzg-sort[data-dir=none] {
+    color: var(--dzg-sort-none-fg, var(--dzg-sort-fg, var(--tz-fg-muted)));
+  }
+
 
   .dzg-fbtn#{$no-funnel}::before,
   .dzg-fbtn#{$no-filter}::after {

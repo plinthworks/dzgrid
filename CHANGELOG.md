@@ -22,12 +22,13 @@ minor: an addition, nothing removed; every default unchanged.
   sort (Firefox does not carry Shift into a keyboard click). Checked in Chrome, Firefox and WebKit
   (`scripts/browser-1-15.mjs`, French and Arabic). A narrow header keeps it. Every other
   column: no mark until sorted, as before. An app no longer draws its own sort button nor hides the grid's mark.
-  `@dzgrid/theme`: the ⇅ arrow and the button's reset (24 px target, the grid's focus ring). Type
+  `@dzgrid/theme`: the ⇅ arrow and the button's reset (24 px target, the grid's focus ring, the resize grip's room);
+  `variables.css`: an unsorted mark (this one or `icons.sortNone`) in `--dzg-sort-none-fg`. Type
   `SortButtonMessageKey`.
 
 ### Sizes
-- `@dzgrid/dom` 26 120 → 26 250 (measured 26 229), `@dzgrid/theme` 3 110 → 3 170 (measured 3 167), both by the +2 %
-  rule; K.8 92 814 / 93 000.
+- `@dzgrid/dom` 26 120 → 26 250 (measured 26 229), `@dzgrid/theme` 3 110 → 3 170 (measured 3 167), `variables.css` 1 950 → 1 970
+  (measured 1 966), by the +2 % rule; K.8 92 814 / 93 000.
 
 ## [1.14.0] - 2026-11-19
 

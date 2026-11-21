@@ -327,7 +327,7 @@ describe('the size lines (owner, 2026-10-20, step 21; reset at the Phase 3 close
     // owner 2026-11-13 (« A partout »): filters-base 12 150 (measured 12 129); menu.css 800 (measured 775) and variables.css
     // 1 900 (measured 1 853: the tooltip's arrow, 38 variables) beyond the +2 % rule, accepted by the owner.
     // 1.12.0's five corrections (owner « oui lance les 5 corrections », +2 % rule): variables.css 1 900 → 1 938 (measured 1 921).
-    expect([b['@dzgrid/dom/filters-base']!.maxGzip, b['@dzgrid/theme/menu.css']!.maxGzip, b['@dzgrid/theme/variables.css']!.maxGzip]).toEqual([12300, 800, 1950]); // 1.13.0 (+2 % rule, measured 1 946: the keyboard-only ring, the detail's inset): variables.css 1 950; 1.13.0 (+2 % rule, measured 12 266): filters-base 12 300; filters-base 12 200 (+2 %, measured 12 164)
+    expect([b['@dzgrid/dom/filters-base']!.maxGzip, b['@dzgrid/theme/menu.css']!.maxGzip, b['@dzgrid/theme/variables.css']!.maxGzip]).toEqual([12300, 800, 1970]); // 1.15.0 (+2 % rule, measured 1 966: the unsorted mark's colour): variables.css 1 970; 1.13.0 (+2 % rule, measured 1 946: the keyboard-only ring, the detail's inset): variables.css 1 950; 1.13.0 (+2 % rule, measured 12 266): filters-base 12 300; filters-base 12 200 (+2 %, measured 12 164)
     expect(b['@dzgrid/dom/pagination']!.maxGzip).toBe(3450); // Phase 4 close: 3 211 + 10 % → 3 550; Phase 6 close: 3 132 + 10 % → 3 450
     expect(b['@dzgrid/dom/export']!.maxGzip).toBe(1350); // a raise: it was at its cap
   });

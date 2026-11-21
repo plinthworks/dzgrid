@@ -398,7 +398,7 @@ open, narrow columns' titles shrank to one letter or nothing.
     by default the mark shows only once the column is sorted, and that stays so for every other column). On a sortable
     column:
     - The mark shows unsorted too (`data-dir="none"`): the app's `icons.sortNone`, else the theme's own two-way arrow
-      (⇅, muted). Sorted, the arrow and, in a multi-column sort, the precedence, as on any header.
+      (⇅, muted; with `variables.css`, unsorted marks take `--dzg-sort-none-fg`, the sorted colour by default). Sorted, the arrow and, in a multi-column sort, the precedence, as on any header.
     - The mark is a button (`<button type="button" class="dzg-sort">`, at the header's end): beside a header part
       (`@dzgrid/dom/slots`) the part took the title's place, so there is no title left to click. A click on it sorts as
       a click on a title does (ascending → descending → none; Shift adds to the sort). Its name: « Sort by {column} »
