@@ -177,6 +177,22 @@
       "types": "./src/editors-search.ts",
       "default": "./src/editors-search.ts"
     },
+    "./sparkline": {
+      "types": "./src/sparkline.ts",
+      "default": "./src/sparkline.ts"
+    },
+    "./locales/en-sparkline": {
+      "types": "./src/locales/en-sparkline.ts",
+      "default": "./src/locales/en-sparkline.ts"
+    },
+    "./locales/fr-sparkline": {
+      "types": "./src/locales/fr-sparkline.ts",
+      "default": "./src/locales/fr-sparkline.ts"
+    },
+    "./locales/ar-sparkline": {
+      "types": "./src/locales/ar-sparkline.ts",
+      "default": "./src/locales/ar-sparkline.ts"
+    },
     "./locales/en-forms": {
       "types": "./src/locales/en-forms.ts",
       "default": "./src/locales/en-forms.ts"

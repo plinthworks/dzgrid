@@ -1,0 +1,82 @@
+---
+title: "sparklines"
+description: "Un petit graphique en ligne, aire, barres ou gagné / perdu d’une liste de nombres dans chaque cellule, lu à voix haute en résumé."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Montre une tendance dans chaque ligne — les trente derniers jours d’un compteur — en mini-courbe dessinée par la grille,
+sans bibliothèque de graphiques.
+
+<FeatureFacts name="sparklines" />
+
+## Ce qu’elle fait
+
+Avec `sparklines()` dans `features`, une colonne de [`type`](../../column-options/type/) `'sparkline'` dessine sa liste
+de nombres en petit graphique SVG qui remplit la cellule. La valeur est un tableau dans l’ordre du temps
+(`[3, 5, 41, 27]`, un `null` étant un trou dans la ligne) ou un texte de nombres séparés par des espaces. Quatre sortes,
+pour la grille ou par colonne avec l’option [`sparkline`](../../column-options/sparkline/) :
+
+- `line` (par défaut) : les points reliés, un trou coupant la ligne ;
+- `area` : la ligne au-dessus d’une aire remplie jusqu’à zéro ;
+- `bar` : une barre par point depuis zéro, les barres négatives dans leur couleur ;
+- `winloss` : une barre par point, vers le haut pour un gain, vers le bas pour une perte, rien pour zéro.
+
+L’échelle va du plus petit au plus grand nombre de chaque ligne, ou est fixée pour toutes avec `min` et `max`. Les
+marques montrent le dernier point (`'last'`, par défaut), le plus petit et le plus grand (`'minmax'`) ou aucun.
+
+**La lire.** Les mots de la cellule sont un résumé pour les lecteurs d’écran — « 12 valeurs, de 3 à 41, dernière 27 » —
+le dessin leur étant caché. Le pointeur sur le dessin montre le point le plus proche dans l’infobulle de la grille
+(« 41 (3 sur 12) ») avec un anneau dessus ; une fonction qui dessine les infobulles, comme le pont de DzTooltip, la
+montre aussi. Le focus clavier sur la cellule montre le résumé.
+
+**De droite à gauche.** Le temps va de gauche à droite dans les deux sens, comme les nombres et les heures dans un
+texte arabe : le dessin n’est jamais retourné. La cellule, ses marges et le résumé suivent la langue et le sens de la
+grille.
+
+**La donnée reste la donnée.** Le tri suit la dernière valeur de chaque ligne. CSV, Excel, JSON, le presse-papiers,
+l’impression et la recherche utilisent les nombres séparés par des espaces (`3 5 41 27`), qu’un collage ou un import
+relit ; le résumé n’est jamais écrit dans un fichier. Sans la fonction, la cellule montre ces nombres en texte.
+
+Ses textes sont dans `@dzgrid/dom/locales/<lang>-sparkline`, son apparence dans `@dzgrid/theme/sparkline.css`
+(variables `--dzg-sparkline-line`, `--dzg-sparkline-area`, `--dzg-sparkline-negative`, `--dzg-sparkline-marker`, chacune
+à 3:1 au moins sur les lignes). Seules les lignes à l’écran sont dessinées, et une cellule ne se redessine que si sa
+liste change : 10 000 lignes de 30 points défilent comme une grille de texte.
+
+## Options
+
+`sparklines(options)` donne les valeurs de la grille ; l’option `sparkline` d’une colonne l’emporte, clé par clé.
+
+- `kind` : `'line'` (par défaut), `'area'`, `'bar'` ou `'winloss'`.
+- `min`, `max` : une échelle fixe pour toutes les lignes.
+- `markers` : `'last'` (par défaut), `'minmax'` ou `'none'`.
+- `tooltip: false` : pas d’infobulle de point.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { sparklines } from '@dzgrid/dom/sparkline';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_SPARKLINE } from '@dzgrid/dom/locales/fr-sparkline';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/sparkline.css';
+
+type Meter = { id: string; site: string; week: number[] };
+
+createGrid<Meter>(document.getElementById('meters')!, {
+  rows: [{ id: 'm1', site: 'Chênebourg', week: [12, 15, 9, 22, 18, 25, 21] }],
+  columns: [
+    { id: 'site', header: 'Site' },
+    { id: 'week', header: '7 derniers jours', type: 'sparkline', sparkline: { kind: 'area' } },
+  ],
+  getRowId: (r) => r.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_SPARKLINE.text } },
+  features: [sparklines()],
+});
+```
+
+## Voir aussi
+
+- L’option de colonne [`sparkline`](../../column-options/sparkline/) et l’option [`type`](../../column-options/type/).
+- [Infobulles et popovers](../../guides/tooltips-popovers/).

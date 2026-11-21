@@ -1,0 +1,69 @@
+@layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+@layer dzgrid.theme {
+  .dzg-spark {
+    display: block;
+    inline-size: 100%;
+    block-size: 70%;
+    max-block-size: 2rem;
+    overflow: visible;
+    direction: ltr;
+  }
+  .dzg-spark path,
+  .dzg-spark rect {
+    vector-effect: non-scaling-stroke;
+  }
+  .dzg-spark-line {
+    fill: none;
+    stroke: var(--dzg-sparkline-line, var(--tz-accent));
+    stroke-width: 1.5px;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .dzg-spark-area {
+    fill: var(--dzg-sparkline-area, color-mix(in srgb, var(--tz-accent) 20%, transparent));
+    stroke: none;
+  }
+  .dzg-spark-bar {
+    fill: var(--dzg-sparkline-line, var(--tz-accent));
+  }
+  .dzg-spark-neg {
+    fill: var(--dzg-sparkline-negative, var(--tz-danger));
+  }
+  .dzg-spark-bar.dzg-spark-mark {
+    fill: var(--dzg-sparkline-marker, var(--tz-fg));
+  }
+  .dzg-spark-dot,
+  .dzg-spark-hover {
+    fill: none;
+    stroke: var(--dzg-sparkline-marker, var(--tz-fg));
+    stroke-width: 5px;
+    stroke-linecap: round;
+  }
+  .dzg-spark-hover {
+    stroke-width: 8px;
+    stroke-opacity: 0.45;
+  }
+  .dzg-cell:has(> .dzg-spark) {
+    display: flex;
+    align-items: center;
+  }
+  @media (forced-colors: active) {
+    .dzg-spark-line {
+      stroke: CanvasText;
+    }
+    .dzg-spark-area {
+      fill: none;
+    }
+    .dzg-spark-bar,
+    .dzg-spark-neg {
+      fill: CanvasText;
+    }
+    .dzg-spark-bar.dzg-spark-mark {
+      fill: Highlight;
+    }
+    .dzg-spark-dot,
+    .dzg-spark-hover {
+      stroke: Highlight;
+    }
+  }
+}

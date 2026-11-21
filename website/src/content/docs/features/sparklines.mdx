@@ -1,0 +1,80 @@
+---
+title: "sparklines"
+description: "A small line, area, bar or win / loss chart of a list of numbers in each cell, read aloud as a summary."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Shows a trend in each row — a counter's last thirty days — as a tiny chart drawn by the grid, with no chart library.
+
+<FeatureFacts name="sparklines" />
+
+## What it does
+
+With `sparklines()` in `features`, a column of [`type`](../../column-options/type/) `'sparkline'` draws its list of
+numbers as a small SVG chart that fills the cell. The value is an array in time order (`[3, 5, 41, 27]`, a `null` a
+gap in the line) or text of numbers between spaces. Four kinds, set for the grid or per column with the
+[`sparkline`](../../column-options/sparkline/) option:
+
+- `line` (the default): the points joined, a gap breaking the line;
+- `area`: the line over a filled area down to zero;
+- `bar`: one bar per point from zero, negative bars in their own colour;
+- `winloss`: one bar per point, up for a win, down for a loss, nothing for zero.
+
+The range runs from each row's smallest to largest value, or is fixed for every row with `min` and `max`. Markers show
+the last point (`'last'`, the default), the smallest and the largest (`'minmax'`) or none.
+
+**Reading it.** The cell's words are a summary for screen readers — « 12 values, from 3 to 41, last 27 » — the drawing
+itself hidden from them. Moving the pointer over the drawing shows the nearest point in the grid's tooltip (« 41 (3 of
+12) ») with a ring on it; a feature that draws the tooltips, such as DzTooltip's bridge, shows it too. A keyboard focus
+on the cell shows the summary.
+
+**Right to left.** Time runs left to right in both directions, as numbers and clock times do in Arabic text: the drawing
+is never mirrored. The cell, its padding and the summary follow the grid's language and direction.
+
+**The data stays data.** Sorting sorts by each row's last value. CSV, Excel, JSON, the clipboard, print and find use
+the numbers between spaces (`3 5 41 27`), which a paste or an import reads back; the summary is never written to a
+file. Without the feature the cell shows those numbers as text.
+
+Its texts are in `@dzgrid/dom/locales/<lang>-sparkline`, its look in `@dzgrid/theme/sparkline.css` (variables
+`--dzg-sparkline-line`, `--dzg-sparkline-area`, `--dzg-sparkline-negative`, `--dzg-sparkline-marker`, each at least
+3:1 against the rows). Only the rows on screen are drawn, and a cell redraws only when its list changes: 10 000 rows of
+30 points scroll as a grid of text does.
+
+## Options
+
+`sparklines(options)` gives the grid's defaults; a column's `sparkline` wins, key by key.
+
+- `kind`: `'line'` (default), `'area'`, `'bar'` or `'winloss'`.
+- `min`, `max`: a fixed range for every row.
+- `markers`: `'last'` (default), `'minmax'` or `'none'`.
+- `tooltip: false`: no point tooltip.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { sparklines } from '@dzgrid/dom/sparkline';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_SPARKLINE } from '@dzgrid/dom/locales/en-sparkline';
+import '@dzgrid/theme/dzgrid.css';
+import '@dzgrid/theme/sparkline.css';
+
+type Meter = { id: string; site: string; week: number[] };
+
+createGrid<Meter>(document.getElementById('meters')!, {
+  rows: [{ id: 'm1', site: 'Oakfield', week: [12, 15, 9, 22, 18, 25, 21] }],
+  columns: [
+    { id: 'site', header: 'Site' },
+    { id: 'week', header: 'Last 7 days', type: 'sparkline', sparkline: { kind: 'area' } },
+  ],
+  getRowId: (r) => r.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_SPARKLINE.text } },
+  features: [sparklines()],
+});
+```
+
+## See also
+
+- The [`sparkline`](../../column-options/sparkline/) column option and the [`type`](../../column-options/type/) option.
+- [Tooltips and popovers](../../guides/tooltips-popovers/).

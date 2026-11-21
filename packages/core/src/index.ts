@@ -38,6 +38,7 @@ export { collatorFor } from './i18n/collate.js';
 export type { ValueCodec, ColumnType, Rejected } from './value/codec.js';
 export { REJECTED, isBlank } from './value/codec.js';
 export { textCodec } from './value/codecs/text.js';
+export { sparklineCodec, type SparklineValues } from './value/codecs/sparkline.js';
 export { numberCodec, numberCodecWith } from './value/codecs/number.js';
 export { booleanCodec, booleanCodecWith } from './value/codecs/boolean.js';
 export type { EnumOption } from './value/codecs/enum.js';
@@ -46,7 +47,7 @@ export { dayCodec, readDayText } from './value/codecs/day.js';
 export { instantCodec, instantToIso } from './value/codecs/instant.js';
 
 export { PrefixSums } from './layout/prefix-sums.js';
-export type { AggCtx, AggFn, AggFuncName, Side, CellClassContext, EditableRule, EditableInfo, EditChecks, OptionSearch, ColumnDef, ColumnGroupDef, ColumnOrGroup, ResolvedColumn, SpanCtx, ColumnTooltip, TooltipPlacement, TooltipSpec, ValueReader } from './columns/defs.js';
+export type { AggCtx, AggFn, AggFuncName, Side, CellClassContext, EditableRule, EditableInfo, EditChecks, OptionSearch, ColumnDef, ColumnGroupDef, ColumnOrGroup, ResolvedColumn, SpanCtx, ColumnTooltip, TooltipPlacement, TooltipSpec, SparklineOptions, ValueReader } from './columns/defs.js';
 export { NO_OVERLAY, compilePath, resolveColumns } from './columns/defs.js';
 export { editableAt } from './columns/editable.js';
 export type { ColumnLookup, ColumnState, ColumnSlice, ColumnLayout, ColumnChange, ColumnModel } from './columns/model.js';

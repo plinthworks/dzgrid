@@ -195,7 +195,7 @@ export function createGrid<T, M extends RowModel<T> = ClientModel<T>>(host: HTML
   g.bands = handles.flatMap((h) => h.bands ?? []);
   g.spans = handles.find((h) => h.spans)?.spans ?? null;
   g.slots = handles.find((h) => h.slots)?.slots ?? null;
-  told.push(...(typeof initial.rowHeight != 'function' || initial.features?.some((f) => f.id === 'row-heights') ? [] : [problem('missing-feature', 'warning', 'settings.rowHeight', 'row-heights')]), ...(['wrap', 'auto-height', 'showAs', 'show-as'] as const).flatMap((o, i, a) => (i % 2 || initial.features?.some((f) => f.id === a[i + 1]) ? [] : columns.visible().filter((c) => c.def[o as 'wrap']).slice(0, 1).map((c) => problem('missing-feature', 'warning', `columns.${c.id}.${o}`, a[i + 1])))), ...(g.spans ? [] : missingFeatureProblems(initial)), ...unslotted(initial as GridSettings<unknown>, rows.page));
+  told.push(...(typeof initial.rowHeight != 'function' || initial.features?.some((f) => f.id === 'row-heights') ? [] : [problem('missing-feature', 'warning', 'settings.rowHeight', 'row-heights')]), ...(['wrap', 'auto-height', 'showAs', 'show-as', 'sparkline', 'sparkline'] as const).flatMap((o, i, a) => (i % 2 || initial.features?.some((f) => f.id === a[i + 1]) ? [] : columns.visible().filter((c) => c.def[o as 'wrap']).slice(0, 1).map((c) => problem('missing-feature', 'warning', `columns.${c.id}.${o}`, a[i + 1])))), ...(g.spans ? [] : missingFeatureProblems(initial)), ...unslotted(initial as GridSettings<unknown>, rows.page));
   g.edit = (g.features = handles).find((h) => h.edit)?.edit; g.tip.seam = handles.find((h) => h.tooltips)?.tooltips; // the edit and tooltip seams (tooltips.md 13), found once
   scope.add(() => { for (const h of handles) h.destroy(); });
 

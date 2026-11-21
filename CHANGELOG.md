@@ -5,6 +5,35 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased — 1.16.0
+
+Sparklines, master / detail in Excel and a tree's cascading ticks (owner 2026-11-21, « commence par les mini-courbes
+et le reste »). A minor: additions, nothing removed; every default unchanged.
+
+### Added
+- **Sparklines** (`type: 'sparkline'`, `sparklines()` of `@dzgrid/dom/sparkline`, opt-in; sparklines.md): a column
+  holding a list of numbers in time order (an array, a `null` a gap, or text of numbers between spaces) drawn as a
+  small SVG chart of our own — `kind: 'line' | 'area' | 'bar' | 'winloss'`, a range fixed by `min` / `max` or each
+  row's own, `markers: 'last' | 'minmax' | 'none'`; `sparklines(options)` the grid's defaults, a column's `sparkline`
+  winning key by key. The cell's words are a summary for screen readers (« 12 values, from 3 to 41, last 27 »), the
+  drawing hidden from them; the pointer over it shows the nearest point (« 41 (3 of 12) ») in the grid's tooltip — so
+  a tooltip feature such as DzTooltip's bridge shows it too — with a ring on it; a keyboard focus shows the summary;
+  `tooltip: false` turns the point tooltip off. **Decisions**: time runs left to right in right to left too (never
+  mirrored, as numbers and clock times in Arabic text); sorting uses each row's last value; CSV, Excel, JSON, the
+  clipboard, print and find carry the numbers between spaces (`3 5 41 27`, read back by a paste or an import), never
+  the summary. Without the feature the numbers show as text (`sparkline` options without it: `missing-feature`). New
+  texts `locales/<lang>-sparkline` (`sparkline.summary`, `sparkline.point`, type `SparklineMessageKey`), look
+  `@dzgrid/theme/sparkline.css` (`--dzg-sparkline-line`, `-area`, `-negative`, `-marker`, theme keys
+  `sparklineLine`…, 3:1 on the rows), core `sparklineCodec`, types `SparklineOptions`, `SparklineValues`. Checked in
+  Chrome, Firefox and WebKit, French and Arabic, light and dark (`scripts/browser-1-16.mjs`); 10 000 rows scroll at
+  the same frame times as text.
+
+### Sizes
+- **K.8 93 000 → 94 000** (owner 2026-11-21, « tu peux augmenter la taille s'il le faut »; measured 93 063: the
+  `'sparkline'` type's codec in the core). +2 % rule: `@dzgrid/core` 29 590 → 29 800, `@dzgrid/core/state` 1 615 →
+  1 640 and `@dzgrid/dom/print` 1 720 → 1 750 (their code unchanged), `@dzgrid/dom/theme` 2 550 → 2 600. New lines at their measure + 10 %: `dom/sparkline`
+  2 350, `-sparkline` texts 200 / 200 / 300, `sparkline.css` 550.
+
 ## [1.15.0] - 2026-11-21
 
 The option that retires the owner's app's last patch on DzGrid's own classes (owner 2026-11-21, « ★ partout »), and

@@ -8,6 +8,7 @@ import { dayCodec } from '../value/codecs/day.js';
 import { enumCodec, type EnumOption } from '../value/codecs/enum.js';
 import { instantCodec } from '../value/codecs/instant.js';
 import { numberCodecWith } from '../value/codecs/number.js';
+import { sparklineCodec } from '../value/codecs/sparkline.js';
 import { textCodec } from '../value/codecs/text.js';
 import { isKnownZone } from '../value/zone-day.js';
 
@@ -70,6 +71,19 @@ export interface ColumnTooltip<T, V = unknown> extends TooltipSpec {
  * alignment along it (`-start`, `-end`; none: centred). `auto`: the default (below; the grid's at its cell's start).
  */
 export type TooltipPlacement = 'auto' | `${'top' | 'bottom' | 'start' | 'end' | 'left' | 'right'}${'' | '-start' | '-end'}`;
+
+/** A sparkline's drawing (1.16.0, docs/behaviors/sparklines.md 3–8): a column's `sparkline`, or `sparklines(options)`'s defaults. */
+export interface SparklineOptions {
+  /** @default 'line' */
+  readonly kind?: 'line' | 'area' | 'bar' | 'winloss';
+  /** The range's bottom and top, the same for every row (default: each row's own smallest and largest). */
+  readonly min?: number;
+  readonly max?: number;
+  /** @default 'last' */
+  readonly markers?: 'last' | 'minmax' | 'none';
+  /** `false`: no point tooltip on hover (the column's own tooltip, as before). */
+  readonly tooltip?: false;
+}
 
 export interface ColumnDef<T, V = unknown> {
   /** Required and stable: the key of the column's state. */
@@ -241,6 +255,11 @@ export interface ColumnDef<T, V = unknown> {
    */
   readonly showAs?: 'percentOfTotal' | 'percentOfGroup';
   /**
+   * 1.16.0, a `type: 'sparkline'` column drawn by `sparklines()` of `@dzgrid/dom/sparkline` (sparklines.md 6): its
+   * drawing's options, key by key over the feature's. Without the feature: told once (`missing-feature`), the numbers shown.
+   */
+  readonly sparkline?: SparklineOptions;
+  /**
    * Whether a data row's cell can be edited (editing.md 1): `true`, or a rule told the row and the
    * grid's `settings.context`; only `true` means yes. Never a detail, filler or loading row.
    * @default false
@@ -375,7 +394,7 @@ export const NO_OVERLAY: ValueReader<never> = {
 };
 
 const FORBIDDEN_SEGMENTS = new Set(['__proto__', 'constructor', 'prototype']);
-const COLUMN_TYPES: ReadonlySet<string> = new Set(['text', 'number', 'day', 'instant', 'boolean', 'enum', 'custom']);
+const COLUMN_TYPES: ReadonlySet<string> = new Set(['text', 'number', 'day', 'instant', 'boolean', 'enum', 'custom', 'sparkline']);
 
 /**
  * A reader for `a.b.c`, or null for an empty path, an empty segment or a
@@ -410,6 +429,7 @@ function codecFor<T>(def: ColumnDef<T, any>, type: ColumnType): ValueCodec<any> 
     case 'instant': return instantCodec({ ...(def.assumeZone !== undefined && { assumeZone: def.assumeZone }), ...(def.instantFormat && { format: def.instantFormat }) });
     case 'enum': return def.enumOptions ? enumCodec(def.enumOptions) : 'needs-options';
     case 'custom': return 'needs-codec';
+    case 'sparkline': return sparklineCodec;
   }
 }
 

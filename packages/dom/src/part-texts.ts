@@ -67,6 +67,18 @@ export interface FormsMessages {
   readonly text: { readonly [K in FormsMessageKey]: MessageValue };
 }
 
+/**
+ * The sparklines' texts (1.16.0, `@dzgrid/dom/sparkline`, sparklines.md 7–8), in their own bundles
+ * (`locales/<lang>-sparkline`): optional here, required by `sparklines()`. `{n}` the count (plural), `{min}`, `{max}`,
+ * `{last}`, `{value}` numbers in the grid's language, `{i}` a point's place from 1.
+ */
+export type SparklineMessageKey = 'sparkline.summary' | 'sparkline.point';
+/** A sparkline bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_SPARKLINE.text }`. */
+export interface SparklineMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in SparklineMessageKey]: MessageValue };
+}
+
 /** The detail panels' texts (`@dzgrid/dom/detail`, Phase 4 step 10), in their own bundles (`locales/<lang>-detail`): optional here, required by `detail()`. */
 export type DetailMessageKey = 'detail.label' | 'detail.expanded' | 'detail.collapsed';
 /** A detail bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_DETAIL.text }`. */

@@ -64,6 +64,8 @@ export interface GridTheme {
   readonly sortNoneFg?: ThemeValue;
   /** Form editing (1.15.0, `@dzgrid/theme/forms.css`): a pending cell's triangle and tint; a row being edited, its outline. */
   readonly pendingMark?: ThemeValue; readonly pendingBg?: ThemeValue; readonly rowEditingOutline?: ThemeValue;
+  /** Sparklines (1.16.0, `@dzgrid/theme/sparkline.css`): the line and bars, the area's fill, a negative bar, the markers. */
+  readonly sparklineLine?: ThemeValue; readonly sparklineArea?: ThemeValue; readonly sparklineNegative?: ThemeValue; readonly sparklineMarker?: ThemeValue;
   // The popups' buttons (`@dzgrid/theme/buttons.css`): weight, side padding, height; under the pointer and pressed (unset: no
   // change); the primary one (Apply) and its states.
   readonly buttonFontWeight?: ThemeValue; readonly buttonPaddingInline?: ThemeValue; readonly buttonHeight?: ThemeValue; readonly buttonHoverBg?: ThemeValue;

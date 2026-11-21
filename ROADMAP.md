@@ -1489,6 +1489,17 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
 - [x] Full verification: see `docs/release-1.15.0.md` « Vérifié ».
 - For the owner: publish (`docs/release-1.15.0.md`).
 
+## 1.16.0 — minor, in preparation on `next` (2026-11-21; owner « commence par les mini-courbes et le reste »)
+
+- [x] Sparklines (sparklines.md): `type: 'sparkline'` (a list of numbers; its codec in the core: sorted by the last value,
+  files and clipboard the numbers between spaces) drawn by `sparklines()` of `@dzgrid/dom/sparkline` — line, area,
+  bar, win / loss, `min` / `max`, markers; a summary for screen readers, the point's value in the grid's tooltip on
+  hover, the summary on a keyboard focus; time left to right in right to left too. `@dzgrid/theme/sparkline.css`,
+  `locales/<lang>-sparkline`. Tests by hand (core 8, dom 20, theme 11); browsers 132 / 132 (`scripts/browser-1-16.mjs`:
+  Chrome, Firefox, WebKit; fr, ar; light, dark). 10 000 rows: scroll p95 18.4 / 19.0 / 18.0 ms (Chrome, Firefox, WebKit),
+  as the same grid in text. **K.8 93 000 → 94 000** (owner 2026-11-21, « tu peux augmenter la taille s'il le faut »;
+  measured 93 063); core 29 800, core/state 1 640, dom/print 1 750, dom/theme 2 600 (+2 %).
+
 ## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)
 
 - **Batch 1 — skeleton (2026-11-10, not committed).** `website/` (Astro Starlight, versions pinned as DzCalendar's,

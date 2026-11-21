@@ -327,7 +327,13 @@ describe('1.15.0, the five packages', () => {
   it('export forms.css (1.15.0, edit-batch.md 4, edit-row.md 3), built like the others', () => {
     const theme = pkg('theme');
     for (const f of ['forms.css', 'forms.unlayered.css', 'forms.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
-    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'pager', 'forms'\]/);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'pager', 'forms'[\],]/); // 1.16.0: sparkline after it
+  });
+
+  it('export sparkline.css (1.16.0, sparklines.md 14), built like the others', () => {
+    const theme = pkg('theme');
+    for (const f of ['sparkline.css', 'sparkline.unlayered.css', 'sparkline.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'forms', 'sparkline'\]/);
   });
 
   it('ship no rich tooltip entry (owner 2026-11-14: moved to @dztooltip, never published)', () => {

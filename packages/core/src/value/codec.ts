@@ -4,7 +4,7 @@ import type { LocaleCtx } from './locale.js';
 export const REJECTED: unique symbol = Symbol();
 export type Rejected = typeof REJECTED;
 
-export type ColumnType = 'text' | 'number' | 'day' | 'instant' | 'boolean' | 'enum' | 'custom';
+export type ColumnType = 'text' | 'number' | 'day' | 'instant' | 'boolean' | 'enum' | 'custom' | 'sparkline';
 
 /**
  * How one type of value is read, written, compared and exported.

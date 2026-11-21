@@ -1,6 +1,6 @@
 ---
 title: "type"
-description: "What the cells hold: text, number, day, instant, boolean, enum or custom."
+description: "What the cells hold: text, number, day, instant, boolean, enum, sparkline or custom."
 ---
 
 import LiveDemo from '../../../components/LiveDemo.astro';
@@ -20,6 +20,8 @@ The kind of value in the column: how it is read, shown, sorted, filtered and edi
   read: give `date.getTime()`.
 - `'boolean'`: yes or no.
 - `'enum'`: one value of a closed list, which [`enumOptions`](../enum-options/) gives.
+- `'sparkline'`: a list of numbers in time order (`[3, 5, 41]`, or `'3 5 41'`), drawn as a small chart by
+  [`sparklines()`](../../features/sparklines/) (1.16.0); without it, the numbers as text.
 - `'custom'`: your own [`codec`](../codec/), which it needs.
 
 A value the type cannot read leaves the cell empty, never guessed; sorting the column tells it with an

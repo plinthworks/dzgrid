@@ -1,0 +1,33 @@
+---
+title: "sparkline"
+description: "How a sparkline column is drawn: line, area, bars or win / loss, its range, its markers."
+---
+
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+A column's own drawing for its list of numbers, over the grid's defaults.
+
+<OptionFacts column="sparkline" />
+
+## What it does
+
+On a column of [`type`](../type/) `'sparkline'`, drawn by the [`sparklines()`](../../features/sparklines/) feature from
+`@dzgrid/dom/sparkline`. Each key wins over the feature's options: `kind` (`'line'`, `'area'`, `'bar'`, `'winloss'`),
+`min` and `max` (a range fixed for every row, so rows compare at a glance; a value beyond is drawn at the edge),
+`markers` (`'last'`, `'minmax'`, `'none'`) and `tooltip: false` (no point tooltip). Without the feature the numbers
+show as text and the grid tells one `missing-feature` warning.
+
+## Example
+
+```ts
+import type { ColumnDef } from '@dzgrid/core';
+
+type Meter = { id: string; load: number[] };
+
+export const load: ColumnDef<Meter> = { id: 'load', header: 'Load', type: 'sparkline', sparkline: { kind: 'bar', min: 0, max: 100 } };
+```
+
+## See also
+
+- The [`sparklines()`](../../features/sparklines/) feature.
+- [`type`](../type/).

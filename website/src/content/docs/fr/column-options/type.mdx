@@ -1,6 +1,6 @@
 ---
 title: "type"
-description: "Ce que contiennent les cellules : texte, nombre, jour, instant, oui/non, liste ou sur mesure."
+description: "Ce que contiennent les cellules : texte, nombre, jour, instant, oui/non, liste, mini-courbe ou sur mesure."
 ---
 
 import LiveDemo from '../../../../components/LiveDemo.astro';
@@ -21,6 +21,8 @@ La sorte de valeur de la colonne : comment elle est lue, affichée, triée, filt
   JavaScript n’est pas lue : donnez `date.getTime()`.
 - `'boolean'` : oui ou non.
 - `'enum'` : une valeur d’une liste fermée, que donne [`enumOptions`](../enum-options/).
+- `'sparkline'` : une liste de nombres dans l’ordre du temps (`[3, 5, 41]`, ou `'3 5 41'`), dessinée en petit
+  graphique par [`sparklines()`](../../features/sparklines/) (1.16.0) ; sans elle, les nombres en texte.
 - `'custom'` : votre propre [`codec`](../codec/), qu’il demande.
 
 Une valeur que le type ne sait pas lire laisse la cellule vide, jamais devinée ; trier la colonne la signale par

@@ -604,7 +604,7 @@
     {
       "name": "type",
       "type": "ColumnType",
-      "resolved": "\"number\" | \"boolean\" | \"text\" | \"day\" | \"instant\" | \"enum\" | \"custom\"",
+      "resolved": "\"number\" | \"boolean\" | \"text\" | \"day\" | \"instant\" | \"enum\" | \"custom\" | \"sparkline\"",
       "required": false,
       "doc": "",
       "default": {
@@ -990,6 +990,15 @@
       "resolved": null,
       "required": false,
       "doc": "1.14.0, with `showAs()` of `@dzgrid/dom/show-as` (aggregation.md 19–24): a number column shown as its share of the total of the filtered rows (`percentOfTotal`) or of its group's sum (`percentOfGroup`). The value stays the data: sort, filters, edits, the clipboard and the files read it.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
+      "name": "sparkline",
+      "type": "SparklineOptions",
+      "resolved": null,
+      "required": false,
+      "doc": "1.16.0, a `type: 'sparkline'` column drawn by `sparklines()` of `@dzgrid/dom/sparkline` (sparklines.md 6): its drawing's options, key by key over the feature's. Without the feature: told once (`missing-feature`), the numbers shown.",
       "default": null,
       "source": "packages/core/src/columns/defs.ts"
     },
@@ -3553,6 +3562,25 @@
       "css": [],
       "doc": "",
       "source": "packages/dom/src/editors-search/index.ts"
+    },
+    {
+      "name": "sparklines",
+      "entry": "@dzgrid/dom/sparkline",
+      "signature": "sparklines(options?: SparklineOptions): GridFeature",
+      "param": null,
+      "options": [],
+      "texts": {
+        "bundle": "sparkline",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/sparkline.css",
+      "css": [],
+      "doc": "`sparklines(options)`: draws every `type: 'sparkline'` column — a list of numbers in time order — as a small line, area, bar or win / loss chart (1.16.0, docs/behaviors/sparklines.md). The options are the grid's defaults; a column's `sparkline: { … }` wins, key by key. The cell's words are a summary for screen readers (« 12 values, from 3 to 41, last 27 »); the pointer over the drawing shows the point's value in the grid's tooltip, a keyboard focus the summary. Time runs left to right in both directions. Files, the clipboard and print write the numbers.",
+      "source": "packages/dom/src/sparkline/index.ts"
     }
   ]
 }

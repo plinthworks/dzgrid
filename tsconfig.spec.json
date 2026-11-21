@@ -245,6 +245,18 @@
       "@dzgrid/dom/row-heights": [
         "./packages/dom/src/row-heights.ts"
       ],
+      "@dzgrid/dom/sparkline": [
+        "./packages/dom/src/sparkline.ts"
+      ],
+      "@dzgrid/dom/locales/en-sparkline": [
+        "./packages/dom/src/locales/en-sparkline.ts"
+      ],
+      "@dzgrid/dom/locales/fr-sparkline": [
+        "./packages/dom/src/locales/fr-sparkline.ts"
+      ],
+      "@dzgrid/dom/locales/ar-sparkline": [
+        "./packages/dom/src/locales/ar-sparkline.ts"
+      ],
       "@dzgrid/dom/show-as": [
         "./packages/dom/src/show-as.ts"
       ],

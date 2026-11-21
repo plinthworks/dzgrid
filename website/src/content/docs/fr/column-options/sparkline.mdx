@@ -1,0 +1,33 @@
+---
+title: "sparkline"
+description: "Comment une colonne de mini-courbes est dessinée : ligne, aire, barres ou gagné / perdu, son échelle, ses marques."
+---
+
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Le dessin propre à une colonne pour sa liste de nombres, par-dessus les valeurs de la grille.
+
+<OptionFacts column="sparkline" />
+
+## Ce qu’il fait
+
+Sur une colonne de [`type`](../type/) `'sparkline'`, dessinée par la fonction [`sparklines()`](../../features/sparklines/)
+de `@dzgrid/dom/sparkline`. Chaque clé l’emporte sur les options de la fonction : `kind` (`'line'`, `'area'`, `'bar'`,
+`'winloss'`), `min` et `max` (une échelle fixe pour toutes les lignes, pour les comparer d’un coup d’œil ; une valeur
+au-delà est dessinée au bord), `markers` (`'last'`, `'minmax'`, `'none'`) et `tooltip: false` (pas d’infobulle de
+point). Sans la fonction, les nombres s’affichent en texte et la grille signale un avertissement `missing-feature`.
+
+## Exemple
+
+```ts
+import type { ColumnDef } from '@dzgrid/core';
+
+type Meter = { id: string; load: number[] };
+
+export const load: ColumnDef<Meter> = { id: 'load', header: 'Charge', type: 'sparkline', sparkline: { kind: 'bar', min: 0, max: 100 } };
+```
+
+## Voir aussi
+
+- La fonction [`sparklines()`](../../features/sparklines/).
+- [`type`](../type/).

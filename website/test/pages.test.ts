@@ -46,7 +46,7 @@ const WRITTEN = [
   'column-options/movable', 'column-options/number-format', 'column-options/pinned', 'column-options/resizable',
   'column-options/row-span', 'column-options/sortable', 'column-options/tooltip', 'column-options/total',
   'column-options/type', 'column-options/ui', 'column-options/validate', 'column-options/value',
-  'column-options/width', 'column-options/wrap', 'column-options/show-as',
+  'column-options/width', 'column-options/wrap', 'column-options/show-as', 'column-options/sparkline',
   'api/index', 'api/core', 'api/dom', 'api/theme', 'api/angular', 'api/element',
   'features/index', ...FEATURES.map(([, name]: [string, string]) => `features/${name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`),
 ];
