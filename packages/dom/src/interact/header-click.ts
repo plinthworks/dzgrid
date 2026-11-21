@@ -21,11 +21,11 @@ export function installHeaderClick<T>(g: GridContext<T>, toggleAll: () => void):
     const t = e.target as HTMLElement;
     if (t.closest('.dzg-resize')) return;
     // Cells of the rows the features add (filters) and group headers are not column headers:
-    // they never sort; nor does a control a part put in a header (a filter button, a menu).
+    // they never sort; nor does a control a part put in a header (a filter button, a menu). The sort button does (49).
     if (t.closest('.dzg-hextra, .dzg-hgroup')) return;
     const hcell = t.closest('.dzg-hcell');
     const control = t.closest<HTMLElement>(INTERACTIVE + ', [data-dzg-owner]');
-    if (control && hcell && control !== hcell && hcell.contains(control) && !control.matches('.dzg-box')) return;
+    if (control && hcell && control !== hcell && hcell.contains(control) && !control.matches('.dzg-box,.dzg-sort')) return;
     if (headerRenderer.check && headerRenderer.check.contains(t)) {
       toggleAll();
       return;

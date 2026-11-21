@@ -42,8 +42,9 @@ function setup(g: GridContext<unknown>): FeatureHandle {
   const seam = () => g.features.find((h) => h.filter)?.filter;
   // A header holding a control (step 21): one tab stop for the grid (the part's controls only while
   // the focus is in them), Enter or F2 in (Enter sorts when the part takes no focus), Escape out.
+  // The grid's sort button beside the part (`sortMark: 'always'`, presentation-settings.md 49) goes with them.
   const tab = (cell: HTMLElement, i: number): void => {
-    for (const c of cell.querySelectorAll<HTMLElement>('.dzg-hlabel :is(input,button,select,textarea,a[href],[tabindex])')) c.tabIndex = i;
+    for (const c of cell.querySelectorAll<HTMLElement>('.dzg-hlabel :is(input,button,select,textarea,a[href],[tabindex]),:scope>button.dzg-sort')) c.tabIndex = i;
   };
   cellKeys(g, '.dzg-hcell:not(.dzg-hextra):not(.dzg-hgroup)', (cell) => {
     const id = cell.dataset['col']!;

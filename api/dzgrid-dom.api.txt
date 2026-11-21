@@ -34,6 +34,7 @@
 # history: owner 2026-11-19 « AA »: rowHeight accepts a function (1.14.0); headers 'none' and focusVisible as published in 1.13.0 — @dzgrid/dom#GridSettings
 # history: owner 2026-11-19 « AA »: the 1.14.0 entries show-as, editors-textarea, group-select, row-heights (additions) — @dzgrid/dom/row-heights#rowHeights, @dzgrid/dom/show-as#showAs, @dzgrid/dom/show-as#ShowAsOptions, @dzgrid/dom/editors-textarea#TextareaEditor, @dzgrid/dom/editors-textarea#textareaEditor, @dzgrid/dom/editors-textarea#TEXTAREA_CSS, @dzgrid/dom/group-select#groupSelect
 # history: 1.14.0 published
+# history: owner 2026-11-21 « ★ partout » (1.15.0 sortMark, presentation-settings.md 49): the sort button's name added to the base bundles, an addition as the yes / no words of 2026-11-10 — @dzgrid/dom/locales/en#EN, @dzgrid/dom/locales/fr#FR, @dzgrid/dom/locales/ar#AR
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -2665,6 +2666,7 @@
           'pinned.end': string;
           'header.withSort': string;
           'header.sortHint': string;
+          'header.sortButton': string;
           'cell.yes': string;
           'cell.no': string;
       };
@@ -2715,6 +2717,7 @@
           'pinned.end': string;
           'header.withSort': string;
           'header.sortHint': string;
+          'header.sortButton': string;
           'cell.yes': string;
           'cell.no': string;
       };
@@ -2774,6 +2777,7 @@
           'pinned.end': string;
           'header.withSort': string;
           'header.sortHint': string;
+          'header.sortButton': string;
           'cell.yes': string;
           'cell.no': string;
       };

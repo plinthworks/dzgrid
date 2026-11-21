@@ -16,7 +16,9 @@ describe('messages', () => {
       expect(placeholders(AR.text[key]), `ar ${key}`).toEqual(want);
     }
     // 1.10.0: the base bundles also carry the optional yes / no words (badge-boolean.md « Yes / no … without a part »).
-    for (const m of [EN, FR, AR]) expect(Object.keys(m.text).sort()).toEqual([...MESSAGE_KEYS, 'cell.yes', 'cell.no'].sort());
+    // 1.15.0: and the sort button's name beside a header part (presentation-settings.md 49), its placeholder the same.
+    for (const m of [EN, FR, AR]) expect(Object.keys(m.text).sort()).toEqual([...MESSAGE_KEYS, 'cell.yes', 'cell.no', 'header.sortButton'].sort());
+    for (const m of [EN, FR, AR]) expect(placeholders(m.text['header.sortButton']!)).toEqual(['column']);
   });
 
   it('give every plural message every category its language has', () => {

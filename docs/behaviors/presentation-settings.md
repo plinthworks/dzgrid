@@ -393,6 +393,30 @@ open, narrow columns' titles shrank to one letter or nothing.
     control »), Enter sorts only when it does not. The sort stays on a click on the header, and on Enter on a header
     whose part takes no focus.
 
+#### 1.15.0 — the owner's app's last rustine (owner 2026-11-21, « ★ partout »)
+49. **A header part keeps the grid's sort usable**: `sortMark: 'always'` (`ColumnDef`, beside `filterButton: false`;
+    by default the mark shows only once the column is sorted, and that stays so for every other column). On a sortable
+    column:
+    - The mark shows unsorted too (`data-dir="none"`): the app's `icons.sortNone`, else the theme's own two-way arrow
+      (⇅, muted). Sorted, the arrow and, in a multi-column sort, the precedence, as on any header.
+    - The mark is a button (`<button type="button" class="dzg-sort">`, at the header's end): beside a header part
+      (`@dzgrid/dom/slots`) the part took the title's place, so there is no title left to click. A click on it sorts as
+      a click on a title does (ascending → descending → none; Shift adds to the sort). Its name: « Sort by {column} »
+      (`header.sortButton`, in the en / fr / ar base bundles; a host bundle without it: the column's title). The state
+      stays the header's (`aria-sort` on the first sorted column, the precedence in its name); the button says none.
+    - Keyboard: the grid stays one Tab stop; the button is never a Tab stop of its own. With a part, it joins the part's
+      controls once the focus enters the part (Enter or F2 on the header, parts.md « Keys in a header cell holding a
+      control »): Tab goes from the part's controls on to it, Enter or Space on it sorts, Escape goes
+      back to the header. To add to the sort by keyboard: Shift+Enter on the header, with or without a part (on the
+      button itself, Firefox's Enter does not carry Shift into the click — measured — so the header's key is the one way).
+      Without a part, Enter on the header sorts as before. Enter on a header whose part takes no
+      focus still sorts.
+    - A narrow header (43) keeps the button: only the decorative unsorted mark gives way under 6.5rem.
+    - `sortMark` set or taken off live: the mark is rebuilt as a button, or as the decorative mark (only once sorted).
+    - Not sortable, or no `sortMark`: nothing changes. Right to left: the button sits at the header's logical end.
+    Before, an app drew its own sort button in its part and hid the grid's mark with a rule on `.dzg-hcell` /
+    `.dzg-sort` (two arrows otherwise once sorted).
+
 ## Right to left
 The separator, the last column's line, the arrow's place and the header padding are logical; the separator's
 background position is mirrored by `:dir(rtl)`.
@@ -401,6 +425,6 @@ background position is mirrored by `:dir(rtl)`.
 `packages/dom/test/presentation-1-12.test.ts` (25, 29, 32), `packages/theme/test/presentation-1-12.test.ts` (24, 26–33,
 both copies, contrast pairs, the guide's table), `packages/theme/test/presentation-1-12-fixes.test.ts` (34–37, 39–40),
 `packages/dom/test/filters-set-width.test.ts` (38), `packages/dom/test/pager-icons.test.ts` (41),
-`packages/theme/test/panel-1-12-1.test.ts` and `packages/dom/test/panel-1-12-1.test.ts` (42–43), `packages/theme/test/app-1-13.test.ts` and `packages/dom/test/app-1-13.test.ts` (44–47), `packages/dom/test/rustines-1-13.test.ts` and `packages/theme/test/rustines-1-13.test.ts` (48), browsers `node scripts/browser-1-12.mjs` (Chrome, Firefox, WebKit ×
+`packages/theme/test/panel-1-12-1.test.ts` and `packages/dom/test/panel-1-12-1.test.ts` (42–43), `packages/theme/test/app-1-13.test.ts` and `packages/dom/test/app-1-13.test.ts` (44–47), `packages/dom/test/rustines-1-13.test.ts` and `packages/theme/test/rustines-1-13.test.ts` (48), `packages/dom/test/sort-mark-1-15.test.ts` and `packages/theme/test/sort-mark-1-15.test.ts` (49; Chrome, Firefox, WebKit: `node scripts/browser-1-15.mjs`), browsers `node scripts/browser-1-12.mjs` (Chrome, Firefox, WebKit ×
 layered / unlayered × light / dark × ltr / ar × a page with Tailwind 3's preflight; axe; every variable's default and
 effect, table-driven; 34 the header's places, 37 the forced row text, 38 the list's width; 39–40 the pager apart from the popups' buttons, each bar variable's default and effect; 41 the pager's icons: size, colour, disabled colour, mirrored, names; 42 the panel's rows (box and name centres within 1.5 px, heights), search field, lock, head, axe; 43 narrow titles at 80 px, auto-size; 44 the placeholder's contrast and variable under the preflight, 45 no funnel, 46 a part's width at each alignment, 47 an arrow then Enter in one task; (14) 48 no ring after a click on a cell, a header, a panel and back on a key, `headers: 'none'`, a skipped column, the arrows through a detail's grid, its sideways follow and `--dzg-detail-inset`).

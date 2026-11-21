@@ -60,7 +60,8 @@ describe('the dock\'s head buttons (42)', () => {
 describe('a narrow header keeps its title (43)', () => {
   it('a header with a filter button is a size container; under 6.5rem the unsorted mark gives way, and an unfiltered button at rest', () => {
     expect(FILTERS_CSS).toContain(':where(.dzg-hcell:has(>.dzg-fbtn)){justify-content:end;container-type:inline-size}');
-    expect(FILTERS_CSS).toContain('@container (inline-size<6.5rem){:where(.dzg-hcell>.dzg-sort[data-dir=none]){position:absolute;opacity:0}:where(.dzg-hcell:not(:hover,:focus-within,[data-dzg-filtered])>.dzg-fbtn){inline-size:0;opacity:0}:where(.dzg-hcell:not(:hover,:focus-within,[data-dzg-filtered]))::after{display:none}}');
+    // The decorative mark only (`span`): a sort button beside a header part stays (1.15.0, presentation-settings.md 49).
+    expect(FILTERS_CSS).toContain('@container (inline-size<6.5rem){:where(.dzg-hcell>span.dzg-sort[data-dir=none]){position:absolute;opacity:0}:where(.dzg-hcell:not(:hover,:focus-within,[data-dzg-filtered])>.dzg-fbtn){inline-size:0;opacity:0}:where(.dzg-hcell:not(:hover,:focus-within,[data-dzg-filtered]))::after{display:none}}');
     // Never display: none nor visibility: hidden — still reached and named.
     expect(FILTERS_CSS).not.toMatch(/@container[^}]*(display:none|visibility)/);
   });

@@ -5,6 +5,30 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased — 1.15.0
+
+The option that retires the owner's app's last patch on DzGrid's own classes (owner 2026-11-21, « ★ partout »). A
+minor: an addition, nothing removed; every default unchanged.
+
+### Added
+- **`sortMark: 'always'`** (`ColumnDef`, opt-in; presentation-settings.md 49, parts.md « Keys in a header cell holding
+  a control »): for a header part that took the title's place (a search box), the grid keeps the sort usable. On a
+  sortable column the mark shows unsorted too (`icons.sortNone`, else the theme's ⇅) and is a button —
+  `<button type="button" class="dzg-sort">` at the header's end, named « Sort by {column} » (new text
+  `header.sortButton` in the en / fr / ar base bundles, optional: a bundle without it names the button by the column's
+  title). A click sorts as a title's click (ascending → descending → none; Shift adds). The state stays the header's
+  (`aria-sort`, the precedence in its name). Keyboard: the grid stays one Tab stop; once the focus is in the part, Tab
+  reaches the button, Enter or Space sorts, Escape goes back to the header; Shift+Enter on the header adds to the
+  sort (Firefox does not carry Shift into a keyboard click). Checked in Chrome, Firefox and WebKit
+  (`scripts/browser-1-15.mjs`, French and Arabic). A narrow header keeps it. Every other
+  column: no mark until sorted, as before. An app no longer draws its own sort button nor hides the grid's mark.
+  `@dzgrid/theme`: the ⇅ arrow and the button's reset (24 px target, the grid's focus ring). Type
+  `SortButtonMessageKey`.
+
+### Sizes
+- `@dzgrid/dom` 26 120 → 26 250 (measured 26 229), `@dzgrid/theme` 3 110 → 3 170 (measured 3 167), both by the +2 %
+  rule; K.8 92 814 / 93 000.
+
 ## [1.14.0] - 2026-11-19
 
 Six opt-in additions from the ag-Grid gap analysis (owner 2026-11-18, « oui lance 1 à 5 », and dragging a header out to

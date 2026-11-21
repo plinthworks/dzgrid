@@ -6,6 +6,11 @@ import type { MessageValue } from './messages.js';
  * Types only, in a file of their own that the base imports as types: its bundle is the same, byte for byte.
  */
 export type PartsMessageKey = 'cell.yes' | 'cell.no';
+/**
+ * The name of a column's sort button beside a header part (`sortMark: 'always'`, 1.15.0, presentation-settings.md 49):
+ * in the base bundles, optional here — a bundle without it names the button by the column's title.
+ */
+export type SortButtonMessageKey = 'header.sortButton';
 /** A parts bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_PARTS.text }`. */
 export interface PartsMessages {
   readonly locale: string;

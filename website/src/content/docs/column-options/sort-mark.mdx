@@ -1,0 +1,88 @@
+---
+title: "sortMark"
+description: "`'always'`: the column's sort mark shows unsorted too — beside a header part, it is the grid's sort button."
+---
+
+import LiveDemo from '../../../components/LiveDemo.astro';
+import OptionFacts from '../../../components/OptionFacts.astro';
+
+Keeps one column's sort usable when your own header part took the place of its title.
+
+<OptionFacts column="sortMark" />
+
+## What it does
+
+By default a header shows no sort mark until its column is sorted: you click the title to sort. A header part
+(`ui.header`, with `slots()`) — a search box in place of the title, say — leaves no title to click. With
+`sortMark: 'always'` on a sortable column:
+
+- the mark shows unsorted too: your `icons.sortNone`, else a two-way arrow (⇅);
+- the mark is a real button at the header's end, named « Sort by {column} » (the
+  `header.sortButton` text of the base bundles; a bundle of yours without it names it by the column's title). A click
+  sorts as a click on a title does — ascending, descending, none; Shift adds to the sort. The sort state stays on the
+  header (`aria-sort`), the precedence too in a multi-column sort;
+- by keyboard the grid stays one Tab stop: Enter or F2 on the header goes into your part, Tab then reaches the button,
+  Enter or Space sorts, Escape goes back to the header; Shift+Enter on the header adds to the sort. Without a part,
+  Enter on the header sorts as before.
+
+Every other column keeps the mark only once sorted. A column that does not sort shows nothing. In right to left, the
+button sits at the header's start on screen — its logical end. Your part draws no sort button of its own.
+
+## Example
+
+```ts
+import { createGrid, definePart, type GridMessages } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters';
+import { slots } from '@dzgrid/dom/slots';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { EN } from '@dzgrid/dom/locales/en';
+
+type Plant = { id: string; name: string; water: number };
+
+const messages: GridMessages = { ...EN, text: { ...EN.text, ...EN_FILTERS.text } };
+
+// A search box in place of the title: it filters the column; the grid keeps the sort button beside it.
+const searchHeader = definePart('header', {
+  mount(host, c) {
+    const box = document.createElement('input');
+    box.setAttribute('aria-label', c.label);
+    box.placeholder = c.label;
+    box.addEventListener('input', () => c.filter?.set(box.value ? { type: 'text', op: 'contains', value: box.value } : null));
+    host.append(box);
+    return { focus: () => (box.focus(), true) };
+  },
+});
+
+createGrid<Plant>(document.getElementById('plants')!, {
+  rows: [{ id: 'p1', name: 'Fern', water: 3 }],
+  columns: [
+    { id: 'name', header: 'Plant', ui: { header: 'searchHeader' }, filterButton: false, sortMark: 'always' },
+    { id: 'water', header: 'Water (days)', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  parts: { searchHeader },
+  features: [slots(), filters()],
+});
+```
+
+## Live demo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Plants' }}
+  columns={[
+    { id: 'name', header: 'Plant', width: 160, sortMark: 'always' },
+    { id: 'water', header: 'Water (days)', type: 'number', flex: 1 },
+  ]}
+  rows={[
+    { id: 'p1', name: 'Fern', water: 3 },
+    { id: 'p2', name: 'Cactus', water: 21 },
+    { id: 'p3', name: 'Basil', water: 2 },
+  ]}
+  caption="Plant shows its mark before any sort (⇅); Water shows one only once you sort it."
+/>
+
+## See also
+
+- [`filterButton`](../filter-button/), [`sortable`](../sortable/), [`ui`](../ui/).

@@ -117,6 +117,12 @@ export interface ColumnDef<T, V = unknown> {
    */
   readonly filterButton?: false;
   /**
+   * `'always'`: its sort mark shows unsorted too, not only once sorted, and is a button (1.15.0, presentation-settings.md
+   * 49) — for a header part that took the title's place (`@dzgrid/dom/slots`): « Sort by {column} », a click sorts and
+   * Shift adds, reached by Tab once the focus is in the part. Nothing on a column that does not sort.
+   */
+  readonly sortMark?: 'always';
+  /**
    * `false`: the arrow keys, Home and End jump over it, in the header as in the body, and Tab enters the grid past it
    * (1.13.0, reading-keyboard.md « A column the keyboard skips »): a column empty on purpose (the space under a master's
    * chevron in a detail's grid). Still drawn, named for screen readers, and reached by a click.

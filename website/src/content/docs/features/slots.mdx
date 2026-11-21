@@ -21,7 +21,8 @@ Cell parts work without any feature. `slots()` adds four more places a part may 
 
 The grid keeps the rest: the header's role, sort state and mark, the resize grip and the click that sorts; the
 overlay's place and its retry button; the tooltip's element, timing, Escape and placement. A header part gets the
-column, its `label` and its sort.
+column, its `label` and its sort. A part that takes the title's place (a search box) leaves no title to click: give
+that column [`sortMark: 'always'`](../../column-options/sort-mark/) and the grid puts its own sort button beside the part.
 
 A header, overlay, busy or tooltip part registered on a grid without this feature, or a column's `ui.header` or
 `ui.tooltip`, tells a `missing-feature` warning. A name no one registered for that slot tells `unknown-part`, and the

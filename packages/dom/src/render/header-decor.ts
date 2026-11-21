@@ -23,7 +23,7 @@ export function widthOf<T>(g: GridContext<T>, id: string): number {
  * precedence also in the header's name (returned: the features may join theirs
  * before it is written once). And its resize handle.
  */
-export function decorateHeader<T>(g: GridContext<T>, col: { id: string; sortable: boolean; def: { header?: string; resizable?: boolean } }, el: HTMLElement, sort: readonly SortItem[]): string | null {
+export function decorateHeader<T>(g: GridContext<T>, col: { id: string; sortable: boolean; def: { header?: string; resizable?: boolean; sortMark?: 'always' } }, el: HTMLElement, sort: readonly SortItem[]): string | null {
   el.classList.toggle('dzg-sortable', col.sortable);
   let grip = el.querySelector<HTMLElement>(':scope > .dzg-resize');
   if (col.def.resizable === false) grip?.remove();
@@ -38,17 +38,26 @@ export function decorateHeader<T>(g: GridContext<T>, col: { id: string; sortable
   }
   const at = sort.findIndex((s) => s.column === col.id);
   setAttr(el, 'aria-sort', at === 0 ? (sort[0]!.dir === 'asc' ? 'ascending' : 'descending') : null);
+  // `sortMark: 'always'` (presentation-settings.md 49): the mark kept unsorted, and a button — the control left to sort
+  // when a header part took the title's place; out of the Tab order (`@dzgrid/dom/slots` lets Tab reach it in the part).
+  const keep = col.sortable && col.def.sortMark;
   let mark = el.querySelector<HTMLElement>(':scope > .dzg-sort');
+  if (mark && (mark.tagName == 'BUTTON') != !!keep) mark.remove(), (mark = null);
   // Unsorted: no mark, unless the app gave one for a sortable column (`icons.sortNone`, presentation-settings.md 25).
-  if (at === -1 && !(col.sortable && g.settings.icons?.sortNone)) {
+  if (at === -1 && !(col.sortable && g.settings.icons?.sortNone) && !keep) {
     mark?.remove();
     return null;
   }
   if (!mark) {
-    mark = g.doc.createElement('span');
+    mark = g.doc.createElement(keep ? 'button' : 'span');
     mark.className = 'dzg-sort';
-    mark.setAttribute('aria-hidden', 'true');
+    if (keep) (mark as HTMLButtonElement).type = 'button', (mark.tabIndex = -1);
+    else mark.setAttribute('aria-hidden', 'true');
     el.append(mark);
+  }
+  if (keep) {
+    const title = col.def.header ?? col.id;
+    setAttr(mark, 'aria-label', g.settings.messages.text['header.sortButton'] === undefined ? title : g.msg('header.sortButton', { column: title }));
   }
   setAttr(mark, 'data-dir', at === -1 ? 'none' : sort[at]!.dir);
   const many = at !== -1 && sort.length > 1;

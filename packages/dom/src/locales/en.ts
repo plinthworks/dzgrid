@@ -32,6 +32,7 @@ export const EN = {
     'pinned.end': "Pinned at the end",
     'header.withSort': "{header}, {priority}",
     'header.sortHint': "Press Enter to sort, Shift+Enter to add to the sort",
+    'header.sortButton': "Sort by {column}",
     // A boolean column's words (1.10.0, badge-boolean.md « Yes / no … without a part »); the -parts bundles carry them too.
     'cell.yes': "Yes",
     'cell.no': "No",

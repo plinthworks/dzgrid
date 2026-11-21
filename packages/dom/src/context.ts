@@ -17,7 +17,7 @@ import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { EditSeam, FeatureHandle, GroupsApi, MoveFn, SlotDrivers, SpanFeature } from './features.js';
 import type { CellInput, PartBase, SlotPart } from './part.js';
 import type { Warmup } from './warmup.js';
-import type { DetailMessageKey, EditMessageKey, EditorsMessageKey, RangeMessageKey, FillMessageKey, ColumnsMessageKey, ColumnsChooserMessageKey, ColumnMenuMessageKey, ContextMenuMessageKey, ContextMenuXlsxKey, PinnedMessageKey, TotalsMessageKey, ImportMessageKey, PrintMessageKey, FreshMessageKey, StatusMessageKey, FindMessageKey, ClearFiltersKey, RowDragMessageKey, FiltersPanelMessageKey, DockMessageKey, RowNumbersMessageKey, RulesMessageKey, TreeMessageKey, GroupMessageKey, PivotMessageKey, PivotBarMessageKey } from './part-texts.js';
+import type { SortButtonMessageKey, DetailMessageKey, EditMessageKey, EditorsMessageKey, RangeMessageKey, FillMessageKey, ColumnsMessageKey, ColumnsChooserMessageKey, ColumnMenuMessageKey, ContextMenuMessageKey, ContextMenuXlsxKey, PinnedMessageKey, TotalsMessageKey, ImportMessageKey, PrintMessageKey, FreshMessageKey, StatusMessageKey, FindMessageKey, ClearFiltersKey, RowDragMessageKey, FiltersPanelMessageKey, DockMessageKey, RowNumbersMessageKey, RulesMessageKey, TreeMessageKey, GroupMessageKey, PivotMessageKey, PivotBarMessageKey } from './part-texts.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -274,5 +274,5 @@ export interface GridContext<T> {
   refused?: ((key: RowKey) => boolean) | undefined;
   /** Find's text in force (`@dzgrid/dom/find`), '' or absent: none — what a cell part is given (`search.find`). */
   findText?: string;
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | TotalsMessageKey | ImportMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | ClearFiltersKey | RowDragMessageKey | FiltersPanelMessageKey | DockMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey | PivotMessageKey | PivotBarMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | TotalsMessageKey | ImportMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | ClearFiltersKey | RowDragMessageKey | FiltersPanelMessageKey | DockMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey | PivotMessageKey | PivotBarMessageKey | SortButtonMessageKey, params?: Readonly<Record<string, string | number>>): string;
 }

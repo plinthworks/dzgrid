@@ -176,6 +176,28 @@
   content: "▼";
 }
 
+.dzg-sort[data-dir=none]:where(:not([data-dzg-icons~=sort-none] *))::before {
+  content: "⇅";
+}
+
+button.dzg-sort {
+  min-inline-size: 1.5rem;
+  min-block-size: 1.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+button.dzg-sort:last-child {
+  margin-inline-end: calc(var(--dzg-target-min, 24px) - var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1));
+}
+
+button.dzg-sort:focus-visible {
+  outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+  outline-offset: -2px;
+}
+
 .dzg-resize::after {
   content: "";
   position: absolute;

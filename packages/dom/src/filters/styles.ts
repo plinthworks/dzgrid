@@ -30,7 +30,7 @@ export const FILTERS_CSS =
   // stays the grip's), back under the pointer or with the focus; never display: none. Without it the grip's room (the
   // cell's `::after`, which queries its own cell) goes to the title too: a plain header's title reaches the grip the same.
   ':where(.dzg-hcell:has(>.dzg-fbtn)){justify-content:end;container-type:inline-size}' +
-  '@container (inline-size<6.5rem){:where(.dzg-hcell>.dzg-sort[data-dir=none]){position:absolute;opacity:0}:where(.dzg-hcell:not(:hover,:focus-within,[data-dzg-filtered])>.dzg-fbtn){inline-size:0;opacity:0}:where(.dzg-hcell:not(:hover,:focus-within,[data-dzg-filtered]))::after{display:none}}' +
+  '@container (inline-size<6.5rem){:where(.dzg-hcell>span.dzg-sort[data-dir=none]){position:absolute;opacity:0}:where(.dzg-hcell:not(:hover,:focus-within,[data-dzg-filtered])>.dzg-fbtn){inline-size:0;opacity:0}:where(.dzg-hcell:not(:hover,:focus-within,[data-dzg-filtered]))::after{display:none}}' +
   ':where(.dzg-hcell:has(>.dzg-fbtn))::after{content:"";order:9;flex:none;inline-size:calc(var(--dzg-target-min,24px) - var(--dzg-header-padding-inline,var(--dzg-cell-padding-inline,.5rem))*var(--dzg-density,1))}' +
   // Beside a button the label gives way, cut with an ellipsis.
   ':where(.dzg-hcell>.dzg-hlabel){min-inline-size:0;overflow:hidden;text-overflow:ellipsis}' +

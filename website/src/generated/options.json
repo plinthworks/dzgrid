@@ -747,6 +747,15 @@
       "source": "packages/core/src/columns/defs.ts"
     },
     {
+      "name": "sortMark",
+      "type": "'always'",
+      "resolved": null,
+      "required": false,
+      "doc": "`'always'`: its sort mark shows unsorted too, not only once sorted, and is a button (1.15.0, presentation-settings.md 49) — for a header part that took the title's place (`@dzgrid/dom/slots`): « Sort by {column} », a click sorts and Shift adds, reached by Tab once the focus is in the part. Nothing on a column that does not sort.",
+      "default": null,
+      "source": "packages/core/src/columns/defs.ts"
+    },
+    {
       "name": "keyboard",
       "type": "false",
       "resolved": null,

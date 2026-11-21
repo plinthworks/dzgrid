@@ -22,7 +22,9 @@ dessiner, à la place de la grille :
 
 La grille garde le reste : le rôle du titre, l’état et la marque du tri, la poignée de redimensionnement et le clic qui
 trie ; la place du message et son bouton « Réessayer » ; l’élément de l’infobulle, son délai, Échap et sa position. Une
-partie de titre reçoit la colonne, son `label` et son tri.
+partie de titre reçoit la colonne, son `label` et son tri. Une partie qui prend la place du titre (une zone de recherche)
+ne laisse plus de titre à cliquer : donnez à cette colonne [`sortMark: 'always'`](../../column-options/sort-mark/) et la
+grille met son propre bouton de tri à côté de la partie.
 
 Une partie de titre, de message, d’attente ou d’infobulle enregistrée dans une grille sans cette fonction, ou le
 `ui.header` ou `ui.tooltip` d’une colonne, signale un avertissement `missing-feature`. Un nom que personne n’a

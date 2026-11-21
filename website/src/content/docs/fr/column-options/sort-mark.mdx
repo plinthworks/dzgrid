@@ -1,0 +1,88 @@
+---
+title: "sortMark"
+description: "`'always'` : la marque de tri de la colonne se montre aussi sans tri — à côté d’une part d’en-tête, c’est le bouton de tri de la grille."
+---
+
+import LiveDemo from '../../../../components/LiveDemo.astro';
+import OptionFacts from '../../../../components/OptionFacts.astro';
+
+Garde le tri d’une colonne utilisable quand votre propre part d’en-tête a pris la place de son titre.
+
+<OptionFacts column="sortMark" />
+
+## Ce qu’il fait
+
+Par défaut, un en-tête ne montre aucune marque de tri tant que sa colonne n’est pas triée : on clique sur le titre
+pour trier. Une part d’en-tête (`ui.header`, avec `slots()`) — une zone de recherche à la place du titre, par exemple —
+ne laisse plus de titre à cliquer. Avec `sortMark: 'always'` sur une colonne triable :
+
+- la marque se montre aussi sans tri : votre `icons.sortNone`, sinon une double flèche (⇅) ;
+- la marque est un vrai bouton au bout de l’en-tête, nommé « Trier par {colonne} » (le
+  texte `header.sortButton` des paquets de base ; un paquet à vous qui ne l’a pas le nomme par le titre de la colonne).
+  Un clic trie comme un clic sur un titre — croissant, décroissant, sans tri ; Maj ajoute au tri. L’état du tri reste
+  sur l’en-tête (`aria-sort`), l’ordre aussi dans un tri sur plusieurs colonnes ;
+- au clavier, la grille reste un seul arrêt de Tab : Entrée ou F2 sur l’en-tête entre dans votre part, Tab atteint
+  ensuite le bouton, Entrée ou Espace trie, Échap revient à l’en-tête ; Maj+Entrée sur l’en-tête ajoute au tri. Sans part,
+  Entrée sur l’en-tête trie comme avant.
+
+Les autres colonnes gardent la marque seulement une fois triées. Une colonne qui ne trie pas ne montre rien. De droite
+à gauche, le bouton est au début de l’en-tête à l’écran — sa fin logique. Votre part ne dessine pas de bouton de tri.
+
+## Exemple
+
+```ts
+import { createGrid, definePart, type GridMessages } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters';
+import { slots } from '@dzgrid/dom/slots';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { FR } from '@dzgrid/dom/locales/fr';
+
+type Plant = { id: string; name: string; water: number };
+
+const messages: GridMessages = { ...FR, text: { ...FR.text, ...FR_FILTERS.text } };
+
+// Une zone de recherche à la place du titre : elle filtre la colonne ; la grille garde le bouton de tri à côté.
+const searchHeader = definePart('header', {
+  mount(host, c) {
+    const box = document.createElement('input');
+    box.setAttribute('aria-label', c.label);
+    box.placeholder = c.label;
+    box.addEventListener('input', () => c.filter?.set(box.value ? { type: 'text', op: 'contains', value: box.value } : null));
+    host.append(box);
+    return { focus: () => (box.focus(), true) };
+  },
+});
+
+createGrid<Plant>(document.getElementById('plantes')!, {
+  rows: [{ id: 'p1', name: 'Fougère', water: 3 }],
+  columns: [
+    { id: 'name', header: 'Plante', ui: { header: 'searchHeader' }, filterButton: false, sortMark: 'always' },
+    { id: 'water', header: 'Arrosage (jours)', type: 'number' },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  parts: { searchHeader },
+  features: [slots(), filters()],
+});
+```
+
+## Démo
+
+<LiveDemo
+  height={220}
+  settings={{ label: 'Plantes' }}
+  columns={[
+    { id: 'name', header: 'Plante', width: 160, sortMark: 'always' },
+    { id: 'water', header: 'Arrosage (jours)', type: 'number', flex: 1 },
+  ]}
+  rows={[
+    { id: 'p1', name: 'Fougère', water: 3 },
+    { id: 'p2', name: 'Cactus', water: 21 },
+    { id: 'p3', name: 'Basilic', water: 2 },
+  ]}
+  caption="Plante montre sa marque avant tout tri (⇅) ; Arrosage n’en montre une qu’une fois triée."
+/>
+
+## Voir aussi
+
+- [`filterButton`](../filter-button/), [`sortable`](../sortable/), [`ui`](../ui/).

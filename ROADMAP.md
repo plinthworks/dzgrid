@@ -1472,6 +1472,13 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   Angular example 103 800, +2 %), site 36 / 36, the owner's app 199 OK on the local pack. K.8 92 611 / 93 000.
 - For the owner: commit, publish (`docs/release-1.14.0.md`).
 
+## 1.15.0 — minor (in preparation, 2026-11-21; owner « ★ partout »)
+
+- [x] `sortMark: 'always'` (presentation-settings.md 49): the sort mark kept unsorted, a named button beside a header
+  part — the owner's app's last patch on `.dzg-*` classes retired. Tests by hand (dom 14, theme 8), browsers 38 / 38
+  (Chrome, Firefox, WebKit; fr, ar). K.8 92 814 / 93 000.
+- For the owner: the full verification (gate, real app, release:check), then publish.
+
 ## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)
 
 - **Batch 1 — skeleton (2026-11-10, not committed).** `website/` (Astro Starlight, versions pinned as DzCalendar's,
