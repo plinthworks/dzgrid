@@ -19,6 +19,9 @@ Checked in this order, after the codec has read the value:
 - `pattern`: a regular expression (or its source) the whole text must match; the flags `g`, `y` and `m` are dropped.
 - `options`: the allowed values, a list or a function `(row, context)`; the cell's current value always passes. A
   list column is chosen in the list editor (`editors({ list: listEditor })`, from `@dzgrid/dom/editors-list`).
+- `search` (1.15.0): a list asked of your server while the user types, `(text, { signal, row, context })` returning the
+  options as a promise, a list or an observable; with it `options` is not checked. Opened by
+  [`searchEditor`](../../features/search-editor/).
 
 `maxLength` caps what the field accepts; `editor` names your own editor part. A bad rule is told with an
 `invalid-column` warning at `columns.<id>.edit.<key>`, and that rule is ignored. [`validate`](../validate/) runs

@@ -1,0 +1,99 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/forms.css — the marks of form editing (1.15.0, owner 2026-11-21 « fais-les tous »): loaded by the
+// applications that use `editBatch()`, `editors({ row })` or `editors({ search })`, after the theme and edit.css; the
+// base theme does not grow. Compiled to forms.css (layered) and forms.unlayered.css ($layered: false) by
+// `npm run build:theme`; a test fails when they drift.
+//
+// A pending cell (edit-batch.md 4): a triangle in its inline-start top corner and a light tint — a shape, never colour
+// alone (WCAG 1.4.1); forced colours: a dashed outline. A row being edited (edit-row.md 3): an outline round the row;
+// its yes/no field a checkbox. The searching list (editors.md 26): its note (searching, no result, failed) under the
+// options. Colours only as variables (--dzg-pending-mark, --dzg-pending-bg, --dzg-row-editing-outline, the palette's
+// as fallbacks); no physical side (the triangle's corner follows the cell's direction).
+// ─────────────────────────────────────────────────────────────────────────────
+
+$layered: true !default;
+
+$mark: var(--dzg-pending-mark, var(--tz-warning));
+$tint: var(--dzg-pending-bg, color-mix(in srgb, var(--tz-warning) 10%, transparent));
+$row: var(--dzg-row-editing-outline, var(--tz-accent));
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+@include layer {
+  // The triangle: a gradient from the inline-start top corner (its direction's), over a tint of the whole cell.
+  .dzg-cell--unsaved {
+    background-image: linear-gradient(135deg, $mark 0 0.4rem, transparent 0), linear-gradient($tint, $tint);
+  }
+
+  .dzg-cell--unsaved:dir(rtl) {
+    background-image: linear-gradient(225deg, $mark 0 0.4rem, transparent 0), linear-gradient($tint, $tint);
+  }
+
+  // Held, its « waiting to be sent » dot says nothing more than the triangle: gone, the cell's own padding back.
+  .dzg-cell--unsaved.dzg-cell--pending {
+    padding-inline-end: calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1));
+  }
+
+  .dzg-cell--unsaved.dzg-cell--pending::after {
+    content: none;
+  }
+
+  // A row being edited: a line round it, over its cells (rows are clipped by their layer: inside its box).
+  .dzg-row[data-dzg-row-editing]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    border: 2px solid $row;
+    pointer-events: none;
+  }
+
+  // A yes/no field in a row being edited: the whole cell a label (the target), its checkbox at the inline start.
+  .dzg-yesno {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .dzg-yesno > input {
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    margin: 0;
+    accent-color: var(--tz-accent);
+  }
+
+  // The searching list's state, under its options.
+  .dzg-search-note {
+    padding-block: 0.25rem;
+    padding-inline: 0.5rem;
+    color: var(--tz-fg-muted);
+    font-size: 0.875em;
+  }
+
+  .dzg-search-note[hidden] {
+    display: none;
+  }
+
+  @media (forced-colors: active) {
+    .dzg-cell--unsaved {
+      outline: 2px dashed CanvasText;
+      outline-offset: -3px;
+    }
+
+    .dzg-row[data-dzg-row-editing]::after {
+      border-color: Highlight;
+    }
+  }
+}

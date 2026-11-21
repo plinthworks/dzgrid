@@ -35,6 +35,7 @@ const EVENTS: Record<Exclude<GridEvent<R>['type'], 'problems'>, true> = {
   partAction: true, fetchFailed: true, rowExpanded: true, firstDataRendered: true, editingStarted: true, editingStopped: true, cellEdited: true,
   saveFailed: true, editStates: true, orderStale: true, undoChanged: true, rangeChanged: true, rangeCopied: true, stateChanged: true,
   stateRestored: true, densityChanged: true, groupByChanged: true, rowMove: true, exportRequested: true, exportFinished: true, exportRefused: true,
+  pendingChange: true, // 1.15.0 (edit-batch.md 12)
 };
 
 @Component({

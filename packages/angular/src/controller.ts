@@ -2,6 +2,7 @@ import { Injectable, computed, signal, untracked } from '@angular/core';
 import { makeQuery, type GridCommand, type GridCommandResult, type GridKernel, type Problem, type RowKey, type RowModel, type RowTransaction, type TransactionResult } from '@dzgrid/core';
 import type { GridFeature, GridInstance } from '@dzgrid/dom';
 import type { EditApi } from '@dzgrid/dom/edit';
+import type { EditBatchApi } from '@dzgrid/dom/edit-batch';
 import type { RangeApi } from '@dzgrid/dom/range';
 import type { FillApi } from '@dzgrid/dom/fill';
 import type { GridStateApi } from '@dzgrid/dom/state';
@@ -116,6 +117,13 @@ export class DzgController<T = unknown> {
    */
   edit(): EditApi<T> | null {
     return this._by<EditApi<T>>('edit');
+  }
+  /**
+   * The grid's pending changes (1.15.0, edit-batch.md 5): the `editBatch()` feature given in `features` — `pending()`,
+   * `count`, `saveAll()`, `discardAll()`, `discard(key)`; null before the grid, without it, after it.
+   */
+  batch(): EditBatchApi<T> | null {
+    return this._by<EditBatchApi<T>>('edit-batch');
   }
   /** The grid's block of cells (Phase 5 step 12): the `range()` feature given in `features`; null before, without it, after. */
   range(): RangeApi | null {

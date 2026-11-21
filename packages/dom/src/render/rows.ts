@@ -164,8 +164,8 @@ export interface Frame<T> {
   readonly read?: EditSeam['read'] | null | undefined;
   /** Some visible column is editable: whether a data cell cannot be edited (`aria-readonly`); null: none is. */
   readonly ro?: ((key: RowKey, column: string) => boolean) | null;
-  /** The cell an editor is open in (retained-row contract 5): its value, part and classes are left alone. */
-  readonly active?: { readonly key: RowKey; readonly column: string } | null | undefined;
+  /** The cell an editor is open in (retained-row contract 5): its value, part and classes are left alone; `cols`: a row's (1.15.0). */
+  readonly active?: { readonly key: RowKey; readonly column: string; readonly cols?: ReadonlySet<string> | undefined } | null | undefined;
 }
 
 export class RowRenderer<T> {
@@ -606,7 +606,7 @@ export class RowRenderer<T> {
     // Some column editable: a cell that cannot be edited says so (editing.md 3; a filler's, a loading row's too).
     setAttr(cell.el, 'aria-readonly', f.ro && (data === undefined || f.ro(key, col.id)) ? 'true' : null);
     // The cell an editor is open in keeps what it shows (retained-row contract 5).
-    if (f.active && f.active.key === key && f.active.column === col.id) return;
+    if (f.active && f.active.key === key && (f.active.column === col.id || f.active.cols?.has(col.id))) return;
     const { value, text } = data === undefined ? { value: null, text: '' } : cellValue(col, data as never, f.ctx, f.read, key);
     // The host's classes from the data (step 26, cell-class.md): diffed, never the grid's own (dzg-).
     const rule = col.def.ui?.cellClass;

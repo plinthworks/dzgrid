@@ -5,6 +5,7 @@
  * cell; rollback to the last saved value), and undo / redo (edit-undo.md). The DOM (steps 4–8) calls it.
  */
 export { createEdits } from './edit/controller.js';
+export type { EditEntry, EditGesture, EditInner, RowRefusal, RowRule } from './edit/controller.js';
 export type { CellState, EditController, EditOptions, SaveHandler, SaveRequest, SaveChange, UndoResult, CommitResult } from './edit/controller.js';
 export { checkValue, parseInput } from './edit/input.js';
 export type { CellInput, Checked } from './edit/input.js';

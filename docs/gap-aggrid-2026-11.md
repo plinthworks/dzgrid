@@ -75,9 +75,9 @@ la phase 3, aujourd'hui dépassée : presque tous ses « P5…P10 » sont faits)
 | Éditeurs texte, nombre, date, case | Les champs de base | C | `features/editors` (jour, date-heure avec fuseau) | ✅ | — | haute |
 | Éditeur grand texte | Zone multi-ligne en surimpression | C | 1.14.0 : `edit.editor: 'textarea'` + `@dzgrid/dom/editors-textarea` | ✅ | — | moyenne |
 | Select / rich select | Liste avec recherche, clavier | C / E | `features/list-editor` | ✅ | — | haute |
-| Rich select à valeurs asynchrones | La liste cherche dans le serveur en tapant | E | absent : au-delà de 500 options, champ texte | ❌ | M | haute |
-| Édition de ligne entière | Toute la ligne passe en édition, une validation | C | absent (édition cellule par cellule) | ❌ | M | moyenne |
-| Édition par lot (batch) | Les changements attendent, puis « Enregistrer tout » / « Annuler tout » | E ? | absent : chaque geste part à `save` aussitôt | ❌ | M | haute |
+| Rich select à valeurs asynchrones | La liste cherche dans le serveur en tapant | E | 1.15.0 : `edit: { search }` + `@dzgrid/dom/editors-search` (editors.md 23–29) | ✅ | — | haute |
+| Édition de ligne entière | Toute la ligne passe en édition, une validation | C | 1.15.0 : `editors({ row: rowEditor })` (`@dzgrid/dom/editors-row`, edit-row.md) | ✅ | — | moyenne |
+| Édition par lot (batch) | Les changements attendent, puis « Enregistrer tout » / « Annuler tout » | E ? | 1.15.0 : `editBatch()` (`@dzgrid/dom/edit-batch`, edit-batch.md ; Q-G2 « A ») | ✅ | — | haute |
 | Annuler / rétablir | Ctrl+Z / Ctrl+Y | C | `edit-undo.md` (100 gestes) | ✅ | — | haute |
 | Validation | Refus, message accessible | C | `column-options/validate`, `edit-validation.md` | ✅ | — | haute |
 | Analyse / enregistrement des valeurs | Texte → valeur, valeur → ligne | C | `column-options/codec`, `save` | ✅ | — | haute |

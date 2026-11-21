@@ -233,3 +233,41 @@ comment or a reason typed over several lines in a box larger than the cell.
     the application's own help (no new text). Right to left: `dir="auto"`, logical sides only.
 Tests: `packages/dom/test/editors-textarea.test.ts` (by hand); `scripts/browser-1-14.mjs --only textarea` in Chrome, Firefox,
 WebKit.
+
+## Searching list (1.15.0, owner 2026-11-21 « fais-les tous »; opt-in)
+Gap analysis row « Rich select à valeurs asynchrones » (❌). Behaviour borrowed from grids' rich selects that ask the
+server while the user types; the APG « combobox with list autocomplete » pattern. For lists too big to load (beyond the
+500 options of 16).
+
+23. **`edit: { search }`** on a column — `search(text, { signal, row, context })` returning the options `[{ value, label? }]`
+    as a promise, a list, or an observable (anything with `subscribe`: its first value) — with
+    `editors({ search: searchEditor })` (`@dzgrid/dom/editors-search`, its own entry). Without it: the column opens as
+    without `search`, and one `missing-feature` warning per column (detail `@dzgrid/dom/editors-search`). `search` wins
+    over `options` for what the list shows; no 500 cap.
+24. **The field**: an editable combobox (`role="combobox"`, `aria-autocomplete="list"`, `aria-expanded`,
+    `aria-controls`), opening with the cell's text selected (a printable key: that character); its listbox in the same
+    popup as the simple list's (below the cell, above near the bottom, never covering the field).
+25. **Asking**: on opening, with the text shown; then 250 ms after the last keystroke. A newer ask **aborts** the one
+    before (its `signal`); an answer that comes after a newer ask is ignored. Closing the field aborts what is asked.
+26. **States**, each in the listbox and said politely: *loading* (`aria-busy="true"`, « Searching… »,
+    `edit.searching`), *no result* (« No result », `edit.noResult`), *error* (a throw or a rejection: « Search
+    failed », `edit.searchFailed`; typing again asks again; the error is not a cell refusal and is never told as row
+    data). Options show their label (else the column's text of the value); the current value is marked selected.
+27. **Keys**: typing edits the text (Home, End, the arrows left and right in the text); Up / Down move the active
+    option (`aria-activedescendant`), Alt+Down opens the list again; Enter keeps the active option (with no active
+    option: nothing changes, the field closes as kept unchanged); Tab keeps it and moves; Escape closes the list first,
+    then gives up; a click on an option keeps it. A blur keeps the active option only when one was picked by a key or
+    the pointer; else nothing changes.
+28. **Value**: the option's `value` is kept through the column's rules; `options` (or an enum's own options) is not
+    checked when `search` is given — the application's `save` is the judge. The cell shows the value as its column
+    formats it (give the column a `format` or `enumOptions`-free formatter that knows the labels).
+29. **Right to left**: the field `dir="auto"`, the list aligned to the cell's inline start.
+
+| Key | en | fr | ar |
+|---|---|---|---|
+| `edit.searching` | Searching… | Recherche… | جارٍ البحث… |
+| `edit.noResult` | No result | Aucun résultat | لا توجد نتائج |
+| `edit.searchFailed` | Search failed | La recherche a échoué | فشل البحث |
+
+Texts in `@dzgrid/dom/locales/<lang>-forms`. Tests: `packages/dom/test/editors-search.test.ts` (by hand);
+`scripts/browser-1-15.mjs --only search` (Chrome, Firefox, WebKit; en / ar; light / dark).

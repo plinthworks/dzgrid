@@ -1,0 +1,83 @@
+---
+title: "editBatch"
+description: "Changes kept in the grid, then saved together in one request, or all given up."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+The changes kept in the grid until you save them together, given in `features` beside `edit()`.
+
+<FeatureFacts name="editBatch" />
+
+## What it does
+
+With `editBatch()` in `features`, every gesture — a field kept, a yes/no toggled, Delete, a paste, a fill, an undo, a
+row kept with [`rowEditor`](../row-editor/) — is checked as usual and shown at once, but nothing is sent: the cell is
+**pending**. It carries a triangle in its inline-start top corner and a light tint (`--dzg-pending-mark`,
+`--dzg-pending-bg`, in `@dzgrid/theme/forms.css`) and screen readers hear « Not saved ». A cell changed twice is one
+change; brought back to its saved value, it is no longer pending.
+
+`batch.api(grid)` gives:
+
+- `pending()`: the list of `{ key, column, value, previous, row }`, the new value and the saved one it replaces.
+- `count`: how many cells are pending.
+- `saveAll()`: every pending change checked again (each column's rules, then `validateRow` when given) and sent **in one
+  request** to your `save` (`origin: 'batch'`). Any local refusal sends nothing. It resolves `{ sent, refused }` once you
+  answered; your answer refuses cells as any save does (`cells: [{ key, column, reason }]`), each back to its saved
+  value with its reason.
+- `discardAll()`, `discard(key, column?)`: changes dropped, the saved values shown again.
+
+Undo and redo work across the pending changes. A pending change is kept by row key: sorted, filtered, on another page of
+a server source, it shows again when its row comes back. The grid tells `pendingChange` (`{ count }`) each time the count
+moves — Angular `(pendingChange)` and `ctrl.batch()`, the element `dzg-pending-change` — so your page can warn before
+leaving; the grid never opens a dialog itself.
+
+## Options
+
+- `validateRow`: a rule over each row with pending changes, `(values, row, context) => { column, code } | list | null`,
+  checked before `saveAll()` sends; its code is worded by your `validation.<code>` text.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { editBatch } from '@dzgrid/dom/edit-batch';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+import { EN_FORMS } from '@dzgrid/dom/locales/en-forms';
+import '@dzgrid/theme/edit.css';
+import '@dzgrid/theme/forms.css';
+
+type Item = { id: string; name: string; stock: number };
+
+const batch = editBatch<Item>();
+const grid = createGrid<Item>(document.getElementById('stock')!, {
+  rows: [{ id: 'a1', name: 'Lamp', stock: 4 }, { id: 'a2', name: 'Desk', stock: 0 }],
+  columns: [
+    { id: 'name', header: 'Name', editable: true },
+    { id: 'stock', header: 'Stock', type: 'number', editable: true, edit: { min: 0 } },
+  ],
+  getRowId: (r) => r.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text, ...EN_FORMS.text } },
+  // One request for every change, when the user presses « Save all ».
+  features: [edit<Item>({ save: (req) => fetch('/api/items', { method: 'PATCH', body: JSON.stringify(req.changes) }) }), editors(), batch],
+});
+
+document.getElementById('save-all')!.addEventListener('click', async () => {
+  const { sent, refused } = await batch.api(grid)!.saveAll();
+  console.log(`${sent} sent, ${refused.length} refused`);
+});
+document.getElementById('cancel-all')!.addEventListener('click', () => batch.api(grid)!.discardAll());
+// The application warns before leaving; the grid never opens a dialog.
+window.addEventListener('beforeunload', (e) => {
+  if (batch.api(grid)?.count) e.preventDefault();
+});
+```
+
+## See also
+
+- The [`edit`](../edit/) feature, whose `save` receives the batch.
+- [`rowEditor`](../row-editor/), whose rows become pending changes.

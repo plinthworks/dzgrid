@@ -321,7 +321,13 @@ describe('1.14.0, the five packages', () => {
   it('export pager.css (1.12.0, presentation-settings.md 39–40), built like the others', () => {
     const theme = pkg('theme');
     for (const f of ['pager.css', 'pager.unlayered.css', 'pager.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
-    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'buttons', 'pager'\]/);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'buttons', 'pager'[,\]]/); // 1.15.0: 'forms' after it
+  });
+
+  it('export forms.css (1.15.0, edit-batch.md 4, edit-row.md 3), built like the others', () => {
+    const theme = pkg('theme');
+    for (const f of ['forms.css', 'forms.unlayered.css', 'forms.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'pager', 'forms'\]/);
   });
 
   it('ship no rich tooltip entry (owner 2026-11-14: moved to @dztooltip, never published)', () => {

@@ -1,0 +1,58 @@
+.dzg-cell--unsaved {
+  background-image: linear-gradient(135deg, var(--dzg-pending-mark, var(--tz-warning)) 0 0.4rem, transparent 0), linear-gradient(var(--dzg-pending-bg, color-mix(in srgb, var(--tz-warning) 10%, transparent)), var(--dzg-pending-bg, color-mix(in srgb, var(--tz-warning) 10%, transparent)));
+}
+
+.dzg-cell--unsaved:dir(rtl) {
+  background-image: linear-gradient(225deg, var(--dzg-pending-mark, var(--tz-warning)) 0 0.4rem, transparent 0), linear-gradient(var(--dzg-pending-bg, color-mix(in srgb, var(--tz-warning) 10%, transparent)), var(--dzg-pending-bg, color-mix(in srgb, var(--tz-warning) 10%, transparent)));
+}
+
+.dzg-cell--unsaved.dzg-cell--pending {
+  padding-inline-end: calc(var(--dzg-cell-padding-inline, 0.5rem) * var(--dzg-density, 1));
+}
+
+.dzg-cell--unsaved.dzg-cell--pending::after {
+  content: none;
+}
+
+.dzg-row[data-dzg-row-editing]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border: 2px solid var(--dzg-row-editing-outline, var(--tz-accent));
+  pointer-events: none;
+}
+
+.dzg-yesno {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.dzg-yesno > input {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  margin: 0;
+  accent-color: var(--tz-accent);
+}
+
+.dzg-search-note {
+  padding-block: 0.25rem;
+  padding-inline: 0.5rem;
+  color: var(--tz-fg-muted);
+  font-size: 0.875em;
+}
+
+.dzg-search-note[hidden] {
+  display: none;
+}
+
+@media (forced-colors: active) {
+  .dzg-cell--unsaved {
+    outline: 2px dashed CanvasText;
+    outline-offset: -3px;
+  }
+  .dzg-row[data-dzg-row-editing]::after {
+    border-color: Highlight;
+  }
+}

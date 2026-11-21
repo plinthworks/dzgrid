@@ -251,6 +251,24 @@
       "@dzgrid/dom/editors-textarea": [
         "./packages/dom/src/editors-textarea.ts"
       ],
+      "@dzgrid/dom/edit-batch": [
+        "./packages/dom/src/edit-batch.ts"
+      ],
+      "@dzgrid/dom/editors-row": [
+        "./packages/dom/src/editors-row.ts"
+      ],
+      "@dzgrid/dom/editors-search": [
+        "./packages/dom/src/editors-search.ts"
+      ],
+      "@dzgrid/dom/locales/en-forms": [
+        "./packages/dom/src/locales/en-forms.ts"
+      ],
+      "@dzgrid/dom/locales/fr-forms": [
+        "./packages/dom/src/locales/fr-forms.ts"
+      ],
+      "@dzgrid/dom/locales/ar-forms": [
+        "./packages/dom/src/locales/ar-forms.ts"
+      ],
       "@dzgrid/dom/group-select": [
         "./packages/dom/src/group-select.ts"
       ],

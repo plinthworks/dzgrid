@@ -42,6 +42,10 @@ la grille n’est pas créée : une erreur nomme les clés qui manquent.
 - `list` : l’éditeur de liste, `listEditor` de `@dzgrid/dom/editors-list`.
 - `textarea` : l’éditeur de texte long, [`textareaEditor`](../textarea-editor/) de `@dzgrid/dom/editors-textarea`, pour
   les colonnes avec `edit: { editor: 'textarea' }` (1.14.0).
+- `search` : la liste qui cherche, [`searchEditor`](../search-editor/) de `@dzgrid/dom/editors-search`, pour les
+  colonnes avec `edit: { search }` (1.15.0).
+- `row` : la modification d’une ligne entière, [`rowEditor`](../row-editor/) de `@dzgrid/dom/editors-row` (1.15.0) ;
+  avec lui, `validateRow` vérifie toute la ligne avant de la garder.
 
 ## Exemple
 

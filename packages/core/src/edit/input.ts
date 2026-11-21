@@ -76,7 +76,8 @@ export function rulesOf<T>(col: ResolvedColumn<T>, ctx: LocaleCtx): Rules {
       bad.push('edit.pattern');
     }
   }
-  let options: unknown = e.options ?? (col.type === 'enum' ? def.enumOptions : null) ?? null;
+  // A list searched on the server (1.15.0, editors.md 28): the application's save is the judge, no options checked.
+  let options: unknown = e.search ? null : e.options ?? (col.type === 'enum' ? def.enumOptions : null) ?? null;
   if (options !== null && typeof options !== 'function' && !Array.isArray(options)) {
     options = null;
     bad.push('edit.options');

@@ -1,5 +1,6 @@
 import type { InstantFormatSpec, NumberFormatSpec } from '../i18n/format.js';
 import type { RowKey } from '../ids.js';
+import type { AbortSignalLike } from '../abort.js';
 import { problem, type Problem } from '../problems.js';
 import type { ColumnType, ValueCodec } from '../value/codec.js';
 import { booleanCodec } from '../value/codecs/boolean.js';
@@ -271,7 +272,19 @@ export interface EditChecks<T, V = unknown> {
   readonly options?: readonly EnumOption[] | ((row: Readonly<T>, context: unknown) => readonly EnumOption[]);
   readonly maxLength?: number;
   readonly editor?: string;
+  /**
+   * A list searched on the server while the user types (1.15.0, editors.md 23–29; `editors({ search: searchEditor })`
+   * of `@dzgrid/dom/editors-search`): the options for a text, as a promise, a list or an observable (its first value);
+   * `signal` aborts when a newer text is asked or the field closes. With it, `options` is not checked.
+   */
+  readonly search?: OptionSearch<T>;
 }
+
+/** What a searching list asks (1.15.0): the options for `text`, by a promise, a list, or anything with `subscribe`. */
+export type OptionSearch<T> = (
+  text: string,
+  o: { readonly signal: AbortSignalLike; readonly row: Readonly<T>; readonly context: unknown },
+) => PromiseLike<readonly EnumOption[]> | readonly EnumOption[] | { subscribe(o: { next(v: readonly EnumOption[]): void; error(e: unknown): void }): { unsubscribe(): void } };
 
 /**
  * A column's `editable`: yes, no, or a rule over the row and the application's context; `info.pinned` says a pinned row's

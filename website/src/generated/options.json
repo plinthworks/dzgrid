@@ -1790,6 +1790,33 @@
           "doc": "The long-text editor, `textareaEditor` of `@dzgrid/dom/editors-textarea` (1.14.0, editors.md 18–22), for the columns with `edit: { editor: 'textarea' }`. Without it they open the one-line field, and one warning `missing-feature` per column.",
           "default": null,
           "source": "packages/dom/src/editors/index.ts"
+        },
+        {
+          "name": "search",
+          "type": "SearchEditor",
+          "resolved": null,
+          "required": false,
+          "doc": "The searching list, `searchEditor` of `@dzgrid/dom/editors-search` (1.15.0, editors.md 23–29), for the columns with `edit: { search }`. Without it they open as without `search`, and one warning `missing-feature` per column.",
+          "default": null,
+          "source": "packages/dom/src/editors/index.ts"
+        },
+        {
+          "name": "row",
+          "type": "RowEditor",
+          "resolved": "((x: EdEnv) => RowPlug) & { readonly keys: readonly string[]; }",
+          "required": false,
+          "doc": "Full-row editing, `rowEditor` of `@dzgrid/dom/editors-row` (1.15.0, edit-row.md): every editable cell of a row at once.",
+          "default": null,
+          "source": "packages/dom/src/editors/index.ts"
+        },
+        {
+          "name": "validateRow",
+          "type": "RowRule<any>",
+          "resolved": null,
+          "required": false,
+          "doc": "With `row`: a rule over the whole row, checked before it is kept (edit-row.md 9).",
+          "default": null,
+          "source": "packages/dom/src/editors/index.ts"
         }
       ],
       "texts": {
@@ -3441,6 +3468,73 @@
       "css": [],
       "doc": "`groupSelect()`: beside `grouping()` with checkbox selection, a group row's box ticks every row under it (1.14.0, docs/behaviors/row-grouping.md 25–29) — every level below, open or closed, after the filters (a server's groups: the rows held) — and shows ticked, unticked or partly ticked from them; a click on it or Space on the group row. The selection stays the rows' keys (`include` or « all except »); a group row is never selected itself. Its own entry.",
       "source": "packages/dom/src/group-select/index.ts"
+    },
+    {
+      "name": "editBatch",
+      "entry": "@dzgrid/dom/edit-batch",
+      "signature": "editBatch<T = unknown>(o?: EditBatchOptions<T>): EditBatchFeature<T>",
+      "param": "o",
+      "options": [
+        {
+          "name": "validateRow",
+          "type": "RowRule<T>",
+          "resolved": null,
+          "required": false,
+          "doc": "A rule over each row with pending changes, checked before `saveAll()` sends (edit-batch.md 6, edit-row.md 9).",
+          "default": null,
+          "source": "packages/dom/src/edit-batch/index.ts"
+        }
+      ],
+      "texts": {
+        "bundle": "forms",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/forms.css",
+      "css": [],
+      "doc": "`editBatch(options)` (1.15.0, docs/behaviors/edit-batch.md): the changes kept in the grid, pending, until the application calls `saveAll()` — one save request with every change — or `discardAll()`. Beside `edit()` (which holds its gestures when this feature is in `features`) and `editors()`; its texts in `@dzgrid/dom/locales/<lang>-forms`, its mark in `@dzgrid/theme/forms.css`.",
+      "source": "packages/dom/src/edit-batch/index.ts"
+    },
+    {
+      "name": "rowEditor",
+      "entry": "@dzgrid/dom/editors-row",
+      "signature": "rowEditor(x: EdEnv): RowPlug",
+      "param": null,
+      "options": [],
+      "texts": {
+        "bundle": "forms",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/forms.css",
+      "css": [],
+      "doc": "Full-row editing (1.15.0, docs/behaviors/edit-row.md): F2, Enter, a character, a double click or tap opens every editable cell of the row, each with its own editor (the editors' kinds; a yes/no cell a checkbox). Tab moves between them; Enter keeps the row — its fields checked, then the row by `validateRow`, all or nothing — as one gesture (one save, `origin: 'row'`, or pending with `editBatch()`); Escape gives it up; a blur keeps it. Its own entry, `@dzgrid/dom/editors-row`: `editors({ row: rowEditor })`.",
+      "source": "packages/dom/src/editors-row/index.ts"
+    },
+    {
+      "name": "searchEditor",
+      "entry": "@dzgrid/dom/editors-search",
+      "signature": "searchEditor(x: EdEnv, value: unknown, search: OptionSearch<unknown>, label: (v: unknown) => string, name: string, done: (move: boolean) => void, row: unknown): Ed",
+      "param": null,
+      "options": [],
+      "texts": {
+        "bundle": "forms",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": "@dzgrid/theme/forms.css",
+      "css": [],
+      "doc": "",
+      "source": "packages/dom/src/editors-search/index.ts"
     }
   ]
 }

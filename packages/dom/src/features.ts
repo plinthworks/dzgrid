@@ -58,6 +58,8 @@ export interface EditSeam {
   tip?(key: RowKey, column: string): string | null;
   /** 2: something waits to be sent or is being saved; 1: a cell was refused; 0: neither (a nested grid is kept alive meanwhile, step 8, owner S8-O3). */
   busy?(): number;
+  /** @internal The edit controller (`@dzgrid/core/edit`), for `@dzgrid/dom/edit-batch` and the row editor (1.15.0); no semver promise. */
+  readonly x?: unknown;
 }
 
 export interface FeatureHandle {

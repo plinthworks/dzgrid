@@ -56,6 +56,17 @@ export interface EditorsMessages {
   readonly text: { readonly [K in EditorsMessageKey]: MessageValue };
 }
 
+/**
+ * The form editing texts (1.15.0: `@dzgrid/dom/edit-batch`, `/editors-row`, `/editors-search`), in their own bundles
+ * (`locales/<lang>-forms`): optional here, each required by the entry that says it (edit-batch.md, edit-row.md, editors.md 26).
+ */
+export type FormsMessageKey = 'edit.unsaved' | 'edit.discarded' | 'edit.notSent' | 'edit.rowEditing' | 'edit.rowCancelled' | 'edit.searching' | 'edit.noResult' | 'edit.searchFailed';
+/** A forms bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_EDIT.text, ...FR_EDITORS.text, ...FR_FORMS.text }`. */
+export interface FormsMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in FormsMessageKey]: MessageValue };
+}
+
 /** The detail panels' texts (`@dzgrid/dom/detail`, Phase 4 step 10), in their own bundles (`locales/<lang>-detail`): optional here, required by `detail()`. */
 export type DetailMessageKey = 'detail.label' | 'detail.expanded' | 'detail.collapsed';
 /** A detail bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_DETAIL.text }`. */

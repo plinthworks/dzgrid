@@ -93,7 +93,7 @@ sous `website/src/content/docs/` ; ✅ complet · 🟡 partiel (dit).
 | Validation, refus, message accessible | `validate` | dom `edit-validation*` | `column-options/validate` | ✅ |
 | Annuler / rétablir (100 gestes) | `edit-undo.md` | dom `edit-undo*` | `features/edit` | ✅ |
 | Ligne qui ne bouge pas après édition | `reapplyAfterEdit` (K.14) | dom `edit-reapply*` | `features/edit` | ✅ |
-| Édition par lot, ligne entière, liste serveur | — | — | — | ❌ absents (gap §4, utilité haute) |
+| Édition par lot, ligne entière, liste serveur | `editBatch()`, `editors({ row: rowEditor })`, `edit: { search }` + `searchEditor` | dom `edit-batch` (17), `editors-row` (17), `editors-search` (10) | `features/edit-batch`, `row-editor`, `search-editor` | ✅ 1.15.0 |
 
 ### DzGrid — groupes, pivot, arbre, détail
 

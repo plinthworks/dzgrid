@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased — 1.15.0
 
-The option that retires the owner's app's last patch on DzGrid's own classes (owner 2026-11-21, « ★ partout »). A
-minor: an addition, nothing removed; every default unchanged.
+The option that retires the owner's app's last patch on DzGrid's own classes (owner 2026-11-21, « ★ partout »), and
+form editing — batch, full row, a list searched on the server (owner 2026-11-21, « fais-les tous »; gap analysis Q-G2
+« A »). A minor: additions, nothing removed; every default unchanged.
 
 ### Added
 - **`sortMark: 'always'`** (`ColumnDef`, opt-in; presentation-settings.md 49, parts.md « Keys in a header cell holding
@@ -26,8 +27,40 @@ minor: an addition, nothing removed; every default unchanged.
   `variables.css`: an unsorted mark (this one or `icons.sortNone`) in `--dzg-sort-none-fg`. Type
   `SortButtonMessageKey`.
 
+- **Batch editing, `editBatch()`** (`@dzgrid/dom/edit-batch`, opt-in; edit-batch.md): beside `edit()`, every gesture
+  (a field, a toggle, Delete, a paste, a fill, an undo, a row) is checked and shown but kept **pending**, never sent.
+  A pending cell carries `dzg-cell--unsaved` — a triangle in its inline-start top corner and a tint (`--dzg-pending-mark`,
+  `--dzg-pending-bg`, theme keys `pendingMark`, `pendingBg`) — and is described « Not saved ». `batch.api(grid)`:
+  `pending()` (`{ key, column, value, previous, row }`), `count`, `saveAll()` (every cell checked again, then the rows
+  by `validateRow`; any local refusal sends nothing; else **one** `SaveRequest`, `origin: 'batch'`, the application's
+  per-cell refusals shown as today; resolves `{ sent, refused }`), `discardAll()`, `discard(key, column?)`. Undo and
+  redo across pending changes (back to the saved value: no longer pending). Kept by row key across sorting, filtering
+  and a server source's pages; a row the application removes takes its changes along. `pendingChange` (`{ count }`) to
+  warn before leaving: Angular `(pendingChange)` and `DzgController.batch()`, the element `dzg-pending-change`; the
+  grid opens no dialog.
+- **Full-row editing, `editors({ row: rowEditor })`** (`@dzgrid/dom/editors-row`, opt-in; edit-row.md): F2, Enter, a
+  character or a double click opens every editable cell of the row at once (a yes/no cell a checkbox), the row outlined
+  (`--dzg-row-editing-outline`, theme key `rowEditingOutline`); Tab / Shift+Tab between the fields, past the last one
+  the row kept and the next opened; Enter keeps the row as one gesture (`origin: 'row'`; pending with `editBatch()`),
+  Escape gives it up, a blur keeps it. Changed fields checked by their columns, then the row by
+  `editors({ validateRow })`; one refusal keeps nothing (fields `aria-invalid`, the first focused with the bubble).
+  Opening said « Editing row {row}, {n} fields ».
+- **A list searched on the server**: column `edit: { search: (text, { signal, row, context }) => … }` (a promise, a
+  list or an observable) with `editors({ search: searchEditor })` (`@dzgrid/dom/editors-search`, opt-in; editors.md
+  23–29): an editable combobox asking on opening and 250 ms after the last key, the previous ask aborted, late answers
+  ignored; « Searching… », « No result », « Search failed » shown and said; Down / Up, Enter, Escape, a click. No 500
+  cap; `options` not checked when `search` is given.
+- Texts in their own bundles `@dzgrid/dom/locales/<en|fr|ar>-forms` (`EN_FORMS`, …); the look in
+  `@dzgrid/theme/forms.css`. Types: `SaveOrigin` gains `'batch'` and `'row'`, `GridEvent` gains `pendingChange`,
+  `EditChecks.search` / `OptionSearch`, `RowRule`, `RowRefusal`, `PendingChange`, `SaveAllResult`, `EditBatchApi`.
+  Checked in Chrome, Firefox and WebKit, French and Arabic, light and dark (`scripts/browser-1-15.mjs --only forms`).
+
 ### Sizes
-- `@dzgrid/dom` 26 120 → 26 250 (measured 26 229), `@dzgrid/theme` 3 110 → 3 170 (measured 3 167), `variables.css` 1 950 → 1 970
+- Form editing: `@dzgrid/core/edit` 3 175 → 3 238 (measured 3 232), `@dzgrid/dom/edit` 4 150 → 4 190 (4 183),
+  `@dzgrid/dom/editors` 6 765 → 6 900 (6 898), `@dzgrid/angular` 8 800 → 8 830 (8 826), by the +2 % rule; new lines at
+  their measure + 10 %: edit-batch 1 800 (1 628 over `/edit`), editors-row 3 200 (2 881 over `/editors`),
+  editors-search 1 350 (1 200), `forms.css` 600 (513), the -forms texts 300 / 350 / 500; K.8 92 853 / 93 000.
+- `@dzgrid/dom` 26 120 → 26 250 (measured 26 245 with the row seam), `@dzgrid/theme` 3 110 → 3 170 (measured 3 167), `variables.css` 1 950 → 1 970
   (measured 1 966), by the +2 % rule; K.8 92 814 / 93 000.
 
 ## [1.14.0] - 2026-11-19

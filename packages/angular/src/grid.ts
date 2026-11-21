@@ -51,6 +51,8 @@ const OUTS = [
   // 1.11.0: every other event too (test/parity.test.ts).
   'modelUpdated', 'sortChanged', 'filterChanged', 'quickChanged', 'pageChanged', 'columnsChanged', 'columnResized', 'pinnedChanged', 'focusChanged', 'firstDataRendered', 'selectionRefused',
   'editingStarted', 'editingStopped', 'editStates', 'stateRestored', 'groupByChanged', 'exportRequested', 'exportFinished', 'exportRefused',
+  // 1.15.0: `editBatch()`'s count (edit-batch.md 12).
+  'pendingChange',
 ];
 
 /** What `membershipOf` reads of a query with no filter and no search. */
@@ -243,6 +245,8 @@ export class DzGrid<T> implements AfterContentInit {
   readonly exportRequested = output<Ev<T, 'exportRequested'>>();
   readonly exportFinished = output<Ev<T, 'exportFinished'>>();
   readonly exportRefused = output<Ev<T, 'exportRefused'>>();
+  /** How many cells wait for `saveAll()` (`editBatch()`, 1.15.0, edit-batch.md 12), each time it changes: warn before leaving. */
+  readonly pendingChange = output<Ev<T, 'pendingChange'>>();
   readonly problems = output<readonly Problem[]>();
   readonly gridReady = output<DzgController<T>>();
 

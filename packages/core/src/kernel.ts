@@ -127,6 +127,8 @@ export type GridEvent<T> =
   | { readonly type: 'saveFailed'; readonly source: 'data'; readonly key: RowKey; readonly column: string; readonly value: unknown; readonly error: unknown; readonly reason: string | null; readonly code: string | null }
   /** Cells whose save state changed (pending, saving, saved, failed, dropped): what the DOM repaints. */
   | { readonly type: 'editStates'; readonly source: ChangeSource; readonly cells: readonly { readonly key: RowKey; readonly column: string }[] }
+  /** `@dzgrid/dom/edit-batch` (1.15.0, edit-batch.md 12; the core never sends it): how many cells wait for `saveAll()`, each time it changes. */
+  | { readonly type: 'pendingChange'; readonly source: ChangeSource; readonly count: number }
   /** `@dzgrid/dom/editors` (Phase 5 step 5; the core never sends these): a field opened on a cell, and by what. */
   | { readonly type: 'editingStarted'; readonly source: 'user'; readonly key: RowKey; readonly column: string; readonly start: 'f2' | 'enter' | 'key' | 'dblclick' | 'tap' | 'tab' }
   /** The field closed: `kept` its text kept (saved or unchanged), and how (`lost`: the cell left the page). */
@@ -214,8 +216,8 @@ export interface ExportServerPart {
 
 export type SelectionReason = 'scope-changed' | 'rows-dropped';
 
-/** What made an edit (Phase 5): typed or picked, an undo, a redo; Part B's paste, fill and bulk edit. */
-export type SaveOrigin = 'edit' | 'undo' | 'redo' | 'paste' | 'fill' | 'bulk' | 'cut';
+/** What made an edit (Phase 5): typed or picked, an undo, a redo; Part B's paste, fill and bulk edit; 1.15.0 a batch saved together (`@dzgrid/dom/edit-batch`), a row kept (`@dzgrid/dom/editors-row`). */
+export type SaveOrigin = 'edit' | 'undo' | 'redo' | 'paste' | 'fill' | 'bulk' | 'cut' | 'batch' | 'row';
 
 /**
  * What a selection rule refused (step 21): `rows` in the order asked; `reason`, the rule's first

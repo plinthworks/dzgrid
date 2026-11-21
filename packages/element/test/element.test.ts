@@ -349,3 +349,35 @@ describe('<dz-grid> disconnect and reconnect (10)', () => {
     expect([el.grid, texts(el)]).toEqual([g, ['Oran', 'Blida', 'Alger']]);
   });
 });
+
+describe('<dz-grid> batch editing (1.15.0, edit-batch.md 5, 12)', () => {
+  it('dzg-pending-change tells the count; the api through the feature and el.grid; saveAll sends one request', async () => {
+    const { edit } = await import('@dzgrid/dom/edit');
+    const { editBatch } = await import('@dzgrid/dom/edit-batch');
+    const { EN_EDIT } = await import('@dzgrid/dom/locales/en-edit');
+    const { EN_FORMS } = await import('@dzgrid/dom/locales/en-forms');
+    const sent: unknown[][] = [];
+    const batch = editBatch<R>();
+    document.body.insertAdjacentHTML('beforeend', '<dz-grid-test></dz-grid-test>');
+    const el = document.body.lastElementChild as DzGridElement<R>;
+    const counts: number[] = [];
+    el.env = env;
+    el.features = [edit<R>({ save: (req) => void sent.push(req.changes.map((c) => c.value)) }), batch];
+    el.columns = [{ id: 'name' }, { id: 'n', type: 'number', editable: true }];
+    el.getRowId = (r) => r.id;
+    el.rows = ROWS;
+    el.messages = { ...EN, text: { ...EN.text, ...EN_EDIT.text, ...EN_FORMS.text } };
+    el.addEventListener('dzg-pending-change', (e) => counts.push((e as CustomEvent).detail.count));
+    await el.ready;
+    await tick();
+    const editing = el.grid!.kernel;
+    const api = batch.api({ kernel: editing })!;
+    (el.features![0] as ReturnType<typeof edit<R>>).api(el.grid!)!.commit([{ key: el.grid!.kernel.rows.displayed.keyAt(0 as DisplayIndex), column: 'n', input: { text: '9' } }]);
+    expect(counts).toEqual([1]);
+    expect(api.count).toBe(1);
+    expect(sent).toEqual([]);
+    await api.saveAll();
+    expect(sent).toEqual([[9]]);
+    expect(counts).toEqual([1, 0]);
+  });
+});

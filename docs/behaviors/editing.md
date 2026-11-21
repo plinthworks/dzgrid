@@ -210,3 +210,7 @@ refused (criterion 5). Manual: `docs/a11y-protocol.md` §19.
   `api.commit` (`read-only`) pinned (`edit-detail.test.ts`, `edit-tree.test.ts`); Enter still enters a panel's grid.
 - 22: nested grids edit for themselves (`edit-nested.test.ts`); a panel that goes while its grid saves keeps that
   grid alive (master-detail.md, owner S8-O3).
+
+## Form editing (1.15.0, opt-in)
+A row opened whole (`editors({ row: rowEditor })`): `edit-row.md`. Changes kept pending until saved together
+(`editBatch()`): `edit-batch.md`. A list searched on the server (`edit: { search }`): `editors.md` 23–29.

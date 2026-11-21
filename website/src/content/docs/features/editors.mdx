@@ -40,6 +40,10 @@ than 500 options opens a text field too, with an `invalid-column` warning. An `e
 - `list`: the list editor, `listEditor` from `@dzgrid/dom/editors-list`.
 - `textarea`: the long-text editor, [`textareaEditor`](../textarea-editor/) from `@dzgrid/dom/editors-textarea`, for the
   columns with `edit: { editor: 'textarea' }` (1.14.0).
+- `search`: the searching list, [`searchEditor`](../search-editor/) from `@dzgrid/dom/editors-search`, for the columns
+  with `edit: { search }` (1.15.0).
+- `row`: full-row editing, [`rowEditor`](../row-editor/) from `@dzgrid/dom/editors-row` (1.15.0); with it,
+  `validateRow` checks the whole row before it is kept.
 
 ## Example
 

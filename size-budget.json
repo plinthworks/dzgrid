@@ -82,7 +82,7 @@
     },
     "@dzgrid/core/edit": {
       "file": "packages/core/src/edit.ts",
-      "maxGzip": 3175,
+      "maxGzip": 3238,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/range": {
@@ -238,6 +238,18 @@
     "@dzgrid/dom/locales/ar-editors": {
       "file": "packages/dom/src/locales/ar-editors.ts",
       "maxGzip": 600
+    },
+    "@dzgrid/dom/locales/en-forms": {
+      "file": "packages/dom/src/locales/en-forms.ts",
+      "maxGzip": 300
+    },
+    "@dzgrid/dom/locales/fr-forms": {
+      "file": "packages/dom/src/locales/fr-forms.ts",
+      "maxGzip": 350
+    },
+    "@dzgrid/dom/locales/ar-forms": {
+      "file": "packages/dom/src/locales/ar-forms.ts",
+      "maxGzip": 500
     },
     "@dzgrid/dom/locales/en-range": {
       "file": "packages/dom/src/locales/en-range.ts",
@@ -498,6 +510,10 @@
     "@dzgrid/theme/edit.css": {
       "file": "packages/theme/edit.css",
       "maxGzip": 2280
+    },
+    "@dzgrid/theme/forms.css": {
+      "file": "packages/theme/forms.css",
+      "maxGzip": 600
     },
     "@dzgrid/theme/range.css": {
       "file": "packages/theme/range.css",
@@ -806,7 +822,7 @@
     },
     "@dzgrid/dom/edit": {
       "file": "packages/dom/src/edit.ts",
-      "maxGzip": 4150,
+      "maxGzip": 4190,
       "external": [
         "@dzgrid/core",
         "@dzgrid/core/internal",
@@ -816,7 +832,7 @@
     },
     "@dzgrid/dom/editors": {
       "file": "packages/dom/src/editors.ts",
-      "maxGzip": 6765,
+      "maxGzip": 6900,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
@@ -828,7 +844,7 @@
     },
     "@dzgrid/dom/editors-base": {
       "file": "packages/dom/src/editors-base.ts",
-      "maxGzip": 6765,
+      "maxGzip": 6900,
       "over": "@dzgrid/dom/popup",
       "external": [
         "@dzgrid/core",
@@ -866,6 +882,41 @@
         "@dzgrid/core",
         "@dzgrid/core/internal",
         "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/edit-batch": {
+      "file": "packages/dom/src/edit-batch.ts",
+      "maxGzip": 1800,
+      "over": "@dzgrid/dom/edit",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/core/edit",
+        "@dzgrid/dom/internal"
+      ]
+    },
+    "@dzgrid/dom/editors-row": {
+      "file": "packages/dom/src/editors-row.ts",
+      "maxGzip": 3200,
+      "over": "@dzgrid/dom/editors",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/core/edit",
+        "@dzgrid/dom/internal",
+        "./editors/dates/*"
+      ]
+    },
+    "@dzgrid/dom/editors-search": {
+      "file": "packages/dom/src/editors-search.ts",
+      "maxGzip": 1350,
+      "over": "@dzgrid/dom/editors",
+      "external": [
+        "@dzgrid/core",
+        "@dzgrid/core/internal",
+        "@dzgrid/core/edit",
+        "@dzgrid/dom/internal",
+        "./editors/dates/*"
       ]
     },
     "@dzgrid/dom/range": {
@@ -1409,7 +1460,7 @@
     },
     "@dzgrid/angular": {
       "file": "packages/angular/dist/fesm2022/dzgrid-angular.mjs",
-      "maxGzip": 8800,
+      "maxGzip": 8830,
       "external": [
         "@angular/*",
         "@dzgrid/*",

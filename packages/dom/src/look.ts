@@ -62,6 +62,8 @@ export interface GridTheme {
   readonly overlayFg?: ThemeValue; readonly overlayBg?: ThemeValue; readonly footerBg?: ThemeValue; readonly footerFg?: ThemeValue;
   /** The unsorted mark's colour (`icons.sortNone`); the sorted one's by default. */
   readonly sortNoneFg?: ThemeValue;
+  /** Form editing (1.15.0, `@dzgrid/theme/forms.css`): a pending cell's triangle and tint; a row being edited, its outline. */
+  readonly pendingMark?: ThemeValue; readonly pendingBg?: ThemeValue; readonly rowEditingOutline?: ThemeValue;
   // The popups' buttons (`@dzgrid/theme/buttons.css`): weight, side padding, height; under the pointer and pressed (unset: no
   // change); the primary one (Apply) and its states.
   readonly buttonFontWeight?: ThemeValue; readonly buttonPaddingInline?: ThemeValue; readonly buttonHeight?: ThemeValue; readonly buttonHoverBg?: ThemeValue;

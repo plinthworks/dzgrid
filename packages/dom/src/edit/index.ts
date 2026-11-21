@@ -70,7 +70,8 @@ export function edit<T = unknown>(o: EditFeatureOptions<T> = {}): EditFeature<T>
       if (missing.length) throw new TypeError(`edit: missing ${missing.join(', ')}`);
       const { kernel } = g;
       const win = g.win as (Window & typeof globalThis) | null;
-      const ctl = createEdits(kernel as GridKernel<T>, { ctx: () => g.ctx, ...(o.save && { save: o.save }), ...(win?.AbortController && { abort: () => new win.AbortController() }) });
+      // With `editBatch()` (1.15.0, edit-batch.md 2): every gesture held until `saveAll()`.
+      const ctl = createEdits(kernel as GridKernel<T>, { ctx: () => g.ctx, hold: !!g.settings.features?.some((f) => f.id == 'edit-batch'), ...(o.save && { save: o.save }), ...(win?.AbortController && { abort: () => new win.AbortController() }) });
       const m = marks(g, ctl, o.savingBorder !== false);
       const s = stale(g, m);
       /** Undo and redo (edit-undo.md 2–13; owner S8-O2, S8-O4): the keys and the API one path, one sentence, the focus. */
@@ -110,7 +111,7 @@ export function edit<T = unknown>(o: EditFeatureOptions<T> = {}): EditFeature<T>
       apis.set(kernel, api);
       return {
         // The editors (`@dzgrid/dom/editors`) find the grid's edits here.
-        edit: { ...m.seam, api, busy: () => (ctl.dirty ? 2 : +[...m.cells.values()].some((x) => m.seam.tip!(x.k, x.c))) },
+        edit: { ...m.seam, api, x: ctl, busy: () => (ctl.dirty ? 2 : +[...m.cells.values()].some((x) => m.seam.tip!(x.k, x.c))) },
         decorateHeader: s.decorateHeader,
         keys(e, at, owner) {
           // The letter: `key`'s when it is a Latin one, else the physical key's (`code` KeyZ, KeyY); with Shift:

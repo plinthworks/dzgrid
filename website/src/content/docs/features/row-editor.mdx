@@ -1,0 +1,75 @@
+---
+title: "rowEditor"
+description: "Every editable cell of a row opened at once, kept or given up as one."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Full-row editing, given as `editors({ row: rowEditor })`.
+
+<FeatureFacts name="rowEditor" />
+
+## What it does
+
+`rowEditor` is not a feature of its own: give it to [`editors()`](../editors/). Its own entry,
+`@dzgrid/dom/editors-row`, keeps it out of grids that edit a cell at a time.
+
+F2, Enter, a character typed or a double click opens **every editable cell of the row**, each with its usual editor (a
+yes/no cell a checkbox); the focus goes to the cell you started from and the row is outlined
+(`--dzg-row-editing-outline`). **Tab** and **Shift+Tab** move between the fields; past the last one, Tab keeps the row and
+opens the next. **Enter** keeps the whole row as one request (`origin: 'row'`, one undo) — or one gesture of pending
+changes with [`editBatch()`](../edit-batch/); **Escape** gives the whole row up; clicking elsewhere keeps it.
+
+Before keeping, each changed field is checked by its column's rules, then the row by `validateRow`; one refusal keeps
+nothing: the refused fields are marked invalid and the first one takes the focus with its reason. Screen readers hear
+« Editing row … » when it opens and each field's name.
+
+## Options (on `editors()`)
+
+- `row: rowEditor`: turns the grid's editing row-wide.
+- `validateRow`: `(values, row, context) => { column, code } | list | null`, every column's value as it would be kept.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { rowEditor } from '@dzgrid/dom/editors-row';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+import { EN_FORMS } from '@dzgrid/dom/locales/en-forms';
+import '@dzgrid/theme/edit.css';
+import '@dzgrid/theme/forms.css';
+
+type Leave = { id: string; who: string; from: number; to: number; paid: boolean };
+
+// Not typed `GridMessages`: an app's own `validation.<code>` keys are extra keys.
+const messages = {
+  ...EN,
+  text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text, ...EN_FORMS.text, 'validation.order': 'must come after the start' },
+};
+
+createGrid<Leave>(document.getElementById('leaves')!, {
+  rows: [{ id: 'l1', who: 'Sam', from: 3, to: 7, paid: true }],
+  columns: [
+    { id: 'who', header: 'Who', editable: true, edit: { required: true } },
+    { id: 'from', header: 'From day', type: 'number', editable: true },
+    { id: 'to', header: 'To day', type: 'number', editable: true },
+    { id: 'paid', header: 'Paid', type: 'boolean', editable: true },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [
+    edit<Leave>({ save: (req) => fetch('/api/leaves', { method: 'PATCH', body: JSON.stringify(req.changes) }) }),
+    // A rule across the row's fields, checked before the row is kept.
+    editors({ row: rowEditor, validateRow: (v) => ((v['to'] as number) < (v['from'] as number) ? { column: 'to', code: 'order' } : null) }),
+  ],
+});
+```
+
+## See also
+
+- The [`editors`](../editors/) feature, which takes it.
+- [`editBatch`](../edit-batch/), to keep the rows pending.

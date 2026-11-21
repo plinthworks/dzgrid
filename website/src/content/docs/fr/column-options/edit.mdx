@@ -21,6 +21,9 @@ Contrôlés dans cet ordre, après que le codec a lu la valeur :
 - `options` : les valeurs permises, une liste ou une fonction `(row, context)` ; la valeur actuelle de la cellule
   passe toujours. Une colonne à liste se choisit dans l’éditeur de liste (`editors({ list: listEditor })`, de
   `@dzgrid/dom/editors-list`).
+- `search` (1.15.0) : une liste demandée à votre serveur pendant la frappe, `(text, { signal, row, context })` qui rend
+  les options en promesse, en liste ou en observable ; avec elle, `options` n’est pas vérifié. Ouverte par
+  [`searchEditor`](../../features/search-editor/).
 
 `maxLength` limite ce que le champ accepte ; `editor` nomme votre propre partie d’édition. Une règle fautive est
 signalée par un avertissement `invalid-column` à `columns.<id>.edit.<key>`, et cette règle est ignorée.

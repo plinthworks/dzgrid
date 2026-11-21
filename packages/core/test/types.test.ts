@@ -98,7 +98,7 @@ describe('the edit controller (Phase 5 step 3)', () => {
   });
 
   it('the edit events and the save request carry their origin', () => {
-    expectTypeOf<SaveOrigin>().toEqualTypeOf<'edit' | 'undo' | 'redo' | 'paste' | 'fill' | 'bulk' | 'cut'>(); // Part B step 10: `cut`
+    expectTypeOf<SaveOrigin>().toEqualTypeOf<'edit' | 'undo' | 'redo' | 'paste' | 'fill' | 'bulk' | 'cut' | 'batch' | 'row'>(); // Part B step 10: `cut`; 1.15.0: `batch` (edit-batch.md 5), `row` (edit-row.md 8)
     expectTypeOf<Extract<GridEvent<Row>, { type: 'cellEdited' }>['origin']>().toEqualTypeOf<SaveOrigin>();
     expectTypeOf<Extract<GridEvent<Row>, { type: 'saveFailed' }>['source']>().toEqualTypeOf<'data'>();
     expectTypeOf<Extract<GridEvent<Row>, { type: 'saveFailed' }>['reason']>().toEqualTypeOf<string | null>();

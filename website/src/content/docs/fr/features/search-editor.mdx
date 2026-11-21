@@ -1,0 +1,63 @@
+---
+title: "searchEditor"
+description: "Une liste qui interroge votre serveur pendant la frappe, pour les listes trop grandes à charger."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+La liste qui cherche des éditeurs, donnée par `editors({ search: searchEditor })`.
+
+<FeatureFacts name="searchEditor" />
+
+## Ce qu’il fait
+
+Donnez à une colonne `edit: { search }` et passez `searchEditor` à [`editors()`](../editors/). La cellule ouvre une
+liste modifiable : elle demande `search(text, { signal, row, context })` tout de suite avec le texte de la cellule, puis
+250 ms après la dernière touche. Une demande plus récente abandonne la précédente par son `signal`, et une réponse en
+retard est ignorée. Votre recherche rend les options `[{ value, label? }]` en promesse, en liste ou en observable (sa
+première valeur) : pas de limite de 500 options.
+
+La liste montre « Recherche… » pendant l’attente, « Aucun résultat » quand rien ne revient, « La recherche a échoué »
+sur une erreur, chacun dit aux lecteurs d’écran. Bas et Haut changent l’option active, **Entrée** la garde, un clic la
+garde, **Échap** ferme la liste puis abandonne ; sans choix, rien ne change. `options` n’est pas vérifié quand `search`
+est donné : votre `save` juge. La cellule montre la valeur comme sa colonne la met en forme.
+
+Sans `searchEditor`, la colonne s’ouvre comme si `search` n’était pas là, et la grille donne un avertissement
+`missing-feature` par colonne.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { searchEditor } from '@dzgrid/dom/editors-search';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+import { EN_FORMS } from '@dzgrid/dom/locales/en-forms';
+import '@dzgrid/theme/edit.css';
+import '@dzgrid/theme/forms.css';
+
+type Parcel = { id: string; label: string; city: string };
+
+createGrid<Parcel>(document.getElementById('parcels')!, {
+  rows: [{ id: 'p1', label: 'Box 12', city: 'Oran' }],
+  columns: [
+    { id: 'label', header: 'Parcel' },
+    {
+      id: 'city', header: 'City', editable: true,
+      // Asked 250 ms after the last key; `signal` aborts an ask a newer one replaced.
+      edit: { search: (text, { signal }) => fetch(`/api/cities?q=${encodeURIComponent(text)}`, { signal: signal as AbortSignal }).then((r) => r.json()) },
+    },
+  ],
+  getRowId: (r) => r.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text, ...EN_FORMS.text } },
+  features: [edit<Parcel>(), editors({ search: searchEditor })],
+});
+```
+
+## Voir aussi
+
+- La fonction [`editors`](../editors/), qui le prend.
+- L’option de colonne [`edit`](../../column-options/edit/).

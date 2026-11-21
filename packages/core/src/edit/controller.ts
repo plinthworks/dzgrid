@@ -19,6 +19,16 @@ export interface SaveChange<T> {
   readonly row: Readonly<T>;
   readonly pinned?: 'top' | 'bottom' | undefined;
 }
+/** A row's refusal (1.15.0, edit-row.md 9): the column it is shown on, and its code (worded by `validation.<code>`). */
+export interface RowRefusal {
+  readonly column: string;
+  readonly code: string;
+}
+/**
+ * A rule over a whole row (1.15.0, edit-row.md 9, edit-batch.md 6): `values` every column's value as it would be kept,
+ * `row` the row as held, `context` the grid's. Null, undefined or an empty list: kept; else the refusals.
+ */
+export type RowRule<T> = (values: Readonly<Record<string, unknown>>, row: Readonly<T>, context: unknown) => RowRefusal | readonly RowRefusal[] | null | undefined;
 /** One gesture's save: one generation, never reused. */
 export interface SaveRequest<T> {
   readonly origin: SaveOrigin;
@@ -42,6 +52,8 @@ export interface EditOptions<T> {
    * a signal that never aborts: `destroy` then only ignores the answer (cut for the budget, S3-O4).
    */
   readonly abort?: () => AbortHandle;
+  /** Every gesture waits, status `pending`, until one marked to go takes its cells (`@dzgrid/dom/edit-batch`, 1.15.0). */
+  readonly hold?: boolean;
 }
 export interface CellState {
   readonly status: 'pending' | 'saving' | 'saved' | 'failed';
@@ -80,32 +92,52 @@ export interface EditController<T> {
   setSave(save?: SaveHandler<T>): void;
   /** Aborts the requests in flight and ignores their answers; returns how many changes were dropped. */
   destroy(): number;
+  /** @internal The controller's insides, for `@dzgrid/dom/edit-batch` (1.15.0, edit-batch.md); no semver promise. */
+  readonly x?: EditInner<T>;
 }
 
-type Status = CellState['status'];
-/** A cell's edit: what it shows while it counts, and where its saves stand. */
-interface Entry {
+/** @internal A cell's edit inside the controller (`@dzgrid/dom/edit-batch`); no semver promise. */
+export interface EditEntry {
   readonly k: RowKey;
   readonly c: string;
-  /** Its key in the overlay (`cellKey`). */
   readonly id: string;
   v: unknown;
-  s: Status;
-  /** The newest gesture staged on the cell. */
+  s: CellState['status'];
   g: number;
-  /** The gesture in flight, if any (one at a time per cell). */
   f?: number | undefined;
-  /** The newest value saved (saves are serial per cell: the last answer accepted is the newest). */
   l?: { readonly v: unknown };
-  /** The row object last read (followed while the change is live): a saved or refused value counts while the rows hold this one. */
   d: unknown;
-  /** The refusal of the newest gesture: its value, reason and code (cleared by the next change). */
   r?: { readonly v: unknown; readonly why: string | null; readonly code: string | null } | undefined;
-  /** The row was removed while its save flew: the answer will not show (edit-save.md 21). */
   x?: boolean;
 }
+/** @internal A gesture: its generation, origin, cells (value and previous); `go`: sent even while held. */
+export interface EditGesture { readonly g: number; readonly origin: SaveOrigin; readonly cells: Map<EditEntry, { readonly v: unknown; readonly p: unknown }>; go?: boolean }
+/** @internal The controller's insides (`@dzgrid/dom/edit-batch`, 1.15.0); no semver promise. */
+export interface EditInner<T> {
+  readonly cells: Map<string, EditEntry>;
+  readonly waiting: Map<number, EditGesture>;
+  readonly flying: Map<number, { readonly x: EditGesture }>;
+  /** A new generation. */
+  gen(): number;
+  /** Sends what may go; returns the cells it moved. */
+  pump(): EditEntry[];
+  states(source: ChangeSource, list: readonly EditEntry[]): void;
+  /** A new overlay version, the columns of `es` told. */
+  show(es: Iterable<EditEntry>, source: ChangeSource): void;
+  unwait(e: EditEntry): void;
+  drop(e: EditEntry): unknown;
+}
+
+/**
+ * A cell's edit: what it shows while it counts, and where its saves stand. `id` its key in the overlay (`cellKey`);
+ * `g` the newest gesture staged on it; `f` the gesture in flight, if any (one at a time per cell); `l` the newest value
+ * saved (saves are serial per cell: the last answer accepted is the newest); `d` the row object last read (followed
+ * while the change is live: a saved or refused value counts while the rows hold this one); `r` the refusal of the
+ * newest gesture (cleared by the next change); `x` the row was removed while its save flew (edit-save.md 21).
+ */
+type Entry = EditEntry;
 interface Change { readonly v: unknown; readonly p: unknown }
-interface Gesture { readonly g: number; readonly origin: SaveOrigin; readonly cells: Map<Entry, Change> }
+type Gesture = EditGesture;
 /** An undo entry: per cell, its key, the value before the gesture and the value it kept. */
 interface Batch { readonly g: number; cells: { readonly k: RowKey; readonly c: string; readonly e: string; readonly b: unknown; readonly a: unknown }[] }
 
@@ -130,7 +162,7 @@ export function createEdits<T>(kernel: GridKernel<T>, o: EditOptions<T>): EditCo
   let dead = false;
   const cells = new Map<string, Entry>();
   const waiting = new Map<number, Gesture>();
-  const flying = new Map<number, { readonly x: Gesture; readonly h: AbortHandle | undefined }>();
+  const flying = new Map<number, { readonly x: Gesture; readonly h?: AbortHandle | undefined }>();
   const undoS: Batch[] = [];
   const redoS: Batch[] = [];
   let can = 0;
@@ -192,7 +224,8 @@ export function createEdits<T>(kernel: GridKernel<T>, o: EditOptions<T>): EditCo
     const out: Entry[] = [];
     // A save that commits from inside adds a gesture this loop reaches too.
     for (const x of waiting.values()) {
-      if ([...x.cells.keys()].some((e) => e.f !== undefined)) continue;
+      // Held (a batch): only a gesture marked to go leaves.
+      if ((o.hold && !x.go) || [...x.cells.keys()].some((e) => e.f !== undefined)) continue;
       waiting.delete(x.g);
       out.push(...x.cells.keys());
       const fn = save;
@@ -387,6 +420,7 @@ export function createEdits<T>(kernel: GridKernel<T>, o: EditOptions<T>): EditCo
     get canUndo() { return undoS.length > 0; },
     get canRedo() { return redoS.length > 0; },
     setSave(fn) { save = fn; },
+    x: { cells, waiting, flying, gen: () => ++gen, pump, states, show: showNew, unwait, drop },
     destroy() {
       if (dead) return 0;
       dead = true;

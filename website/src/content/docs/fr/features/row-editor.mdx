@@ -1,0 +1,77 @@
+---
+title: "rowEditor"
+description: "Toutes les cellules modifiables d’une ligne ouvertes à la fois, gardées ou abandonnées ensemble."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+La modification d’une ligne entière, donnée par `editors({ row: rowEditor })`.
+
+<FeatureFacts name="rowEditor" />
+
+## Ce qu’il fait
+
+`rowEditor` n’est pas une fonction à part : donnez-le à [`editors()`](../editors/). Sa propre entrée,
+`@dzgrid/dom/editors-row`, le garde hors des grilles qui modifient une cellule à la fois.
+
+F2, Entrée, un caractère tapé ou un double clic ouvre **toutes les cellules modifiables de la ligne**, chacune avec son
+éditeur habituel (une cellule oui / non, une case à cocher) ; le focus va à la cellule de départ et la ligne est
+entourée (`--dzg-row-editing-outline`). **Tab** et **Maj+Tab** passent d’un champ à l’autre ; après le dernier, Tab garde
+la ligne et ouvre la suivante. **Entrée** garde toute la ligne en une requête (`origin: 'row'`, une annulation) — ou un
+geste de modifications en attente avec [`editBatch()`](../edit-batch/) ; **Échap** abandonne toute la ligne ; un clic
+ailleurs la garde.
+
+Avant de garder, chaque champ changé est vérifié par les règles de sa colonne, puis la ligne par `validateRow` ; un seul
+refus ne garde rien : les champs refusés sont marqués invalides et le premier prend le focus avec sa raison. Les lecteurs
+d’écran entendent « Modification de la ligne … » à l’ouverture et le nom de chaque champ.
+
+## Options (sur `editors()`)
+
+- `row: rowEditor` : la modification de la grille passe à la ligne entière.
+- `validateRow` : `(values, row, context) => { column, code } | liste | null`, la valeur de chaque colonne telle
+  qu’elle serait gardée.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { edit } from '@dzgrid/dom/edit';
+import { editors } from '@dzgrid/dom/editors-base';
+import { rowEditor } from '@dzgrid/dom/editors-row';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_EDIT } from '@dzgrid/dom/locales/en-edit';
+import { EN_EDITORS } from '@dzgrid/dom/locales/en-editors';
+import { EN_FORMS } from '@dzgrid/dom/locales/en-forms';
+import '@dzgrid/theme/edit.css';
+import '@dzgrid/theme/forms.css';
+
+type Leave = { id: string; who: string; from: number; to: number; paid: boolean };
+
+// Not typed `GridMessages`: an app's own `validation.<code>` keys are extra keys.
+const messages = {
+  ...EN,
+  text: { ...EN.text, ...EN_EDIT.text, ...EN_EDITORS.text, ...EN_FORMS.text, 'validation.order': 'must come after the start' },
+};
+
+createGrid<Leave>(document.getElementById('leaves')!, {
+  rows: [{ id: 'l1', who: 'Sam', from: 3, to: 7, paid: true }],
+  columns: [
+    { id: 'who', header: 'Who', editable: true, edit: { required: true } },
+    { id: 'from', header: 'From day', type: 'number', editable: true },
+    { id: 'to', header: 'To day', type: 'number', editable: true },
+    { id: 'paid', header: 'Paid', type: 'boolean', editable: true },
+  ],
+  getRowId: (r) => r.id,
+  messages,
+  features: [
+    edit<Leave>({ save: (req) => fetch('/api/leaves', { method: 'PATCH', body: JSON.stringify(req.changes) }) }),
+    // A rule across the row's fields, checked before the row is kept.
+    editors({ row: rowEditor, validateRow: (v) => ((v['to'] as number) < (v['from'] as number) ? { column: 'to', code: 'order' } : null) }),
+  ],
+});
+```
+
+## Voir aussi
+
+- La fonction [`editors`](../editors/), qui le prend.
+- [`editBatch`](../edit-batch/), pour garder les lignes en attente.

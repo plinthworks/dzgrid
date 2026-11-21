@@ -1,5 +1,6 @@
-import { problem, type EnumOption, type FocusPos, type KeyOwner, type Problem, type ResolvedColumn, type RowKey } from '@dzgrid/core';
-import { emit, intlTag } from '@dzgrid/core/internal';
+import { problem, type EnumOption, type FocusPos, type KeyOwner, type OptionSearch, type Problem, type ResolvedColumn, type RowKey } from '@dzgrid/core';
+import type { RowRule } from '@dzgrid/core/edit';
+import { emit } from '@dzgrid/core/internal';
 import { composing, type Once } from '@dzgrid/dom/internal';
 import type { GridContext } from '../context.js';
 import type { EditApi } from '../edit/index.js';
@@ -11,6 +12,7 @@ import { setAttr } from '../render/write.js';
 import { bubble } from './bubble.js';
 import { calendars, dateEd, dayText, today, type CalendarKit } from './dates.js';
 import { editorHost } from './host.js';
+import { caretOf, fieldOf, kindOf, listOf, optionsOf, shownOf, textOf as textIn, type Kind } from './cells.js';
 
 /** The texts `editors()` needs, from `@dzgrid/dom/locales/<lang>-editors` (Retry is the base's `grid.retry`). */
 export const EDITORS_KEYS = [
@@ -40,6 +42,26 @@ export interface EditorsOptions {
    * with `edit: { editor: 'textarea' }`. Without it they open the one-line field, and one warning `missing-feature` per column.
    */
   readonly textarea?: (x: EdEnv, field: HTMLTextAreaElement) => Ed;
+  /**
+   * The searching list, `searchEditor` of `@dzgrid/dom/editors-search` (1.15.0, editors.md 23–29), for the columns with
+   * `edit: { search }`. Without it they open as without `search`, and one warning `missing-feature` per column.
+   */
+  readonly search?: SearchEditor;
+  /** Full-row editing, `rowEditor` of `@dzgrid/dom/editors-row` (1.15.0, edit-row.md): every editable cell of a row at once. */
+  readonly row?: RowEditor;
+  /** With `row`: a rule over the whole row, checked before it is kept (edit-row.md 9). */
+  readonly validateRow?: RowRule<any>;
+}
+/** The searching list's shape (`@dzgrid/dom/editors-search`): `keys` the texts it needs. */
+export type SearchEditor = ((x: EdEnv, value: unknown, search: OptionSearch<unknown>, label: (v: unknown) => string, name: string, done: (move: boolean) => void, row: unknown) => Ed) & { readonly keys: readonly string[] };
+/** The row editor's shape (`@dzgrid/dom/editors-row`): set up once per grid (it checks its own texts, `keys`). */
+export type RowEditor = ((x: EdEnv) => RowPlug) & { readonly keys: readonly string[] };
+/** What the row editor does for the editors (`@dzgrid/dom/editors-row`). */
+export interface RowPlug {
+  /** In place of a cell's editor: the row opened, or its field focused. */
+  open(k: RowKey, c: string, start: Start, ch?: string): boolean;
+  paint(): void;
+  destroy(): void;
 }
 /** The list editor's shape (`@dzgrid/dom/editors-list`). */
 export type ListEditor = (x: EdEnv, value: unknown, opts: readonly EnumOption[], label: (v: unknown) => string, name: string, done: (move: boolean) => void) => Ed;
@@ -70,13 +92,12 @@ export interface EdEnv {
   /** None: no calendar (`@dzgrid/dom/editors-base` without `loadCalendar`). */
   readonly cal: Once<0, CalendarKit> | null;
 }
-type Kind = 'text' | 'number' | 'day' | 'instant' | 'boolean' | 'list' | 'textarea' | Part<SlotContext['editor']>;
-type Start = SlotContext['editor']['start'];
+export type { Kind } from './cells.js';
+export type Start = SlotContext['editor']['start'];
 type Via = 'enter' | 'tab' | 'escape' | 'blur' | 'lost';
 /** The editor open: its cell, its column, what it is, the nodes a part owns, the server page and query it opened on. */
 interface Open { readonly k: RowKey; readonly c: string; readonly col: ResolvedColumn<unknown>; readonly e: Ed; readonly own: Set<Node>; readonly at: unknown }
 
-const BUILT = ['text', 'number', 'day', 'instant', 'boolean', 'list', 'textarea'];
 /** More options than this: a text field read by the codec (the searchable list is later; editors.md 16). */
 const MAX = 500;
 
@@ -108,7 +129,7 @@ export function editorsWith(o: EditorsOptions, load?: () => Promise<CalendarKit>
 }
 
 function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, CalendarKit> | null): FeatureHandle {
-  const missing = EDITORS_KEYS.filter((key) => g.settings.messages.text[key] === undefined);
+  const missing = [...EDITORS_KEYS, ...(o.search?.keys ?? [])].filter((key) => g.settings.messages.text[key as 'edit.refused'] === undefined);
   if (missing.length) throw new TypeError(`editors: missing ${missing.join(', ')}`);
   const { kernel, el, doc, scope } = g;
   // Without the edits nothing is taken: the grid stays as it was (one warning).
@@ -147,37 +168,6 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
   const broken = new Map<string, unknown>();
   /** When a double tap last opened something (the browser's double click after it is not a second one). */
   let tapped = -1e9;
-
-  /** The options of a list column, or null (none given). */
-  const optionsOf = (col: ResolvedColumn<unknown>): unknown => col.def.edit?.options ?? (col.type === 'enum' ? col.def.enumOptions : null) ?? null;
-  /** The editor of a column (editors.md 1, step06-plan « Choice of editor »), or null: none. */
-  const kind = (col: ResolvedColumn<unknown> | undefined): Kind | null => {
-    if (!col) return null;
-    const e = col.def.edit?.editor;
-    const reg = g.parts();
-    const part = (n: string) => (reg[n]?.slot === 'editor' ? (reg[n]!.part as Part<SlotContext['editor']>) : null);
-    if (e != null && !BUILT.includes(e)) return part(e);
-    const t = e ?? part(`editor.${col.type}`) ?? (optionsOf(col) ? 'list' : col.type);
-    return typeof t !== 'string' ? t : t === 'list' ? (optionsOf(col) ? t : 'text') : BUILT.includes(t) ? (t as Kind) : null;
-  };
-  /** A number as typed: the shortest text that reads back the same, the locale's decimal sign, the grid's digits, no groups. */
-  const numText = (v: number): string => {
-    const nf = new Intl.NumberFormat(intlTag(g.ctx));
-    const dot = nf.formatToParts(0.5).find((p) => p.type === 'decimal')?.value ?? '.';
-    return String(v).replace(/[\d.]/g, (c) => (c === '.' ? dot : nf.format(+c)));
-  };
-  /** A value as the column shows it (an enum's label, a yes/no's word); a string as it is. */
-  const shown = (col: ResolvedColumn<unknown>, v: unknown): string => {
-    if (v == null) return '';
-    try {
-      const x = col.codec.coerce(v, g.ctx);
-      return x === null ? String(v) : col.codec.format(x as never, g.ctx);
-    } catch {
-      return String(v);
-    }
-  };
-  /** A value as it opens in a text field: numbers as typed, the rest as shown. */
-  const textOf = (col: ResolvedColumn<unknown>, v: unknown): string => (typeof v === 'number' && col.type === 'number' ? numText(v) : typeof v === 'string' && col.type === 'text' ? v : shown(col, v));
 
   const stopped = (s: Open, kept: boolean, via: Via): void =>
     emit(kernel, { type: 'editingStopped', source: 'user', key: s.k, column: s.c, kept, via });
@@ -244,31 +234,15 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
     const v = col.codec.coerce(g.edit!.read(col, kernel.rowOf(k)!.data, k), g.ctx) !== true;
     const code = api().commit([{ key: k, column: c, input: { value: v } }]).refused[0]?.code;
     if (code) refused(k, c, msg('edit.refused', { column: head(col), reason: api().reason(c, code) }));
-    else g.live.announce(shown(col, v));
+    else g.live.announce(shownOf(g, col, v));
     return true;
   };
 
-  /** A text, number or date field: the step-5 `<input>`. */
-  const field = (col: ResolvedColumn<unknown>, kd: Kind, name: string): HTMLInputElement => {
-    const f = doc.createElement(kd === 'textarea' ? 'textarea' : 'input') as HTMLInputElement;
-    const a = (n: string, v: string): void => f.setAttribute(n, v);
-    f.className = 'dzg-field';
-    a('autocomplete', 'off');
-    a('enterkeyhint', 'done');
-    // The column's and the row's headers (the header cells carry no id: a name, not aria-labelledby).
-    a('aria-label', name);
-    // The cap (S5-O5, review R3): a whole number ≥ 1 (at most 2^31 − 1); 0 or Infinity: none; anything else 1 000.
-    const max = col.def.edit?.maxLength ?? 1000;
-    if (max !== 0 && max !== Infinity) f.maxLength = Number.isInteger(max) && max > 0 ? Math.min(max, 2 ** 31 - 1) : 1000;
-    if (kd === 'text' || kd === 'textarea') a('dir', 'auto');
-    else a('dir', 'ltr'), a('spellcheck', 'false'), kd === 'number' && a('inputmode', 'decimal');
-    return f;
-  };
-
   const open = (k: RowKey, c: string, start: Start, ch?: string): boolean => {
+    if (R) return R.open(k, c, start, ch);
     const col = g.columns.get(c);
     const node = kernel.rowOf(k);
-    let kd = kind(col);
+    let kd = kindOf(g, o, col);
     const id = `${k}\n${c}`;
     if (cur || !node || !kd || kd === 'boolean' || !kernel.editable(k, c) || broken.get(id) === node.data) return false;
     const w = wait;
@@ -277,14 +251,16 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
     const st = api().state(k, c);
     const v = st?.status === 'failed' ? st.refused : g.edit!.read(col!, node.data, k);
     // Not mounted yet: the key taken, the editor at the paint with what was typed meanwhile (review R1).
-    if (!g.rowRenderer.cell(k, c)) return (wait = w?.k === k && w.c === c ? { ...w, t: w.t + (ch ?? '') } : { k, c, s: start, t: ch ?? textOf(col!, v) }), true;
+    if (!g.rowRenderer.cell(k, c)) return (wait = w?.k === k && w.c === c ? { ...w, t: w.t + (ch ?? '') } : { k, c, s: start, t: ch ?? textIn(g, col!, v) }), true;
     // The row header's value as its column shows it (not its cell's text: a part may draw it otherwise, review R6).
     const rh = g.columns.visible()[0]!;
-    const name = msg('editors.fieldName', { column: head(col!), row: shown(rh, g.edit!.read(rh, node.data, k)) });
+    const name = msg('editors.fieldName', { column: head(col!), row: shownOf(g, rh, g.edit!.read(rh, node.data, k)) });
     let opts: readonly EnumOption[] | null = null;
-    if (kd === 'list' && !o.list) (kd = 'text'), tell(once(`${c}\nl`, problem('missing-feature', 'warning', `columns.${c}.edit`, '@dzgrid/dom/editors-list')));
+    const srch = o.search && col!.def.edit?.search;
+    if (col!.def.edit?.search && !o.search) tell(once(`${c}\ns`, problem('missing-feature', 'warning', `columns.${c}.edit`, '@dzgrid/dom/editors-search')));
+    if (kd === 'list' && !o.list && !srch) (kd = 'text'), tell(once(`${c}\nl`, problem('missing-feature', 'warning', `columns.${c}.edit`, '@dzgrid/dom/editors-list')));
     if (kd === 'textarea' && !o.textarea) (kd = 'text'), tell(once(`${c}\nt`, problem('missing-feature', 'warning', `columns.${c}.edit`, '@dzgrid/dom/editors-textarea')));
-    if (kd === 'list') {
+    if (kd === 'list' && !srch) {
       const src = optionsOf(col!);
       try {
         opts = typeof src === 'function' ? (src as (r: unknown, x: unknown) => readonly EnumOption[])(node.data, g.settings.context) : (src as readonly EnumOption[]);
@@ -325,11 +301,11 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
           host.replaceChildren();
         },
       };
-    } else if (kd === 'list') s.e = o.list!(env, col!.codec.coerce(v, g.ctx), opts!, (x) => shown(col!, x), name, (m) => void done(s, m));
+    } else if (kd === 'list') s.e = srch ? o.search!(env, col!.codec.coerce(v, g.ctx), srch, (x) => shownOf(g, col!, x), name, (m) => void done(s, m), node.data) : o.list!(env, col!.codec.coerce(v, g.ctx), opts!, (x) => shownOf(g, col!, x), name, (m) => void done(s, m));
     else {
-      const f = field(col!, kd, name);
+      const f = fieldOf(g, col!, kd, name);
       const d = kd === 'day' || kd === 'instant';
-      if (!d) f.value = ch ?? textOf(col!, v);
+      if (!d) f.value = ch ?? textIn(g, col!, v);
       s.e = d ? dateEd(env, f, col!, v, ch, () => blur(s)) : kd === 'textarea' ? o.textarea!(env, f as never) : { root: f, focus: f, input: () => ({ text: f.value }), drop() {} };
     }
     const e = s.e;
@@ -340,7 +316,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
     if (typeof kd === 'object') {
       try {
         handle = (kd as { mount(h: HTMLElement, c: SlotContext['editor']): EditorHandle }).mount(e.root, {
-          ...g.partBase!, value: col!.codec.coerce(v, g.ctx), text: shown(col!, v), row: node.data, key: k, column: col!, start, ...(start === 'key' && ch && { char: ch }),
+          ...g.partBase!, value: col!.codec.coerce(v, g.ctx), text: shownOf(g, col!, v), row: node.data, key: k, column: col!, start, ...(start === 'key' && ch && { char: ch }),
           keep: (input) => done(s, true, input),
           cancel: () => void (cur === s && close(s, true, false, 'escape')),
           refuse: (code) => void (cur === s && deny(s, api().reason(c, code))),
@@ -365,22 +341,6 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
     if (e.focus instanceof HTMLInputElement) e.focus.setSelectionRange(e.focus.value.length, e.focus.value.length);
     e.ready?.(ch);
     emit(kernel, { type: 'editingStarted', source: 'user', key: k, column: c, start });
-    return true;
-  };
-
-  /**
-   * Home, End, PageUp, PageDown in a field: Chrome on a Mac scrolls the grid on Home/End instead of moving the caret
-   * (the edited row left the view), PageUp/PageDown scroll it everywhere. Taken here: Home and End move the caret
-   * (Shift extends the selection), the pages nothing; the grid never scrolls under an open field.
-   */
-  const caret = (s: Open, e: KeyboardEvent, plain: boolean): boolean => {
-    const f = s.e.focus;
-    if (!plain || e.target !== f || !(f instanceof HTMLInputElement) || !/^(Home|End|Page(Up|Down))$/.test(e.key)) return false;
-    const end = f.value.length;
-    // Shift keeps the selection's anchor (the end it started from, review R3).
-    const a = f.selectionDirection === 'backward' ? f.selectionEnd! : f.selectionStart!;
-    if (e.key === 'Home') f.setSelectionRange(0, e.shiftKey ? a : 0, 'backward');
-    else if (e.key === 'End') f.setSelectionRange(e.shiftKey ? a : end, end, 'forward');
     return true;
   };
 
@@ -421,7 +381,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
 
   /** The next (`d` 1) or previous (−1) cell with an editor in reading order (a yes/no cell has none): visible columns, then the displayed rows (a pinned row's: its band's, step 8b-1). */
   const next = (k: RowKey, c: string, d: 1 | -1): { k: RowKey; c: string } | null => {
-    const cols = g.columns.visible().filter((x) => x.def.editable && kind(x) && kind(x) !== 'boolean').map((x) => x.id);
+    const cols = g.columns.visible().filter((x) => x.def.editable && kindOf(g, o, x) && kindOf(g, o, x) !== 'boolean').map((x) => x.id);
     const D = g.rowsOf?.(k) ?? g.rows.displayed;
     let r = D.indexOf(k);
     let i = cols.indexOf(c);
@@ -461,7 +421,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
   };
   /** A double click or a double tap: the editor, or a yes/no toggled once. */
   const twice = (p: FocusPos & { kind: 'cell' }, s: Start): unknown =>
-    kind(g.columns.get(p.column)) === 'boolean' ? kernel.editable(p.row, p.column) && toggle(p.row, p.column) : open(p.row, p.column, s);
+    kindOf(g, o, g.columns.get(p.column)) === 'boolean' && !R ? kernel.editable(p.row, p.column) && toggle(p.row, p.column) : open(p.row, p.column, s);
   scope.on(el.body, 'dblclick', (e: MouseEvent) => {
     const p = cellAt(e.target);
     if (p && g.now() - tapped > 500) twice(p, 'dblclick');
@@ -482,6 +442,9 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
     }
   });
 
+  /** Full-row editing (1.15.0, edit-row.md): the row editor in place of the cell's field. */
+  const R = o.row?.(env);
+
   return {
     keys(e: KeyboardEvent, at: FocusPos | null, owner: KeyOwner): boolean {
       const s = cur;
@@ -489,7 +452,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
       const plain = !e.altKey && !e.ctrlKey && !e.metaKey;
       // The editor's own keys, then these three; a nested grid's editor is that grid's.
       // Ctrl/Cmd+Enter (QB5, fill.md 17): before the editor's own keys (a list's Enter).
-      if (s) return s.e.root.contains(e.target as Node) && (caret(s, e, plain) || (e.key === 'Enter' && !e.altKey && !e.shiftKey && e.ctrlKey !== e.metaKey && e.metaKey === g.mac && all(s)) || !!s.e.keys?.(e) || (plain && end(s, e.key, e.shiftKey)));
+      if (s) return s.e.root.contains(e.target as Node) && (caretOf(s.e.focus, e, plain) || (e.key === 'Enter' && !e.altKey && !e.shiftKey && e.ctrlKey !== e.metaKey && e.metaKey === g.mac && all(s)) || !!s.e.keys?.(e) || (plain && end(s, e.key, e.shiftKey)));
       // An editor waiting for its paint takes the keys a field would (review R1): Backspace shortens what was typed,
       // Enter and Tab are kept for the opening, F2 and Delete change nothing, Escape gives it up.
       if (w && plain && at?.kind === 'cell' && at.row === w.k && at.column === w.c) {
@@ -501,7 +464,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
       }
       if (owner !== 'cell' || at?.kind !== 'cell' || !plain || e.shiftKey) return false;
       const { row: k, column: c } = at;
-      const kd = kind(g.columns.get(c));
+      const kd = kindOf(g, o, g.columns.get(c));
       const ok = !!kd && kernel.editable(k, c);
       // A held Space or Enter (key repeat) toggles once, and selects nothing either (review R5).
       if (e.repeat && ok && kd === 'boolean' && (e.key === ' ' || e.key === 'Enter')) return true;
@@ -509,7 +472,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
       // Space toggles an editable yes/no cell instead of selecting the row (O8).
       if (e.key === ' ') return ok && kd === 'boolean' && toggle(k, c);
       // Enter: a part that takes the focus first (editing.md 5); a cell that cannot be edited: the grid's Enter.
-      if (e.key === 'Enter') return ok && (!!g.rowRenderer.partAt(k, c)?.focus?.() || (kd === 'boolean' ? toggle(k, c) : open(k, c, 'enter')));
+      if (e.key === 'Enter') return ok && (!!g.rowRenderer.partAt(k, c)?.focus?.() || (kd === 'boolean' && !R ? toggle(k, c) : open(k, c, 'enter')));
       if ((e.key !== 'Delete' && e.key !== 'Backspace') || !kernel.editable(k, c)) return false;
       // Cleared without a field: the column's empty value, one save; a required column refuses it.
       const code = api().commit([{ key: k, column: c, input: { text: '' } }]).refused[0]?.code;
@@ -517,6 +480,7 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
       return true;
     },
     afterRows() {
+      R?.paint();
       H.paint();
       const w = wait;
       const f = kernel.focus;
@@ -533,12 +497,13 @@ function setup(g: GridContext<unknown>, o: EditorsOptions, cal: Once<0, Calendar
         const e = x.def.edit?.editor;
         if (e == null) return [];
         const id = `${x.id}\n${e}`;
-        if (e === 'list') return optionsOf(x) ? [] : once(id, problem('invalid-column', 'warning', `columns.${x.id}.edit.editor`, e));
-        return kind(x) ? [] : once(id, problem('unknown-part', 'warning', `columns.${x.id}.edit.editor`, e));
+        if (e === 'list') return listOf(o, x) ? [] : once(id, problem('invalid-column', 'warning', `columns.${x.id}.edit.editor`, e));
+        return kindOf(g, o, x) ? [] : once(id, problem('unknown-part', 'warning', `columns.${x.id}.edit.editor`, e));
       }));
     },
     destroy() {
       unhear?.();
+      R?.destroy();
       cur?.e.drop();
       cur = null;
       H.destroy();

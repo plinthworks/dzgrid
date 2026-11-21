@@ -17,7 +17,7 @@ import type { HeaderBandSpec, HeaderRowSpec } from './render/header.js';
 import type { EditSeam, FeatureHandle, GroupsApi, MoveFn, SlotDrivers, SpanFeature } from './features.js';
 import type { CellInput, PartBase, SlotPart } from './part.js';
 import type { Warmup } from './warmup.js';
-import type { SortButtonMessageKey, DetailMessageKey, EditMessageKey, EditorsMessageKey, RangeMessageKey, FillMessageKey, ColumnsMessageKey, ColumnsChooserMessageKey, ColumnMenuMessageKey, ContextMenuMessageKey, ContextMenuXlsxKey, PinnedMessageKey, TotalsMessageKey, ImportMessageKey, PrintMessageKey, FreshMessageKey, StatusMessageKey, FindMessageKey, ClearFiltersKey, RowDragMessageKey, FiltersPanelMessageKey, DockMessageKey, RowNumbersMessageKey, RulesMessageKey, TreeMessageKey, GroupMessageKey, PivotMessageKey, PivotBarMessageKey } from './part-texts.js';
+import type { SortButtonMessageKey, FormsMessageKey, DetailMessageKey, EditMessageKey, EditorsMessageKey, RangeMessageKey, FillMessageKey, ColumnsMessageKey, ColumnsChooserMessageKey, ColumnMenuMessageKey, ContextMenuMessageKey, ContextMenuXlsxKey, PinnedMessageKey, TotalsMessageKey, ImportMessageKey, PrintMessageKey, FreshMessageKey, StatusMessageKey, FindMessageKey, ClearFiltersKey, RowDragMessageKey, FiltersPanelMessageKey, DockMessageKey, RowNumbersMessageKey, RulesMessageKey, TreeMessageKey, GroupMessageKey, PivotMessageKey, PivotBarMessageKey } from './part-texts.js';
 
 /** Test seams: what a test without layout replaces. */
 export interface GridEnv {
@@ -188,9 +188,9 @@ export interface GridContext<T> {
   edit?: EditSeam | undefined;
   /**
    * The editor open in a cell (retained-row contract 5): the paint leaves that cell's value, part and classes.
-   * Its host is `@dzgrid/dom/editors` (Phase 5 step 5).
+   * Its host is `@dzgrid/dom/editors` (Phase 5 step 5); `cols`: every column of a row being edited (`@dzgrid/dom/editors-row`, 1.15.0).
    */
-  editor?: { readonly key: RowKey; readonly column: string; readonly cell: HTMLElement; readonly field: HTMLElement } | null;
+  editor?: { readonly key: RowKey; readonly column: string; readonly cell: HTMLElement; readonly field: HTMLElement; readonly cols?: ReadonlySet<string> } | null;
   /**
    * A feature selects blocks of cells (`@dzgrid/dom/range`, Phase 5 step 11a): the grid says `aria-multiselectable`
    * whatever the row selection, and a Shift+click on a cell is the feature's (rows are ticked by their box, owner QB1);
@@ -274,5 +274,5 @@ export interface GridContext<T> {
   refused?: ((key: RowKey) => boolean) | undefined;
   /** Find's text in force (`@dzgrid/dom/find`), '' or absent: none — what a cell part is given (`search.find`). */
   findText?: string;
-  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | TotalsMessageKey | ImportMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | ClearFiltersKey | RowDragMessageKey | FiltersPanelMessageKey | DockMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey | PivotMessageKey | PivotBarMessageKey | SortButtonMessageKey, params?: Readonly<Record<string, string | number>>): string;
+  msg(key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | TotalsMessageKey | ImportMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | ClearFiltersKey | RowDragMessageKey | FiltersPanelMessageKey | DockMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey | PivotMessageKey | PivotBarMessageKey | SortButtonMessageKey | FormsMessageKey, params?: Readonly<Record<string, string | number>>): string;
 }
