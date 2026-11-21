@@ -14,8 +14,8 @@ changed; then presses the application's « Save all » (one request) or « Cance
 
 1. **Opt-in**: `editBatch()` of `@dzgrid/dom/edit-batch` in `features`, beside `edit()` (and `editors()`). Without
    `edit()`: one `missing-feature` warning, nothing else. Its own entry: a grid without it pays nothing.
-2. **Kept, not sent**: every gesture (a field kept, a yes/no toggled, Delete, a paste, a fill, Ctrl/Cmd+Enter, a row
-   kept by `edit-row.md`, an undo, a redo, `api.commit`) is checked as today (`edit-validation.md`: a refusal never
+2. **Kept, not sent**: every gesture (a field kept, a yes/no toggled, Delete, Ctrl/Cmd+Enter, a row kept by
+   `edit-row.md`, an undo, a redo, `api.commit`) — a paste and a fill too when the application asks (11) — is checked as today (`edit-validation.md`: a refusal never
    becomes pending) and shown at once, but no request leaves. The cell's change is **pending**.
 3. **One change per cell**: a cell changed twice holds its newest value; its *previous* value stays the value saved
    before the first change (the source's, or the last value saved). A cell brought back to that value (typed again, or
@@ -53,8 +53,17 @@ changed; then presses the application's « Save all » (one request) or « Cance
     when the row comes back (a server source sorts and filters by the values it holds — the saved ones). A row the
     application **removes** from its own rows (`rows`, a transaction): its pending changes go with it (as a save in
     flight's, `edit-save.md` 21). A row **replaced** with the same key: kept, shown over the new row.
-11. **Paste and fill** (`range-selection.md`, `fill.md`): a paste or a fill is one gesture of pending changes (one undo).
-    The copy of a block copies what the cells show (pending values included).
+11. **Paste and fill** (`range-selection.md`, `clipboard.md`, `fill.md`; owner 2026-11-21: no « Save all » for them
+    unless the application asks): by default a paste (and a cut) and a fill (the handle, Ctrl+D / Ctrl+R, the fill's
+    API) are **saved at once**, as without the batch — one request each (`origin: 'paste'`, `'cut'`, `'fill'`), refusals
+    as `edit-save.md`; they never become pending, `count` and `pendingChange` do not move. `editBatch({ paste:
+    'pending' })` (paste and cut) and `editBatch({ fill: 'pending' })` keep them instead: one gesture of pending changes
+    (one undo). Ctrl/Cmd+Enter in a block (`fill.md` 17) is typed: pending. **A paste or fill saved at once over a
+    pending cell**: the saved value wins — the request carries it with `previous` the saved value, the cell's pending
+    change is dropped (`count` and `pendingChange` move) and said politely (« {n} changes discarded », after the
+    gesture's own sentence); the other pending cells stay. An undo of such a gesture is a change like any other (9):
+    pending — it gives back what the cells showed before, a dropped pending value included. The copy of a block copies
+    what the cells show (pending values included).
 12. **Leaving with changes**: the grid never opens a browser dialog. It tells `pendingChange` (`{ count }`) each time
     the count changes — Angular `(pendingChange)`, the element `dzg-pending-change` — and `count` is there to read: the
     application warns (its own `beforeunload`, a route guard). `reload()` and a server refresh keep the pending
@@ -74,7 +83,9 @@ changed; then presses the application's « Save all » (one request) or « Cance
 - A separate feature in its own entry (size rule: new code in opt-in entries), rather than a flag of `edit()`.
 - Kept by row key across paging, sorting and filtering (★); dropped with a row the application removes.
 - All or nothing before sending: a local refusal sends nothing (no half-saved form).
+- A paste and a fill saved at once by default (owner 2026-11-21); `paste` / `fill: 'pending'` to keep them; over a
+  pending cell the saved value wins (★).
 - Refusals from the application as today: back to the saved value, the refused value offered when reopened.
 
-Tests: `packages/dom/test/edit-batch.test.ts`, `packages/core/test/edit-batch.test.ts` (by hand);
+Tests: `packages/dom/test/edit-batch.test.ts`, `packages/dom/test/edit-batch-bulk.test.ts`, `packages/core/test/edit-batch.test.ts` (by hand);
 `scripts/browser-1-15.mjs --only batch` (Chrome, Firefox, WebKit; en / ar; light / dark).

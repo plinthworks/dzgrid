@@ -28,7 +28,11 @@ form editing — batch, full row, a list searched on the server (owner 2026-11-2
   `SortButtonMessageKey`.
 
 - **Batch editing, `editBatch()`** (`@dzgrid/dom/edit-batch`, opt-in; edit-batch.md): beside `edit()`, every gesture
-  (a field, a toggle, Delete, a paste, a fill, an undo, a row) is checked and shown but kept **pending**, never sent.
+  (a field, a toggle, Delete, an undo, a row) is checked and shown but kept **pending**, never sent. A paste (or a cut)
+  and a fill are **saved at once** by default, one request each as without the batch (owner 2026-11-21: no « Save
+  all » for them); `editBatch({ paste: 'pending', fill: 'pending' })` keeps them pending. Over a pending cell a paste
+  or fill saved at once wins: `previous` the saved value, the pending change dropped and said « {n} changes
+  discarded ».
   A pending cell carries `dzg-cell--unsaved` — a triangle in its inline-start top corner and a tint (`--dzg-pending-mark`,
   `--dzg-pending-bg`, theme keys `pendingMark`, `pendingBg`) — and is described « Not saved ». `batch.api(grid)`:
   `pending()` (`{ key, column, value, previous, row }`), `count`, `saveAll()` (every cell checked again, then the rows

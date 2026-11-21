@@ -40,7 +40,7 @@ Types added (additions only): `SaveOrigin` gains `'batch'` and `'row'`; `GridEve
 | Undo / redo | across pending; back to saved leaves the list | one gesture per row | as a list pick |
 | Rules | re-checked before `saveAll`, `validateRow` | each field, then `validateRow`; all or nothing | `options` skipped |
 | Server source | kept by key across page / sort / filter | kept before a page / query change | the `signal` aborts |
-| Clipboard / fill | a paste, a fill: one pending gesture; copy reads the overlay | — | — |
+| Clipboard / fill | a paste, a fill: saved at once (one request), or one pending gesture with `paste` / `fill: 'pending'`; over a pending cell the saved value wins; copy reads the overlay | — | — |
 | Export / print | the overlay (what the cells show), as today's saving values | — | — |
 | Leave / reload | `pendingChange`, `count`; reload keeps | — | — |
 

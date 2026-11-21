@@ -11,12 +11,18 @@ Les modifications gardées dans la grille jusqu’à ce que vous les enregistrie
 
 ## Ce qu’il fait
 
-Avec `editBatch()` dans `features`, chaque geste — un champ gardé, un oui / non basculé, Suppr, un collage, un
-remplissage, une annulation, une ligne gardée avec [`rowEditor`](../row-editor/) — est vérifié comme d’habitude et
+Avec `editBatch()` dans `features`, chaque geste — un champ gardé, un oui / non basculé, Suppr, une annulation, une
+ligne gardée avec [`rowEditor`](../row-editor/) — est vérifié comme d’habitude et
 montré aussitôt, mais rien ne part : la cellule est **en attente**. Elle porte un triangle dans son coin haut côté début
 et une teinte légère (`--dzg-pending-mark`, `--dzg-pending-bg`, dans `@dzgrid/theme/forms.css`) et les lecteurs d’écran
 entendent « Non enregistré ». Une cellule changée deux fois est une seule modification ; revenue à sa valeur enregistrée,
 elle n’est plus en attente.
+
+Un collage (ou une coupe) et un remplissage (la poignée, Ctrl+D / Ctrl+R) sont **enregistrés aussitôt** par défaut,
+comme sans le lot : une requête chacun (`origin: 'paste'`, `'cut'`, `'fill'`), rien en attente, pas de « Tout
+enregistrer » à montrer. Sur une cellule en attente, la valeur enregistrée l’emporte : la requête la porte, la
+modification en attente de la cellule est abandonnée et les lecteurs d’écran entendent « 1 modification abandonnée ».
+Les options ci-dessous les gardent en attente à la place.
 
 `batch.api(grid)` donne :
 
@@ -38,6 +44,9 @@ filtrée, sur une autre page d’une source serveur, elle revient quand sa ligne
 
 - `validateRow` : une règle sur chaque ligne en attente, `(values, row, context) => { column, code } | liste | null`,
   vérifiée avant que `saveAll()` envoie ; son code est dit par votre texte `validation.<code>`.
+- `paste: 'save' | 'pending'` (défaut `'save'`) : un collage ou une coupe enregistré aussitôt, ou gardé en attente (un
+  geste, une annulation).
+- `fill: 'save' | 'pending'` (défaut `'save'`) : de même pour un remplissage.
 
 ## Exemple
 

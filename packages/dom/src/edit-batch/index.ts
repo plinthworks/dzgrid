@@ -27,6 +27,10 @@ export interface SaveAllResult {
 export interface EditBatchOptions<T> {
   /** A rule over each row with pending changes, checked before `saveAll()` sends (edit-batch.md 6, edit-row.md 9). */
   readonly validateRow?: RowRule<T>;
+  /** A paste or a cut (edit-batch.md 11): `'save'` (default) saved at once, one request, as without the batch; `'pending'` kept. */
+  readonly paste?: 'save' | 'pending';
+  /** A fill — the handle, Ctrl+D / Ctrl+R, the fill's API (edit-batch.md 11): `'save'` (default) saved at once; `'pending'` kept. */
+  readonly fill?: 'save' | 'pending';
 }
 /** A grid's pending changes (edit-batch.md 5). */
 export interface EditBatchApi<T> {
@@ -88,11 +92,16 @@ function setup<T>(g: GridContext<unknown>, o: EditBatchOptions<T>, apis: WeakMap
   const list = (): EditEntry[] => [...I().cells.values()].filter(held);
 
   let count = 0;
+  /** The pending cells when last counted: those a paste or a fill saved at once takes over (edit-batch.md 11). */
+  let was = new Set<EditEntry>();
   /** `pendingChange` when the count moved (edit-batch.md 12). */
   const recount = (source: ChangeSource): void => {
-    const n = list().length;
-    if (n !== count) emit(kernel, { type: 'pendingChange', source, count: (count = n) });
+    const l = list();
+    was = new Set(l);
+    if (l.length !== count) emit(kernel, { type: 'pendingChange', source, count: (count = l.length) });
   };
+  /** The origins saved at once (edit-batch.md 11): a paste and a cut, a fill, unless the application keeps them. */
+  const now = new Set([...(o.paste == 'pending' ? [] : ['paste', 'cut']), ...(o.fill == 'pending' ? [] : ['fill'])]);
   /** Back to the saved value (edit-batch.md 3): no longer pending — the saved value shown again, nothing to send. */
   const unpend = (es: EditEntry[], source: ChangeSource): void => {
     const x = I();
@@ -114,7 +123,24 @@ function setup<T>(g: GridContext<unknown>, o: EditBatchOptions<T>, apis: WeakMap
   // The cells a gesture changed (its `cellEdited`s come before its `editStates`): those back to their saved value leave.
   let touched: Set<string> | null = null;
   const unhear = kernel.subscribe((ev) => {
-    if (ev.type === 'cellEdited') (touched ??= new Set()).add(`${ev.key}\n${ev.column}`);
+    if (ev.type === 'cellEdited') {
+      (touched ??= new Set()).add(`${ev.key}\n${ev.column}`);
+      // A paste or a fill saved at once: its gesture (the newest waiting) goes; a pending cell it takes, dropped and said.
+      const G = [...I().waiting.values()].pop();
+      if (G && !G.go && now.has(G.origin)) {
+        G.go = true;
+        let n = 0;
+        for (const [e, ch] of G.cells) if (was.has(e)) n++, G.cells.set(e, { v: ch.v, p: base(e) });
+        if (n) {
+          // Said after the gesture's own sentences (« Saving », « Cells filled »), joined to them.
+          g.live.said = '';
+          queueMicrotask(() => queueMicrotask(() => {
+            const x = g.live.said;
+            g.live.announce((x ? `${x}. ` : '') + g.msg('edit.discarded', { n }));
+          }));
+        }
+      }
+    }
     else if (ev.type === 'editStates') {
       const t = touched;
       touched = null;

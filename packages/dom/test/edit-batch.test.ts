@@ -10,8 +10,8 @@ import { flush, keep, saving, server } from './support-saves.js';
 
 afterEach(cleanup);
 
-const batched = (o: { columns?: ColumnDef<R, any>[]; validateRow?: Parameters<typeof editBatch<R>>[0] extends infer X ? X extends { validateRow?: infer V } ? V : never : never; lang?: 'en' | 'ar'; settings?: object } = {}) => {
-  const b = editBatch<R>(o.validateRow ? { validateRow: o.validateRow } : {});
+const batched = (o: { columns?: ColumnDef<R, any>[]; validateRow?: Parameters<typeof editBatch<R>>[0] extends infer X ? X extends { validateRow?: infer V } ? V : never : never; lang?: 'en' | 'ar'; settings?: object; paste?: 'pending' } = {}) => {
+  const b = editBatch<R>({ ...(o.validateRow && { validateRow: o.validateRow }), ...(o.paste && { paste: o.paste }) });
   const lang = o.lang ?? 'en';
   const t = saving({
     lang, ...(o.columns && { columns: o.columns }),
@@ -58,8 +58,8 @@ describe('kept, not sent (edit-batch.md 2–4)', () => {
     expect(t.field()).not.toBeNull();
   });
 
-  it('several cells in one commit (a paste, a fill): one gesture of pending changes, one undo', () => {
-    const t = batched();
+  it("several cells in one commit (a paste kept by paste: 'pending'): one gesture of pending changes, one undo", () => {
+    const t = batched({ paste: 'pending' });
     t.e.api(t.g)!.commit([{ key: k('r1'), column: 'n', input: { text: '10' } }, { key: k('r2'), column: 'q', input: { text: '20' } }], { origin: 'paste' });
     expect(t.list()).toEqual(['r1/n:1→10', 'r2/q:74→20']);
     expect(t.held).toEqual([]);

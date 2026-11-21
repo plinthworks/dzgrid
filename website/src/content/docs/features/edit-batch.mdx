@@ -11,11 +11,16 @@ The changes kept in the grid until you save them together, given in `features` b
 
 ## What it does
 
-With `editBatch()` in `features`, every gesture — a field kept, a yes/no toggled, Delete, a paste, a fill, an undo, a
-row kept with [`rowEditor`](../row-editor/) — is checked as usual and shown at once, but nothing is sent: the cell is
+With `editBatch()` in `features`, every gesture — a field kept, a yes/no toggled, Delete, an undo, a row kept with
+[`rowEditor`](../row-editor/) — is checked as usual and shown at once, but nothing is sent: the cell is
 **pending**. It carries a triangle in its inline-start top corner and a light tint (`--dzg-pending-mark`,
 `--dzg-pending-bg`, in `@dzgrid/theme/forms.css`) and screen readers hear « Not saved ». A cell changed twice is one
 change; brought back to its saved value, it is no longer pending.
+
+A paste (or a cut) and a fill (the handle, Ctrl+D / Ctrl+R) are **saved at once** by default, as without the batch: one
+request each (`origin: 'paste'`, `'cut'`, `'fill'`), nothing pending, no « Save all » to show. Over a pending cell the
+saved value wins: the request carries it, the cell's pending change is dropped and screen readers hear « 1 change
+discarded ». The options below keep them pending instead.
 
 `batch.api(grid)` gives:
 
@@ -36,6 +41,9 @@ leaving; the grid never opens a dialog itself.
 
 - `validateRow`: a rule over each row with pending changes, `(values, row, context) => { column, code } | list | null`,
   checked before `saveAll()` sends; its code is worded by your `validation.<code>` text.
+- `paste: 'save' | 'pending'` (default `'save'`): a paste or a cut saved at once, or kept pending (one gesture, one
+  undo).
+- `fill: 'save' | 'pending'` (default `'save'`): the same for a fill.
 
 ## Example
 

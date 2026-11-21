@@ -17,7 +17,10 @@
  * - row: F2 opens every editable cell (its yes/no a checkbox), the row outlined, Tab / Shift+Tab move in reading order
  *   (right to left in Arabic), Escape gives it up, Enter keeps it as one request (origin row), a refused field stays;
  * - search: typing asks after the pause, the list under the field (never over it), Down and Enter keep the option,
- *   « Aucun résultat » for nothing found.
+ *   « Aucun résultat » for nothing found;
+ * - bulk (`?mode=bulk`, light only; edit-batch.md 11): beside the batch, a paste over a pending cell and a real drag of
+ *   the fill handle are each saved at once (one request, nothing pending, no mark, the paste's `previous` the saved
+ *   value); with `&keep` (`paste` / `fill: 'pending'`) they stay pending and nothing is sent.
  */
 import { browser } from '../spikes/kit.mjs';
 
@@ -149,7 +152,26 @@ const focusCell = async (page, row, col) => {
   await page.locator(cellSel(row, col)).click();
   await frames(page);
 };
-for (const name of engines.filter(() => ['batch', 'row', 'search'].some(wants))) {
+// A paste as the browsers send it, its data readable (Firefox ignores a synthetic ClipboardEvent's data, clipboard S7 5).
+const paste = (page, text) => page.evaluate((text) => {
+  const e = new Event('paste', { bubbles: true, cancelable: true });
+  Object.defineProperty(e, 'clipboardData', { value: { getData: (f) => (f === 'text/plain' ? text : ''), types: ['text/plain'] } });
+  document.activeElement.dispatchEvent(e);
+}, text);
+const center = async (page, row, col) => page.evaluate((sel) => { const r = document.querySelector(sel).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, cellSel(row, col));
+/** A real drag of the fill handle from the focused cell to `row`/`col`. */
+const dragFill = async (page, row, col, ar) => {
+  const p = await page.evaluate(() => { const r = document.querySelector('.dzg-fill').getBoundingClientRect(); return { x: r.right - 3, y: r.bottom - 3, l: r.left + 3 }; });
+  const t = await center(page, row, col);
+  await page.mouse.move(ar ? p.l : p.x, p.y);
+  await page.mouse.down();
+  await page.mouse.move(t.x, t.y, { steps: 8 });
+  await frames(page, 2);
+  await page.mouse.up();
+  await frames(page, 2);
+};
+const bulkFacts = (page) => page.evaluate(() => ({ saves: window.saves.map((s) => `${s.origin}:${s.changes.length}`), count: window.batch().count, marks: document.querySelectorAll('.dzg-cell--unsaved').length }));
+for (const name of engines.filter(() => ['batch', 'row', 'search', 'bulk'].some(wants))) {
   const B = await browser(name);
   try {
     for (const lang of ['fr', 'ar']) {
@@ -191,6 +213,40 @@ for (const name of engines.filter(() => ['batch', 'row', 'search'].some(wants)))
             await frames(page);
             const after = await page.evaluate((sel) => ({ saves: window.saves.map((s) => `${s.origin}:${s.changes.length}`), marks: document.querySelectorAll('.dzg-cell--unsaved').length }), cellSel(2, 'qty'));
             check(`${tag} batch: saveAll sends one request with both, the marks go`, res.sent === 2 && after.saves.join() === 'batch:2' && after.marks === 0, JSON.stringify({ res, after }));
+          }
+
+          if (wants('bulk') && !dark) {
+            const ar = lang === 'ar';
+            await open(page, 'bulk', lang, dark);
+            await focusCell(page, 1, 'qty');
+            await page.keyboard.press('F2');
+            await page.keyboard.press(`${MOD(name)}+A`);
+            await page.keyboard.type('42');
+            await page.keyboard.press('Enter');
+            await frames(page);
+            const k0 = await bulkFacts(page);
+            await focusCell(page, 1, 'qty');
+            await paste(page, '7');
+            await frames(page);
+            const k1 = await page.evaluate((sel) => ({ prev: window.saves[0]?.changes[0]?.previous, text: document.querySelector(sel).textContent }), cellSel(1, 'qty'));
+            const p1 = await bulkFacts(page);
+            check(`${tag} bulk: a paste over a pending cell saved at once (previous the saved value), nothing pending, no mark`, k0.count === 1 && p1.saves.join() === 'paste:1' && p1.count === 0 && p1.marks === 0 && k1.prev === 3 && k1.text.includes('7'), JSON.stringify({ k0, p1, k1 }));
+            await focusCell(page, 2, 'qty');
+            await dragFill(page, 4, 'qty', ar);
+            const f1 = await bulkFacts(page);
+            check(`${tag} bulk: a real drag of the fill handle saved at once, one request, nothing pending`, f1.saves.join() === 'paste:1,fill:2' && f1.count === 0 && f1.marks === 0, JSON.stringify(f1));
+
+            await page.goto(`${base}/v1-15-forms.html?mode=bulk&keep${ar ? '&lang=ar' : ''}`);
+            await page.waitForSelector(cellSel(1, 'qty'));
+            await frames(page);
+            await focusCell(page, 1, 'qty');
+            await paste(page, '7');
+            await frames(page);
+            const p2 = await bulkFacts(page);
+            await focusCell(page, 2, 'qty');
+            await dragFill(page, 4, 'qty', ar);
+            const f2 = await bulkFacts(page);
+            check(`${tag} bulk keep: the paste and the fill pending, nothing sent, marked`, p2.saves.length === 0 && p2.count === 1 && p2.marks === 1 && f2.saves.length === 0 && f2.count === 3 && f2.marks === 3, JSON.stringify({ p2, f2 }));
           }
 
           if (wants('row')) {

@@ -3483,6 +3483,24 @@
           "doc": "A rule over each row with pending changes, checked before `saveAll()` sends (edit-batch.md 6, edit-row.md 9).",
           "default": null,
           "source": "packages/dom/src/edit-batch/index.ts"
+        },
+        {
+          "name": "paste",
+          "type": "'save' | 'pending'",
+          "resolved": null,
+          "required": false,
+          "doc": "A paste or a cut (edit-batch.md 11): `'save'` (default) saved at once, one request, as without the batch; `'pending'` kept.",
+          "default": null,
+          "source": "packages/dom/src/edit-batch/index.ts"
+        },
+        {
+          "name": "fill",
+          "type": "'save' | 'pending'",
+          "resolved": null,
+          "required": false,
+          "doc": "A fill — the handle, Ctrl+D / Ctrl+R, the fill's API (edit-batch.md 11): `'save'` (default) saved at once; `'pending'` kept.",
+          "default": null,
+          "source": "packages/dom/src/edit-batch/index.ts"
         }
       ],
       "texts": {
