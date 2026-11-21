@@ -15,12 +15,15 @@
   "@dzgrid/core/state": "/packages/core/src/state.ts",
   "@dzgrid/core/server": "/packages/core/src/server.ts",
   "@dzgrid/core/server-side": "/packages/core/src/server-side.ts",
+  "@dzgrid/core/edit": "/packages/core/src/edit.ts",
   "@dzgrid/dom": "/packages/dom/src/index.ts",
   "@dzgrid/dom/internal": "/packages/dom/src/internal.ts"
 } }</script>
 <link rel="stylesheet" href="/packages/theme/dzgrid.css">
 <link rel="stylesheet" href="/packages/theme/grouping.css">
 <link rel="stylesheet" href="/packages/theme/pivot.css">
+<link rel="stylesheet" href="/packages/theme/edit.css">
+<link rel="stylesheet" href="/packages/theme/forms.css">
 <style>
   body { margin: 16px; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); color-scheme: var(--tz-color-scheme, light dark); }
   section { inline-size: min(1000px, 100%); margin-block-end: 24px; }
@@ -32,6 +35,7 @@
   <h1>DzGrid</h1>
   <section><h2 id="tree-title"></h2><dz-grid id="tree" density="compact"></dz-grid></section>
   <section><h2 id="pivot-title"></h2><dz-grid id="pivot" row-height="36"></dz-grid></section>
+  <section><h2 id="form-title"></h2><dz-grid id="form" header-height="44" focus-visible="keyboard"></dz-grid></section>
 </main>
 <script type="module" src="./element.ts"></script>
 </body>

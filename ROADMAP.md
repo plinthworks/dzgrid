@@ -1477,6 +1477,10 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
 - [x] `sortMark: 'always'` (presentation-settings.md 49): the sort mark kept unsorted, a named button beside a header
   part — the owner's app's last patch on `.dzg-*` classes retired. Tests by hand (dom 14, theme 8), browsers 38 / 38
   (Chrome, Firefox, WebKit; fr, ar). K.8 92 814 / 93 000.
+- [x] `<dz-grid>` in Firefox and WebKit (Phase 11 L7's open check): `npm run test:element` runs Chrome, Firefox and
+  WebKit, 81 / 81 — the tree and pivot pages plus a form (a cell part, `header-height`, live properties,
+  `focus-visible`, `editBatch()`'s `dzg-pending-change`, `headers="none"`) and a framework smoke page from the built
+  packages. No defect, no engine quirk. A React / Vue page left.
 - For the owner: the full verification (gate, real app, release:check), then publish.
 
 ## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)

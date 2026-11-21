@@ -16,7 +16,7 @@ termes génériques, jamais citée) ; la mémoire du propriétaire.
 4. Le site est complet et **gardé par des tests** : chaque réglage (39), option de colonne (48) et fonction (53 pages) a sa page en/fr (`website/test/options.test.ts`) ; l'API de référence est générée depuis `api/*.api.txt`.
 5. **Incohérences trouvées** : la base d'API du cœur n'a pas `xlsx: { title, subtitle, footer }` ni `XlsxText` (1.14.0) → la page API du site non plus ; README avec des tailles d'octobre (84 912 / 94 609) ; `ARCHITECTURE.md` K.8 « ≤ 92 kB » (ligne à 93 000) et K.7 Angular `^19‖^20‖^21` (pairs réels jusqu'à `^22`) ; 7 fiches de comportement qu'aucun test ne cite.
 6. **Taille** : K.8 92 611 / 93 000 — 389 o (0,4 %) de marge : la prochaine lecture d'un réglage dans la base y touche ; relever la ligne est une décision du propriétaire (déjà 85 → 90 → 91 → 92 → 93 k).
-7. **Vérifications ouvertes** (depuis la phase 11) : écoute au lecteur d'écran (L4c, jamais faite : `docs/a11y/acr-wcag22.md` « draft »), `<dz-grid>` dans Firefox / WebKit (`scripts/browser-element.mjs` Chrome seul), deux écarts 4× acceptés ou non, deuxième journée du banc.
+7. **Vérifications ouvertes** (depuis la phase 11) : écoute au lecteur d'écran (L4c, jamais faite : `docs/a11y/acr-wcag22.md` « draft »), `<dz-grid>` dans Firefox / WebKit (fait le 2026-11-21 : `scripts/browser-element.mjs` dans les trois moteurs), deux écarts 4× acceptés ou non, deuxième journée du banc.
 8. **DzTooltip 1.0.0** : 35 / 35 à l'audit Floating UI, 20 fichiers de tests, matrice navigateurs lancée ; pas de budget de taille, pas de base d'API (`check:api`), pas de site, un seul fichier de test Angular, les contrôles navigateur de la fixture Angular en attente.
 9. **La migration** : 199 OK dans Chrome le 2026-11-19, une rustine restante (la marque de tri d'un en-tête à filtre) ; huit bouchons à remplacer par les vraies pièces de l'appli ; jamais compilée dans la vraie appli.
 10. **Prochaine décision** : l'édition formulaire (Q-G1/Q-G2 du gap, sans réponse) ou ce que tu as dit « après » (sparklines, maître / détail dans Excel) — questions à la fin.
@@ -151,7 +151,7 @@ sous `website/src/content/docs/` ; ✅ complet · 🟡 partiel (dit).
 |---|---|---|---|---|
 | `<dz-grid>` Angular 19–22, signaux, une sortie par événement, `[features]`, gabarits de cellule | `@dzgrid/angular` (pairs `^19‖^20‖^21‖^22`, `packages/angular/package.json`) | angular (58 fichiers), `parity.test.ts`, `packages/angular/browser/run.mjs` | `getting-started/angular`, `api/angular` | ✅ |
 | Détail Angular imbriqué avec flèches et défilement du maître | `dzgNested`, `dzgNestedArrows`, `dzgNestedInlineScroll` | angular `detail-nested-arrows` | `features/nested-grid` | ✅ |
-| Élément `<dz-grid>` sans framework | `@dzgrid/element` (1 750 o) | element (2 fichiers), `scripts/browser-element.mjs` | `getting-started/web-component` | 🟡 Chrome seul (script : `browser('chrome')`) |
+| Élément `<dz-grid>` sans framework | `@dzgrid/element` (1 750 o) | element (2 fichiers), `scripts/browser-element.mjs` | `getting-started/web-component` | ✅ Chrome, Firefox, WebKit (2026-11-21 : `npm run test:element`, 81 / 81, page témoin sans framework comprise) |
 | React / Vue | — | — | — | 🟡 l'élément suffit ; pas d'enveloppe |
 
 ### DzGrid — docs, site, qualité
@@ -193,7 +193,7 @@ sous `website/src/content/docs/` ; ✅ complet · 🟡 partiel (dit).
 | 6 | STATUS (2026-11-14) : DzTooltip `scripts/browser.mjs` « câblé, pas encore lancé » | Lancé depuis le 2026-11-16 (sections 12–14) ; mais les contrôles de la fixture Angular (section 11b) attendent toujours une fixture propre à DzTooltip | DzTooltip `scripts/browser.mjs` en-tête ; `CHANGELOG.md` 1.0.0 | S (STATUS) / M (fixture) |
 | 7 | STATUS tête : « étiquette v1.14.0 à poser » | Toujours absente, en local et sur `origin` | `git tag -l`, `git ls-remote --tags origin` (dernière : v1.13.0) | S (propriétaire) |
 | 8 | DzTooltip CHANGELOG : « No size budgets yet » ; CLAUDE.md « sizes measured, never asserted » | Aucun `size-budget.json`, aucun `check:size`, aucun `api/*.api.txt` ni `check:api` : une régression de taille ou d'API passerait | `ls /Users/nadou/Dev/dztooltip/*.json` ; `scripts/` sans `size.mjs` ni `api.mjs` | M |
-| 9 | Gap §14 : React / Vue « page React / Vue restent à faire » ; ROADMAP L7 « Firefox, WebKit and a React / Vue page left » | Rien depuis : `browser-element.mjs` ouvre Chrome seul | `scripts/browser-element.mjs` l. 22 | S–M |
+| 9 | Gap §14 : React / Vue « page React / Vue restent à faire » ; ROADMAP L7 « Firefox, WebKit and a React / Vue page left » | Firefox / WebKit fait le 2026-11-21 (les trois moteurs, page témoin `smoke.html` sans framework) ; reste une page React / Vue | `scripts/browser-element.mjs` l. 22 | S–M |
 | 10 | `docs/a11y/acr-wcag22.md` : « 1.8.0 in preparation », « draft », « no screen-reader listening » | Jamais mis à jour depuis (1.14.0 publiée) ; l'écoute (L4c) n'a pas eu lieu | en-tête du fichier ; `spikes/s4-a11y/results/` sans `manual-*.md` | S (version) / propriétaire (écoute) |
 | 11 | `docs/inventory.md` (comparaison phase 3) | Dépassé — le gap de novembre le dit lui-même | `docs/gap-aggrid-2026-11.md` l. 11 | S (bandeau « dépassé » ou suppression) |
 | 12 | Matrices navigateurs 1.12 / 1.13 / 1.14 | Les pages qu'elles ouvrent (`playground/v1-12-1.html`, `v1-13.html`, `v1-14.html`) sont hors git (règle des démos) : la matrice n'est pas rejouable depuis un clone ; seules `v1-14.*` restent sur le disque | `git ls-files playground \| grep v1-` : rien ; `ls playground` : `v1-14.*` seulement | décision (les pages sont-elles des démos du propriétaire ?) |
@@ -218,7 +218,7 @@ grep sans résultat dans `website/src/content/docs`) ; « Unreleased » traînan
 | 7 | **Sparklines** (part SVG à nous) et **maître / détail dans Excel** | moyenne | M + M | gap n° 7, 9 ; propriétaire « le reste on le fera après » (STATUS tête) |
 | 8 | **Sélection en cascade sur l'arbre** | moyenne | S | gap §5 |
 | 9 | **Set filter en arbre pour les dates** (année › mois › jour) | moyenne | M | gap n° 8 |
-| 10 | **`<dz-grid>` dans Firefox et WebKit** (+ une page React / Vue) | moyenne (adoption) | S–M | ROADMAP L7, §2-9 |
+| 10 | **`<dz-grid>` dans Firefox et WebKit** ✅ 2026-11-21 (+ une page React / Vue, reste) | moyenne (adoption) | S–M | ROADMAP L7, §2-9 |
 | 11 | **Écoute au lecteur d'écran** (4 passages × 45 min, `docs/a11y/parcours-essentiel.md`) puis ACR relu | haute pour qui vend l'accessibilité | M (temps du propriétaire) | ROADMAP L4c ; mémoire |
 | 12 | **DzTooltip** : budgets de taille + base d'API + fixture Angular pour les contrôles navigateur ; tests Angular plus épais | moyenne | S + S + M | §2-6, 8 ; `packages/angular/test` : 1 fichier |
 | 13 | **Marge K.8** : 389 o. Ce que ça veut dire : toute lecture d'un nouveau réglage **dans la base** (`@dzgrid/dom`, `@dzgrid/core`, le thème de base, le paquet Angular) coûte 50–500 o gz ; une fonction à part (nouvelle entrée) ne compte pas tant que le profil audit ne la charge pas. Prochaine base-level : soit un golf, soit une décision « 93 → 94 k » | — | décision | `size-budget.json` ; mémoire (« raising limits without the owner » : non) |

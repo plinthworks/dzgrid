@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DzGrid: the Web Component from the built packages</title>
+<!-- The « framework smoke page » (1.15.0, scripts/browser-element.mjs): no framework, no bundler, no TypeScript — the
+     built packages (`npm run build`, packages/*/dist) as a page would load them from a CDN, one import map. -->
+<script type="importmap">{ "imports": {
+  "@dzgrid/core": "/packages/core/dist/index.js",
+  "@dzgrid/core/internal": "/packages/core/dist/internal.js",
+  "@dzgrid/dom": "/packages/dom/dist/index.js",
+  "@dzgrid/dom/internal": "/packages/dom/dist/internal.js",
+  "@dzgrid/dom/locales/en": "/packages/dom/dist/locales/en.js",
+  "@dzgrid/element/define": "/packages/element/dist/define.js"
+} }</script>
+<link rel="stylesheet" href="/packages/theme/dzgrid.css">
+<style>
+  body { margin: 16px; font: 14px system-ui, sans-serif; background: var(--tz-bg); color: var(--tz-fg); }
+  dz-grid > .dzg { block-size: 300px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Fruit</h1>
+  <dz-grid id="g" label="Fruit" density="compact"></dz-grid>
+</main>
+<script type="module">
+  import '@dzgrid/element/define';
+  import { EN } from '@dzgrid/dom/locales/en';
+  const el = document.getElementById('g');
+  window.heard = [];
+  for (const type of ['dzg-ready', 'dzg-sort-changed', 'dzg-problems']) el.addEventListener(type, () => window.heard.push(type));
+  el.columns = [{ id: 'name', header: 'Name', width: 200 }, { id: 'kg', header: 'Kilograms', type: 'number', width: 140 }];
+  el.getRowId = (r) => r.id;
+  el.messages = EN;
+  el.rows = ['Apple', 'Pear', 'Plum', 'Fig', 'Quince'].map((name, i) => ({ id: `f${i}`, name, kg: (i * 7) % 5 + 1 }));
+  el.ready.then(() => (window.ready = true));
+</script>
+</body>
+</html>
