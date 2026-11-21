@@ -15,6 +15,7 @@
 # history: owner 2026-11-19 « AA »: rowHeight accepts a function (1.14.0); headers 'none' and focusVisible as published in 1.13.0 — @dzgrid/angular#DzGrid
 # history: 1.14.0 published
 # history: owner 2026-11-21 « on le garde »: the 1.15.0 entries edit-batch, editors-row, editors-search; Angular (pendingChange) — @dzgrid/angular#DzGrid
+# history: owner 2026-11-21 « on le garde »: DzgController.batch() (1.15.0 batch editing) — @dzgrid/angular#DzgController
 
 @ @dzgrid/angular
 ## DZGRID_ANGULAR_VERSION
@@ -742,6 +743,7 @@
       clearFilters(): boolean;
       resetState(): Problem[] | null;
       edit(): EditApi<T> | null;
+      batch(): EditBatchApi<T> | null;
       range(): RangeApi | null;
       fill(): FillApi | null;
       grouping(): GroupingApi | null;

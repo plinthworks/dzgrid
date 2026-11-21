@@ -792,6 +792,7 @@ declare class DzgController<T = unknown> {
     clearFilters(): boolean;
     resetState(): Problem[] | null;
     edit(): EditApi<T> | null;
+    batch(): EditBatchApi<T> | null;
     range(): RangeApi | null;
     fill(): FillApi | null;
     grouping(): GroupingApi | null;
