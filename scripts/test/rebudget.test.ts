@@ -479,6 +479,13 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
     expect(() => sizeBudget(94001, ceilingFor('profile: audit screen (K.8)'))).toThrow(/ceiling/); // owner 2026-11-21 (« tu peux augmenter la taille s'il le faut »): K.8 93 000 → 94 000 (measured 93 063: the 'sparkline' type in the core); owner 2026-11-16 (« A, monte à 93 000 »): K.8 93 000 (the owner's app's patches as options, measured 92 378); owner 2026-11-13 (« tu peux augmenter »): K.8 92 000 (the header fix of the five corrections in the base, measured 91 037); owner 2026-11-10 (« augmente la limite »): K.8 91 000; owner step 16: past 90 000
   });
 
+  it('1.16.0, master / detail in Excel (owner 2026-11-21 « A pour Excel », beyond +2 %): @dzgrid/core/xlsx 7 350 → 7 650', () => {
+    expect(ceilingFor('@dzgrid/core/xlsx')).toBe(7650); // owner 2026-11-21: measured 7 616, the details' seam in the writer
+    const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, { maxGzip: number | null }> }).entries;
+    expect(e['@dzgrid/core/xlsx']?.maxGzip).toBe(7650); // owner 2026-11-21 « A pour Excel »
+    expect(() => sizeBudget(7651, ceilingFor('@dzgrid/core/xlsx'))).toThrow(/ceiling/); // the owner's line is a ceiling
+  });
+
   it('Phase 6 step 9, owner Q9-5 / Q9-6: dom/tree 3 850 (the sticky copies capped in pixels), dom/pinned-rows 2 200 (compression alone)', () => {
     expect(ceilingFor('@dzgrid/dom/tree')).toBe(4250); // 1.9.0 presentation settings (+2 %): 4 250; Phase 9 (Q-CM4, +2 % rule): 4 200; owner step 14/15 (2026-10-29): 3 850 → 3 950; « étape 7 » (owner 2026-11-01): 4 080
     const e = (JSON.parse(readFileSync(new URL('../../size-budget.json', import.meta.url), 'utf8')) as { entries: Record<string, { maxGzip: number | null }> }).entries;

@@ -91,6 +91,19 @@ describe('the drawing (sparklines.md 3–5)', () => {
     }
   });
 
+  it('a huge list (300 000 points) draws and sums up without throwing (review 1.16.0: a spread past the engine\'s argument limit)', () => {
+    const big = Array.from({ length: 300_000 }, (_, i) => i % 7);
+    const t = make({ rows: [{ id: 'h', t: big }], col: { sparkline: { markers: 'minmax' } } });
+    expect(t.cell('h').textContent).toBe('300,000 values, from 0 to 6, last 0'); // 299 999 % 7 = 0
+    expect(t.svg('h')!.children.length).toBe(3); // the line, the smallest's dot, the largest's dot
+  });
+
+  it('values at the ends of the number range: no NaN in the drawing (review 1.16.0: hi - lo overflowed to Infinity)', () => {
+    const t = make({ rows: [{ id: 'x', t: [-1e308, 0, 1e308] }] });
+    // -1e308 → 92, 0 → the middle 50, 1e308 → 8; x 3, 50, 97.
+    expect(t.shapes('x')).toEqual(['dzg-spark-line:M3 92L50 50L97 8', 'dzg-spark-dot:M97 8h0']);
+  });
+
   it('area: the line over a fill down to zero (the bottom when all are above it)', () => {
     const t = make({ col: { sparkline: { kind: 'area', markers: 'none' } } });
     expect(t.shapes('a')).toEqual(['dzg-spark-area:M3 92L3 92L34.33 87.58L65.67 8L97 38.95L97 92Z', 'dzg-spark-line:M3 92L34.33 87.58L65.67 8L97 38.95']);
@@ -223,6 +236,19 @@ describe('tooltips (8, 9)', () => {
     expect(t.tip.hidden).toBe(false);
     expect(t.tip.textContent).toBe('4 values, from 3 to 41, last 27');
     expect(t.cell('a').getAttribute('aria-describedby') ?? '').not.toContain(t.tip.id);
+  });
+});
+
+describe('print (12, review 1.16.0)', () => {
+  it('the printed table carries the numbers between spaces, never the summary or a drawing', async () => {
+    vi.useRealTimers(); // preparePrint gives the main thread back between slices
+    const { preparePrint } = await import('../src/print.js');
+    const { EN_PRINT } = await import('../src/locales/en-print.js');
+    const t = make({ settings: { messages: { ...TEXTS.en, text: { ...TEXTS.en.text, ...EN_PRINT.text } } } });
+    await preparePrint(t.g);
+    const tr = [...document.querySelectorAll<HTMLTableRowElement>('body > .dzg-print tbody tr')];
+    expect(tr.slice(0, 3).map((r) => r.cells[1]!.textContent)).toEqual(['3 5 41 27', '10  20', '-2 0 4']);
+    expect(document.querySelector('body > .dzg-print svg')).toBeNull();
   });
 });
 

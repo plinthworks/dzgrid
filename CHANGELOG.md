@@ -5,10 +5,15 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased — 1.16.0
+## [1.16.0] - 2026-11-21
 
 Sparklines, master / detail in Excel and a tree's cascading ticks (owner 2026-11-21, « commence par les mini-courbes
-et le reste »). A minor: additions, nothing removed; every default unchanged.
+et le reste »; « A pour Excel, prépare la 1.16 »). A minor: additions, nothing removed; every default unchanged.
+
+**Already in 1.15.0's files.** The three entries below (`@dzgrid/dom/sparkline`, `@dzgrid/core/xlsx-detail` with the
+`xlsx.detail` options, `@dzgrid/dom/tree-select`) were built into the 1.15.0 packages published on 2026-11-21, before
+their review and without a word here. 1.16.0 is their official release: documented, reviewed, with the fixes listed
+under « Fixed ». An application that already imports them from 1.15.0 changes nothing but its version.
 
 ### Added
 - **Sparklines** (`type: 'sparkline'`, `sparklines()` of `@dzgrid/dom/sparkline`, opt-in; sparklines.md): a column
@@ -57,8 +62,21 @@ et le reste »). A minor: additions, nothing removed; every default unchanged.
   2 350, `-sparkline` texts 200 / 200 / 300, `sparkline.css` 550.
 - Master / detail in Excel: new lines `core/xlsx-detail` 600, the export's `xlsx detail` chunk 850; +2 %:
   `dom/detail` 4 360 → 4 440, the export run chunk 5 550 → 5 640. **For the owner**: `@dzgrid/core/xlsx` measures
-  7 616 over its 7 350 line (+3.6 %, beyond +2 %: the details' seam in the writer).
+  7 350 → 7 650 (owner 2026-11-21, « A pour Excel », beyond +2 %; measured 7 616: the details' seam in the writer).
 - Cascading ticks: the new line `dom/tree-select` 1 050.
+- The real Angular build (`example:bytes`) 104 000 → 104 200 by the +2 % rule (measured 104 189); K.8 93 073 / 94 000.
+
+### Fixed (independent review; these were in 1.15.0's files)
+- Sparklines: a very long list (300 000 points) drew nothing and its summary stayed empty — its smallest and largest
+  were found with a spread past the engine's argument limit, which threw; now found by a loop.
+- Sparklines: values at the ends of the number range (±1e308) gave a drawing with `NaN` coordinates (`max - min`
+  overflowed to Infinity), so nothing showed; the range is now scaled by halves.
+
+### Upgrading from 1.15.0
+- Nothing to change; every addition is opt-in. **`ColumnType` gains `'sparkline'`**: an exhaustive `switch` over a
+  column's `type` needs a case for it. `ColumnDef` gains the optional `sparkline`; `XlsxOptions` the optional
+  `detail`, `detailRows`, `detailColumns`; `XlsxInput` the optional `expanded`, `details`; `XlsxSummary` the optional
+  `details`.
 
 ## [1.15.0] - 2026-11-21
 

@@ -1489,7 +1489,10 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
 - [x] Full verification: see `docs/release-1.15.0.md` « Vérifié ».
 - For the owner: publish (`docs/release-1.15.0.md`).
 
-## 1.16.0 — minor, in preparation on `next` (2026-11-21; owner « commence par les mini-courbes et le reste »)
+## 1.16.0 — minor, prepared on `next` (2026-11-21; owner « commence par les mini-courbes et le reste », then « A pour Excel, prépare la 1.16 »)
+
+The three entries below were already in the 1.15.0 packages (published 2026-11-21 from a tree on `next`), before
+their review and undocumented; 1.16.0 is their official release.
 
 - [x] Sparklines (sparklines.md): `type: 'sparkline'` (a list of numbers; its codec in the core: sorted by the last value,
   files and clipboard the numbers between spaces) drawn by `sparklines()` of `@dzgrid/dom/sparkline` — line, area,
@@ -1502,11 +1505,15 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
 - [x] Master / detail in Excel (xlsx-export.md 12–19): `xlsx: { detail: 'expanded' | 'all', detailRows, detailColumns }`,
   a `nestedGrid`'s rows by default, a server's promises awaited one by one (progress, cancel; a rejection fails); blocks
   one column in, one outline level down; CSV unchanged. `@dzgrid/core/xlsx-detail`, a lazy DOM chunk. Tests by hand
-  (core 9, dom 7); browsers 132 / 132 (`--only xlsx`). `@dzgrid/core/xlsx` 7 616 over its 7 350 line (+3.6 %): the
-  owner's decision.
+  (core 9, dom 7); browsers 132 / 132 (`--only xlsx`). `@dzgrid/core/xlsx` 7 350 → 7 650 (owner 2026-11-21 « A pour
+  Excel », measured 7 616).
 - [x] Cascading ticks in a tree, `treeSelect()` (tree-selection.md « Cascading ticks » 1–6): a branch ticked by a box or
   Space, the rows above following, a parent's box tri-state; lazy children arrive ticked under a ticked parent. Tests by
   hand (dom 10); browsers 84 / 84 (`--only tree`). New line `dom/tree-select` 1 050.
+- [x] Independent review: two sparkline defects fixed, tests first (a 300 000-point list threw in a spread; ±1e308
+  drew `NaN`; sparklines.md 16); tests added: print of a sparkline, loaded children under a closed parent ticked.
+- [x] Full verification: see `docs/release-1.16.0.md` « Vérifié ».
+- For the owner: publish (`docs/release-1.16.0.md`).
 
 ## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)
 

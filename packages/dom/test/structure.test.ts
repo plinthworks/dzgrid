@@ -229,7 +229,9 @@ describe('the DOM layer’s shape', () => {
     expect(offenders).toEqual([]);
     // Nothing else imports it, nor the core's tree entry: a flat grid carries none of it (the lazy entry, step 7, only its own file).
     // Grouping (Phase 7 step 5) shares the tree's pure pinned-rows stack and its chevron styles, nothing else (checked below).
-    expect(files(SRC).filter((f) => !/^tree(\/|\.ts$)/.test(relative(SRC, f)) && relative(SRC, f) !== 'tree-lazy.ts' && relative(SRC, f) !== 'grouping/index.ts' && /from '(\.{1,2}\/(?:.*\/)?tree(\/|\.js')|@dzgrid\/core\/tree')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
+    expect(files(SRC).filter((f) => !/^tree(\/|\.ts$)/.test(relative(SRC, f)) && relative(SRC, f) !== 'tree-lazy.ts' && relative(SRC, f) !== 'grouping/index.ts' && relative(SRC, f) !== 'tree-select/index.ts' && /from '(\.{1,2}\/(?:.*\/)?tree(\/|\.js')|@dzgrid\/core\/tree')/.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
+    // 1.16.0: treeSelect() names the core tree's `TreeRows` type only, never its code.
+    expect([...readFileSync(join(SRC, 'tree-select/index.ts'), 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => m[1])).toEqual(['@dzgrid/core', '@dzgrid/core/internal']);
     // Lazy children (step 7): the tree names their type only; the lazy entry is its file and nothing else.
     expect(/from '\.\/lazy\.js'/.test(readFileSync(join(SRC, 'tree/index.ts'), 'utf8').replace(/^import type .*$/gm, ''))).toBe(false);
     expect([...readFileSync(join(SRC, 'tree-lazy.ts'), 'utf8').matchAll(/^(?:import|export) (?!type )[^;]*from '([^']+)'/gm)].map((m) => m[1])).toEqual(['./tree/lazy.js']);
@@ -337,15 +339,19 @@ describe('the DOM layer’s shape', () => {
     expect(offenders).toEqual([]);
     const dynamic = chunk.flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/import\('([^']+)'\)/g)].map((m) => m[1]));
     // Phase 9: the Excel chunk, by import() only, so a CSV export never downloads it; 1.9.0: the JSON chunk likewise.
-    expect(dynamic.sort()).toEqual(['../json/index.js', '../xlsx/index.js', '@dzgrid/core/server', '@dzgrid/core/spans']);
+    expect(dynamic.sort()).toEqual(['../json/index.js', '../xlsx/detail.js', '../xlsx/index.js', '@dzgrid/core/server', '@dzgrid/core/spans']); // 1.16.0: the masters' details, only with xlsx.detail
     // The JSON chunk (json-export.md): the run chunk's slices only, nothing of the base.
     const js = files(join(SRC, 'export/json'));
     expect(js.map((f) => relative(SRC, f))).toEqual(['export/json/index.ts']);
     expect(js.flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^import (?!type )[^;]*from '([^']+)'/gm)].map((m) => m[1]))).toEqual(['../run/slice.js']);
     // The Excel chunk: the xlsx entry and the run chunk's slices only; the core's xlsx entry nowhere else.
     const xl = files(join(SRC, 'export/xlsx'));
-    expect(xl.map((f) => relative(SRC, f))).toEqual(['export/xlsx/index.ts']);
-    expect(xl.flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/^import (?!type )[^;]*from '([^']+)'/gm)].map((m) => m[1]))).toEqual(['@dzgrid/core/xlsx', '../run/slice.js']);
+    expect(xl.map((f) => relative(SRC, f)).sort()).toEqual(['export/xlsx/detail.ts', 'export/xlsx/index.ts']); // 1.16.0: the masters' details, a chunk of their own
+    const xi = (f: string) => [...readFileSync(join(SRC, f), 'utf8').matchAll(/^import (?!type )[^;]*from '([^']+)'/gm)].map((m) => m[1]);
+    expect(xi('export/xlsx/index.ts')).toEqual(['@dzgrid/core/xlsx', '../run/slice.js']);
+    // The details' chunk: the core, and the core's details writer by import() only (never the xlsx writer itself).
+    expect(xi('export/xlsx/detail.ts')).toEqual(['@dzgrid/core']);
+    expect([...readFileSync(join(SRC, 'export/xlsx/detail.ts'), 'utf8').matchAll(/import\('([^']+)'\)/g)].map((m) => m[1])).toEqual(['@dzgrid/core/xlsx-detail']);
     expect(files(SRC).filter((f) => !/^export\/xlsx\//.test(relative(SRC, f)) && /^import (?!type )[^;]*from '@dzgrid\/core\/xlsx'/m.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);
     // The base never reaches the csv entry; only the export chunk does.
     expect(files(SRC).filter((f) => !/^export\/run\//.test(relative(SRC, f)) && /^import (?!type )[^;]*from '@dzgrid\/core\/csv'/m.test(readFileSync(f, 'utf8'))).map((f) => relative(SRC, f))).toEqual([]);

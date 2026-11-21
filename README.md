@@ -20,7 +20,7 @@ A data grid written from scratch in TypeScript, for applications where right-to-
 - **Server data without surprises.** A request gate guarantees that only the answer to the last request of the current query is shown, whatever order answers arrive in. Pages, cursors, unknown totals, retry and errors are part of the model.
 - **Cells spanning rows and columns**, like an HTML table's `rowspan` and `colspan`: merged identical values, spans decided by the data, grouped headers, full-width rows.
 - **Problems are values.** A bad column, filter or server answer is reported as a structured problem — never a silent failure, never a crash.
-- **Small.** Every entry has a size budget (`npm run check:size`); what a grid does not use, it does not load: each feature is its own entry, and the heavy parts (date pickers, the value list, the export run, motion) load on first use. The audit screen's whole first load — core, server, DOM, filters, paging, export, theme, Angular wrapper, one language — is 92 611 B gzipped (guard 93 000); in a real Angular 21 build (`ng build`, `npm run example:bytes`), DzGrid's share of the audit screen's first load is 103 734 B (ceiling 103 800, owner decision; the editable « stock » screen loads apart).
+- **Small.** Every entry has a size budget (`npm run check:size`); what a grid does not use, it does not load: each feature is its own entry, and the heavy parts (date pickers, the value list, the export run, motion) load on first use. The audit screen's whole first load — core, server, DOM, filters, paging, export, theme, Angular wrapper, one language — is 93 073 B gzipped (guard 94 000); in a real Angular 21 build (`ng build`, `npm run example:bytes`), DzGrid's share of the audit screen's first load is 104 189 B (ceiling 104 200, owner decision; the editable « stock » screen loads apart).
 
 ## Install
 
@@ -175,8 +175,8 @@ Minified and gzipped, each entry bundled as a consumer ships it, the packages it
 | `@dzgrid/theme/{tailwind,tailwind3,bootstrap}.css` | the framework bridges | 325 / 325 / 340 |
 | `@dzgrid/angular` | the Angular wrapper | 8 826 |
 | `@dzgrid/element` | the Web Component, over the DOM layer | 1 690 |
-| profile: the audit screen (K.8) | everything above it uses, first load, with the theme and one language | 92 853 |
-| the same screen in a real Angular 21 build | DzGrid's share of the first load (`ng build`, `npm run example:bytes`, at the 1.15.0 release) | 103 979 |
+| profile: the audit screen (K.8) | everything above it uses, first load, with the theme and one language | 93 073 |
+| the same screen in a real Angular 21 build | DzGrid's share of the first load (`ng build`, `npm run example:bytes`, at the 1.16.0 release) | 104 189 |
 
 Optional peers: `@tzslot/core` and `@tzslot/dom` 2.4 (date filters and date editors), `gsap` 3.13 (motion).
 

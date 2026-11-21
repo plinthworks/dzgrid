@@ -112,6 +112,21 @@ describe('children not loaded yet (5)', () => {
   const kids = (p: string): T[] => [0, 1].map((i) => ({ id: `${p}-${i}`, parent: p, name: `Child ${p}.${i}`, n: i }));
   const flush = async () => { for (let i = 0; i < 8; i++) await Promise.resolve(); };
 
+  it('loaded children under a closed parent (review 1.16.0): ticked with it, and their box state', async () => {
+    const answers: ((v: readonly T[]) => void)[] = [];
+    const lazy = lazyChildren<T>({ has: (r) => !!(r as { lazy?: boolean }).lazy, load: () => new Promise<readonly T[]>((ok) => answers.push(ok)) });
+    const t = tmake({ rows: ROWS, tree: { lazy }, features: [treeSelect()], settings: SEL });
+    const box = (id: string) => t.row(id)!.querySelector<HTMLElement>('.dzg-check .dzg-box')!;
+    t.expand(['S1']);
+    answers[0]!(kids('S1'));
+    await flush();
+    t.expand(['S1'], false);
+    click(box('S1'));
+    expect([...t.g.kernel.selection.keys].map(idOf).sort()).toEqual(['S1', 'S1-0', 'S1-1']);
+    click(box('S1'));
+    expect([...t.g.kernel.selection.keys].map(idOf)).toEqual([]);
+  });
+
   it('a parent ticked before its children load: they arrive ticked; unticked: they arrive unticked', async () => {
     const answers: ((v: readonly T[]) => void)[] = [];
     const lazy = lazyChildren<T>({ has: (r) => !!(r as { lazy?: boolean }).lazy, load: () => new Promise<readonly T[]>((ok) => answers.push(ok)) });

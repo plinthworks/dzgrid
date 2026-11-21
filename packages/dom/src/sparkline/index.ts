@@ -33,6 +33,9 @@ const drawn = new WeakMap<Element, Drawn>();
 
 const fin = (n: unknown): n is number => typeof n == 'number' && Number.isFinite(n);
 const r2 = (n: number): number => Math.round(n * 100) / 100;
+// The smallest and the largest of a list, without a spread (a huge list would pass the engine's argument limit).
+const least = (a: readonly number[]): number => a.reduce((m, x) => (x < m ? x : m), Infinity);
+const most = (a: readonly number[]): number => a.reduce((m, x) => (x > m ? x : m), -Infinity);
 
 /** The options of a column: its own `sparkline`, key by key over the grid's (sparklines.md 6). */
 function optionsOf(col: ResolvedColumn<unknown>, base: SparklineOptions): Opts {
@@ -45,13 +48,14 @@ export function shapes(v: SparklineValues, o: Opts): { line: string; area: strin
   const n = v.length;
   const nums = v.filter(fin);
   const bar = o.kind === 'bar';
-  let lo = fin(o.min) ? o.min : Math.min(...nums, ...(bar ? [0] : []));
-  let hi = fin(o.max) ? o.max : Math.max(...nums, ...(bar ? [0] : []));
+  let lo = fin(o.min) ? o.min : Math.min(least(nums), bar ? 0 : Infinity);
+  let hi = fin(o.max) ? o.max : Math.max(most(nums), bar ? 0 : -Infinity);
   if (hi < lo) [lo, hi] = [hi, lo];
-  const yOf = (a: number): number => (hi === lo ? 50 : r2(Y1 - ((Math.min(Math.max(a, lo), hi) - lo) / (hi - lo)) * (Y1 - Y0)));
+  // Halves first: at the ends of the number range, hi - lo would overflow to Infinity.
+  const yOf = (a: number): number => (hi === lo ? 50 : r2(Y1 - ((Math.min(Math.max(a, lo), hi) / 2 - lo / 2) / (hi / 2 - lo / 2)) * (Y1 - Y0)));
   // The marked points: the last, or the smallest and the largest (their first time).
   const lastAt = v.findLastIndex(fin);
-  const marked = new Set(o.markers === 'none' ? [] : o.markers === 'last' ? [lastAt] : [v.indexOf(Math.min(...nums)), v.indexOf(Math.max(...nums))]);
+  const marked = new Set(o.markers === 'none' ? [] : o.markers === 'last' ? [lastAt] : [v.indexOf(least(nums)), v.indexOf(most(nums))]);
   const at: number[] = [];
   const ys: number[] = [];
   const out = { line: '', area: '', bars: [] as { bx: number; by: number; w: number; h: number; neg: boolean; mark: boolean }[], dots: [] as [number, number][], at, ys };
@@ -109,7 +113,7 @@ const dot = (doc: Document, cls: string, [px, py]: [number, number]): SVGElement
 function summaryOf(c: SlotContext['cell'], v: SparklineValues, fmt: (n: number) => string): string {
   const nums = v.filter(fin);
   if (!nums.length) return '';
-  return c.msg('sparkline.summary', { n: nums.length, min: fmt(Math.min(...nums)), max: fmt(Math.max(...nums)), last: fmt(nums.at(-1)!) });
+  return c.msg('sparkline.summary', { n: nums.length, min: fmt(least(nums)), max: fmt(most(nums)), last: fmt(nums.at(-1)!) });
 }
 
 /** The cell part: the words in a hidden span, the drawing hidden from assistive technologies. */

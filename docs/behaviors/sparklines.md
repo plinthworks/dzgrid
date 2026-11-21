@@ -61,3 +61,6 @@ point; tabs or arrows onto the cell; sorts by it; copies it, exports it, prints 
     and the hover ring in `Highlight` (a negative bar told by its side of zero).
 15. **Size and speed**: the drawing scales to its cell (no measure, no layout read); a pooled cell redraws only when
     its list or its options changed. 10 000 rows of 30 points scroll as a grid of text does (measured, browser-1-16).
+16. **Any list, any number** (review 1.16.0): a list of any length draws and sums up without failing (a huge list's
+    smallest and largest found without a spread past the engine's argument limit); values at the ends of the number
+    range (±1e308) draw in the box, never a broken drawing (the range scaled by halves, so `max - min` never overflows).
