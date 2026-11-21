@@ -220,6 +220,8 @@ export interface ColumnDef<T, V = unknown> {
     readonly movable?: boolean;
     readonly hideable?: false;
     readonly menu?: false;
+    readonly filterButton?: false;
+    readonly keyboard?: false;
     readonly chooser?: false;
     readonly sortable?: boolean;
     readonly groupable?: boolean;
@@ -264,6 +266,7 @@ export interface ColumnDef<T, V = unknown> {
     readonly colSpan?: (ctx: SpanCtx<T>) => number;
     readonly groupShow?: 'open' | 'closed';
     readonly csv?: 'text';
+    readonly showAs?: 'percentOfTotal' | 'percentOfGroup';
     readonly editable?: EditableRule<T>;
     readonly validate?: (value: V | null, row: Readonly<T>, context: unknown) => string | null | undefined;
     readonly edit?: EditChecks<T, V>;
@@ -395,6 +398,15 @@ export interface ColumnState {
     readonly hidden?: boolean;
     readonly pinned?: Side | null;
     readonly order?: number;
+}
+```
+
+### ColumnTooltip
+
+```ts
+export interface ColumnTooltip<T, V = unknown> extends TooltipSpec {
+    readonly when?: 'always' | 'truncated';
+    readonly content?: (value: V | null, row: Readonly<T>, context: unknown) => string | TooltipSpec | null;
 }
 ```
 
@@ -1825,6 +1837,28 @@ export interface SpanCtx<T> {
 export type TextOp = 'contains' | 'notContains' | 'equals' | 'notEqual' | 'startsWith' | 'endsWith' | 'blank' | 'notBlank';
 ```
 
+### TooltipPlacement
+
+```ts
+export type TooltipPlacement = 'auto' | `${'top' | 'bottom' | 'start' | 'end' | 'left' | 'right'}${'' | '-start' | '-end'}`;
+```
+
+### TooltipSpec
+
+```ts
+export interface TooltipSpec {
+    readonly text?: string;
+    readonly html?: string;
+    readonly tone?: 'info' | 'neutral' | 'success' | 'warning' | 'danger';
+    readonly placement?: TooltipPlacement;
+    readonly animation?: 'fade' | 'scale' | 'slide' | 'pop' | 'rise' | 'morph' | 'none';
+    readonly shape?: 'bubble' | 'ticket' | 'pill' | (string & {});
+    readonly delayMs?: number;
+    readonly maxWidth?: number | string;
+    readonly style?: Readonly<Record<`--${string}`, string>>;
+}
+```
+
 ### TransactionResult
 
 ```ts
@@ -2516,37 +2550,6 @@ export declare function zoneDayBounds(day: Day, zone: string): {
     readonly from: InstantMs;
     readonly to: InstantMs;
 };
-```
-
-### ColumnTooltip
-
-```ts
-export interface ColumnTooltip<T, V = unknown> extends TooltipSpec {
-    readonly when?: 'always' | 'truncated';
-    readonly content?: (value: V | null, row: Readonly<T>, context: unknown) => string | TooltipSpec | null;
-}
-```
-
-### TooltipSpec
-
-```ts
-export interface TooltipSpec {
-    readonly text?: string;
-    readonly html?: string;
-    readonly tone?: 'info' | 'neutral' | 'success' | 'warning' | 'danger';
-    readonly placement?: TooltipPlacement;
-    readonly animation?: 'fade' | 'scale' | 'slide' | 'pop' | 'rise' | 'morph' | 'none';
-    readonly shape?: 'bubble' | 'ticket' | 'pill' | (string & {});
-    readonly delayMs?: number;
-    readonly maxWidth?: number | string;
-    readonly style?: Readonly<Record<`--${string}`, string>>;
-}
-```
-
-### TooltipPlacement
-
-```ts
-export type TooltipPlacement = 'auto' | `${'top' | 'bottom' | 'start' | 'end' | 'left' | 'right'}${'' | '-start' | '-end'}`;
 ```
 
 ## `@dzgrid/core/server`
@@ -3249,6 +3252,9 @@ export interface XlsxOptions<T = any> {
     readonly xlsxStyle?: (c: XlsxStyleContext<T>) => XlsxStyle | null | undefined;
     readonly chunkRows?: number;
     readonly groupRows?: boolean | undefined;
+    readonly title?: XlsxText | undefined;
+    readonly subtitle?: XlsxText | undefined;
+    readonly footer?: XlsxText | undefined;
 }
 ```
 
@@ -3288,6 +3294,24 @@ export interface XlsxStyleContext<T> {
 ```ts
 export interface XlsxSummary extends CsvSummary {
     readonly problems: readonly Problem[];
+}
+```
+
+### XlsxText
+
+```ts
+export type XlsxText = string | readonly string[] | ((c: XlsxTextContext) => string | readonly string[]);
+```
+
+### XlsxTextContext
+
+```ts
+export interface XlsxTextContext {
+    readonly rows: number;
+    readonly scope: CsvScope;
+    readonly query: Query;
+    readonly now: number;
+    readonly ctx: LocaleCtx;
 }
 ```
 

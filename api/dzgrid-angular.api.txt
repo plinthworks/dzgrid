@@ -13,10 +13,11 @@
 # history: owner 2026-11-16 « A, monte à 93 000 »: [focusVisible] input, additions only — @dzgrid/angular#DzGrid
 # history: owner 2026-11-16 « A »: [dzgNestedArrows], [dzgNestedInlineScroll] (the 1.13.0 detail options for an Angular detail), additions only — @dzgrid/angular#DzGrid
 # history: owner 2026-11-19 « AA »: rowHeight accepts a function (1.14.0); headers 'none' and focusVisible as published in 1.13.0 — @dzgrid/angular#DzGrid
+# history: 1.14.0 published
 
 @ @dzgrid/angular
 ## DZGRID_ANGULAR_VERSION
-  declare const DZGRID_ANGULAR_VERSION = "1.12.0";
+  declare const DZGRID_ANGULAR_VERSION = "1.14.0";
 ## DZG_DEFAULTS
   declare const DZG_DEFAULTS: InjectionToken<DzGridDefaults>;
 ## DZG_ENV

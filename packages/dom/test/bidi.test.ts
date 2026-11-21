@@ -1,3 +1,4 @@
+// A value that mixes directions with the grid gets its own bidi paragraph (docs/behaviors/direction.md).
 import { describe, it, expect } from 'vitest';
 import { isolationFor } from '../src/render/bidi.js';
 

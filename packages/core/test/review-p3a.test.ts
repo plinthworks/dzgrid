@@ -1,3 +1,4 @@
+// Review of Phase 3 step A: the operations' branches and split keys among others (docs/behaviors/operations.md C7, C8).
 import { describe, it, expect } from 'vitest';
 import { clientRows, createColumnModel, createKernel, dataKey, localeCtx, makeQuery, resolveOperations, splitQuery, type GridEvent, type RowModel, type ClientModel } from '@dzgrid/core';
 type R = { id: string; n: number; t: string };

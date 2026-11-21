@@ -1,3 +1,5 @@
+// How values are shown: Gregorian always, Latin digits by default, ISO years before 1583, marks stripped for copy and
+// export (docs/behaviors/display-format.md).
 import { localeCtx, readNumber, formattersFor, parseDay, parseInstant, stripMarks, REJECTED, dayCodec, instantCodec, booleanCodec, enumCodec, instantToIso, type InstantMs } from '@dzgrid/core';
 import { formatParts } from '@dzgrid/core/internal';
 import type { Suite } from './index.js';

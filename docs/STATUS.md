@@ -1,6 +1,8 @@
 # État du travail — à lire en premier si la session est perdue
 
-Mis à jour : 2026-11-19. **1.14.0 publiée sur npm par le propriétaire (les cinq paquets vérifiés ; étiquette v1.14.0 à poser).** Suite, plus tard (propriétaire « le reste on le fera après ») : sparklines, détail des maîtres dans Excel, les questions de docs/gap-aggrid-2026-11.md. Avant : 2026-11-19 (suite). **1.14.0 préparée (non commitée, non publiée ; propriétaire « vérification puis tu
+Mis à jour : 2026-11-21. **Hygiène après 1.14.0 (inventaire `docs/inventaire-2026-11.md` §2, propriétaire « ★ partout »)** : surface 1.14.0 acceptée dans `api/*.api.txt` (« 1.14.0 published » : `XlsxText`, `xlsx.title / subtitle / footer`…) et pages d'API du site régénérées ; tableau des tailles du README remesuré (K.8 92 611 / 93 000, appli Angular réelle 103 734 / 103 800) ; `ARCHITECTURE.md` K.7 (Angular jusqu'à `^22`) et K.8 (93 kB) ; chaque fiche citée par un test, gardé par `scripts/test/behaviors-cited.test.ts` (seule exception : `sheets.md`, parquée) ; l'ACR dit qu'il décrit 1.8.0 et ce qui a changé depuis, sans rien revendiquer de plus ; `docs/inventory.md` marqué dépassé. Les pages des matrices 1.12 / 1.13 (hors git, règle des démos) ne sont plus sur le disque : ces matrices ne se rejouent pas depuis un clone (décision du propriétaire, inventaire §3-17). Ensuite : 1.15.0, l'option qui retire la dernière rustine de l'appli.
+
+Mis à jour : 2026-11-19. **1.14.0 publiée sur npm par le propriétaire (les cinq paquets vérifiés ; étiquette v1.14.0 posée et poussée).** Suite, plus tard (propriétaire « le reste on le fera après ») : sparklines, détail des maîtres dans Excel, les questions de docs/gap-aggrid-2026-11.md. Avant : 2026-11-19 (suite). **1.14.0 préparée (non commitée, non publiée ; propriétaire « vérification puis tu
 publies »)** : cinq paquets en 1.14.0, CHANGELOG `[1.14.0] - 2026-11-19` (notes de mise à jour : `rowHeight` peut être une
 fonction, le reste optionnel), `docs/release-1.14.0.md`, pages d'API régénérées. Revue indépendante : deux défauts corrigés,
 tests rouges d'abord — `showAs` imprimait vide une ligne épinglée (`show-as.test.ts`) ; `groupSelect()` sous `rules()`
@@ -106,7 +108,7 @@ et quoi, la fonction où et comment ; une apparence (`tone`, `placement`, …) s
 n'est plus un réglage (150 ms). `check:api` : `ColumnDef` accepté (« A »), la couture ajoutée, les entrées
 `@dzgrid/dom/tooltip`, `/popover`, `@dzgrid/angular/tooltip`, `/popover`, `@dzgrid/theme/tooltips.css` retirées à la
 main avec la ligne « owner 2026-11-14: rich tooltips moved to @dztooltip, never published ». Matrice
-`browser-1-12.mjs` : sections 11–11e parties (DzTooltip `scripts/browser.mjs`, câblé, pas encore lancé). Site : la page
+`browser-1-12.mjs` : sections 11–11e parties (DzTooltip `scripts/browser.mjs`, câblé ; lancé depuis le 2026-11-16, sections 12–14 ; la section 11b attend une fixture Angular propre à DzTooltip). Site : la page
 « Tooltips and popovers » courte (en, fr) avec l'exemple du pont ; `features/tooltips` supprimée ; tableau des
 variables sans les variables parties. Tailles : base 25 800 → 25 700 (mesuré 25 653), K.8 91 831 / 92 000,
 `@dzgrid/dom/theme` 2 513 / 2 530. `pack:local` fait ; **`gate:step` vert : 9 434/9 437 (3 sautés)**, du premier coup ; real-app 58/58 ; matrice

@@ -132,12 +132,17 @@ export type GridIcon = string | SVGElement;
 export interface GridIcons {
     readonly sortAsc?: GridIcon;
     readonly sortDesc?: GridIcon;
+    readonly sortNone?: GridIcon;
     readonly filter?: GridIcon;
     readonly filterActive?: GridIcon;
     readonly menu?: GridIcon;
     readonly chevron?: GridIcon;
     readonly submenu?: GridIcon;
     readonly grip?: GridIcon;
+    readonly pagerFirst?: GridIcon;
+    readonly pagerPrevious?: GridIcon;
+    readonly pagerNext?: GridIcon;
+    readonly pagerLast?: GridIcon;
 }
 ```
 
@@ -269,6 +274,7 @@ export interface GridTheme {
     readonly pinnedColumnLine?: ThemeValue;
     readonly pinnedShadow?: ThemeValue;
     readonly detailLine?: ThemeValue;
+    readonly detailInset?: ThemeValue;
     readonly rowOddBg?: ThemeValue;
     readonly rowHoverBg?: ThemeValue;
     readonly rowSelectedBg?: ThemeValue;
@@ -328,6 +334,59 @@ export interface GridTheme {
     readonly scrollbar?: ThemeValue;
     readonly scrollbarThumb?: ThemeValue;
     readonly scrollbarThumbActive?: ThemeValue;
+    readonly rowHoverFg?: ThemeValue;
+    readonly rowSelectedFg?: ThemeValue;
+    readonly rowActiveFg?: ThemeValue;
+    readonly columnSeparator?: ThemeValue;
+    readonly columnSeparatorSize?: ThemeValue;
+    readonly columnSeparatorHeight?: ThemeValue;
+    readonly lastRowLine?: ThemeValue;
+    readonly lastColumnLine?: ThemeValue;
+    readonly headerSeparatorEnd?: ThemeValue;
+    readonly headerPaddingInline?: ThemeValue;
+    readonly headerButtonFg?: ThemeValue;
+    readonly headerButtonActiveFg?: ThemeValue;
+    readonly headerGroupLine?: ThemeValue;
+    readonly sortFg?: ThemeValue;
+    readonly inputFg?: ThemeValue;
+    readonly inputRadius?: ThemeValue;
+    readonly buttonFg?: ThemeValue;
+    readonly buttonRadius?: ThemeValue;
+    readonly popupRadius?: ThemeValue;
+    readonly popupBorder?: ThemeValue;
+    readonly popupPadding?: ThemeValue;
+    readonly optionSelectedBg?: ThemeValue;
+    readonly tooltipFontSize?: ThemeValue;
+    readonly tooltipFontFamily?: ThemeValue;
+    readonly tooltipFontWeight?: ThemeValue;
+    readonly tooltipLineHeight?: ThemeValue;
+    readonly tooltipMaxWidth?: ThemeValue;
+    readonly tooltipPaddingBlock?: ThemeValue;
+    readonly tooltipPaddingInline?: ThemeValue;
+    readonly tooltipRadius?: ThemeValue;
+    readonly tooltipWhiteSpace?: ThemeValue;
+    readonly tooltipArrowSize?: ThemeValue;
+    readonly tooltipArrowColor?: ThemeValue;
+    readonly overlayFg?: ThemeValue;
+    readonly overlayBg?: ThemeValue;
+    readonly footerBg?: ThemeValue;
+    readonly footerFg?: ThemeValue;
+    readonly sortNoneFg?: ThemeValue;
+    readonly buttonFontWeight?: ThemeValue;
+    readonly buttonPaddingInline?: ThemeValue;
+    readonly buttonHeight?: ThemeValue;
+    readonly buttonHoverBg?: ThemeValue;
+    readonly buttonHoverFg?: ThemeValue;
+    readonly buttonActiveBg?: ThemeValue;
+    readonly buttonPrimaryBg?: ThemeValue;
+    readonly buttonPrimaryFg?: ThemeValue;
+    readonly buttonPrimaryBorder?: ThemeValue;
+    readonly buttonPrimaryHoverBg?: ThemeValue;
+    readonly buttonPrimaryHoverFg?: ThemeValue;
+    readonly buttonPrimaryActiveBg?: ThemeValue;
+    readonly buttonFontSize?: ThemeValue;
+    readonly setListMinWidth?: ThemeValue;
+    readonly setListMaxWidth?: ThemeValue;
 }
 ```
 
@@ -634,6 +693,10 @@ export interface SlotContext {
         readonly height: number;
         readonly depth?: number;
         leave?(): void;
+        adopt?(grid: GridInstance<any, any>, o: {
+            readonly arrows?: 'rows';
+            readonly inlineScroll?: 'master';
+        }): () => void;
     };
 }
 ```
@@ -651,6 +714,44 @@ export interface SlotPart<S extends WiredSlot = WiredSlot> {
 
 ```ts
 export type ThemeValue = string | number;
+```
+
+### TipFor
+
+```ts
+export interface TipFor extends Omit<TooltipSpec, 'text'> {
+    readonly text: string;
+    readonly col?: ResolvedColumn<any>;
+    readonly row?: Readonly<unknown> | null;
+    readonly value?: unknown;
+    readonly said?: boolean;
+    readonly node?: DocumentFragment | null;
+}
+```
+
+### TooltipSeam
+
+```ts
+export interface TooltipSeam {
+    targets?(): string;
+    tipFor?(target: HTMLElement): TipFor | null | undefined;
+    ok?(anchor: HTMLElement): boolean;
+    html?(html: string, doc: Document): DocumentFragment;
+    show(s: TooltipShow): void;
+    hide(el: HTMLElement, done: () => void): () => void;
+}
+```
+
+### TooltipShow
+
+```ts
+export interface TooltipShow {
+    readonly el: HTMLElement;
+    readonly anchor: HTMLElement;
+    readonly tip: TipFor;
+    readonly dir: Dir;
+    readonly hide: () => void;
+}
 ```
 
 ### UPDATE_POLICY
@@ -712,44 +813,6 @@ export declare function injectStyles(target: Document | ShadowRoot, nonce?: stri
 export declare function msg(m: GridMessages, key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | RangeLoadKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | TotalsMessageKey | ImportMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | RowDragMessageKey | FindHeldKey | ClearFiltersKey | FiltersPanelMessageKey | DockMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey | PivotMessageKey | PivotBarMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>, ctx?: LocaleCtx): string;
 ```
 
-### TipFor
-
-```ts
-export interface TipFor extends Omit<TooltipSpec, 'text'> {
-    readonly text: string;
-    readonly col?: ResolvedColumn<any>;
-    readonly row?: Readonly<unknown> | null;
-    readonly value?: unknown;
-    readonly said?: boolean;
-    readonly node?: DocumentFragment | null;
-}
-```
-
-### TooltipSeam
-
-```ts
-export interface TooltipSeam {
-    targets?(): string;
-    tipFor?(target: HTMLElement): TipFor | null | undefined;
-    ok?(anchor: HTMLElement): boolean;
-    html?(html: string, doc: Document): DocumentFragment;
-    show(s: TooltipShow): void;
-    hide(el: HTMLElement, done: () => void): () => void;
-}
-```
-
-### TooltipShow
-
-```ts
-export interface TooltipShow {
-    readonly el: HTMLElement;
-    readonly anchor: HTMLElement;
-    readonly tip: TipFor;
-    readonly dir: Dir;
-    readonly hide: () => void;
-}
-```
-
 ## `@dzgrid/dom/popup`
 
 ### PopupHost
@@ -800,6 +863,12 @@ export declare function popupsFor(g: GridContext<unknown>): PopupHost;
 
 ## `@dzgrid/dom/spans`
 
+### SPANS_CSS
+
+```ts
+export declare const SPANS_CSS: string;
+```
+
 ### spans
 
 ```ts
@@ -808,13 +877,13 @@ export declare function spans(o?: {
 }): GridFeature;
 ```
 
-### SPANS_CSS
+## `@dzgrid/dom/groups`
+
+### GROUPS_CSS
 
 ```ts
-export declare const SPANS_CSS: string;
+export declare const GROUPS_CSS: string;
 ```
-
-## `@dzgrid/dom/groups`
 
 ### GroupsApi
 
@@ -848,12 +917,6 @@ export interface GroupsFeature extends GridFeature {
 
 ```ts
 export declare function groups(): GroupsFeature;
-```
-
-### GROUPS_CSS
-
-```ts
-export declare const GROUPS_CSS: string;
 ```
 
 ## `@dzgrid/dom/slots`
@@ -898,6 +961,12 @@ export declare function quickSearch(o?: QuickSearchSetup): QuickSearch;
 
 ## `@dzgrid/dom/pagination`
 
+### PAGINATION_CSS
+
+```ts
+export declare const PAGINATION_CSS: string;
+```
+
 ### PAGINATION_KEYS
 
 ```ts
@@ -916,12 +985,6 @@ export interface PaginationOptions {
 
 ```ts
 export declare function pagination(o?: PaginationOptions): GridFeature;
-```
-
-### PAGINATION_CSS
-
-```ts
-export declare const PAGINATION_CSS: string;
 ```
 
 ## `@dzgrid/dom/export`
@@ -1035,6 +1098,18 @@ export type Refusal = boolean | {
 export type XlsxExportOptions = Omit<XlsxOptions, 'text' | 'enums' | 'header' | 'columns' | 'levelHeader' | 'treeColumn' | 'chunkRows'>;
 ```
 
+### XlsxText
+
+```ts
+= ./export/index.js#XlsxText
+```
+
+### XlsxTextContext
+
+```ts
+= ./export/index.js#XlsxTextContext
+```
+
 ### csvExport
 
 ```ts
@@ -1117,6 +1192,12 @@ export declare function rules(): GridFeature;
 
 ## `@dzgrid/dom/tree`
 
+### TREE_CSS
+
+```ts
+export declare const TREE_CSS: string;
+```
+
 ### TREE_KEYS
 
 ```ts
@@ -1182,12 +1263,6 @@ export interface TreeMessages {
 export declare function tree<T>(o: TreeFeatureOptions<T>): TreeFeature;
 ```
 
-### TREE_CSS
-
-```ts
-export declare const TREE_CSS: string;
-```
-
 ## `@dzgrid/dom/tree-lazy`
 
 ### LazyChildren
@@ -1222,6 +1297,12 @@ export declare function lazyChildren<T>(o: LazyOptions<T>): LazyChildren<T>;
 ```
 
 ## `@dzgrid/dom/detail`
+
+### DETAIL_CSS
+
+```ts
+export declare const DETAIL_CSS: string;
+```
 
 ### DETAIL_KEYS
 
@@ -1273,6 +1354,8 @@ export interface NestedGridOptions<C> {
     readonly settings: (c: NestedContext) => GridSettings<C>;
     readonly keep?: number;
     readonly onGrid?: (grid: GridInstance<C, any>, c: NestedContext) => void;
+    readonly arrows?: 'rows';
+    readonly inlineScroll?: 'master';
     readonly env?: (c: NestedContext) => GridEnv;
 }
 ```
@@ -1287,12 +1370,6 @@ export declare function detail<T>(o: DetailFeatureOptions<T>): GridFeature;
 
 ```ts
 export declare function nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<'detail'>;
-```
-
-### DETAIL_CSS
-
-```ts
-export declare const DETAIL_CSS: string;
 ```
 
 ## `@dzgrid/dom/edit`
@@ -1442,6 +1519,12 @@ export type CellInput = {
 };
 ```
 
+### EDITORS_CSS
+
+```ts
+export declare const EDITORS_CSS: string;
+```
+
 ### EDITORS_KEYS
 
 ```ts
@@ -1498,6 +1581,7 @@ export interface EditorsOptions {
     readonly loadCalendar?: () => Promise<CalendarKit>;
     readonly dateMessages?: Readonly<Record<string, object>>;
     readonly list?: ListEditor;
+    readonly textarea?: (x: EdEnv, field: HTMLTextAreaElement) => Ed;
 }
 ```
 
@@ -1505,12 +1589,6 @@ export interface EditorsOptions {
 
 ```ts
 export declare function editors(o?: EditorsOptions): GridFeature;
-```
-
-### EDITORS_CSS
-
-```ts
-export declare const EDITORS_CSS: string;
 ```
 
 ## `@dzgrid/dom/filters-base`
@@ -1748,6 +1826,7 @@ export interface EditorsOptions {
     readonly loadCalendar?: () => Promise<CalendarKit>;
     readonly dateMessages?: Readonly<Record<string, object>>;
     readonly list?: ListEditor;
+    readonly textarea?: (x: EdEnv, field: HTMLTextAreaElement) => Ed;
 }
 ```
 
@@ -2063,6 +2142,7 @@ export interface ColumnsMessages {
 export interface ColumnsOptions {
     readonly drag?: boolean;
     readonly fitOnLoad?: 'content';
+    readonly dragOutHides?: boolean;
 }
 ```
 
@@ -2483,6 +2563,12 @@ export declare function contextMenu<T = unknown>(o?: ContextMenuOptions<T>): Con
 
 ## `@dzgrid/dom/statusbar`
 
+### STATUS_CSS
+
+```ts
+export declare const STATUS_CSS: string;
+```
+
 ### STATUS_KEYS
 
 ```ts
@@ -2556,13 +2642,13 @@ export interface StatusStats {
 export declare function statusBar(o?: StatusBarOptions): StatusBarFeature;
 ```
 
-### STATUS_CSS
+## `@dzgrid/dom/find`
+
+### FIND_CSS
 
 ```ts
-export declare const STATUS_CSS: string;
+export declare const FIND_CSS: string;
 ```
-
-## `@dzgrid/dom/find`
 
 ### FIND_KEYS
 
@@ -2653,12 +2739,6 @@ export interface FindState {
 export declare function find(o?: FindOptions): FindFeature;
 ```
 
-### FIND_CSS
-
-```ts
-export declare const FIND_CSS: string;
-```
-
 ## `@dzgrid/dom/row-drag`
 
 ### DropWhere
@@ -2671,6 +2751,12 @@ export declare const FIND_CSS: string;
 
 ```ts
 = @dzgrid/core/row-drag#MoveStep
+```
+
+### ROW_DRAG_CSS
+
+```ts
+export declare const ROW_DRAG_CSS: string;
 ```
 
 ### ROW_DRAG_KEYS
@@ -2786,13 +2872,13 @@ export type RowMoveResult = 'moved' | 'edge' | 'locked' | 'sorted' | 'grouped' |
 export declare function rowDrag<T = unknown>(o?: RowDragOptions<T>): RowDragFeature<T>;
 ```
 
-### ROW_DRAG_CSS
+## `@dzgrid/dom/dock`
+
+### DOCK_CSS
 
 ```ts
-export declare const ROW_DRAG_CSS: string;
+export declare const DOCK_CSS: string;
 ```
-
-## `@dzgrid/dom/dock`
 
 ### DOCK_KEYS
 
@@ -2894,12 +2980,6 @@ export interface DockPanel {
 
 ```ts
 export declare function dock(o?: DockOptions): DockFeature;
-```
-
-### DOCK_CSS
-
-```ts
-export declare const DOCK_CSS: string;
 ```
 
 ## `@dzgrid/dom/pivot`
@@ -3073,6 +3153,12 @@ export declare function pivotBar(o: PivotBarOptions): GridFeature;
 
 ## `@dzgrid/dom/row-numbers`
 
+### ROW_NUMBERS_CSS
+
+```ts
+export declare const ROW_NUMBERS_CSS: string;
+```
+
 ### ROW_NUMBERS_KEYS
 
 ```ts
@@ -3102,12 +3188,6 @@ export interface RowNumbersMessages {
 
 ```ts
 export declare function rowNumbers(): GridFeature;
-```
-
-### ROW_NUMBERS_CSS
-
-```ts
-export declare const ROW_NUMBERS_CSS: string;
 ```
 
 ## `@dzgrid/dom/grouping`
@@ -3186,16 +3266,16 @@ export interface GroupingFeatureOptions extends GroupingOptions {
 }
 ```
 
-### grouping
-
-```ts
-export declare function grouping(o?: GroupingFeatureOptions): GroupingFeature;
-```
-
 ### TREE_CSS
 
 ```ts
 export declare const TREE_CSS: string;
+```
+
+### grouping
+
+```ts
+export declare function grouping(o?: GroupingFeatureOptions): GroupingFeature;
 ```
 
 ## `@dzgrid/dom/group-zone`
@@ -3263,6 +3343,12 @@ export declare function groupZone(o: GroupZoneOptions): GridFeature;
 
 ## `@dzgrid/dom/filters-panel`
 
+### FILTERS_PANEL_CSS
+
+```ts
+export declare const FILTERS_PANEL_CSS: string;
+```
+
 ### FILTERS_PANEL_KEYS
 
 ```ts
@@ -3321,12 +3407,6 @@ export interface FiltersPanelOptions {
 
 ```ts
 export declare function filtersPanel(o?: FiltersPanelOptions): FiltersPanelFeature;
-```
-
-### FILTERS_PANEL_CSS
-
-```ts
-export declare const FILTERS_PANEL_CSS: string;
 ```
 
 ## `@dzgrid/dom/columns-panel`
@@ -3561,16 +3641,68 @@ export declare function pinnedRows<T = unknown>(o?: PinnedRowsOptions<T>): Pinne
 
 ## `@dzgrid/dom/auto-height`
 
+### WRAP_CSS
+
+```ts
+export declare const WRAP_CSS = ":is(.dzg-body,.dzg-sticky) .dzg-cell[data-wrap]{line-height:var(--dzg-wrap-line,1.25rem);padding-block:calc((var(--dzg-row-height,2rem) - var(--dzg-line,1px) - var(--dzg-wrap-line,1.25rem))/2)}";
+```
+
 ### autoHeight
 
 ```ts
 export declare function autoHeight(): GridFeature;
 ```
 
-### WRAP_CSS
+## `@dzgrid/dom/row-heights`
+
+### rowHeights
 
 ```ts
-export declare const WRAP_CSS = ":is(.dzg-body,.dzg-sticky) .dzg-cell[data-wrap]{line-height:var(--dzg-wrap-line,1.25rem);padding-block:calc((var(--dzg-row-height,2rem) - var(--dzg-line,1px) - var(--dzg-wrap-line,1.25rem))/2)}";
+export declare function rowHeights(): GridFeature;
+```
+
+## `@dzgrid/dom/show-as`
+
+### ShowAsOptions
+
+```ts
+export interface ShowAsOptions {
+    readonly digits?: number;
+}
+```
+
+### showAs
+
+```ts
+export declare function showAs(o?: ShowAsOptions): GridFeature;
+```
+
+## `@dzgrid/dom/editors-textarea`
+
+### TEXTAREA_CSS
+
+```ts
+export declare const TEXTAREA_CSS: string;
+```
+
+### TextareaEditor
+
+```ts
+export type TextareaEditor = typeof import('./editors-textarea/index.js').textareaEditor;
+```
+
+### textareaEditor
+
+```ts
+export declare function textareaEditor(x: EdEnv, f: HTMLTextAreaElement): Ed;
+```
+
+## `@dzgrid/dom/group-select`
+
+### groupSelect
+
+```ts
+export declare function groupSelect(): GridFeature;
 ```
 
 ## `@dzgrid/dom/row-gaps`
@@ -3874,6 +4006,12 @@ export interface DateSettings {
 }
 ```
 
+### FILTERS_CSS
+
+```ts
+export declare const FILTERS_CSS: string;
+```
+
 ### FILTER_KEYS
 
 ```ts
@@ -3923,12 +4061,6 @@ export interface SetKit {
 
 ```ts
 export declare function filters(o?: FiltersOptions): FiltersFeature;
-```
-
-### FILTERS_CSS
-
-```ts
-export declare const FILTERS_CSS: string;
 ```
 
 ## `@dzgrid/dom/totals-row`
@@ -4063,6 +4195,12 @@ export declare function columnHover(): GridFeature;
 
 ## `@dzgrid/dom/responsive`
 
+### RESPONSIVE_CSS
+
+```ts
+export declare const RESPONSIVE_CSS: string;
+```
+
 ### ResponsiveOptions
 
 ```ts
@@ -4075,12 +4213,6 @@ export interface ResponsiveOptions {
 
 ```ts
 export declare function responsive(o?: ResponsiveOptions): GridFeature;
-```
-
-### RESPONSIVE_CSS
-
-```ts
-export declare const RESPONSIVE_CSS: string;
 ```
 
 ## `@dzgrid/dom/import`
@@ -4115,6 +4247,12 @@ export interface FileImportOptions {
     readonly onRows: (rows: Record<string, unknown>[], problems: readonly Problem[], file: ImportedFile) => void;
     readonly drop?: boolean;
 }
+```
+
+### IMPORT_CSS
+
+```ts
+export declare const IMPORT_CSS: string;
 ```
 
 ### IMPORT_KEYS
@@ -4163,64 +4301,6 @@ export interface ImportedFile {
 
 ```ts
 export declare function fileImport(o: FileImportOptions): FileImportFeature;
-```
-
-### IMPORT_CSS
-
-```ts
-export declare const IMPORT_CSS: string;
-```
-
-## `@dzgrid/dom/row-heights`
-
-### rowHeights
-
-```ts
-export declare function rowHeights(): GridFeature;
-```
-
-## `@dzgrid/dom/show-as`
-
-### showAs
-
-```ts
-export declare function showAs(o?: ShowAsOptions): GridFeature;
-```
-
-### ShowAsOptions
-
-```ts
-export interface ShowAsOptions {
-    readonly digits?: number;
-}
-```
-
-## `@dzgrid/dom/editors-textarea`
-
-### TextareaEditor
-
-```ts
-export type TextareaEditor = typeof import('./editors-textarea/index.js').textareaEditor;
-```
-
-### textareaEditor
-
-```ts
-export declare function textareaEditor(x: EdEnv, f: HTMLTextAreaElement): Ed;
-```
-
-### TEXTAREA_CSS
-
-```ts
-export declare const TEXTAREA_CSS: string;
-```
-
-## `@dzgrid/dom/group-select`
-
-### groupSelect
-
-```ts
-export declare function groupSelect(): GridFeature;
 ```
 
 ## Texts bundles

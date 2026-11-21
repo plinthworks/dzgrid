@@ -12,6 +12,18 @@ the owner: `docs/a11y/acr-resume-fr.md`.
 | Contact | The project's repository owner. |
 | Evaluation methods used | Automated checks in real browser engines (below), unit and behaviour tests in jsdom, a contrast script over every colour pair the theme draws, behaviour sheets written before the code (`docs/behaviors/`). **No assistive-technology testing yet.** |
 
+**Version note (2026-11-21).** This draft describes **1.8.0**; it has not been re-evaluated since. The published
+version is now 1.14.0. What changed since 1.8.0 and touches what a person with a disability meets — each item has its
+behaviour sheet and its tests, and the automated browser checks (axe) of each release ran on it, but none of it is
+evaluated in this report and nothing here claims more conformance than the 1.8.0 rows below:
+1.9.0 — vertical and wrapped headers, a totals row, file import, responsive columns that fold, theming
+knobs; 1.10.0–1.11.0 — column hover, translated yes / no words, an output for every grid event; 1.12.0 — the panel and pager
+buttons' look, the unsorted mark, the simple tooltip per column (`aria-describedby`); 1.13.0 — `focusVisible:
+'keyboard'` (the focus ring after a key only), `headers: 'none'`, `ColumnDef.keyboard: false` (a column skipped by the
+arrows and Tab), `nestedGrid({ arrows, inlineScroll })`; 1.14.0 — dragging a header out to hide it (pointer only; the
+column menu and the chooser stay the keyboard way), percentages, a long-text editor, Excel title and footer, group
+ticks, row heights by a function. The screen-reader listening (« Notes ») is still to do.
+
 ## Applicable standards
 
 | Standard | Included in report |

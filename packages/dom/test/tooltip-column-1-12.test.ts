@@ -1,6 +1,6 @@
 // A tooltip per column in one line, per cell over it, only when cut; a look the grid's bubble leaves to a feature; the
 // seam where a feature takes the tooltips over (docs/behaviors/tooltips.md 10, 11, 13; owner 2026-11-14: the rich
-// bubbles moved to DzTooltip, `@dztooltip/dzgrid` the feature). Expectations written by hand.
+// bubbles moved to DzTooltip, `@dztooltip/dzgrid` the feature, docs/behaviors/tooltips-popovers.md). Expectations written by hand.
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
 import { dataKey, type ColumnDef, type GridEvent, type Problem } from '@dzgrid/core';
 import { createGrid, type GridInstance } from '../src/grid.js';

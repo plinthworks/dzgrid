@@ -1,3 +1,5 @@
+// Reading a date-time: an offset wins, no offset is `ambiguous-instant` unless a zone is assumed, clock changes follow
+// `disambiguation` (docs/behaviors/instant-reading.md; the cases in conformance/cases/instant-parse).
 import { describe, it, expect } from 'vitest';
 import { readInstant, parseInstant } from '@dzgrid/core';
 

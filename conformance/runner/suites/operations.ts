@@ -1,3 +1,5 @@
+// Who does sort, filter, search and paging, client or server: defaults, shorthands, refusals, the split query
+// (docs/behaviors/operations.md).
 import { makeQuery, resolveOperations, splitQuery } from '@dzgrid/core';
 import type { Suite } from './index.js';
 

@@ -16,8 +16,8 @@ Le propriétaire a accepté toutes les recommandations du §1. Elles priment sur
 | K.4 Données | Lignes du consommateur jamais modifiées ; `getRowId` requis ; transactions `{add, update, remove}` ; modifications en surcouche. |
 | K.5 Moteurs | `client` (P1) → `paged` serveur, total inconnu accepté (P3) → `infinite` et `serverSide` (P8) ; `viewport` hors v1 ; pas de worker en v1. |
 | K.6 Priorité Enterprise | Plages/presse-papiers/remplissage/édition en masse → filtre à valeurs → master/detail → regroupement → arbre → Excel → menus → filtre avancé → pivot ; graphiques hors v1. |
-| K.7 Cibles | Chrome/Edge 123, Safari 17.5, Firefox 120 ; Angular ^19 \|\| ^20 \|\| ^21 ; Node ≥ 22. |
-| K.8 Budgets | Profil audit ≤ 92 kB gz (propriétaire 2026-11-13, « tu peux augmenter » : 91 → 92 kB, la correction des titres de la 1.12.0 dans la base ; avant ≤ 91 kB, propriétaire 2026-11-10, « augmente la limite » : 90 → 91 kB, les mots oui / non traduits dans la base, 1.10.0 ; avant ≤ 90 kB, 85 kB jusqu'au 2026-10-29 ; relevé par le propriétaire à l'étape 16 : « ok pour les hausses, pourquoi tu te casses la tête sur la taille », `docs/phase-6-steps/decisions.md` « Step 16 — owner answers ») ; tout sauf graphiques ≤ 150 kB gz ; 100 000 × 30 : premier rendu ≤ 120 ms, défilement ≥ 58 fps, tri numérique ≤ 40 ms, tri texte ≤ 250 ms, filtre texte ≤ 35 ms, ≤ 25 Mo. |
+| K.7 Cibles | Chrome/Edge 123, Safari 17.5, Firefox 120 ; Angular ^19 \|\| ^20 \|\| ^21 \|\| ^22 ; Node ≥ 22. |
+| K.8 Budgets | Profil audit ≤ 93 kB gz (propriétaire 2026-11-16, « A, monte à 93 000 » : 92 → 93 kB, les options qui retirent les rustines de l'appli du propriétaire, 1.13.0 ; avant ≤ 92 kB, propriétaire 2026-11-13, « tu peux augmenter » : 91 → 92 kB, la correction des titres de la 1.12.0 dans la base ; avant ≤ 91 kB, propriétaire 2026-11-10, « augmente la limite » : 90 → 91 kB, les mots oui / non traduits dans la base, 1.10.0 ; avant ≤ 90 kB, 85 kB jusqu'au 2026-10-29 ; relevé par le propriétaire à l'étape 16 : « ok pour les hausses, pourquoi tu te casses la tête sur la taille », `docs/phase-6-steps/decisions.md` « Step 16 — owner answers ») ; tout sauf graphiques ≤ 150 kB gz ; 100 000 × 30 : premier rendu ≤ 120 ms, défilement ≥ 58 fps, tri numérique ≤ 40 ms, tri texte ≤ 250 ms, filtre texte ≤ 35 ms, ≤ 25 Mo. |
 | K.9 Nommage | `DzGrid`, scope `@dzgrid` ; palette partagée `--tz-*`, propre à la grille `--dzg-*` / `.dzg-*` ; playground 4700. Le scope npm reste à réserver. |
 | K.10 Dépendances | Aucune dépendance d'exécution dans `core`, `dom`, `theme` ; pas de RxJS. `@tzslot/dom` et `@tzslot/core` (`>=2.4.0 <3`, depuis la passe des retours d'usage du 2026-10-27 ; `>=2.2.0 <3` avant) : pairs **optionnelles** de `@dzgrid/dom` et `@dzgrid/angular`, pour les filtres de dates (étape 14). `gsap` (`^3.13.0`) : pair **optionnel** de `@dzgrid/dom` pour `@dzgrid/dom/motion-gsap` (étape 26 ; licence de GSAP, pas MIT : voir « Décisions de l'étape 26 »). |
 | K.11 Excel | Writer XLSX maison, RTL compris, sans SheetJS (P9). |
@@ -699,7 +699,7 @@ Ordre proposé, guidé par les écrans de Sehhaty :
 | 10 | Graphiques intégrés | **Hors v1** (K.13) | — |
 
 ### K.7 Navigateurs et frameworks
-- **Recommandation** : navigateurs à jour, seuil fixé par `light-dark()` : **Chrome et Edge 123, Safari 17.5, Firefox 120** (même seuil que tzslot et DzCalendar). Angular `^19 || ^20 || ^21` (signaux d'entrée et `model()` stables à partir de 19 ; Sehhaty est en 21). Node ≥ 22 pour les outils.
+- **Recommandation** : navigateurs à jour, seuil fixé par `light-dark()` : **Chrome et Edge 123, Safari 17.5, Firefox 120** (même seuil que tzslot et DzCalendar). Angular `^19 || ^20 || ^21 || ^22` (signaux d'entrée et `model()` stables à partir de 19 ; Sehhaty est en 21). Node ≥ 22 pour les outils.
 - **Si autre choix** : viser Angular 18 comme tzslot oblige à contourner `model()` et NG0600.
 
 ### K.8 Budgets de taille et de performance

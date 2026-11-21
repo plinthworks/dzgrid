@@ -33,6 +33,7 @@
 # history: owner 2026-11-14: rich tooltips moved to @dztooltip, never published — entries removed: @dzgrid/dom/tooltip, @dzgrid/dom/popover
 # history: owner 2026-11-19 « AA »: rowHeight accepts a function (1.14.0); headers 'none' and focusVisible as published in 1.13.0 — @dzgrid/dom#GridSettings
 # history: owner 2026-11-19 « AA »: the 1.14.0 entries show-as, editors-textarea, group-select, row-heights (additions) — @dzgrid/dom/row-heights#rowHeights, @dzgrid/dom/show-as#showAs, @dzgrid/dom/show-as#ShowAsOptions, @dzgrid/dom/editors-textarea#TextareaEditor, @dzgrid/dom/editors-textarea#textareaEditor, @dzgrid/dom/editors-textarea#TEXTAREA_CSS, @dzgrid/dom/group-select#groupSelect
+# history: 1.14.0 published
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -112,12 +113,17 @@
   export interface GridIcons {
       readonly sortAsc?: GridIcon;
       readonly sortDesc?: GridIcon;
+      readonly sortNone?: GridIcon;
       readonly filter?: GridIcon;
       readonly filterActive?: GridIcon;
       readonly menu?: GridIcon;
       readonly chevron?: GridIcon;
       readonly submenu?: GridIcon;
       readonly grip?: GridIcon;
+      readonly pagerFirst?: GridIcon;
+      readonly pagerPrevious?: GridIcon;
+      readonly pagerNext?: GridIcon;
+      readonly pagerLast?: GridIcon;
   }
 ## GridInstance
   export interface GridInstance<T, M extends RowModel<T> = ClientModel<T>> {
@@ -233,6 +239,7 @@
       readonly pinnedColumnLine?: ThemeValue;
       readonly pinnedShadow?: ThemeValue;
       readonly detailLine?: ThemeValue;
+      readonly detailInset?: ThemeValue;
       readonly rowOddBg?: ThemeValue;
       readonly rowHoverBg?: ThemeValue;
       readonly rowSelectedBg?: ThemeValue;
@@ -292,6 +299,59 @@
       readonly scrollbar?: ThemeValue;
       readonly scrollbarThumb?: ThemeValue;
       readonly scrollbarThumbActive?: ThemeValue;
+      readonly rowHoverFg?: ThemeValue;
+      readonly rowSelectedFg?: ThemeValue;
+      readonly rowActiveFg?: ThemeValue;
+      readonly columnSeparator?: ThemeValue;
+      readonly columnSeparatorSize?: ThemeValue;
+      readonly columnSeparatorHeight?: ThemeValue;
+      readonly lastRowLine?: ThemeValue;
+      readonly lastColumnLine?: ThemeValue;
+      readonly headerSeparatorEnd?: ThemeValue;
+      readonly headerPaddingInline?: ThemeValue;
+      readonly headerButtonFg?: ThemeValue;
+      readonly headerButtonActiveFg?: ThemeValue;
+      readonly headerGroupLine?: ThemeValue;
+      readonly sortFg?: ThemeValue;
+      readonly inputFg?: ThemeValue;
+      readonly inputRadius?: ThemeValue;
+      readonly buttonFg?: ThemeValue;
+      readonly buttonRadius?: ThemeValue;
+      readonly popupRadius?: ThemeValue;
+      readonly popupBorder?: ThemeValue;
+      readonly popupPadding?: ThemeValue;
+      readonly optionSelectedBg?: ThemeValue;
+      readonly tooltipFontSize?: ThemeValue;
+      readonly tooltipFontFamily?: ThemeValue;
+      readonly tooltipFontWeight?: ThemeValue;
+      readonly tooltipLineHeight?: ThemeValue;
+      readonly tooltipMaxWidth?: ThemeValue;
+      readonly tooltipPaddingBlock?: ThemeValue;
+      readonly tooltipPaddingInline?: ThemeValue;
+      readonly tooltipRadius?: ThemeValue;
+      readonly tooltipWhiteSpace?: ThemeValue;
+      readonly tooltipArrowSize?: ThemeValue;
+      readonly tooltipArrowColor?: ThemeValue;
+      readonly overlayFg?: ThemeValue;
+      readonly overlayBg?: ThemeValue;
+      readonly footerBg?: ThemeValue;
+      readonly footerFg?: ThemeValue;
+      readonly sortNoneFg?: ThemeValue;
+      readonly buttonFontWeight?: ThemeValue;
+      readonly buttonPaddingInline?: ThemeValue;
+      readonly buttonHeight?: ThemeValue;
+      readonly buttonHoverBg?: ThemeValue;
+      readonly buttonHoverFg?: ThemeValue;
+      readonly buttonActiveBg?: ThemeValue;
+      readonly buttonPrimaryBg?: ThemeValue;
+      readonly buttonPrimaryFg?: ThemeValue;
+      readonly buttonPrimaryBorder?: ThemeValue;
+      readonly buttonPrimaryHoverBg?: ThemeValue;
+      readonly buttonPrimaryHoverFg?: ThemeValue;
+      readonly buttonPrimaryActiveBg?: ThemeValue;
+      readonly buttonFontSize?: ThemeValue;
+      readonly setListMinWidth?: ThemeValue;
+      readonly setListMaxWidth?: ThemeValue;
   }
 ## HeaderHeights
   export interface HeaderHeights {
@@ -534,6 +594,10 @@
           readonly height: number;
           readonly depth?: number;
           leave?(): void;
+          adopt?(grid: GridInstance<any, any>, o: {
+              readonly arrows?: 'rows';
+              readonly inlineScroll?: 'master';
+          }): () => void;
       };
   }
 ## SlotPart
@@ -543,6 +607,32 @@
   }
 ## ThemeValue
   export type ThemeValue = string | number;
+## TipFor
+  export interface TipFor extends Omit<TooltipSpec, 'text'> {
+      readonly text: string;
+      readonly col?: ResolvedColumn<any>;
+      readonly row?: Readonly<unknown> | null;
+      readonly value?: unknown;
+      readonly said?: boolean;
+      readonly node?: DocumentFragment | null;
+  }
+## TooltipSeam
+  export interface TooltipSeam {
+      targets?(): string;
+      tipFor?(target: HTMLElement): TipFor | null | undefined;
+      ok?(anchor: HTMLElement): boolean;
+      html?(html: string, doc: Document): DocumentFragment;
+      show(s: TooltipShow): void;
+      hide(el: HTMLElement, done: () => void): () => void;
+  }
+## TooltipShow
+  export interface TooltipShow {
+      readonly el: HTMLElement;
+      readonly anchor: HTMLElement;
+      readonly tip: TipFor;
+      readonly dir: Dir;
+      readonly hide: () => void;
+  }
 ## UPDATE_POLICY
   export declare const UPDATE_POLICY: UpdatePolicy;
 ## UpdatePolicy
@@ -570,32 +660,6 @@
   export declare function injectStyles(target: Document | ShadowRoot, nonce?: string): void;
 ## msg
   export declare function msg(m: GridMessages, key: MessageKey | FilterMessageKey | PaginationMessageKey | ExportMessageKey | RulesMessageKey | TreeMessageKey | DetailMessageKey | EditMessageKey | EditorsMessageKey | RangeMessageKey | RangeLoadKey | FillMessageKey | ColumnsMessageKey | ColumnsChooserMessageKey | ColumnMenuMessageKey | ContextMenuMessageKey | ContextMenuXlsxKey | PinnedMessageKey | TotalsMessageKey | ImportMessageKey | PrintMessageKey | FreshMessageKey | StatusMessageKey | FindMessageKey | RowDragMessageKey | FindHeldKey | ClearFiltersKey | FiltersPanelMessageKey | DockMessageKey | RowNumbersMessageKey | FilterRowsMessageKey | GroupMessageKey | PivotMessageKey | PivotBarMessageKey | AppMessageKey, params?: Readonly<Record<string, string | number>>, ctx?: LocaleCtx): string;
-## TipFor
-  export interface TipFor extends Omit<TooltipSpec, 'text'> {
-      readonly text: string;
-      readonly col?: ResolvedColumn<any>;
-      readonly row?: Readonly<unknown> | null;
-      readonly value?: unknown;
-      readonly said?: boolean;
-      readonly node?: DocumentFragment | null;
-  }
-## TooltipSeam
-  export interface TooltipSeam {
-      targets?(): string;
-      tipFor?(target: HTMLElement): TipFor | null | undefined;
-      ok?(anchor: HTMLElement): boolean;
-      html?(html: string, doc: Document): DocumentFragment;
-      show(s: TooltipShow): void;
-      hide(el: HTMLElement, done: () => void): () => void;
-  }
-## TooltipShow
-  export interface TooltipShow {
-      readonly el: HTMLElement;
-      readonly anchor: HTMLElement;
-      readonly tip: TipFor;
-      readonly dir: Dir;
-      readonly hide: () => void;
-  }
 
 @ @dzgrid/dom/popup
 ## PopupHost
@@ -630,14 +694,16 @@
   export declare function popupsFor(g: GridContext<unknown>): PopupHost;
 
 @ @dzgrid/dom/spans
+## SPANS_CSS
+  export declare const SPANS_CSS: string;
 ## spans
   export declare function spans(o?: {
       readonly acrossLevels?: boolean;
   }): GridFeature;
-## SPANS_CSS
-  export declare const SPANS_CSS: string;
 
 @ @dzgrid/dom/groups
+## GROUPS_CSS
+  export declare const GROUPS_CSS: string;
 ## GroupsApi
   export interface GroupsApi {
       collapsible(id: string): boolean;
@@ -660,8 +726,6 @@
   }
 ## groups
   export declare function groups(): GroupsFeature;
-## GROUPS_CSS
-  export declare const GROUPS_CSS: string;
 
 @ @dzgrid/dom/slots
 ## slots
@@ -684,6 +748,8 @@
   export declare function quickSearch(o?: QuickSearchSetup): QuickSearch;
 
 @ @dzgrid/dom/pagination
+## PAGINATION_CSS
+  export declare const PAGINATION_CSS: string;
 ## PAGINATION_KEYS
   export declare const PAGINATION_KEYS: ("pager.label" | "pager.first" | "pager.prev" | "pager.next" | "pager.last" | "pager.page" | "pager.pageOpen" | "pager.size" | "count.range" | "count.rangeOpen" | "count.filtered" | "selected.hidden" | "selected.selectAll" | "selected.clear" | "announce.page" | "announce.pageOpen")[];
 ## PaginationOptions
@@ -692,8 +758,6 @@
   }
 ## pagination
   export declare function pagination(o?: PaginationOptions): GridFeature;
-## PAGINATION_CSS
-  export declare const PAGINATION_CSS: string;
 
 @ @dzgrid/dom/export
 ## CsvExport
@@ -765,6 +829,10 @@
   };
 ## XlsxExportOptions
   export type XlsxExportOptions = Omit<XlsxOptions, 'text' | 'enums' | 'header' | 'columns' | 'levelHeader' | 'treeColumn' | 'chunkRows'>;
+## XlsxText
+  = ./export/index.js#XlsxText
+## XlsxTextContext
+  = ./export/index.js#XlsxTextContext
 ## csvExport
   export declare function csvExport(o: CsvExportOptions): CsvExport;
 
@@ -807,6 +875,8 @@
   export declare function rules(): GridFeature;
 
 @ @dzgrid/dom/tree
+## TREE_CSS
+  export declare const TREE_CSS: string;
 ## TREE_KEYS
   export declare const TREE_KEYS: readonly [
       "tree.expanded",
@@ -844,8 +914,6 @@
   }
 ## tree
   export declare function tree<T>(o: TreeFeatureOptions<T>): TreeFeature;
-## TREE_CSS
-  export declare const TREE_CSS: string;
 
 @ @dzgrid/dom/tree-lazy
 ## LazyChildren
@@ -865,6 +933,8 @@
   export declare function lazyChildren<T>(o: LazyOptions<T>): LazyChildren<T>;
 
 @ @dzgrid/dom/detail
+## DETAIL_CSS
+  export declare const DETAIL_CSS: string;
 ## DETAIL_KEYS
   export declare const DETAIL_KEYS: readonly [
       "detail.label",
@@ -893,14 +963,14 @@
       readonly settings: (c: NestedContext) => GridSettings<C>;
       readonly keep?: number;
       readonly onGrid?: (grid: GridInstance<C, any>, c: NestedContext) => void;
+      readonly arrows?: 'rows';
+      readonly inlineScroll?: 'master';
       readonly env?: (c: NestedContext) => GridEnv;
   }
 ## detail
   export declare function detail<T>(o: DetailFeatureOptions<T>): GridFeature;
 ## nestedGrid
   export declare function nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<'detail'>;
-## DETAIL_CSS
-  export declare const DETAIL_CSS: string;
 
 @ @dzgrid/dom/edit
 ## EDIT_KEYS
@@ -1000,6 +1070,8 @@
   } | {
       readonly value: unknown;
   };
+## EDITORS_CSS
+  export declare const EDITORS_CSS: string;
 ## EDITORS_KEYS
   export declare const EDITORS_KEYS: readonly [
       "edit.refused",
@@ -1038,11 +1110,10 @@
       readonly loadCalendar?: () => Promise<CalendarKit>;
       readonly dateMessages?: Readonly<Record<string, object>>;
       readonly list?: ListEditor;
+      readonly textarea?: (x: EdEnv, field: HTMLTextAreaElement) => Ed;
   }
 ## editors
   export declare function editors(o?: EditorsOptions): GridFeature;
-## EDITORS_CSS
-  export declare const EDITORS_CSS: string;
 
 @ @dzgrid/dom/filters-base
 ## DateAdapter
@@ -1196,6 +1267,7 @@
       readonly loadCalendar?: () => Promise<CalendarKit>;
       readonly dateMessages?: Readonly<Record<string, object>>;
       readonly list?: ListEditor;
+      readonly textarea?: (x: EdEnv, field: HTMLTextAreaElement) => Ed;
   }
 ## editors
   export declare function editors(o?: EditorsOptions): GridFeature;
@@ -1399,6 +1471,7 @@
   export interface ColumnsOptions {
       readonly drag?: boolean;
       readonly fitOnLoad?: 'content';
+      readonly dragOutHides?: boolean;
   }
 ## DropTarget
   export interface DropTarget {
@@ -1693,6 +1766,8 @@
   export declare function contextMenu<T = unknown>(o?: ContextMenuOptions<T>): ContextMenuFeature<T>;
 
 @ @dzgrid/dom/statusbar
+## STATUS_CSS
+  export declare const STATUS_CSS: string;
 ## STATUS_KEYS
   export declare const STATUS_KEYS: readonly StatusMessageKey[];
 ## StatusBarApi
@@ -1734,10 +1809,10 @@
   }
 ## statusBar
   export declare function statusBar(o?: StatusBarOptions): StatusBarFeature;
-## STATUS_CSS
-  export declare const STATUS_CSS: string;
 
 @ @dzgrid/dom/find
+## FIND_CSS
+  export declare const FIND_CSS: string;
 ## FIND_KEYS
   export declare const FIND_KEYS: readonly FindMessageKey[];
 ## FindApi
@@ -1787,14 +1862,14 @@
   }
 ## find
   export declare function find(o?: FindOptions): FindFeature;
-## FIND_CSS
-  export declare const FIND_CSS: string;
 
 @ @dzgrid/dom/row-drag
 ## DropWhere
   = @dzgrid/core/row-drag#DropWhere
 ## MoveStep
   = @dzgrid/core/row-drag#MoveStep
+## ROW_DRAG_CSS
+  export declare const ROW_DRAG_CSS: string;
 ## ROW_DRAG_KEYS
   export declare const ROW_DRAG_KEYS: readonly RowDragMessageKey[];
 ## RowDragApi
@@ -1860,10 +1935,10 @@
   export type RowMoveResult = 'moved' | 'edge' | 'locked' | 'sorted' | 'grouped' | 'refused' | 'tooMany' | 'unknown';
 ## rowDrag
   export declare function rowDrag<T = unknown>(o?: RowDragOptions<T>): RowDragFeature<T>;
-## ROW_DRAG_CSS
-  export declare const ROW_DRAG_CSS: string;
 
 @ @dzgrid/dom/dock
+## DOCK_CSS
+  export declare const DOCK_CSS: string;
 ## DOCK_KEYS
   export declare const DOCK_KEYS: readonly DockMessageKey[];
 ## DockApi
@@ -1918,8 +1993,6 @@
   = @dzgrid/core/dock#DockState
 ## dock
   export declare function dock(o?: DockOptions): DockFeature;
-## DOCK_CSS
-  export declare const DOCK_CSS: string;
 
 @ @dzgrid/dom/pivot
 ## PIVOT_KEYS
@@ -2035,6 +2108,8 @@
   export declare function pivotBar(o: PivotBarOptions): GridFeature;
 
 @ @dzgrid/dom/row-numbers
+## ROW_NUMBERS_CSS
+  export declare const ROW_NUMBERS_CSS: string;
 ## ROW_NUMBERS_KEYS
   export declare const ROW_NUMBERS_KEYS: readonly [
       "rownum.header"
@@ -2050,8 +2125,6 @@
   }
 ## rowNumbers
   export declare function rowNumbers(): GridFeature;
-## ROW_NUMBERS_CSS
-  export declare const ROW_NUMBERS_CSS: string;
 
 @ @dzgrid/dom/grouping
 ## GROUP_KEYS
@@ -2104,10 +2177,10 @@
           }) | null;
       };
   }
-## grouping
-  export declare function grouping(o?: GroupingFeatureOptions): GroupingFeature;
 ## TREE_CSS
   export declare const TREE_CSS: string;
+## grouping
+  export declare function grouping(o?: GroupingFeatureOptions): GroupingFeature;
 
 @ @dzgrid/dom/group-zone
 ## GroupZoneOptions
@@ -2153,6 +2226,8 @@
   export declare function groupZone(o: GroupZoneOptions): GridFeature;
 
 @ @dzgrid/dom/filters-panel
+## FILTERS_PANEL_CSS
+  export declare const FILTERS_PANEL_CSS: string;
 ## FILTERS_PANEL_KEYS
   export declare const FILTERS_PANEL_KEYS: readonly FiltersPanelMessageKey[];
 ## FiltersPanelApi
@@ -2185,8 +2260,6 @@
   }
 ## filtersPanel
   export declare function filtersPanel(o?: FiltersPanelOptions): FiltersPanelFeature;
-## FILTERS_PANEL_CSS
-  export declare const FILTERS_PANEL_CSS: string;
 
 @ @dzgrid/dom/columns-panel
 ## COLUMNS_CHOOSER_KEYS
@@ -2315,10 +2388,34 @@
   export declare function pinnedRows<T = unknown>(o?: PinnedRowsOptions<T>): PinnedRowsFeature<T>;
 
 @ @dzgrid/dom/auto-height
-## autoHeight
-  export declare function autoHeight(): GridFeature;
 ## WRAP_CSS
   export declare const WRAP_CSS = ":is(.dzg-body,.dzg-sticky) .dzg-cell[data-wrap]{line-height:var(--dzg-wrap-line,1.25rem);padding-block:calc((var(--dzg-row-height,2rem) - var(--dzg-line,1px) - var(--dzg-wrap-line,1.25rem))/2)}";
+## autoHeight
+  export declare function autoHeight(): GridFeature;
+
+@ @dzgrid/dom/row-heights
+## rowHeights
+  export declare function rowHeights(): GridFeature;
+
+@ @dzgrid/dom/show-as
+## ShowAsOptions
+  export interface ShowAsOptions {
+      readonly digits?: number;
+  }
+## showAs
+  export declare function showAs(o?: ShowAsOptions): GridFeature;
+
+@ @dzgrid/dom/editors-textarea
+## TEXTAREA_CSS
+  export declare const TEXTAREA_CSS: string;
+## TextareaEditor
+  export type TextareaEditor = typeof import('./editors-textarea/index.js').textareaEditor;
+## textareaEditor
+  export declare function textareaEditor(x: EdEnv, f: HTMLTextAreaElement): Ed;
+
+@ @dzgrid/dom/group-select
+## groupSelect
+  export declare function groupSelect(): GridFeature;
 
 @ @dzgrid/dom/row-gaps
 ## GapCtx
@@ -2492,6 +2589,8 @@
       readonly messages?: Readonly<Record<string, object>>;
       readonly calendar?: DateCalendarOptions;
   }
+## FILTERS_CSS
+  export declare const FILTERS_CSS: string;
 ## FILTER_KEYS
   export declare const FILTER_KEYS: ("filter.op.contains" | "filter.op.notContains" | "filter.op.equals" | "filter.op.notEqual" | "filter.op.startsWith" | "filter.op.endsWith" | "filter.op.blank" | "filter.op.notBlank" | "filter.op.lt" | "filter.op.lte" | "filter.op.gt" | "filter.op.gte" | "filter.op.between" | "filter.op.onDay" | "filter.op.notOnDay" | "filter.op.betweenDays" | "filter.op.before" | "filter.op.after" | "filter.op.onOrBefore" | "filter.op.onOrAfter" | "filter.inputLabel" | "filter.summaryActive" | "filter.clear" | "filter.invalid" | "announce.filtered" | "announce.filteredOpen" | "filter.popupLabel" | "header.withFilter" | "filter.op" | "filter.value" | "filter.valueTo" | "filter.apply" | "filter.all" | "filter.yes" | "filter.no" | "filter.date" | "filter.dateTime" | "filter.period" | "filter.zone" | "filter.loadingDates" | "filter.loadFailed" | "filter.set.search" | "filter.set.all" | "filter.set.allShown" | "filter.set.blanks" | "filter.set.option" | "filter.set.count" | "filter.set.truncated" | "filter.set.failed" | "filter.floatingToggle" | "announce.floatingHidden" | "announce.floatingShown")[];
 ## FiltersFeature
@@ -2523,8 +2622,6 @@
   }
 ## filters
   export declare function filters(o?: FiltersOptions): FiltersFeature;
-## FILTERS_CSS
-  export declare const FILTERS_CSS: string;
 
 @ @dzgrid/dom/locales/en
 ## EN
@@ -4721,14 +4818,14 @@
   };
 
 @ @dzgrid/dom/responsive
+## RESPONSIVE_CSS
+  export declare const RESPONSIVE_CSS: string;
 ## ResponsiveOptions
   export interface ResponsiveOptions {
       readonly priority?: Readonly<Record<string, number>>;
   }
 ## responsive
   export declare function responsive(o?: ResponsiveOptions): GridFeature;
-## RESPONSIVE_CSS
-  export declare const RESPONSIVE_CSS: string;
 
 @ @dzgrid/dom/import
 ## FileImportApi
@@ -4751,6 +4848,8 @@
       readonly onRows: (rows: Record<string, unknown>[], problems: readonly Problem[], file: ImportedFile) => void;
       readonly drop?: boolean;
   }
+## IMPORT_CSS
+  export declare const IMPORT_CSS: string;
 ## IMPORT_KEYS
   export declare const IMPORT_KEYS: readonly [
       "import.drop",
@@ -4775,8 +4874,6 @@
   }
 ## fileImport
   export declare function fileImport(o: FileImportOptions): FileImportFeature;
-## IMPORT_CSS
-  export declare const IMPORT_CSS: string;
 
 @ @dzgrid/dom/locales/en-import
 ## EN_IMPORT
@@ -4810,27 +4907,3 @@
           'import.failed': string;
       };
   };
-
-@ @dzgrid/dom/row-heights
-## rowHeights
-  export declare function rowHeights(): GridFeature;
-
-@ @dzgrid/dom/show-as
-## showAs
-  export declare function showAs(o?: ShowAsOptions): GridFeature;
-## ShowAsOptions
-  export interface ShowAsOptions {
-      readonly digits?: number;
-  }
-
-@ @dzgrid/dom/editors-textarea
-## TextareaEditor
-  export type TextareaEditor = typeof import('./editors-textarea/index.js').textareaEditor;
-## textareaEditor
-  export declare function textareaEditor(x: EdEnv, f: HTMLTextAreaElement): Ed;
-## TEXTAREA_CSS
-  export declare const TEXTAREA_CSS: string;
-
-@ @dzgrid/dom/group-select
-## groupSelect
-  export declare function groupSelect(): GridFeature;

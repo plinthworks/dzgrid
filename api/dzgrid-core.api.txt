@@ -14,6 +14,7 @@
 # history: owner 2026-11-12 « 1 ok … on agrandit »: the header floor (column-resize.md 21–24); additions only — @dzgrid/core#ColumnModel
 # history: owner 2026-11-13: autoColumns generic over the column type (default ColumnDef) — 1.12.0 — @dzgrid/core/auto-columns#AutoColumnsOptions, @dzgrid/core/auto-columns#MergedColumn, @dzgrid/core/auto-columns#autoColumns
 # history: owner 2026-11-14 « A »: a column's tooltip in one line (true, false, a function, ColumnTooltip options) and headerTooltip as words or a TooltipSpec — inputs widened, 1.12.0 — @dzgrid/core#ColumnDef, @dzgrid/core#ColumnTooltip, @dzgrid/core#TooltipSpec, @dzgrid/core#TooltipPlacement
+# history: 1.14.0 published
 
 @ @dzgrid/core
 ## AbortHandle
@@ -161,6 +162,8 @@
       readonly movable?: boolean;
       readonly hideable?: false;
       readonly menu?: false;
+      readonly filterButton?: false;
+      readonly keyboard?: false;
       readonly chooser?: false;
       readonly sortable?: boolean;
       readonly groupable?: boolean;
@@ -205,6 +208,7 @@
       readonly colSpan?: (ctx: SpanCtx<T>) => number;
       readonly groupShow?: 'open' | 'closed';
       readonly csv?: 'text';
+      readonly showAs?: 'percentOfTotal' | 'percentOfGroup';
       readonly editable?: EditableRule<T>;
       readonly validate?: (value: V | null, row: Readonly<T>, context: unknown) => string | null | undefined;
       readonly edit?: EditChecks<T, V>;
@@ -304,6 +308,11 @@
       readonly hidden?: boolean;
       readonly pinned?: Side | null;
       readonly order?: number;
+  }
+## ColumnTooltip
+  export interface ColumnTooltip<T, V = unknown> extends TooltipSpec {
+      readonly when?: 'always' | 'truncated';
+      readonly content?: (value: V | null, row: Readonly<T>, context: unknown) => string | TooltipSpec | null;
   }
 ## ColumnType
   export type ColumnType = 'text' | 'number' | 'day' | 'instant' | 'boolean' | 'enum' | 'custom';
@@ -1316,6 +1325,20 @@
   }
 ## TextOp
   export type TextOp = 'contains' | 'notContains' | 'equals' | 'notEqual' | 'startsWith' | 'endsWith' | 'blank' | 'notBlank';
+## TooltipPlacement
+  export type TooltipPlacement = 'auto' | `${'top' | 'bottom' | 'start' | 'end' | 'left' | 'right'}${'' | '-start' | '-end'}`;
+## TooltipSpec
+  export interface TooltipSpec {
+      readonly text?: string;
+      readonly html?: string;
+      readonly tone?: 'info' | 'neutral' | 'success' | 'warning' | 'danger';
+      readonly placement?: TooltipPlacement;
+      readonly animation?: 'fade' | 'scale' | 'slide' | 'pop' | 'rise' | 'morph' | 'none';
+      readonly shape?: 'bubble' | 'ticket' | 'pill' | (string & {});
+      readonly delayMs?: number;
+      readonly maxWidth?: number | string;
+      readonly style?: Readonly<Record<`--${string}`, string>>;
+  }
 ## TransactionResult
   export interface TransactionResult {
       readonly kind: 'reset' | 'delta' | 'none';
@@ -1637,25 +1660,6 @@
       readonly from: InstantMs;
       readonly to: InstantMs;
   };
-## ColumnTooltip
-  export interface ColumnTooltip<T, V = unknown> extends TooltipSpec {
-      readonly when?: 'always' | 'truncated';
-      readonly content?: (value: V | null, row: Readonly<T>, context: unknown) => string | TooltipSpec | null;
-  }
-## TooltipSpec
-  export interface TooltipSpec {
-      readonly text?: string;
-      readonly html?: string;
-      readonly tone?: 'info' | 'neutral' | 'success' | 'warning' | 'danger';
-      readonly placement?: TooltipPlacement;
-      readonly animation?: 'fade' | 'scale' | 'slide' | 'pop' | 'rise' | 'morph' | 'none';
-      readonly shape?: 'bubble' | 'ticket' | 'pill' | (string & {});
-      readonly delayMs?: number;
-      readonly maxWidth?: number | string;
-      readonly style?: Readonly<Record<`--${string}`, string>>;
-  }
-## TooltipPlacement
-  export type TooltipPlacement = 'auto' | `${'top' | 'bottom' | 'start' | 'end' | 'left' | 'right'}${'' | '-start' | '-end'}`;
 
 @ @dzgrid/core/server
 ## AbortHandle
@@ -2102,6 +2106,9 @@
       readonly xlsxStyle?: (c: XlsxStyleContext<T>) => XlsxStyle | null | undefined;
       readonly chunkRows?: number;
       readonly groupRows?: boolean | undefined;
+      readonly title?: XlsxText | undefined;
+      readonly subtitle?: XlsxText | undefined;
+      readonly footer?: XlsxText | undefined;
   }
 ## XlsxPiece
   export interface XlsxPiece {
@@ -2125,6 +2132,16 @@
 ## XlsxSummary
   export interface XlsxSummary extends CsvSummary {
       readonly problems: readonly Problem[];
+  }
+## XlsxText
+  export type XlsxText = string | readonly string[] | ((c: XlsxTextContext) => string | readonly string[]);
+## XlsxTextContext
+  export interface XlsxTextContext {
+      readonly rows: number;
+      readonly scope: CsvScope;
+      readonly query: Query;
+      readonly now: number;
+      readonly ctx: LocaleCtx;
   }
 ## ZipEntry
   export interface ZipEntry {

@@ -1,3 +1,4 @@
+// Right to left: the logical inline scroll position across engines, a direction changed live (docs/behaviors/direction.md).
 import { describe, it, expect } from 'vitest';
 import { inlineScroll, isOnScrollbar, logicalSpan, logicalX, scrollConvention, setInlineScroll, watchDirection, type ScrollConvention } from '../src/dir.js';
 import { Scope } from '../src/render/scope.js';

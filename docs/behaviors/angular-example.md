@@ -53,7 +53,7 @@ audit screen's last bytes.)
 ## Tests
 - `perf/test/example-csv.test.ts` (no Angular, runs in vitest): the Arabic sample — BOM `EF BB BF`, the first header first, no U+200E, U+200F or U+061C, CRLF at every line end, RFC 4180 (every record the same number of fields, the quoted note read back whole), Latin digits only, the first data line written by hand.
 - `perf/test/example-ssr.test.ts` (skipped without the example's server build): `renderApplication` resolves; `<dz-grid>` present, no grid rows; no "document is not defined", no error; the process ends by itself (no open timer); `kernel()` null.
-- `perf/test/example-bytes.test.ts` (skipped without the example's builds): the DzGrid share ≤ 85 000; the baseline and the wrapper share recorded.
+- `perf/test/example-bytes.test.ts` (skipped without the example's builds): the DzGrid share ≤ its ceiling (`K8` in `scripts/example.mjs`, 103 800 since 1.14.0); the baseline and the wrapper share recorded.
 - `perf/test/audit-profile.test.ts`: the K.8 profile names every `@dzgrid/*` value the example imports too.
 - In headless Chrome (`node scripts/example.mjs browser`): the client build shows the grid, French and Arabic; in `zone` and in `default`, an `emit` from a pooled cell updates the host's counter; ticks per scroll step bounded.
 - Smoke 19 and 22 by hand: build exit 0 and the server render.

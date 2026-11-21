@@ -1,5 +1,8 @@
 # DzGrid feature inventory (public documentation, own words)
 
+> **Outdated** (2026-11-21): this is the Phase 3 comparison. The current one is `docs/gap-aggrid-2026-11.md`
+> (ag-Grid's features against DzGrid 1.14.0) and `docs/inventaire-2026-11.md` (what DzGrid has, what is left).
+
 ## How to read the tables
 
 - **Grids:** AG = ag-Grid, MUI = MUI X Data Grid, TS = TanStack Table (headless), TB = Tabulator, HT = Handsontable, KD = Kendo UI for Angular, DX = DevExtreme.
