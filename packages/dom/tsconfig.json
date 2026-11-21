@@ -17,6 +17,7 @@
       "@dzgrid/core/csv": ["../core/src/csv.ts"],
       "@dzgrid/core/xlsx": ["../core/src/xlsx.ts"],
       "@dzgrid/core/xlsx-detail": ["../core/src/xlsx-detail.ts"],
+      "@dzgrid/core/pdf": ["../core/src/pdf.ts"],
       "@dzgrid/core/rules": ["../core/src/rules.ts"],
       "@dzgrid/core/tree": ["../core/src/tree.ts"],
       "@dzgrid/core/tree-lazy": ["../core/src/tree-lazy.ts"],

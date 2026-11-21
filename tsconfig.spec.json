@@ -35,6 +35,9 @@
       "@dzgrid/core/xlsx-detail": [
         "./packages/core/src/xlsx-detail.ts"
       ],
+      "@dzgrid/core/pdf": [
+        "./packages/core/src/pdf.ts"
+      ],
       "@dzgrid/core/rules": [
         "./packages/core/src/rules.ts"
       ],
@@ -187,6 +190,15 @@
       ],
       "@dzgrid/dom/locales/ar-advanced-filter": [
         "./packages/dom/src/locales/ar-advanced-filter.ts"
+      ],
+      "@dzgrid/dom/locales/en-pdf": [
+        "./packages/dom/src/locales/en-pdf.ts"
+      ],
+      "@dzgrid/dom/locales/fr-pdf": [
+        "./packages/dom/src/locales/fr-pdf.ts"
+      ],
+      "@dzgrid/dom/locales/ar-pdf": [
+        "./packages/dom/src/locales/ar-pdf.ts"
       ],
       "@dzgrid/dom/filters-panel": [
         "./packages/dom/src/filters-panel.ts"

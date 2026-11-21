@@ -77,6 +77,8 @@ export interface ContextMenuOptions<T = unknown> {
     readonly csv?: { run(scope?: 'displayed'): Promise<unknown> };
     /** Export to Excel (the displayed rows): `csvExport({ xlsx })`'s `xlsx` (Phase 9); its label `cmenu.exportXlsx` is then required. */
     readonly xlsx?: { run(scope?: 'displayed'): Promise<unknown> } | undefined;
+    /** Export to PDF (1.17.0, pdf-export.md): `{ run: (s) => exporter.run(s, { format: 'pdf' }) }`; its label `cmenu.exportPdf` (`locales/<lang>-pdf`) is then required. */
+    readonly pdf?: { run(scope?: 'displayed'): Promise<unknown> } | undefined;
     /** Expand / Collapse on a parent row. */
     readonly tree?: { api(grid: Grid): TreeApiLike | null };
     /** Pin / Unpin the row (owner Q-CM3 A). */
@@ -120,7 +122,7 @@ export function contextMenu<T = unknown>(o: ContextMenuOptions<T> = {}): Context
     id: 'context-menu',
     api: (grid) => apis.get(grid.kernel) ?? null,
     setup(g) {
-      needTexts(g, o.use?.xlsx ? [...CONTEXT_MENU_KEYS, 'cmenu.exportXlsx'] : CONTEXT_MENU_KEYS, 'context-menu');
+      needTexts(g, [...CONTEXT_MENU_KEYS, ...(o.use?.xlsx ? ['cmenu.exportXlsx'] : []), ...(o.use?.pdf ? ['cmenu.exportPdf'] : [])], 'context-menu');
       const { kernel, el, scope, columns: m } = g;
       const grid = { kernel };
       const L = menuList(g);
@@ -194,6 +196,7 @@ export function contextMenu<T = unknown>(o: ContextMenuOptions<T> = {}): Context
         const p = o.use?.pinned?.api(g);
         const csv = o.use?.csv;
         const xl = o.use?.xlsx;
+        const pd = o.use?.pdf;
         const st = o.use?.status?.api(g);
         const b = c.block && r?.box();
         // Cut: disabled when no cell of the block (or the cell) is editable; Paste: when its target (the block's first cell) is read-only.
@@ -235,7 +238,7 @@ export function contextMenu<T = unknown>(o: ContextMenuOptions<T> = {}): Context
           p ? (c.band
             ? [it('unpin', pin(c.band, p.get()[c.band].filter((x) => id(c.band!, x) !== c.key)))]
             : (['top', 'bottom'] as const).map((s) => it(`pin.${s}`, pin(s, [...p.get()[s], c.row]), p.get()[s].some((x) => id(s, x) === id(s, c.row))))) : [],
-          [csv && it('export.csv', () => void csv.run('displayed')), xl && it('export.xlsx', () => void xl.run('displayed'))],
+          [csv && it('export.csv', () => void csv.run('displayed')), xl && it('export.xlsx', () => void xl.run('displayed')), pd && it('export.pdf', () => void pd.run('displayed'))],
           [c.block && st?.stats() && { id: 'status.read', label: g.msg('status.read'), action: () => st.announce() }],
           // « Clear all filters » (find.md 15): while a filter or the search is on, its text given; as `clearFilters()`.
           [z.key !== kernel.query.key && g.settings.messages.text['cmenu.clearFilters'] && it('clearFilters', () => kernel.dispatch({ type: 'query.set', query: z }, 'user'))],

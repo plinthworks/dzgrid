@@ -19,7 +19,7 @@ export interface RunArgs {
   readonly t0: number;
   readonly signal: AbortSignal;
   /** `'xlsx'`: the Excel file (Phase 9); CSV otherwise. */
-  readonly format?: 'csv' | 'xlsx' | 'json' | undefined;
+  readonly format?: 'csv' | 'xlsx' | 'json' | 'pdf' | undefined;
 }
 
 type Stage = NonNullable<Extract<GridEvent<unknown>, { type: 'exportFinished' }>['failure']>['stage'];
@@ -51,6 +51,7 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
   const { kernel: K, rows: M } = g;
   const { scope, signal } = r;
   const xl = r.format === 'xlsx';
+  const pd = r.format === 'pdf';
   // The file's kind, told in the request and the events unless CSV (json-export.md 2).
   const fmt = r.format === 'csv' ? undefined : r.format;
   const gone = (): boolean => g.scope.isDisposed;
@@ -113,9 +114,9 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
 
   async function steps(): Promise<ExportOutcome> {
     if (signal.aborted) return finish('cancelled');
-    // An Excel export without the `xlsx` option: told, nothing built.
-    if (xl && !o.xlsx) {
-      emit(K, { type: 'problems', source: 'host', problems: [problem('missing-feature', 'warning', 'export.xlsx')] });
+    // An Excel export without the `xlsx` option (a PDF without `pdf`): told, nothing built.
+    if ((xl && !o.xlsx) || (pd && !o.pdf)) {
+      emit(K, { type: 'problems', source: 'host', problems: [problem('missing-feature', 'warning', `export.${fmt}`)] });
       return finish('failed', { stage: 'build', err: own('missing-feature') });
     }
     // The rows the browser writes are those of a settled model: never a page still loading.
@@ -239,13 +240,17 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
         const d = xl && typeof x == 'object' && x.detail ? await race(import('../xlsx/detail.js').then((m) => m.prepare(g, x, rows, env, { signal, prep: (n, t) => progress('preparing', n, t) }))) : undefined;
         if (d === null) return finish('cancelled');
         if (d?.problems.length) emit(K, { type: 'problems', source: 'host', problems: d.problems });
+        const done = (n: number) => progress('building', Math.min(n, held.count), held.count);
+        // The PDF's code (1.17.0, pdf-export.md): a chunk of its own, with `@dzgrid/core/pdf`.
         const made = await (xl
-          ? race(import('../xlsx/index.js')).then((m) => m.build(g, d ? { ...o, xlsx: { ...x as object, ...d.options } } : o, d ? { ...rows, ...d.input } : rows, fns, request.columns, spans, env, (n) => progress('building', Math.min(n, held.count), held.count), { scope, rows: held.count }))
-          : race(import('../json/index.js')).then((x) => x.build(g, o, held, request.columns, env)));
+          ? race(import('../xlsx/index.js')).then((m) => m.build(g, d ? { ...o, xlsx: { ...x as object, ...d.options } } : o, d ? { ...rows, ...d.input } : rows, fns, request.columns, spans, env, done, { scope, rows: held.count }))
+          : pd
+            ? race(import('../pdf/index.js')).then((m) => m.build(g, o, rows, fns, request.columns, env, done, { scope, rows: held.count }))
+            : race(import('../json/index.js')).then((x) => x.build(g, o, held, request.columns, env)));
         if (!made) return finish('cancelled');
         sum = made.sum;
         if (sum.problems.length) emit(K, { type: 'problems', source: 'host', problems: sum.problems });
-        if (!made.blob) return finish('failed', { stage: 'build', err: own('xlsx-too-large') });
+        if (!made.blob) return finish('failed', { stage: 'build', err: own(pd ? 'pdf-script' : 'xlsx-too-large') });
         blob = made.blob;
       } else {
         // A grouped grid (csv-export.md « Grouped rows »): the screen's labels, the grouping's totals and label column;

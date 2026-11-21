@@ -47,7 +47,7 @@ function typeOnly(t: readonly Token[], i: number): boolean {
 }
 
 /** Every reason a source breaks purity, as short labels. Exported for the self-test below. */
-export function violations(source: string, opts: { base: boolean; server?: boolean; spans?: boolean; csv?: boolean; edit?: boolean; range?: boolean; state?: boolean; xlsx?: boolean; import?: boolean } = { base: true }): string[] {
+export function violations(source: string, opts: { base: boolean; server?: boolean; spans?: boolean; csv?: boolean; edit?: boolean; range?: boolean; state?: boolean; xlsx?: boolean; pdf?: boolean; import?: boolean } = { base: true }): string[] {
   const found: string[] = [];
   const t = tokens(source);
   t.forEach((tok, i) => {
@@ -79,10 +79,10 @@ export function violations(source: string, opts: { base: boolean; server?: boole
       if (!opts.server && !opts.csv && /(^|\/)server(\.js|\/|$)/.test(spec)) found.push('server import');
       // Nor the spans entry (step 9b): a grid without span rules carries none of it.
       // The xlsx entry (Phase 9) builds on CSV's reads and the groups' walk: a fix to one rule reaches both files.
-      if (!opts.spans && !opts.csv && !opts.xlsx && /(^|\/)spans(\.js|\/|$)/.test(spec)) found.push('spans import');
+      if (!opts.spans && !opts.csv && !opts.xlsx && !opts.pdf && /(^|\/)spans(\.js|\/|$)/.test(spec)) found.push('spans import');
       // Nor the csv entry (step 10): a grid that exports nothing carries none of it. The range entry
       // (Phase 5 step 10) shares its cell writer: a copy writes what an export writes.
-      if (!opts.csv && !opts.range && !opts.xlsx && !opts.import && /(^|\/)csv(\.js|\/|$)/.test(spec)) found.push('csv import');
+      if (!opts.csv && !opts.range && !opts.xlsx && !opts.pdf && !opts.import && /(^|\/)csv(\.js|\/|$)/.test(spec)) found.push('csv import');
       // Nor the xlsx entry: a grid exporting CSV only carries none of it.
       if (!opts.xlsx && /(^|\/)xlsx(\.js|\/|$)/.test(spec)) found.push('xlsx import');
       // Nor the edit entry (Phase 5 step 3): a read-only grid carries none of it. The range entry names
@@ -108,7 +108,7 @@ describe('core purity', () => {
   it('names no forbidden global, package or dynamic import', () => {
     const offenders = all.flatMap((f) => {
       const rel = f.slice(SRC.length + 1);
-      const v = violations(readFileSync(f, 'utf8'), { base: !rel.startsWith('enterprise'), server: rel === 'server.ts' || rel === 'infinite.ts' || rel === 'server-side.ts' || rel === 'server-pivot.ts' || rel.startsWith('server/') || rel.startsWith('server-pivot/'), spans: rel === 'spans.ts' || rel.startsWith('spans/'), csv: rel === 'csv.ts' || rel.startsWith('csv/'), edit: rel === 'edit.ts' || rel.startsWith('edit/'), range: rel === 'range.ts' || rel.startsWith('range/'), state: rel === 'state.ts' || rel.startsWith('state/'), xlsx: rel === 'xlsx.ts' || rel === 'xlsx-detail.ts' || rel.startsWith('xlsx/'), import: rel === 'import.ts' || rel.startsWith('import/') });
+      const v = violations(readFileSync(f, 'utf8'), { base: !rel.startsWith('enterprise'), server: rel === 'server.ts' || rel === 'infinite.ts' || rel === 'server-side.ts' || rel === 'server-pivot.ts' || rel.startsWith('server/') || rel.startsWith('server-pivot/'), spans: rel === 'spans.ts' || rel.startsWith('spans/'), csv: rel === 'csv.ts' || rel.startsWith('csv/'), edit: rel === 'edit.ts' || rel.startsWith('edit/'), range: rel === 'range.ts' || rel.startsWith('range/'), state: rel === 'state.ts' || rel.startsWith('state/'), xlsx: rel === 'xlsx.ts' || rel === 'xlsx-detail.ts' || rel.startsWith('xlsx/'), pdf: rel === 'pdf.ts' || rel.startsWith('pdf/'), import: rel === 'import.ts' || rel.startsWith('import/') });
       return v.length ? [`${rel}: ${[...new Set(v)].join(', ')}`] : [];
     });
     expect(offenders).toEqual([]);

@@ -1543,4 +1543,10 @@ their review and undocumented; 1.16.0 is their official release.
   `advanced-filter.css`); Angular `[(advancedFilter)]`; element `advancedFilter`. Tests by hand: core 29, conformance 7,
   dom 17, theme 6, Angular 2, element 4; browsers `scripts/browser-1-17.mjs` 84 / 84 (Chrome, Firefox, WebKit; fr light,
   ar dark; keys; axe 0). K.8 93 768 / 94 000.
-- [ ] Owner's review of the autonomous decisions; later, if asked: a typed text form, a docked panel.
+- [x] PDF export: sheet `docs/behaviors/pdf-export.md`, plan and autonomous decisions
+  `docs/phase-14-steps/pdf-export-plan.md`. `@dzgrid/core/pdf` (Helvetica / WinAnsi, a TrueType subset embedded, right
+  to left and shaped scripts refused), the DOM's lazy pdf chunk, `csvExport({ pdf })`, `use.pdf` and `-pdf` texts. Tests
+  by hand: core 30 (Ghostscript and pdfminer included), dom 11; browsers `scripts/browser-1-17.mjs --only pdf` 39 / 39
+  (Chrome, Firefox, WebKit; Chrome's viewer screenshot). 10 000 × 10: 157–264 ms, 0.72–0.75 MB. K.8 93 762 / 94 000.
+- [ ] Owner's review of the autonomous decisions; later, if asked: a typed text form, a docked panel; PDF: Arabic
+  shaping and bidi, a watermark, the master / detail blocks.

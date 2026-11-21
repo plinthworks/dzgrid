@@ -1165,6 +1165,15 @@
           "source": "packages/dom/src/export/index.ts"
         },
         {
+          "name": "pdf",
+          "type": "true | PdfExportOptions",
+          "resolved": null,
+          "required": false,
+          "doc": "PDF files too (1.17.0, pdf-export.md): `run(scope, { format: 'pdf' })`, `bind(button, { format: 'pdf' })`. Absent: a PDF export fails with `missing-feature`. Helvetica (Latin text) unless `font` gives a TrueType font; Arabic refused (`print()`).",
+          "default": null,
+          "source": "packages/dom/src/export/index.ts"
+        },
+        {
           "name": "text",
           "type": "'value' | 'display'",
           "resolved": null,
@@ -2226,7 +2235,7 @@
       "options": [
         {
           "name": "use",
-          "type": "{ /** Copy, Copy with headers; with `edit` Cut and Paste. */ readonly range?: { api(grid: Grid): RangeApiLike | null }; /** Fill down / Fill right, by its `along`. */ readonly fill?: { api(grid: Grid): FillApiLike | null }; /** Undo / Redo; Cut and Paste need it too. */ readonly edit?: { api(grid: Grid): EditApiLike | null }; /** Export to CSV (the displayed rows). */ readonly csv?: { run(scope?: 'displayed'): Promise<unknown> }; /** Export to Excel (the displayed rows): `csvExport({ xlsx })`'s `xlsx` (Phase 9); its label `cmenu.exportXlsx` is then required. */ readonly xlsx?: { run(scope?: 'displayed'): Promise<unknown> } | undefined; /** Expand / Collapse on a parent row. */ readonly tree?: { api(grid: Grid): TreeApiLike | null }; /** Pin / Unpin the row (owner Q-CM3 A). */ readonly pinned?: { api(grid: Grid): PinnedRowsApiLike<T> | null }; /** « Read the totals » on a cell of the block (`statusBar()`, owner Q-SB3; its label from the status bar's texts). */ readonly status?: { api(grid: Grid): StatusApiLike | null } }",
+          "type": "{ /** Copy, Copy with headers; with `edit` Cut and Paste. */ readonly range?: { api(grid: Grid): RangeApiLike | null }; /** Fill down / Fill right, by its `along`. */ readonly fill?: { api(grid: Grid): FillApiLike | null }; /** Undo / Redo; Cut and Paste need it too. */ readonly edit?: { api(grid: Grid): EditApiLike | null }; /** Export to CSV (the displayed rows). */ readonly csv?: { run(scope?: 'displayed'): Promise<unknown> }; /** Export to Excel (the displayed rows): `csvExport({ xlsx })`'s `xlsx` (Phase 9); its label `cmenu.exportXlsx` is then required. */ readonly xlsx?: { run(scope?: 'displayed'): Promise<unknown> } | undefined; /** Export to PDF (1.17.0, pdf-export.md): `{ run: (s) => exporter.run(s, { format: 'pdf' }) }`; its label `cmenu.exportPdf` (`locales/<lang>-pdf`) is then required. */ readonly pdf?: { run(scope?: 'displayed'): Promise<unknown> } | undefined; /** Expand / Collapse on a parent row. */ readonly tree?: { api(grid: Grid): TreeApiLike | null }; /** Pin / Unpin the row (owner Q-CM3 A). */ readonly pinned?: { api(grid: Grid): PinnedRowsApiLike<T> | null }; /** « Read the totals » on a cell of the block (`statusBar()`, owner Q-SB3; its label from the status bar's texts). */ readonly status?: { api(grid: Grid): StatusApiLike | null } }",
           "resolved": null,
           "required": false,
           "doc": "The features the default items drive, through their `api(grid)` only (typed: the menu ships none of them). Absent: their items are absent.",

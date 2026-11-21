@@ -129,7 +129,7 @@ const SIZE_CEILINGS = {
   '@dzgrid/dom/locales/fr-column-menu': 610, // Phase 9 « Clear all filters » (2 % rule, measured 603); Q3-5: 550 → 600
   '@dzgrid/dom/locales/ar-column-menu': 710, // Phase 9 « Clear all filters » (2 % rule, measured 709); Q3-5: 650 → 700
   // Phase 9, the cell menu (owner Q-CM4, 2026-11-02): over the popup host, the shared list in the internal entry; its texts in their own bundles; its look in menu.css.
-  '@dzgrid/dom/context-menu': 2560, // Phase 9 « Clear all filters » (2026-11-03): 2 500 → 2 560 (measured 2 560, +2.4 %: TO CONFIRM by the owner, above the 2 % rule); owner 2026-11-03 (Excel export): 2 450 → 2 500 (« Export to Excel »); owner 2026-11-03: 2 400 → 2 450 (« Read the totals »); owner 2026-11-02: 2 100 → 2 400 (measured 2 325; the default items ≈ 650 B)
+  '@dzgrid/dom/context-menu': 2610, // 1.17.0 (+2 % rule, measured 2 591: `use.pdf` and its key); before 2 560: Phase 9 « Clear all filters » (2026-11-03): 2 500 → 2 560 (measured 2 560, +2.4 %: TO CONFIRM by the owner, above the 2 % rule); owner 2026-11-03 (Excel export): 2 450 → 2 500 (« Export to Excel »); owner 2026-11-03: 2 400 → 2 450 (« Read the totals »); owner 2026-11-02: 2 100 → 2 400 (measured 2 325; the default items ≈ 650 B)
   // Phase 9 status bar (owner 2026-11-03, status-dock-plan.md §5): the strip over the DOM base, its -status texts.
   '@dzgrid/dom/statusbar': 2300,
   '@dzgrid/dom/locales/en-status': 250,

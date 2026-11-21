@@ -1030,6 +1030,7 @@ export interface CsvExportOptions extends Omit<CsvOptions, 'chunkRows'> {
     }) => void | Promise<void>;
     readonly loadRun?: () => Promise<typeof Chunk>;
     readonly xlsx?: true | XlsxExportOptions;
+    readonly pdf?: true | PdfExportOptions;
 }
 ```
 
@@ -1064,7 +1065,7 @@ export type ExportAllResult = {
 ### ExportFormat
 
 ```ts
-export type ExportFormat = 'csv' | 'xlsx' | 'json';
+export type ExportFormat = 'csv' | 'xlsx' | 'json' | 'pdf';
 ```
 
 ### ExportOutcome
@@ -1114,6 +1115,24 @@ export type XlsxExportOptions = Omit<XlsxOptions, 'text' | 'enums' | 'header' | 
 
 ```ts
 export declare function csvExport(o: CsvExportOptions): CsvExport;
+```
+
+### PdfExportOptions
+
+```ts
+export type PdfExportOptions = Omit<PdfOptions, 'header' | 'columns' | 'treeColumn' | 'groupRows'>;
+```
+
+### PdfText
+
+```ts
+= ./export/index.js#PdfText
+```
+
+### PdfTextContext
+
+```ts
+= ./export/index.js#PdfTextContext
 ```
 
 ## `@dzgrid/dom/parts`
@@ -2419,6 +2438,9 @@ export interface ContextMenuOptions<T = unknown> {
         readonly xlsx?: {
             run(scope?: 'displayed'): Promise<unknown>;
         } | undefined;
+        readonly pdf?: {
+            run(scope?: 'displayed'): Promise<unknown>;
+        } | undefined;
         readonly tree?: {
             api(grid: Grid): TreeApiLike | null;
         };
@@ -2559,6 +2581,23 @@ export interface TreeApiLike {
 
 ```ts
 export declare function contextMenu<T = unknown>(o?: ContextMenuOptions<T>): ContextMenuFeature<T>;
+```
+
+### ContextMenuPdfKey
+
+```ts
+export type ContextMenuPdfKey = 'cmenu.exportPdf';
+```
+
+### PdfMessages
+
+```ts
+export interface PdfMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in ContextMenuPdfKey]: MessageValue;
+    };
+}
 ```
 
 ## `@dzgrid/dom/statusbar`
@@ -7126,6 +7165,39 @@ export declare const AR_ADVANCED_FILTER: {
         'adv.conditionAdded': string;
         'adv.groupAdded': string;
         'adv.removed': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-pdf`
+
+```ts
+export declare const EN_PDF: {
+    locale: string;
+    text: {
+        'cmenu.exportPdf': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-pdf`
+
+```ts
+export declare const FR_PDF: {
+    locale: string;
+    text: {
+        'cmenu.exportPdf': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-pdf`
+
+```ts
+export declare const AR_PDF: {
+    locale: string;
+    text: {
+        'cmenu.exportPdf': string;
     };
 };
 ```

@@ -73,6 +73,8 @@ export type GapProblemCode = 'invalid-gap';
  * ZIP's limits. A type only.
  */
 export type XlsxProblemCode = 'xlsx-early-day' | 'xlsx-text-cut' | 'xlsx-outline-depth' | 'xlsx-style-limit' | 'xlsx-too-large';
+/** `@dzgrid/core/pdf`'s (1.17.0, pdf-export.md 12–14). */
+export type PdfProblemCode = 'pdf-glyph' | 'pdf-text-cut' | 'pdf-script' | 'pdf-font';
 
 /**
  * `@dzgrid/core/grouping`'s own (Phase 7, aggregation.md 3, 15): a total that does not fit its column's type, an
@@ -88,7 +90,7 @@ export type GroupProblemCode = 'agg-type' | 'agg-threw' | 'pivot-too-many';
  */
 export type ImportProblemCode = 'import-file' | 'import-header' | 'import-cell';
 
-export type ProblemCode = (typeof PROBLEM_CODES)[number] | GroupProblemCode | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | GapProblemCode | XlsxProblemCode | ImportProblemCode | 'print-too-many' | 'unknown-ui-key'
+export type ProblemCode = (typeof PROBLEM_CODES)[number] | GroupProblemCode | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | GapProblemCode | XlsxProblemCode | PdfProblemCode | ImportProblemCode | 'print-too-many' | 'unknown-ui-key'
   /** A block of cells over rows a list loaded in blocks does not hold yet: its copy, cut, paste or erase refused (Phase 8). */
   | 'rows-not-loaded'
   /** `@dzgrid/dom`'s (Phase 11 L9, virtual-scroll.md): a viewport grown with its rows (the host without the layout), held to the window; path `host`. A type only. */

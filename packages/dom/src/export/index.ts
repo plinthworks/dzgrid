@@ -1,6 +1,7 @@
 import type { ChangeSource, LocaleCtx } from '@dzgrid/core';
 import type { CsvOptions, CsvScope, ExportRequest } from '@dzgrid/core/csv';
 import type { XlsxOptions } from '@dzgrid/core/xlsx';
+import type { PdfOptions } from '@dzgrid/core/pdf';
 import { emit } from '@dzgrid/core/internal';
 import type { GridContext } from '../context.js';
 import type { GridFeature } from '../features.js';
@@ -27,14 +28,20 @@ export interface ExportProgress {
   readonly total: number | null;
 }
 
-/** The file an export writes (Phase 9): CSV, or Excel when the `xlsx` option is set. */
-export type ExportFormat = 'csv' | 'xlsx' | 'json';
+/** The file an export writes (Phase 9): CSV, or Excel when the `xlsx` option is set; a PDF (1.17.0) with the `pdf` option. */
+export type ExportFormat = 'csv' | 'xlsx' | 'json' | 'pdf';
 /**
  * The Excel file's own options (docs/behaviors/xlsx-export.md); `text`, `enums`, `header`, `columns`, `levelHeader` and
  * `treeColumn` are the CSV options', shared. `sheetName` defaults to the `export.fileName` text, `rtl` to the grid's direction.
  */
 export type XlsxExportOptions = Omit<XlsxOptions, 'text' | 'enums' | 'header' | 'columns' | 'levelHeader' | 'treeColumn' | 'chunkRows'>;
 export type { XlsxText, XlsxTextContext } from '@dzgrid/core/xlsx';
+/**
+ * The PDF's own options (1.17.0, docs/behaviors/pdf-export.md); `header`, `columns`, `treeColumn` and `groupRows` are the
+ * CSV options', shared. `rtl` defaults to the grid's direction; a title, subtitle or footer function is asked with the export.
+ */
+export type PdfExportOptions = Omit<PdfOptions, 'header' | 'columns' | 'treeColumn' | 'groupRows'>;
+export type { PdfText, PdfTextContext } from '@dzgrid/core/pdf';
 
 /** `csvExport()`'s options: how the file is written (step 10's), and the export's own. */
 export interface CsvExportOptions extends Omit<CsvOptions, 'chunkRows'> {
@@ -59,6 +66,11 @@ export interface CsvExportOptions extends Omit<CsvOptions, 'chunkRows'> {
   readonly loadRun?: () => Promise<typeof Chunk>;
   /** Excel files too (Phase 9): `run(scope, { format: 'xlsx' })`, `bind(button, { format: 'xlsx' })`, `xlsx.run()`. Absent: CSV only. */
   readonly xlsx?: true | XlsxExportOptions;
+  /**
+   * PDF files too (1.17.0, pdf-export.md): `run(scope, { format: 'pdf' })`, `bind(button, { format: 'pdf' })`. Absent: a PDF
+   * export fails with `missing-feature`. Helvetica (Latin text) unless `font` gives a TrueType font; Arabic refused (`print()`).
+   */
+  readonly pdf?: true | PdfExportOptions;
 }
 
 export interface CsvExport extends GridFeature {

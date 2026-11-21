@@ -195,7 +195,7 @@ export interface ExportTrace {
   readonly at: string;
   readonly scope: ExportScope;
   /** `'xlsx'` for an Excel export (Phase 9); absent for CSV. */
-  readonly format?: 'csv' | 'xlsx' | 'json';
+  readonly format?: 'csv' | 'xlsx' | 'json' | 'pdf';
 }
 
 /** What an export writes: the rows shown, every row the query matches, or the selected ones it shows (`CsvScope`). */

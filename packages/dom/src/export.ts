@@ -4,4 +4,4 @@
  * (`export/run/`) loaded at the first export. It reaches the base only through the grid it is set up on.
  */
 export { csvExport, EXPORT_KEYS } from './export/index.js';
-export type { CsvExport, CsvExportOptions, ExportFormat, XlsxExportOptions, XlsxText, XlsxTextContext, ExportAllContext, ExportAllResult, ExportOutcome, ExportProgress, Refusal } from './export/index.js';
+export type { CsvExport, CsvExportOptions, ExportFormat, XlsxExportOptions, XlsxText, XlsxTextContext, PdfExportOptions, PdfText, PdfTextContext, ExportAllContext, ExportAllResult, ExportOutcome, ExportProgress, Refusal } from './export/index.js';

@@ -33,6 +33,10 @@
       "types": "./src/xlsx-detail.ts",
       "default": "./src/xlsx-detail.ts"
     },
+    "./pdf": {
+      "types": "./src/pdf.ts",
+      "default": "./src/pdf.ts"
+    },
     "./rules": {
       "types": "./src/rules.ts",
       "default": "./src/rules.ts"

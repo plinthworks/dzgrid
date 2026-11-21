@@ -25,12 +25,23 @@ default unchanged.
   `locales/<lang>-advanced-filter` (en, fr, ar); look `@dzgrid/theme/advanced-filter.css` (`--dzg-adv-group-line`,
   `--dzg-adv-root-line`, `--dzg-adv-condition-bg`; theme keys `advGroupLine`, `advRootLine`, `advConditionBg`).
 - **Angular** `<dz-grid [(advancedFilter)]="expression">`; **element** `el.advancedFilter`.
+- **PDF export** (owner « … et l'export »; `docs/behaviors/pdf-export.md`, plan and decisions
+  `docs/phase-14-steps/pdf-export-plan.md`): `csvExport({ pdf: true | { … } })`, `run(scope, { format: 'pdf' })`,
+  `bind(button, { format: 'pdf' })`. The Excel file's rows and columns, each cell as print writes it, across pages: A4
+  or Letter, landscape when the columns do not fit (`orientation: 'auto'`), the header on every page, « 1 / 3 », title /
+  subtitle / footer as Excel's, numbers end-aligned, a wide table shrunk to fit, long text wrapped to 3 lines then cut
+  with « … », fixed print colours. Helvetica (Latin text; other characters « ? », `pdf-glyph`); `font` / `boldFont`
+  embed the application's TrueType font, subset, with ToUnicode. Arabic, Hebrew and shaped scripts are refused
+  (`pdf-script`, nothing written): use `print()`. A pure writer `@dzgrid/core/pdf` (`pdfParts`, `pdfFile`, `toPdf`:
+  the same rows give the same bytes, Node too) and a lazy chunk; the cell menu's `use.pdf` with `locales/<lang>-pdf`.
 
 ### Notes for an upgrade
 - `ColumnFilter` gains `{ type: 'advanced'; expression }` and `WireFilter` `{ type: 'advanced'; expression }` (valid
   under the key `''` only): a `switch` over `type` that must be exhaustive needs the new case. A server receives the
   `''` entry only when the application uses the advanced filter.
 - Not yet: a typed text form of the expression.
+- `ExportFormat`, `ExportRequest.format` and the export events' `format` gain `'pdf'`; `ProblemCode` gains `pdf-glyph`,
+  `pdf-text-cut`, `pdf-script`, `pdf-font`.
 
 ## [1.16.0] - 2026-11-21
 

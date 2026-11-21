@@ -197,6 +197,18 @@
       "types": "./src/locales/ar-advanced-filter.ts",
       "default": "./src/locales/ar-advanced-filter.ts"
     },
+    "./locales/en-pdf": {
+      "types": "./src/locales/en-pdf.ts",
+      "default": "./src/locales/en-pdf.ts"
+    },
+    "./locales/fr-pdf": {
+      "types": "./src/locales/fr-pdf.ts",
+      "default": "./src/locales/fr-pdf.ts"
+    },
+    "./locales/ar-pdf": {
+      "types": "./src/locales/ar-pdf.ts",
+      "default": "./src/locales/ar-pdf.ts"
+    },
     "./sparkline": {
       "types": "./src/sparkline.ts",
       "default": "./src/sparkline.ts"

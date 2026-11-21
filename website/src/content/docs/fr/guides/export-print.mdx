@@ -180,6 +180,36 @@ declare const exporter: CsvExport;
 exporter.bind(document.getElementById('json')!, { scope: 'all', format: 'json' });
 ```
 
+## PDF
+
+La même fonction écrit un PDF (1.17.0) avec l’option `pdf` : `run(scope, { format: 'pdf' })` ou
+`bind(button, { format: 'pdf' })`. Ce sont les lignes et colonnes du fichier Excel — lignes de groupe, totaux, ligne
+de totaux, arbre indenté — chaque cellule telle que l’écran la montre, sur plusieurs pages : A4 (ou `page: 'letter'`),
+paysage quand les colonnes ne tiennent pas en portrait (`orientation`), l’en-tête en haut de chaque page, « 1 / 3 » en
+bas, `title`, `subtitle` et `footer` comme ceux d’Excel. Nombres du côté de fin, texte du côté de début ; un tableau
+plus large que la page est réduit pour tenir (jamais coupé) ; un texte long passe à la ligne sur `wrap` lignes (3), la
+suite coupée par « … ». Couleurs d’impression claires, quel que soit le thème de l’écran. Son code (et
+`@dzgrid/core/pdf`) est chargé au premier export PDF.
+
+**Polices et écritures.** Par défaut Helvetica, que tout lecteur PDF possède : texte latin (français, anglais,
+espagnol, allemand…, € et guillemets typographiques) ; un autre caractère est écrit « ? » et un avertissement
+`pdf-glyph` en donne le nombre. Donnez votre police TrueType (`font: ArrayBuffer`, un `.ttf` ; `boldFont` aussi) pour
+le grec, le cyrillique, le chinois, le japonais, le coréen : elle est incorporée avec les seuls glyphes utilisés.
+**L’arabe et l’hébreu sont refusés** (`pdf-script`, l’export échoue, rien n’est téléchargé) : il faudrait lier les
+lettres et les ordonner de droite à gauche, ce que ce rédacteur ne fait pas — utilisez [`print()`](#imprimer) et
+« Enregistrer en PDF » du navigateur, qui les met en forme.
+
+```ts
+import type { CsvExport } from '@dzgrid/dom/export';
+
+declare const exporter: CsvExport; // créé par csvExport({ canExport: true, pdf: { title: 'Bouilloires' } })
+exporter.bind(document.getElementById('pdf')!, { scope: 'displayed', format: 'pdf' });
+```
+
+Dans le menu du clic droit : `contextMenu({ use: { pdf: { run: (s) => exporter.run(s, { format: 'pdf' }) } } })`, son
+libellé dans `@dzgrid/dom/locales/<lang>-pdf`. `@dzgrid/core/pdf` seul (`toPdf`) écrit le même fichier sur un serveur
+Node.
+
 ## Importer un fichier
 
 `fileImport({ onRows })` de `@dzgrid/dom/import` lit un fichier CSV ou Excel (`.xlsx`) déposé sur la grille, ou

@@ -13,15 +13,27 @@
  * - Escape drops a draft and gives the focus back to the button; « Supprimer la condition » by Enter moves the focus;
  * - the look: the root group's line on its inline start (right in Arabic), in the accent; Apply in the accent; the dialog
  *   carries the grid's direction; axe 0 with the dialog open; no page error.
+ *
+ * `--only pdf` (the PDF export, docs/behaviors/pdf-export.md; page `playground/v1-17-pdf.html`, not committed; `--only
+ * filter` the builder alone): per engine, the page's « PDF » button downloads a `.pdf` (a real `<a download>`), read
+ * back by the test-only reader (core/test/support/pdf-read.ts: the frame, the pages, the header on each, « x / y », the
+ * title on the first, the footer on the last, every row once), the same text in the three engines, Ghostscript happy
+ * with it when installed, `exportFinished` done; an Arabic grid refused (`pdf-script`, nothing downloads); 10 000 rows ×
+ * 10 columns timed (click to download) and weighed. Then Chrome opens the file in its PDF viewer and a page is
+ * screenshot (its path printed, to be looked at).
  */
-import { spawn } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { spawn, spawnSync } from 'node:child_process';
+import { mkdirSync, readFileSync, statSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { browser } from '../spikes/kit.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const PORT = 4717;
 const arg = (k) => { const i = process.argv.indexOf(k); return i < 0 ? null : process.argv[i + 1]; };
 const engines = arg('--engine') ? [arg('--engine')] : ['chrome', 'firefox', 'webkit'];
+const only = arg('--only');
 let fails = 0;
 let passes = 0;
 const check = (name, ok, detail = '') => { ok ? passes++ : fails++; console.log(`${ok ? 'ok  ' : 'FAIL'} ${name}${ok || detail === '' ? '' : ` — ${JSON.stringify(detail)}`}`); };
@@ -53,7 +65,7 @@ const EXAMPLE = (S) => ({
 
 const server = await serve();
 try {
-  for (const name of engines) {
+  for (const name of only === 'pdf' ? [] : engines) {
     const B = await browser(name);
     try {
       for (const [lang, dark] of [['fr', false], ['ar', true]]) {
@@ -173,8 +185,112 @@ try {
       await B.close();
     }
   }
+  if (only !== 'filter') await pdfChecks();
 } finally {
   await server.stop();
+}
+
+async function pdfChecks() {
+  const { readPdf } = await import(pathToFileURL(`${ROOT}packages/core/test/support/pdf-read.ts`).href);
+  const OUT = join(tmpdir(), 'dzg-pdf-1-17');
+  mkdirSync(OUT, { recursive: true });
+  const gs = spawnSync('gs', ['--version']).status === 0;
+  const pageTexts = (r) => r.pages.map((p) => p.runs.map((x) => x.text));
+  let first = null;
+  const timings = [];
+  for (const name of engines) {
+    const B = await browser(name);
+    try {
+      const ctx = await B.newContext({ acceptDownloads: true, viewport: { width: 1040, height: 720 } });
+      try {
+        const page = await ctx.newPage();
+        const errors = [];
+        page.on('pageerror', (e) => errors.push(String(e)));
+        const tag = `${name} pdf`;
+        await page.goto(`${server.base}/v1-17-pdf.html`);
+        await page.waitForSelector('.dzg-row');
+        const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 60_000 }), page.click('#pdf')]);
+        const file = join(OUT, `grid-${name}.pdf`);
+        await dl.saveAs(file);
+        check(`${tag}: the button downloads a .pdf named as the export`, /^export-\d{4}-\d\d-\d\d-\d{4}\.pdf$/.test(dl.suggestedFilename()), dl.suggestedFilename());
+        const bytes = new Uint8Array(readFileSync(file));
+        const r = readPdf(bytes);
+        const T = pageTexts(r);
+        const P = T.length;
+        check(`${tag}: a sound file (header, xref offsets, startxref, trailer), several pages`, r.errors.length === 0 && P >= 3, { errors: r.errors, P });
+        check(`${tag}: the title and subtitle on the first page, the footer on the last only`, T[0][0] === 'Rapport des clients' && T[0][1] === '240 lignes' && T.at(-1).includes('Document interne') && !T.slice(0, -1).flat().includes('Document interne'), [T[0].slice(0, 3), T.at(-1).slice(-3)]);
+        check(`${tag}: the header (group and columns) on top of every page, « x / y » at the bottom`, T.every((t, k) => t.includes('Identité') && t.includes('Montant') && t.at(-1) === `${k + 1} / ${P}`), T.map((t) => t.at(-1)));
+        const names = T.flat().filter((t) => /^Client \d+$/.test(t));
+        check(`${tag}: every row once, in order`, names.length === 240 && names.every((t, i) => t === `Client ${i}`), names.length);
+        check(`${tag}: the screen's format (fr-FR currency: U+202F written as a space, the no-break space before € kept)`, T.flat().includes('1 234,50\u00a0€'), T[0].slice(0, 20));
+        check(`${tag}: compressed by the browser (FlateDecode)`, Buffer.from(bytes).toString('latin1').includes('/Filter /FlateDecode'));
+        if (first) check(`${tag}: the same text as Chrome's file`, JSON.stringify(T) === JSON.stringify(first));
+        else first = T;
+        if (gs) {
+          const g = spawnSync('gs', ['-dNODISPLAY', '-dBATCH', '-dNOPAUSE', '-dPDFSTOPONERROR', '-q', '-sDEVICE=nullpage', file], { encoding: 'utf8' });
+          check(`${tag}: Ghostscript reads every page, no error`, g.status === 0 && !/error|warning|repair/i.test(g.stdout + g.stderr), g.stderr);
+        }
+        const fin = await page.evaluate(() => window.events.filter((e) => e.type === 'exportFinished').map((e) => ({ outcome: e.outcome, format: e.format, rows: e.rows })));
+        const phases = await page.evaluate(() => [...new Set(window.progress)]);
+        check(`${tag}: exportFinished done, format pdf, 240 rows; progress preparing, building, saving`, fin.length === 1 && fin[0].outcome === 'done' && fin[0].format === 'pdf' && fin[0].rows === 240 && ['preparing', 'building', 'saving'].every((p) => phases.includes(p)), { fin, phases });
+
+        const clean = errors.length;
+        // Arabic: refused, nothing downloads.
+        await page.goto(`${server.base}/v1-17-pdf.html?lang=ar&dark`);
+        await page.waitForSelector('.dzg-row');
+        let got = false;
+        page.on('download', () => (got = true));
+        await page.click('#pdf');
+        await page.waitForFunction(() => window.events.some((e) => e.type === 'exportFinished'), null, { timeout: 30_000 });
+        await page.waitForTimeout(500);
+        const arab = await page.evaluate(() => ({ fin: window.events.find((e) => e.type === 'exportFinished'), problems: window.events.filter((e) => e.type === 'problems').flatMap((e) => e.problems.map((p) => p.code)), said: document.querySelector('.dzg [aria-live=polite]')?.textContent ?? '' }));
+        check(`${tag}: an Arabic grid is refused — failed (pdf-script), nothing downloads, said`, !got && arab.fin?.outcome === 'failed' && arab.fin?.failure?.name === 'pdf-script' && arab.problems.includes('pdf-script') && arab.said !== '', arab);
+
+        // 10 000 rows × 10 columns: click to download.
+        await page.goto(`${server.base}/v1-17-pdf.html?rows=10000&cols=10`);
+        await page.waitForSelector('.dzg-row');
+        await page.evaluate(() => window.exporter.prefetch());
+        await page.waitForTimeout(300);
+        const t0 = Date.now();
+        const [big] = await Promise.all([page.waitForEvent('download', { timeout: 300_000 }), page.click('#pdf')]);
+        const bigFile = join(OUT, `big-${name}.pdf`);
+        await big.saveAs(bigFile);
+        const ms = Date.now() - t0;
+        const size = statSync(bigFile).size;
+        const br = readPdf(new Uint8Array(readFileSync(bigFile)));
+        timings.push({ name, ms, size, pages: br.pages.length });
+        check(`${tag}: 10 000 rows × 10 columns: a sound file (${ms} ms, ${(size / 1e6).toFixed(2)} MB, ${br.pages.length} pages)`, br.errors.length === 0 && br.pages.length > 100, br.errors.slice(0, 3));
+        // The refused export's failure goes to the grid's error report (window.reportError), as every failed export's.
+        check(`${tag}: no page error but the refused export's one report`, clean === 0 && errors.length === 1, errors);
+      } finally {
+        await ctx.close();
+      }
+    } finally {
+      await B.close();
+    }
+  }
+  console.log(`10 000 × 10: ${timings.map((t) => `${t.name} ${t.ms} ms, ${(t.size / 1e6).toFixed(2)} MB, ${t.pages} pages`).join('; ')}`);
+
+  // Chrome's PDF viewer: the file opened, the first page screenshot.
+  if (engines.includes('chrome')) {
+    const B = await browser('chrome', { headless: false });
+    try {
+      const ctx = await B.newContext({ viewport: { width: 1000, height: 1100 } });
+      try {
+        const page = await ctx.newPage();
+        await page.goto(pathToFileURL(join(OUT, 'grid-chrome.pdf')).href);
+        await page.waitForTimeout(2500);
+        const shot = join(OUT, 'chrome-viewer.png');
+        await page.screenshot({ path: shot });
+        const viewer = await page.evaluate(() => !!document.querySelector('embed[type="application/pdf"], embed[type="application/x-google-chrome-pdf"]') || document.contentType === 'application/pdf');
+        check(`chrome pdf: Chrome's PDF viewer opens the file (screenshot ${shot})`, viewer, viewer);
+      } finally {
+        await ctx.close();
+      }
+    } finally {
+      await B.close();
+    }
+  }
 }
 console.log(`\n${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

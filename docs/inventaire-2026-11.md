@@ -118,7 +118,7 @@ sous `website/src/content/docs/` ; ✅ complet · 🟡 partiel (dit).
 | Excel : plusieurs feuilles, maître / détail, images, formules | — | — | — | ❌ (gap §9) |
 | Impression, menu d'impression | `print()`, `printMenu()` | dom `print*` (4), `print-menu` | `features/print`, `print-on-menu` | ✅ |
 | Import CSV / Excel (bombe ZIP bornée) | `fileImport()` | dom `import`, core `import*` | `features/file-import` | ✅ |
-| PDF généré | — | — | — | 🟡 impression du navigateur seulement |
+| PDF généré | — | — | — | 🟡 1.17.0 `csvExport({ pdf })` (latin, police TrueType donnée) ; arabe par l'impression du navigateur |
 
 ### DzGrid — présentation et thème
 

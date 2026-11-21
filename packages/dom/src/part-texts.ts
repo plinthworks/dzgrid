@@ -147,6 +147,16 @@ export type ContextMenuMessageKey =
  * `ContextMenuMessages` bundle made for 1.3.0 keeps compiling; required by `contextMenu()` only with `use.xlsx`.
  */
 export type ContextMenuXlsxKey = 'cmenu.exportXlsx';
+/**
+ * « Export to PDF » (1.17.0, pdf-export.md), the cell menu's item with `use.pdf`, in its own bundles
+ * (`locales/<lang>-pdf`): optional here, required by `contextMenu()` only with `use.pdf`.
+ */
+export type ContextMenuPdfKey = 'cmenu.exportPdf';
+/** The PDF item's bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_PDF.text }`. */
+export interface PdfMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in ContextMenuPdfKey]: MessageValue };
+}
 /** A cell menu bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_CONTEXT_MENU.text }`. */
 export interface ContextMenuMessages {
   readonly locale: string;

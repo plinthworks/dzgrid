@@ -168,7 +168,7 @@ la phase 3, aujourd'hui dépassée : presque tous ses « P5…P10 » sont faits)
 | Excel : formules, protection, mise en page, tableaux Excel | Fichier avancé | E | absent | ❌ | M | basse |
 | Excel : contenu en plus (titre, pied) | Lignes avant / après | E | 1.14.0 : `xlsx: { title, subtitle, footer }` | ✅ | — | moyenne |
 | Import Excel / CSV | Lire un fichier déposé | E | `features/file-import` | ✅ | — | moyenne |
-| Export PDF | PDF propre (styles, filigrane, langues) | E | via l'impression du navigateur (`features/print`) | 🟡 pas de PDF généré, pas de filigrane | L | moyenne |
+| Export PDF | PDF propre (styles, filigrane, langues) | E | `csvExport({ pdf })` (1.17.0, `pdf-export.md`) ; arabe par l'impression du navigateur (`features/print`) | 🟡 PDF généré (latin, police TrueType donnée) ; pas d'arabe ni de filigrane | L | moyenne |
 | Impression | Vue imprimable | C | `features/print`, `features/print-on-menu` | ✅ | — | moyenne |
 | Export JSON | — | — (pas chez ag) | `json-export.md` | ✅ (en plus) | — | basse |
 

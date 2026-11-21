@@ -19,6 +19,7 @@
 # history: owner 2026-11-21 « commence par les mini-courbes et le reste »: 1.16.0 entries (sparkline, tree-select, xlsx-detail), additions — @dzgrid/core/xlsx-detail#xlsxDetails
 # history: owner 2026-11-21: XlsxOptions gains detail, detailRows, detailColumns (1.16.0 master detail in Excel), additions — @dzgrid/core/xlsx#XlsxOptions, @dzgrid/core/xlsx#XlsxInput
 # history: owner 2026-11-21 autonomous: advanced filter — @dzgrid/core#ColumnFilter, @dzgrid/core#FilterCondition, @dzgrid/core#FilterExpression, @dzgrid/core#FilterGroup, @dzgrid/core#advancedOf, @dzgrid/core#setAdvanced, @dzgrid/core#withAdvanced, @dzgrid/core/server#WireExpression, @dzgrid/core/server#WireFilter
+# history: owner 2026-11-21 autonomous: PDF export — @dzgrid/core#ProblemCode, @dzgrid/core#ExportTrace, @dzgrid/core/csv#ExportRequest, @dzgrid/core/pdf#PDF_MIME, @dzgrid/core/pdf#PdfInput, @dzgrid/core/pdf#PdfObject, @dzgrid/core/pdf#PdfOptions, @dzgrid/core/pdf#PdfPiece, @dzgrid/core/pdf#PdfSummary, @dzgrid/core/pdf#PdfText, @dzgrid/core/pdf#PdfTextContext, @dzgrid/core/pdf#pdfFile, @dzgrid/core/pdf#pdfParts, @dzgrid/core/pdf#toPdf
 
 @ @dzgrid/core
 ## AbortHandle
@@ -410,7 +411,7 @@
       readonly id: string;
       readonly at: string;
       readonly scope: ExportScope;
-      readonly format?: 'csv' | 'xlsx' | 'json';
+      readonly format?: 'csv' | 'xlsx' | 'json' | 'pdf';
   }
 ## FilterKind
   export interface FilterKind<S extends Json = Json, V = unknown> {
@@ -1087,7 +1088,7 @@
       readonly detail?: string;
   }
 ## ProblemCode
-  export type ProblemCode = (typeof PROBLEM_CODES)[number] | GroupProblemCode | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | GapProblemCode | XlsxProblemCode | ImportProblemCode | 'print-too-many' | 'unknown-ui-key' | 'rows-not-loaded' | 'unbounded-viewport';
+  export type ProblemCode = (typeof PROBLEM_CODES)[number] | GroupProblemCode | StateProblemCode | PinnedProblemCode | AutoHeightProblemCode | GapProblemCode | XlsxProblemCode | PdfProblemCode | ImportProblemCode | 'print-too-many' | 'unknown-ui-key' | 'rows-not-loaded' | 'unbounded-viewport';
 ## Query
   export interface Query {
       readonly sort: readonly SortItem[];
@@ -2105,7 +2106,7 @@
       readonly count: number | null;
       readonly selection?: SelectionState;
       readonly server?: Omit<DataRequest, 'page' | 'signal'>;
-      readonly format?: 'csv' | 'xlsx' | 'json';
+      readonly format?: 'csv' | 'xlsx' | 'json' | 'pdf';
   }
 ## csvChunks
   export declare function csvChunks<T>(i: CsvInput<T>, o?: CsvOptions): Generator<string, CsvSummary>;
@@ -3124,3 +3125,68 @@
 @ @dzgrid/core/xlsx-detail
 ## xlsxDetails
   export declare function xlsxDetails<T>(c: XlsxDetailContext<T>): XlsxDetailBlocks;
+
+@ @dzgrid/core/pdf
+## PDF_MIME
+  export declare const PDF_MIME = "application/pdf";
+## PdfInput
+  export interface PdfInput<T> extends CsvInput<T> {
+      readonly widths?: Readonly<Record<string, number>>;
+      readonly groups?: readonly ColumnOrGroup<T>[];
+      readonly text?: ((node: RowNode<T>, column: ResolvedColumn<T>) => string | undefined) | undefined;
+  }
+## PdfObject
+  export interface PdfObject {
+      readonly id: number;
+      readonly dict: string;
+      readonly data?: Uint8Array;
+  }
+## PdfOptions
+  export interface PdfOptions {
+      readonly page?: 'a4' | 'letter' | undefined;
+      readonly orientation?: 'auto' | 'portrait' | 'landscape' | undefined;
+      readonly margin?: number | undefined;
+      readonly fontSize?: number | undefined;
+      readonly wrap?: number | undefined;
+      readonly header?: boolean | undefined;
+      readonly groups?: boolean | undefined;
+      readonly columns?: readonly string[] | undefined;
+      readonly treeColumn?: string | undefined;
+      readonly groupRows?: boolean | undefined;
+      readonly title?: PdfText | undefined;
+      readonly subtitle?: PdfText | undefined;
+      readonly footer?: PdfText | undefined;
+      readonly pageNumbers?: boolean | ((page: number, pages: number) => string) | undefined;
+      readonly font?: ArrayBuffer | Uint8Array | undefined;
+      readonly boldFont?: ArrayBuffer | Uint8Array | undefined;
+      readonly rtl?: boolean | undefined;
+  }
+## PdfPiece
+  export type PdfPiece = PdfObject | number;
+## PdfSummary
+  export interface PdfSummary extends CsvSummary {
+      readonly problems: readonly Problem[];
+      readonly pages: number;
+  }
+## PdfText
+  export type PdfText = string | readonly string[] | ((c: PdfTextContext) => string | readonly string[]);
+## PdfTextContext
+  export interface PdfTextContext {
+      readonly rows: number;
+      readonly scope: CsvScope;
+      readonly query: Query;
+      readonly now: number;
+      readonly ctx: LocaleCtx;
+  }
+## pdfFile
+  export declare function pdfFile(): {
+      add(o: PdfObject, deflated?: Uint8Array): Uint8Array[];
+      end(): Uint8Array[];
+  };
+## pdfParts
+  export declare function pdfParts<T>(i: PdfInput<T>, o?: PdfOptions): Generator<PdfPiece, PdfSummary>;
+## toPdf
+  export declare function toPdf<T>(i: PdfInput<T>, o?: PdfOptions, deflate?: (b: Uint8Array) => Uint8Array): {
+      readonly parts: Uint8Array[];
+      readonly summary: PdfSummary;
+  };

@@ -39,6 +39,7 @@
 # history: owner 2026-11-21 « on le garde »: the forms texts and sheet of 1.15.0 form editing — @dzgrid/dom/locales/en-forms#EN_FORMS, @dzgrid/dom/locales/fr-forms#FR_FORMS, @dzgrid/dom/locales/ar-forms#AR_FORMS
 # history: owner 2026-11-21 « commence par les mini-courbes et le reste »: 1.16.0 entries (sparkline, tree-select, xlsx-detail), additions — @dzgrid/dom/tree-select#treeSelect, @dzgrid/dom/sparkline#sparklines, @dzgrid/dom/sparkline#SPARKLINE_KEYS, @dzgrid/dom/sparkline#SparklineOptions, @dzgrid/dom/sparkline#SparklineValues, @dzgrid/dom/locales/en-sparkline#EN_SPARKLINE, @dzgrid/dom/locales/fr-sparkline#FR_SPARKLINE, @dzgrid/dom/locales/ar-sparkline#AR_SPARKLINE
 # history: owner 2026-11-21 autonomous: advanced filter — @dzgrid/dom/advanced-filter#ADVANCED_FILTER_CSS, @dzgrid/dom/advanced-filter#ADVANCED_FILTER_KEYS, @dzgrid/dom/advanced-filter#AdvancedFilterApi, @dzgrid/dom/advanced-filter#AdvancedFilterFeature, @dzgrid/dom/advanced-filter#AdvancedFilterMessageKey, @dzgrid/dom/advanced-filter#AdvancedFilterMessages, @dzgrid/dom/advanced-filter#AdvancedFilterOptions, @dzgrid/dom/advanced-filter#advancedFilter, @dzgrid/dom/locales/en-advanced-filter#EN_ADVANCED_FILTER, @dzgrid/dom/locales/fr-advanced-filter#FR_ADVANCED_FILTER, @dzgrid/dom/locales/ar-advanced-filter#AR_ADVANCED_FILTER
+# history: owner 2026-11-21 autonomous: PDF export — @dzgrid/dom/export#CsvExportOptions, @dzgrid/dom/export#ExportFormat, @dzgrid/dom/export#PdfExportOptions, @dzgrid/dom/export#PdfText, @dzgrid/dom/export#PdfTextContext, @dzgrid/dom/context-menu#ContextMenuOptions, @dzgrid/dom/context-menu#ContextMenuPdfKey, @dzgrid/dom/context-menu#PdfMessages, @dzgrid/dom/locales/en-pdf#EN_PDF, @dzgrid/dom/locales/fr-pdf#FR_PDF, @dzgrid/dom/locales/ar-pdf#AR_PDF
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -800,6 +801,7 @@
       }) => void | Promise<void>;
       readonly loadRun?: () => Promise<typeof Chunk>;
       readonly xlsx?: true | XlsxExportOptions;
+      readonly pdf?: true | PdfExportOptions;
   }
 ## EXPORT_KEYS
   export declare const EXPORT_KEYS: ("export.fileName" | "announce.exportStarted" | "announce.exportDone" | "announce.exportDoneHidden" | "announce.exportDoneOpen" | "announce.exportFailed" | "announce.exportRefused" | "announce.exportCancelled")[];
@@ -818,7 +820,7 @@
       readonly fileName?: string;
   } | void;
 ## ExportFormat
-  export type ExportFormat = 'csv' | 'xlsx' | 'json';
+  export type ExportFormat = 'csv' | 'xlsx' | 'json' | 'pdf';
 ## ExportOutcome
   export type ExportOutcome = 'done' | 'refused' | 'failed' | 'cancelled' | 'busy';
 ## ExportProgress
@@ -840,6 +842,12 @@
   = ./export/index.js#XlsxTextContext
 ## csvExport
   export declare function csvExport(o: CsvExportOptions): CsvExport;
+## PdfExportOptions
+  export type PdfExportOptions = Omit<PdfOptions, 'header' | 'columns' | 'treeColumn' | 'groupRows'>;
+## PdfText
+  = ./export/index.js#PdfText
+## PdfTextContext
+  = ./export/index.js#PdfTextContext
 
 @ @dzgrid/dom/parts
 ## BadgeOptions
@@ -1669,6 +1677,9 @@
           readonly xlsx?: {
               run(scope?: 'displayed'): Promise<unknown>;
           } | undefined;
+          readonly pdf?: {
+              run(scope?: 'displayed'): Promise<unknown>;
+          } | undefined;
           readonly tree?: {
               api(grid: Grid): TreeApiLike | null;
           };
@@ -1769,6 +1780,15 @@
   }
 ## contextMenu
   export declare function contextMenu<T = unknown>(o?: ContextMenuOptions<T>): ContextMenuFeature<T>;
+## ContextMenuPdfKey
+  export type ContextMenuPdfKey = 'cmenu.exportPdf';
+## PdfMessages
+  export interface PdfMessages {
+      readonly locale: string;
+      readonly text: {
+          readonly [K in ContextMenuPdfKey]: MessageValue;
+      };
+  }
 
 @ @dzgrid/dom/statusbar
 ## STATUS_CSS
@@ -5248,5 +5268,32 @@
           'adv.conditionAdded': string;
           'adv.groupAdded': string;
           'adv.removed': string;
+      };
+  };
+
+@ @dzgrid/dom/locales/en-pdf
+## EN_PDF
+  export declare const EN_PDF: {
+      locale: string;
+      text: {
+          'cmenu.exportPdf': string;
+      };
+  };
+
+@ @dzgrid/dom/locales/fr-pdf
+## FR_PDF
+  export declare const FR_PDF: {
+      locale: string;
+      text: {
+          'cmenu.exportPdf': string;
+      };
+  };
+
+@ @dzgrid/dom/locales/ar-pdf
+## AR_PDF
+  export declare const AR_PDF: {
+      locale: string;
+      text: {
+          'cmenu.exportPdf': string;
       };
   };

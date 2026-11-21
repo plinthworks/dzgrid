@@ -1,12 +1,12 @@
 ---
 title: "csvExport"
-description: "Écrire les lignes de la grille dans un fichier CSV, Excel ou JSON depuis votre propre bouton."
+description: "Écrire les lignes de la grille dans un fichier CSV, Excel, JSON ou PDF depuis votre propre bouton."
 ---
 
 import LiveDemo from '../../../../components/LiveDemo.astro';
 import FeatureFacts from '../../../../components/FeatureFacts.astro';
 
-Écrit les lignes telles que la grille les montre dans un fichier — CSV, Excel ou JSON — depuis votre propre bouton.
+Écrit les lignes telles que la grille les montre dans un fichier — CSV, Excel, JSON ou PDF — depuis votre propre bouton.
 
 <FeatureFacts name="csvExport" />
 
@@ -16,14 +16,15 @@ import FeatureFacts from '../../../../components/FeatureFacts.astro';
 `run(scope)` exporte depuis le code. Le fichier contient les colonnes visibles dans leur ordre, le tri et les filtres.
 Portées : `'displayed'` (les lignes affichées : la page courante si la grille est paginée), `'selected'`, `'all'`
 (toutes les lignes qui répondent à la requête). `format: 'xlsx'` écrit un fichier Excel quand l’option `xlsx` est
-active ; `format: 'json'` un fichier JSON, sans option.
+active ; `format: 'json'` un fichier JSON, sans option ; `format: 'pdf'` un PDF quand l’option `pdf` est active
+(1.17.0).
 
 Les valeurs sont écrites comme valeurs : jours ISO, instants dans le fuseau d’affichage, nombres qu’un tableur peut
 additionner, libellés des listes. Un texte qui commence comme une formule reçoit un `'` devant pour qu’un tableur ne
 l’exécute pas. Le fichier est construit par morceaux pour que la page ne se fige jamais ; `cancel()` l’arrête. `run`
 se termine par `'done'`, `'refused'`, `'failed'`, `'cancelled'` ou `'busy'`.
 
-Un fichier Excel demandé sans l’option `xlsx`, ou `'all'` sur des lignes serveur sans `exportAll`, échoue avec un
+Un fichier Excel demandé sans l’option `xlsx` (un PDF sans `pdf`), ou `'all'` sur des lignes serveur sans `exportAll`, échoue avec un
 avertissement `missing-feature`. Le [`contextMenu`](../context-menu/) propose la même chose par
 `use: { csv: exporter, xlsx: exporter.xlsx }`.
 
@@ -49,6 +50,15 @@ avertissement `missing-feature`. Le [`contextMenu`](../context-menu/) propose la
   (ses `settings`, telles que l’application les donne) ; sinon `detailRows(master, { key, signal })` — une liste, ou une
   promesse (celle d’un serveur : attendue maître après maître, comptée dans `preparing`, interrompue par une annulation ;
   un rejet fait échouer l’export) — et `detailColumns`. CSV et JSON restent un seul tableau.
+- `pdf` (1.17.0) : `true` (ou ses options) pour les fichiers PDF aussi — les lignes et colonnes du fichier Excel,
+  chaque cellule telle que l’écran la montre, sur plusieurs pages, l’en-tête sur chacune et « 1 / 3 » en bas. `page`
+  (`'a4'` par défaut, `'letter'`), `orientation` (`'auto'` par défaut : paysage quand les colonnes ne tiennent pas ;
+  `'portrait'`, `'landscape'`), `margin` (en points, 36), `fontSize` (8 ; un tableau réduit à la largeur de la page ne
+  descend jamais sous la moitié), `wrap` (lignes par cellule, 3 ; la suite coupée par « … »), `title` / `subtitle` /
+  `footer` comme ceux d’Excel, `pageNumbers` (`false`, ou `(page, pages) => texte`), `rtl` (par défaut le sens de la
+  grille). Helvetica couvre le texte latin ; `font` (et `boldFont`) incorpore votre police TrueType pour les autres
+  alphabets. L’arabe et l’hébreu sont refusés (`pdf-script`) : utilisez [`print`](../print/) pour eux. Dans le menu
+  des cellules : `use: { pdf: { run: (s) => exporter.run(s, { format: 'pdf' }) } }`.
 - `text` : `'value'` (par défaut), ou `'display'` pour chaque cellule telle que la grille la montre.
 - `separator` : `','`, `';'` ou une tabulation. Par défaut : celui de la locale.
 - `bom` : un BOM au début, pour qu’Excel lise l’UTF-8 (l’arabe). Par défaut `true`.

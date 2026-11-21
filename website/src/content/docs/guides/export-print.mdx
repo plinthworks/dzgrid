@@ -173,6 +173,34 @@ declare const exporter: CsvExport;
 exporter.bind(document.getElementById('json')!, { scope: 'all', format: 'json' });
 ```
 
+## PDF
+
+The same feature writes a PDF (1.17.0) with the `pdf` option: `run(scope, { format: 'pdf' })` or
+`bind(button, { format: 'pdf' })`. It is the Excel file's rows and columns — group rows, totals, the totals row, a
+tree indented — each cell as the screen shows it, across pages: A4 (or `page: 'letter'`), landscape when the columns
+do not fit the portrait page (`orientation`), the header on top of every page, « 1 / 3 » at the bottom, `title`,
+`subtitle` and `footer` as Excel's. Numbers on the end side, text on the start side; a table wider than the page is
+shrunk to fit (never split); a long text wraps to `wrap` lines (3) and the rest is cut with « … ». Light print
+colours, whatever the screen's theme. Its code (and `@dzgrid/core/pdf`) is fetched at the first PDF export.
+
+**Fonts and scripts.** By default Helvetica, which every PDF viewer has: Latin text (English, French, Spanish,
+German…, € and typographic quotes); another character is written « ? » and a `pdf-glyph` warning gives the count. Give
+your own TrueType font (`font: ArrayBuffer`, a `.ttf`; `boldFont` too) for Greek, Cyrillic, Chinese, Japanese,
+Korean: it is embedded with only the glyphs used. **Arabic and Hebrew are refused** (`pdf-script`, the export fails,
+nothing downloads): writing them needs letter shaping and right-to-left ordering, which this writer does not do —
+use [`print()`](#print) and the browser's « Save as PDF », which shapes them.
+
+```ts
+import type { CsvExport } from '@dzgrid/dom/export';
+
+declare const exporter: CsvExport; // made with csvExport({ canExport: true, pdf: { title: 'Kettles' } })
+exporter.bind(document.getElementById('pdf')!, { scope: 'displayed', format: 'pdf' });
+```
+
+In the right-click menu: `contextMenu({ use: { pdf: { run: (s) => exporter.run(s, { format: 'pdf' }) } } })`, its
+label from `@dzgrid/dom/locales/<lang>-pdf`. `@dzgrid/core/pdf` alone (`toPdf`) writes the same file on a Node
+server.
+
 ## Import a file
 
 `fileImport({ onRows })` from `@dzgrid/dom/import` reads a CSV or Excel (`.xlsx`) file dropped on the grid, or picked
