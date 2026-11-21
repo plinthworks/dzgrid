@@ -3233,6 +3233,8 @@ export interface XlsxInput<T> extends CsvInput<T> {
     readonly widths?: Readonly<Record<string, number>>;
     readonly pinned?: readonly string[];
     readonly groups?: readonly ColumnOrGroup<T>[];
+    readonly expanded?: ((key: RowKey) => boolean) | undefined;
+    readonly details?: XlsxDetails | undefined;
 }
 ```
 
@@ -3259,6 +3261,12 @@ export interface XlsxOptions<T = any> {
     readonly title?: XlsxText | undefined;
     readonly subtitle?: XlsxText | undefined;
     readonly footer?: XlsxText | undefined;
+    readonly detail?: 'expanded' | 'all' | false | undefined;
+    readonly detailRows?: ((master: Readonly<T>, c: {
+        readonly key: RowKey;
+        readonly signal?: AbortSignalLike;
+    }) => readonly unknown[] | Promise<readonly unknown[] | null | undefined> | null | undefined) | undefined;
+    readonly detailColumns?: readonly ColumnOrGroup<any>[] | undefined;
 }
 ```
 

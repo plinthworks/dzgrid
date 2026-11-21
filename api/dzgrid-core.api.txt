@@ -17,6 +17,7 @@
 # history: 1.14.0 published
 # history: owner 2026-11-21 « on le garde »: GridEvent gains pendingChange (batch editing, 1.15.0) — @dzgrid/core#GridEvent
 # history: owner 2026-11-21 « commence par les mini-courbes et le reste »: 1.16.0 entries (sparkline, tree-select, xlsx-detail), additions — @dzgrid/core/xlsx-detail#xlsxDetails
+# history: owner 2026-11-21: XlsxOptions gains detail, detailRows, detailColumns (1.16.0 master detail in Excel), additions — @dzgrid/core/xlsx#XlsxOptions, @dzgrid/core/xlsx#XlsxInput
 
 @ @dzgrid/core
 ## AbortHandle
@@ -2093,6 +2094,8 @@
       readonly widths?: Readonly<Record<string, number>>;
       readonly pinned?: readonly string[];
       readonly groups?: readonly ColumnOrGroup<T>[];
+      readonly expanded?: ((key: RowKey) => boolean) | undefined;
+      readonly details?: XlsxDetails | undefined;
   }
 ## XlsxOptions
   export interface XlsxOptions<T = any> {
@@ -2115,6 +2118,12 @@
       readonly title?: XlsxText | undefined;
       readonly subtitle?: XlsxText | undefined;
       readonly footer?: XlsxText | undefined;
+      readonly detail?: 'expanded' | 'all' | false | undefined;
+      readonly detailRows?: ((master: Readonly<T>, c: {
+          readonly key: RowKey;
+          readonly signal?: AbortSignalLike;
+      }) => readonly unknown[] | Promise<readonly unknown[] | null | undefined> | null | undefined) | undefined;
+      readonly detailColumns?: readonly ColumnOrGroup<any>[] | undefined;
   }
 ## XlsxPiece
   export interface XlsxPiece {
