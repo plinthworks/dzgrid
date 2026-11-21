@@ -3593,6 +3593,27 @@
       "css": [],
       "doc": "`treeSelect()`: beside `tree()` with checkbox selection, cascading ticks (1.16.0, docs/behaviors/tree-selection.md « Cascading ticks » 1–6). A click on a box or Space on a row ticks or unticks the row and every row under it (every level, open or closed, after the filters), then ticks each row above when every row under it is ticked, unticks it otherwise; a parent's box shows its branch ticked, unticked or partly ticked. Children not loaded yet arrive ticked under a ticked parent. The selection stays the rows' keys. Its own entry.",
       "source": "packages/dom/src/tree-select/index.ts"
+    },
+    {
+      "name": "advancedFilter",
+      "entry": "@dzgrid/dom/advanced-filter",
+      "signature": "advancedFilter(_o?: AdvancedFilterOptions): AdvancedFilterFeature",
+      "param": null,
+      "options": [],
+      "texts": {
+        "bundle": "advanced-filter",
+        "langs": [
+          "en",
+          "fr",
+          "ar"
+        ]
+      },
+      "sheet": null,
+      "css": [
+        "ADVANCED_FILTER_CSS"
+      ],
+      "doc": "`advancedFilter()`: one expression across columns, AND / OR groups nested, built in a dialog (docs/behaviors/advanced-filter.md 9–18), beside `filters()` whose forms each condition shows. The expression is the filter model's `''` entry (`@dzgrid/core`'s `advancedOf` / `withAdvanced`), applied with the column filters (AND).",
+      "source": "packages/dom/src/advanced-filter/index.ts"
     }
   ]
 }

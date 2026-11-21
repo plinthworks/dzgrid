@@ -1,0 +1,71 @@
+---
+title: "advancedFilter"
+description: "Une seule expression de filtre sur plusieurs colonnes, groupes ET / OU imbriqués, construite dans une boîte de dialogue."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Un filtre qui dit `(Statut = Erreur OU Statut = Alerte) ET Jour ≥ 2026-11-01`.
+
+<FeatureFacts name="advancedFilter" />
+
+## Ce qu'elle fait
+
+Le filtre avancé est une seule expression pour toute la grille : un **groupe** joint ses éléments par ET (tous) ou OU
+(au moins un), les groupes s'imbriquent sur cinq niveaux, et chaque **condition** nomme une colonne et porte le filtre
+de cette colonne, écrit comme un filtre de colonne (texte, nombre, jour, instant, oui / non, liste de valeurs,
+plusieurs conditions, sorte propre). Elle vit dans le modèle de filtre sous la clé `''` — aucune colonne n'a d'id vide
+— : l'état sauvé, `[(filter)]`, `filterChanged` et la requête d'un serveur la portent. Les filtres de colonne
+s'appliquent toujours : ET entre eux. « Effacer tous les filtres » l'efface aussi.
+
+`advancedFilter()` ajoute le constructeur, à côté de [`filters()`](../filters/) dont chaque condition montre le
+formulaire : une boîte de dialogue modale ouverte par `api(grid).open()` ou par votre propre bouton (`bind(button)`),
+avec « + Condition », « + Groupe », un choix ET / OU par groupe, une liste de colonnes par condition et son formulaire,
+Appliquer, Effacer et Annuler. Elle édite un brouillon : Appliquer (ou Entrée dans une valeur) l'écrit en un seul
+changement ; Échap, Annuler ou un appui dehors l'abandonnent. Une condition qui ne filtre encore rien est laissée de
+côté ; une valeur illisible garde la boîte ouverte sur elle. Les listes de valeurs ignorent l'expression : on peut
+ajouter `OU Statut = Alerte` pendant que `Statut = Erreur` s'applique.
+
+Sans le constructeur, `advancedOf(filter)`, `withAdvanced(filter, expression)` et `setAdvanced(kernel, expression)` de
+`@dzgrid/core` lisent et écrivent l'expression. Une expression fautive ne lève jamais : elle ne s'applique pas, et
+chaque faute est dite comme un problème avec son chemin (`advancedFilter.items[1].column`). La forme texte (taper
+l'expression) n'existe pas encore.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters';
+import { advancedFilter } from '@dzgrid/dom/advanced-filter';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_FILTERS } from '@dzgrid/dom/locales/fr-filters';
+import { FR_ADVANCED_FILTER } from '@dzgrid/dom/locales/fr-advanced-filter';
+import '@dzgrid/theme/advanced-filter.css';
+
+type Alarm = { id: string; status: string; day: string };
+
+const adv = advancedFilter();
+const grid = createGrid<Alarm>(document.getElementById('alarmes')!, {
+  rows: [{ id: 'a1', status: 'Erreur', day: '2026-11-03' }, { id: 'a2', status: 'OK', day: '2026-11-04' }],
+  columns: [{ id: 'status', header: 'Statut', filter: { kind: 'set' } }, { id: 'day', header: 'Jour', type: 'day' }],
+  getRowId: (r) => r.id,
+  messages: { ...FR, text: { ...FR.text, ...FR_FILTERS.text, ...FR_ADVANCED_FILTER.text } },
+  features: [filters(), adv],
+});
+adv.api(grid)!.bind(document.getElementById('avance')!);
+adv.api(grid)!.set({
+  join: 'and',
+  items: [
+    { join: 'or', items: [{ column: 'status', filter: { type: 'set', include: ['Erreur', 'Alerte'] } }] },
+    { column: 'day', filter: { type: 'day', op: 'gte', value: '2026-11-01' } },
+  ],
+});
+```
+
+En Angular, `<dz-grid [features]="features" [(advancedFilter)]="expression">` ; sur l'élément `<dz-grid>`,
+`el.advancedFilter`.
+
+## Voir aussi
+
+- La fonction [`filters`](../filters/) et le [`filtersPanel`](../filters-panel/).
+- [L'état de la grille](../grid-state/), qui la sauve avec les filtres de colonne.

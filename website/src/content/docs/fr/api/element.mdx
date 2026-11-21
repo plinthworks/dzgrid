@@ -39,6 +39,8 @@ export declare class DzGridElement<T = unknown> extends Base {
     set icons(v: GridSettings<T>['icons']);
     get settings(): Partial<GridSettings<T>>;
     set settings(v: Partial<GridSettings<T>>);
+    get advancedFilter(): FilterExpression | null;
+    set advancedFilter(v: FilterExpression | null);
     get env(): GridEnv;
     set env(v: GridEnv);
     reload(): void;
@@ -87,6 +89,8 @@ export declare class DzGridElement<T = unknown> extends Base {
     set icons(v: GridSettings<T>['icons']);
     get settings(): Partial<GridSettings<T>>;
     set settings(v: Partial<GridSettings<T>>);
+    get advancedFilter(): FilterExpression | null;
+    set advancedFilter(v: FilterExpression | null);
     get env(): GridEnv;
     set env(v: GridEnv);
     reload(): void;

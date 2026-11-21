@@ -58,7 +58,7 @@ la phase 3, aujourd'hui dépassée : presque tous ses « P5…P10 » sont faits)
 | Set filter « mode Excel » | Même allure et comportement qu'Excel | E | liste proche d'Excel, pas de mode dédié | 🟡 pas de bascule « mode Excel » | S | basse |
 | Multi filter | Deux filtres dans une colonne (condition + liste) | E | `filter-multi.md` (`condition: true`) | ✅ | — | moyenne |
 | Plusieurs conditions ET / OU | « contient A ou B » | C | `filter-combined.md` | ✅ | — | moyenne |
-| Advanced filter | Expression ET / OU sur plusieurs colonnes, saisie ou constructeur | E | absent | ❌ | L | moyenne |
+| Advanced filter | Expression ET / OU sur plusieurs colonnes, saisie ou constructeur | E | 1.17.0 : `advanced-filter.md` (constructeur ; pas de saisie texte) | 🟡 pas de forme texte | S | moyenne |
 | Quick filter | Une boîte cherche dans toutes les colonnes | C | `features/quick-search`, sans accents, arabe replié, serveur | ✅ | — | haute |
 | Floating filters | Une ligne de champs sous les en-têtes | C | `features/filters` (ligne de filtres) | ✅ | — | haute |
 | Floating filter propre | Son contrôle dans la ligne de filtres | C | `settings/filter-kinds` | ✅ | — | basse |

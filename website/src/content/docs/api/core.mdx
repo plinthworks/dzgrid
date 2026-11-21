@@ -316,6 +316,9 @@ export type ColumnFilter = {
     readonly type: 'custom';
     readonly kind: string;
     readonly state: Json;
+} | {
+    readonly type: 'advanced';
+    readonly expression: FilterExpression;
 };
 ```
 
@@ -2556,6 +2559,58 @@ export declare function zoneDayBounds(day: Day, zone: string): {
 };
 ```
 
+### FilterCondition
+
+```ts
+export interface FilterCondition {
+    readonly column: string;
+    readonly filter: ColumnFilter;
+}
+```
+
+### FilterExpression
+
+```ts
+export type FilterExpression = FilterGroup | FilterCondition;
+```
+
+### FilterGroup
+
+```ts
+export interface FilterGroup {
+    readonly join: 'and' | 'or';
+    readonly items: readonly FilterExpression[];
+}
+```
+
+### advancedOf
+
+```ts
+export declare const advancedOf: (filter: FilterModel | null | undefined) => FilterExpression | null;
+```
+
+### setAdvanced
+
+```ts
+export declare const setAdvanced: (k: {
+    readonly query: {
+        readonly filter: FilterModel;
+    };
+    dispatch(cmd: {
+        readonly type: "filter.set";
+        readonly filter: FilterModel;
+    }, source: "api" | "host" | "user"): {
+        readonly ok: boolean;
+    };
+}, expression: FilterExpression | null, source?: "api" | "host" | "user") => boolean;
+```
+
+### withAdvanced
+
+```ts
+export declare const withAdvanced: (filter: FilterModel | null | undefined, expression: FilterExpression | null) => FilterModel;
+```
+
 ## `@dzgrid/core/server`
 
 ### AbortHandle
@@ -2827,6 +2882,9 @@ export type WireFilter = {
     readonly type: 'custom';
     readonly kind: string;
     readonly value: Json;
+} | {
+    readonly type: 'advanced';
+    readonly expression: WireExpression;
 };
 ```
 
@@ -2871,6 +2929,18 @@ export declare function sourceRows<T>(data: DataSource<T>, o?: SourceRowsOptions
 export declare function toWire<T>(f: FilterModel, env: WireEnv<T>): {
     readonly filter: WireFilterModel;
     readonly problems: readonly Problem[];
+};
+```
+
+### WireExpression
+
+```ts
+export type WireExpression = {
+    readonly join: 'and' | 'or';
+    readonly items: readonly WireExpression[];
+} | {
+    readonly column: string;
+    readonly filter: WireFilter;
 };
 ```
 

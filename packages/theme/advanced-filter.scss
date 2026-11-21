@@ -1,0 +1,95 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// @dzgrid/theme/advanced-filter.css — the advanced filter's builder (1.17.0, docs/behaviors/advanced-filter.md 10–12,
+// 17): its own file, loaded by the applications that use `@dzgrid/dom/advanced-filter`. Its layout (the groups, the
+// indent, the rows of controls) is injected by the feature; this file colours it, on the filter popup's surface.
+// Compiled to advanced-filter.css (layered) and advanced-filter.unlayered.css ($layered: false) by
+// `npm run build:theme`; a test fails when they drift.
+//
+// A group is a box with a line on its inline start (the accent at the root, the border below); a condition a raised
+// row; the buttons flat with a line, Apply in the accent; the focus a 2 px ring in the accent. Every look a
+// `--dzg-adv-*` variable over the shared palette. No colour literal, no physical side (guards).
+// ─────────────────────────────────────────────────────────────────────────────
+
+$layered: true !default;
+
+@mixin layer {
+  @if $layered {
+    @layer dzgrid.theme {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@if $layered {
+  @layer dzgrid.layout, dzgrid.theme, dzgrid.skin, dzgrid.bridge, dzgrid.contrast;
+}
+
+@include layer {
+  .dzg-adv {
+    color: var(--tz-fg);
+    accent-color: var(--tz-accent);
+  }
+
+  .dzg-adv-g {
+    border: var(--dzg-line, 1px) solid var(--dzg-adv-group-line, var(--tz-border));
+    border-inline-start-width: 3px;
+    border-radius: var(--dzg-radius, 0.375rem);
+  }
+
+  .dzg-adv-root > .dzg-adv-g {
+    border-inline-start-color: var(--dzg-adv-root-line, var(--tz-accent));
+  }
+
+  .dzg-adv-c {
+    border-radius: var(--dzg-radius, 0.375rem);
+    background: var(--dzg-adv-condition-bg, var(--tz-bg-raised));
+  }
+
+  .dzg-adv-col span {
+    color: var(--tz-fg-muted);
+  }
+
+  .dzg-adv select,
+  .dzg-adv-c input:not([type='radio'], [type='checkbox']) {
+    border: var(--dzg-line, 1px) solid var(--tz-border);
+    border-radius: var(--dzg-radius, 0.375rem);
+    color: inherit;
+    background: var(--tz-bg);
+  }
+
+  .dzg-adv-acts button,
+  .dzg-adv-rm,
+  .dzg-adv-foot button {
+    border: var(--dzg-line, 1px) solid var(--dzg-button-border, var(--tz-fg-muted));
+    border-radius: var(--dzg-button-radius, var(--dzg-radius, 0.375rem));
+    padding-inline: var(--dzg-button-padding-inline, 0.75rem);
+    color: var(--dzg-button-fg, var(--tz-fg));
+    background: var(--dzg-button-bg, var(--tz-bg));
+    cursor: pointer;
+  }
+
+  .dzg-adv-acts button:hover,
+  .dzg-adv-rm:hover,
+  .dzg-adv-foot button:hover {
+    background: var(--dzg-button-hover-bg, var(--tz-bg-raised));
+  }
+
+  .dzg-adv-foot .dzg-adv-apply {
+    border-color: var(--tz-accent);
+    color: var(--tz-accent-fg);
+    background: var(--tz-accent);
+  }
+
+  .dzg-adv :focus-visible {
+    outline: 2px solid var(--dzg-focus-ring, var(--tz-accent));
+    outline-offset: 1px;
+  }
+
+  @media (forced-colors: active) {
+    .dzg-adv-g {
+      border-color: CanvasText;
+    }
+  }
+}

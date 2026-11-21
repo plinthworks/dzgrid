@@ -22,6 +22,7 @@ import * as totals from '@dzgrid/core/totals';
 const PUBLIC = [
   'editableAt',
   'DEFAULT_PAGE_SIZE', 'DEFAULT_PAGE_SIZES', 'EMPTY_QUERY', 'INTENT_OWNERS', 'MAX_INSTANT', 'MAX_PHYSICAL', 'NO_OVERLAY', 'NO_SELECTION', 'PROBLEM_CODES', 'PrefixSums', 'REBASE', 'REJECTED', 'RELATIVE_RANGES',
+  'advancedOf', 'setAdvanced', 'withAdvanced', // 1.17.0 (advanced-filter.md 2)
   'addDays', 'anchorFor', 'assignKeys', 'booleanCodec', 'booleanCodecWith', 'canonicalId', 'civilToEpochDay',
   'clearSelection', 'clientRows', 'createKernel', 'collatorFor', 'compareDays', 'compilePath', 'createColumnModel', 'dataKey', 'dayAt', 'dayCodec', 'dayFieldOrder', 'dayToEpochDay', 'daysInMonth', 'detailKey',
   'enumCodec', 'epochDayToCivil', 'filterKindOf', 'epochDayToDay', 'fold', 'formattersFor', 'groupKey', 'headerSelection', 'liveChangeProblems', 'messageProblems', 'idOfDataKey',

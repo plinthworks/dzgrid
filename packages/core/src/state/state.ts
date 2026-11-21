@@ -263,7 +263,8 @@ export function restoreState<T>(k: GridKernel<T>, raw: unknown, env: StateEnv = 
       sort: has('sort') ? sort : q.sort,
       filter: has('filter')
         ? Object.fromEntries(Object.entries(isObj(s.filter) ? s.filter : bad('filter') ?? {}).filter(([id, f]) => {
-          const col = m.get(id);
+          // The advanced filter (key '', advanced-filter.md 8): checked when it filters, as any filter.
+          const col = !id || m.get(id);
           return !col ? say('state-column', `filter.${id}`) : isObj(f) || bad(`filter.${id}`);
         }))
         : q.filter,

@@ -5,6 +5,7 @@
  *   edit.scss     → edit.css (layered) and edit.unlayered.css ($layered: false), Phase 5 step 4 (owner S4-O2)
  *   forms.scss    → forms.css and forms.unlayered.css, 1.15.0 (batch, row and searching-list marks)
  *   sparkline.scss → sparkline.css and sparkline.unlayered.css, 1.16.0 (the sparklines' drawing)
+ *   advanced-filter.scss → advanced-filter.css and advanced-filter.unlayered.css, 1.17.0 (the advanced filter's builder)
  *   range.scss    → range.css (layered) and range.unlayered.css ($layered: false), Phase 5 step 11a
  *   fill.scss     → fill.css and fill.unlayered.css, Phase 5 step 12
  *   columns.scss  → columns.css and columns.unlayered.css, Phase 6 step 2
@@ -38,7 +39,7 @@ const out = (source, file) => {
   writeFileSync(`${dir}${file}`, `${css}\n`);
   console.log(`build:theme: ${file}`);
 };
-for (const name of ['dzgrid', 'contrast', 'edit', 'menu', 'range', 'fill', 'columns', 'columns-panel', 'pinned-rows', 'print', 'fresh-rows', 'find', 'filters-panel', 'row-numbers', 'search', 'grouping', 'row-drag', 'dock', 'pivot', 'vertical-headers', 'variables', 'buttons', 'pager', 'forms', 'sparkline']) {
+for (const name of ['dzgrid', 'contrast', 'edit', 'menu', 'range', 'fill', 'columns', 'columns-panel', 'pinned-rows', 'print', 'fresh-rows', 'find', 'filters-panel', 'row-numbers', 'search', 'grouping', 'row-drag', 'dock', 'pivot', 'vertical-headers', 'variables', 'buttons', 'pager', 'forms', 'sparkline', 'advanced-filter']) {
   out(`@use "${name}";`, `${name}.css`);
   out(`@use "${name}" with ($layered: false);`, `${name}.unlayered.css`);
 }

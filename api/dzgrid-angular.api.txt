@@ -16,6 +16,7 @@
 # history: 1.14.0 published
 # history: owner 2026-11-21 « on le garde »: the 1.15.0 entries edit-batch, editors-row, editors-search; Angular (pendingChange) — @dzgrid/angular#DzGrid
 # history: owner 2026-11-21 « on le garde »: DzgController.batch() (1.15.0 batch editing) — @dzgrid/angular#DzgController
+# history: owner 2026-11-21 autonomous: advanced filter — @dzgrid/angular#DzGrid
 
 @ @dzgrid/angular
 ## DZGRID_ANGULAR_VERSION
@@ -104,6 +105,7 @@
       } | undefined>;
       readonly quick: _angular_core.ModelSignal<string | undefined>;
       readonly filter: _angular_core.ModelSignal<Readonly<Record<string, _dzgrid_core.ColumnFilter>> | undefined>;
+      readonly advancedFilter: _angular_core.ModelSignal<FilterExpression | null | undefined>;
       readonly selected: _angular_core.ModelSignal<SelectionState | undefined>;
       readonly expanded: _angular_core.ModelSignal<ReadonlySet<RowKey> | undefined>;
       readonly groupBy: _angular_core.ModelSignal<readonly string[] | undefined>;
@@ -628,6 +630,11 @@
               "required": false;
               "isSignal": true;
           };
+          "advancedFilter": {
+              "alias": "advancedFilter";
+              "required": false;
+              "isSignal": true;
+          };
           "selected": {
               "alias": "selected";
               "required": false;
@@ -646,6 +653,7 @@
       }, {
           "quick": "quickChange";
           "filter": "filterChange";
+          "advancedFilter": "advancedFilterChange";
           "selected": "selectedChange";
           "expanded": "expandedChange";
           "groupBy": "groupByChange";

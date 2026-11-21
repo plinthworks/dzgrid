@@ -841,6 +841,8 @@ function takeFilter(f: ColumnFilter, path: string): { readonly filter: ColumnFil
 
 function snapshot(f: ColumnFilter, depth: number): ColumnFilter {
   if (!f || typeof f !== 'object' || depth > 20) return f;
+  // An advanced filter (advanced-filter.md 5): copied whole as JSON (a cycle or a BigInt throws: refused).
+  if (f.type === 'advanced') return JSON.parse(JSON.stringify(f));
   if (f.type === 'custom') return { ...f, state: JSON.parse(JSON.stringify(f.state)) };
   if (f.type === 'combined' && Array.isArray(f.conditions)) return { ...f, conditions: f.conditions.map((c) => snapshot(c, depth + 1)) };
   return f;

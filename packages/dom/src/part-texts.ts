@@ -243,6 +243,16 @@ export interface RowNumbersMessages {
  * (`locales/<lang>-filters-panel`): optional here, required by `filtersPanel()`. `{n}` a number.
  */
 export type FiltersPanelMessageKey = `fpanel.${'title' | 'close' | 'clearAll' | 'search' | 'none' | 'matches' | 'active' | 'count'}`;
+/**
+ * The advanced filter's texts (`@dzgrid/dom/advanced-filter`, 1.17.0, advanced-filter.md), in their own bundles
+ * (`locales/<lang>-advanced-filter`): optional here, required by `advancedFilter()`. `{n}` a number.
+ */
+export type AdvancedFilterMessageKey = `adv.${'title' | 'join' | 'and' | 'or' | 'groupAnd' | 'groupOr' | 'addCondition' | 'addGroup' | 'removeCondition' | 'removeGroup' | 'column' | 'pick' | 'condition' | 'apply' | 'clear' | 'cancel' | 'conditionAdded' | 'groupAdded' | 'removed'}`;
+/** An advanced filter bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_ADVANCED_FILTER.text }`. */
+export interface AdvancedFilterMessages {
+  readonly locale: string;
+  readonly text: { readonly [K in AdvancedFilterMessageKey]: MessageValue };
+}
 /** A filters panel bundle, spread by the host into its messages: `text: { ...FR.text, ...FR_FILTERS_PANEL.text }`. */
 export interface FiltersPanelMessages {
   readonly locale: string;

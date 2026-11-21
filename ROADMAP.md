@@ -1534,3 +1534,13 @@ their review and undocumented; 1.16.0 is their official release.
   `@default` tags), `options.test.ts`. Part 2 (same day): the other 19 settings — every setting has its page. Part 3 (same day): the 44 column options, each with its page. Part 4 (same day): the 48 features, each with its page (facts from `FEATURES` in gen-options). Batch 4 (same day): the API reference, one page per package (`scripts/gen-api.mjs`, `api.test.ts`). Batch 5 (same day): every page seen in
   Chrome at 1280 and 400 px, links 200, axe and Firefox/WebKit on one page of each kind (docs/STATUS.md). The site is done; the
   owner switched Pages on 2026-11-11.
+
+## 1.17.0 — minor, in progress on `v117` (2026-11-21; owner « on passe au filtre avancé… tu peux continuer en autonome »)
+
+- [x] Advanced filter: sheet `docs/behaviors/advanced-filter.md`, plan and autonomous decisions
+  `docs/phase-14-steps/advanced-filter-plan.md`. Core: the expression under the filter model's `''` key (evaluated,
+  wire form, kernel copy, state, value lists left out); `advancedFilter()` builder (`@dzgrid/dom/advanced-filter`, texts,
+  `advanced-filter.css`); Angular `[(advancedFilter)]`; element `advancedFilter`. Tests by hand: core 29, conformance 7,
+  dom 17, theme 6, Angular 2, element 4; browsers `scripts/browser-1-17.mjs` 84 / 84 (Chrome, Firefox, WebKit; fr light,
+  ar dark; keys; axe 0). K.8 93 768 / 94 000.
+- [ ] Owner's review of the autonomous decisions; later, if asked: a typed text form, a docked panel.

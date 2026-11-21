@@ -1,0 +1,94 @@
+{
+  "id": "bad-value-drops-all",
+  "suite": "filter-advanced",
+  "description": "A number condition whose value is text: the whole expression does not apply, told at the value.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "status"
+      },
+      {
+        "id": "d",
+        "type": "day"
+      },
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "status": "Erreur",
+        "d": "2026-11-03",
+        "n": 5
+      },
+      {
+        "id": "2",
+        "status": "Alerte",
+        "d": "2026-10-20",
+        "n": 1
+      },
+      {
+        "id": "3",
+        "status": "OK",
+        "d": "2026-11-10",
+        "n": 9
+      },
+      {
+        "id": "4",
+        "status": "Alerte",
+        "d": "2026-11-02",
+        "n": 7
+      },
+      {
+        "id": "5",
+        "status": null,
+        "d": null,
+        "n": null
+      }
+    ],
+    "filter": {
+      "": {
+        "type": "advanced",
+        "expression": {
+          "join": "and",
+          "items": [
+            {
+              "column": "status",
+              "filter": {
+                "type": "text",
+                "op": "equals",
+                "value": "OK"
+              }
+            },
+            {
+              "column": "n",
+              "filter": {
+                "type": "number",
+                "op": "gt",
+                "value": "x"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "problems": [
+      [
+        "invalid-filter",
+        "advancedFilter.items[1].filter.value"
+      ]
+    ]
+  }
+}

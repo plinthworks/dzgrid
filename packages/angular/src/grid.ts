@@ -22,8 +22,8 @@ import {
   type OutputEmitterRef,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import type { ColumnOrGroup, FilterModel, Query, GridEvent, GridKernel, Problem, RowIdInput, RowKey, RowModel, SelectionState } from '@dzgrid/core';
-import { problem } from '@dzgrid/core';
+import type { ColumnOrGroup, FilterExpression, FilterModel, Query, GridEvent, GridKernel, Problem, RowIdInput, RowKey, RowModel, SelectionState } from '@dzgrid/core';
+import { advancedOf, problem, setAdvanced } from '@dzgrid/core';
 import { canonical, emit, isDataKey } from '@dzgrid/core/internal';
 import type { SaveHandler } from '@dzgrid/core/edit';
 import type { GridState } from '@dzgrid/core/state';
@@ -193,6 +193,8 @@ export class DzGrid<T> implements AfterContentInit {
   /** Unset, the grid owns them; set, written as the host; the user's changes come back. */
   readonly quick = model<string>();
   readonly filter = model<FilterModel>();
+  /** The advanced filter's expression (1.17.0, advanced-filter.md 19): the filter model's `''` entry; null removes it. */
+  readonly advancedFilter = model<FilterExpression | null>();
   readonly selected = model<SelectionState>();
   /** The rows open (a tree's parents, details' masters): the host's set written, the user's and the data's changes back. */
   readonly expanded = model<ReadonlySet<RowKey>>();
@@ -329,7 +331,7 @@ export class DzGrid<T> implements AfterContentInit {
         this._tell();
       });
     });
-    effect(() => (this.quick(), this.filter(), this.selected(), this.expanded(), this._write(this.controller.kernel())));
+    effect(() => (this.quick(), this.filter(), this.advancedFilter(), this.selected(), this.expanded(), this._write(this.controller.kernel())));
     effect(() => (this.save(), this._grid() && untracked(() => this._save())));
     effect(() => (this.state(), this._grid() && untracked(() => this._state())));
     effect(() => (this.groupBy(), this._grid() && untracked(() => this._group())));
@@ -400,6 +402,8 @@ export class DzGrid<T> implements AfterContentInit {
         if (quick !== undefined && quick !== k.query.quick) k.dispatch({ type: 'quick.set', text: quick }, 'host');
         const filter = this.filter();
         if (filter && canonical(filter) !== canonical(k.query.filter)) k.dispatch({ type: 'filter.set', filter }, 'host');
+        const adv = this.advancedFilter();
+        if (adv !== undefined && canonical(adv) !== canonical(advancedOf(k.query.filter))) setAdvanced(k, adv, 'host');
         const selected = this.selected();
         if (selected && !sameSelection(selected, k.selection)) k.dispatch({ type: 'selection.set', selection: selected }, 'host');
         this._shut(k);
@@ -564,6 +568,10 @@ export class DzGrid<T> implements AfterContentInit {
     }
     if (e.type === 'quickChanged') this.quick.set(e.text);
     if (e.type === 'groupByChanged') this.groupBy.set(e.by);
-    if (e.type === 'filterChanged') this.filter.set(e.filter);
+    if (e.type === 'filterChanged') {
+      this.filter.set(e.filter);
+      const adv = advancedOf(e.filter);
+      if (canonical(adv) !== canonical(this.advancedFilter() ?? null)) this.advancedFilter.set(adv);
+    }
   }
 }

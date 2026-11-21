@@ -1,0 +1,68 @@
+---
+title: "advancedFilter"
+description: "One filter expression across columns, with AND / OR groups nested, built in a dialog."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+A filter that says `(Status = Error OR Status = Warning) AND Date ≥ 2026-11-01`.
+
+<FeatureFacts name="advancedFilter" />
+
+## What it does
+
+The advanced filter is one expression for the whole grid: a **group** joins its items with AND (every one) or OR (one
+at least), groups nest five deep, and each **condition** names a column and holds that column's filter, written as a
+column filter is (text, number, day, instant, yes / no, a value list, several conditions, a custom kind). It lives in
+the filter model under the key `''` — no column has an empty id — so the saved state, `[(filter)]`, `filterChanged`
+and a server's request carry it. The column filters still apply: AND between them. « Clear all filters » clears it too.
+
+`advancedFilter()` adds the builder, beside [`filters()`](../filters/) whose forms each condition shows: a modal
+dialog opened by `api(grid).open()` or by your own button (`bind(button)`), with « + Condition », « + Group », a join
+switch per group, a column list per condition and its form, Apply, Clear and Cancel. It edits a draft: Apply (or Enter
+in a value) writes it in one change; Escape, Cancel or a press outside drop it. A condition that filters nothing yet
+is left out; a value that does not read keeps the dialog open on it. The value lists ignore the expression, so you can
+add `OR Status = Warning` while `Status = Error` is applied.
+
+Without the builder, `advancedOf(filter)`, `withAdvanced(filter, expression)` and `setAdvanced(kernel, expression)`
+from `@dzgrid/core` read and write the expression. A bad expression never throws: it does not apply, and each fault is
+told as a problem with its path (`advancedFilter.items[1].column`). A text form (typing the expression) is not there yet.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { filters } from '@dzgrid/dom/filters';
+import { advancedFilter } from '@dzgrid/dom/advanced-filter';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_FILTERS } from '@dzgrid/dom/locales/en-filters';
+import { EN_ADVANCED_FILTER } from '@dzgrid/dom/locales/en-advanced-filter';
+import '@dzgrid/theme/advanced-filter.css';
+
+type Alarm = { id: string; status: string; day: string };
+
+const adv = advancedFilter();
+const grid = createGrid<Alarm>(document.getElementById('alarms')!, {
+  rows: [{ id: 'a1', status: 'Error', day: '2026-11-03' }, { id: 'a2', status: 'OK', day: '2026-11-04' }],
+  columns: [{ id: 'status', header: 'Status', filter: { kind: 'set' } }, { id: 'day', header: 'Day', type: 'day' }],
+  getRowId: (r) => r.id,
+  messages: { ...EN, text: { ...EN.text, ...EN_FILTERS.text, ...EN_ADVANCED_FILTER.text } },
+  features: [filters(), adv],
+});
+adv.api(grid)!.bind(document.getElementById('advanced')!);
+adv.api(grid)!.set({
+  join: 'and',
+  items: [
+    { join: 'or', items: [{ column: 'status', filter: { type: 'set', include: ['Error', 'Warning'] } }] },
+    { column: 'day', filter: { type: 'day', op: 'gte', value: '2026-11-01' } },
+  ],
+});
+```
+
+In Angular, `<dz-grid [features]="features" [(advancedFilter)]="expression">`; on `<dz-grid>` the element,
+`el.advancedFilter`.
+
+## See also
+
+- The [`filters`](../filters/) feature and the [`filtersPanel`](../filters-panel/).
+- [Grid state](../grid-state/), which saves it with the column filters.

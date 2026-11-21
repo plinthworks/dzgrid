@@ -1,6 +1,7 @@
 import type { ColumnType } from '../value/codec.js';
 import type { Day } from '../value/day.js';
 import type { LocaleCtx } from '../value/locale.js';
+import { problem, type Problem } from '../problems.js';
 
 /** Data that survives JSON: what a filter's state and a request may carry. */
 export type Json = null | boolean | number | string | readonly Json[] | { readonly [k: string]: Json };
@@ -36,7 +37,64 @@ export type ColumnFilter =
   | { readonly type: 'set'; readonly include?: readonly string[]; readonly exclude?: readonly string[]; readonly blanks?: 'include' | 'exclude' }
   | { readonly type: 'combined'; readonly join: 'and' | 'or'; readonly conditions: readonly ColumnFilter[] }
   /** A filter kind from a module (`FilterKind`, docs/behaviors/filter-custom.md): its state, read by the kind. */
-  | { readonly type: 'custom'; readonly kind: string; readonly state: Json };
+  | { readonly type: 'custom'; readonly kind: string; readonly state: Json }
+  /** The advanced filter (docs/behaviors/advanced-filter.md): one expression across columns, under the key `''` only. */
+  | { readonly type: 'advanced'; readonly expression: FilterExpression };
+
+/** A condition of the advanced filter: a column and its filter, written as a column filter is. */
+export interface FilterCondition { readonly column: string; readonly filter: ColumnFilter }
+/** A group of the advanced filter: its items joined by `and` (every one) or `or` (one at least); 5 levels at most. */
+export interface FilterGroup { readonly join: 'and' | 'or'; readonly items: readonly FilterExpression[] }
+export type FilterExpression = FilterGroup | FilterCondition;
+
+/**
+ * Walks an advanced filter's expression (advanced-filter.md 4, 5), alike for the browser (filter/compile.ts) and the
+ * wire (server/wire.ts): a group joins its live items (`group`), a condition's column is checked (unknown, not
+ * filtering) and its filter read by `leaf`. Null: refused (a bad item drops the whole expression, its problems told
+ * with their paths); 0: nothing live (a half-typed condition, an empty group). Groups nest 5 deep at most.
+ */
+export function walkExpression<C extends { readonly filterable: boolean }, R>(
+  e: FilterExpression,
+  path: string,
+  problems: Problem[],
+  column: (id: string) => C | undefined,
+  leaf: (col: C, f: ColumnFilter, path: string, e: FilterCondition) => R | 0 | null,
+  group: (join: 'and' | 'or', items: R[]) => R,
+  depth = 1,
+): R | 0 | null {
+  const bad = (): null => {
+    problems.push(problem('invalid-filter', 'error', path));
+    return null;
+  };
+  if (!e || typeof e !== 'object') return bad();
+  if ('items' in e) {
+    if (depth > 5 || (e.join !== 'and' && e.join !== 'or') || !Array.isArray(e.items)) return bad();
+    const parts = e.items.map((x, i) => walkExpression(x, `${path}.items[${i}]`, problems, column, leaf, group, depth + 1));
+    if (parts.includes(null)) return null;
+    const live = parts.filter((p): p is R => p !== 0);
+    return live.length ? group(e.join, live) : 0;
+  }
+  const col = typeof e.column == 'string' ? column(e.column) : undefined;
+  if (!col) return problems.push(problem('unknown-column', 'error', `${path}.column`)), null;
+  return col.filterable ? leaf(col, e.filter, `${path}.filter`, e) : bad();
+}
+
+/** The advanced filter's expression in a filter model, null when there is none. */
+export const advancedOf = (filter: FilterModel | null | undefined): FilterExpression | null => {
+  const f = filter?.[''];
+  return f?.type === 'advanced' ? f.expression : null;
+};
+/** Writes the expression in force on a grid (null removes it), the column filters kept: what `filter.set` answers. */
+export const setAdvanced = (
+  k: { readonly query: { readonly filter: FilterModel }; dispatch(cmd: { readonly type: 'filter.set'; readonly filter: FilterModel }, source: 'api' | 'host' | 'user'): { readonly ok: boolean } },
+  expression: FilterExpression | null,
+  source: 'api' | 'host' | 'user' = 'api',
+): boolean => k.dispatch({ type: 'filter.set', filter: withAdvanced(k.query.filter, expression) }, source).ok;
+/** A copy of a filter model with this expression (null: none); the column filters kept. */
+export const withAdvanced = (filter: FilterModel | null | undefined, expression: FilterExpression | null): FilterModel => {
+  const { '': _, ...rest } = filter ?? {};
+  return expression ? { ...rest, '': { type: 'advanced', expression } } : rest;
+};
 
 export type InstantFilter = Extract<ColumnFilter, { type: 'instant' }>;
 

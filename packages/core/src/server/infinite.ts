@@ -515,7 +515,7 @@ function createInfinite<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: Infin
         data: () => data,
         parts: (col) => {
           const filter = { ...wire };
-          delete filter[col];
+          delete filter[col], delete filter[''];
           return { ...(Object.keys(filter).length > 0 && { filter }), ...(server.quick !== undefined && { quick: server.quick }), params, zone: ctx.timeZone };
         },
         ticked: (col) => tickedIn(server.filter ?? {}, col),

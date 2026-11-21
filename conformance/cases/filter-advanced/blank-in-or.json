@@ -1,0 +1,84 @@
+{
+  "id": "blank-in-or",
+  "suite": "filter-advanced",
+  "description": "Blanks: status is blank OR n < 2; a negation keeps blanks as a column filter does.",
+  "input": {
+    "locale": "fr-FR",
+    "columns": [
+      {
+        "id": "status"
+      },
+      {
+        "id": "d",
+        "type": "day"
+      },
+      {
+        "id": "n",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "status": "Erreur",
+        "d": "2026-11-03",
+        "n": 5
+      },
+      {
+        "id": "2",
+        "status": "Alerte",
+        "d": "2026-10-20",
+        "n": 1
+      },
+      {
+        "id": "3",
+        "status": "OK",
+        "d": "2026-11-10",
+        "n": 9
+      },
+      {
+        "id": "4",
+        "status": "Alerte",
+        "d": "2026-11-02",
+        "n": 7
+      },
+      {
+        "id": "5",
+        "status": null,
+        "d": null,
+        "n": null
+      }
+    ],
+    "filter": {
+      "": {
+        "type": "advanced",
+        "expression": {
+          "join": "or",
+          "items": [
+            {
+              "column": "status",
+              "filter": {
+                "type": "text",
+                "op": "blank"
+              }
+            },
+            {
+              "column": "n",
+              "filter": {
+                "type": "number",
+                "op": "lt",
+                "value": 2
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "expected": {
+    "ids": [
+      "2",
+      "5"
+    ]
+  }
+}

@@ -66,6 +66,8 @@ export interface GridTheme {
   readonly pendingMark?: ThemeValue; readonly pendingBg?: ThemeValue; readonly rowEditingOutline?: ThemeValue;
   /** Sparklines (1.16.0, `@dzgrid/theme/sparkline.css`): the line and bars, the area's fill, a negative bar, the markers. */
   readonly sparklineLine?: ThemeValue; readonly sparklineArea?: ThemeValue; readonly sparklineNegative?: ThemeValue; readonly sparklineMarker?: ThemeValue;
+  /** The advanced filter's builder (1.17.0, `@dzgrid/theme/advanced-filter.css`): a group's line, the root group's line, a condition's row. */
+  readonly advGroupLine?: ThemeValue; readonly advRootLine?: ThemeValue; readonly advConditionBg?: ThemeValue;
   // The popups' buttons (`@dzgrid/theme/buttons.css`): weight, side padding, height; under the pointer and pressed (unset: no
   // change); the primary one (Apply) and its states.
   readonly buttonFontWeight?: ThemeValue; readonly buttonPaddingInline?: ThemeValue; readonly buttonHeight?: ThemeValue; readonly buttonHoverBg?: ThemeValue;

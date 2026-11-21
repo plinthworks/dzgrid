@@ -18,6 +18,7 @@
 # history: owner 2026-11-21 « on le garde »: GridEvent gains pendingChange (batch editing, 1.15.0) — @dzgrid/core#GridEvent
 # history: owner 2026-11-21 « commence par les mini-courbes et le reste »: 1.16.0 entries (sparkline, tree-select, xlsx-detail), additions — @dzgrid/core/xlsx-detail#xlsxDetails
 # history: owner 2026-11-21: XlsxOptions gains detail, detailRows, detailColumns (1.16.0 master detail in Excel), additions — @dzgrid/core/xlsx#XlsxOptions, @dzgrid/core/xlsx#XlsxInput
+# history: owner 2026-11-21 autonomous: advanced filter — @dzgrid/core#ColumnFilter, @dzgrid/core#FilterCondition, @dzgrid/core#FilterExpression, @dzgrid/core#FilterGroup, @dzgrid/core#advancedOf, @dzgrid/core#setAdvanced, @dzgrid/core#withAdvanced, @dzgrid/core/server#WireExpression, @dzgrid/core/server#WireFilter
 
 @ @dzgrid/core
 ## AbortHandle
@@ -257,6 +258,9 @@
       readonly type: 'custom';
       readonly kind: string;
       readonly state: Json;
+  } | {
+      readonly type: 'advanced';
+      readonly expression: FilterExpression;
   };
 ## ColumnGroupDef
   export interface ColumnGroupDef<T> {
@@ -1667,6 +1671,34 @@
       readonly from: InstantMs;
       readonly to: InstantMs;
   };
+## FilterCondition
+  export interface FilterCondition {
+      readonly column: string;
+      readonly filter: ColumnFilter;
+  }
+## FilterExpression
+  export type FilterExpression = FilterGroup | FilterCondition;
+## FilterGroup
+  export interface FilterGroup {
+      readonly join: 'and' | 'or';
+      readonly items: readonly FilterExpression[];
+  }
+## advancedOf
+  export declare const advancedOf: (filter: FilterModel | null | undefined) => FilterExpression | null;
+## setAdvanced
+  export declare const setAdvanced: (k: {
+      readonly query: {
+          readonly filter: FilterModel;
+      };
+      dispatch(cmd: {
+          readonly type: "filter.set";
+          readonly filter: FilterModel;
+      }, source: "api" | "host" | "user"): {
+          readonly ok: boolean;
+      };
+  }, expression: FilterExpression | null, source?: "api" | "host" | "user") => boolean;
+## withAdvanced
+  export declare const withAdvanced: (filter: FilterModel | null | undefined, expression: FilterExpression | null) => FilterModel;
 
 @ @dzgrid/core/server
 ## AbortHandle
@@ -1860,6 +1892,9 @@
       readonly type: 'custom';
       readonly kind: string;
       readonly value: Json;
+  } | {
+      readonly type: 'advanced';
+      readonly expression: WireExpression;
   };
 ## WireFilterModel
   export type WireFilterModel = Readonly<Record<string, WireFilter>>;
@@ -1880,6 +1915,14 @@
   export declare function toWire<T>(f: FilterModel, env: WireEnv<T>): {
       readonly filter: WireFilterModel;
       readonly problems: readonly Problem[];
+  };
+## WireExpression
+  export type WireExpression = {
+      readonly join: 'and' | 'or';
+      readonly items: readonly WireExpression[];
+  } | {
+      readonly column: string;
+      readonly filter: WireFilter;
   };
 
 @ @dzgrid/core/spans

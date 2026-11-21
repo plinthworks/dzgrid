@@ -5,7 +5,7 @@ import { problem, type Problem } from '../problems.js';
 import { dayToEpochDay, parseDay } from '../value/day.js';
 import { relativeOf, resolveInstantRange } from './instant.js';
 import type { AnyFilterKind } from './kind.js';
-import { INSTANT_OPS, NUM_OPS, setFault, TEXT_OPS, type ColumnFilter, type FilterModel } from './model.js';
+import { INSTANT_OPS, NUM_OPS, setFault, TEXT_OPS, walkExpression, type ColumnFilter, type FilterExpression, type FilterModel } from './model.js';
 
 /** A test on a source row index (D7): no node is built per row. */
 export type RowTest = (src: number) => boolean;
@@ -40,14 +40,11 @@ export function compileFilter<T>(model: FilterModel, env: ColumnEnv<T>, kinds?: 
   const tests: RowTest[] = [];
   const applied: Record<string, ColumnFilter> = {};
   for (const [colId, f] of Object.entries(model ?? {})) {
-    const path = `filter.${colId}`;
-    const col = env.columns.get(colId);
-    if (!col) { problems.push(problem('unknown-column', 'error', path)); continue; }
-    if (!col.filterable) { problems.push(problem('invalid-filter', 'error', path)); continue; }
-    const t = compileOne(col, f, path, env, problems, 1, kinds);
+    // The advanced filter (advanced-filter.md): its expression under the key '' (no column id is empty).
+    const t = colId ? leaf(colId, f, `filter.${colId}`, env, problems, kinds) : f?.type === 'advanced' ? expr(f.expression, env, problems, kinds) : bad(problems, ADV);
     if (t !== null && t !== INACTIVE) {
       tests.push(t);
-      applied[colId] = t.a ?? f;
+      applied[colId] = colId ? t.a ?? f : { type: 'advanced', expression: t.e! };
     }
   }
   if (!tests.length) return { active: false, test: () => true, problems, applied };
@@ -70,9 +67,31 @@ export function filterIndices(count: number, filters: readonly CompiledFilter[],
   return out.slice(0, n);
 }
 
-/** A combined filter's test carries the conditions that apply (`a`). */
-type Compiled = (RowTest & { a?: ColumnFilter }) | typeof INACTIVE | null;
+/** A combined filter's test carries the conditions that apply (`a`); an advanced filter's item, the part of it that applies (`e`). */
+type Compiled = (RowTest & { a?: ColumnFilter; e?: FilterExpression }) | typeof INACTIVE | null;
 type Lookup = (name: string) => AnyFilterKind | undefined;
+const ADV = 'advancedFilter';
+
+/** A column's filter, the column first checked (unknown, or not filtering). */
+function leaf<T>(colId: string, f: ColumnFilter, path: string, env: ColumnEnv<T>, problems: Problem[], kinds?: Lookup): Compiled {
+  const col = env.columns.get(colId);
+  if (!col) return problems.push(problem('unknown-column', 'error', path)), null;
+  return col.filterable ? compileOne(col, f, path, env, problems, 1, kinds) : bad(problems, path);
+}
+
+/** The advanced filter's test (advanced-filter.md 4, 5): each test carries the part of the expression that applies (`e`). */
+function expr<T>(e: FilterExpression, env: ColumnEnv<T>, problems: Problem[], kinds?: Lookup): Compiled {
+  type E = RowTest & { e: FilterExpression };
+  const t = walkExpression<ResolvedColumn<T>, E>(
+    e, ADV, problems, (id) => env.columns.get(id),
+    (col, f, path, c) => {
+      const t = compileOne(col, f, path, env, problems, 1, kinds);
+      return t === INACTIVE ? 0 : t && Object.assign(t, { e: { column: c.column, filter: t.a ?? f } });
+    },
+    (join, live) => Object.assign(join === 'and' ? (src: number) => live.every((t) => t(src)) : (src: number) => live.some((t) => t(src)), { e: { join, items: live.map((p) => p.e) } }),
+  );
+  return t === 0 ? INACTIVE : t;
+}
 
 function compileOne<T>(col: ResolvedColumn<T>, f: ColumnFilter, path: string, env: ColumnEnv<T>, problems: Problem[], depth: number, kinds?: Lookup): Compiled {
   if (!f || typeof f !== 'object') return bad(problems, path);

@@ -377,7 +377,8 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
   /** Whether `changed` (absent: any column) holds a column the sort, the applied filters or the search read. */
   const touches = (changed?: readonly string[]): boolean => {
     const read = [...query.sort.map((s) => s.column), ...Object.keys(appliedOf(query.filter).m), ...(quickWords(query.quick).length ? seen(columns).map((c) => c.id) : []), ...(shape?.reads?.() ?? [])];
-    return changed ? changed.some((c) => read.includes(c)) : read.length > 0;
+    // An advanced filter in force (key '') reads columns of its own: any change runs the filter again.
+    return changed ? read.includes('') || changed.some((c) => read.includes(c)) : read.length > 0;
   };
 
   // The clock is read only by a compile that meets a shortcut.
@@ -513,8 +514,9 @@ export function clientRows<T>(o: ClientOptions<T>): ClientModel<T> {
     // nothing again); the search over the columns it reads.
     const others = { ...query.filter };
     const counted = { ...appliedOf(query.filter).m };
-    delete others[column];
-    delete counted[column];
+    // The advanced filter (key '') is left out too (advanced-filter.md 7): a builder offers every value.
+    delete others[column], delete others[''];
+    delete counted[column], delete counted[''];
     const words = quickWords(query.quick);
     return cache.distinct(col, env(), {
       search,

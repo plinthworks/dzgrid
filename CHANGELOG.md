@@ -5,6 +5,33 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased — 1.17.0
+
+The advanced filter (owner 2026-11-21, « on passe au filtre avancé… tu peux continuer en autonome »;
+`docs/behaviors/advanced-filter.md`, plan and decisions `docs/phase-14-steps/advanced-filter-plan.md`). Opt-in; every
+default unchanged.
+
+### Added
+- **One filter expression across columns, AND / OR groups nested** (5 levels): a group `{ join: 'and' | 'or', items }`,
+  a condition `{ column, filter }` holding a column filter as written today (every type and operator). It is the filter
+  model's `''` entry — `{ '': { type: 'advanced', expression } }` — evaluated by the core, AND with the column filters,
+  carried by the saved state, `[(filter)]`, `filterChanged` and a server's request (each condition in its wire form);
+  value lists ignore it; « Clear all filters » clears it. A bad expression never throws: it does not apply, each fault
+  a problem with its path (`advancedFilter.items[1].column`). `advancedOf`, `withAdvanced`, `setAdvanced` in
+  `@dzgrid/core`; `WireExpression` in `@dzgrid/core/server`.
+- **`advancedFilter()`** (`@dzgrid/dom/advanced-filter`): the builder beside `filters()`, a modal dialog (`api(grid).open()`
+  or `bind(button)`) with groups, conditions in the columns' own filter forms (an enum column gets the value list), a
+  join switch per group, Apply / Clear / Cancel, keys and announcements; right to left, light and dark. Texts
+  `locales/<lang>-advanced-filter` (en, fr, ar); look `@dzgrid/theme/advanced-filter.css` (`--dzg-adv-group-line`,
+  `--dzg-adv-root-line`, `--dzg-adv-condition-bg`; theme keys `advGroupLine`, `advRootLine`, `advConditionBg`).
+- **Angular** `<dz-grid [(advancedFilter)]="expression">`; **element** `el.advancedFilter`.
+
+### Notes for an upgrade
+- `ColumnFilter` gains `{ type: 'advanced'; expression }` and `WireFilter` `{ type: 'advanced'; expression }` (valid
+  under the key `''` only): a `switch` over `type` that must be exhaustive needs the new case. A server receives the
+  `''` entry only when the application uses the advanced filter.
+- Not yet: a typed text form of the expression.
+
 ## [1.16.0] - 2026-11-21
 
 Sparklines, master / detail in Excel and a tree's cascading ticks (owner 2026-11-21, « commence par les mini-courbes

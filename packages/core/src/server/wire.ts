@@ -1,7 +1,7 @@
 import type { ColumnLookup } from '../columns/model.js';
 import type { ResolvedColumn } from '../columns/defs.js';
 import { relativeOf, resolveInstantRange } from '../filter/instant.js';
-import { INSTANT_OPS, isJson, NUM_OPS, setFault, TEXT_OPS, type ColumnFilter, type FilterModel, type Json, type NumOp, type RelativeRange, type TextOp, type WireKind } from '../filter/model.js';
+import { INSTANT_OPS, isJson, NUM_OPS, setFault, TEXT_OPS, walkExpression, type ColumnFilter, type FilterModel, type Json, type NumOp, type RelativeRange, type TextOp, type WireKind } from '../filter/model.js';
 import { problem, type Problem } from '../problems.js';
 import { epochDayToDay, parseDay, type Day } from '../value/day.js';
 import type { LocaleCtx } from '../value/locale.js';
@@ -53,7 +53,12 @@ export type WireFilter =
   | { readonly type: 'boolean'; readonly value: boolean }
   | { readonly type: 'set'; readonly include?: readonly string[]; readonly exclude?: readonly string[]; readonly blanks?: 'include' | 'exclude' }
   | { readonly type: 'combined'; readonly join: 'and' | 'or'; readonly conditions: readonly WireFilter[] }
-  | { readonly type: 'custom'; readonly kind: string; readonly value: Json };
+  | { readonly type: 'custom'; readonly kind: string; readonly value: Json }
+  /** The advanced filter (advanced-filter.md 6), under the key `''` only. */
+  | { readonly type: 'advanced'; readonly expression: WireExpression };
+
+/** An advanced filter's group or condition, each condition's filter in its wire form. */
+export type WireExpression = { readonly join: 'and' | 'or'; readonly items: readonly WireExpression[] } | { readonly column: string; readonly filter: WireFilter };
 
 const MAX_DEPTH = 3;
 const MS_PER_DAY = 86_400_000;
@@ -86,16 +91,27 @@ export function toWire<T>(f: FilterModel, env: WireEnv<T>): { readonly filter: W
   const problems: Problem[] = [];
   const filter: Record<string, WireFilter> = {};
   for (const [colId, cf] of Object.entries(f ?? {})) {
-    const path = `filter.${colId}`;
-    const col = env.columns.get(colId);
-    if (!col) problems.push(problem('unknown-column', 'error', path));
-    else if (!col.filterable) problems.push(problem('invalid-filter', 'error', path));
-    else {
-      const w = wireOne(col, cf, path, env, problems, 1);
-      if (w) filter[colId] = w;
-    }
+    // The advanced filter (advanced-filter.md 6): under the key '', each condition in its wire form.
+    const w = colId ? leaf(colId, cf, `filter.${colId}`, env, problems) : cf?.type === 'advanced'
+        ? walkExpression<ResolvedColumn<T>, WireExpression>(cf.expression, 'advancedFilter', problems, (id) => env.columns.get(id), (col, f, path, c) => {
+            const w = wireOne(col, f, path, env, problems, 1);
+            return w && { column: c.column, filter: w };
+          }, (join, items) => ({ join, items }))
+        : bad(problems, 'advancedFilter');
+    if (w) filter[colId] = colId ? (w as WireFilter) : { type: 'advanced', expression: w as WireExpression };
   }
   return { filter, problems };
+}
+
+const bad = (problems: Problem[], path: string): null => {
+  problems.push(problem('invalid-filter', 'error', path));
+  return null;
+};
+
+function leaf<T>(colId: string, cf: ColumnFilter, path: string, env: WireEnv<T>, problems: Problem[]): Out {
+  const col = env.columns.get(colId);
+  if (!col) return problems.push(problem('unknown-column', 'error', path)), null;
+  return col.filterable ? wireOne(col, cf, path, env, problems, 1) : bad(problems, path);
 }
 
 function wireOne<T>(col: ResolvedColumn<T>, f: ColumnFilter, path: string, env: WireEnv<T>, problems: Problem[], depth: number): Out {

@@ -333,7 +333,14 @@ describe('1.16.0, the five packages', () => {
   it('export sparkline.css (1.16.0, sparklines.md 14), built like the others', () => {
     const theme = pkg('theme');
     for (const f of ['sparkline.css', 'sparkline.unlayered.css', 'sparkline.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
-    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'forms', 'sparkline'\]/);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'forms', 'sparkline'[\],]/); // 1.17.0: advanced-filter after it
+  });
+
+  it('export advanced-filter.css (1.17.0, advanced-filter.md 17), the @dzgrid/dom/advanced-filter entry and its texts, built like the others', () => {
+    const theme = pkg('theme');
+    for (const f of ['advanced-filter.css', 'advanced-filter.unlayered.css', 'advanced-filter.scss']) expect([theme.exports[`./${f}`], theme.files.includes(f)]).toEqual([`./${f}`, true]);
+    expect(readFileSync(`${ROOT}scripts/build-theme.mjs`, 'utf8')).toMatch(/'sparkline', 'advanced-filter'\]/);
+    for (const e of ['./advanced-filter', './locales/en-advanced-filter', './locales/fr-advanced-filter', './locales/ar-advanced-filter']) expect(pkg('dom').exports[e], e).toBeDefined();
   });
 
   it('ship no rich tooltip entry (owner 2026-11-14: moved to @dztooltip, never published)', () => {

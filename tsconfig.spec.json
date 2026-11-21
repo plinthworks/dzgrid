@@ -176,6 +176,18 @@
       "@dzgrid/dom/dock": [
         "./packages/dom/src/dock.ts"
       ],
+      "@dzgrid/dom/advanced-filter": [
+        "./packages/dom/src/advanced-filter.ts"
+      ],
+      "@dzgrid/dom/locales/en-advanced-filter": [
+        "./packages/dom/src/locales/en-advanced-filter.ts"
+      ],
+      "@dzgrid/dom/locales/fr-advanced-filter": [
+        "./packages/dom/src/locales/fr-advanced-filter.ts"
+      ],
+      "@dzgrid/dom/locales/ar-advanced-filter": [
+        "./packages/dom/src/locales/ar-advanced-filter.ts"
+      ],
       "@dzgrid/dom/filters-panel": [
         "./packages/dom/src/filters-panel.ts"
       ],

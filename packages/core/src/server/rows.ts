@@ -410,7 +410,7 @@ function createSource<T>(binding: SourceBinding<T>, env: ModelEnv<T>, o: SourceR
         data: () => data,
         parts: (col) => {
           const filter = { ...wire };
-          delete filter[col];
+          delete filter[col], delete filter[''];
           // No filter left but this column's: none sent, as a rows request sends none.
           return { ...(Object.keys(filter).length > 0 && { filter }), ...(server.quick !== undefined && { quick: server.quick }), params, zone: ctx.timeZone };
         },

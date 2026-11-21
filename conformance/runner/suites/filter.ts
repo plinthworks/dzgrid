@@ -18,4 +18,5 @@ export const filter: Record<string, Suite> = {
   'filter-combined': run,
   'filter-instant': run,
   'filter-custom': run,
+  'filter-advanced': run,
 };

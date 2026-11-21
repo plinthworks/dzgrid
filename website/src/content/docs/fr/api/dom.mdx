@@ -4505,6 +4505,72 @@ export declare const SPARKLINE_KEYS: readonly [
 = @dzgrid/core#SparklineValues
 ```
 
+## `@dzgrid/dom/advanced-filter`
+
+### ADVANCED_FILTER_CSS
+
+```ts
+export declare const ADVANCED_FILTER_CSS: string;
+```
+
+### ADVANCED_FILTER_KEYS
+
+```ts
+export declare const ADVANCED_FILTER_KEYS: readonly AdvancedFilterMessageKey[];
+```
+
+### AdvancedFilterApi
+
+```ts
+export interface AdvancedFilterApi {
+    open(anchor?: HTMLElement): boolean;
+    close(): void;
+    bind(button: HTMLElement): () => void;
+    get(): FilterExpression | null;
+    set(expression: FilterExpression | null): boolean;
+    readonly isOpen: boolean;
+}
+```
+
+### AdvancedFilterFeature
+
+```ts
+export interface AdvancedFilterFeature extends GridFeature {
+    api(grid: {
+        readonly kernel: GridKernel<any, any>;
+    }): AdvancedFilterApi | null;
+}
+```
+
+### AdvancedFilterMessageKey
+
+```ts
+export type AdvancedFilterMessageKey = `adv.${'title' | 'join' | 'and' | 'or' | 'groupAnd' | 'groupOr' | 'addCondition' | 'addGroup' | 'removeCondition' | 'removeGroup' | 'column' | 'pick' | 'condition' | 'apply' | 'clear' | 'cancel' | 'conditionAdded' | 'groupAdded' | 'removed'}`;
+```
+
+### AdvancedFilterMessages
+
+```ts
+export interface AdvancedFilterMessages {
+    readonly locale: string;
+    readonly text: {
+        readonly [K in AdvancedFilterMessageKey]: MessageValue;
+    };
+}
+```
+
+### AdvancedFilterOptions
+
+```ts
+export type AdvancedFilterOptions = Record<string, never>;
+```
+
+### advancedFilter
+
+```ts
+export declare function advancedFilter(_o?: AdvancedFilterOptions): AdvancedFilterFeature;
+```
+
 ## Paquets de textes
 
 Un paquet par langue et par fonction, ajouté aux `messages` de la grille (voir [Fonctions](../../features/)).
@@ -6973,6 +7039,93 @@ export declare const AR_SPARKLINE: {
             other: string;
         };
         "sparkline.point": string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-advanced-filter`
+
+```ts
+export declare const EN_ADVANCED_FILTER: {
+    locale: string;
+    text: {
+        'adv.title': string;
+        'adv.join': string;
+        'adv.and': string;
+        'adv.or': string;
+        'adv.groupAnd': string;
+        'adv.groupOr': string;
+        'adv.addCondition': string;
+        'adv.addGroup': string;
+        'adv.removeCondition': string;
+        'adv.removeGroup': string;
+        'adv.column': string;
+        'adv.pick': string;
+        'adv.condition': string;
+        'adv.apply': string;
+        'adv.clear': string;
+        'adv.cancel': string;
+        'adv.conditionAdded': string;
+        'adv.groupAdded': string;
+        'adv.removed': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-advanced-filter`
+
+```ts
+export declare const FR_ADVANCED_FILTER: {
+    locale: string;
+    text: {
+        'adv.title': string;
+        'adv.join': string;
+        'adv.and': string;
+        'adv.or': string;
+        'adv.groupAnd': string;
+        'adv.groupOr': string;
+        'adv.addCondition': string;
+        'adv.addGroup': string;
+        'adv.removeCondition': string;
+        'adv.removeGroup': string;
+        'adv.column': string;
+        'adv.pick': string;
+        'adv.condition': string;
+        'adv.apply': string;
+        'adv.clear': string;
+        'adv.cancel': string;
+        'adv.conditionAdded': string;
+        'adv.groupAdded': string;
+        'adv.removed': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-advanced-filter`
+
+```ts
+export declare const AR_ADVANCED_FILTER: {
+    locale: string;
+    text: {
+        'adv.title': string;
+        'adv.join': string;
+        'adv.and': string;
+        'adv.or': string;
+        'adv.groupAnd': string;
+        'adv.groupOr': string;
+        'adv.addCondition': string;
+        'adv.addGroup': string;
+        'adv.removeCondition': string;
+        'adv.removeGroup': string;
+        'adv.column': string;
+        'adv.pick': string;
+        'adv.condition': string;
+        'adv.apply': string;
+        'adv.clear': string;
+        'adv.cancel': string;
+        'adv.conditionAdded': string;
+        'adv.groupAdded': string;
+        'adv.removed': string;
     };
 };
 ```

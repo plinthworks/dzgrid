@@ -10,7 +10,7 @@
  * for what is not text (rows, columns, getRowId, messages, features, parts, theme, icons, settings), attributes for the simple
  * settings; every grid event re-dispatched as `dzg-<type in kebab case>`. Bad input never throws: `dzg-problems`.
  */
-import { problem, type GridEvent, type Problem, type RowModel } from '@dzgrid/core';
+import { advancedOf, problem, setAdvanced, type FilterExpression, type GridEvent, type Problem, type RowModel } from '@dzgrid/core';
 import { createGrid, type GridEnv, type GridInstance, type GridSettings } from '@dzgrid/dom';
 
 /** The settings the element's own properties hold (everything else goes through `settings`). */
@@ -73,6 +73,8 @@ export class DzGridElement<T = unknown> extends Base {
   /** Connected at least once since the element was made: attributes are read, the grid may be made. */
   #wired = false;
   #seen: Problem[] = [];
+  /** The advanced filter's expression set before the grid exists. */
+  #a: FilterExpression | null = null;
   #drawn: () => void = () => {};
   #gaveUp: (e: unknown) => void = () => {};
   /** Resolved once the grid is first made; rejected when it cannot be (refused, or a grid already there). Settled once. */
@@ -84,7 +86,7 @@ export class DzGridElement<T = unknown> extends Base {
     this.ready.catch(() => {});
     // Properties set before the element was defined (a framework rendering first): taken back through the setters.
     const self = this as unknown as Record<string, unknown>;
-    for (const p of [...PROPS, 'settings', 'env']) {
+    for (const p of [...PROPS, 'settings', 'env', 'advancedFilter']) {
       if (Object.hasOwn(this, p)) {
         const v = self[p];
         delete self[p];
@@ -128,6 +130,18 @@ export class DzGridElement<T = unknown> extends Base {
     if (this.#refused('settings', v)) return;
     this.#settings = v ?? {};
     this.#apply();
+  }
+  /**
+   * The advanced filter's expression in force (advanced-filter.md 20): the filter model's `''` entry, the column filters
+   * kept; null removes it. Set before the grid exists: written when it is made. Its changes come with
+   * `dzg-filter-changed` (`advancedOf(detail.filter)`).
+   */
+  get advancedFilter(): FilterExpression | null {
+    return this.#grid ? advancedOf(this.#grid.kernel.query.filter) : this.#a;
+  }
+  set advancedFilter(v: FilterExpression | null) {
+    this.#a = v;
+    if (this.#grid) setAdvanced(this.#grid.kernel, v, 'host');
   }
   /** The grid's environment (`GridEnv`), read when the grid is made. */
   get env(): GridEnv { return this.#env; }
@@ -244,6 +258,8 @@ export class DzGridElement<T = unknown> extends Base {
       this.#tell([problem('invalid-setting', 'error', 'element', 'refused')]);
       return this.#gaveUp(e);
     }
+    // An expression set before: written now, its events among the creation's (none set: nothing changes).
+    this.advancedFilter = this.#a;
     this.#early = null;
     this.#last = s;
     const grid = this.#grid;

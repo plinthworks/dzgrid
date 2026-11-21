@@ -38,6 +38,7 @@
 # history: owner 2026-11-21 « on le garde »: the 1.15.0 entries edit-batch, editors-row, editors-search; Angular (pendingChange) — @dzgrid/dom/edit-batch#editBatch, @dzgrid/dom/edit-batch#BATCH_KEYS, @dzgrid/dom/edit-batch#EditBatchApi, @dzgrid/dom/edit-batch#EditBatchFeature, @dzgrid/dom/edit-batch#EditBatchOptions, @dzgrid/dom/edit-batch#PendingChange, @dzgrid/dom/edit-batch#SaveAllResult, @dzgrid/dom/edit-batch#RowRefusal, @dzgrid/dom/edit-batch#RowRule, @dzgrid/dom/editors-row#rowEditor, @dzgrid/dom/editors-row#ROW_KEYS, @dzgrid/dom/editors-row#RowEditor, @dzgrid/dom/editors-row#RowPlug, @dzgrid/dom/editors-row#RowRefusal, @dzgrid/dom/editors-row#RowRule, @dzgrid/dom/editors-search#searchEditor, @dzgrid/dom/editors-search#SEARCH_KEYS, @dzgrid/dom/editors-search#SearchEditor, @dzgrid/dom/editors-search#OptionSearch
 # history: owner 2026-11-21 « on le garde »: the forms texts and sheet of 1.15.0 form editing — @dzgrid/dom/locales/en-forms#EN_FORMS, @dzgrid/dom/locales/fr-forms#FR_FORMS, @dzgrid/dom/locales/ar-forms#AR_FORMS
 # history: owner 2026-11-21 « commence par les mini-courbes et le reste »: 1.16.0 entries (sparkline, tree-select, xlsx-detail), additions — @dzgrid/dom/tree-select#treeSelect, @dzgrid/dom/sparkline#sparklines, @dzgrid/dom/sparkline#SPARKLINE_KEYS, @dzgrid/dom/sparkline#SparklineOptions, @dzgrid/dom/sparkline#SparklineValues, @dzgrid/dom/locales/en-sparkline#EN_SPARKLINE, @dzgrid/dom/locales/fr-sparkline#FR_SPARKLINE, @dzgrid/dom/locales/ar-sparkline#AR_SPARKLINE
+# history: owner 2026-11-21 autonomous: advanced filter — @dzgrid/dom/advanced-filter#ADVANCED_FILTER_CSS, @dzgrid/dom/advanced-filter#ADVANCED_FILTER_KEYS, @dzgrid/dom/advanced-filter#AdvancedFilterApi, @dzgrid/dom/advanced-filter#AdvancedFilterFeature, @dzgrid/dom/advanced-filter#AdvancedFilterMessageKey, @dzgrid/dom/advanced-filter#AdvancedFilterMessages, @dzgrid/dom/advanced-filter#AdvancedFilterOptions, @dzgrid/dom/advanced-filter#advancedFilter, @dzgrid/dom/locales/en-advanced-filter#EN_ADVANCED_FILTER, @dzgrid/dom/locales/fr-advanced-filter#FR_ADVANCED_FILTER, @dzgrid/dom/locales/ar-advanced-filter#AR_ADVANCED_FILTER
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -5132,5 +5133,120 @@
               other: string;
           };
           "sparkline.point": string;
+      };
+  };
+
+@ @dzgrid/dom/advanced-filter
+## ADVANCED_FILTER_CSS
+  export declare const ADVANCED_FILTER_CSS: string;
+## ADVANCED_FILTER_KEYS
+  export declare const ADVANCED_FILTER_KEYS: readonly AdvancedFilterMessageKey[];
+## AdvancedFilterApi
+  export interface AdvancedFilterApi {
+      open(anchor?: HTMLElement): boolean;
+      close(): void;
+      bind(button: HTMLElement): () => void;
+      get(): FilterExpression | null;
+      set(expression: FilterExpression | null): boolean;
+      readonly isOpen: boolean;
+  }
+## AdvancedFilterFeature
+  export interface AdvancedFilterFeature extends GridFeature {
+      api(grid: {
+          readonly kernel: GridKernel<any, any>;
+      }): AdvancedFilterApi | null;
+  }
+## AdvancedFilterMessageKey
+  export type AdvancedFilterMessageKey = `adv.${'title' | 'join' | 'and' | 'or' | 'groupAnd' | 'groupOr' | 'addCondition' | 'addGroup' | 'removeCondition' | 'removeGroup' | 'column' | 'pick' | 'condition' | 'apply' | 'clear' | 'cancel' | 'conditionAdded' | 'groupAdded' | 'removed'}`;
+## AdvancedFilterMessages
+  export interface AdvancedFilterMessages {
+      readonly locale: string;
+      readonly text: {
+          readonly [K in AdvancedFilterMessageKey]: MessageValue;
+      };
+  }
+## AdvancedFilterOptions
+  export type AdvancedFilterOptions = Record<string, never>;
+## advancedFilter
+  export declare function advancedFilter(_o?: AdvancedFilterOptions): AdvancedFilterFeature;
+
+@ @dzgrid/dom/locales/en-advanced-filter
+## EN_ADVANCED_FILTER
+  export declare const EN_ADVANCED_FILTER: {
+      locale: string;
+      text: {
+          'adv.title': string;
+          'adv.join': string;
+          'adv.and': string;
+          'adv.or': string;
+          'adv.groupAnd': string;
+          'adv.groupOr': string;
+          'adv.addCondition': string;
+          'adv.addGroup': string;
+          'adv.removeCondition': string;
+          'adv.removeGroup': string;
+          'adv.column': string;
+          'adv.pick': string;
+          'adv.condition': string;
+          'adv.apply': string;
+          'adv.clear': string;
+          'adv.cancel': string;
+          'adv.conditionAdded': string;
+          'adv.groupAdded': string;
+          'adv.removed': string;
+      };
+  };
+
+@ @dzgrid/dom/locales/fr-advanced-filter
+## FR_ADVANCED_FILTER
+  export declare const FR_ADVANCED_FILTER: {
+      locale: string;
+      text: {
+          'adv.title': string;
+          'adv.join': string;
+          'adv.and': string;
+          'adv.or': string;
+          'adv.groupAnd': string;
+          'adv.groupOr': string;
+          'adv.addCondition': string;
+          'adv.addGroup': string;
+          'adv.removeCondition': string;
+          'adv.removeGroup': string;
+          'adv.column': string;
+          'adv.pick': string;
+          'adv.condition': string;
+          'adv.apply': string;
+          'adv.clear': string;
+          'adv.cancel': string;
+          'adv.conditionAdded': string;
+          'adv.groupAdded': string;
+          'adv.removed': string;
+      };
+  };
+
+@ @dzgrid/dom/locales/ar-advanced-filter
+## AR_ADVANCED_FILTER
+  export declare const AR_ADVANCED_FILTER: {
+      locale: string;
+      text: {
+          'adv.title': string;
+          'adv.join': string;
+          'adv.and': string;
+          'adv.or': string;
+          'adv.groupAnd': string;
+          'adv.groupOr': string;
+          'adv.addCondition': string;
+          'adv.addGroup': string;
+          'adv.removeCondition': string;
+          'adv.removeGroup': string;
+          'adv.column': string;
+          'adv.pick': string;
+          'adv.condition': string;
+          'adv.apply': string;
+          'adv.clear': string;
+          'adv.cancel': string;
+          'adv.conditionAdded': string;
+          'adv.groupAdded': string;
+          'adv.removed': string;
       };
   };

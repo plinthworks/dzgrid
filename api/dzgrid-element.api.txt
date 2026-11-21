@@ -4,6 +4,7 @@
 # history: owner 2026-11-10: baseline extended to every published entry
 # history: owner 2026-11-13: reload() on the grid's api, DzgController and <dz-grid> — additions only, 1.12.0 — @dzgrid/element#DzGridElement, @dzgrid/element/define#DzGridElement
 # history: 1.14.0 published
+# history: owner 2026-11-21 autonomous: advanced filter — @dzgrid/element#DzGridElement, @dzgrid/element/define#DzGridElement
 
 @ @dzgrid/element
 ## DzGridElement
@@ -34,6 +35,8 @@
       set icons(v: GridSettings<T>['icons']);
       get settings(): Partial<GridSettings<T>>;
       set settings(v: Partial<GridSettings<T>>);
+      get advancedFilter(): FilterExpression | null;
+      set advancedFilter(v: FilterExpression | null);
       get env(): GridEnv;
       set env(v: GridEnv);
       reload(): void;
@@ -74,6 +77,8 @@
       set icons(v: GridSettings<T>['icons']);
       get settings(): Partial<GridSettings<T>>;
       set settings(v: Partial<GridSettings<T>>);
+      get advancedFilter(): FilterExpression | null;
+      set advancedFilter(v: FilterExpression | null);
       get env(): GridEnv;
       set env(v: GridEnv);
       reload(): void;

@@ -8,6 +8,7 @@
 # history: 1.14.0 published
 # history: owner 2026-11-21 « on le garde »: the forms texts and sheet of 1.15.0 form editing — @dzgrid/theme/forms.css, @dzgrid/theme/forms.unlayered.css, @dzgrid/theme/forms.scss
 # history: owner 2026-11-21 « commence par les mini-courbes et le reste »: 1.16.0 entries (sparkline, tree-select, xlsx-detail), additions — @dzgrid/theme/sparkline.css, @dzgrid/theme/sparkline.unlayered.css, @dzgrid/theme/sparkline.scss
+# history: owner 2026-11-21 autonomous: advanced filter — @dzgrid/theme/advanced-filter.css, @dzgrid/theme/advanced-filter.unlayered.css, @dzgrid/theme/advanced-filter.scss
 
 @ @dzgrid/theme
 
@@ -180,3 +181,9 @@
 @ @dzgrid/theme/sparkline.unlayered.css
 
 @ @dzgrid/theme/sparkline.scss
+
+@ @dzgrid/theme/advanced-filter.css
+
+@ @dzgrid/theme/advanced-filter.unlayered.css
+
+@ @dzgrid/theme/advanced-filter.scss

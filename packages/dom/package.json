@@ -181,6 +181,22 @@
       "types": "./src/tree-select.ts",
       "default": "./src/tree-select.ts"
     },
+    "./advanced-filter": {
+      "types": "./src/advanced-filter.ts",
+      "default": "./src/advanced-filter.ts"
+    },
+    "./locales/en-advanced-filter": {
+      "types": "./src/locales/en-advanced-filter.ts",
+      "default": "./src/locales/en-advanced-filter.ts"
+    },
+    "./locales/fr-advanced-filter": {
+      "types": "./src/locales/fr-advanced-filter.ts",
+      "default": "./src/locales/fr-advanced-filter.ts"
+    },
+    "./locales/ar-advanced-filter": {
+      "types": "./src/locales/ar-advanced-filter.ts",
+      "default": "./src/locales/ar-advanced-filter.ts"
+    },
     "./sparkline": {
       "types": "./src/sparkline.ts",
       "default": "./src/sparkline.ts"
