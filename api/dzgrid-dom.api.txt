@@ -35,6 +35,8 @@
 # history: owner 2026-11-19 « AA »: the 1.14.0 entries show-as, editors-textarea, group-select, row-heights (additions) — @dzgrid/dom/row-heights#rowHeights, @dzgrid/dom/show-as#showAs, @dzgrid/dom/show-as#ShowAsOptions, @dzgrid/dom/editors-textarea#TextareaEditor, @dzgrid/dom/editors-textarea#textareaEditor, @dzgrid/dom/editors-textarea#TEXTAREA_CSS, @dzgrid/dom/group-select#groupSelect
 # history: 1.14.0 published
 # history: owner 2026-11-21 « ★ partout » (1.15.0 sortMark, presentation-settings.md 49): the sort button's name added to the base bundles, an addition as the yes / no words of 2026-11-10 — @dzgrid/dom/locales/en#EN, @dzgrid/dom/locales/fr#FR, @dzgrid/dom/locales/ar#AR
+# history: owner 2026-11-21 « on le garde »: the 1.15.0 entries edit-batch, editors-row, editors-search; Angular (pendingChange) — @dzgrid/dom/edit-batch#editBatch, @dzgrid/dom/edit-batch#BATCH_KEYS, @dzgrid/dom/edit-batch#EditBatchApi, @dzgrid/dom/edit-batch#EditBatchFeature, @dzgrid/dom/edit-batch#EditBatchOptions, @dzgrid/dom/edit-batch#PendingChange, @dzgrid/dom/edit-batch#SaveAllResult, @dzgrid/dom/edit-batch#RowRefusal, @dzgrid/dom/edit-batch#RowRule, @dzgrid/dom/editors-row#rowEditor, @dzgrid/dom/editors-row#ROW_KEYS, @dzgrid/dom/editors-row#RowEditor, @dzgrid/dom/editors-row#RowPlug, @dzgrid/dom/editors-row#RowRefusal, @dzgrid/dom/editors-row#RowRule, @dzgrid/dom/editors-search#searchEditor, @dzgrid/dom/editors-search#SEARCH_KEYS, @dzgrid/dom/editors-search#SearchEditor, @dzgrid/dom/editors-search#OptionSearch
+# history: owner 2026-11-21 « on le garde »: the forms texts and sheet of 1.15.0 form editing — @dzgrid/dom/locales/en-forms#EN_FORMS, @dzgrid/dom/locales/fr-forms#FR_FORMS, @dzgrid/dom/locales/ar-forms#AR_FORMS
 
 @ @dzgrid/dom
 ## ExportMessageKey
@@ -4909,5 +4911,166 @@
           'import.drop': string;
           'import.read': string;
           'import.failed': string;
+      };
+  };
+
+@ @dzgrid/dom/edit-batch
+## editBatch
+  export declare function editBatch<T = unknown>(o?: EditBatchOptions<T>): EditBatchFeature<T>;
+## BATCH_KEYS
+  export declare const BATCH_KEYS: readonly [
+      "edit.unsaved",
+      "edit.discarded",
+      "edit.notSent"
+  ];
+## EditBatchApi
+  export interface EditBatchApi<T> {
+      pending(): PendingChange<T>[];
+      readonly count: number;
+      saveAll(): Promise<SaveAllResult>;
+      discardAll(): number;
+      discard(key: RowKey, column?: string): number;
+  }
+## EditBatchFeature
+  export interface EditBatchFeature<T> extends GridFeature {
+      api(grid: {
+          readonly kernel: GridKernel<T, any>;
+      }): EditBatchApi<T> | null;
+  }
+## EditBatchOptions
+  export interface EditBatchOptions<T> {
+      readonly validateRow?: RowRule<T>;
+  }
+## PendingChange
+  export interface PendingChange<T> {
+      readonly key: RowKey;
+      readonly column: string;
+      readonly value: unknown;
+      readonly previous: unknown;
+      readonly row: Readonly<T>;
+  }
+## SaveAllResult
+  export interface SaveAllResult {
+      readonly sent: number;
+      readonly refused: readonly {
+          readonly key: RowKey;
+          readonly column: string;
+          readonly code: string | null;
+          readonly reason: string | null;
+      }[];
+  }
+## RowRefusal
+  = @dzgrid/core/edit#RowRefusal
+## RowRule
+  = @dzgrid/core/edit#RowRule
+
+@ @dzgrid/dom/editors-row
+## rowEditor
+  export declare const rowEditor: RowEditor;
+## ROW_KEYS
+  export declare const ROW_KEYS: readonly [
+      "edit.rowEditing",
+      "edit.rowCancelled"
+  ];
+## RowEditor
+  export type RowEditor = ((x: EdEnv) => RowPlug) & {
+      readonly keys: readonly string[];
+  };
+## RowPlug
+  export interface RowPlug {
+      open(k: RowKey, c: string, start: Start, ch?: string): boolean;
+      paint(): void;
+      destroy(): void;
+  }
+## RowRefusal
+  = @dzgrid/core/edit#RowRefusal
+## RowRule
+  = @dzgrid/core/edit#RowRule
+
+@ @dzgrid/dom/editors-search
+## searchEditor
+  export declare const searchEditor: SearchEditor;
+## SEARCH_KEYS
+  export declare const SEARCH_KEYS: readonly [
+      "edit.searching",
+      "edit.noResult",
+      "edit.searchFailed"
+  ];
+## SearchEditor
+  export type SearchEditor = ((x: EdEnv, value: unknown, search: OptionSearch<unknown>, label: (v: unknown) => string, name: string, done: (move: boolean) => void, row: unknown) => Ed) & {
+      readonly keys: readonly string[];
+  };
+## OptionSearch
+  = @dzgrid/core#OptionSearch
+
+@ @dzgrid/dom/locales/en-forms
+## EN_FORMS
+  export declare const EN_FORMS: {
+      locale: string;
+      text: {
+          "edit.unsaved": string;
+          "edit.discarded": {
+              one: string;
+              other: string;
+          };
+          "edit.notSent": string;
+          "edit.rowEditing": {
+              one: string;
+              other: string;
+          };
+          "edit.rowCancelled": string;
+          "edit.searching": string;
+          "edit.noResult": string;
+          "edit.searchFailed": string;
+      };
+  };
+
+@ @dzgrid/dom/locales/fr-forms
+## FR_FORMS
+  export declare const FR_FORMS: {
+      locale: string;
+      text: {
+          "edit.unsaved": string;
+          "edit.discarded": {
+              one: string;
+              other: string;
+          };
+          "edit.notSent": string;
+          "edit.rowEditing": {
+              one: string;
+              other: string;
+          };
+          "edit.rowCancelled": string;
+          "edit.searching": string;
+          "edit.noResult": string;
+          "edit.searchFailed": string;
+      };
+  };
+
+@ @dzgrid/dom/locales/ar-forms
+## AR_FORMS
+  export declare const AR_FORMS: {
+      locale: string;
+      text: {
+          "edit.unsaved": string;
+          "edit.discarded": {
+              one: string;
+              two: string;
+              few: string;
+              many: string;
+              other: string;
+          };
+          "edit.notSent": string;
+          "edit.rowEditing": {
+              one: string;
+              two: string;
+              few: string;
+              many: string;
+              other: string;
+          };
+          "edit.rowCancelled": string;
+          "edit.searching": string;
+          "edit.noResult": string;
+          "edit.searchFailed": string;
       };
   };

@@ -14,6 +14,7 @@
 # history: owner 2026-11-16 « A »: [dzgNestedArrows], [dzgNestedInlineScroll] (the 1.13.0 detail options for an Angular detail), additions only — @dzgrid/angular#DzGrid
 # history: owner 2026-11-19 « AA »: rowHeight accepts a function (1.14.0); headers 'none' and focusVisible as published in 1.13.0 — @dzgrid/angular#DzGrid
 # history: 1.14.0 published
+# history: owner 2026-11-21 « on le garde »: the 1.15.0 entries edit-batch, editors-row, editors-search; Angular (pendingChange) — @dzgrid/angular#DzGrid
 
 @ @dzgrid/angular
 ## DZGRID_ANGULAR_VERSION
@@ -343,6 +344,11 @@
       } & _dzgrid_core.ExportTrace & {
           readonly refusal: "host" | "too-large" | "error";
           readonly reason?: string;
+      }>;
+      readonly pendingChange: OutputEmitterRef<{
+          readonly type: "pendingChange";
+          readonly source: _dzgrid_core.ChangeSource;
+          readonly count: number;
       }>;
       readonly problems: OutputEmitterRef<readonly Problem[]>;
       readonly gridReady: OutputEmitterRef<DzgController<T>>;
@@ -678,6 +684,7 @@
           "exportRequested": "exportRequested";
           "exportFinished": "exportFinished";
           "exportRefused": "exportRefused";
+          "pendingChange": "pendingChange";
           "problems": "problems";
           "gridReady": "gridReady";
       }, [

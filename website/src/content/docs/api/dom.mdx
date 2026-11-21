@@ -4303,6 +4303,171 @@ export interface ImportedFile {
 export declare function fileImport(o: FileImportOptions): FileImportFeature;
 ```
 
+## `@dzgrid/dom/edit-batch`
+
+### editBatch
+
+```ts
+export declare function editBatch<T = unknown>(o?: EditBatchOptions<T>): EditBatchFeature<T>;
+```
+
+### BATCH_KEYS
+
+```ts
+export declare const BATCH_KEYS: readonly [
+    "edit.unsaved",
+    "edit.discarded",
+    "edit.notSent"
+];
+```
+
+### EditBatchApi
+
+```ts
+export interface EditBatchApi<T> {
+    pending(): PendingChange<T>[];
+    readonly count: number;
+    saveAll(): Promise<SaveAllResult>;
+    discardAll(): number;
+    discard(key: RowKey, column?: string): number;
+}
+```
+
+### EditBatchFeature
+
+```ts
+export interface EditBatchFeature<T> extends GridFeature {
+    api(grid: {
+        readonly kernel: GridKernel<T, any>;
+    }): EditBatchApi<T> | null;
+}
+```
+
+### EditBatchOptions
+
+```ts
+export interface EditBatchOptions<T> {
+    readonly validateRow?: RowRule<T>;
+}
+```
+
+### PendingChange
+
+```ts
+export interface PendingChange<T> {
+    readonly key: RowKey;
+    readonly column: string;
+    readonly value: unknown;
+    readonly previous: unknown;
+    readonly row: Readonly<T>;
+}
+```
+
+### SaveAllResult
+
+```ts
+export interface SaveAllResult {
+    readonly sent: number;
+    readonly refused: readonly {
+        readonly key: RowKey;
+        readonly column: string;
+        readonly code: string | null;
+        readonly reason: string | null;
+    }[];
+}
+```
+
+### RowRefusal
+
+```ts
+= @dzgrid/core/edit#RowRefusal
+```
+
+### RowRule
+
+```ts
+= @dzgrid/core/edit#RowRule
+```
+
+## `@dzgrid/dom/editors-row`
+
+### rowEditor
+
+```ts
+export declare const rowEditor: RowEditor;
+```
+
+### ROW_KEYS
+
+```ts
+export declare const ROW_KEYS: readonly [
+    "edit.rowEditing",
+    "edit.rowCancelled"
+];
+```
+
+### RowEditor
+
+```ts
+export type RowEditor = ((x: EdEnv) => RowPlug) & {
+    readonly keys: readonly string[];
+};
+```
+
+### RowPlug
+
+```ts
+export interface RowPlug {
+    open(k: RowKey, c: string, start: Start, ch?: string): boolean;
+    paint(): void;
+    destroy(): void;
+}
+```
+
+### RowRefusal
+
+```ts
+= @dzgrid/core/edit#RowRefusal
+```
+
+### RowRule
+
+```ts
+= @dzgrid/core/edit#RowRule
+```
+
+## `@dzgrid/dom/editors-search`
+
+### searchEditor
+
+```ts
+export declare const searchEditor: SearchEditor;
+```
+
+### SEARCH_KEYS
+
+```ts
+export declare const SEARCH_KEYS: readonly [
+    "edit.searching",
+    "edit.noResult",
+    "edit.searchFailed"
+];
+```
+
+### SearchEditor
+
+```ts
+export type SearchEditor = ((x: EdEnv, value: unknown, search: OptionSearch<unknown>, label: (v: unknown) => string, name: string, done: (move: boolean) => void, row: unknown) => Ed) & {
+    readonly keys: readonly string[];
+};
+```
+
+### OptionSearch
+
+```ts
+= @dzgrid/core#OptionSearch
+```
+
 ## Texts bundles
 
 One bundle per language and feature, spread into the grid's `messages` (see [Features](../../features/)).
@@ -6645,6 +6810,84 @@ export declare const AR_IMPORT: {
         'import.drop': string;
         'import.read': string;
         'import.failed': string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/en-forms`
+
+```ts
+export declare const EN_FORMS: {
+    locale: string;
+    text: {
+        "edit.unsaved": string;
+        "edit.discarded": {
+            one: string;
+            other: string;
+        };
+        "edit.notSent": string;
+        "edit.rowEditing": {
+            one: string;
+            other: string;
+        };
+        "edit.rowCancelled": string;
+        "edit.searching": string;
+        "edit.noResult": string;
+        "edit.searchFailed": string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/fr-forms`
+
+```ts
+export declare const FR_FORMS: {
+    locale: string;
+    text: {
+        "edit.unsaved": string;
+        "edit.discarded": {
+            one: string;
+            other: string;
+        };
+        "edit.notSent": string;
+        "edit.rowEditing": {
+            one: string;
+            other: string;
+        };
+        "edit.rowCancelled": string;
+        "edit.searching": string;
+        "edit.noResult": string;
+        "edit.searchFailed": string;
+    };
+};
+```
+
+### `@dzgrid/dom/locales/ar-forms`
+
+```ts
+export declare const AR_FORMS: {
+    locale: string;
+    text: {
+        "edit.unsaved": string;
+        "edit.discarded": {
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        "edit.notSent": string;
+        "edit.rowEditing": {
+            one: string;
+            two: string;
+            few: string;
+            many: string;
+            other: string;
+        };
+        "edit.rowCancelled": string;
+        "edit.searching": string;
+        "edit.noResult": string;
+        "edit.searchFailed": string;
     };
 };
 ```

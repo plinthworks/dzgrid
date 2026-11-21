@@ -359,6 +359,11 @@ declare class DzGrid<T> implements AfterContentInit {
         readonly refusal: "host" | "too-large" | "error";
         readonly reason?: string;
     }>;
+    readonly pendingChange: OutputEmitterRef<{
+        readonly type: "pendingChange";
+        readonly source: _dzgrid_core.ChangeSource;
+        readonly count: number;
+    }>;
     readonly problems: OutputEmitterRef<readonly Problem[]>;
     readonly gridReady: OutputEmitterRef<DzgController<T>>;
     readonly controller: DzgController<T>;
@@ -693,6 +698,7 @@ declare class DzGrid<T> implements AfterContentInit {
         "exportRequested": "exportRequested";
         "exportFinished": "exportFinished";
         "exportRefused": "exportRefused";
+        "pendingChange": "pendingChange";
         "problems": "problems";
         "gridReady": "gridReady";
     }, [

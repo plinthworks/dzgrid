@@ -15,6 +15,7 @@
 # history: owner 2026-11-13: autoColumns generic over the column type (default ColumnDef) — 1.12.0 — @dzgrid/core/auto-columns#AutoColumnsOptions, @dzgrid/core/auto-columns#MergedColumn, @dzgrid/core/auto-columns#autoColumns
 # history: owner 2026-11-14 « A »: a column's tooltip in one line (true, false, a function, ColumnTooltip options) and headerTooltip as words or a TooltipSpec — inputs widened, 1.12.0 — @dzgrid/core#ColumnDef, @dzgrid/core#ColumnTooltip, @dzgrid/core#TooltipSpec, @dzgrid/core#TooltipPlacement
 # history: 1.14.0 published
+# history: owner 2026-11-21 « on le garde »: GridEvent gains pendingChange (batch editing, 1.15.0) — @dzgrid/core#GridEvent
 
 @ @dzgrid/core
 ## AbortHandle
@@ -643,6 +644,10 @@
           readonly key: RowKey;
           readonly column: string;
       }[];
+  } | {
+      readonly type: 'pendingChange';
+      readonly source: ChangeSource;
+      readonly count: number;
   } | {
       readonly type: 'editingStarted';
       readonly source: 'user';

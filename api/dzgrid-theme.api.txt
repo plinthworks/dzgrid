@@ -6,6 +6,7 @@
 # history: owner 2026-11-14 Q-T1 B: the new entries of tooltips and popovers (additions) — @dzgrid/theme/tooltips.css, @dzgrid/theme/tooltips.unlayered.css, @dzgrid/theme/tooltips.scss
 # history: owner 2026-11-14: rich tooltips moved to @dztooltip, never published — entries removed: @dzgrid/theme/tooltips.css, @dzgrid/theme/tooltips.unlayered.css, @dzgrid/theme/tooltips.scss
 # history: 1.14.0 published
+# history: owner 2026-11-21 « on le garde »: the forms texts and sheet of 1.15.0 form editing — @dzgrid/theme/forms.css, @dzgrid/theme/forms.unlayered.css, @dzgrid/theme/forms.scss
 
 @ @dzgrid/theme
 
@@ -166,3 +167,9 @@
 @ @dzgrid/theme/dzgrid.comfort.unlayered.css
 
 @ @dzgrid/theme/comfort.scss
+
+@ @dzgrid/theme/forms.css
+
+@ @dzgrid/theme/forms.unlayered.css
+
+@ @dzgrid/theme/forms.scss

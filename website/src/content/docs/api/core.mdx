@@ -842,6 +842,10 @@ export type GridEvent<T> = {
         readonly column: string;
     }[];
 } | {
+    readonly type: 'pendingChange';
+    readonly source: ChangeSource;
+    readonly count: number;
+} | {
     readonly type: 'editingStarted';
     readonly source: 'user';
     readonly key: RowKey;
