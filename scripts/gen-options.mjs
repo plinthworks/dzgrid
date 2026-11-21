@@ -39,7 +39,7 @@ export const FEATURES = [
   ['theme', 'theming'], ['wrapped-headers', 'wrappedHeaders'], ['column-hover', 'columnHover'], ['responsive', 'responsive'],
   ['import', 'fileImport'], ['spans', 'spans'], ['groups', 'groups'], ['slots', 'slots'],
   ['row-heights', 'rowHeights'], ['show-as', 'showAs'], ['editors-textarea', 'textareaEditor'], ['group-select', 'groupSelect'],
-  ['edit-batch', 'editBatch'], ['editors-row', 'rowEditor'], ['editors-search', 'searchEditor'], ['sparkline', 'sparklines'],
+  ['edit-batch', 'editBatch'], ['editors-row', 'rowEditor'], ['editors-search', 'searchEditor'], ['sparkline', 'sparklines'], ['tree-select', 'treeSelect'],
 ];
 /** A feature whose entry exports no `*_KEYS` but uses another's texts (`printOnMenu`: `print()`'s table). */
 const TEXTS_OF = { printOnMenu: 'print' };

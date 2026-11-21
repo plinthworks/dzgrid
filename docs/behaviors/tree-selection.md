@@ -31,15 +31,35 @@ row, Ctrl+A, ticks the header box; closes a parent whose children are selected.
 - **Hidden selected rows**: collapsing keeps them selected; the footer's count and
   `selection.count` include them; the export of `selected` writes them (`csv-export.md`).
 - **Rules** (`selection-rules.md`) apply to tree rows as to any row.
-- **Later (owner Q2): `selection.tree: 'cascade'`** — selecting a parent selects its descendants,
-  and a parent shows ticked, unticked or partly ticked from them (the checkbox's `aria-checked`
-  `mixed`). Only for trees fully loaded in the browser (no lazy children): a server tree cannot
-  know its hidden descendants. The selection stays a set of keys, so the cascade can be added
-  without changing its type.
+- **The cascade** is opt-in: `treeSelect()` (1.16.0, « Cascading ticks » below).
 
 ## Where DzGrid differs on purpose
 - No cascade by default: on health data, ticking a service must not tick hundreds of patients
   without the user seeing them.
+
+## Cascading ticks (1.16.0, owner 2026-11-21 « et le reste »; gap analysis §5)
+Written before the code. As `groupSelect()` does for groups (row-grouping.md 25–29), for a tree's rows.
+
+1. **Opt-in**: `treeSelect()` of `@dzgrid/dom/tree-select` (its own entry) beside `tree()`, with checkbox selection
+   (`selection: { mode: 'multi', checkbox: true }`). Without `tree()`: one `missing-feature` warning
+   (`features.treeSelect`), nothing else. Without it: the independent selection above, unchanged.
+2. **A parent's box shows its branch**: ticked when the row and every row under it (every level, open or closed, after
+   the filters and the search) are ticked; unticked when none is; partly ticked otherwise (`aria-checked="mixed"`, the
+   box's dash). Its box is a `checkbox` named by its tree cell's text. A leaf's box is the row's selection, as before.
+   A row a selection rule refuses counts as ticked for the state (as the header box and `groupSelect()`).
+3. **A click on a box, or Space on a row** (no modifier): on a parent partly ticked or unticked → the row and every row
+   under it ticked; ticked → all unticked; on a leaf → the leaf toggled. Then each row above it is ticked when every row
+   under it is, unticked otherwise. One `selectionChanged` (source `user`), said as any selection. Under « all »
+   (`exclude`) the exceptions follow. A selection rule still decides row by row. Rows hidden by a filter or the search
+   are not touched (what you see).
+4. **Other gestures as before**: a row click (`selection.click`), Ctrl/Cmd+click, Shift ranges, Ctrl+A, the header box
+   and the API select rows one by one; the boxes then show each branch's state as it is (a selected parent's own box
+   stays ticked: the row is selected).
+5. **Children not loaded yet** (`tree-lazy.md`, a server's tree): a parent's box acts on itself and on what it holds;
+   ticked, its children arrive ticked when it is opened and they load (as « all except » for that branch); unticked
+   before they arrive, they arrive unticked. The browser never names rows it never received.
+6. **The selection stays a set of row keys**: a ticked parent is a selected row (counted, exported with `selected`);
+   nothing else changes in its type or events.
 
 ## Tests (to be written with the code)
 Step 2: the non-data skip in select-all, ranges and `allDisplayed` (core). Step 5:

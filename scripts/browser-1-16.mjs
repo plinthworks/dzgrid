@@ -16,6 +16,10 @@
  * file built by the browser (its own deflate), read back in the page: the open master's deliveries under it one column
  * in, its header row, the block at outline level 1, the filter on the master's columns; `&detail=all` every master with
  * deliveries; `&detail=all&async` the application's slow promises asked one master after another, the file the same.
+ * Cascading ticks in a tree (`--only tree`, `v1-16-tree.html`, tree-selection.md « Cascading ticks »; not committed), French
+ * and Arabic, light and dark: a real click on a service's box ticks its branch (every row aria-selected), a visit's
+ * box then unticks it and the rows above, the parents' boxes partly ticked (the dash drawn, `aria-checked` mixed), Space
+ * on the service gives the branch back; the boxes on the row's start side.
  * Perf (`--only perf`, light, French): 10 000 rows × 4 sparkline columns (30, 12, 12, 16 points), the viewport scrolled
  * 90 px a frame for 240 frames; frame times (p50, p95, max) beside the same grid without the feature (`&plain`: the
  * numbers as text).
@@ -160,6 +164,53 @@ for (const name of wants('xlsx') ? engines : []) {
           check(`${tag}: the filter on the master's two columns`, new RegExp(`<autoFilter ref="A1:B${all ? 9 : 7}"/>`).test(r.sheet), /<autoFilter[^>]*>/.exec(r.sheet)?.[0]);
           check(`${tag}: right to left in Arabic`, lang === 'ar' ? /rightToLeft="1"/.test(r.sheet) : !/rightToLeft/.test(r.sheet));
           if (mode.endsWith('&async')) check(`${tag}: the application's promises, one per master, in order`, r.asked.join() === 's1,s2,s3', r.asked.join());
+          check(`${tag}: no page error`, errors.length === 0, errors.join(' | '));
+        } finally {
+          await ctx.close();
+        }
+      }
+    }
+  } finally {
+    await B.close();
+  }
+}
+
+// ---- Cascading ticks in a tree.
+for (const name of wants('tree') ? engines : []) {
+  const B = await browser(name);
+  try {
+    for (const lang of ['fr', 'ar']) {
+      for (const dark of [false, true]) {
+        const tag = `${name} tree ${lang} ${dark ? 'dark' : 'light'}`;
+        const ctx = await B.newContext({ viewport: { width: 800, height: 520 } });
+        try {
+          const page = await ctx.newPage();
+          const errors = [];
+          page.on('pageerror', (e) => errors.push(String(e)));
+          await page.goto(`${base}/v1-16-tree.html?${lang === 'ar' ? 'lang=ar' : ''}${dark ? '&dark' : ''}`);
+          await page.waitForSelector('.dzg-row[aria-rowindex="8"]');
+          await frames(page);
+          const ROW = (i) => `.dzg-row[aria-rowindex="${i + 2}"]`;
+          const BOX = (i) => `${ROW(i)} .dzg-check .dzg-box`;
+          const sel = () => page.evaluate(() => [...document.querySelectorAll('.dzg-row')].sort((a, b) => a.getAttribute('aria-rowindex') - b.getAttribute('aria-rowindex')).map((r) => (r.getAttribute('aria-selected') === 'true' ? 1 : 0)).join(''));
+          const box = (i) => page.evaluate((s) => { const b = document.querySelector(s); return { role: b.getAttribute('role'), checked: b.getAttribute('aria-checked'), mark: getComputedStyle(b, '::before').content }; }, BOX(i));
+          // Rows: 0 S0, 1 P1, 2 V1, 3 V2, 4 P2, 5 S1, 6 P3.
+          await page.locator(BOX(0)).click();
+          await frames(page);
+          check(`${tag}: a click on the service's box ticks its branch`, (await sel()) === '1111100', await sel());
+          const s0 = await box(0);
+          check(`${tag}: its box a ticked checkbox`, s0.role === 'checkbox' && s0.checked === 'true' && /✓/.test(s0.mark), JSON.stringify(s0));
+          await page.locator(BOX(2)).click();
+          await frames(page);
+          check(`${tag}: a visit unticked unticks the rows above`, (await sel()) === '0001100', await sel());
+          const [b0, b1] = [await box(0), await box(1)];
+          check(`${tag}: the parents partly ticked, the dash drawn`, b0.checked === 'mixed' && b1.checked === 'mixed' && /−/.test(b0.mark) && /−/.test(b1.mark), JSON.stringify([b0, b1]));
+          await page.locator(`${ROW(0)} .dzg-cell[data-col="n"]`).click();
+          await page.keyboard.press(' ');
+          await frames(page);
+          check(`${tag}: Space on the service ticks its branch again`, (await sel()) === '1111100', await sel());
+          const side = await page.evaluate((s) => { const b = document.querySelector(s).getBoundingClientRect(), r = document.querySelector('.dzg-row[aria-rowindex="2"]').getBoundingClientRect(); return { l: b.left - r.left, r: r.right - b.right }; }, BOX(0));
+          check(`${tag}: the box at the row's start`, lang === 'ar' ? side.r < side.l : side.l < side.r, JSON.stringify(side));
           check(`${tag}: no page error`, errors.length === 0, errors.join(' | '));
         } finally {
           await ctx.close();

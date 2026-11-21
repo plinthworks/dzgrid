@@ -16,7 +16,8 @@ Montre les lignes en arbre ; la hiérarchie vient de vos lignes, de l’une de t
 la ferme ou va à son parent (en miroir en arabe), `*` ouvre ses sœurs ; un clic sur le chevron ouvre ou ferme aussi.
 Chaque ouverture ou fermeture par l’utilisateur est annoncée. Un tri range les enfants de chaque parent entre eux ; ce
 qui est ouvert le reste après un tri, un filtre ou de nouvelles lignes. Les lignes de l’arbre sont des lignes de
-données ordinaires : la sélection, l’édition et l’export fonctionnent sur elles.
+données ordinaires : la sélection, l’édition et l’export fonctionnent sur elles. Chaque ligne se coche seule ;
+[`treeSelect()`](../tree-select/) (1.16.0) fait cocher toute sa branche par une case.
 
 Donnez exactement un seul de `parentId`, `children` ou `path` ; aucun ou plusieurs donne une erreur `tree-shape`. Un
 id de parent qui ne nomme aucune ligne place la ligne en haut (`tree-orphan`) ; un cycle est rompu (`tree-cycle`) ;

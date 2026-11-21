@@ -1,0 +1,51 @@
+---
+title: "treeSelect"
+description: "In a tree, ticking a row's box ticks its whole branch; a parent's box shows its branch partly ticked."
+---
+
+import FeatureFacts from '../../../components/FeatureFacts.astro';
+
+Boxes that tick a folder and everything in it.
+
+<FeatureFacts name="treeSelect" />
+
+## What it does
+
+Beside [`tree()`](../tree/), with checkbox selection (`selection: { mode: 'multi', checkbox: true }`), `treeSelect()`
+makes the boxes cascade. A click on a row's box, or Space on the row, ticks the row and every row under it — every
+level, open or closed, the rows the filters and the search keep — or, when they all are, unticks them. Then each row
+above it is ticked when every row under it is, and unticked otherwise. A parent's box shows its branch ticked,
+unticked or partly ticked (`mixed`, a dash) and is named by its row for a screen reader. Each change is one
+`selectionChanged`, said as any selection.
+
+Row clicks, Ctrl/Cmd+click, Shift ranges, Ctrl+A, the header box and the API still select rows one by one; the boxes
+show each branch as it then is. A parent whose children are not loaded yet (lazy children, a server's tree) acts on
+itself: ticked, its children arrive ticked when it opens. The selection stays the rows' keys, so a ticked parent is a
+selected row like any other. Without `tree()`, the grid tells one `missing-feature` warning; without `treeSelect()`,
+each row is ticked on its own, as before.
+
+## Example
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { tree } from '@dzgrid/dom/tree';
+import { treeSelect } from '@dzgrid/dom/tree-select';
+import { EN } from '@dzgrid/dom/locales/en';
+import { EN_TREE } from '@dzgrid/dom/locales/en-tree';
+
+type Folder = { id: string; parent: string | null; name: string };
+
+createGrid<Folder>(document.getElementById('files')!, {
+  rows: [{ id: 'f1', parent: null, name: 'Reports' }, { id: 'f2', parent: 'f1', name: 'March' }],
+  columns: [{ id: 'name', header: 'Name' }],
+  getRowId: (r) => r.id,
+  selection: { mode: 'multi', checkbox: true },
+  messages: { ...EN, text: { ...EN.text, ...EN_TREE.text } },
+  features: [tree<Folder>({ parentId: (r) => r.parent }), treeSelect()],
+});
+```
+
+## See also
+
+- The [`tree`](../tree/) feature and [`groupSelect`](../group-select/) for groups.
+- The [`selection`](../../settings/selection/) setting.

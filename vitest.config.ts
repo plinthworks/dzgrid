@@ -86,6 +86,7 @@ const domAlias = {
   '@dzgrid/dom/pinned-rows': fileURLToPath(new URL('./packages/dom/src/pinned-rows.ts', import.meta.url)),
   '@dzgrid/dom/auto-height': fileURLToPath(new URL('./packages/dom/src/auto-height.ts', import.meta.url)),
   '@dzgrid/dom/row-heights': fileURLToPath(new URL('./packages/dom/src/row-heights.ts', import.meta.url)),
+  '@dzgrid/dom/tree-select': fileURLToPath(new URL('./packages/dom/src/tree-select.ts', import.meta.url)),
   '@dzgrid/dom/sparkline': fileURLToPath(new URL('./packages/dom/src/sparkline.ts', import.meta.url)),
   '@dzgrid/dom/locales/en-sparkline': fileURLToPath(new URL('./packages/dom/src/locales/en-sparkline.ts', import.meta.url)),
   '@dzgrid/dom/locales/fr-sparkline': fileURLToPath(new URL('./packages/dom/src/locales/fr-sparkline.ts', import.meta.url)),

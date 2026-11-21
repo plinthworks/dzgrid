@@ -3581,6 +3581,18 @@
       "css": [],
       "doc": "`sparklines(options)`: draws every `type: 'sparkline'` column — a list of numbers in time order — as a small line, area, bar or win / loss chart (1.16.0, docs/behaviors/sparklines.md). The options are the grid's defaults; a column's `sparkline: { … }` wins, key by key. The cell's words are a summary for screen readers (« 12 values, from 3 to 41, last 27 »); the pointer over the drawing shows the point's value in the grid's tooltip, a keyboard focus the summary. Time runs left to right in both directions. Files, the clipboard and print write the numbers.",
       "source": "packages/dom/src/sparkline/index.ts"
+    },
+    {
+      "name": "treeSelect",
+      "entry": "@dzgrid/dom/tree-select",
+      "signature": "treeSelect(): GridFeature",
+      "param": null,
+      "options": [],
+      "texts": null,
+      "sheet": null,
+      "css": [],
+      "doc": "`treeSelect()`: beside `tree()` with checkbox selection, cascading ticks (1.16.0, docs/behaviors/tree-selection.md « Cascading ticks » 1–6). A click on a box or Space on a row ticks or unticks the row and every row under it (every level, open or closed, after the filters), then ticks each row above when every row under it is ticked, unticks it otherwise; a parent's box shows its branch ticked, unticked or partly ticked. Children not loaded yet arrive ticked under a ticked parent. The selection stays the rows' keys. Its own entry.",
+      "source": "packages/dom/src/tree-select/index.ts"
     }
   ]
 }

@@ -1504,6 +1504,9 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   one column in, one outline level down; CSV unchanged. `@dzgrid/core/xlsx-detail`, a lazy DOM chunk. Tests by hand
   (core 9, dom 7); browsers 132 / 132 (`--only xlsx`). `@dzgrid/core/xlsx` 7 616 over its 7 350 line (+3.6 %): the
   owner's decision.
+- [x] Cascading ticks in a tree, `treeSelect()` (tree-selection.md « Cascading ticks » 1–6): a branch ticked by a box or
+  Space, the rows above following, a parent's box tri-state; lazy children arrive ticked under a ticked parent. Tests by
+  hand (dom 10); browsers 84 / 84 (`--only tree`). New line `dom/tree-select` 1 050.
 
 ## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)
 

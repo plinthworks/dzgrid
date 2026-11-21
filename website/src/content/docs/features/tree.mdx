@@ -15,7 +15,8 @@ Shows the rows as a tree; the hierarchy comes from your rows, in one of three wa
 `tree()` indents the tree column one step per level and gives each parent a chevron. → opens a row, ← closes it or
 goes to its parent (mirrored in Arabic), `*` opens its siblings; a click on the chevron opens or closes too. Each
 opening or closing by the user is said. A sort orders each parent's children among themselves; what is open stays open
-after a sort, a filter or new rows. Tree rows are ordinary data rows: selection, editing and export work on them.
+after a sort, a filter or new rows. Tree rows are ordinary data rows: selection, editing and export work on them. Each row is ticked on its own;
+[`treeSelect()`](../tree-select/) (1.16.0) makes a box tick its whole branch.
 
 Give exactly one of `parentId`, `children` or `path`; none or several is a `tree-shape` error. A parent id that names
 no row puts the row at the top (`tree-orphan`); a cycle is broken (`tree-cycle`); with `children`, ids must be unique

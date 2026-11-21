@@ -248,6 +248,9 @@
       "@dzgrid/dom/row-heights": [
         "./packages/dom/src/row-heights.ts"
       ],
+      "@dzgrid/dom/tree-select": [
+        "./packages/dom/src/tree-select.ts"
+      ],
       "@dzgrid/dom/sparkline": [
         "./packages/dom/src/sparkline.ts"
       ],

@@ -1,0 +1,53 @@
+---
+title: "treeSelect"
+description: "Dans un arbre, cocher la case d’une ligne coche toute sa branche ; la case d’un parent montre sa branche cochée en partie."
+---
+
+import FeatureFacts from '../../../../components/FeatureFacts.astro';
+
+Des cases qui cochent un dossier et tout ce qu’il contient.
+
+<FeatureFacts name="treeSelect" />
+
+## Ce qu’elle fait
+
+À côté de [`tree()`](../tree/), avec la sélection par cases (`selection: { mode: 'multi', checkbox: true }`),
+`treeSelect()` fait descendre les cases. Un clic sur la case d’une ligne, ou Espace sur la ligne, coche la ligne et
+toutes les lignes sous elle — à chaque niveau, ouvertes ou fermées, celles que les filtres et la recherche gardent — ou,
+quand elles le sont toutes, les décoche. Puis chaque ligne au-dessus est cochée quand toutes les lignes sous elle le
+sont, décochée sinon. La case d’un parent montre sa branche cochée, décochée ou cochée en partie (`mixed`, un tiret) et
+porte le nom de sa ligne pour un lecteur d’écran. Chaque changement est un seul `selectionChanged`, annoncé comme toute
+sélection.
+
+Les clics sur une ligne, Ctrl/Cmd+clic, les plages avec Maj, Ctrl+A, la case de l’en-tête et l’API sélectionnent
+toujours les lignes une à une ; les cases montrent alors chaque branche telle qu’elle est. Un parent dont les enfants ne
+sont pas encore chargés (enfants paresseux, arbre d’un serveur) agit sur lui-même : coché, ses enfants arrivent cochés
+quand il s’ouvre. La sélection reste les clés des lignes : un parent coché est une ligne sélectionnée comme une autre.
+Sans `tree()`, la grille signale un avertissement `missing-feature` ; sans `treeSelect()`, chaque ligne se coche seule,
+comme avant.
+
+## Exemple
+
+```ts
+import { createGrid } from '@dzgrid/dom';
+import { tree } from '@dzgrid/dom/tree';
+import { treeSelect } from '@dzgrid/dom/tree-select';
+import { FR } from '@dzgrid/dom/locales/fr';
+import { FR_TREE } from '@dzgrid/dom/locales/fr-tree';
+
+type Folder = { id: string; parent: string | null; name: string };
+
+createGrid<Folder>(document.getElementById('files')!, {
+  rows: [{ id: 'f1', parent: null, name: 'Rapports' }, { id: 'f2', parent: 'f1', name: 'Mars' }],
+  columns: [{ id: 'name', header: 'Nom' }],
+  getRowId: (r) => r.id,
+  selection: { mode: 'multi', checkbox: true },
+  messages: { ...FR, text: { ...FR.text, ...FR_TREE.text } },
+  features: [tree<Folder>({ parentId: (r) => r.parent }), treeSelect()],
+});
+```
+
+## Voir aussi
+
+- La fonction [`tree`](../tree/) et [`groupSelect`](../group-select/) pour les groupes.
+- Le réglage [`selection`](../../settings/selection/).

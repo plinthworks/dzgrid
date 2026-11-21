@@ -40,6 +40,15 @@ et le reste »). A minor: additions, nothing removed; every default unchanged.
   export loads it itself, in a chunk of its own); core `XlsxOptions.detail`, `detailRows`, `detailColumns`,
   `XlsxInput.expanded`, `details`, types `XlsxDetails`, `XlsxDetailContext`, `XlsxDetailBlocks`. Checked in Chrome,
   Firefox and WebKit (the browser's deflate), French and Arabic (`scripts/browser-1-16.mjs --only xlsx`).
+- **Cascading ticks in a tree, `treeSelect()`** (`@dzgrid/dom/tree-select`, opt-in; tree-selection.md « Cascading
+  ticks »): beside `tree()` with checkbox selection, a click on a row's box or Space on the row ticks (or unticks) the
+  row and every row under it — every level, open or closed, after the filters and the search — then each row above is
+  ticked when every row under it is, unticked otherwise; one `selectionChanged`. A parent's box is a checkbox named by
+  its row, ticked / unticked / partly ticked (`mixed`). **Decisions**: other gestures (row clicks, Ctrl/Cmd+click,
+  Shift ranges, Ctrl+A, the header box, the API) still select row by row, the boxes showing each branch as it is; a
+  parent whose children are not loaded yet (lazy, a server's tree) acts on itself, its children arriving ticked under
+  a ticked parent; rows hidden by a filter are never touched. Without it, each row is ticked on its own as before.
+  Checked in Chrome, Firefox and WebKit, French and Arabic, light and dark (`scripts/browser-1-16.mjs --only tree`).
 
 ### Sizes
 - **K.8 93 000 → 94 000** (owner 2026-11-21, « tu peux augmenter la taille s'il le faut »; measured 93 063: the
@@ -49,6 +58,7 @@ et le reste »). A minor: additions, nothing removed; every default unchanged.
 - Master / detail in Excel: new lines `core/xlsx-detail` 600, the export's `xlsx detail` chunk 850; +2 %:
   `dom/detail` 4 360 → 4 440, the export run chunk 5 550 → 5 640. **For the owner**: `@dzgrid/core/xlsx` measures
   7 616 over its 7 350 line (+3.6 %, beyond +2 %: the details' seam in the writer).
+- Cascading ticks: the new line `dom/tree-select` 1 050.
 
 ## [1.15.0] - 2026-11-21
 

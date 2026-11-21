@@ -177,6 +177,10 @@
       "types": "./src/editors-search.ts",
       "default": "./src/editors-search.ts"
     },
+    "./tree-select": {
+      "types": "./src/tree-select.ts",
+      "default": "./src/tree-select.ts"
+    },
     "./sparkline": {
       "types": "./src/sparkline.ts",
       "default": "./src/sparkline.ts"
