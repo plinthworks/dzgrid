@@ -29,6 +29,10 @@
       "types": "./src/xlsx.ts",
       "default": "./src/xlsx.ts"
     },
+    "./xlsx-detail": {
+      "types": "./src/xlsx-detail.ts",
+      "default": "./src/xlsx-detail.ts"
+    },
     "./rules": {
       "types": "./src/rules.ts",
       "default": "./src/rules.ts"

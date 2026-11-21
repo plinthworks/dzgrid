@@ -53,6 +53,8 @@ export function nestedGrid<C>(o: NestedGridOptions<C>): SlotPart<'detail'> {
   return {
     slot: 'detail',
     part: {
+      /** Its settings for a master, read by the Excel export's details (1.16.0, xlsx-export.md 14). */
+      settings: o.settings,
       /**
        * The kept grids let go (review 2): every one when the grid around is destroyed (`keep` absent), else those
        * whose master row `keep` no longer finds. A grid kept for a refusal only stays until then, or until its panel

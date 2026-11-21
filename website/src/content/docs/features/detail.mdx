@@ -18,8 +18,9 @@ close, mirrored in Arabic), opens a panel under the row; the rows below move dow
 is mounted when first shown and removed when its row closes or scrolls away. Each opening by the user is said.
 
 The panel is one stop for the keys: ↓ from the master reaches it, Enter or F2 goes inside, Escape comes back. Its name
-is « Details of » its master. It is never selected, edited, copied or exported. A height change inside it never moves
-the rows above it.
+is « Details of » its master. It is never selected, edited or copied. A height change inside it never moves the rows
+above it. The Excel export can write each master's detail rows under it (1.16.0, [`csvExport`](../csv-export/)'s
+`xlsx.detail`); CSV and JSON never do.
 
 Master/detail refuses a tree and the `spans()` feature beside it (`unsupported-combination`): the grid shows the
 details without the other. Its texts are required: an error names any missing key. A height that is not a number of 0

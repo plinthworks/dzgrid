@@ -12,6 +12,10 @@
  *   tooltip off the cell; the fourth point then at once;
  * - a keyboard arrow onto the cell: the summary at once;
  * - right to left: time still left to right (the first point left of the last).
+ * Master / detail in Excel (`--only xlsx`, `v1-16-xlsx.html`, xlsx-export.md 12–18; not committed), French and Arabic: the
+ * file built by the browser (its own deflate), read back in the page: the open master's deliveries under it one column
+ * in, its header row, the block at outline level 1, the filter on the master's columns; `&detail=all` every master with
+ * deliveries; `&detail=all&async` the application's slow promises asked one master after another, the file the same.
  * Perf (`--only perf`, light, French): 10 000 rows × 4 sparkline columns (30, 12, 12, 16 points), the viewport scrolled
  * 90 px a frame for 240 frames; frame times (p50, p95, max) beside the same grid without the feature (`&plain`: the
  * numbers as text).
@@ -115,6 +119,48 @@ for (const name of wants('sparkline') ? engines : []) {
           check(`${tag}: a keyboard focus shows the summary at once`, k.on && k.shown && k.text === words, JSON.stringify(k));
           check(`${tag}: no page error`, errors.length === 0, errors.join(' | '));
           if (lang === 'ar' && dark) await page.screenshot({ path: `/tmp/dzg-browser-1-16-${name}-ar-dark.png` });
+        } finally {
+          await ctx.close();
+        }
+      }
+    }
+  } finally {
+    await B.close();
+  }
+}
+
+// ---- Master / detail in the Excel file.
+for (const name of wants('xlsx') ? engines : []) {
+  const B = await browser(name);
+  try {
+    for (const lang of ['fr', 'ar']) {
+      for (const mode of ['', '&detail=all', '&detail=all&async']) {
+        const tag = `${name} ${lang}${mode || ' expanded'}`;
+        const ctx = await B.newContext({ viewport: { width: 900, height: 600 } });
+        try {
+          const page = await ctx.newPage();
+          const errors = [];
+          page.on('pageerror', (e) => errors.push(String(e)));
+          await page.goto(`${base}/v1-16-xlsx.html?${lang === 'ar' ? 'lang=ar' : ''}${mode}`);
+          await page.waitForSelector('.dzg-row[aria-rowindex="2"]');
+          await frames(page);
+          const r = await page.evaluate(() => window.exportXlsx());
+          const strings = [...r.strings.matchAll(/<t[^>]*>([^<]*)<\/t>/g)].map((m) => m[1]);
+          const cell = (ref) => {
+            const m = new RegExp(`<c r="${ref}"([^>]*?)/?>(?:<v>([^<]*)</v>)?`).exec(r.sheet);
+            return !m || m[2] === undefined ? undefined : / t="s"/.test(m[1]) ? strings[Number(m[2])] : Number(m[2]);
+          };
+          const lv = (y) => (new RegExp(`<row r="${y}"[^>]*outlineLevel="(\\d)"`).exec(r.sheet) ?? [])[1] ?? null;
+          const ref = lang === 'ar' ? 'مرجع' : 'Réf.';
+          check(`${tag}: exported`, r.outcome === 'done', r.outcome);
+          check(`${tag}: the first master's deliveries under it, one column in, its header row`, [cell('B3'), cell('B4'), cell('D4'), cell('B5'), cell('D5')].join('|') === [ref, 'D-1', 4, 'D-2', 1.5].join('|'), [cell('B3'), cell('B4'), cell('D4'), cell('B5'), cell('D5')].join('|'));
+          check(`${tag}: the block one outline level down, the master none`, [lv(2), lv(3), lv(4), lv(5)].join() === ',1,1,1' && /summaryBelow="0"/.test(r.sheet));
+          const all = mode !== '';
+          check(`${tag}: ${all ? 'every master with deliveries' : 'only the open master'}`, all ? cell('B8') === 'D-3' && lv(8) === '1' : lv(6) === null && lv(7) === null && cell('B6') === 100 && cell('B7') === 50, `${cell('B6')} ${cell('B7')} ${cell('B8')}`);
+          check(`${tag}: the filter on the master's two columns`, new RegExp(`<autoFilter ref="A1:B${all ? 9 : 7}"/>`).test(r.sheet), /<autoFilter[^>]*>/.exec(r.sheet)?.[0]);
+          check(`${tag}: right to left in Arabic`, lang === 'ar' ? /rightToLeft="1"/.test(r.sheet) : !/rightToLeft/.test(r.sheet));
+          if (mode.endsWith('&async')) check(`${tag}: the application's promises, one per master, in order`, r.asked.join() === 's1,s2,s3', r.asked.join());
+          check(`${tag}: no page error`, errors.length === 0, errors.join(' | '));
         } finally {
           await ctx.close();
         }

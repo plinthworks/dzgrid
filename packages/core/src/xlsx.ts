@@ -4,7 +4,7 @@
  * deflates with `CompressionStream`) and on a Node server (stored, or `zlib`'s deflate injected).
  */
 export { toXlsx, xlsxParts, serialOfDay, XLSX_COLUMNS, XLSX_MIME, XLSX_ROWS } from './xlsx/sheet.js';
-export type { XlsxInput, XlsxOptions, XlsxPiece, XlsxStyle, XlsxStyleContext, XlsxSummary, XlsxText, XlsxTextContext } from './xlsx/sheet.js';
+export type { XlsxDetailBlocks, XlsxDetailContext, XlsxDetails, XlsxInput, XlsxOptions, XlsxPiece, XlsxStyle, XlsxStyleContext, XlsxSummary, XlsxText, XlsxTextContext } from './xlsx/sheet.js';
 export { numFmtFor, sheetNameOf } from './xlsx/xml.js';
 export { crc32, utf8, zipFile } from './xlsx/zip.js';
 export type { ZipEntry } from './xlsx/zip.js';

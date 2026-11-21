@@ -19,8 +19,9 @@ montre la `part` : une partie `'detail'` à vous (`definePart('detail', …)`), 
 la vue en défilant. Chaque ouverture par l’utilisateur est annoncée.
 
 Le volet est un seul arrêt pour les touches : ↓ depuis le maître l’atteint, Entrée ou F2 entre dedans, Échap en
-ressort. Son nom est « Détails de » son maître. Il n’est jamais sélectionné, édité, copié ni exporté. Un changement de
-hauteur à l’intérieur ne déplace jamais les lignes au-dessus.
+ressort. Son nom est « Détails de » son maître. Il n’est jamais sélectionné, édité ni copié. Un changement de hauteur à
+l’intérieur ne déplace jamais les lignes au-dessus. L’export Excel peut écrire les lignes de détail de chaque maître
+sous lui (1.16.0, `xlsx.detail` de [`csvExport`](../csv-export/)) ; CSV et JSON jamais.
 
 Le maître-détail refuse à côté de lui un arbre et la fonction `spans()` (`unsupported-combination`) : la grille montre
 les détails sans l’autre. Ses textes sont obligatoires : une erreur nomme chaque clé manquante. Une hauteur qui n’est

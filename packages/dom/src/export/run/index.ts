@@ -234,8 +234,13 @@ export async function run(g: GridContext<unknown>, o: CsvExportOptions, r: RunAr
       if (fmt) {
         // The Excel file's code and the JSON file's: chunks of their own, each loaded at its first export (CSV's first
         // download unchanged).
+        // The masters' details (xlsx-export.md 12–14): a chunk of their own, loaded and awaited only when asked.
+        const x = o.xlsx;
+        const d = xl && typeof x == 'object' && x.detail ? await race(import('../xlsx/detail.js').then((m) => m.prepare(g, x, rows, env, { signal, prep: (n, t) => progress('preparing', n, t) }))) : undefined;
+        if (d === null) return finish('cancelled');
+        if (d?.problems.length) emit(K, { type: 'problems', source: 'host', problems: d.problems });
         const made = await (xl
-          ? race(import('../xlsx/index.js')).then((x) => x.build(g, o, rows, fns, request.columns, spans, env, (n) => progress('building', Math.min(n, held.count), held.count), { scope, rows: held.count }))
+          ? race(import('../xlsx/index.js')).then((m) => m.build(g, d ? { ...o, xlsx: { ...x as object, ...d.options } } : o, d ? { ...rows, ...d.input } : rows, fns, request.columns, spans, env, (n) => progress('building', Math.min(n, held.count), held.count), { scope, rows: held.count }))
           : race(import('../json/index.js')).then((x) => x.build(g, o, held, request.columns, env)));
         if (!made) return finish('cancelled');
         sum = made.sum;

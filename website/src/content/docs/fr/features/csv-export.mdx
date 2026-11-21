@@ -42,7 +42,13 @@ avertissement `missing-feature`. Le [`contextMenu`](../context-menu/) propose la
 - `xlsx` : `true` (ou ses options) pour les fichiers Excel aussi. Absente : CSV et JSON seulement. Ses `title`,
   `subtitle` et `footer` (1.14.0) : des lignes au-dessus et au-dessous du tableau, fusionnées sur sa largeur — un texte,
   des textes une ligne chacun, ou une fonction de l’export (`{ rows, scope, query, now, ctx }`), par exemple
-  `` footer: (x) => `${x.rows} lignes` ``. Les boutons de filtre et les lignes figées restent sur le tableau.
+  `` footer: (x) => `${x.rows} lignes` ``. Les boutons de filtre et les lignes figées restent sur le tableau. Son
+  `detail` (1.16.0) : avec [`detail`](../detail/), les lignes de détail de chaque maître sous lui — `'expanded'` les
+  maîtres ouverts à l’écran, `'all'` tous — une ligne d’en-tête des colonnes du détail puis ses lignes, décalées d’une
+  colonne et d’un niveau de plan Excel (son + / − à côté du maître). Par défaut les lignes et colonnes d’un `nestedGrid`
+  (ses `settings`, telles que l’application les donne) ; sinon `detailRows(master, { key, signal })` — une liste, ou une
+  promesse (celle d’un serveur : attendue maître après maître, comptée dans `preparing`, interrompue par une annulation ;
+  un rejet fait échouer l’export) — et `detailColumns`. CSV et JSON restent un seul tableau.
 - `text` : `'value'` (par défaut), ou `'display'` pour chaque cellule telle que la grille la montre.
 - `separator` : `','`, `';'` ou une tabulation. Par défaut : celui de la locale.
 - `bom` : un BOM au début, pour qu’Excel lise l’UTF-8 (l’arabe). Par défaut `true`.

@@ -14,6 +14,7 @@
       "@dzgrid/core/spans": ["../core/dist/spans.d.ts"],
       "@dzgrid/core/csv": ["../core/dist/csv.d.ts"],
       "@dzgrid/core/xlsx": ["../core/dist/xlsx.d.ts"],
+      "@dzgrid/core/xlsx-detail": ["../core/dist/xlsx-detail.d.ts"],
       "@dzgrid/core/rules": ["../core/dist/rules.d.ts"],
       "@dzgrid/core/tree": ["../core/dist/tree.d.ts"],
       "@dzgrid/core/tree-lazy": ["../core/dist/tree-lazy.d.ts"],

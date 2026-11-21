@@ -40,7 +40,12 @@ An Excel file asked without the `xlsx` option, or `'all'` on server rows without
 - `xlsx`: `true` (or its options) for Excel files too. Absent: CSV and JSON only. Its `title`, `subtitle` and `footer`
   (1.14.0): rows above and under the table, merged across it — a text, texts one row each, or a function of the export
   (`{ rows, scope, query, now, ctx }`), e.g. `` footer: (x) => `${x.rows} rows` ``. The filter buttons and the frozen rows
-  stay on the table.
+  stay on the table. Its `detail` (1.16.0): beside [`detail`](../detail/), each master's detail rows under it —
+  `'expanded'` the masters open on screen, `'all'` every one — a header row of the detail's columns then its rows, one
+  column in and one Excel outline level down (its + / − beside the master). The rows and columns of a `nestedGrid`
+  by default (its `settings`, as the application gives them); otherwise `detailRows(master, { key, signal })` — a list,
+  or a promise (a server's: awaited one master after another, counted in `preparing`, aborted by a cancel; a rejection
+  fails the export) — and `detailColumns`. CSV and JSON stay one table.
 - `text`: `'value'` (default), or `'display'` for each cell as the grid shows it.
 - `separator`: `','`, `';'` or a tab. Default: the locale's.
 - `bom`: a BOM first, so Excel reads UTF-8 (Arabic). Default `true`.

@@ -29,7 +29,7 @@ const PUBLIC = [
   'layerPlacement', 'localeCtx', 'makeQuery', 'nextSort', 'normalizeDigits', 'numberCodec', 'numberCodecWith', 'offsetAt',
   'overscanRows', 'parseDay', 'partNameFor', 'parseInstant', 'pinnedKey', 'problem', 'quickWords', 'readDayText', 'readInstant',
   'readMachineNumber', 'readNumber', 'reconcileFocus', 'relativeDays', 'reconcileSelection', 'resolveColumns', 'resolveOperations', 'resolveInstantRange', 'resolveWall',
-  'scrollMapper', 'scrollTopFor', 'selectAll', 'selectOnly', 'selectRange', 'selectionCount', 'splitQuery', 'stripMarks',
+  'scrollMapper', 'scrollTopFor', 'selectAll', 'selectOnly', 'selectRange', 'selectionCount', 'sparklineCodec', 'splitQuery', 'stripMarks', // 1.16.0: sparklineCodec (sparklines.md 2)
   'textCodec', 'toggle', 'uniformRowLayout', 'VALUES_MAX', 'variableRowLayout', 'visibleWindow', 'windowAt', 'zoneDayBounds',
 ];
 

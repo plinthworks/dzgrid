@@ -140,3 +140,33 @@ a report's title above its table, a note under it.
     characters is cut to Excel's cap (not told: these are the application's own texts). Excel's row limit counts these
     rows.
 11. **CSV, JSON**: unchanged (a CSV has no merged rows; a title line would break its readers).
+
+## Master / detail (1.16.0, owner 2026-11-21 « et le reste »; gap analysis Q-G5 « A »)
+Written before the code. A grid with master rows (`detail()`, master-detail.md) writes, in Excel only, each master's
+detail rows under it. Opt-in: without it, the file is as before (the masters only).
+
+12. **Which masters**: `xlsx: { detail: 'expanded' }` — the masters open on screen, among the rows the scope writes;
+    `'all'` — every master the scope writes (`isMaster`). `false` (default): none.
+13. **Where**: right under its master, one header row of the detail's column labels (bold, a thin bottom border — the
+    master header's look — and no filter buttons), then the detail rows; the block starts **one column in** (column B;
+    after the level column with `tree: 'level'`), so it reads as indented under its master. Excel's row groups: the block
+    one outline level under its master (its + / − beside the master), open. A master with no detail rows writes no block.
+14. **What**: `detailRows(master, { key, signal })` gives a master's rows — an array, or a promise (a server's). The
+    promises are awaited one master after another before the file is written: progress `preparing` counts the masters
+    done; Cancel aborts the `signal` and the export (`cancelled`); a rejection fails the export (`failed`, nothing
+    downloads: never a file with holes). `detailColumns`: its columns (groups give their leaves, one header row).
+    With `nestedGrid(…)` and no `detailRows` / `detailColumns`: its `settings(…)` for each master — its `rows` when an
+    array and its visible `columns` — as the application gives them, not the panel's own sort or filters; a server's rows
+    there cannot be read (no block, `unsupported-combination` told once at `xlsx.detail`): give `detailRows`. Angular's
+    `[dzgNested]` grid is the application's own: give `detailRows` and `detailColumns`.
+15. **Cells**: typed as the master's (numbers, days, instants, booleans, enums by label), by the detail column's type and
+    format; `xlsxStyle` is called for them with the detail's column id and row.
+16. **The master table stays the table**: frozen panes, widths and the filter buttons are the master's; Excel's filter
+    reads every row of its range, details included (fold them with − to filter the masters alone).
+17. **Counts**: the summary's `rows` counts the masters; `details` the detail rows written. Excel's row limit counts
+    every row (`xlsx-too-large`); `maxCells` the masters'.
+18. **CSV and JSON unchanged**: one table, the masters only (the detail option is Excel's).
+19. **Problems** never hold a value: a detail column refused is told at `xlsx.detailColumns[i]`. In
+    `@dzgrid/core/xlsx` alone (a Node server: `toXlsx`), `detailRows` is called as the file is written and must answer
+    at once: one that throws or gives something other than a list (a promise) is told at `xlsx.detailRows`
+    (`invalid-setting`, once), that master without a block.

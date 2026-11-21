@@ -1,7 +1,9 @@
 import { NO_OVERLAY, type ColumnOrGroup, type ResolvedColumn, type ValueReader } from '../columns/defs.js';
-import type { DisplayIndex } from '../ids.js';
+import type { AbortSignalLike } from '../abort.js';
+import type { DisplayIndex, RowKey } from '../ids.js';
 import { problem, type Problem } from '../problems.js';
 import type { DataNode, RowNode } from '../row/node.js';
+import type { DisplayedRows } from '../row/displayed.js';
 import type { SpanCell } from '../spans/map.js';
 import { groupChains } from '../spans/bands.js';
 import { dayToEpochDay, type Day } from '../value/day.js';
@@ -71,6 +73,18 @@ export interface XlsxOptions<T = any> {
   readonly subtitle?: XlsxText | undefined;
   /** Rows under the table after an empty row, italic. */
   readonly footer?: XlsxText | undefined;
+  /**
+   * 1.16.0 (xlsx-export.md 12–19): each master's detail rows under it — the masters open on screen (`'expanded'`, the
+   * input's `expanded`) or every one (`'all'`); `false` (default): none. Needs `detailRows` and `detailColumns`.
+   */
+  readonly detail?: 'expanded' | 'all' | false | undefined;
+  /**
+   * A master's detail rows; null or an empty list: no block. Here it must answer at once (a list); the DOM export awaits
+   * a promise (a server's) first, `signal` aborted by a cancel.
+   */
+  readonly detailRows?: ((master: Readonly<T>, c: { readonly key: RowKey; readonly signal?: AbortSignalLike }) => readonly unknown[] | Promise<readonly unknown[] | null | undefined> | null | undefined) | undefined;
+  /** The detail's columns (groups give their leaves; one header row). */
+  readonly detailColumns?: readonly ColumnOrGroup<any>[] | undefined;
 }
 
 /** What a title, subtitle or footer function is told by the DOM export (1.14.0): the rows written, the scope, the query in force, when (epoch ms), the language. */
@@ -92,11 +106,45 @@ export interface XlsxInput<T> extends CsvInput<T> {
   readonly pinned?: readonly string[];
   /** The grid's column definitions, groups included: the group header rows. */
   readonly groups?: readonly ColumnOrGroup<T>[];
+  /** 1.16.0, `detail: 'expanded'`: whether a master is open on screen. */
+  readonly expanded?: ((key: RowKey) => boolean) | undefined;
+  /** 1.16.0, with `detail`: the blocks' writer, `xlsxDetails` of `@dzgrid/core/xlsx-detail` (without it: no block, told). */
+  readonly details?: XlsxDetails | undefined;
 }
+
+/** What the writer hands `xlsxDetails` (1.16.0): the rows it writes and its own cell writers. */
+export interface XlsxDetailContext<T> {
+  readonly rows: DisplayedRows<T>;
+  readonly at: Uint32Array | null;
+  /** How many places of `at` (or rows) the file goes through. */
+  readonly total: number;
+  /** A node the file leaves out (a loading row, a detail panel). */
+  skip(node: RowNode<T>): boolean;
+  readonly options: XlsxOptions<T>;
+  readonly expanded?: ((key: RowKey) => boolean) | undefined;
+  /** The blocks' first column, from 0. */
+  readonly first: number;
+  /** A master's outline level by display index (0 when the rows are not outlined). */
+  level(r: number): number;
+  /** A detail column's typed cell writer (`j` its place), and its bold header cell, at `ref`. */
+  cell(col: ResolvedColumn<unknown>, j: number): (ref: string, node: DataNode<unknown>) => string;
+  head(col: ResolvedColumn<unknown>, ref: string): string;
+  tell(p: Problem): void;
+}
+/** The detail blocks (1.16.0): the rows they add, the deepest level, the rows written; master `k`'s block from row `y`. */
+export interface XlsxDetailBlocks {
+  readonly extra: number;
+  readonly top: number;
+  readonly count: number;
+  write(k: number, y: number): readonly [xml: string, rows: number] | undefined;
+}
+export type XlsxDetails = <T>(c: XlsxDetailContext<T>) => XlsxDetailBlocks;
 
 /** The counts and the problems: never a cell value, a row key or a row number. */
 export interface XlsxSummary extends CsvSummary {
   readonly problems: readonly Problem[];
+  /** 1.16.0: the detail rows written under their masters (`rows` counts the masters). */
+  readonly details?: number;
 }
 
 /** One piece of one part of the file; the pieces of a part come together, in order. */
@@ -168,7 +216,9 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
   const foot = lines('footer', { italic: true });
   /** The rows above the table: the title's and subtitle's, and an empty one. */
   const T = tops.length && tops.length + 1;
-  if (W > XLSX_COLUMNS || T + H + total + (foot.length && foot.length + 1) > XLSX_ROWS) {
+  // The masters' detail blocks (xlsx-export.md 12–19): their own entry's, asked here; the cells the file's own.
+  const P = o.detail && n ? i.details?.({ rows, at, total, skip, options: o, expanded: i.expanded, first: lead + 1, level: (r) => (outline ? Math.min(levelAt!.call(rows, r as DisplayIndex), OUTLINE) : 0), cell: (c, j) => cellOf(c as ResolvedColumn<T>, j, 1) as never, head: (c, ref) => textCell(ref, label(c as ResolvedColumn<T>), hs(c.id, label(c as ResolvedColumn<T>))), tell: (p) => problems.push(p) }) ?? (tell('missing-feature', 'xlsx.detail'), undefined) : undefined;
+  if (W > XLSX_COLUMNS || T + H + total + (P?.extra ?? 0) + (foot.length && foot.length + 1) > XLSX_ROWS) {
     tell('xlsx-too-large', 'xlsx');
     return { rows: 0, columns: n, ...counts, problems };
   }
@@ -221,8 +271,12 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
   // ---- The header rows: group labels merged across their columns, a column's label merged upward to its first free level.
   const merges: string[] = [];
   const head: string[][] = Array.from({ length: H }, () => []);
+  const hl: CellLook = { bold: true, border: true };
+  /** A header cell's style: bold, the application's look. */
+  const hs = (column: string, value: string) => (hook ? hooked(hl, { column, value, row: null, header: true }) : look(hl));
+  /** A column's label: the zone after an instant's. */
+  const label = (c: ResolvedColumn<T>) => labelOf(c, o.text !== 'display' && (o.instants === 'utc' ? 'UTC' : ctx.timeZone));
   if (hdr) {
-    const hl: CellLook = { bold: true, border: true };
     const gl = look({ ...hl, center: true });
     const put = (r: number, j: number, s: string, st: number) => (head[r]![j] = s ? textCell(L[j]! + (T + r + 1), s, st) : `<c r="${L[j]}${T + r + 1}" s="${st}"/>`);
     const leaf = (j: number, label: string, top: number, st: number) => {
@@ -230,7 +284,7 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
       for (let r = top + 1; r < H; r++) put(r, j, '', st);
       if (top < H - 1) merges.push(`${L[j]}${T + top + 1}:${L[j]}${T + H}`);
     };
-    if (lead) leaf(0, o.levelHeader ?? 'Level', 0, hook ? hooked(hl, { column: '', value: o.levelHeader ?? 'Level', row: null, header: true }) : look(hl));
+    if (lead) leaf(0, o.levelHeader ?? 'Level', 0, hs('', o.levelHeader ?? 'Level'));
     for (let k = 0; k < depth; k++) {
       for (let j = 0; j < n; ) {
         const g = chainOf(cols[j]!)[k];
@@ -244,10 +298,7 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
         j = e;
       }
     }
-    cols.forEach((c, j) => {
-      const label = labelOf(c, o.text !== 'display' && (o.instants === 'utc' ? 'UTC' : ctx.timeZone));
-      leaf(j + lead, label, chainOf(c).length, hook ? hooked(hl, { column: c.id, value: label, row: null, header: true }) : look(hl));
-    });
+    cols.forEach((c, j) => leaf(j + lead, label(c), chainOf(c).length, hs(c.id, label(c))));
   }
 
   // ---- What the outline needs before the rows: the deepest level, the rows past Excel's seven.
@@ -263,6 +314,7 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
     }
     if (deep) tell('xlsx-outline-depth', 'xlsx.tree', deep);
   }
+  top = Math.max(top, P?.top ?? 0);
 
   const widths = i.widths ?? {};
   let colsXml = '';
@@ -272,7 +324,7 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
     if (typeof px == 'number' && px >= 0) colsXml += `<col min="${j + lead + 1}" max="${j + lead + 1}" width="${Math.min(255, Math.trunc((px / 7) * 256) / 256)}" customWidth="1"/>`;
   });
   const pane = X || Y ? `<pane${X ? ` xSplit="${X}"` : ''}${Y ? ` ySplit="${Y}"` : ''} topLeftCell="${colName(X)}${Y + 1}" activePane="${X && Y ? 'bottomRight' : Y ? 'bottomLeft' : 'topRight'}" state="frozen"/>` : '';
-  let out = `${HEAD}<worksheet xmlns="${NS}" xmlns:r="${REL}">${outline ? '<sheetPr><outlinePr summaryBelow="0"/></sheetPr>' : ''}<sheetViews><sheetView workbookViewId="0"${o.rtl ? ' rightToLeft="1"' : ''}>${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"${top ? ` outlineLevelRow="${top}"` : ''}/>${colsXml && `<cols>${colsXml}</cols>`}<sheetData>`;
+  let out = `${HEAD}<worksheet xmlns="${NS}" xmlns:r="${REL}">${outline || P?.extra ? '<sheetPr><outlinePr summaryBelow="0"/></sheetPr>' : ''}<sheetViews><sheetView workbookViewId="0"${o.rtl ? ' rightToLeft="1"' : ''}>${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"${top ? ` outlineLevelRow="${top}"` : ''}/>${colsXml && `<cols>${colsXml}</cols>`}<sheetData>`;
   /** A title or footer row: one text cell merged across the written columns (an empty text: an empty row). */
   const line = (y: number, [s, l]: [string, CellLook]): string => (W > 1 && merges.push(`A${y}:${L[W - 1]}${y}`), `<row r="${y}">${s && textCell(`A${y}`, s, look(l))}</row>`);
   tops.forEach((t, r) => (out += line(r + 1, t)));
@@ -281,30 +333,32 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
   // ---- Each column's cell, built once: the value read as CSV reads it, then typed.
   const display = o.text === 'display';
   const wall = o.instants === 'utc' ? (ms: number) => Math.floor(ms / 1000) * 1000 : wallMs(ctx.timeZone);
-  const early = new Map<number, number>();
-  const cut = new Map<number, number>();
-  // A span's origin column not written (j -1): its slots counted under the first column rather than a path `[-1]`.
-  const more = (m: Map<number, number>, j: number) => m.set(Math.max(0, j), (m.get(Math.max(0, j)) ?? 0) + 1);
+  // By the column's path; a span's origin column not written (j -1): its slots counted under the first column.
+  const early = new Map<string, number>();
+  const cut = new Map<string, number>();
+  const more = (m: Map<string, number>, p: string) => m.set(p, (m.get(p) ?? 0) + 1);
   const indents = new Map<string, number>();
   type Cell = (ref: string, node: RowNode<T>, lv: number) => string;
-  const cellOf = (col: ResolvedColumn<T>, j: number): Cell => {
+  /** `det`: a detail column (xlsx-export.md 15), its problems at `xlsx.detailColumns[j]` (its rows hold no edit: no id). */
+  const cellOf = (col: ResolvedColumn<T>, j: number, det?: 1): Cell => {
     const c = col.codec;
+    const path = det ? `xlsx.detailColumns[${j}]` : `xlsx.columns[${Math.max(0, j)}]`;
     const type = display || col.def.csv === 'text' ? 'text' : c.kind === 'number' ? 'number' : col.type;
     const fmt = type === 'day' ? 14 : type === 'instant' ? 22 : type === 'number' ? numFmtFor(col.def.numberFormat, ctx) : 0;
-    const tree = outline && j === treeAt;
+    const tree = !det && outline && j === treeAt;
     const fns = i.aggFuncs;
     const fn = fns && Object.hasOwn(fns, col.id) ? fns[col.id] : col.def.aggFunc;
     /** The cell's look at a tree level: its format, the indent in the tree column. */
     const lookAt = (lv: number, f: string | number): CellLook => ({ fmt: f, ...(tree && lv && { indent: Math.min(lv, OUTLINE) }) });
     const styleAt = (lv: number, f: string | number): number => {
-      const k = `${j}|${lv}|${f}`;
+      const k = `${path}|${lv}|${f}`;
       let s = indents.get(k);
       if (s === undefined) indents.set(k, (s = look(lookAt(lv, f))));
       return s;
     };
     const text = (ref: string, s: string, st: number) => {
       if (s.length > MAX_TEXT) {
-        more(cut, j);
+        more(cut, path);
         s = s.slice(0, /[\ud800-\udbff]/.test(s[MAX_TEXT - 1]!) ? MAX_TEXT - 1 : MAX_TEXT);
       }
       return textCell(ref, s, st);
@@ -328,7 +382,7 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
         }
       } else {
         try {
-          v = readValue(col, node, env);
+          v = readValue(col, node as DataNode<T>, env);
         } catch {
           v = null;
         }
@@ -351,7 +405,7 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
             if (s === null) {
               const t = day ? (v as string) : wallText(ms);
               if (t === null) throw 0;
-              more(early, j);
+              more(early, path);
               f = 0;
               w = (st) => text(ref, t, st);
             } else w = (st) => numCell(ref, s, st);
@@ -387,11 +441,13 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
   const outRow = merging && map ? new Int32Array(rows.count) : null;
   const size = Number.isInteger(o.chunkRows) && o.chunkRows! > 0 ? o.chunkRows! : 500;
   let written = 0;
+  /** The detail rows written so far, their header rows included. */
+  let below = 0;
   for (let k = 0; k < total; k++) {
     const r = at ? at[k]! : k;
     const node: RowNode<T> = rows.nodeAt(r as DisplayIndex);
     if (skip(node)) continue;
-    const y = T + H + ++written;
+    const y = T + H + ++written + below;
     if (outRow) outRow[r] = y;
     const lv = levelAt ? levelAt.call(rows, r as DisplayIndex) : 0;
     let over: SpanCell[] | null = null;
@@ -426,14 +482,17 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
       if (origin && from.kind === 'data') line += writer(origin)(ref, from, lv);
     });
     out += line + '</row>';
+    // Its detail block (xlsx-export.md 13).
+    const b = P?.write(k, T + H + written + below + 1);
+    if (b) (out += b[0]), (below += b[1]);
     if (written % size === 0) {
       yield { entry: 'xl/worksheets/sheet1.xml', text: out };
       out = '';
     }
   }
   for (const [s, j] of merged.values()) merges.push(`${L[j + lead]}${outRow![s.row]}:${L[j + lead + s.cols - 1]}${outRow![s.row + s.rows - 1]}`);
-  const range = hdr ? `${L[0]}${T + H}:${L[W - 1]}${T + H + written}` : '';
-  foot.forEach((t, r) => (out += line(T + H + written + 2 + r, t)));
+  const range = hdr ? `${L[0]}${T + H}:${L[W - 1]}${T + H + written + below}` : '';
+  foot.forEach((t, r) => (out += line(T + H + written + below + 2 + r, t)));
   out += `</sheetData>${range && `<autoFilter ref="${range}"/>`}${merges.length ? `<mergeCells count="${merges.length}">${merges.map((m) => `<mergeCell ref="${m}"/>`).join('')}</mergeCells>` : ''}</worksheet>`;
   yield { entry: 'xl/worksheets/sheet1.xml', text: out };
 
@@ -452,11 +511,11 @@ export function* xlsxParts<T>(i: XlsxInput<T>, o: XlsxOptions<T> = {}): Generato
   const abs = range.replace(/([A-Z]+)(\d+)/g, '$$$1$$$2');
   yield { entry: 'xl/workbook.xml', text: `${HEAD}<workbook xmlns="${NS}" xmlns:r="${REL}"><sheets><sheet name="${esc(name)}" sheetId="1" r:id="rId1"/></sheets>${range && `<definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="0" hidden="1">'${esc(name.replace(/'/g, "''"))}'!${abs}</definedName></definedNames>`}</workbook>` };
 
-  early.forEach((k, j) => tell('xlsx-early-day', `xlsx.columns[${j}]`, k));
-  cut.forEach((k, j) => tell('xlsx-text-cut', `xlsx.columns[${j}]`, k));
+  early.forEach((k, p) => tell('xlsx-early-day', p, k));
+  cut.forEach((k, p) => tell('xlsx-text-cut', p, k));
   if (bad) tell('invalid-setting', 'xlsx.xlsxStyle');
   if (full) tell('xlsx-style-limit', 'xlsx.xlsxStyle');
-  return { rows: written, columns: n, ...counts, problems };
+  return { rows: written, columns: n, ...counts, problems, ...(o.detail && { details: P?.count ?? 0 }) };
 }
 
 /**

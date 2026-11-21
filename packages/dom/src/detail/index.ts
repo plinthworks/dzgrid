@@ -83,6 +83,19 @@ function setup<T>(g: GridContext<unknown>, o: DetailFeatureOptions<T>, sizes: Ma
   let depth = o.nested ?? 1;
   if (o.nested === undefined) for (let p = el.root.parentElement?.closest('.dzg'); p; p = p.parentElement?.closest('.dzg')) depth++;
   const mx = (key: RowKey): RowKey => key.slice(2) as RowKey;
+  // For the Excel file (xlsx-export.md 12–14): open, a master, a `nestedGrid`'s settings.
+  const own = typeof o.part === 'string' ? undefined : o.part;
+  g.masters = {
+    open: (k) => kernel.expansion.has(k),
+    is: (row) => {
+      try {
+        return o.isMaster?.(row as T) ?? true;
+      } catch {
+        return false;
+      }
+    },
+    nested: ((own ?? g.parts()[o.part as string])?.part as { settings?: NonNullable<GridContext<unknown>['masters']>['nested'] } | undefined)?.settings,
+  };
 
   // The rows' places (D7): a measure wins over the shape's height; a new row height carries the old layout's (step 9 review).
   // Masters no longer in the rows (a transaction, new rows) forget their measure: a row added again is measured anew.
@@ -281,6 +294,7 @@ function setup<T>(g: GridContext<unknown>, o: DetailFeatureOptions<T>, sizes: Ma
       boxes.clear();
       for (const c of decorated) undecorate(c);
       g.layoutFor = undefined;
+      delete g.masters;
     },
   };
 }

@@ -1499,6 +1499,11 @@ Lots and measures: `docs/phase-11-steps/decisions.md` (L1–L9). Architect check
   Chrome, Firefox, WebKit; fr, ar; light, dark). 10 000 rows: scroll p95 18.4 / 19.0 / 18.0 ms (Chrome, Firefox, WebKit),
   as the same grid in text. **K.8 93 000 → 94 000** (owner 2026-11-21, « tu peux augmenter la taille s'il le faut »;
   measured 93 063); core 29 800, core/state 1 640, dom/print 1 750, dom/theme 2 600 (+2 %).
+- [x] Master / detail in Excel (xlsx-export.md 12–19): `xlsx: { detail: 'expanded' | 'all', detailRows, detailColumns }`,
+  a `nestedGrid`'s rows by default, a server's promises awaited one by one (progress, cancel; a rejection fails); blocks
+  one column in, one outline level down; CSV unchanged. `@dzgrid/core/xlsx-detail`, a lazy DOM chunk. Tests by hand
+  (core 9, dom 7); browsers 132 / 132 (`--only xlsx`). `@dzgrid/core/xlsx` 7 616 over its 7 350 line (+3.6 %): the
+  owner's decision.
 
 ## The documentation website (started 2026-11-10; plan `docs/website-plan.md`)
 

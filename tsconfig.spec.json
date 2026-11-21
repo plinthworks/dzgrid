@@ -32,6 +32,9 @@
       "@dzgrid/core/xlsx": [
         "./packages/core/src/xlsx.ts"
       ],
+      "@dzgrid/core/xlsx-detail": [
+        "./packages/core/src/xlsx-detail.ts"
+      ],
       "@dzgrid/core/rules": [
         "./packages/core/src/rules.ts"
       ],

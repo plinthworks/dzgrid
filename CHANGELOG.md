@@ -27,12 +27,28 @@ et le reste »). A minor: additions, nothing removed; every default unchanged.
   `sparklineLine`…, 3:1 on the rows), core `sparklineCodec`, types `SparklineOptions`, `SparklineValues`. Checked in
   Chrome, Firefox and WebKit, French and Arabic, light and dark (`scripts/browser-1-16.mjs`); 10 000 rows scroll at
   the same frame times as text.
+- **Master / detail in the Excel file** (`csvExport({ xlsx: { detail } })`, opt-in; xlsx-export.md 12–19): beside
+  `detail()`, each master's detail rows under it — `'expanded'` the masters open on screen, `'all'` every master — a
+  header row of the detail's labels (bold, no filter buttons) then its rows, one column in and one Excel outline level
+  under the master (its + / −), open. The rows and visible columns of a `nestedGrid` by default (its `settings`, as the
+  application gives them, not the panel's sort or filters); otherwise `detailRows(master, { key, signal })` and
+  `detailColumns` (Angular's `[dzgNested]` grids: give both). **Decisions**: a promise (a server's detail) is awaited
+  one master after another before the file is written, counted in the `preparing` progress, its `signal` aborted by a
+  cancel (`cancelled`); a rejection fails the export (`failed`, never a file with holes); the frozen panes, widths and
+  filter buttons stay the master's; CSV and JSON unchanged (one table). Summary `details` (the detail rows written).
+  New entry `@dzgrid/core/xlsx-detail` (`xlsxDetails`, handed in the writer's input `details` by a Node server; the DOM
+  export loads it itself, in a chunk of its own); core `XlsxOptions.detail`, `detailRows`, `detailColumns`,
+  `XlsxInput.expanded`, `details`, types `XlsxDetails`, `XlsxDetailContext`, `XlsxDetailBlocks`. Checked in Chrome,
+  Firefox and WebKit (the browser's deflate), French and Arabic (`scripts/browser-1-16.mjs --only xlsx`).
 
 ### Sizes
 - **K.8 93 000 → 94 000** (owner 2026-11-21, « tu peux augmenter la taille s'il le faut »; measured 93 063: the
   `'sparkline'` type's codec in the core). +2 % rule: `@dzgrid/core` 29 590 → 29 800, `@dzgrid/core/state` 1 615 →
   1 640 and `@dzgrid/dom/print` 1 720 → 1 750 (their code unchanged), `@dzgrid/dom/theme` 2 550 → 2 600. New lines at their measure + 10 %: `dom/sparkline`
   2 350, `-sparkline` texts 200 / 200 / 300, `sparkline.css` 550.
+- Master / detail in Excel: new lines `core/xlsx-detail` 600, the export's `xlsx detail` chunk 850; +2 %:
+  `dom/detail` 4 360 → 4 440, the export run chunk 5 550 → 5 640. **For the owner**: `@dzgrid/core/xlsx` measures
+  7 616 over its 7 350 line (+3.6 %, beyond +2 %: the details' seam in the writer).
 
 ## [1.15.0] - 2026-11-21
 
