@@ -35,6 +35,16 @@ default unchanged.
   (`pdf-script`, nothing written): use `print()`. A pure writer `@dzgrid/core/pdf` (`pdfParts`, `pdfFile`, `toPdf`:
   the same rows give the same bytes, Node too) and a lazy chunk; the cell menu's `use.pdf` with `locales/<lang>-pdf`.
 
+### Fixed
+- **A full-width row's named part is drawn** (found in the owner's demo, 2026-11-22): `fullWidth` answering
+  `{ part: 'name' }` was typed and documented but ignored — the row always drew the first visible column's cell. The
+  registered `cell` part of that name now draws it (an Angular `dzgPart` template or `componentPart('cell', C)` too),
+  with the first visible column's cell context, mounted / updated / destroyed with the row; an unknown name is
+  `unknown-part` at `settings.fullWidth` and the plain text. `true` unchanged; exports, print and the clipboard keep the
+  first column's text. Core: `SpanMap.fullPart?(row)`, `RowSpanPlan.part`. +2 % rule: `@dzgrid/dom` 26 250 → 26 300
+  (measured 26 256: the base's cell reads the part), `@dzgrid/dom/spans` 5 050 → 5 100 (5 082), `@dzgrid/core/spans`
+  4 100 → 4 150 (4 133); K.8 93 770 / 94 000.
+
 ### Notes for an upgrade
 - `ColumnFilter` gains `{ type: 'advanced'; expression }` and `WireFilter` `{ type: 'advanced'; expression }` (valid
   under the key `''` only): a `switch` over `type` that must be exhaustive needs the new case. A server receives the

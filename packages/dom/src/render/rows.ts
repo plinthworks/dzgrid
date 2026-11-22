@@ -57,6 +57,8 @@ export interface SpanPlace {
   readonly rows: number;
   readonly cols: number;
   readonly width: number;
+  /** A full-width cell's part (`fullWidth` answering `{ part }`, 1.17.0), found by the spans feature; null: the plain text. */
+  readonly part?: SlotPart<'cell'> | null;
 }
 
 /**
@@ -620,7 +622,7 @@ export class RowRenderer<T> {
       cell.cls = swapClasses(cell.el, cell.cls, next);
     }
     // A part expects a row: none on a filler or a detail (their cells stay empty).
-    const part = data === undefined ? null : f.partFor(col);
+    const part = data === undefined ? null : span?.part !== undefined ? span.part : f.partFor(col);
     if (part || cell.part) {
       if (cell.part && cell.part !== part) this.#unpart(cell);
       if (part) {

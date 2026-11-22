@@ -21,6 +21,11 @@
  * with it when installed, `exportFinished` done; an Arabic grid refused (`pdf-script`, nothing downloads); 10 000 rows ×
  * 10 columns timed (click to download) and weighed. Then Chrome opens the file in its PDF viewer and a page is
  * screenshot (its path printed, to be looked at).
+ *
+ * `--only full` (1.17.0 fix, spans.md « A full-width row drawn by a part »; page `playground/v1-17-full.html`, not
+ * committed): per engine, left to right and right to left, a full-width row naming a part (`{ part: 'note' }`) 72 px
+ * tall among 32 px rows (`rowHeights()`): the part's element in the one cell, as tall as the row, the cell as wide as
+ * the view from its inline start, still there after a sideways scroll; the other rows keep their text, no part.
  */
 import { spawn, spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, statSync } from 'node:fs';
@@ -65,7 +70,8 @@ const EXAMPLE = (S) => ({
 
 const server = await serve();
 try {
-  for (const name of only === 'pdf' ? [] : engines) {
+  if (only === 'full') await fullChecks();
+  for (const name of only === 'pdf' || only === 'full' ? [] : engines) {
     const B = await browser(name);
     try {
       for (const [lang, dark] of [['fr', false], ['ar', true]]) {
@@ -185,7 +191,7 @@ try {
       await B.close();
     }
   }
-  if (only !== 'filter') await pdfChecks();
+  if (only !== 'filter' && only !== 'full') await pdfChecks();
 } finally {
   await server.stop();
 }
@@ -292,5 +298,54 @@ async function pdfChecks() {
     }
   }
 }
+async function fullChecks() {
+  for (const name of engines) {
+    const B = await browser(name);
+    try {
+      for (const lang of ['fr', 'ar']) {
+        const tag = `${name} full ${lang}`;
+        const ctx = await B.newContext({ viewport: { width: 900, height: 600 } });
+        try {
+          const page = await ctx.newPage();
+          const errors = [];
+          page.on('pageerror', (e) => errors.push(String(e)));
+          await page.goto(`${server.base}/v1-17-full.html${lang === 'ar' ? '?lang=ar' : ''}`);
+          await page.waitForSelector('.dzg-row[data-full] .fw-note');
+          await frames(page);
+          const read = () => page.evaluate(() => {
+            const vp = document.querySelector('.dzg-viewport').getBoundingClientRect();
+            const row = document.querySelector('.dzg-layer > .dzg-row[data-full]');
+            const cell = row.querySelector('.dzg-cell');
+            const n = cell.querySelector('.fw-note');
+            const r = (e) => { const b = e.getBoundingClientRect(); return { l: Math.round(b.left), r: Math.round(b.right), t: Math.round(b.top), h: Math.round(b.height), w: Math.round(b.width) }; };
+            const plain = document.querySelector('.dzg-layer > .dzg-row:not([data-full]) [data-col="name"]');
+            return { vp: r(document.querySelector('.dzg-viewport')), vpW: document.querySelector('.dzg-viewport').clientWidth, vpL: Math.round(vp.left), row: r(row), cell: r(cell), note: r(n), text: n.textContent, cells: row.querySelectorAll('.dzg-cell').length, plain: plain?.textContent ?? null, parts: document.querySelectorAll('.fw-note').length, fulls: document.querySelectorAll('.dzg-layer > .dzg-row[data-full]').length };
+          });
+          const a = await read();
+          check(`${tag}: the part draws the full-width cell, the first column's text in its context`, a.cells === 1 && /^(Section|قسم) 1 — t0$/.test(a.text), a.text);
+          check(`${tag}: one part per full-width row, none on the others`, a.parts === a.fulls && a.fulls > 0 && /^(Client|زبون) 0-0$/.test(a.plain), [a.parts, a.fulls, a.plain]);
+          check(`${tag}: the row and the part are 72 px tall`, a.row.h === 72 && Math.abs(a.note.h - 72) <= 1 && Math.abs(a.cell.h - 72) <= 1, [a.row.h, a.cell.h, a.note.h]);
+          const startEdge = (b) => (lang === 'ar' ? b.r : b.l);
+          check(`${tag}: the cell as wide as the view, from its inline start`, Math.abs(a.cell.w - a.vpW) <= 2 && Math.abs(startEdge(a.cell) - startEdge(a.vp)) <= 2, [a.cell, a.vp, a.vpW]);
+          await page.evaluate((rtl) => { const v = document.querySelector('.dzg-viewport'); v.scrollLeft = rtl ? -400 : 400; }, lang === 'ar');
+          await frames(page, 3);
+          const b = await read();
+          check(`${tag}: after a sideways scroll the cell stays at the view's start`, Math.abs(startEdge(b.cell) - startEdge(b.vp)) <= 2 && b.text === a.text, [b.cell, b.vp]);
+          if (name === 'chrome') {
+            const shot = join(tmpdir(), `dzgrid-full-${lang}.png`);
+            await page.screenshot({ path: shot });
+            console.log(`     screenshot ${shot}`);
+          }
+          check(`${tag}: no page error`, errors.length === 0, errors);
+        } finally {
+          await ctx.close();
+        }
+      }
+    } finally {
+      await B.close();
+    }
+  }
+}
+
 console.log(`\n${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);

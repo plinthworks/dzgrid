@@ -16,6 +16,8 @@ export interface RowSpanPlan {
   readonly spans: boolean;
   /** The row is one cell across. */
   readonly full: boolean;
+  /** The part a full-width row names (`fullWidth` answering `{ part }`); undefined otherwise (1.17.0). */
+  readonly part?: string | undefined;
   /** The cells spanning rows that start in this row, with their column's id. */
   readonly tall: readonly (readonly [string, SpanCell])[];
   /** The row's pinned cells (id, offset in the segment, in the start segment): placed, since a covered slot leaves a hole. */
@@ -56,6 +58,6 @@ export function rowPlanner(map: SpanMap, layout: ColumnLayout): (row: number) =>
     ids.forEach((id, c) => {
       if (seg[c] !== 1 && !covered.has(c)) pinned.push([id, off[c]!, !seg[c]]);
     });
-    return { covered, cells, mount, spans: meet.some((s) => s.rows > 1), full: map.fullWidth(row), tall, pinned };
+    return { covered, cells, mount, spans: meet.some((s) => s.rows > 1), full: map.fullWidth(row), part: map.fullPart?.(row), tall, pinned };
   };
 }

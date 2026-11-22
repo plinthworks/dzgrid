@@ -15,7 +15,11 @@ grille.
 
 Une fonction consultée pour chaque ligne : `true` la met sur toute la largeur, un objet `{ part }` nomme la partie qui
 la dessine, une valeur fausse la laisse normale. Une ligne pleine largeur montre la valeur de la première colonne
-visible — mettez-y le titre, par un `value` au besoin. Sa cellule colle au début de la vue et reste lisible quand la
+visible — mettez-y le titre, par un `value` au besoin. Avec `{ part: 'nom' }`, la partie `cell` enregistrée sous ce
+nom dessine la cellule à la place (en Angular, un gabarit `dzgPart` ou un `componentPart('cell', C)` de ce nom), avec
+le contexte de cellule de la première colonne visible (`c.row`, `c.text`, `c.value`) ; un nom qu’aucune partie de
+cellule ne porte est signalé (`unknown-part`) et le texte s’affiche. Les exports, l’impression et le presse-papiers
+gardent le texte de la première colonne. Sa cellule colle au début de la vue et reste lisible quand la
 grille défile de côté ; la case de sélection, s’il y en a une, reste à côté. Tout son texte est dans la cellule pour
 les lecteurs d’écran.
 

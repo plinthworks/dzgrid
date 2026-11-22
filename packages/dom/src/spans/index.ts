@@ -66,15 +66,30 @@ function setup(g: GridContext<unknown>): FeatureHandle {
   const current = () => mapFor(g.rows.displayed);
 
   // ---- per-row plans, by display index, for one map and one column layout ----
-  let planned: { map: SpanMap; version: number; plan: (row: number) => RowSpanPlan | null } | null = null;
+  let planned: { map: SpanMap; version: number; reg: object; plan: (row: number) => RowSpanPlan | null } | null = null;
   let plans = new Map<number, RowSpanPlan | null>();
+  // The unknown part names full-width rows gave, told once.
+  const told = new Set<string>();
   function planFor(m: SpanMap, i: number): RowSpanPlan | null {
-    if (planned?.map !== m || planned.version !== columns.version || plans.size > MAX_PLANS) {
-      planned = { map: m, version: columns.version, plan: rowPlanner(m, columns.layout) };
+    const reg = g.parts();
+    if (planned?.map !== m || planned.version !== columns.version || planned.reg !== reg || plans.size > MAX_PLANS) {
+      planned = { map: m, version: columns.version, reg, plan: rowPlanner(m, columns.layout) };
       plans = new Map();
     }
     let p = plans.get(i);
-    if (p === undefined) plans.set(i, (p = planned.plan(i)));
+    if (p === undefined) {
+      p = planned.plan(i);
+      // A full-width row naming a part (`{ part }`): its one cell drawn by that cell part; an unknown name, the plain text.
+      const n = p?.part;
+      if (n !== undefined) {
+        const e = reg[n];
+        const part = e?.slot == 'cell' ? e : null;
+        if (!part && !told.has(n)) told.add(n), emit(kernel, { type: 'problems', source: 'host', problems: [problem('unknown-part', 'error', 'settings.fullWidth', n)] });
+        // The plan is this call's own: its first cell carries the part.
+        (p!.cells as Map<number, object>).set(0, { ...p!.cells.get(0), part });
+      }
+      plans.set(i, p);
+    }
     return p;
   }
 

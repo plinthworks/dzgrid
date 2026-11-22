@@ -14,7 +14,10 @@ Rows that are not records but titles or notes between them: one cell across the 
 
 A function asked for each row: `true` makes it full width, an object `{ part }` names the part that draws it,
 anything false leaves it a normal row. A full-width row shows the value of the first visible column — put the title
-there, with a `value` getter if need be. Its cell sticks to the start of the view and stays readable while the grid
+there, with a `value` getter if need be. With `{ part: 'name' }`, the registered `cell` part of that name draws the
+cell instead (in Angular a `dzgPart` template or a `componentPart('cell', C)` of that name), given the first visible
+column's cell context (`c.row`, `c.text`, `c.value`); a name no cell part has is told (`unknown-part`) and the text
+shows. Exports, print and the clipboard keep the first column's text. Its cell sticks to the start of the view and stays readable while the grid
 scrolls sideways; the selection box, when there is one, stays beside it. Its whole text is in the cell for screen
 readers.
 

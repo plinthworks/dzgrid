@@ -35,6 +35,8 @@ export interface SpanMap extends SpanLookup {
   inRow(row: number, colFirst: number, colLast: number): SpanCell[];
   /** The row is one cell over every column (its owner covers them all). */
   fullWidth(row: number): boolean;
+  /** The part a full-width row names (`{ part }`), undefined for `true` or another row (1.17.0). */
+  fullPart?(row: number): string | undefined;
   /**
    * What this map has to tell: the refused rules and answers, the overlaps,
    * and the clipped spans not already told under the same column layout
@@ -213,6 +215,8 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
   // Spans are refused with trees and details (D9): a row that is not data reads as none.
   const dataOf = (i: number): T | null => (nodes[i]!.kind === 'data' ? (nodes[i] as DataNode<T>).data : null);
   const fw = new Uint8Array(n);
+  // The parts full-width rows name, by row (few: a sparse map).
+  const fwPart = new Map<number, string>();
   // Each row's tree column (a data row's, by the function; a string: every row's).
   const tcIn = input.treeColumn;
   const tc: (string | undefined)[] = new Array(n);
@@ -224,7 +228,9 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
     } catch {}
     if (fwRule && node.kind === 'data') {
       try {
-        if (fwRule(node.data)) fw[i] = 1;
+        const a = fwRule(node.data);
+        if (a) fw[i] = 1;
+        if (typeof (a as { part?: unknown }).part == 'string') fwPart.set(i, (a as { part: string }).part);
       } catch {
         say('invalid-span', '', `rows[${i}]`, 'fullWidth threw');
       }
@@ -443,6 +449,7 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
       return out;
     },
     fullWidth: (r) => inRange(r, 0) && fw[r] === 1,
+    fullPart: (r) => fwPart.get(r),
     problems,
   };
   MEMO.set(map, { deps, columns: columns as SpanColumns<unknown>, segs, told });
