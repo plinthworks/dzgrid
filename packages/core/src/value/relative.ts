@@ -39,13 +39,20 @@ export function dayAt(now: number, zone: string): { readonly day: Day; readonly 
   return day && { day, until: zoneDayBounds(day, zone).to };
 }
 
-/** Whether a filter model holds a shortcut (a day or instant filter with op `relative`, alone or in a combined one): what makes a model read the clock. */
+/** Whether a filter model holds a shortcut (a day or instant filter with op `relative`, alone, in a combined one or in the advanced filter's expression): what makes a model read the clock. */
 export function hasRelative(filter: unknown): boolean {
   const holds = (f: unknown): boolean => {
-    const c = f as { type?: unknown; op?: unknown; conditions?: unknown } | null;
+    const c = f as { type?: unknown; op?: unknown; conditions?: unknown; expression?: unknown } | null;
     if (!c || typeof c !== 'object') return false;
     if (c.type === 'combined') return Array.isArray(c.conditions) && c.conditions.some(holds);
+    // The advanced filter (advanced-filter.md 4): each condition's filter, in groups at any depth.
+    if (c.type === 'advanced') return walk(c.expression, 0);
     return (c.type === 'day' || c.type === 'instant') && c.op === 'relative';
+  };
+  const walk = (e: unknown, depth: number): boolean => {
+    const x = e as { items?: unknown; filter?: unknown } | null;
+    if (!x || typeof x !== 'object' || depth > 5) return false;
+    return Array.isArray(x.items) ? x.items.some((y) => walk(y, depth + 1)) : holds(x.filter);
   };
   return !!filter && typeof filter === 'object' && Object.values(filter).some(holds);
 }

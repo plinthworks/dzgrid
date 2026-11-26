@@ -68,7 +68,9 @@ the same input gives the same bytes; runs on a Node server: `toPdf`).
     `.otf` CFF, not `.ttc`), embedded as a Unicode font with only the glyphs used kept (the others emptied, so a large
     font stays small), and a ToUnicode map so the text copies and searches. Greek, Cyrillic, Chinese, Japanese,
     Korean, Vietnamese then print. A character the font lacks: « ? » (`pdf-glyph`). A file that is not such a font:
-    `pdf-font` (error), and Helvetica instead.
+    `pdf-font` (error), and Helvetica instead — a damaged one too (advances, `loca` or glyphs outside their tables:
+    checked when it is read, never a throw later; 1.17.0 review). A composite glyph keeps its components; a
+    component list running past its glyph stops at the glyph's end.
 14. **Right-to-left and shaped scripts are refused** (Arabic, Hebrew, Syriac, Thaana, N'Ko, and the Indic and
     South-East Asian scripts that join or reorder letters): writing them needs shaping and the bidirectional
     algorithm, which this writer does not do; it never writes such text wrong. Any such character in a cell, a
@@ -82,6 +84,9 @@ the same input gives the same bytes; runs on a Node server: `toPdf`).
 16. **Problems** hold a code, a path and a count: never a value, a row key or a row number. `run(…, { format: 'pdf' })`
     without the `pdf` option fails with `missing-feature` at `export.pdf`. `ExportRequest.format` and the events'
     `format` are `'pdf'`.
+16b. A row is never taller than a page under its header: with a big `fontSize` and `wrap`, its lines are cut to what
+    fits (« … », `pdf-text-cut`); a first row with no room under the title starts the next page (1.17.0 review). The
+    title in the document's properties is UTF-16, a character outside the first plane as its two units.
 17. **Not in the file**: dates (no creation date: the same rows give the same bytes), images, links, forms, colours
     of the application's cells (`xlsxStyle` is Excel's), the screen's theme.
 
@@ -90,6 +95,9 @@ the same input gives the same bytes; runs on a Node server: `toPdf`).
   offset, `startxref`, page count, text runs on each page, the header on every page, « 2 / 2 », end alignment, wrap and
   cut, WinAnsi replacement and `pdf-glyph`, Arabic refused (`pdf-script`), a tiny hand-built TrueType font embedded
   (subset, widths, ToUnicode), bad font → `pdf-font`, same bytes twice. Ghostscript (`gs -dNODISPLAY`) when present.
+- The 1.17.0 review's adversarial cases, `packages/core/test/pdf-review-1-17.test.ts`: 3 000 rows (offsets, object
+  counts), `(`, `)`, `\\`, CR / LF, control characters, WinAnsi 128–159 and their widths, composite and damaged fonts,
+  200 columns, a row taller than a page, empty grids, huge numbers, refusals; each file read by Ghostscript and pdfminer.
 - DOM `packages/dom/test/export-pdf.test.ts`: the format in the request and events, the file, the option missing,
   cancel, the cell menu item.
 - Real browsers `scripts/browser-1-17.mjs --only pdf`: the file downloads in Chrome, Firefox and WebKit, and opens in

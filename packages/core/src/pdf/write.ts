@@ -93,11 +93,11 @@ const SIZES = { a4: [595.28, 841.89], letter: [612, 792] } as const;
 /** CSS pixels to points: 96 to the inch, 72 points. */
 const PX = 0.75;
 /** Letters that need shaping or right-to-left ordering (pdf-export.md 14): Hebrew to N'Ko and Arabic's extensions, the Indic and South-East Asian scripts, the presentation forms, and the same in the upper planes. */
-const SHAPED = /[֐-ࣿऀ-࿿က-႟ᜀ-᢯ᨀ-ᱏꠀ-꫟יִ-﷿ﹰ-﻾]|[\ud802\ud803\ud83a\ud83b]/;
+const SHAPED = /[\u0590-\u08FF\u0900-\u0FFF\u1000-\u109F\u1700-\u18AF\u1A00-\u1C4F\uA800-\uAADF\uFB1D-\uFDFF\uFE70-\uFEFE]|[\ud802\ud803\ud83a\ud83b]/;
 /** Invisible format characters, dropped. */
-const DROP = /[­​-‏‪-‮⁠-⁩﻿]/g;
+const DROP = /[\u00AD\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]/g;
 /** Spaces of other widths (French numbers' U+202F) as a space; the minus sign as a hyphen; a tab a space. */
-const SPACES = /[\t -   　]/g;
+const SPACES = /[\t\u2002-\u200A\u202F\u205F\u3000]/g;
 
 const num = (n: number): string => String(Math.round(n * 100) / 100);
 const ascii = (s: string): Uint8Array => {
@@ -106,7 +106,7 @@ const ascii = (s: string): Uint8Array => {
   return b;
 };
 /** A text string of the document's properties: UTF-16BE, its mark first. */
-const utf16 = (s: string): string => '<FEFF' + Array.from(s, (c) => c.charCodeAt(0).toString(16).padStart(4, '0')).join('') + '>';
+const utf16 = (s: string): string => '<FEFF' + Array.from(s.split(''), (c) => hex4(c.charCodeAt(0))).join('') + '>';
 const hex4 = (n: number): string => n.toString(16).padStart(4, '0');
 
 /** A face the text is drawn with: a width per character (thousandths), its token for the content stream. */
@@ -396,6 +396,8 @@ export function* pdfParts<T>(i: PdfInput<T>, o: PdfOptions = {}): Generator<PdfP
     if (node.kind !== 'data' && j === treeAt) return node.kind === 'group' || node.kind === 'footer' ? (i.groupLabel?.(node) ?? node.label) : '';
     return value(col, node);
   };
+  // A row never taller than a page under its header: its lines cut to what fits (1.17.0 review).
+  const cap = Math.max(1, Math.min(most, Math.floor((PH - 2 * M - HH - 2 * padY) / LH)));
   const laid: Laid[] = [];
   for (let k = 0; k < total; k++) {
     const r = at ? at[k]! : k;
@@ -409,7 +411,7 @@ export function* pdfParts<T>(i: PdfInput<T>, o: PdfOptions = {}): Generator<PdfP
       if (node.kind !== 'data' && j !== treeAt && !('aggs' in node)) return [];
       const t = textOf(col, node, j);
       const w = widths[j]! - 2 * padX - (j === treeAt ? lv * indent : 0);
-      return fit(t, face, fs, Math.max(w, fs), most, `pdf.columns[${j}]`, col.codec.kind === 'number' || col.type === 'number');
+      return fit(t, face, fs, Math.max(w, fs), cap, `pdf.columns[${j}]`, col.codec.kind === 'number' || col.type === 'number');
     });
     laid.push({ kind, level: lv, cells, h: Math.max(1, ...cells.map((c) => c.length)) * LH + 2 * padY });
     if (laid.length % 200 === 0) yield laid.length;
@@ -422,7 +424,8 @@ export function* pdfParts<T>(i: PdfInput<T>, o: PdfOptions = {}): Generator<PdfP
   let y = top - titleH - HH;
   let from = 0;
   laid.forEach((row, k) => {
-    if (y - row.h < bottom && k > from) pages.push([from, k]), (from = k), (y = top - HH);
+    // The first row under a title that leaves it no room starts the next page (a row always fits under the header).
+    if (y - row.h < bottom && (k > from || (!pages.length && titleH > 0))) pages.push([from, k]), (from = k), (y = top - HH);
     y -= row.h;
   });
   pages.push([from, laid.length]);

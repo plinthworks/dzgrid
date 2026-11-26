@@ -230,7 +230,8 @@ export function buildSpanMap<T>(input: SpanInput<T>, prev?: SpanMap | null): Spa
       try {
         const a = fwRule(node.data);
         if (a) fw[i] = 1;
-        if (typeof (a as { part?: unknown }).part == 'string') fwPart.set(i, (a as { part: string }).part);
+        // Nothing (undefined, null) is « not full width », as before 1.17.0: never read as an object.
+        if (a && typeof (a as { part?: unknown }).part == 'string') fwPart.set(i, (a as { part: string }).part);
       } catch {
         say('invalid-span', '', `rows[${i}]`, 'fullWidth threw');
       }

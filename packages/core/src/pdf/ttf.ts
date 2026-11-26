@@ -53,6 +53,15 @@ export function readTrueType(src: ArrayBuffer | Uint8Array): TrueType | null {
     const glyphs = u16(at('maxp') + 4);
     const metrics = u16(hhea + 34);
     if (!upm || !metrics || !glyphs) return null;
+    // A damaged file never throws later (1.17.0 review): the advances, `loca` and every glyph checked inside their tables.
+    const len = (t: string) => tables.get(t)![1];
+    if (len('hmtx') < metrics * 4 || len('loca') < (glyphs + 1) * (long ? 4 : 2)) return null;
+    const offAt = (g: number): number => (long ? u32(loca + g * 4) : u16(loca + g * 2) * 2);
+    for (let g = 0, last = 0; g <= glyphs; g++) {
+      const x = offAt(g);
+      if (x < last || x > len('glyf')) return null;
+      last = x;
+    }
     const os2 = tables.get('OS/2');
     const scale = (x: number) => Math.round((x * 1000) / upm);
     const ascent = scale(i16(hhea + 4));
@@ -117,7 +126,7 @@ export function readTrueType(src: ArrayBuffer | Uint8Array): TrueType | null {
       return g;
     };
     const advance = (g: number): number => scale(u16(hmtx + Math.min(g, metrics - 1) * 4));
-    const off = (g: number): number => (long ? u32(loca + g * 4) : u16(loca + g * 2) * 2);
+    const off = offAt;
 
     const subset = (used: ReadonlySet<number>): Uint8Array => {
       // The glyphs kept: .notdef, the used ones, and every component of a composite one.
@@ -126,8 +135,10 @@ export function readTrueType(src: ArrayBuffer | Uint8Array): TrueType | null {
         if (keep.has(g) || g >= glyphs) return;
         keep.add(g);
         const s = glyf + off(g);
-        if (off(g + 1) > off(g) && i16(s) < 0) {
-          for (let p = s + 10, more = true; more; ) {
+        const end = glyf + off(g + 1);
+        if (end - s >= 10 && i16(s) < 0) {
+          // Components inside the glyph only: a damaged one that runs on stops at its end.
+          for (let p = s + 10, more = true; more && p + 4 <= end; ) {
             const flags = u16(p);
             add(u16(p + 2));
             p += 4 + (flags & 1 ? 4 : 2) + (flags & 8 ? 2 : flags & 0x40 ? 4 : flags & 0x80 ? 8 : 0);

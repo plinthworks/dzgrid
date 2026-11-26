@@ -3,7 +3,7 @@
   "entries": {
     "@dzgrid/core": {
       "file": "packages/core/src/index.ts",
-      "maxGzip": 30240
+      "maxGzip": 30300
     },
     "@dzgrid/core/server": {
       "file": "packages/core/src/server.ts",
@@ -47,7 +47,7 @@
     },
     "@dzgrid/core/tree-lazy": {
       "file": "packages/core/src/tree-lazy.ts",
-      "maxGzip": 1500,
+      "maxGzip": 1530,
       "over": "@dzgrid/core"
     },
     "@dzgrid/core/detail": {

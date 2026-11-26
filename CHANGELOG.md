@@ -5,9 +5,10 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased — 1.17.0
+## [1.17.0] - 2026-11-26
 
-The advanced filter (owner 2026-11-21, « on passe au filtre avancé… tu peux continuer en autonome »;
+The advanced filter, the PDF export and a full-width row's named part. A minor: additions, nothing removed; every
+default unchanged. The advanced filter (owner 2026-11-21, « on passe au filtre avancé… tu peux continuer en autonome »;
 `docs/behaviors/advanced-filter.md`, plan and decisions `docs/phase-14-steps/advanced-filter-plan.md`). Opt-in; every
 default unchanged.
 
@@ -45,10 +46,30 @@ default unchanged.
   (measured 26 256: the base's cell reads the part), `@dzgrid/dom/spans` 5 050 → 5 100 (5 082), `@dzgrid/core/spans`
   4 100 → 4 150 (4 133); K.8 93 770 / 94 000.
 
+### Fixed (independent review, before the release; each with a test that failed first)
+- Advanced filter: a date shortcut (« today », « last 7 days ») inside the expression was not seen as one — the grid
+  armed no midnight timer, and a server source sent no advanced filter at all (the shortcut refused for want of a
+  clock). It is now a shortcut wherever it sits (advanced-filter.md 17b).
+- Full-width rows: a `fullWidth` rule answering `undefined` or `null` for an ordinary row (plain JavaScript,
+  `row.x && { part }`) was told as `invalid-span` « fullWidth threw » on every such row; it is « not full width »
+  again, as before 1.17.0 (spans.md).
+- PDF: a TrueType font damaged inside (advances or `loca` outside their tables) threw out of the export instead of
+  `pdf-font`; it is now checked when read (Helvetica instead), and a composite glyph's component walk stops at the
+  glyph's end (pdf-export.md 13).
+- PDF: with a big `fontSize` and `wrap`, a row taller than the page ran off its bottom; its lines are now cut to what
+  fits, and a first row with no room under the title starts the next page (pdf-export.md 16b).
+- PDF: a title with a character outside the first plane (an emoji) lost its second UTF-16 unit in the document's
+  properties.
+- Sizes after the review (+2 % rule): `@dzgrid/core` 30 240 → 30 300 (measured 30 289: the shortcuts seen in the
+  expression), `@dzgrid/core/tree-lazy` 1 500 → 1 530 (1 502: the same minified bytes over a larger core); the real
+  Angular app 104 200 → 105 000 (104 964); K.8 93 825 / 94 000.
+
 ### Notes for an upgrade
 - `ColumnFilter` gains `{ type: 'advanced'; expression }` and `WireFilter` `{ type: 'advanced'; expression }` (valid
   under the key `''` only): a `switch` over `type` that must be exhaustive needs the new case. A server receives the
   `''` entry only when the application uses the advanced filter.
+- `SpanMap` (`@dzgrid/core/spans`) gains the optional `fullPart(row)` and `RowSpanPlan` the optional `part`: an object
+  implementing `SpanMap` itself is unaffected (optional), one reading a plan may see the new key.
 - Not yet: a typed text form of the expression.
 - `ExportFormat`, `ExportRequest.format` and the export events' `format` gain `'pdf'`; `ProblemCode` gains `pdf-glyph`,
   `pdf-text-cut`, `pdf-script`, `pdf-font`.

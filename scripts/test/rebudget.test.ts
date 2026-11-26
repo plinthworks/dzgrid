@@ -20,7 +20,7 @@ const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const LAZY_HTML = 600; // review 3 moved the long-text count into the chunk: measured 517
 const SCRIPT = join(ROOT, 'scripts/rebudget.mjs');
 /** The DOM and core base lines and ceilings: 29 000 and 21 980 until Phase 6 step 8b-1 (owner Q2, pinned rows: core up to 29 150, the DOM base up to 22 400, Q-B). */
-const CORE = 30240; // 1.17.0 advanced filter (+2 % rule, measured 30 228): core 29 800 → 30 240; 1.16.0 sparklines (+2 % rule; measured 29 772: the 'sparkline' type's codec): core 29 590 → 29 800; owner 2026-11-12: the header floor (measured 29 584); 1.9.0 lot B (+2 % rule, measured 29 507): 29 300 → 29 550, columns that collapse; Phase 8 steps 2–3 (owner Q-B 2026-11-05, +2 % rule): 29 250 → 29 300; Phase 7 step 2 (owner Q-B 2026-11-04, +2 % rule): 29 150 → 29 250, the grouping seams
+const CORE = 30300; // 1.17.0 review (+2 % rule over 29 800, measured 30 289: the advanced filter's shortcuts seen by hasRelative): core 30 240 → 30 300; 1.17.0 advanced filter (+2 % rule, measured 30 228): core 29 800 → 30 240; 1.16.0 sparklines (+2 % rule; measured 29 772: the 'sparkline' type's codec): core 29 590 → 29 800; owner 2026-11-12: the header floor (measured 29 584); 1.9.0 lot B (+2 % rule, measured 29 507): 29 300 → 29 550, columns that collapse; Phase 8 steps 2–3 (owner Q-B 2026-11-05, +2 % rule): 29 250 → 29 300; Phase 7 step 2 (owner Q-B 2026-11-04, +2 % rule): 29 150 → 29 250, the grouping seams
 /** @dzgrid/dom/range and /fill's ceilings: 4 950 and 3 000 until Phase 6 step 8b-2 (owner Q1: blocks and the fill in the pinned bands, up to ~5 200 and ~3 150). */
 const RANGE = 5200;
 const FILL = 3264; // Phase 8 step 5 (+2 %): 3 200 → 3 264; // Phase 9 (owner Q-CM4, 2026-11-02): 3 150 → 3 200 (the fill's `along` and `can`)
@@ -60,7 +60,7 @@ describe('sizes: measure + 10 %, rounded up to 50 B', () => {
       '@dzgrid/dom/filters': 12350, '@dzgrid/theme': 3170, // 1.15.0 (+2 % rule, sortMark's button; measured DOM 26 229, theme 3 167): theme 3 170; 1.13.0 (+2 % rule, measured 3 093: the keyboard-only ring, the detail's inset): theme 3 110; 1.13.0 (+2 % rule, a narrow header's title): filters 12 350; owner 2026-11-13 (« A partout »): filters 12 200, theme 3 050; owner 2026-11-12: filters 12 180, filters-base 12 125 (the header floor); 1.10.0 (+2 % rule, the filter row's height): filters 12 150, filters-base 12 100; 1.9.0 presentation settings (+2 %): 12 050, 2 990; Phase 8 step 4 (+2 %): 2 907 → 2 960; filters: owner's-look budgets (2026-10-27) 10 000 → 10 100; Phase 9 (Q-F6) 11 400
       '@dzgrid/core/tree': 3500, // theme: Q-C2 (Phase 5 close), « up to 2 750 within T7's 3 050 »
       '@dzgrid/core/rules': 600, '@dzgrid/dom/parts': 800, // Q-C3 (Phase 5 close): the rule's raises accepted, now grants
-      '@dzgrid/core/tree-lazy': 1500, '@dzgrid/dom/tree-lazy': 1000,
+      '@dzgrid/core/tree-lazy': 1530, '@dzgrid/dom/tree-lazy': 1000, // 1.17.0 review (+2 % rule, measured 1 502 over the core: the same 3 254 B min, the core under it grew with the advanced filter's shortcuts): 1 500 → 1 530
       // Q7 (2026-10-21): « core/csv up to 2 000 », a grant the close keeps (1 847 + 10 % would be 2 050).
       '@dzgrid/core/csv': 2110, // 1.9.0 lot B (+2 %): 2 085 → 2 110; Phase 11 L9: 23 850 (+2 % rule, the unbounded view); Phase 11 L4a (+2 %): 2 080 → 2 085; Phase 8 step 4 (+2 %): 2 040 → 2 080; Phase 7 close (+2 %): grouped files, 2 000 → 2 040
     };

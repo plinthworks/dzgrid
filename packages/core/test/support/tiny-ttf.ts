@@ -3,7 +3,12 @@
  * `head`, `hhea`, `maxp` 1.0, `hmtx`, `cmap` (one format-4 subtable, a segment per character), `loca` (short), `glyf`
  * (each glyph a rectangle of its own size), `post` 3.0. Glyph 0 is .notdef; `chars` maps each character to the next ids.
  */
-export function tinyTtf(chars: readonly string[], advance = (k: number) => 500 + k * 10): { bytes: Uint8Array; glyphOf: Map<string, number> } {
+export function tinyTtf(
+  chars: readonly string[],
+  advance = (k: number) => 500 + k * 10,
+  /** A glyph's own bytes (a composite one, a damaged one) in place of its rectangle (1.17.0 review). */
+  glyph?: (g: number) => number[] | undefined,
+): { bytes: Uint8Array; glyphOf: Map<string, number> } {
   const glyphOf = new Map<string, number>();
   chars.forEach((c, k) => glyphOf.set(c, k + 1));
   const N = chars.length + 1;
@@ -15,7 +20,7 @@ export function tinyTtf(chars: readonly string[], advance = (k: number) => 500 +
   const hmtx = Array.from({ length: N }, (_, g) => [...u16(g ? advance(g) : 600), ...u16(0)]).flat();
   // A rectangle glyph: one contour of four on-curve points (2-byte coordinates, deltas).
   const rect = (w: number, h: number) => [...u16(1), ...u16(0), ...u16(0), ...u16(w), ...u16(h), ...u16(3), ...u16(0), 1, 1, 1, 1, ...u16(0), ...u16(w), ...u16(0), ...u16(-w & 0xffff), ...u16(0), ...u16(0), ...u16(h), ...u16(0)];
-  const glyphs = Array.from({ length: N }, (_, g) => (chars[g - 1] === ' ' ? [] : rect(100 + g * 7, 600 + g)));
+  const glyphs = Array.from({ length: N }, (_, g) => glyph?.(g) ?? (chars[g - 1] === ' ' ? [] : rect(100 + g * 7, 600 + g)));
   const glyf: number[] = [];
   const loca: number[] = [];
   for (const g of glyphs) loca.push(...u16(glyf.length / 2)), glyf.push(...g, ...(g.length % 2 ? [0] : []));

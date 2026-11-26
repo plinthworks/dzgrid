@@ -77,6 +77,9 @@ Date ≥ 2026-11-01`, removes a condition, applies; the rows narrow. Reopens it,
     grid's `dir`. Colours and spacing as `--dzg-*` variables over the shared `--tz-*` palette
     (`@dzgrid/theme/advanced-filter.css`), light and dark. Texts from `@dzgrid/dom/locales/<lang>-advanced-filter`
     (en, fr, ar), missing texts told as for every feature.
+17b. **A shortcut inside the expression** (« today », « last 7 days » on a day or instant column) is a shortcut as
+    in a column's filter (filter-relative.md): the grid's midnight timer is armed and a server is sent the day's range,
+    and asked again when the day changes (1.17.0 review: it was neither — a server got no advanced filter at all).
 18. **Not done (later, if asked):** a typed text form (`Statut = "Erreur" ET …` parsed with errors at a position); a
     docked panel; NOT groups; dragging items.
 
@@ -90,6 +93,6 @@ Date ≥ 2026-11-01`, removes a condition, applies; the rows narrow. Reopens it,
     (`advancedOf(detail.filter)`): no event of its own (the element's size line had no room for one).
 
 ## Tests
-`packages/core/test/advanced-filter.test.ts`, `conformance/cases/filter-advanced/*.json`,
+`packages/core/test/advanced-filter.test.ts`, `packages/core/test/advanced-filter-review-1-17.test.ts`, `conformance/cases/filter-advanced/*.json`,
 `packages/dom/test/advanced-filter.test.ts`, `packages/angular/test/advanced-filter.test.ts`,
 `packages/element/test/advanced-filter.test.ts`; browsers `scripts/browser-1-17.mjs`.
