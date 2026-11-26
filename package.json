@@ -32,6 +32,7 @@
     "test:real-app": "node scripts/browser-real-app.mjs",
     "test:a11y": "node scripts/browser-a11y.mjs",
     "test:element": "node scripts/browser-element.mjs",
+    "test:filter-columns": "node scripts/browser-filter-columns.mjs",
     "bench:browser": "node scripts/perf-browser.mjs",
     "example:build": "node scripts/example.mjs build",
     "example:csv": "node scripts/example.mjs csv",
